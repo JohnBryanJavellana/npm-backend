@@ -172,14 +172,8 @@ class BookSeeder extends Seeder
                     'publication_year' => $data['publication_year'],
                 ]);
 
-                $book = Book::create([
-                    'book_catalog_id' => $catalog->id,
-                    'status' => 'ACTIVE',
-                    'photo' => '1e0613c5-94cd-4cb1-b720-9dd2af8c5948.png',
-                    'pdf_copy' => null,
-                ]);
-
-                $qr_path = public_path("qr/book/$book->id.png");
+                $qr_path_name = GenerateTrace::createTraceNumber(Book::class, '-BOOKQR-', 'qr', 10, 99) . '.png';
+                $qr_path = public_path("qr/book/$qr_path_name");
                 QrCode::format('png')
                     ->size(500)
                     ->style('round')
@@ -187,6 +181,14 @@ class BookSeeder extends Seeder
                     ->backgroundColor(255, 255, 255)
                     ->merge('/public/system-images/62334fcadd0d9e6d0a152aca.png', 0.19)
                     ->generate($book->id, $qr_path);
+
+                $book = Book::create([
+                    'book_catalog_id' => $catalog->id,
+                    'status' => 'ACTIVE',
+                    'qr' => $qr_path_name,
+                    'photo' => '1e0613c5-94cd-4cb1-b720-9dd2af8c5948.png',
+                    'pdf_copy' => null,
+                ]);
 
                 $numCopies = rand(1, $data['max_copies']);
 
