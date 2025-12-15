@@ -19,7 +19,6 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(BookCatalog::class)->constrained()->onDelete('CASCADE');
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
-            $table->longText('qr');
             $table->longText('photo');
             $table->string('pdf_copy')->nullable();
             $table->timestamps();
