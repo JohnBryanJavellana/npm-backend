@@ -141,7 +141,7 @@ class TraineeEnrollment extends Controller
     }
 
     /** CREATE ENROLLMENT REQUESTS v2  FOR TOMORROW*/ 
-    public function send_enrollment_request(EnrollmentRequest $request) {    
+    public function send_enrollment_request(EnrollmentRequest $request) {
         try {
 
             DB::beginTransaction();
@@ -149,6 +149,11 @@ class TraineeEnrollment extends Controller
             $user_id = $request->user()->id;
 
             $addtional_info_id = AdditionalTraineeInfo::where('user_id', $user_id)->value('id');
+            $training = Training::where('id',$validated["training_id"])->lockForUpdate()->first();
+
+            if(!$training) {
+                return response()->json(['message' => 'Training not found.'], 404);
+            }
 
             if ( !$addtional_info_id ) {
                 return response()->json(['message' => 'To get started, open My Account and enter some of your information.'], 422);
@@ -181,7 +186,7 @@ class TraineeEnrollment extends Controller
                 }
             }
 
-            Training::where('id', $validated["training_id"])->decrement('schedule_slot', 1);
+            $training->decrement('schedule_slot', 1);
             AuditHelper::log($user_id, "User " . $user_id . " sent an enrollment request.");
             Notifications::notify($user_id, null, "ENROLLMENT", "has sent their enrollement request");
 
@@ -195,7 +200,7 @@ class TraineeEnrollment extends Controller
             }
 
             DB::commit();
-            return response()->json(['message' => 'Enrollment request sent successfully'], 200);
+            return response()->json(['message' => 'Enrollment request sent successfully'], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("error send_enrollment_request", [$e]);
@@ -203,7 +208,7 @@ class TraineeEnrollment extends Controller
         }
     }
 
-    /** REMOVING ENROLLMENT REQUESTS */
+    /** CANCELLING ENROLLMENT REQUESTS */
     public function remove_training_request (Request $request, int $training_request_id) {
         \Log::info("inputs", [$request->all(), $training_request_id]);
         try {
@@ -211,6 +216,9 @@ class TraineeEnrollment extends Controller
             $training_request = EnrolledCourse::find($training_request_id);
             $training_request->enrolled_course_status = 'CANCELLED';
             $training_request->save();
+
+            //TRAINING ID PASS
+            // Training::where("id", $request->training_id)->increment('schedule_slot',1);
 
             AuditHelper::log($request->user()->id, "User " . $request->user()->id . " has cancelled training request.");
 
