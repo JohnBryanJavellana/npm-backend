@@ -44,7 +44,7 @@ class UserLibraryRule implements ValidationRule
                 ->count();
 
             if($this->max - $max_books < count($value)) {
-                $fail("It looks like you will exceed with your borrowing limit (5 books max). You can return a book to borrow a new one.");
+                $fail("It looks like you will exceed with your borrowing limit (5 books max).");
             }
 
             $bookReservations = BookReservation::forUser($this->user->id)

@@ -172,20 +172,9 @@ class BookSeeder extends Seeder
                     'publication_year' => $data['publication_year'],
                 ]);
 
-                $qr_path_name = GenerateTrace::createTraceNumber(Book::class, '-BOOKQR-', 'qr', 10, 99) . '.png';
-                $qr_path = public_path("qr/book/$qr_path_name");
-                QrCode::format('png')
-                    ->size(500)
-                    ->style('round')
-                    ->margin(1)
-                    ->backgroundColor(255, 255, 255)
-                    ->merge('/public/system-images/62334fcadd0d9e6d0a152aca.png', 0.19)
-                    ->generate($book->id, $qr_path);
-
                 $book = Book::create([
                     'book_catalog_id' => $catalog->id,
                     'status' => 'ACTIVE',
-                    'qr' => $qr_path_name,
                     'photo' => '1e0613c5-94cd-4cb1-b720-9dd2af8c5948.png',
                     'pdf_copy' => null,
                 ]);
@@ -193,11 +182,23 @@ class BookSeeder extends Seeder
                 $numCopies = rand(1, $data['max_copies']);
 
                 for ($i = 1; $i <= $numCopies; $i++) {
-                    BookCopy::create([
-                        'book_id' => $book->id,
-                        'unique_identifier' => GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99),
-                        'status' => 'AVAILABLE',
-                    ]);
+                    $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
+
+                    $new_book_copy = new BookCopy;
+                    $new_book_copy->book_id = $book->id;
+                    $new_book_copy->unique_identifier = $new_book_ui;
+                    $new_book_copy->qr = "$new_book_ui.png";
+                    $new_book_copy->status = 'AVAILABLE';
+                    $new_book_copy->save();
+
+                    $qr_path = public_path("qr/book/$new_book_ui.png");
+                    QrCode::format('png')
+                        ->size(500)
+                        ->style('round')
+                        ->margin(1)
+                        ->backgroundColor(255, 255, 255)
+                        ->merge('/public/system-images/62334fcadd0d9e6d0a152aca.png', 0.19)
+                        ->generate($new_book_ui, $qr_path);
                 }
             }
 

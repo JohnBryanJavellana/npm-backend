@@ -553,11 +553,12 @@ class LibraryController extends Controller
                     ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
                     ->pluck('training_id');
 
-                $books = Book::with(['catalog.genre'])
-                    ->withCount(['copies' => function($query) {
+                $books = Book::with([
+                    'catalog.genre',
+                    'copies' => function($query) {
                         return $query->where('status', 'AVAILABLE');
-                    }])
-                    ->where('status', 'ACTIVE');
+                    }
+                ])->where('status', 'ACTIVE');
 
                 return $books->get()
                     ->map(function ($self) use ($record, $user) {
