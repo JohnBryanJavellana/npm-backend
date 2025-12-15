@@ -328,8 +328,8 @@ class LibraryController extends Controller
             $ttl = now()->addMinutes(env('CACHE_DURATION'));
             $bookReservationCheck = Cache::remember('count_book_extensions_extension_cache_' . ($request->libraryId), $ttl, function () use($request) {
                 $a = ExtensionRequest::where([
-                    'book_res_id' => $request->libraryId,
-                    'user_id' => $request->userId
+                    'book_res_id' => $request?->libraryId,
+                    'user_id' => $request?->userId
                 ])->with([
                     'extendingBooks' => function ($query) {
                         $query->where('status', "PENDING");
@@ -341,8 +341,8 @@ class LibraryController extends Controller
                 ])->first();
 
                 return [
-                    'hasBooksNeedAction' => count($a->library->borrowedBooks) > 0,
-                    'hasPendingReservation' => !is_null($a->extendingBooks)
+                    'hasBooksNeedAction' => $a && count($a->library->borrowedBooks) > 0,
+                    'hasPendingReservation' => $a && !is_null($a->extendingBooks)
                 ];
             });
 
@@ -495,7 +495,7 @@ class LibraryController extends Controller
             $this_book->status = $request->status;
             $this_book->save();
 
-            if(!is_null($this_book->book_copy_id)){
+            if(is_null($this_book->book_copy_id)){
                 $book_copy = BookCopy::find($this_book->book_copy_id);
 
                 switch ($request->status) {
@@ -612,9 +612,11 @@ class LibraryController extends Controller
 
     public function create_walkin_request (CreateWalkInRequest $request) {
         return TransactionUtil::transact($request, function() use ($request) {
+            \Log::info($request->all());
+
             $bookReservations = BookReservation::forUser($request->user()->role === "TRAINER" ? $request->user()->id : $request->borrower)
                 ->whereNotIn('status', ['CANCELLED', 'RETURNED', 'REJECTED'])
-                ->whereIn('book_id', $request->bookId)
+                ->whereIn('book_id', collect($request->data)->pluck('bookId')->toArray())
                 ->exists();
 
             if ($bookReservations) {
@@ -627,33 +629,33 @@ class LibraryController extends Controller
                 $book_res->type = $request->type;
                 $book_res->save();
 
-                \Log::info($request->data);
-
                 foreach($request->data as $book) {
-                    \Log::info($book);
+                    $book_record = new BookReservation();
+                    $is_e_copy = Book::where('id', $book['bookId'])->whereNotNull('pdf_copy')->first();
 
-                    // $book_record = new BookReservation();
-                    // $is_e_copy = Book::where('id', $book['bookId'])->whereNotNull('pdf_copy')->first();
+                    $record = BookCopy::where(['book_id' => $book['bookId'], 'status' => "AVAILABLE"]);
 
-                    // $record = BookCopy::where(['book_id' => $book['bookId'], 'status' => "AVAILABLE"]);
-                    // if($book['preferredBookCopy'] && $book['preferredBookCopy'] !== 'undefined') $record->where('unique_identifier', $book->preferredBookCopy);
-                    // $record = $record->first();
+                    if($book['preferredBookCopy'] && $book['preferredBookCopy'] !== 'undefined') {
+                        $record->where('unique_identifier', $book['preferredBookCopy']);
+                    }
 
-                    // if (!$is_e_copy) {
-                    //     if($record == null) {
-                    //         return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
-                    //     }
+                    $rec = $record->first();
 
-                    //     $record->status = "RESERVED";
-                    //     $record->save();
-                    // }
+                    if (!$is_e_copy) {
+                        if($rec === null) {
+                            return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
+                        }
 
-                    // $book_record->from_date = $request->fromDate;
-                    // $book_record->to_date = $request->toDate;
-                    // $book_record->book_copy_id = $record?->id;
-                    // $book_record->book_res_id = $book_res->id;
-                    // $book_record->book_id = $book;
-                    // $book_record->save();
+                        $rec->status = "RESERVED";
+                        $rec->save();
+                    }
+
+                    $book_record->from_date = $request->fromDate;
+                    $book_record->to_date = $request->toDate;
+                    $book_record->book_copy_id = $rec?->id;
+                    $book_record->book_res_id = $book_res->id;
+                    $book_record->book_id = $book['bookId'];
+                    $book_record->save();
                 }
 
                 if(env("USE_EVENT")) {
