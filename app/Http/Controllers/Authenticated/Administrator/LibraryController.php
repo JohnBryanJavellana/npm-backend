@@ -106,12 +106,11 @@ class LibraryController extends Controller
             }
 
             if($request->copies) {
-                for ($i = 0; $i < $request->copies; $i++) {
-                    $book_copy = new BookCopy;
-                    $book_copy->unique_identifier = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
-                    $book_copy->book_id = $book->id;
-                    $book_copy->save();
-                }
+                $fixedRequest = $request->merge([
+                    'insideJob' => true,
+                    'bookId' => $book->id
+                ]);
+                $this->create_book_copies($fixedRequest);
             }
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a book ID#" . $book->id);
@@ -128,6 +127,21 @@ class LibraryController extends Controller
         });
     }
 
+    public function create_book_copies (Request $request) {
+        return TransactionUtil::transact(null, function() use ($request) {
+            if($request->copies) {
+                for ($i = 0; $i < $request->copies; $i++) {
+                    $book_copy = new BookCopy;
+                    $book_copy->unique_identifier = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
+                    $book_copy->book_id = $request->bookId;
+                    $book_copy->save();
+                }
+            }
+
+            return $request->insideJob ? true : response()->json(['message' => "You've added a book copy."], 201);
+        });
+    }
+
     public function remove_book (Request $request, int $book_id) {
         return TransactionUtil::transact(null, function() use ($request, $book_id) {
             $this_book = Book::withCount(['hasData'])->where('id', $book_id)->first();
@@ -135,8 +149,11 @@ class LibraryController extends Controller
             if($this_book->has_data_count > 0) {
                 return response()->json(['message' => "Can't remove book. It already has connected data."], 200);
             } else {
-                if(file_exists(public_path('book-images/' . $this_book->photo))){
+                if(file_exists(public_path('book-images/' . $this_book->photo)) &&
+                   file_exists(public_path('qr/book/' . $this_book->qr))
+                ){
                     unlink(public_path('book-images/' . $this_book->photo));
+                    unlink(public_path('qr/book/' . $this_book->qr));
                 }
 
                 $this_book->delete();

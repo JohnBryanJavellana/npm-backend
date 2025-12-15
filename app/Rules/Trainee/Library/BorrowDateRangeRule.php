@@ -14,6 +14,8 @@ class BorrowDateRangeRule implements ValidationRule
      * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
 
+    protected $stopOnFirstFailure = true;
+
     protected $max_days = 7;
 
     public function __construct(public $from) {}
