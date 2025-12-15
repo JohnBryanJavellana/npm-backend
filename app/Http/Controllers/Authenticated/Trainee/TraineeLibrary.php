@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BELibrary;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\BookRequest;
-use App\Http\Requests\CancelBookRequest;
-use App\Http\Requests\ExtendingRequest;
+
+use App\Http\Requests\Trainee\Library\BookRequest;
+use App\Http\Requests\Trainee\Library\CancelBookRequest;
+use App\Http\Requests\Trainee\Library\ExtendingRequest;
+
 use App\Mail\BookReservationStatus;
 use App\Utils\{AuditHelper, GenerateTrace, Notifications};
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -135,7 +137,7 @@ class TraineeLibrary extends Controller
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
     }
-
+ 
     /** GET AVAILABLE BOOKS FOR EXTENSION */
     public function view_available_extension(Request $request)
     {

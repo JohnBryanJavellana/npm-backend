@@ -28,7 +28,8 @@ class CreateWalkInRequest extends FormRequest
             'toDate' => ['required', 'date'],
             'purpose' => ['required', 'string'],
             'type' => ['required', 'string'],
-            'bookId' => ['required', 'array'],
+            'data' => ['required', 'array'],
+            'data.*.bookId' => ['required', 'numeric'],
             'otherPurpose' => [ Rule::when($this->purpose === 'reason13', ['required'], ['nullable']) ]
         ];
     }
