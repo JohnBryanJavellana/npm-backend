@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Utils\GenerateTrace;
 use App\Models\{
     Book,
@@ -177,6 +178,15 @@ class BookSeeder extends Seeder
                     'photo' => '1e0613c5-94cd-4cb1-b720-9dd2af8c5948.png',
                     'pdf_copy' => null,
                 ]);
+
+                $qr_path = public_path("qr/book/$book->id.png");
+                QrCode::format('png')
+                    ->size(500)
+                    ->style('round')
+                    ->margin(1)
+                    ->backgroundColor(255, 255, 255)
+                    ->merge('/public/system-images/62334fcadd0d9e6d0a152aca.png', 0.19)
+                    ->generate($book->id, $qr_path);
 
                 $numCopies = rand(1, $data['max_copies']);
 
