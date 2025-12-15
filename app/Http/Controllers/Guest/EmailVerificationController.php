@@ -68,7 +68,7 @@ class EmailVerificationController extends Controller {
             // --- Custom Post-Verification Actions ---
 
             // 9. Generate and save a QR Code for the user.
-            $name = public_path("qr/$user->id.png");
+            $name = public_path("qr/user/$user->id.png");
             QrCode::format('png')
                 ->size(500)
                 ->style('round')

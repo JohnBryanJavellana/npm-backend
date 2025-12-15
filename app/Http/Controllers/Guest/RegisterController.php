@@ -125,7 +125,7 @@ class RegisterController extends Controller
                 if (Auth::attempt(['email' => $request->email, 'password' => ''])){
                     $user = Auth::user();
 
-                    $qr_path = public_path("qr/$user->id.png");
+                    $qr_path = public_path("qr/user/$user->id.png");
                     QrCode::format('png')
                         ->size(500)
                         ->style('round')
