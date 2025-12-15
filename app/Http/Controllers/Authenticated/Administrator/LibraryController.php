@@ -627,27 +627,33 @@ class LibraryController extends Controller
                 $book_res->type = $request->type;
                 $book_res->save();
 
-                foreach($request->bookId as $book) {
-                    $book_record = new BookReservation();
-                    $is_e_copy = Book::where('id', $book)->whereNotNull('pdf_copy')->first();
+                \Log::info($request->data);
 
-                    $record = BookCopy::where(['book_id' => $book, 'status' => "AVAILABLE"])->first();
+                foreach($request->data as $book) {
+                    \Log::info($book);
 
-                    if (!$is_e_copy) {
-                        if($record == null) {
-                            return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
-                        }
+                    // $book_record = new BookReservation();
+                    // $is_e_copy = Book::where('id', $book['bookId'])->whereNotNull('pdf_copy')->first();
 
-                        $record->status = "RESERVED";
-                        $record->save();
-                    }
+                    // $record = BookCopy::where(['book_id' => $book['bookId'], 'status' => "AVAILABLE"]);
+                    // if($book['preferredBookCopy'] && $book['preferredBookCopy'] !== 'undefined') $record->where('unique_identifier', $book->preferredBookCopy);
+                    // $record = $record->first();
 
-                    $book_record->from_date = $request->fromDate;
-                    $book_record->to_date = $request->toDate;
-                    $book_record->book_copy_id = $record?->id;
-                    $book_record->book_res_id = $book_res->id;
-                    $book_record->book_id = $book;
-                    $book_record->save();
+                    // if (!$is_e_copy) {
+                    //     if($record == null) {
+                    //         return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
+                    //     }
+
+                    //     $record->status = "RESERVED";
+                    //     $record->save();
+                    // }
+
+                    // $book_record->from_date = $request->fromDate;
+                    // $book_record->to_date = $request->toDate;
+                    // $book_record->book_copy_id = $record?->id;
+                    // $book_record->book_res_id = $book_res->id;
+                    // $book_record->book_id = $book;
+                    // $book_record->save();
                 }
 
                 if(env("USE_EVENT")) {

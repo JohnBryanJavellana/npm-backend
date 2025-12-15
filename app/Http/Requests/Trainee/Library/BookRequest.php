@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Trainee\Library;
 
 use App\Rules\Trainee\Library\{UserLibraryRule, BorrowDateRangeRule};
 use Illuminate\Contracts\Validation\Validator;
