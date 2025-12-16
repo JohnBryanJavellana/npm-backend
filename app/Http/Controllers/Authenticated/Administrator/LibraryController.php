@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\File;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Utils\TransactionUtil;
 use Carbon\Carbon;
 use App\Http\Requests\Admin\Library\{
@@ -131,10 +132,22 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, function() use ($request) {
             if($request->copies) {
                 for ($i = 0; $i < $request->copies; $i++) {
+                    $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOKQR-', 'unique_identifier', 10, 99);
+
                     $book_copy = new BookCopy;
-                    $book_copy->unique_identifier = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
+                    $book_copy->qr = $new_book_ui . '.png';
+                    $book_copy->unique_identifier = $new_book_ui;
                     $book_copy->book_id = $request->bookId;
                     $book_copy->save();
+
+                    $qr_path = public_path("qr/book/$new_book_ui.png");
+                    QrCode::format('png')
+                        ->size(500)
+                        ->style('round')
+                        ->margin(1)
+                        ->backgroundColor(255, 255, 255)
+                        ->merge('/public/system-images/62334fcadd0d9e6d0a152aca.png', 0.19)
+                        ->generate($new_book_ui, $qr_path);
                 }
             }
 

@@ -16,7 +16,6 @@ class UserLibraryRule implements ValidationRule
      */
 
 
-    protected $stopOnFirstFailure = true;
     protected $user;
     protected $max = 5;
 
@@ -28,8 +27,8 @@ class UserLibraryRule implements ValidationRule
     public function __construct(?User $user)
     {
         $this->user = $user;
-    } 
-    
+    }
+
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if($attribute === "book_id") {
@@ -41,12 +40,19 @@ class UserLibraryRule implements ValidationRule
                 $fail("Trainee has a overdue book, please return or check your borrowed list.");
             }
 
+            $withCSM = BookRes::where(["user_id" => $this->user->id, "status" => "FOR CSM"])
+                ->exists();
+
+            if ($withCSM) {
+                $fail("It looks like you still have a request with 'FOR CSM' status, so you're unable to submit a new request at this time.");
+            }
+
             $max_books = BookReservation::forUser($this->user->id)
                 ->forStatus($this->restrictedstatuses)
                 ->count();
 
             if($this->max - $max_books < count($value)) {
-                $fail("It looks like you will exceed with your borrowing limit (5 books max). You already have {$max_books}");
+                $fail("It looks like you will exceed with your borrowing limit (5 books max). You already have {$max_books}.");
             }
 
             $duplicatedReservations = BookReservation::with('books.catalog:id,title,isbn')
@@ -58,7 +64,7 @@ class UserLibraryRule implements ValidationRule
             if ($duplicatedReservations->isNotEmpty()) {
                 $bookTitles = $duplicatedReservations->pluck('books.catalog.title')->filter()->implode(', ');
                 $bookIds = $duplicatedReservations->pluck('book_id')->toArray();
-                
+
                 $fail("Duplicate request detected. You already have pending requests for: {$bookTitles}");
             }
         }

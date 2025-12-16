@@ -44,23 +44,50 @@ class BookRequest extends FormRequest
         ];
     }
 
-    public function message()
+    public function messages(): array
     {
         return [
-            'book_id.required' => "A book is required.",
-            'from.required' => "Starting date is required",
-            'to.required' => "End date is required",
-            'purpose.required' => "Purpose is required"
+            'book_id.required' => 'A book is required.',
+            'book_id.array' => 'Book selection must be an array.',
+            'from.required' => 'Starting date is required.',
+            'from.date' => 'Starting date must be a valid date.',
+            'to.required' => 'End date is required.',
+            'to.date' => 'End date must be a valid date.',
+            'to.after' => 'End date must be after the starting date.',
+            'purpose.required' => 'Purpose is required.',
+            'purpose.string' => 'Purpose must be text.',
+            'purpose.max' => 'Purpose must not exceed 500 characters.',
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    public function attributes() {
+        return [
+            'book_id' => 'book',
+            'from' => 'starting date',
+            'to'=> 'end date',
+        ];
+    }
+
+    protected function failedValidation(Validator $validator): void
     {
-        $errors = $validator->errors()->all();
+        $errors = $validator->errors();
+        $firstError = $errors->first();
+
         throw new HttpResponseException(
             response()->json([
-                'message' => implode(', ', $errors)
+                'message' => $firstError,
+                'errors' => $errors->toArray(),
             ], 422)
         );
     }
+
+    // protected function failedValidation(Validator $validator)
+    // {
+    //     $errors = $validator->errors()->all();
+    //     throw new HttpResponseException(
+    //         response()->json([
+    //             'message' => implode(', ', $errors)
+    //         ], 422)
+    //     );
+    // }
 }

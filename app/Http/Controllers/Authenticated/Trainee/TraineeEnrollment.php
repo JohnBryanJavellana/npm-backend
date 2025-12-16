@@ -75,7 +75,7 @@ class TraineeEnrollment extends Controller
             \Log::error("error view_module_requirements_v2", [$e->getMessage()]);
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
-        
+
     }
     /** GET/VIEW TRAINEE REQUESTS */
     public function trainee_selected_training (Request $request, $status) {
@@ -106,11 +106,11 @@ class TraineeEnrollment extends Controller
             ->get();
 
             $data = $selected_courses->map( function ($course) use ($request, $userId)  {
-                $course_module_id = $course->training->course_module_id ?? null;   
+                $course_module_id = $course->training->course_module_id ?? null;
                 $req = $this->view_module_requirements_v2($request, $course_module_id, enrolled_id: $course->id);
                 $course->requirement = $req;
                 return $course;
-            }); 
+            });
 
             return SelectedTrainingResource::collection($data);
         } catch (\Exception $e) {
@@ -140,7 +140,6 @@ class TraineeEnrollment extends Controller
         }
     }
 
-    /** CREATE ENROLLMENT REQUESTS v2  FOR TOMORROW*/ 
     public function send_enrollment_request(EnrollmentRequest $request) {
         try {
 
@@ -222,7 +221,7 @@ class TraineeEnrollment extends Controller
 
             AuditHelper::log($request->user()->id, "User " . $request->user()->id . " has cancelled training request.");
 
-            if(env("USE_EVENT")) { 
+            if(env("USE_EVENT")) {
                 event(new BETraineeApplication(''));
             }
 
@@ -237,7 +236,7 @@ class TraineeEnrollment extends Controller
 
     /** UPDATING ENROLLMENT REQUESTS */
     public function update_enrollment_request(Request $request) {
-        \Log::info("UpdateEnrollReq", $request->all()); 
+        \Log::info("UpdateEnrollReq", $request->all());
 
         $validations = [
            'file_upload' => 'required|array',
@@ -265,7 +264,7 @@ class TraineeEnrollment extends Controller
                 AuditHelper::log($request->user()->id, "User " . $request->user()->id . " updated an enrollment request.");
                 Notifications::notify($request->user()->id, null, "ENROLLMENT", "has updated their enrollement request");
 
-                if(env("USE_EVENT")) { 
+                if(env("USE_EVENT")) {
                     event(new BETraineeApplication(''), new BENotification(''));
                 }
 
@@ -410,7 +409,6 @@ class TraineeEnrollment extends Controller
         $requirement->filename = $filename;
         $requirement->save();
 
-        //return file name
     }
     //for removal
     public function createTraceNumber() {

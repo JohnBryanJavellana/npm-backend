@@ -15,7 +15,7 @@ class BookExtensionResource extends JsonResource
     public function toArray(Request $request): array
     {
         // return parent::toArray($request);
-        
+
         return [
             "ext_req_id" => $this->id,
             "ext_purpose" => $this->purpose,

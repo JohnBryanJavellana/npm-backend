@@ -13,7 +13,7 @@ class UserEnrollmentRule implements ValidationRule
      *
      * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
- 
+
     public function __construct(protected ?User $user) { }
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -25,8 +25,9 @@ class UserEnrollmentRule implements ValidationRule
         if ($existingRequest) {
             $fail("Training request is already existing in your list!");
         }
-        
-        $availableSlots = Training::find($value)->value("schedule_slot");
+
+        $availableSlots = Training::find($value)
+            ->value("schedule_slot");
 
         if($availableSlots <= 0) {
             $fail("There is no remaining slot for this training schedule.");
