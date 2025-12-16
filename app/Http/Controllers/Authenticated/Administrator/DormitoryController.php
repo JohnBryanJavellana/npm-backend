@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use App\Http\Requests\Admin\Dormitory\{
-    GetAvailableRooms
+    GetAvailableRooms,
+    CreateOrUpdateDormitory
 };
 use Illuminate\Http\Request;
 use App\Utils\{
@@ -40,91 +41,67 @@ class DormitoryController extends Controller
         return response()->json(['rooms' => $rooms], 200);
     }
 
-    public function create_or_update_dormitory (Request $request) {
-        $validations = [
-            'room_name' => 'required|string',
-            'room_type' => 'required|string',
-            'room_for_type' => 'required|string',
-            'room_description' => 'required|string',
-            'room_cost' => 'required|numeric'
-        ];
+    public function create_or_update_dormitory (CreateOrUpdateDormitory $request) {
+        return TransactionUtil::transact($request, function() use ($request) {
+            $this_dormitory = $request->httpMethod === "POST"
+                ? new Dormitory
+                : Dormitory::find($request->documentId);
 
-        if($request->httpMethod === "POST") {
-            $validations['room_image'] = 'required';
-            $validations['room_slot'] = 'required|numeric';
-            $validations['room_count'] = 'required|numeric';
-        }
+            $this_dormitory->user_id = $request->user()->id;
+            $this_dormitory->room_name = $request->room_name;
+            $this_dormitory->room_description = $request->room_description;
+            $this_dormitory->room_cost = $request->room_cost;
+            $this_dormitory->room_fee_type = $request->room_fee_type;
+            $this_dormitory->is_air_conditioned = $request->room_type;
+            $this_dormitory->room_for_type = $request->room_for_type;
+            if($request->room_status) $this_dormitory->room_status = $request->room_status;
+            $this_dormitory->save();
 
-        $validator = \Validator::make($request->all(), $validations);
-
-        if($validator->fails()) {
-            $errors = $validator->messages()->all();
-            return response()->json(['message' => implode(', ', $errors)], 422);
-        } else {
-            try {
-                DB::beginTransaction();
-
-                $this_dormitory = $request->httpMethod === "POST" ? new Dormitory : Dormitory::find($request->documentId);
-                $this_dormitory->user_id = $request->user()->id;
-                $this_dormitory->room_name = $request->room_name;
-                $this_dormitory->room_description = $request->room_description;
-                $this_dormitory->room_cost = $request->room_cost;
-                $this_dormitory->room_fee_type = $request->room_fee_type;
-                $this_dormitory->room_type = $request->room_type;
-                $this_dormitory->room_for_type = $request->room_for_type;
-                if($request->room_status) $this_dormitory->room_status = $request->room_status;
-                $this_dormitory->save();
-
-                if($request->httpMethod === "POST"){
-                    $fixedRequest = $request->merge([
-                        'insideJob' => true,
-                        'dormitoryId' => $this_dormitory->id
-                    ]);
-                    $this->create_dormitory_rooms($fixedRequest);
-                }
-
-                if($request->data_room_image) {
-                    $room_images = DormitoryRoomImage::whereNotIn('id', $request->data_room_image)
-                        ->where('dormitory_id', $request->documentId)
-                        ->get();
-
-                    foreach($room_images as $item) {
-                        if(file_exists(public_path('room-images/' . $item->filename))) {
-                            unlink(public_path('room-images/' . $item->filename));
-                        }
-
-                        $item->delete();
-                    }
-                }
-
-                if($request->room_image) {
-                    foreach($request->room_image as $image) {
-                        $room_image = new DormitoryRoomImage;
-                        $room_image->dormitory_id = $this_dormitory->id;
-
-                        $image_name = Str::uuid() . '-room-.png';
-                        ConvertToBase64::generate($image, 'image', "room-images/$image_name");
-                        $room_image->filename = $image_name;
-                        $room_image->save();
-                    }
-                }
-
-                AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory room. ID#" . $this_dormitory->id);
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEDormitory(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                DB::commit();
-                return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory room. ID# " . $this_dormitory->id], 201);
-            } catch (\Exception $e) {
-                DB::rollback();
-                return response()->json(['message' => $e->getMessage()], 500);
+            if($request->httpMethod === "POST"){
+                $fixedRequest = $request->merge([
+                    'insideJob' => true,
+                    'dormitoryId' => $this_dormitory->id
+                ]);
+                $this->create_dormitory_rooms($fixedRequest);
             }
-        }
+
+            if($request->data_room_image) {
+                $room_images = DormitoryRoomImage::whereNotIn('id', $request->data_room_image)
+                    ->where('dormitory_id', $request->documentId)
+                    ->get();
+
+                foreach($room_images as $item) {
+                    if(file_exists(public_path('room-images/' . $item->filename))) {
+                        unlink(public_path('room-images/' . $item->filename));
+                    }
+
+                    $item->delete();
+                }
+            }
+
+            if($request->room_image) {
+                foreach($request->room_image as $image) {
+                    $room_image = new DormitoryRoomImage;
+                    $room_image->dormitory_id = $this_dormitory->id;
+
+                    $image_name = Str::uuid() . '-room-.png';
+                    ConvertToBase64::generate($image, 'image', "room-images/$image_name");
+                    $room_image->filename = $image_name;
+                    $room_image->save();
+                }
+            }
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory. ID#" . $this_dormitory->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory. ID# " . $this_dormitory->id], 201);
+        });
     }
 
     public function create_dormitory_rooms (Request $request) {
@@ -147,12 +124,15 @@ class DormitoryController extends Controller
         return TransactionUtil::transact($request, function() use ($request) {
             $ttl = now()->addMinutes(env('CACHE_DURATION'));
             $rooms = Cache::remember('get_available_rooms', $ttl, function () use($request) {
-                return DormitoryRoom::with([
-                    'roomImages'
+                return Dormitory::with([
+                    'room_images',
+                    'rooms' => function($query) {
+                        $query->where('room_available_slot', '>', 0);
+                    }
                 ])->where([
                     'room_for_type' => $request->room_for_type,
-                    'room_type' => $request->room_type
-                ])->where('room_available_slot', '>', 0)->get();
+                    'is_air_conditioned' => $request->room_type
+                ])->get();
             });
 
             return response()->json(['rooms' => $rooms], 200);

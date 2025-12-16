@@ -146,7 +146,11 @@ class Masterlist extends Controller
 
     public function get_users (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
-            $users = User::where('id', '!=', $request->user()->id)->withCount(['hasData'])->get();
+            $users = User::withCount([
+                'trainee_enrolled_courses' => function($query) {
+                    $query->whereNotIn('status', ['CANCELLED', 'COMPLETED', 'DECLINED', 'IR', 'CSFB']);
+                }
+            ])->where('id', '!=', $request->user()->id)->withCount(['hasData'])->get();
             return response()->json(['users' => $users], 200);
         });
     }
