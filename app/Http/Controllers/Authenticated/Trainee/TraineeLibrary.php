@@ -188,13 +188,40 @@ class TraineeLibrary extends Controller
     public function view_available_extension(Request $request)
     {
         \Log::info("data view_available_extension", [$request->all(), $request->user()->id]);
+
+            // try {
+            //     $userId = $request->user()->id;
+            //     $traceNum = $request->trace_number;
+            //     $books = BookReservation::with([
+            //         "books.catalog.genre",
+            //         "bookRes"
+            //     ])
+            //     ->where(['status' => 'RECEIVED'])
+            //     ->whereHas('bookRes', function($query) use ($traceNum, $userId) {
+            //         $query->where(['user_id' => $userId, 'trace_number' => $traceNum]);
+            //     })
+            //     ->get();
+
+            //     // create a resource class
+            //     return response()->json(['availables' => $books], 200);
+            // }
+            // catch (\Exception $e) {
+            //     \Log::error("error view_available_extension", [$e]);
+            //     return response()->json(['message' => $e], 500);
+            // }
+
         try {
             $userId = $request->user()->id;
-            $traceNum = $request->traceNumber;
+            $traceNum = $request->trace_number;
 
            $books = Book::with([
-                "hasData" => function ($query) use ($userId, $traceNum) {
-                    $query->where("status", "RECEIVED");
+                "hasData" => function ($query) use($traceNum,  $userId) {
+                    $query->where("status", "RECEIVED")->whereHas("bookRes", function($q) use ($traceNum, $userId) {
+                        $q->where([
+                            "trace_number" => $traceNum,
+                            "user_id" => $userId
+                        ]);
+                    });;
                 },
                 "catalog.genre"
             ])
@@ -216,35 +243,6 @@ class TraineeLibrary extends Controller
         catch (\Exception $e) {
             \Log::error("error view_available_extension", [$e]);
             return response()->json(['message' => $e], 500);
-        }
-    }
-
-    /** GET PDF COPIES */
-    public function pdf_copies(Request $request)
-    {
-        try {
-            $records = BookReservation::with([
-                "books.catalog.genre",
-                "bookRes",
-            ])
-            ->whereRelation('bookRes', 'user_id', '=', $request->user()->id)
-            // ->forStatus(["RECEIVED"])
-            ->whereNull("book_copy_id")
-            ->get();
-
-            // SECRET WEAPON
-            foreach($records as $record) {
-                if($record->bookRes->to_date < now()) {
-                    $record->status = "EXPIRED";
-                    $record->save();
-                }
-            }
-
-            return PdfCopyResource::collection($records);
-        } catch (\Exception $e) {
-            \Log::error("day", [$e]);
-            // \Log::channel("errormonitor")->error("error pdf_copies", [$e->getMessage()]);
-            return response()->json(["Something went wrong, Please Try Again!"], 500);
         }
     }
 
@@ -321,52 +319,54 @@ class TraineeLibrary extends Controller
     }
 
     /** SENDING EXTEND REQUESTS */
+    // ExtendingRequest $request
     public function extend(ExtendingRequest $request)
     {
         \Log::info("extending...", [$request->all()]);
-        // return response()->json(["message" => "(●'◡'●)"], 200);
-        try {
-            DB::beginTransaction();
-            $validated = $request->validated();
-            $user_id = $request->user()->id;
+        return response()->json(["message" => "(●'◡'●)"], 200);
 
-            $extension_req = ExtensionRequest::create([
-                "user_id" => $user_id,
-                "book_res_id" => $validated["reference_id"],
-                "purpose" => $validated["purpose"],
-            ]);
+        // try {
+        //     DB::beginTransaction();
+        //     $validated = $request->validated();
+        //     $user_id = $request->user()->id;
 
-            foreach($validated['data'] as $data) {
-                BookExtensionRequest::create([
-                    "book_reservation_id" => $data['book_res_id'],
-                    "extension_request_id" => $extension_req->id,
-                    "current_to_date" => Carbon::parse($data['last_main_date'])->format('Y-m-d'),
-                    "date_of_extension" => Carbon::parse($validated['date_of_extension'])->format('Y-m-d'),
-                ]);
+        //     $extension_req = ExtensionRequest::create([
+        //         "user_id" => $user_id,
+        //         "book_res_id" => $validated["reference_id"],
+        //         "purpose" => $validated["purpose"],
+        //     ]);
 
-                BookReservation::find($data["book_res_id"])->update(["status" => "EXTENDING"]);
-            }
+        //     foreach($validated['data'] as $data) {
+        //         BookExtensionRequest::create([
+        //             "book_reservation_id" => $data['book_res_id'],
+        //             "extension_request_id" => $extension_req->id,
+        //             "current_to_date" => Carbon::parse($data['last_main_date'])->format('Y-m-d'),
+        //             "date_of_extension" => Carbon::parse($validated['date_of_extension'])->format('Y-m-d'),
+        //         ]);
 
-            $bookRes = BookRes::find($validated["reference_id"]);
-            $bookRes->status = "EXTENDING";
-            $bookRes->save();
+        //         BookReservation::find($data["book_res_id"])->update(["status" => "EXTENDING"]);
+        //     }
 
-            Cache::forget("count_book_reservation:{$user_id}");
-            Cache::forget("user_id:{$user_id}:status:");
-            Cache::forget("user_id:{$user_id}:status:ACTIVE");
-            Cache::forget("user_id:{$user_id}:status:FOR CSM");
-            Cache::forget("user_id:{$user_id}:status:COMPLETED");
-            Cache::forget("user_id:{$user_id}:status:EXTENDING");
+        //     $bookRes = BookRes::find($validated["reference_id"]);
+        //     $bookRes->status = "EXTENDING";
+        //     $bookRes->save();
 
-            DB::commit();
-            return response()->json(["message" => "Extension request has sent successfully!"], 201);
-        }
-        catch (\Exception $e) {
-        DB::rollBack();
-            \Log::error('error extend', [$e]);
-            // \Log::channel("errormonitor")->error("error extend", [$e->getMessage()]);
-            return response()->json(["message" => "Something went wrong, Please try again"], 500);
-        }
+        //     Cache::forget("count_book_reservation:{$user_id}");
+        //     Cache::forget("user_id:{$user_id}:status:");
+        //     Cache::forget("user_id:{$user_id}:status:ACTIVE");
+        //     Cache::forget("user_id:{$user_id}:status:FOR CSM");
+        //     Cache::forget("user_id:{$user_id}:status:COMPLETED");
+        //     Cache::forget("user_id:{$user_id}:status:EXTENDING");
+
+        //     DB::commit();
+        //     return response()->json(["message" => "Extension request has sent successfully!"], 201);
+        // }
+        // catch (\Exception $e) {
+        // DB::rollBack();
+        //     \Log::error('error extend', [$e]);
+        //     // \Log::channel("errormonitor")->error("error extend", [$e->getMessage()]);
+        //     return response()->json(["message" => "Something went wrong, Please try again"], 500);
+        // }
     }
 
     /** CANCELLING EXTEND REQUESTS */
@@ -427,8 +427,6 @@ class TraineeLibrary extends Controller
             ->lockForUpdate()
             ->get();
 
-            \Log::info("book record", [$books]);
-
             foreach($books as $book) {
                 if (!in_array($book->status, ["CANCELLED", "RECEIVED", "LOST", "RETURNED", "REJECTED"])) {
                     $book->status = "CANCELLED";
@@ -440,18 +438,13 @@ class TraineeLibrary extends Controller
                 }
             }
 
-            \Log::info("outside book_res", [$res_id]);
-
             $book_res = BookReservation::whereHas('bookRes', function($q) use ($res_id){
                 $q->where('id', $res_id);
             })
             ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
             ->exists();
 
-            \Log::info("existing book_res", [$book_res]);
-
             if(!$book_res) {
-                \Log::info("inside book_res", [$book_res]);
                 $record = BookRes::where(['id' => $res_id, 'user_id' => $user_id])->first();
                 $record->status = "FOR CSM";
                 $record->save();
@@ -561,7 +554,6 @@ class TraineeLibrary extends Controller
 
                 DB::commit();
 
-                \Log::info("success");
                 return response()->json(["message" => "Item removed from the cart"], 201);
             } catch(\Exception $e) {
                 DB::rollBack();
@@ -575,11 +567,11 @@ class TraineeLibrary extends Controller
         return TransactionUtil::transact(null, function() use ($request) {
             $userId = $request->user()->id;
             $cache_key = "count_book_reservation:{$userId}";
-            $reservationCount = Cache::remember($cache_key, $this->short_ttl, function () use($request) {
+            $reservationCount = Cache::remember($cache_key, $this->short_ttl, function () use($request, $userId) {
                 $reservations = BookRes::query();
 
-                if($request->userId) {
-                    $reservations->where('user_id', $request->userId);
+                if($userId) {
+                    $reservations->where('user_id', $userId);
                 }
 
                 $get_count = function ($collection) {
@@ -600,12 +592,12 @@ class TraineeLibrary extends Controller
         });
     }
 
-        public function get_book_info (Request $request, int $book_id){
-
-        \Log::info("book_id for pdf" , [$book_id]);
-        return TransactionUtil::transact(null, function() use($request, $book_id) {
+    public function get_book_info (Request $request, int $book_id){
+            return TransactionUtil::transact(null, function() use($request, $book_id) {
             // $ttl = now()->addMinutes(env('CACHE_DURATION'));
             // return Cache::remember("book_info_cache_$book_id:{$request->user()->id}", $ttl, function () use($request, $book_id) {
+                \Log::info($request->all());
+
                 $book = Book::where('id', $book_id)
                     ->withCount('copies', 'hasData')
                     ->with([
@@ -629,7 +621,9 @@ class TraineeLibrary extends Controller
                             'book_id' => $book_id,
                             'status' => 'RECEIVED'
                         ])->where('to_date', '>=', Carbon::now());
-                    })->exists();
+                     })->exists();
+
+                    \Log::info($isMine);
 
                     if ($filename && $isMine) {
                         $filePath = public_path("book-uploaded-files/pdf/{$filename}");
