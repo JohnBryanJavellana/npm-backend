@@ -10,7 +10,7 @@ use App\Http\Requests\Trainee\Library\CancelBookRequest;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use Illuminate\Support\Facades\Cache;
 use App\Mail\BookReservationStatus;
-use App\Utils\{AuditHelper, GenerateTrace, Notifications};
+use App\Utils\{AuditHelper, GenerateTrace, Notifications, TransactionUtil};
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use App\Http\Resources\{BookResource, BookRequestResource, PdfCopyResource, BookExtensionResource, AvailableBooksResource};
@@ -24,6 +24,7 @@ use function PHPUnit\Framework\isEmpty;
 class TraineeLibrary extends Controller
 {
     protected $ttl = 300;
+    protected $short_ttl = 60;
 
     /** GET ALL AVAILABLE BOOKS */
     public function view_books(Request $request)
@@ -39,9 +40,9 @@ class TraineeLibrary extends Controller
             }
 
             $record = EnrolledCourse::where('user_id', $userId)
-            ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
-            ->get()
-            ->select('training_id');
+                ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
+                ->get()
+                ->select('training_id');
 
             $books = Book::with([
                 'catalog.genre',
@@ -88,7 +89,7 @@ class TraineeLibrary extends Controller
             $user_id = $request->user()->id;
             $trac = $request->trace_number;
             $cache_key = "user_id:$user_id:status:$status";
-
+            
             $records = Cache::remember($cache_key, $this->ttl, function () use ($user_id, $status, $trac) {
                 $record = EnrolledCourse::where('user_id', $user_id)
                     ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
@@ -106,7 +107,7 @@ class TraineeLibrary extends Controller
                     ->latest("created_at");
 
                     if ($status) $book_record->where('status',$status);
-                    if ($trac->trace_number) $book_record->where(["trace_number" => $trac, "user_id" => $user_id]);
+                    if ($trac) $book_record->where(["trace_number" => $trac, "user_id" => $user_id]);
 
                     return $book_record->get();
             });
@@ -258,11 +259,12 @@ class TraineeLibrary extends Controller
                 event(new BELibrary(''));
             }
 
-            Cache::forget("user_id:{$request->user()->id}:status:");
-            Cache::forget("user_id:{$request->user()->id}:status:ACTIVE");
-            Cache::forget("user_id:{$request->user()->id}:status:COMPLETED");
-            Cache::forget("user_id:{$request->user()->id}:status:FOR CSM");
-            Cache::forget("user_id:{$request->user()->id}:status:EXTENDING");
+            Cache::forget("count_book_reservation:{$user->id}");
+            Cache::forget("user_id:{$user->id}:status:");
+            Cache::forget("user_id:{$user->id}:status:ACTIVE");
+            Cache::forget("user_id:{$user->id}:status:COMPLETED");
+            Cache::forget("user_id:{$user->id}:status:FOR CSM");
+            Cache::forget("user_id:{$user->id}:status:EXTENDING");
 
             //EMAIL ABOUT SENDING A BORROWING A BOOK
             SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
@@ -354,6 +356,8 @@ class TraineeLibrary extends Controller
             if($book_res) {
                 BookRes::whereKey($res_id)->update(['status' => "FOR CSM"]);
             }
+
+            Cache::forget("user_id:{$request->user()->id}:status:EXTENDING");
 
             DB::commit();
             return response()->json(["message" => "Cancelled Successfully!"], 200);
@@ -525,5 +529,34 @@ class TraineeLibrary extends Controller
                 return response()->json(['message' => "Something went wrong, Please try again!"], 400);
             }
         }
+    }
+
+    public function count_book_reservation (Request $request){
+        return TransactionUtil::transact(null, function() use ($request) {
+            $userId = $request->user()->id;
+            $cache_key = "count_book_reservation:{$userId}";
+            $reservationCount = Cache::remember($cache_key, $this->short_ttl, function () use($request) {
+                $reservations = BookRes::query();
+
+                if($request->userId) {
+                    $reservations->where('user_id', $request->userId);
+                }
+
+                $get_count = function ($collection) {
+                    $count = $collection->count();
+                    return $count > 99 ? '99+' : $count;
+                };
+
+                return [
+                    'total'     => $get_count($reservations),
+                    'active'    => $get_count($reservations->clone()->where('status', 'ACTIVE')),
+                    'for_csm'   => $get_count($reservations->clone()->where('status', 'FOR CSM')),
+                    'extending' => $get_count($reservations->clone()->where('status', 'EXTENDING')),
+                    'completed' => $get_count($reservations->clone()->where('status', 'COMPLETED')),
+                ];
+            });
+
+            return response()->json(['reservationCount' => $reservationCount], 200);
+        });
     }
 }

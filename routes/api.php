@@ -128,7 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('add_book', [TraineeLibrary::class, 'add_book_items']);
             Route::post('remove_book', [TraineeLibrary::class, 'remove_book_items']);
             Route::post('requests/', [TraineeLibrary::class, 'get_book_records']);
-            // Route::post('requests/details', [TraineeLibrary::class, 'get_book_records']);
+            Route::get('requests/count', [TraineeLibrary::class, 'count_book_reservation']);
             Route::post('requests/extention', [TraineeLibrary::class, 'view_extend_request']);
             Route::post('requests/available_extension', [TraineeLibrary::class, 'view_available_extension']);
             Route::post('requests/submit_extension', [TraineeLibrary::class, 'extend']);

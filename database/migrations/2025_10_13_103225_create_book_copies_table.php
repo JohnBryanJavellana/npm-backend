@@ -15,7 +15,6 @@ return new class extends Migration
         Schema::create('book_copies', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Book::class)->constrained()->onDelete('CASCADE');
-            $table->longText('qr');
             $table->string('unique_identifier');
             $table->enum('status', [
                 'AVAILABLE',
