@@ -85,6 +85,7 @@ class TraineeLibrary extends Controller
     /** GET TRAINEE RECORDS */
     public function get_book_records(Request $request) {
         try {
+            \Log::info("data", [$request->all()]);
             $status = $request->type;
             $user_id = $request->user()->id;
             $trac = $request->trace_number;
@@ -107,7 +108,44 @@ class TraineeLibrary extends Controller
                     ->latest("created_at");
 
                     if ($status) $book_record->where('status',$status);
-                    if ($trac) $book_record->where(["trace_number" => $trac, "user_id" => $user_id]);
+
+                    return $book_record->get();
+            });
+
+            return BookRequestResource::collection($records);
+
+        } catch(\Exception $e) {
+            // \Log::channel("errormonitor")->error("error get_book_records", [$e->getMessage()]);
+            \Log::error("day", [$e]);
+            return response()->json([
+                "message" => "Something went wrong, Please try again!"
+            ], 500);
+        }
+    }
+
+    public function view_request_details(Request $request){
+        try {
+            \Log::info("data", [$request->all()]);
+            $user_id = $request->user()->id;
+            $trac = $request->trace_number;
+            $cache_key = "user_id:$user_id:$trac";
+            
+            $records = Cache::remember($cache_key, $this->short_ttl, function () use ($user_id, $trac) {
+                $record = EnrolledCourse::where('user_id', $user_id)
+                    ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
+                    ->get()
+                    ->select('training_id');
+
+                $book_record = BookRes::forUser($user_id)
+                    ->with([
+                        "borrowedBooks.books.catalog.genre",
+                        "borrowedBooks.books.related" => function($q) use ($record) {
+                        $q->whereIn('training_id', $record);
+                    },
+                        "csm"
+                    ])
+                    ->where(["trace_number" => $trac, "user_id" => $user_id])
+                    ->first();
 
                     return $book_record->get();
             });

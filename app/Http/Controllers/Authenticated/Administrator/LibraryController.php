@@ -359,11 +359,9 @@ class LibraryController extends Controller
                     }
                 ])->first();
 
-                \Log::info($a->extendingBooks);
-
                 return [
-                    'hasBooksNeedAction' => count($a->library->borrowedBooks) > 0,
-                    'hasPendingReservation' => count($a->extendingBooks) > 0
+                    'hasBooksNeedAction' => $a && count($a->library->borrowedBooks) > 0,
+                    'hasPendingReservation' => $a && count($a->extendingBooks) > 0
                 ];
             });
 
