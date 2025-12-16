@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BELibrary;
 use App\Http\Controllers\Controller;
-
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use App\Http\Requests\Trainee\Library\BookRequest;
 use App\Http\Requests\Trainee\Library\CancelBookRequest;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
-use Illuminate\Support\Facades\Cache;
 use App\Mail\BookReservationStatus;
 use App\Utils\{AuditHelper, GenerateTrace, Notifications, TransactionUtil};
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -90,7 +91,7 @@ class TraineeLibrary extends Controller
             $user_id = $request->user()->id;
             $trac = $request->trace_number;
             $cache_key = "user_id:$user_id:status:$status";
-            
+
             $records = Cache::remember($cache_key, $this->ttl, function () use ($user_id, $status, $trac) {
                 $record = EnrolledCourse::where('user_id', $user_id)
                     ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
@@ -129,9 +130,9 @@ class TraineeLibrary extends Controller
             $user_id = $request->user()->id;
             $trac = $request->trace_number;
             $cache_key = "user_id:$user_id:$trac";
-            
+
             $records = Cache::remember($cache_key, $this->short_ttl, function () use ($user_id, $trac) {
-                $record = EnrolledCourse::where('user_id', $user_id)                
+                $record = EnrolledCourse::where('user_id', $user_id)
                     ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
                     ->get()
                     ->select('training_id');
@@ -147,7 +148,7 @@ class TraineeLibrary extends Controller
                     ->where(["trace_number" => $trac, "user_id" => $user_id])
                     ->get();
 
-                   return $b;    
+                   return $b;
             });
 
             return BookRequestResource::collection($records);
@@ -300,8 +301,8 @@ class TraineeLibrary extends Controller
             Cache::forget("count_book_reservation:{$user->id}");
             Cache::forget("user_id:{$user->id}:status:");
             Cache::forget("user_id:{$user->id}:status:ACTIVE");
-            Cache::forget("user_id:{$user->id}:status:COMPLETED");
             Cache::forget("user_id:{$user->id}:status:FOR CSM");
+            Cache::forget("user_id:{$user->id}:status:COMPLETED");
             Cache::forget("user_id:{$user->id}:status:EXTENDING");
 
             //EMAIL ABOUT SENDING A BORROWING A BOOK
@@ -327,9 +328,10 @@ class TraineeLibrary extends Controller
         try {
             DB::beginTransaction();
             $validated = $request->validated();
+            $user_id = $request->user()->id;
 
             $extension_req = ExtensionRequest::create([
-                "user_id" => $request->user()->id,
+                "user_id" => $user_id,
                 "book_res_id" => $validated["reference_id"],
                 "purpose" => $validated["purpose"],
             ]);
@@ -349,7 +351,12 @@ class TraineeLibrary extends Controller
             $bookRes->status = "EXTENDING";
             $bookRes->save();
 
-            Cache::forget("user_id:{$request->user()->id}:status:EXTENDING");
+            Cache::forget("count_book_reservation:{$user_id}");
+            Cache::forget("user_id:{$user_id}:status:");
+            Cache::forget("user_id:{$user_id}:status:ACTIVE");
+            Cache::forget("user_id:{$user_id}:status:FOR CSM");
+            Cache::forget("user_id:{$user_id}:status:COMPLETED");
+            Cache::forget("user_id:{$user_id}:status:EXTENDING");
 
             DB::commit();
             return response()->json(["message" => "Extension request has sent successfully!"], 201);
@@ -590,6 +597,60 @@ class TraineeLibrary extends Controller
             });
 
             return response()->json(['reservationCount' => $reservationCount], 200);
+        });
+    }
+
+        public function get_book_info (Request $request, int $book_id){
+
+        \Log::info("book_id for pdf" , [$book_id]);
+        return TransactionUtil::transact(null, function() use($request, $book_id) {
+            // $ttl = now()->addMinutes(env('CACHE_DURATION'));
+            // return Cache::remember("book_info_cache_$book_id:{$request->user()->id}", $ttl, function () use($request, $book_id) {
+                $book = Book::where('id', $book_id)
+                    ->withCount('copies', 'hasData')
+                    ->with([
+                        'related',
+                        'related.training',
+                        'related.training.module',
+                        'catalog',
+                        'catalog.genre'
+                    ])->first();
+
+
+                if ($request->boolean('getFileAsBlob') && $request->has('traceNumber') && $book) {
+                    $filename = $book->pdf_copy ?? null;
+
+                    $isMine = BookRes::where([
+                        'user_id' => $request->user()->id,
+                        'trace_number' => $request->traceNumber
+                    ])
+                    ->whereHas('borrowedBooks', function ($self) use($book_id) {
+                        return $self->where([
+                            'book_id' => $book_id,
+                            'status' => 'RECEIVED'
+                        ])->where('to_date', '>=', Carbon::now());
+                    })->exists();
+
+                    if ($filename && $isMine) {
+                        $filePath = public_path("book-uploaded-files/pdf/{$filename}");
+
+                        if (File::exists($filePath)) {
+                            $headers = [
+                                'Content-Type' => 'application/pdf',
+                                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+                                'Content-Length' => File::size($filePath),
+                                'Access-Control-Allow-Origin' => '*',
+                            ];
+
+                            return Response::file($filePath, $headers);
+                        }
+                    } else {
+                        return response()->json(['data' => ''], 500);
+                    }
+                } else {
+                    return response()->json(['book' => $book], 200);
+                }
+            // });
         });
     }
 }

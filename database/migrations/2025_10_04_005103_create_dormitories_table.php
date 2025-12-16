@@ -20,12 +20,7 @@ return new class extends Migration
             $table->longText('room_description');
             $table->decimal('room_cost', 10, 2)->default(0.00);
             $table->enum('room_fee_type',["OFFICERS", "RATINGS"])->nullable();
-            $table->enum('room_type',[
-                "TRAINEES ENROLLED AIR-CONDITIONED",
-                "TRAINEES ENROLLED NON-AIRCON",
-                "GUESTS AIR-CONDITIONED",
-                "GUESTS NON-AIRCON"
-            ]);
+            $table->enum('is_air_conditioned',["YES", "NO"]);
             $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);
             $table->timestamps();
         });

@@ -242,6 +242,7 @@ class LibraryController extends Controller
                         'catalog.genre'
                     ])->first();
 
+
                 if ($request->boolean('getFileAsBlob') && $request->has('traceNumber') && $book) {
                     $filename = $book->pdf_copy ?? null;
 
@@ -249,12 +250,11 @@ class LibraryController extends Controller
                         'user_id' => $request->user()->id,
                         'trace_number' => $request->traceNumber
                     ])
-                    ->where('to_date', '>=', Carbon::now())
                     ->whereHas('borrowedBooks', function ($self) use($book_id) {
                         return $self->where([
                             'book_id' => $book_id,
                             'status' => 'RECEIVED'
-                        ]);
+                        ])->where('to_date', '>=', Carbon::now());
                     })->exists();
 
                     if ($filename && $isMine) {
@@ -514,7 +514,7 @@ class LibraryController extends Controller
             $this_book->status = $request->status;
             $this_book->save();
 
-            if(is_null($this_book->book_copy_id)){
+            if(!is_null($this_book->book_copy_id)){
                 $book_copy = BookCopy::find($this_book->book_copy_id);
 
                 switch ($request->status) {
