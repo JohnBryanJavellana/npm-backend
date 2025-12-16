@@ -182,23 +182,11 @@ class BookSeeder extends Seeder
                 $numCopies = rand(1, $data['max_copies']);
 
                 for ($i = 1; $i <= $numCopies; $i++) {
-                    $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOKQR-', 'unique_identifier', 10, 99);
-
                     $new_book_copy = new BookCopy;
                     $new_book_copy->book_id = $book->id;
-                    $new_book_copy->unique_identifier = $new_book_ui;
-                    $new_book_copy->qr = "$new_book_ui.png";
+                    $new_book_copy->unique_identifier = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOKQR-', 'unique_identifier', 10, 99);
                     $new_book_copy->status = 'AVAILABLE';
                     $new_book_copy->save();
-
-                    $qr_path = public_path("qr/book/$new_book_ui.png");
-                    QrCode::format('png')
-                        ->size(500)
-                        ->style('round')
-                        ->margin(1)
-                        ->backgroundColor(255, 255, 255)
-                        ->merge('/public/system-images/62334fcadd0d9e6d0a152aca.png', 0.19)
-                        ->generate($new_book_ui, $qr_path);
                 }
             }
 

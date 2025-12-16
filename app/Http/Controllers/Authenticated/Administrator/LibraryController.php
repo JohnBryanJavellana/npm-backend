@@ -132,22 +132,10 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, function() use ($request) {
             if($request->copies) {
                 for ($i = 0; $i < $request->copies; $i++) {
-                    $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOKQR-', 'unique_identifier', 10, 99);
-
                     $book_copy = new BookCopy;
-                    $book_copy->qr = $new_book_ui . '.png';
-                    $book_copy->unique_identifier = $new_book_ui;
+                    $book_copy->unique_identifier = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOKQR-', 'unique_identifier', 10, 99);
                     $book_copy->book_id = $request->bookId;
                     $book_copy->save();
-
-                    $qr_path = public_path("qr/book/$new_book_ui.png");
-                    QrCode::format('png')
-                        ->size(500)
-                        ->style('round')
-                        ->margin(1)
-                        ->backgroundColor(255, 255, 255)
-                        ->merge('/public/system-images/62334fcadd0d9e6d0a152aca.png', 0.19)
-                        ->generate($new_book_ui, $qr_path);
                 }
             }
 
@@ -249,6 +237,7 @@ class LibraryController extends Controller
                     ->with([
                         'related',
                         'related.training',
+                        'related.training.module',
                         'catalog',
                         'catalog.genre'
                     ])->first();
@@ -370,9 +359,11 @@ class LibraryController extends Controller
                     }
                 ])->first();
 
+                \Log::info($a->extendingBooks);
+
                 return [
-                    'hasBooksNeedAction' => $a && count($a->library->borrowedBooks) > 0,
-                    'hasPendingReservation' => $a && !is_null($a->extendingBooks)
+                    'hasBooksNeedAction' => count($a->library->borrowedBooks) > 0,
+                    'hasPendingReservation' => count($a->extendingBooks) > 0
                 ];
             });
 
