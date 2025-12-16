@@ -43,7 +43,7 @@ class BookRequestResource extends JsonResource
                     'book_ui' => $book->book?->unique_identifier,
                     'book_recommended' => $book->books?->related->map(function($course) {
                         return $course->training?->module?->name;
-                    }),    
+                    }),
                 ];
             }),
             'csm' => $this->csm,

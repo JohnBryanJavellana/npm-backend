@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainee\Library\BookRequest;
 use App\Http\Requests\Trainee\Library\CancelBookRequest;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
-
+use Illuminate\Support\Facades\Cache;
 use App\Mail\BookReservationStatus;
 use App\Utils\{AuditHelper, GenerateTrace, Notifications};
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -23,6 +23,8 @@ use function PHPUnit\Framework\isEmpty;
 
 class TraineeLibrary extends Controller
 {
+    protected $ttl = 300;
+
     /** GET ALL AVAILABLE BOOKS */
     public function view_books(Request $request)
     {
@@ -84,28 +86,32 @@ class TraineeLibrary extends Controller
         try {
             $status = $request->type;
             $user_id = $request->user()->id;
+            $trac = $request->trace_number;
+            $cache_key = "user_id:$user_id:status:$status";
 
-            $record = EnrolledCourse::where('user_id', $user_id)
-            ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
-            ->get()
-            ->select('training_id');
+            $records = Cache::remember($cache_key, $this->ttl, function () use ($user_id, $status, $trac) {
+                $record = EnrolledCourse::where('user_id', $user_id)
+                    ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
+                    ->get()
+                    ->select('training_id');
 
-            $book_record = BookRes::forUser($user_id)
-                ->with([
-                    "borrowedBooks.books.catalog.genre",
-                    "borrowedBooks.books.related" => function($q) use ($record) {
-                    $q->whereIn('training_id', $record);
-                },
-                    "csm"
-                ])
-                ->latest("created_at");
+                $book_record = BookRes::forUser($user_id)
+                    ->with([
+                        "borrowedBooks.books.catalog.genre",
+                        "borrowedBooks.books.related" => function($q) use ($record) {
+                        $q->whereIn('training_id', $record);
+                    },
+                        "csm"
+                    ])
+                    ->latest("created_at");
 
-                if ($request->type) $book_record->where('status',$status);
-                if ($request->trace_number) $book_record->where(["trace_number" => $request->trace_number, "user_id" => $user_id]);
+                    if ($status) $book_record->where('status',$status);
+                    if ($trac->trace_number) $book_record->where(["trace_number" => $trac, "user_id" => $user_id]);
 
-                $b = $book_record->get();
+                    return $book_record->get();
+            });
 
-            return BookRequestResource::collection($b);
+            return BookRequestResource::collection($records);
 
         } catch(\Exception $e) {
             // \Log::channel("errormonitor")->error("error get_book_records", [$e->getMessage()]);
@@ -137,22 +143,25 @@ class TraineeLibrary extends Controller
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
     }
- 
+
     /** GET AVAILABLE BOOKS FOR EXTENSION */
     public function view_available_extension(Request $request)
     {
         \Log::info("data view_available_extension", [$request->all(), $request->user()->id]);
         try {
             $userId = $request->user()->id;
-            $traceNum = $request->trace_number;
+            $traceNum = $request->traceNumber;
 
            $books = Book::with([
-                "hasData",
+                "hasData" => function ($query) use ($userId, $traceNum) {
+                    $query->where("status", "RECEIVED");
+                },
                 "catalog.genre"
             ])
             ->whereHas("hasData",function($query) use ($traceNum, $userId){
                     $query
                     ->where("status", "RECEIVED")
+                    ->whereRaw("DATEDIFF(to_date, from_date) < 12")
                     ->whereHas("bookRes", function($q) use ($traceNum, $userId) {
                         $q->where([
                             "trace_number" => $traceNum,
@@ -160,7 +169,7 @@ class TraineeLibrary extends Controller
                         ]);
                     });
                 })
-            ->get();
+            ->get();;
 
             return AvailableBooksResource::collection($books);
         }
@@ -199,7 +208,7 @@ class TraineeLibrary extends Controller
         }
     }
 
-    /** SENDING BOOK REQUEST */
+    /** POST BOOK REQUEST */
     public function send_request_book(BookRequest $request){
         $validated = $request->validated();
         \Log::info("data", $request->validated());
@@ -249,6 +258,12 @@ class TraineeLibrary extends Controller
                 event(new BELibrary(''));
             }
 
+            Cache::forget("user_id:{$request->user()->id}:status:");
+            Cache::forget("user_id:{$request->user()->id}:status:ACTIVE");
+            Cache::forget("user_id:{$request->user()->id}:status:COMPLETED");
+            Cache::forget("user_id:{$request->user()->id}:status:FOR CSM");
+            Cache::forget("user_id:{$request->user()->id}:status:EXTENDING");
+
             //EMAIL ABOUT SENDING A BORROWING A BOOK
             SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
             AuditHelper::log($user->id, "User {$user->id} sent a book request.");
@@ -294,9 +309,12 @@ class TraineeLibrary extends Controller
              * @var mixed allenETA
              * modify if you want. mwaghh! 👌👌😁😁 🍆💦
              */
+
             $bookRes = BookRes::find($validated["reference_id"]);
             $bookRes->status = "EXTENDING";
             $bookRes->save();
+
+            Cache::forget("user_id:{$request->user()->id}:status:EXTENDING");
 
             DB::commit();
             return response()->json(["message" => "Extension request has sent successfully!"], 201);
@@ -326,7 +344,7 @@ class TraineeLibrary extends Controller
             BookReservation::whereKey($record->book_reservation_id)->update([
                 'status' => "RECEIVED"
             ]);
-            
+
             $book_res = BookReservation::whereHas('bookRes', function($q) use ($res_id){
                 $q->where('id', $res_id);
             })

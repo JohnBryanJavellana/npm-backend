@@ -128,7 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('add_book', [TraineeLibrary::class, 'add_book_items']);
             Route::post('remove_book', [TraineeLibrary::class, 'remove_book_items']);
             Route::post('requests/', [TraineeLibrary::class, 'get_book_records']);
-            Route::post('requests/details', [TraineeLibrary::class, 'get_book_records']);
+            // Route::post('requests/details', [TraineeLibrary::class, 'get_book_records']);
             Route::post('requests/extention', [TraineeLibrary::class, 'view_extend_request']);
             Route::post('requests/available_extension', [TraineeLibrary::class, 'view_available_extension']);
             Route::post('requests/submit_extension', [TraineeLibrary::class, 'extend']);
@@ -198,7 +198,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::get('get_pre_data', [LibraryController::class, 'get_pre_data'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
                 Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
                 Route::get('get_book_info/get_copies/{book_id}', [LibraryController::class, 'get_copies'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
-                Route::post('get_book_info/create_book_copies', [LibraryController::class, 'create_book_copies'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
+                Route::post('create_book_copies', [LibraryController::class, 'create_book_copies'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
                 Route::get('get_book_total_reservations/{book_id}', [LibraryController::class, 'get_book_total_reservations'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
                 Route::post('update_reservation', [LibraryController::class, 'update_reservation']);
                 Route::post('get_available_books', [LibraryController::class, 'get_available_books']);

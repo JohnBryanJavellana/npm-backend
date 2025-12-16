@@ -182,7 +182,7 @@ class BookSeeder extends Seeder
                 $numCopies = rand(1, $data['max_copies']);
 
                 for ($i = 1; $i <= $numCopies; $i++) {
-                    $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
+                    $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOKQR-', 'unique_identifier', 10, 99);
 
                     $new_book_copy = new BookCopy;
                     $new_book_copy->book_id = $book->id;
