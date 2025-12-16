@@ -70,7 +70,9 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json(['user' => $user]);
     });
 
-    /** trainee routes */
+    /** trainee routes 
+     * MUST HAVE A THROTTLE
+    */
     Route::middleware('trainee')->group(function () {
         Route::prefix('/my-account/')->group(function() {
             Route::post('create_or_update_additional_info', [MyAccount::class,'create_or_update_additional_info']);
@@ -130,8 +132,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::match(['GET', 'POST'], 'book_info/{book_id}', [TraineeLibrary::class, 'get_book_info']);
             Route::post('requests/', [TraineeLibrary::class, 'get_book_records']);
             Route::post('request/details', [TraineeLibrary::class, 'view_request_details']);
-            Route::get('requests/count', [TraineeLibrary::class, 'count_book_reservation']);
-            Route::post('requests/extention', [TraineeLibrary::class, 'view_extend_request']);
+            Route::match(['GET', 'POST'],'requests/count', [TraineeLibrary::class, 'count_book_reservation']);
+            Route::post('requests/extension', [TraineeLibrary::class, 'view_extend_request']);
             Route::post('requests/available_extension', [TraineeLibrary::class, 'view_available_extension']);
             Route::post('requests/submit_extension', [TraineeLibrary::class, 'extend']);
             Route::post('requests/extension/cancel', [TraineeLibrary::class, 'cancel_extend']);

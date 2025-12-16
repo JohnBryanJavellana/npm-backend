@@ -242,22 +242,18 @@ class LibraryController extends Controller
                         'catalog.genre'
                     ])->first();
 
-
                 if ($request->boolean('getFileAsBlob') && $request->has('traceNumber') && $book) {
                     $filename = $book->pdf_copy ?? null;
 
                     $isMine = BookRes::where([
                         'user_id' => $request->user()->id,
                         'trace_number' => $request->traceNumber
-                    ])
-                    ->whereHas('borrowedBooks', function ($self) use($book_id) {
-                        return $self->where([
-                            'book_id' => $book_id,
-                            'status' => 'RECEIVED'
-                        ])->where('to_date', '>=', Carbon::now());
-                    })->exists();
+                    ])->with(['borrowedBooks' => function ($self) use($book_id) {
+                        $self->where(['book_id' => $book_id, 'status' => 'RECEIVED'])
+                             ->where('to_date', '>=', Carbon::now());
+                    }])->first();
 
-                    if ($filename && $isMine) {
+                    if ($filename && !is_null($isMine->borrowedBooks)) {
                         $filePath = public_path("book-uploaded-files/pdf/{$filename}");
 
                         if (File::exists($filePath)) {
@@ -266,6 +262,8 @@ class LibraryController extends Controller
                                 'Content-Disposition' => 'inline; filename="' . $filename . '"',
                                 'Content-Length' => File::size($filePath),
                                 'Access-Control-Allow-Origin' => '*',
+                                'Access-Control-Expose-Headers' => 'Created-At',
+                                'Created-At' => $isMine->borrowedBooks[0]->to_date
                             ];
 
                             return Response::file($filePath, $headers);

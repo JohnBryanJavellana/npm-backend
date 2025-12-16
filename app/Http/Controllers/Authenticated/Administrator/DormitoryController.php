@@ -124,15 +124,22 @@ class DormitoryController extends Controller
         return TransactionUtil::transact($request, function() use ($request) {
             $ttl = now()->addMinutes(env('CACHE_DURATION'));
             $rooms = Cache::remember('get_available_rooms', $ttl, function () use($request) {
-                return Dormitory::with([
-                    'room_images',
-                    'rooms' => function($query) {
-                        $query->where('room_available_slot', '>', 0);
-                    }
+                $dorms = Dormitory::with([
+                    'room_images'
                 ])->where([
                     'room_for_type' => $request->room_for_type,
                     'is_air_conditioned' => $request->room_type
-                ])->get();
+                ])->get()->map(function($self) {
+                    $a = $self->rooms()->where('room_available_slot', '>', 0)->exists();
+
+                    if(!$a) {
+                        // check tenants
+                    } else {
+                        return $self;
+                    }
+                })->values();
+
+                return $dorms;
             });
 
             return response()->json(['rooms' => $rooms], 200);
@@ -192,128 +199,4 @@ class DormitoryController extends Controller
 
         return response()->json(['room_requests' => $room_requests], 200);
     }
-
-    // public function get_recommended_room (Request $request) {
-    //     $rooms = DormitoryRoom::where([
-    //         'room_for_type' => $request->room_for_type,
-    //         'room_type' => $request->room_type
-    //     ])->where('room_available_slot', '>', 0)->get();
-
-    //     return response()->json(['rooms' => $rooms], 200);
-    // }
-
-    // public function remove_dormitory (Request $request, int $dormitory_id) {
-    //     try {
-    //         DB::beginTransaction();
-
-    //         $this_dorm = DormitoryRoom::withCount(['tenants'])->where('id', $dormitory_id)->first();
-    //         if($this_dorm->tenants_count > 0) {
-    //             return response()->json(['message' => "Can't remove room. It already has connected data."], 200);
-    //         } else {
-
-    //             $dormitory = DormitoryRoom::find($dormitory_id);
-    //             $dormitory->delete();
-
-    //             $new_log = new AuditTrail;
-    //             $new_log->user_id = $request->user()->id;
-    //             $new_log->actions = "User has removed a dormitory. ID# $dormitory_id";
-    //             $new_log->save();
-
-    //             event(new BEDormitory(''));
-    //             DB::commit();
-    //             return response()->json(['message' => "You've removed dormitory. ID# $dormitory_id"], 200);
-    //         }
-    //     } catch (\Exception $e) {
-    //         DB::rollback();
-    //         return response()->json(['message' => $e->getMessage()], 500);
-    //     }
-    // }
-
-    // public function update_status_dormitory (Request $request){
-    //     $validations = [
-    //         'documentId' => 'required',
-    //         'status' => 'required',
-    //         'from' => 'required|date',
-    //         'to' => 'required|date',
-    //         'room' => 'required'
-    //     ];
-
-    //     $validator = \Validator::make($request->all(), $validations);
-
-    //     if ($validator->fails()) {
-    //         return response()->json(['message' => $validator->errors()], 400);
-    //     } else {
-    //         try {
-    //             DB::beginTransaction();
-
-    //             $dormitory_request = DormitoryTenant::find($request->documentId);
-    //             $dormitory_request->tenant_status = $request->status;
-    //             $dormitory_request->tenant_from_date = $request->from;
-    //             $dormitory_request->tenant_to_date = $request->to;
-    //             $dormitory_request->dormitory_room_id = $request->room;
-    //             $dormitory_request->save();
-
-    //             if($request->status === "FOR PAYMENT") {
-    //                 $dormitory_invoice = new DormitoryInvoice;
-    //                 $dormitory_invoice->user_id = $dormitory_request->user_id;
-    //                 $dormitory_invoice->dormitory_tenant_id = $dormitory_request->id;
-    //                 $dormitory_invoice->dormitory_room_id = $request->room;
-    //                 $dormitory_invoice->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class);
-
-    //                 $enrolled_days = [];
-    //                 $trainings = EnrolledCourse::with('training_schedule')->where([
-    //                     'user_id' => $dormitory_request->user_id,
-    //                     'enrolled_course_status' => 'ENROLLED'
-    //                 ])->get();
-
-    //                 foreach($trainings as $t) {
-    //                     // data: $t month name (if month name is not same like if
-    //                     // training_schedule_from is November 30, and training_schedule_to is December 1, it should be November 30 - December 1. but if not
-    //                     // it should be only November 29 - 30), $t->training_schedule_from, $t->training_schedule_to
-    //                     // append to enrolled_days.
-    //                 }
-
-    //                 $dormitory_invoice->description = "";
-
-    //                 $dormitory_invoice->save();
-    //                 DormitoryExtendRequest::where('dormitory_tenant_id', $dormitory_request->id)->delete();
-    //             }
-
-    //             if(in_array($request->status, ["APPROVED", "TERMINATED"])) {
-    //                 $this_room = DormitoryRoom::find($request->room);
-    //                 $this_room->room_available_slot = $request->status === "APPROVED"
-    //                     ? ($this_room->room_available_slot - ($dormitory_request->room_for_type === "COUPLE" ? 2 : 1))
-    //                     : ($this_room->room_available_slot + ($dormitory_request->room_for_type === "COUPLE" ? 2 : 1));
-    //                 $this_room->save();
-    //             }
-
-    //             AuditHelper::log($request->user()->id, "Updated a dormitory request. ID#" . $request->documentId);
-
-    //             event(
-    //                 new BEDormitory(''),
-    //                 new BEAuditTrail('')
-    //             );
-    //             DB::commit();
-    //             return response()->json(['message' => "You've updated a dormitory request. ID#" . $request->documentId], 200);
-    //         } catch (\Exception $e) {
-    //             DB::rollback();
-    //             return response()->json(['message'=> $e->getMessage()], 400);
-    //         }
-    //     }
-    // }
-
-    // public function get_tenants (Request $request, int $room_id) {
-    //     $tenants = DormitoryTenant::with(['tenant'])->where('id', $room_id)->get();
-    //     return response()->json(['tenants' => $tenants], 200);
-    // }
-
-    // public function get_tenants_invoices (Request $request, int $tenant_id) {
-    //     $tenant_invoices = DormitoryInvoice::where('dormitory_tenant_id', $tenant_id)->get();
-    //     return response()->json(['tenant_invoices' => $tenant_invoices], 200);
-    // }
-
-    // public function get_all_invoices (Request $request) {
-    //     $invoices = DormitoryInvoice::with('tenant')->get();
-    //     return response()->json(['invoices' => $invoices], 200);
-    // }
 }

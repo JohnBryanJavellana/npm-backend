@@ -33,26 +33,22 @@ class ExtendingRequest extends FormRequest
                 'data' => json_decode($this->data, true),
             ]);
         }
+
+        return [];
     }
 
 
     public function rules(): array
     {
         return [
-            "reference_id" => "required|exists:book_res,id",
-            "date_of_extension" => [
-                "required",
-                "date",
-            ],
+            // "reference_id" => "required|exists:book_res,id",
             "purpose" => "required|string",
             "data" => "required|array",
             "data.*.book_res_id" => [
-                "required",
-                "integer",
-                "exists:book_reservations,id",
-                new BookLibraryRule($this->user())
+                "required", "integer", "exists:book_reservations,id", new BookLibraryRule($this->user())
             ],
-            "data.*.last_main_date" => "required|string",
+            "data.*.to_date" => "required|date",
+            "data.*.extension_date" => "required|date"
         ];
     }
 
