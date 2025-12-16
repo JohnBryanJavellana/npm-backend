@@ -4,25 +4,23 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use App\Http\Requests\Admin\Dormitory\{
+    GetAvailableRooms
+};
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 use App\Utils\{
     AuditHelper,
-    GenerateTrace,
-    ConvertToBase64
+    ConvertToBase64,
+    TransactionUtil
 };
 use App\Events\{BEDormitory, BEAuditTrail};
-use App\Mail\RoomReservationStatus;
 use App\Models\{
-    EnrolledCourse,
     Dormitory,
     DormitoryRoom,
     DormitoryTenant,
     DormitoryRoomImage,
-    DormitoryInvoice,
-    DormitoryExtendRequest,
-    DormitoryTenantHistory
 };
 
 class DormitoryController extends Controller
@@ -78,13 +76,11 @@ class DormitoryController extends Controller
                 $this_dormitory->save();
 
                 if($request->httpMethod === "POST"){
-                    for($i = 0; $i < $request->room_count; $i++) {
-                        $room = new DormitoryRoom;
-                        $room->dormitory_id = $this_dormitory->id;
-                        $room->room_slot = $request->room_slot;
-                        $room->room_available_slot = $request->room_slot;
-                        $room->save();
-                    }
+                    $fixedRequest = $request->merge([
+                        'insideJob' => true,
+                        'dormitoryId' => $this_dormitory->id
+                    ]);
+                    $this->create_dormitory_rooms($fixedRequest);
                 }
 
                 if($request->data_room_image) {
@@ -129,6 +125,38 @@ class DormitoryController extends Controller
                 return response()->json(['message' => $e->getMessage()], 500);
             }
         }
+    }
+
+    public function create_dormitory_rooms (Request $request) {
+        return TransactionUtil::transact(null, function() use ($request) {
+            if($request->room_count) {
+                for($i = 0; $i < $request->room_count; $i++) {
+                    $room = new DormitoryRoom;
+                    $room->dormitory_id = $request->dormitoryId;
+                    $room->room_slot = $request->room_slot;
+                    $room->room_available_slot = $request->room_slot;
+                    $room->save();
+                }
+            }
+
+            return $request->insideJob ? true : response()->json(['message' => "You've added a dormitory room."], 201);
+        });
+    }
+
+    public function get_available_rooms (GetAvailableRooms $request) {
+        return TransactionUtil::transact($request, function() use ($request) {
+            $ttl = now()->addMinutes(env('CACHE_DURATION'));
+            $rooms = Cache::remember('get_available_rooms', $ttl, function () use($request) {
+                return DormitoryRoom::with([
+                    'roomImages'
+                ])->where([
+                    'room_for_type' => $request->room_for_type,
+                    'room_type' => $request->room_type
+                ])->where('room_available_slot', '>', 0)->get();
+            });
+
+            return response()->json(['rooms' => $rooms], 200);
+        });
     }
 
     public function get_dormitory_info (Request $request, int $room_id) {

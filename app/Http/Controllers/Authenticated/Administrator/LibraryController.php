@@ -123,7 +123,7 @@ class LibraryController extends Controller
                 );
             }
 
-            // Cache::forget('books_cache');
+            Cache::forget('books_cache');
             return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a book. ID#" . $book->id], 201);
         });
     }
@@ -167,7 +167,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                // Cache::forget('books_cache');
+                Cache::forget('books_cache');
                 return response()->json(['message' => "You've removed a book. ID#$book_id"], 200);
             }
         });
@@ -200,7 +200,7 @@ class LibraryController extends Controller
                 );
             }
 
-            // Cache::forget('genres_cache');
+            Cache::forget('genres_cache');
             return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a book genre. ID#" . $this_genre->id], 201);
         });
     }
@@ -222,7 +222,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                // Cache::forget('genres_cache');
+                Cache::forget('genres_cache');
                 return response()->json(['message' => "You've removed a book genre. ID#$genre_id"], 200);
             }
         });
@@ -308,7 +308,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                // Cache::forget('book_copies_cache');
+                Cache::forget('book_copies_cache');
                 return response()->json(['message' => "You've removed book copy. ID#$copy_id"], 200);
             }
         });
@@ -556,7 +556,7 @@ class LibraryController extends Controller
                 );
             }
 
-            // Cache::forget('book_reservations_cache');
+            Cache::forget('book_reservations_cache');
             return response()->json(['message' => "You've updated a book request. ID#" . $request->documentId], 200);
         });
     }

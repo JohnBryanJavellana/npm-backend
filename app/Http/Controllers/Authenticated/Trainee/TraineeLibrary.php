@@ -63,7 +63,7 @@ class TraineeLibrary extends Controller
                     $q->where('user_id', $user->id);
                 },
                 'hasData' => function ($q) use ($user) {
-                    $q->where('status', 'RECEIVED')->whereRelation('bookRes', 'user_id', '=', $user->id);
+                    $q->whereIn('status', ['RECEIVED', 'PENDING', 'APPROVED'])->whereRelation('bookRes', 'user_id', '=', $user->id);
                 },
                 'related as enrolled_trainings_count' => function ($query) use ($record) {
                     $query->whereIn('training_id', $record);
@@ -131,12 +131,12 @@ class TraineeLibrary extends Controller
             $cache_key = "user_id:$user_id:$trac";
             
             $records = Cache::remember($cache_key, $this->short_ttl, function () use ($user_id, $trac) {
-                $record = EnrolledCourse::where('user_id', $user_id)
+                $record = EnrolledCourse::where('user_id', $user_id)                
                     ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
                     ->get()
                     ->select('training_id');
 
-                $book_record = BookRes::forUser($user_id)
+                 $b = BookRes::forUser($user_id)
                     ->with([
                         "borrowedBooks.books.catalog.genre",
                         "borrowedBooks.books.related" => function($q) use ($record) {
@@ -145,9 +145,9 @@ class TraineeLibrary extends Controller
                         "csm"
                     ])
                     ->where(["trace_number" => $trac, "user_id" => $user_id])
-                    ->first();
+                    ->get();
 
-                    return $book_record->get();
+                   return $b;    
             });
 
             return BookRequestResource::collection($records);
@@ -344,11 +344,6 @@ class TraineeLibrary extends Controller
 
                 BookReservation::find($data["book_res_id"])->update(["status" => "EXTENDING"]);
             }
-
-            /**
-             * @var mixed allenETA
-             * modify if you want. mwaghh! 👌👌😁😁 🍆💦
-             */
 
             $bookRes = BookRes::find($validated["reference_id"]);
             $bookRes->status = "EXTENDING";
