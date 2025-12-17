@@ -9,6 +9,15 @@ class BookRes extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
+    public const STATUS_COMPLETED = 'COMPLETED';
+    public const STATUS_ACTIVE    = 'ACTIVE';
+    public const STATUS_FOR_CSM   = 'FOR CSM';
+    public const STATUS_EXTENDING = 'EXTENDING';
+    public const TYPE_ONLINE = 'ONLINE';
+    public const TYPE_WALK_IN = 'WALK-IN';
+
 
     //RELATIONS
     public function borrowedBooks() {

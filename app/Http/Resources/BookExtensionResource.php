@@ -22,13 +22,13 @@ class BookExtensionResource extends JsonResource
             "create_at" => $this->created_at,
             "ext_books" => $this->extendingBooks?->map(function($book) {
                 return [
+                    "ext_book_id" => $book->id,
                     "ext_date_of_extension" => $book->date_of_extension,
                     "current_to_date" => $book->current_to_date,
                     "ext_status" => $book->status,
                     "book_reservation_id" => $book->bookReservation?->id,
                     "book_reservation_from" => $book->bookReservation?->from_date,
-                    "book_reservation_to" => $book->bookReservation?->book_res_id,
-                    "reservation_book_id" => $book->bookReservation?->book_id,
+                    "book_reservation_to" => $book->bookReservation?->to_date,
                     "reservation_book_copy_id" => $book->bookReservation?->book_copy_id,
                     "book_reservation_status" => $book->bookReservation?->status,
                     "book_reservation_created" => $book->bookReservation?->created_at,

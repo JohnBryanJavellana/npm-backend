@@ -26,26 +26,26 @@ class ExtendingRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    protected function prepareForValidation()
-    {
-        if (is_string($this->data)) {
-            $this->merge([
-                'data' => json_decode($this->data, true),
-            ]);
-        }
+    // protected function prepareForValidation()
+    // {
+    //     if (is_string($this->data)) {
+    //         $this->merge([
+    //             'data' => json_decode($this->data, true),
+    //         ]);
+    //     }
 
-        return [];
-    }
+    //     return [];
+    // }
 
 
     public function rules(): array
     {
         return [
-            // "reference_id" => "required|exists:book_res,id",
+            "reference_id" => "required|exists:book_res,id",
             "purpose" => "required|string",
             "data" => "required|array",
             "data.*.book_res_id" => [
-                "required", "integer", "exists:book_reservations,id", new BookLibraryRule($this->user())
+                "required", "integer", "exists:book_reservations,id"
             ],
             "data.*.to_date" => "required|date",
             "data.*.extension_date" => "required|date"
