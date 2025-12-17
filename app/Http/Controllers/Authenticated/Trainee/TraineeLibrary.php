@@ -20,12 +20,19 @@ use App\Models\{User, Book, BookCopy, BookCart, BookReservation, BookRes, Enroll
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use function PHPUnit\Framework\isEmpty;
+use App\Services\LibraryService;
 
 class TraineeLibrary extends Controller
 {
     protected $ttl = 300;
     protected $short_ttl = 60;
+    protected $library_service;
+
+    //inject me ugh👅
+    public function __construct(LibraryService $library_service)
+    {
+        $this->library_service = $library_service;
+    }
 
     /** GET ALL AVAILABLE BOOKS */
     public function view_books(Request $request)
@@ -189,27 +196,6 @@ class TraineeLibrary extends Controller
     {
         \Log::info("data view_available_extension", [$request->all(), $request->user()->id]);
 
-            // try {
-            //     $userId = $request->user()->id;
-            //     $traceNum = $request->trace_number;
-            //     $books = BookReservation::with([
-            //         "books.catalog.genre",
-            //         "bookRes"
-            //     ])
-            //     ->where(['status' => 'RECEIVED'])
-            //     ->whereHas('bookRes', function($query) use ($traceNum, $userId) {
-            //         $query->where(['user_id' => $userId, 'trace_number' => $traceNum]);
-            //     })
-            //     ->get();
-
-            //     // create a resource class
-            //     return response()->json(['availables' => $books], 200);
-            // }
-            // catch (\Exception $e) {
-            //     \Log::error("error view_available_extension", [$e]);
-            //     return response()->json(['message' => $e], 500);
-            // }
-
         try {
             $userId = $request->user()->id;
             $traceNum = $request->trace_number;
@@ -255,24 +241,27 @@ class TraineeLibrary extends Controller
 
             DB::beginTransaction();
 
+            // $this->library_service->createReservation($validated, $user);
+
+            //create book
             $book_res = new BookRes();
             $book_res->user_id = $user->id;
-            $book_res->trace_number = GenerateTrace::createTraceNumber(BookRes::class);;
+            $book_res->trace_number = GenerateTrace::createTraceNumber(BookRes::class);
             $book_res->purpose = $validated['purpose'];
             $book_res->type = 'ONLINE';
             $book_res->save();
 
             foreach($validated['book_id'] as $book) {
                 $is_e_copy = Book::whereKey($book)->whereNotNull('pdf_copy')->first();
-                $record = BookCopy::where(['book_id' => $book, 'status' => "AVAILABLE"])
-                ->lockForUpdate()
-                ->first();
+                $record = BookCopy::where(['book_id' => $book, 'status' => "AVAILABLE"])->first();
 
-                if (!$is_e_copy) {
-                    if($record == null) {
-                        return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
-                    }
+                //continue if pdf copy
+                if(!$is_e_copy && $record == null) {
+                    DB::rollBack();
+                    return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
                 }
+
+                $record->lockForUpdate();
 
                 $book_record = new BookReservation();
                 $book_record->book_res_id = $book_res->id;
@@ -323,50 +312,50 @@ class TraineeLibrary extends Controller
     public function extend(ExtendingRequest $request)
     {
         \Log::info("extending...", [$request->all()]);
-        return response()->json(["message" => "(●'◡'●)"], 200);
+        // return response()->json(["message" => $request->all()], 200);
 
-        // try {
-        //     DB::beginTransaction();
-        //     $validated = $request->validated();
-        //     $user_id = $request->user()->id;
+        try {
+            DB::beginTransaction();
+            $validated = $request->validated();
+            $user_id = $request->user()->id;
 
-        //     $extension_req = ExtensionRequest::create([
-        //         "user_id" => $user_id,
-        //         "book_res_id" => $validated["reference_id"],
-        //         "purpose" => $validated["purpose"],
-        //     ]);
+            $extension_req = ExtensionRequest::create([
+                "user_id" => $user_id,
+                "book_res_id" => $validated["reference_id"],
+                "purpose" => $validated["purpose"],
+            ]);
 
-        //     foreach($validated['data'] as $data) {
-        //         BookExtensionRequest::create([
-        //             "book_reservation_id" => $data['book_res_id'],
-        //             "extension_request_id" => $extension_req->id,
-        //             "current_to_date" => Carbon::parse($data['last_main_date'])->format('Y-m-d'),
-        //             "date_of_extension" => Carbon::parse($validated['date_of_extension'])->format('Y-m-d'),
-        //         ]);
+            foreach($validated['data'] as $data) {
+                BookExtensionRequest::create([
+                    "book_reservation_id" => $data['book_res_id'],
+                    "extension_request_id" => $extension_req->id,
+                    "current_to_date" => Carbon::parse($data['to_date'])->format('Y-m-d'),
+                    "date_of_extension" => Carbon::parse($data['extension_date'])->format('Y-m-d'),
+                ]);
 
-        //         BookReservation::find($data["book_res_id"])->update(["status" => "EXTENDING"]);
-        //     }
+                BookReservation::find($data["book_res_id"])->update(["status" => "EXTENDING"]);
+            }
 
-        //     $bookRes = BookRes::find($validated["reference_id"]);
-        //     $bookRes->status = "EXTENDING";
-        //     $bookRes->save();
+            $bookRes = BookRes::find($validated["reference_id"]);
+            $bookRes->status = "EXTENDING";
+            $bookRes->save();
 
-        //     Cache::forget("count_book_reservation:{$user_id}");
-        //     Cache::forget("user_id:{$user_id}:status:");
-        //     Cache::forget("user_id:{$user_id}:status:ACTIVE");
-        //     Cache::forget("user_id:{$user_id}:status:FOR CSM");
-        //     Cache::forget("user_id:{$user_id}:status:COMPLETED");
-        //     Cache::forget("user_id:{$user_id}:status:EXTENDING");
+            Cache::forget("count_book_reservation:{$user_id}");
+            Cache::forget("user_id:{$user_id}:status:");
+            Cache::forget("user_id:{$user_id}:status:ACTIVE");
+            Cache::forget("user_id:{$user_id}:status:FOR CSM");
+            Cache::forget("user_id:{$user_id}:status:COMPLETED");
+            Cache::forget("user_id:{$user_id}:status:EXTENDING");
 
-        //     DB::commit();
-        //     return response()->json(["message" => "Extension request has sent successfully!"], 201);
-        // }
-        // catch (\Exception $e) {
-        // DB::rollBack();
-        //     \Log::error('error extend', [$e]);
-        //     // \Log::channel("errormonitor")->error("error extend", [$e->getMessage()]);
-        //     return response()->json(["message" => "Something went wrong, Please try again"], 500);
-        // }
+            DB::commit();
+            return response()->json(["message" => "Extension request has sent successfully!"], 201);
+        }
+        catch (\Exception $e) {
+        DB::rollBack();
+            \Log::error('error extend', [$e]);
+            // \Log::channel("errormonitor")->error("error extend", [$e->getMessage()]);
+            return response()->json(["message" => "Something went wrong, Please try again"], 500);
+        }
     }
 
     /** CANCELLING EXTEND REQUESTS */
@@ -393,8 +382,9 @@ class TraineeLibrary extends Controller
             ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
             ->exists();
 
+            //additional overdue
             if($book_res) {
-                BookRes::whereKey($res_id)->update(['status' => "FOR CSM"]);
+                BookRes::whereKey($res_id)->update(['status' => "ACTIVE"]);
             }
 
             Cache::forget("user_id:{$request->user()->id}:status:EXTENDING");

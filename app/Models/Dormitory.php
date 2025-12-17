@@ -16,4 +16,8 @@ class Dormitory extends Model
     public function rooms () {
         return $this->hasMany(DormitoryRoom::class);
     }
+
+    public function tenants(){
+        return $this->hasManyThrough(DormitoryTenant::class, DormitoryRoom::class, 'dormitory_id', 'dormitory_room_id', 'id', 'id');
+    }
 }

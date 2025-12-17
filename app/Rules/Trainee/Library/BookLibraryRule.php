@@ -30,15 +30,15 @@ class BookLibraryRule implements ValidationRule, DataAwareRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        \Log::info("Value From The King.02 👑", [$value]);
-        $available = BookReservation::whereKey($value)?->value('from_date');
-        $date_of_extension = Carbon::parse($this->data['date_of_extension']);
-        $days = $available->diffInDays($date_of_extension);
+        // \Log::info("Value From The King.02 👑", [$value]);
+        // $available = BookReservation::whereKey($value)?->value('from_date');
+        // $date_of_extension = Carbon::parse($this->data['extension_date']);
+        // $days = $available->diffInDays($date_of_extension);
 
-        if ($days > $this->max) {
-            $fail("Out of range!");
-        }
-        \Log::info("Data info from king.02 👑", [$available, $date_of_extension, $days]);
+        // if ($days > $this->max) {
+        //     $fail("Out of range!");
+        // }
+        // \Log::info("Data info from king.02 👑", [$available, $date_of_extension, $days]);
 
 
     }
