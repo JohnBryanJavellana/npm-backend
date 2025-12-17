@@ -52,8 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /** current user */
     Route::get('/user', function(Request $request) {
-        $ttl = now()->addMinutes(env('CACHE_DURATION'));
-        $user = Cache::remember('user_profile_' . $request->user()->id, $ttl, function () use ($request) {
+        $user = Cache::remember('user_profile_' . $request->user()->id, env('CACHE_DURATION'), function () use ($request) {
             $user = User::where('id', $request->user()->id);
 
             if ($user && $request->user()->role === "TRAINEE") {
@@ -70,7 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json(['user' => $user]);
     });
 
-    /** trainee routes 
+    /** trainee routes
      * MUST HAVE A THROTTLE
     */
     Route::middleware('trainee')->group(function () {
