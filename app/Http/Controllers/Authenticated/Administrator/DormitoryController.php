@@ -123,92 +123,14 @@ class DormitoryController extends Controller
 
     public function get_available_rooms (GetAvailableRooms $request) {
         return TransactionUtil::transact($request, function() use ($request) {
-            $rooms = Cache::remember('get_available_rooms', env('app.ttl'), function () use ($request) {
-                $dorms = Dormitory::with(['room_images', 'rooms'])
-                    ->where(['room_for_type' => $request->room_for_type, 'is_air_conditioned' => $request->room_type])
-                    ->get()
-                    ->map(function ($dormitory) {
-                        $availableRooms = collect();
-
-                        foreach ($dormitory->rooms as $room) {
-                            $availabilityRanges = [];
-
-                            if ($room->room_available_slot > 0 && $room->room_status === 'AVAILABLE') {
-                                if (empty($availabilityRanges)) {
-                                    $availabilityRanges[] = [
-                                        'from_date' => $now->toDateString(),
-                                        'to_date'   => null,
-                                    ];
-                                }
-                            }
-
-                            $tenants = $room->hasData;
-
-                            $activeCheckouts = $tenants
-                                ->whereIn('tenant_status', ['APPROVED', 'PAID', 'PROCESSING PAYMENT'])
-                                ->where('tenant_to_date', '>', now())
-                                ->sortBy('tenant_to_date');
-
-                            $futureBookings = $tenants
-                                ->whereIn('tenant_status', ['PENDING', 'RESERVED', 'APPROVED'])
-                                ->sortBy('tenant_from_date');
-
-                            $now = now()->startOfDay();
-                            $firstCheckout = $activeCheckouts->first();
-
-                            if ($firstCheckout) {
-                                $firstCheckoutDate = Carbon::parse($firstCheckout->tenant_from_date);
-                                if ($now->lt($firstCheckoutDate)) {
-                                    $availabilityRanges[] = [
-                                        'from_date' => $now->toDateString(),
-                                        'to_date'   => $firstCheckoutDate->copy()->subDay()->toDateString(),
-                                    ];
-                                }
-                            }
-
-                            foreach ($activeCheckouts as $checkout) {
-                                $checkoutDate      = Carbon::parse($checkout->tenant_to_date);
-                                $availabilityStart = $checkoutDate->copy()->addDay();
-
-                                $nextBooking = $futureBookings
-                                    ->where('tenant_from_date', '>', $checkoutDate->toDateString())
-                                    ->first();
-
-                                $gapEnd = $nextBooking
-                                    ? Carbon::parse($nextBooking->tenant_from_date)->subDay()
-                                    : null;
-
-                                if ($gapEnd === null || $availabilityStart->lessThanOrEqualTo($gapEnd)) {
-                                    $availabilityRanges[] = [
-                                        'from_date' => $availabilityStart->toDateString(),
-                                        'to_date'   => $gapEnd ? $gapEnd->toDateString() : null,
-                                    ];
-                                }
-                            }
-
-                            if (!empty($availabilityRanges)) {
-                                $uniqueRanges = array_unique(array_map('json_encode', $availabilityRanges));
-                                $availabilityRanges = array_map('json_decode', $uniqueRanges);
-                                $room->available_ranges = $availabilityRanges;
-                                $room->unsetRelation('hasData');
-                                $availableRooms->push($room);
-                            }
-                        }
-
-                        if ($availableRooms->isNotEmpty()) {
-                            $dormitory->setRelation('available_rooms', $availableRooms);
-                            unset($dormitory->rooms);
-                            return $dormitory;
-                        }
-
-                        return null;
-                    })
-                    ->filter()
-                    ->values();
-
-                \Log::info('Available Dormitories and Rooms 🍆💦:', ['data' => $dorms->toArray()]);
-
-                return $dorms;
+            $rooms = Cache::remember('get_available_rooms', env('CACHE_DURATION'), function () use ($request) {
+                return Dormitory::with([
+                    'room_images',
+                    'rooms'
+                ])->where([
+                    'room_for_type' => $request->room_for_type,
+                    'is_air_conditioned' => $request->room_type
+                ])->get();
             });
 
             return response()->json(['rooms' => $rooms], 200);

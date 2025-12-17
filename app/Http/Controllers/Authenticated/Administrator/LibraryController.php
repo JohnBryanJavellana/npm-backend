@@ -46,8 +46,7 @@ class LibraryController extends Controller
 {
     public function get_books (Request $request) {
         return TransactionUtil::transact(null, function() {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            $books = Cache::remember('books_cache', $ttl, function () {
+            $books = Cache::remember('books_cache', env('CACHE_DURATION'), function () {
                 return Book::withCount('copies', 'hasData')->with([
                     'catalog',
                     'catalog.genre'
@@ -175,8 +174,7 @@ class LibraryController extends Controller
 
     public function get_genres (Request $request) {
         return TransactionUtil::transact(null, function() {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            $genres = Cache::remember('genres_cache', $ttl, function () {
+            $genres = Cache::remember('genres_cache', env('CACHE_DURATION'), function () {
                 return BookGenre::withCount('hasData')->get();
             });
 
@@ -230,8 +228,7 @@ class LibraryController extends Controller
 
     public function get_book_info (Request $request, int $book_id){
         return TransactionUtil::transact(null, function() use($request, $book_id) {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            return Cache::remember("book_info_cache_$book_id", $ttl, function () use($request, $book_id) {
+            return Cache::remember("book_info_cache_$book_id", env('CACHE_DURATION'), function () use($request, $book_id) {
                 $book = Book::where('id', $book_id)
                     ->withCount('copies', 'hasData')
                     ->with([
@@ -280,8 +277,7 @@ class LibraryController extends Controller
 
     public function get_copies (Request $request, int $book_id) {
         return TransactionUtil::transact(null, function() use ($book_id) {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            $bookCopies = Cache::remember('book_copies_cache', $ttl, function () use($book_id) {
+            $bookCopies = Cache::remember('book_copies_cache', env('CACHE_DURATION'), function () use($book_id) {
                 return BookCopy::withCount('hasData')->where('book_id', operator: $book_id)->get();
             });
 
@@ -314,8 +310,7 @@ class LibraryController extends Controller
 
     public function count_book_reservation (Request $request){
         return TransactionUtil::transact(null, function() use ($request) {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            $reservationCount = Cache::remember('count_book_reservation', $ttl, function () use($request) {
+            $reservationCount = Cache::remember('count_book_reservation', env('CACHE_DURATION'), function () use($request) {
                 $reservations = BookRes::query();
 
                 if($request->userId) {
@@ -342,8 +337,7 @@ class LibraryController extends Controller
 
     public function check_for_book_reservation (Request $request){
         return TransactionUtil::transact(null, function() use ($request) {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            $bookReservationCheck = Cache::remember('count_book_extensions_extension_cache_' . ($request->libraryId), $ttl, function () use($request) {
+            $bookReservationCheck = Cache::remember('count_book_extensions_extension_cache_' . ($request->libraryId), env('CACHE_DURATION'), function () use($request) {
                 $a = ExtensionRequest::where([
                     'book_res_id' => $request?->libraryId,
                     'user_id' => $request?->userId
@@ -369,8 +363,7 @@ class LibraryController extends Controller
 
     public function get_book_reservation (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            $reservationMain = Cache::remember('book_reservations_cache_' . ($request->traceNumber ?? $request->type), $ttl, function () use($request) {
+            $reservationMain = Cache::remember('book_reservations_cache_' . ($request->traceNumber ?? $request->type), env('CACHE_DURATION'), function () use($request) {
                 $reservations = BookRes::with([
                     'trainee',
                     'borrowedBooks',
@@ -396,8 +389,7 @@ class LibraryController extends Controller
 
     public function get_extension_request (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            $extensionMain = Cache::remember('book_extensions_extension_cache_' . ($request->libraryId), $ttl, function () use($request) {
+            $extensionMain = Cache::remember('book_extensions_extension_cache_' . ($request->libraryId), env('CACHE_DURATION'), function () use($request) {
                 return ExtensionRequest::with([
                     'extendingBooks',
                     'extendingBooks.bookReservation',
@@ -416,8 +408,7 @@ class LibraryController extends Controller
 
     public function get_books_that_can_extend (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            $booksThatCanExtend = Cache::remember('get_books_that_can_extend_' . ($request->libraryId . '_' . $request->userId), $ttl, function () use($request) {
+            $booksThatCanExtend = Cache::remember('get_books_that_can_extend_' . ($request->libraryId . '_' . $request->userId), env('CACHE_DURATION'), function () use($request) {
                 return BookReservation::with([
                     'bookRes',
                     'books',
@@ -561,9 +552,8 @@ class LibraryController extends Controller
 
     public function get_available_books (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
 
-            $adjustedBooks = Cache::remember('available_books_cache', $ttl, function () use($request) {
+            $adjustedBooks = Cache::remember('available_books_cache', env('CACHE_DURATION'), function () use($request) {
                 $user = User::findOrFail($request->userId);
 
                 $record = EnrolledCourse::where('user_id', $user->id)
