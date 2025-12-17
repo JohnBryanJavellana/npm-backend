@@ -18,6 +18,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'ttl' => now()->addMinutes(env('CACHE_DURATION')),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

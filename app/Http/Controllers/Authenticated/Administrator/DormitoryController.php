@@ -123,8 +123,7 @@ class DormitoryController extends Controller
 
     public function get_available_rooms (GetAvailableRooms $request) {
         return TransactionUtil::transact($request, function() use ($request) {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            $rooms = Cache::remember('get_available_rooms', $ttl, function () use ($request) {
+            $rooms = Cache::remember('get_available_rooms', env('app.ttl'), function () use ($request) {
                 $dorms = Dormitory::with(['room_images', 'rooms'])
                     ->where(['room_for_type' => $request->room_for_type, 'is_air_conditioned' => $request->room_type])
                     ->get()

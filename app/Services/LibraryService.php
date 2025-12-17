@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\{BookRes, Book, BookCopy};
 use App\Utils\GenerateTrace;
+use Illuminate\Support\Facades\DB;
+
 
 class LibraryService {
 
@@ -25,11 +27,20 @@ class LibraryService {
         ->get()
         ->keBy("id");
 
-        $physical_books = $books->filter(fn($book) => !$book->pdf_copy);
+        $physical_books = $books->filter(fn($book) => !$book->pdf_copy)
+        ->pluck('id')
+        ->toArray();
 
         if(!$physical_books) {
             return;
         }
+
+        $available = BookCopy::whereIn("book_id", $physical_books)
+        ->where('status', "AVAILABLE")
+        ->select('book_id', DB::raw("COUNT(*) as count"))
+        ->orderBy('book_id')
+        ->pluck('book_id', 'count');
+
 
     }
 
