@@ -31,7 +31,7 @@ class GenerateQR {
             $img->text($content, 250, 540, function($font) {
                 $font->file(public_path('fonts/Roboto/Roboto-VariableFont_wdth,wght.ttf'));
                 $font->size(25);
-                $font->color('#535353ff');
+                $font->color('#000000');
                 $font->align('center');
                 $font->valign('bottom');
             });

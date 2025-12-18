@@ -14,13 +14,13 @@ use App\Mail\BookReservationStatus;
 use App\Utils\{AuditHelper, GenerateTrace, Notifications, TransactionUtil};
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
-use App\Http\Resources\{BookResource, BookRequestResource, PdfCopyResource, BookExtensionResource, AvailableBooksResource};
+use App\Http\Resources\{BookResource, BookRequestResource, PdfCopyResource, BookExtensionResource, AvailableBooksResource, BookOverDueResource};
 use App\Jobs\SendingEmail;
 use App\Models\{User, Book, BookCopy, BookCart, BookReservation, BookRes, EnrolledCourse, BookTrainingRelated, ExtensionRequest, BookExtensionRequest};
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use App\Services\LibraryService;
+use App\Services\Trainee\Library\LibraryService;
 
 class TraineeLibrary extends Controller
 {
@@ -28,7 +28,6 @@ class TraineeLibrary extends Controller
     protected $short_ttl = 60;
     protected $library_service;
 
-    //inject me ugh👅
     public function __construct(LibraryService $library_service)
     {
         $this->library_service = $library_service;
@@ -97,10 +96,10 @@ class TraineeLibrary extends Controller
             \Log::info("data", [$request->all()]);
             $status = $request->type;
             $user_id = $request->user()->id;
-            $trac = $request->trace_number;
             $cache_key = "user_id:$user_id:status:$status";
+            \Log::info("CACHE: ", [Cache::has($cache_key), $cache_key]);
 
-            $records = Cache::remember($cache_key, $this->ttl, function () use ($user_id, $status, $trac) {
+            $records = Cache::remember($cache_key, $this->ttl, function () use ($user_id, $status) {
                 $record = EnrolledCourse::where('user_id', $user_id)
                     ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
                     ->get()
@@ -120,11 +119,9 @@ class TraineeLibrary extends Controller
 
                     return $book_record->get();
             });
-
             return BookRequestResource::collection($records);
 
         } catch(\Exception $e) {
-            // \Log::channel("errormonitor")->error("error get_book_records", [$e->getMessage()]);
             \Log::error("day", [$e]);
             return response()->json([
                 "message" => "Something went wrong, Please try again!"
@@ -242,7 +239,7 @@ class TraineeLibrary extends Controller
         try {
             $user = $request->user();
             // DB::beginTransaction();
-
+            \Log::info("micro start:" ,[microtime(true)]);
             $this->library_service->createReservation($validated, $user);
 
             //create book
@@ -299,19 +296,20 @@ class TraineeLibrary extends Controller
             AuditHelper::log($user->id, "User {$user->id} sent a book request.");
             Notifications::notify($user->id, null, 'LIBRARY', 'has sent a book request.');
             // DB::commit();
-
+            \Log::info("micro end:" ,[microtime(as_float: true)]);
             return response()->json(['message' => 'Your book request was sent successfully!'], 200);
-        } catch (\Exception $e) {
+        }
+        catch (\DomainException $d) {
+            return response()->json(["message" => $d], 422);
+        }
+        catch (\Exception $e) {
             // DB::rollBack();
-
-            
             \Log::error('error send_request_book', [$e]);
             return response()->json(['message' => "Something went wrong, Please try again!"], 500);
         }
     }
 
     /** SENDING EXTEND REQUESTS */
-    // ExtendingRequest $request
     public function extend(ExtendingRequest $request)
     {
         \Log::info("extending...", [$request->all()]);
@@ -388,8 +386,16 @@ class TraineeLibrary extends Controller
 
             //additional overdue
             if($book_res) {
-                BookRes::whereKey($res_id)->update(['status' => "ACTIVE"]);
+                $record = BookRes::find($res_id);
+                if (!$record) {
+                    return;
+                }   
+                $date = Carbon::parse($record->to_date);
+                $status = $date->isPast()
+                    ? 'EXPIRED'
+                    : 'ACTIVE';
 
+                $record->update(['status' => $status]);
             }
 
             Cache::forget("user_id:{$request->user()->id}:status:EXTENDING");
@@ -472,6 +478,21 @@ class TraineeLibrary extends Controller
         })
         ->get();
         return BookResource::collection($books);
+    }
+
+    public function view_over_due(Request $request)
+    {
+        $overDues = BookReservation::with([
+            "books.catalog.genre",
+            "book",
+            "bookRes"
+        ])
+        ->forUser($request->user()->id)
+        ->where("status", "EXPIRED")
+        ->where("to_date", "<" , now())
+        ->get();
+
+        return BookOverDueResource::collection($overDues);
     }
 
     public function add_book_items(Request $request)

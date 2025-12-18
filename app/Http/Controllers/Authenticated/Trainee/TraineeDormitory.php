@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
 
 class TraineeDormitory extends Controller
 {
+    
     public function get_all_dormitories(Request $request) {
         $dormitories = DormitoryRoom::where("room_status", "ACTIVE")->get();
         return response()->json(['dormitories' => $dormitories], 200);
