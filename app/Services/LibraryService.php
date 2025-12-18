@@ -49,7 +49,7 @@ class LibraryService {
         if(!$physical_books) {
             return;
         }
-// 114
+
         $available = BookCopy::whereIn("book_id", $physical_books)
         ->where('status', "AVAILABLE")
         ->select('book_id', DB::raw("COUNT(*) as count"))
@@ -64,7 +64,6 @@ class LibraryService {
             throw new \DomainException("The following books have no available copies: ", $unavailable->implode(', '));
         }
         \Log::info("pass", ["passed"]);
-
     }
 
     private function prepareData(array $book_id) {
@@ -78,12 +77,12 @@ class LibraryService {
         ->toArray();
 
         $copies = [];
-        if($physical_books) {
+        if(!empty($physical_books)) {
             $copies = BookCopy::whereIn('book_id', $physical_books)
             ->where("status", "AVAILABLE")
             ->lockForUpdate()
             ->get()
-            ->groupBy('id');
+            ->groupBy('book_id');
         }
 
         return $books->map(function($book) use($copies) {
@@ -108,7 +107,7 @@ class LibraryService {
 
         BookReservation::create([
             "book_res_id" => $res->id,
-            "book_copy_id" => $copy->id,
+            "book_copy_id" => $copy?->id,
             "from_date" => $from,
             "to_date" => $to,
             "book_id" => $book_id,
