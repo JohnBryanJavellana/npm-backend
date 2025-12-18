@@ -13,6 +13,9 @@ use App\Utils\{
     TransactionUtil,
     GenerateQR
 };
+
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+
 use Carbon\Carbon;
 use App\Http\Requests\Admin\Library\{
     CreateOrUpdateBookRequest,
@@ -130,6 +133,8 @@ class LibraryController extends Controller
     public function create_book_copies (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
             if($request->copies) {
+                $copiesData = [];
+
                 for ($i = 0; $i < $request->copies; $i++) {
                     $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
                     $filename = $new_book_ui . ".png";
@@ -142,7 +147,12 @@ class LibraryController extends Controller
                     $book_copy->book_id = $request->bookId;
                     $book_copy->qr = $filename;
                     $book_copy->save();
+
+                    array_push($copiesData, public_path("qr/book/" . $filename));
                 }
+
+                $pdf = PDF::loadView('pdf.book_labels', compact('copiesData'));
+                $pdf->download('book_labels.pdf');
             }
 
             return $request->insideJob ? true : response()->json(['message' => "You've added a book copy."], 201);

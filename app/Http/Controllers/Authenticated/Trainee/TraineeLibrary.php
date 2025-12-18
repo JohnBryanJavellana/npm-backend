@@ -303,8 +303,9 @@ class TraineeLibrary extends Controller
             return response()->json(['message' => 'Your book request was sent successfully!'], 200);
         } catch (\Exception $e) {
             // DB::rollBack();
+
+            
             \Log::error('error send_request_book', [$e]);
-            // \Log::channel("errormonitor")->error("error send_request_book", [$e->getMessage()]);
             return response()->json(['message' => "Something went wrong, Please try again!"], 500);
         }
     }
