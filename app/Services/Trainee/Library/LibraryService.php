@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Trainee\Library;
 
 use App\Models\{BookRes, Book, BookCopy, BookReservation, BookCart};
 use App\Utils\GenerateTrace;
@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\DB;
 
 
 class LibraryService {
+
+    protected $model;
+
+    public function __construct(Book $model)
+    {
+        $this->model = $model;
+    }
 
     public function createReservation($validated, $user)
     {
@@ -36,17 +43,40 @@ class LibraryService {
         });
     }
 
+    //uselesssz start
+    public function getOverDue()
+    {
+        $books = $this->getBooks(["*"],[
+            "hasData", "catalog", "catalog.genre"
+        ]);
+
+        $record = $books->whereHas("hasData", fn($q) => $q->where('to_date', '<', now()));
+
+        return $record;
+    }
+
+    private function getBooks($columns = "*", $with)
+    {
+        $query = $this->model->newQuery()->select($columns);
+
+        if(!empty($with)) {
+            $query->with($with);
+        }
+
+        return $query;
+    }
+
+
     private function validateBook(array     $book_id) {
-        \Log::info("validateBook", $book_id);
-        $books = Book::whereIn("id", $book_id)
-        ->select("id", "pdf_copy")
+        $books = $this->getBooks(["id", "pdf_copy"], ['catalog:id,title'])
+        ->whereIn("id", $book_id)
         ->get()
         ->keyBy("id");
 
         $physical_books = $books->filter(fn($book) => !$book->pdf_copy)
         ->pluck('id')
         ->toArray();
-        \Log::info("validateBook1", $physical_books);
+
         if(!$physical_books) {
             return;
         }
@@ -57,14 +87,11 @@ class LibraryService {
         ->groupBy('book_id')
         ->pluck('count', 'book_id');
 
-        \Log::info("validateBook2", [$available]);
-
         $unavailable = collect($physical_books)->reject(fn($book) => ($available[$book] ?? 0) > 0);
 
         if($unavailable->isNotEmpty()) {
-            throw new \DomainException("The following books have no available copies: ", $unavailable->implode(', '));
+            throw new \DomainException("The following books have no available copies: " . $unavailable->implode(', '));
         }
-        \Log::info("pass", ["passed"]);
     }
 
     private function prepareData(array $book_id) {
@@ -120,4 +147,6 @@ class LibraryService {
 
         BookCart::where(['book_id' => $book_id, 'user_id' => $user->id])->delete();
     }
+
+
 }

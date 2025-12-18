@@ -14,7 +14,7 @@ use App\Utils\{
     GenerateQR
 };
 
-use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 use Carbon\Carbon;
 use App\Http\Requests\Admin\Library\{
@@ -94,26 +94,15 @@ class LibraryController extends Controller
 
             $book->save();
 
-            if($request->training_id) {
-                BookTrainingRelated::where("book_id", $book->id)
-                    ->whereNotIn('training_id', $request->training_id)->delete();
+            BookTrainingRelated::where("book_id", $book->id)->delete();
 
+            if($request->training_id) {
                 foreach ($request->training_id as $tid){
                     $book_related = new BookTrainingRelated;
                     $book_related->book_id = $book->id;
                     $book_related->training_id = $tid;
                     $book_related->save();
                 }
-            } else {
-                BookTrainingRelated::where("book_id", $book->id)->delete();
-            }
-
-            if($request->copies) {
-                $fixedRequest = $request->merge([
-                    'insideJob' => true,
-                    'bookId' => $book->id
-                ]);
-                $this->create_book_copies($fixedRequest);
             }
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a book ID#" . $book->id);
@@ -125,38 +114,54 @@ class LibraryController extends Controller
                 );
             }
 
-            Cache::forget('books_cache');
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a book. ID#" . $book->id], 201);
+            if($request->copies) {
+                $fixedRequest = $request->merge([
+                    'insideJob' => true,
+                    'bookId' => $book->id
+                ]);
+
+                return $this->create_book_copies($fixedRequest);
+            } else {
+                return response()->json(['message' => ""], 200);
+            }
         });
     }
 
-    public function create_book_copies (Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
-            if($request->copies) {
-                $copiesData = [];
+    private function create_book_copies_main (Request $request) {
+        $copiesData = [];
 
-                for ($i = 0; $i < $request->copies; $i++) {
-                    $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
-                    $filename = $new_book_ui . ".png";
+        if($request->copies) {
+            for ($i = 0; $i < $request->copies; $i++) {
+                $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
+                $filename = $new_book_ui . ".png";
 
-                    $qr = new GenerateQR();
-                    $qr->generate($filename, $new_book_ui, $new_book_ui, "qr/book/");
+                $qr = new GenerateQR();
+                $qr->generate($filename, $new_book_ui, $new_book_ui, "qr/book/");
 
-                    $book_copy = new BookCopy;
-                    $book_copy->unique_identifier = $new_book_ui;
-                    $book_copy->book_id = $request->bookId;
-                    $book_copy->qr = $filename;
-                    $book_copy->save();
+                $book_copy = new BookCopy;
+                $book_copy->unique_identifier = $new_book_ui;
+                $book_copy->book_id = $request->bookId;
+                $book_copy->qr = $filename;
+                $book_copy->save();
 
-                    array_push($copiesData, public_path("qr/book/" . $filename));
-                }
-
-                $pdf = PDF::loadView('pdf.book_labels', compact('copiesData'));
-                $pdf->download('book_labels.pdf');
+                array_push($copiesData, public_path("qr/book/$filename"));
             }
+        }
 
-            return $request->insideJob ? true : response()->json(['message' => "You've added a book copy."], 201);
-        });
+        Cache::forget('books_cache');
+
+        $pdf = Pdf::loadView('pdf.book_labels', ['data' => $copiesData])->setPaper('legal', 'landscape');
+        return $pdf->download($request->bookId . '-BOOK-COPIES.pdf');
+    }
+
+    public function create_book_copies (Request $request) {
+        if($request->insideJob === true) {
+            return $this->create_book_copies_main($request);
+        } else {
+            return TransactionUtil::transact(null, function() use ($request) {
+                return $this->create_book_copies_main($request);
+            });
+        }
     }
 
     public function remove_book (Request $request, int $book_id) {

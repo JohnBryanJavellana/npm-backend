@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use App\Models\{User,BookRes};
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('library_invoices', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+            $table->id();
+            $table->longText("trace_number");
+            $table->longText("reference_number")->nullable();
+            $table->foreignIdFor(User::class)->constrained()->onDelete("cascade");
+            $table->foreignIdFor(BookRes::class)->constrained()->onDelete("cascade");
+            $table->decimal("amount", 10, 2);
+            $table->enum("status", ["PENDING", "PAID"]);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('library_invoices');
+    }
+};

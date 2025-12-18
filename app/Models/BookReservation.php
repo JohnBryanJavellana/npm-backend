@@ -28,10 +28,6 @@ class BookReservation extends Model
         return $this->belongsTo(Book::class, "book_id", "id");
     }
 
-    // public function bookExtend()
-    // {
-    //     return $this->hasMany
-    // }
 
     /**
      * SCOPES

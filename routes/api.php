@@ -123,6 +123,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('/libraries/')->group(function() {
             Route::post('request_books', [TraineeLibrary::class, 'send_request_book']);
             Route::get('get_all_books', [TraineeLibrary::class, 'view_books']);
+            Route::get('book_overdues', [TraineeLibrary::class, 'view_over_due']);
             Route::post('cancel_book', [TraineeLibrary::class, 'cancel_book']);
             Route::get('get_cart', [TraineeLibrary::class, 'view_book_cart']);
             Route::get('pdfs', [TraineeLibrary::class, 'pdf_copies']);

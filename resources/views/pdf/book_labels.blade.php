@@ -2,21 +2,39 @@
 <html>
 <head>
     <style>
-        .page-break {
-            page-break-after: always;
+        @page {
+            margin: 0cm;
         }
 
-        .container {
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+
+        .page {
+            page-break-after: always;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            margin-top: 50px;
+        }
+
+        .page:last-child {
+            page-break-after: avoid;
+        }
+
+        .qr-wrapper {
+            padding-top: 2%;
         }
     </style>
 </head>
 <body>
-    @foreach($copiesData as $index => $copy)
-        <div class="container {{ !$loop->last ? 'page-break' : '' }}">
-            <div class="qr-code">
-                <img src="data:image/png;base64,{{ base64_encode(file_get_contents($copy)) }}" width="200">
+    @foreach($data as $path)
+        <div class="page">
+            <div class="qr-wrapper">
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents($path)) }}" width="690">
             </div>
         </div>
     @endforeach
