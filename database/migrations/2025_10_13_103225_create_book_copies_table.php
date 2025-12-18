@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Book::class)->constrained()->onDelete('CASCADE');
             $table->string('unique_identifier');
+            $table->longText('qr');
             $table->enum('status', [
                 'AVAILABLE',
                 'BORROWED',

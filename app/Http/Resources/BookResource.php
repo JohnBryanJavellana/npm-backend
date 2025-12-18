@@ -33,7 +33,8 @@ class BookResource extends JsonResource
             'book_flag' => ($this->carts_count > 0|| $this->has_data_count > 0) ? true : false,
             'book_recommendation' => $this->related->map(function($course) {
                 return $course->training?->module?->name;
-            })
+            }),
+            "book_copies" => $this->copies->map(fn($copy) => $copy)
         ];
     }
 }
