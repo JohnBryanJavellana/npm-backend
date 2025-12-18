@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\LibInvoiceResource;
 use Illuminate\Http\Request;
-use App\Models\{User,EnrolledCourse,DormitoryTenant};
+use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice};
 
 class TraineeInvoices extends Controller
 {
@@ -36,8 +37,17 @@ class TraineeInvoices extends Controller
         return response()->json(['message' => 'Invoices Fetched Successfully!', 'trainings' => $all_enrolled_invoices, 'dorms' => $all_dormitory_invoices], 200);
     }
 
-    public function save_payment()
+    public function library_penalties(Request $request)
     {
-        
+        $records = LibraryInvoice::with([
+            "payee",
+            "BookRes",
+            "selectedBooks.bookReservation.books.catalog.genre"
+            ])
+        ->where("user_id", $request->user()->id)
+        ->get();
+
+        // return response()->json(["invoices" => $records], 200);
+        return LibInvoiceResource::collection($records);
     }
 }

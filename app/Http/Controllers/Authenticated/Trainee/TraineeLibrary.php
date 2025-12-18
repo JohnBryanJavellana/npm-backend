@@ -106,21 +106,21 @@ class TraineeLibrary extends Controller
                     ->select('training_id');
 
                 $book_record = BookRes::forUser($user_id)
-                    ->with([
-                        "borrowedBooks.books.catalog.genre",
-                        "borrowedBooks.books.related" => function($q) use ($record) {
-                        $q->whereIn('training_id', $record);
-                    },
-                        "csm"
-                    ])
-                    ->latest("created_at");
+                ->with([
+                    "borrowedBooks.books.catalog.genre",
+                    "borrowedBooks.books.related" => function($q) use ($record) {
+                    $q->whereIn('training_id', $record);
+                },
+                    "csm"
+                ])
+                ->latest("created_at");
 
-                    if ($status) $book_record->where('status',$status);
+                if ($status) $book_record->where('status',$status);
 
                     return $book_record->get();
+
             });
             return BookRequestResource::collection($records);
-
         } catch(\Exception $e) {
             \Log::error("day", [$e]);
             return response()->json([
@@ -314,7 +314,6 @@ class TraineeLibrary extends Controller
     {
         \Log::info("extending...", [$request->all()]);
         // return response()->json(["message" => $request->all()], 200);
-
         try {
             DB::beginTransaction();
             $validated = $request->validated();
@@ -362,8 +361,6 @@ class TraineeLibrary extends Controller
     /** CANCELLING EXTEND REQUESTS */
     public function cancel_extend(Request $request)
     {
-
-        // return response()->json(["message" => "(●'◡'●)", "data" => $request->all()], 200);
         try {
             DB::beginTransaction();
             $book_ext_id = $request->ext_book_id;
@@ -384,7 +381,6 @@ class TraineeLibrary extends Controller
             ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
             ->exists();
 
-            //additional overdue
             if($book_res) {
                 $record = BookRes::find($res_id);
                 if (!$record) {
@@ -455,6 +451,7 @@ class TraineeLibrary extends Controller
                 event(new BELibrary(''));
             }
 
+            SendingEmail::dispatch($request->user(), new BookReservationStatus(['status' => "CANCELLED"], $request->user()));
             AuditHelper::log($user_id, "User {$user_id} cancelled a book request.");
 
             DB::commit();

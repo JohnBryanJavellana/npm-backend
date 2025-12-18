@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use App\Models\BookExtensionRequest;
+use App\Models\LISelectedBook;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -22,7 +23,8 @@ use App\Http\Requests\Admin\Library\{
     CreateOrUpdateGenre,
     UpdateBookRequest,
     CreateWalkInRequest,
-    ExtensionFormRequest
+    ExtensionFormRequest,
+    RequestFine
 };
 use App\Events\{
     BELibrary,
@@ -44,7 +46,8 @@ use App\Models\{
     BookReservation,
     EnrolledCourse,
     User,
-    ExtensionRequest
+    ExtensionRequest,
+    LibraryInvoice
 };
 
 class LibraryController extends Controller
@@ -361,9 +364,15 @@ class LibraryController extends Controller
                 }
             ])->first();
 
+            $pendingFines = LibraryInvoice::where([
+                'book_res_id' => $request?->libraryId,
+                'user_id' => $request?->userId
+            ])->exists();
+
             $count =  [
                 'hasBooksNeedAction' => $bookReservationCheck && count($bookReservationCheck->library->borrowedBooks) > 0,
-                'hasPendingReservation' => $bookReservationCheck && !is_null($bookReservationCheck->extendingBooks)
+                'hasPendingReservation' => $bookReservationCheck && ($bookReservationCheck->extendingBooks && count($bookReservationCheck->extendingBooks) > 0),
+                'hasPendingFines' => $bookReservationCheck && $pendingFines
             ];
 
             return response()->json(['bookReservationCheck' => $count], 200);
@@ -689,6 +698,76 @@ class LibraryController extends Controller
                 'genres' => $genres,
                 'trainings' => $trainings
             ], 200);
+        });
+    }
+
+    public function get_fines(Request $request) {
+        return TransactionUtil::transact(null, function() use ($request) {
+            $fines = LibraryInvoice::with([
+                'bookRes',
+                'selectedBooks'
+            ])->where([
+                'book_res_id' => $request->libraryId,
+                'user_id' => $request->userId
+            ])->orderBy('created_at', 'DESC')->get();
+
+            return response()->json(['fines' => $fines], 200);
+        });
+    }
+
+    public function get_book_reservation_that_needs_fine (Request $request) {
+        return TransactionUtil::transact(null, function() use ($request) {
+            $booksThatNeedsFine = BookRes::where([
+                'id' => $request?->libraryId,
+                'user_id' => $request?->userId
+            ])->with([
+                'borrowedBooks' => function($query) {
+                    $query->whereIn('status', ['EXPIRED', 'DAMAGED', 'LOST'])
+                        ->whereHas('books', fn($q) => $q->where('pdf_copy', null))
+                        ->whereDoesntHave('fines', fn($q) => $q->whereNotIn('status', ['PENDING', 'PAID']));
+                },
+                'borrowedBooks.books',
+                'borrowedBooks.books.catalog'
+            ])->first();
+
+            return response()->json(['booksThatNeedsFine' => $booksThatNeedsFine], 200);
+        });
+    }
+
+    public function create_fine(RequestFine $request) {
+        return TransactionUtil::transact($request, function() use ($request) {
+            $new_fine = $request->httpMethod === "POST"
+                ? new LibraryInvoice
+                : LibraryInvoice::find($request->documentId);
+
+            $new_fine->trace_number = $request->httpMethod === "POST"
+                ? GenerateTrace::createTraceNumber(LibraryInvoice::class, '-RFINE-', 'trace_number', 10, 99)
+                : $new_fine->trace_number;
+
+            $new_fine->user_id = $request->user_id;
+            $new_fine->book_res_id = $request->book_res_id;
+            $new_fine->details = $request->details;
+            $new_fine->amount = $request->amount;
+            $new_fine->save();
+
+            LISelectedBook::where('library_invoice_id', $new_fine->id)->delete();
+            foreach ($request->selectedBookReservations as $bookReservation) {
+                $new_fine_selected_book_reservation = new LISelectedBook;
+                $new_fine_selected_book_reservation->library_invoice_id = $new_fine->id;
+                $new_fine_selected_book_reservation->book_reservation_id = $bookReservation;
+                $new_fine_selected_book_reservation->save();
+            }
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a request fine. ID#" . $new_fine->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BELibrary(''),
+                    new BEAuditTrail(''),
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a request fine. ID#" . $new_fine->id], 201);
         });
     }
 }

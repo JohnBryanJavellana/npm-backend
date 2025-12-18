@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\DB;
 
 class LibraryService {
 
-    protected $model;
+    protected $bookBodel;
 
-    public function __construct(Book $model)
+    public function __construct(Book $bookModel , BookRes $bookResModel)
     {
-        $this->model = $model;
+        $this->bookBodel = $bookModel;
+        $this->model = $bookResModel;
     }
 
     public function createReservation($validated, $user)
@@ -57,7 +58,7 @@ class LibraryService {
 
     private function getBooks($columns = "*", $with)
     {
-        $query = $this->model->newQuery()->select($columns);
+        $query = $this->bookModel->newQuery()->select($columns);
 
         if(!empty($with)) {
             $query->with($with);
