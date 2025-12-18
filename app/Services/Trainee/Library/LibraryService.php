@@ -10,11 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class LibraryService {
 
-    protected $bookBodel;
+    protected $bookModel;
 
     public function __construct(Book $bookModel , BookRes $bookResModel)
     {
-        $this->bookBodel = $bookModel;
+        $this->bookModel = $bookModel;
         $this->model = $bookResModel;
     }
 
