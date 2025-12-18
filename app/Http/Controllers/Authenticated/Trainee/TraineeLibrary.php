@@ -60,7 +60,8 @@ class TraineeLibrary extends Controller
                 "related" => function($q) use ($record) {
                     $q->whereIn('training_id', $record);
                 },
-                "related.training.module"
+                "related.training.module",
+                "copies"
             ])
             ->withCount([
                 'copies' => function ($q) {
@@ -235,51 +236,52 @@ class TraineeLibrary extends Controller
     /** POST BOOK REQUEST */
     public function send_request_book(BookRequest $request){
         $validated = $request->validated();
+
         \Log::info("data", $request->validated());
+
         try {
             $user = $request->user();
+            // DB::beginTransaction();
 
-            DB::beginTransaction();
-
-            // $this->library_service->createReservation($validated, $user);
+            $this->library_service->createReservation($validated, $user);
 
             //create book
-            $book_res = new BookRes();
-            $book_res->user_id = $user->id;
-            $book_res->trace_number = GenerateTrace::createTraceNumber(BookRes::class);
-            $book_res->purpose = $validated['purpose'];
-            $book_res->type = 'ONLINE';
-            $book_res->save();
+            // $book_res = new BookRes();
+            // $book_res->user_id = $user->id;
+            // $book_res->trace_number = GenerateTrace::createTraceNumber(BookRes::class);
+            // $book_res->purpose = $validated['purpose'];
+            // $book_res->type = 'ONLINE';
+            // $book_res->save();
 
-            foreach($validated['book_id'] as $book) {
-                $is_e_copy = Book::whereKey($book)->whereNotNull('pdf_copy')->first();
-                $record = BookCopy::where(['book_id' => $book, 'status' => "AVAILABLE"])->first();
+            // foreach($validated['book_id'] as $book) {
+            //     $is_e_copy = Book::whereKey($book)->whereNotNull('pdf_copy')->first();
+            //     $record = BookCopy::where(['book_id' => $book, 'status' => "AVAILABLE"])->first();
 
-                //continue if pdf copy
-                if(!$is_e_copy && $record == null) {
-                    DB::rollBack();
-                    return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
-                }
+            //     if(!$is_e_copy && $record == null) {
+            //         DB::rollBack();
+            //         return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
+            //     }
 
-                $record->lockForUpdate();
+            //     $record->lockForUpdate();
+            //     $book_record = new BookReservation();
+            //     $book_record->book_res_id = $book_res->id;
+            //     $book_record->book_copy_id = $record?->id;
+            //     $book_record->from_date = Carbon::parse($validated['from'])->format('Y-m-d');
+            //     $book_record->to_date = Carbon::parse($validated['to'])->format('Y-m-d');
+                
+            //     $book_record->book_id = $book;
 
-                $book_record = new BookReservation();
-                $book_record->book_res_id = $book_res->id;
-                $book_record->book_copy_id = $record?->id;
-                $book_record->from_date = Carbon::parse($validated['from'])->format('Y-m-d');
-                $book_record->to_date = Carbon::parse($validated['to'])->format('Y-m-d');
-                $book_record->book_id = $book;
-                $book_record->save();
+            //     $book_record->save();
 
-                $cart_record = BookCart::where(['book_id' => $book, 'user_id' => $user->id])->first();
-                if($cart_record !==  null) {
-                    $cart_record->delete();
-                }
-                if($record !== null) {
-                    $record->status = "RESERVED";
-                    $record->save();
-                }
-            }
+            //     $cart_record = BookCart::where(['book_id' => $book, 'user_id' => $user->id])->first();
+            //     if($cart_record !==  null) {
+            //         $cart_record->delete();
+            //     }
+            //     if($record !== null) {
+            //         $record->status = "RESERVED";
+            //         $record->save();
+            //     }
+            // }
 
             if(env("USE_EVENT")) {
                 event(new BELibrary(''));
@@ -296,11 +298,11 @@ class TraineeLibrary extends Controller
             SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
             AuditHelper::log($user->id, "User {$user->id} sent a book request.");
             Notifications::notify($user->id, null, 'LIBRARY', 'has sent a book request.');
-            DB::commit();
+            // DB::commit();
 
             return response()->json(['message' => 'Your book request was sent successfully!'], 200);
         } catch (\Exception $e) {
-            DB::rollBack();
+            // DB::rollBack();
             \Log::error('error send_request_book', [$e]);
             // \Log::channel("errormonitor")->error("error send_request_book", [$e->getMessage()]);
             return response()->json(['message' => "Something went wrong, Please try again!"], 500);
@@ -361,16 +363,17 @@ class TraineeLibrary extends Controller
     /** CANCELLING EXTEND REQUESTS */
     public function cancel_extend(Request $request)
     {
-        // return response()->json(["message" => "(●'◡'●)"], 200);
+
+        // return response()->json(["message" => "(●'◡'●)", "data" => $request->all()], 200);
         try {
             DB::beginTransaction();
-            $book_ext_id = $request->book_extention_id;
-            $res_id = $request->request_id;
+            $book_ext_id = $request->ext_book_id;
+            $res_id = $request->book_res_id;
 
-            $record = BookExtensionRequest::whereKey($book_ext_id)->get();
-            $record->update([
-                'status' => "CANCELLED"
-            ]);
+            \Log::info("try cancel", $request->all());
+
+            $record = BookExtensionRequest::whereKey($book_ext_id)->first();
+            $record->update(['status' => "CANCELLED"]);
 
             BookReservation::whereKey($record->book_reservation_id)->update([
                 'status' => "RECEIVED"
@@ -385,6 +388,7 @@ class TraineeLibrary extends Controller
             //additional overdue
             if($book_res) {
                 BookRes::whereKey($res_id)->update(['status' => "ACTIVE"]);
+
             }
 
             Cache::forget("user_id:{$request->user()->id}:status:EXTENDING");
@@ -395,7 +399,7 @@ class TraineeLibrary extends Controller
         catch (\Exception $e) {
             DB::rollBack();
             \Log::error('error cancel_extend', [$e]);
-            // \Log::channel("errormonitor")->error("error cancel_extend", [$e->getMessage()]);
+            \Log::channel("errormonitor")->error("error cancel_extend", [$e->getMessage()]);
             return response()->json(["message" => "Something went wrong, Please try again"], 500);
         }
     }

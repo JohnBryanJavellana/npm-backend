@@ -8,7 +8,9 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\File;
+use Intervention\Image\Facades\Image;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Utils\TransactionUtil;
 use Carbon\Carbon;
@@ -46,12 +48,10 @@ class LibraryController extends Controller
 {
     public function get_books (Request $request) {
         return TransactionUtil::transact(null, function() {
-            $books = Cache::remember('books_cache', env('CACHE_DURATION'), function () {
-                return Book::withCount('copies', 'hasData')->with([
-                    'catalog',
-                    'catalog.genre'
-                ])->get();
-            });
+            $books = Book::withCount('copies', 'hasData')->with([
+                'catalog',
+                'catalog.genre'
+            ])->get();
 
             return response()->json(['books' => $books], 200);
         });
@@ -131,9 +131,37 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, function() use ($request) {
             if($request->copies) {
                 for ($i = 0; $i < $request->copies; $i++) {
+                    $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
+
+                    $filename = $new_book_ui . ".png";
+                    $qr_path = public_path("qr/book/" . $filename);
+
+                    QrCode::format('png')
+                        ->size(500)
+                        ->style('round')
+                        ->margin(1)
+                        ->backgroundColor(255, 255, 255)
+                        ->merge('/public/system-images/62334fcadd0d9e6d0a152aca.png', 0.19, true)
+                        ->generate($new_book_ui, $qr_path);
+
+                    $img = Image::make($qr_path);
+
+                    $img->resizeCanvas(500, 560, 'top', false, 'ffffff');
+
+                    $img->text($new_book_ui, 250, 540, function($font) {
+                        $font->file(public_path('fonts/Roboto-Bold.ttf'));
+                        $font->size(28);
+                        $font->color('#000000');
+                        $font->align('center');
+                        $font->valign('bottom');
+                    });
+
+                    $img->save($qr_path);
+
                     $book_copy = new BookCopy;
-                    $book_copy->unique_identifier = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOKQR-', 'unique_identifier', 10, 99);
+                    $book_copy->unique_identifier = $new_book_ui;
                     $book_copy->book_id = $request->bookId;
+                    $book_copy->qr = $filename;
                     $book_copy->save();
                 }
             }
@@ -144,16 +172,15 @@ class LibraryController extends Controller
 
     public function remove_book (Request $request, int $book_id) {
         return TransactionUtil::transact(null, function() use ($request, $book_id) {
-            $this_book = Book::withCount(['hasData'])->where('id', $book_id)->first();
+            $this_book = Book::withCount(['hasData', 'copies'])->where('id', $book_id)->first();
 
             if($this_book->has_data_count > 0) {
                 return response()->json(['message' => "Can't remove book. It already has connected data."], 200);
             } else {
-                if(file_exists(public_path('book-images/' . $this_book->photo)) &&
-                   file_exists(public_path('qr/book/' . $this_book->qr))
-                ){
+                if(file_exists(public_path('book-images/' . $this_book->photo))){
                     unlink(public_path('book-images/' . $this_book->photo));
-                    unlink(public_path('qr/book/' . $this_book->qr));
+
+                    // remove also those qrs
                 }
 
                 $this_book->delete();
@@ -174,10 +201,7 @@ class LibraryController extends Controller
 
     public function get_genres (Request $request) {
         return TransactionUtil::transact(null, function() {
-            $genres = Cache::remember('genres_cache', env('CACHE_DURATION'), function () {
-                return BookGenre::withCount('hasData')->get();
-            });
-
+            $genres = BookGenre::withCount('hasData')->get();
             return response()->json(['genres' => $genres], 200);
         });
     }
@@ -228,59 +252,54 @@ class LibraryController extends Controller
 
     public function get_book_info (Request $request, int $book_id){
         return TransactionUtil::transact(null, function() use($request, $book_id) {
-            return Cache::remember("book_info_cache_$book_id", env('CACHE_DURATION'), function () use($request, $book_id) {
-                $book = Book::where('id', $book_id)
-                    ->withCount('copies', 'hasData')
-                    ->with([
-                        'related',
-                        'related.training',
-                        'related.training.module',
-                        'catalog',
-                        'catalog.genre'
-                    ])->first();
+            $book = Book::where('id', $book_id)
+                ->withCount('copies', 'hasData')
+                ->with([
+                    'related',
+                    'related.training',
+                    'related.training.module',
+                    'catalog',
+                    'catalog.genre'
+                ])->first();
 
-                if ($request->boolean('getFileAsBlob') && $request->has('traceNumber') && $book) {
-                    $filename = $book->pdf_copy ?? null;
+            if ($request->boolean('getFileAsBlob') && $request->has('traceNumber') && $book) {
+                $filename = $book->pdf_copy ?? null;
 
-                    $isMine = BookRes::where([
-                        'user_id' => $request->user()->id,
-                        'trace_number' => $request->traceNumber
-                    ])->with(['borrowedBooks' => function ($self) use($book_id) {
-                        $self->where(['book_id' => $book_id, 'status' => 'RECEIVED'])
-                             ->where('to_date', '>=', Carbon::now());
-                    }])->first();
+                $isMine = BookRes::where([
+                    'user_id' => $request->user()->id,
+                    'trace_number' => $request->traceNumber
+                ])->with(['borrowedBooks' => function ($self) use($book_id) {
+                    $self->where(['book_id' => $book_id, 'status' => 'RECEIVED'])
+                            ->where('to_date', '>=', Carbon::now());
+                }])->first();
 
-                    if ($filename && !is_null($isMine->borrowedBooks)) {
-                        $filePath = public_path("book-uploaded-files/pdf/{$filename}");
+                if ($filename && !is_null($isMine->borrowedBooks)) {
+                    $filePath = public_path("book-uploaded-files/pdf/{$filename}");
 
-                        if (File::exists($filePath)) {
-                            $headers = [
-                                'Content-Type' => 'application/pdf',
-                                'Content-Disposition' => 'inline; filename="' . $filename . '"',
-                                'Content-Length' => File::size($filePath),
-                                'Access-Control-Allow-Origin' => '*',
-                                'Access-Control-Expose-Headers' => 'Created-At',
-                                'Created-At' => $isMine->borrowedBooks[0]->to_date
-                            ];
+                    if (File::exists($filePath)) {
+                        $headers = [
+                            'Content-Type' => 'application/pdf',
+                            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+                            'Content-Length' => File::size($filePath),
+                            'Access-Control-Allow-Origin' => '*',
+                            'Access-Control-Expose-Headers' => 'Created-At',
+                            'Created-At' => $isMine->borrowedBooks[0]->to_date
+                        ];
 
-                            return Response::file($filePath, $headers);
-                        }
-                    } else {
-                        return response()->json(['data' => ''], 500);
+                        return Response::file($filePath, $headers);
                     }
                 } else {
-                    return response()->json(['book' => $book], 200);
+                    return response()->json(['data' => ''], 500);
                 }
-            });
+            } else {
+                return response()->json(['book' => $book], 200);
+            }
         });
     }
 
     public function get_copies (Request $request, int $book_id) {
         return TransactionUtil::transact(null, function() use ($book_id) {
-            $bookCopies = Cache::remember('book_copies_cache', env('CACHE_DURATION'), function () use($book_id) {
-                return BookCopy::withCount('hasData')->where('book_id', operator: $book_id)->get();
-            });
-
+            $bookCopies = BookCopy::withCount('hasData')->where('book_id', operator: $book_id)->get();
             return response()->json(['bookCopies' => $bookCopies], 200);
         });
     }
@@ -310,97 +329,89 @@ class LibraryController extends Controller
 
     public function count_book_reservation (Request $request){
         return TransactionUtil::transact(null, function() use ($request) {
-            $reservationCount = Cache::remember('count_book_reservation', env('CACHE_DURATION'), function () use($request) {
-                $reservations = BookRes::query();
+            $reservations = BookRes::query();
 
-                if($request->userId) {
-                    $reservations->where('user_id', $request->userId);
-                }
+            if($request->userId) {
+                $reservations->where('user_id', $request->userId);
+            }
 
-                $get_count = function ($collection) {
-                    $count = $collection->count();
-                    return $count > 99 ? '99+' : $count;
-                };
+            $get_count = function ($collection) {
+                $count = $collection->count();
+                return $count > 99 ? '99+' : $count;
+            };
 
-                return [
-                    'total'     => $get_count($reservations),
-                    'active'    => $get_count($reservations->clone()->where('status', 'ACTIVE')),
-                    'for_csm'   => $get_count($reservations->clone()->where('status', 'FOR CSM')),
-                    'extending' => $get_count($reservations->clone()->where('status', 'EXTENDING')),
-                    'completed' => $get_count($reservations->clone()->where('status', 'COMPLETED')),
-                ];
-            });
+            $count = [
+                'total'     => $get_count($reservations),
+                'active'    => $get_count($reservations->clone()->where('status', 'ACTIVE')),
+                'for_csm'   => $get_count($reservations->clone()->where('status', 'FOR CSM')),
+                'extending' => $get_count($reservations->clone()->where('status', 'EXTENDING')),
+                'completed' => $get_count($reservations->clone()->where('status', 'COMPLETED')),
+            ];
 
-            return response()->json(['reservationCount' => $reservationCount], 200);
+            return response()->json(['reservationCount' => $count], 200);
         });
     }
 
     public function check_for_book_reservation (Request $request){
         return TransactionUtil::transact(null, function() use ($request) {
-            $bookReservationCheck = Cache::remember('count_book_extensions_extension_cache_' . ($request->libraryId), env('CACHE_DURATION'), function () use($request) {
-                $a = ExtensionRequest::where([
-                    'book_res_id' => $request?->libraryId,
-                    'user_id' => $request?->userId
-                ])->with([
-                    'extendingBooks' => function ($query) {
-                        $query->where('status', "PENDING");
-                    },
-                    'library.borrowedBooks' => function ($query) {
-                        $query->where('status', 'EXPIRED')
-                              ->where('to_date', '<=', Carbon::now());
-                    }
-                ])->first();
+            $bookReservationCheck = ExtensionRequest::where([
+                'book_res_id' => $request?->libraryId,
+                'user_id' => $request?->userId
+            ])->with([
+                'extendingBooks' => function ($query) {
+                    $query->where('status', "PENDING");
+                },
+                'library.borrowedBooks' => function ($query) {
+                    $query->where('status', 'EXPIRED')
+                            ->where('to_date', '<=', Carbon::now());
+                }
+            ])->first();
 
-                return [
-                    'hasBooksNeedAction' => $a && count($a->library->borrowedBooks) > 0,
-                    'hasPendingReservation' => $a && count($a->extendingBooks) > 0
-                ];
-            });
+            $count =  [
+                'hasBooksNeedAction' => $bookReservationCheck && count($bookReservationCheck->library->borrowedBooks) > 0,
+                'hasPendingReservation' => $bookReservationCheck && !is_null($bookReservationCheck->extendingBooks)
+            ];
 
-            return response()->json(['bookReservationCheck' => $bookReservationCheck], 200);
+            return response()->json(['bookReservationCheck' => $count], 200);
         });
     }
 
     public function get_book_reservation (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
-            $reservationMain = Cache::remember('book_reservations_cache_' . ($request->traceNumber ?? $request->type), env('CACHE_DURATION'), function () use($request) {
-                $reservations = BookRes::with([
-                    'trainee',
-                    'borrowedBooks',
-                    'borrowedBooks.book',
-                    'borrowedBooks.books',
-                    'borrowedBooks.books.catalog',
-                    'borrowedBooks.books.catalog.genre',
-                    'csm',
-                    'csm.user'
-                ]);
+            $reservations = BookRes::with([
+                'trainee',
+                'borrowedBooks',
+                'borrowedBooks.book',
+                'borrowedBooks.books',
+                'borrowedBooks.books.catalog',
+                'borrowedBooks.books.catalog.genre',
+                'csm',
+                'csm.user'
+            ]);
 
-                if($request->userId) $reservations->where('user_id', $request->userId);
-                if($request->type) $reservations->where('status', $request->type);
+            if($request->userId) $reservations->where('user_id', $request->userId);
+            if($request->type) $reservations->where('status', $request->type);
 
-                return $request->traceNumber
-                    ? $reservations->where('trace_number', $request->traceNumber)->first()
-                    : $reservations->orderBy('created_at', 'DESC')->get();
-            });
+            $reservations = $request->traceNumber
+                ? $reservations->where('trace_number', $request->traceNumber)->first()
+                : $reservations->orderBy('created_at', 'DESC')->get();
 
-            return response()->json(['reservations' => $reservationMain], 200);
+            return response()->json(['reservations' => $reservations], 200);
         });
     }
 
     public function get_extension_request (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
-            $extensionMain = Cache::remember('book_extensions_extension_cache_' . ($request->libraryId), env('CACHE_DURATION'), function () use($request) {
-                return ExtensionRequest::with([
-                    'extendingBooks',
-                    'extendingBooks.bookReservation',
-                    'extendingBooks.bookReservation.books',
-                    'extendingBooks.bookReservation.books.catalog',
-                    'extendingBooks.bookReservation.books.catalog.genre'
-                ])->where([
-                    'book_res_id' => $request->libraryId,
-                    'user_id' => $request->userId
-                ])->orderBy('created_at', 'DESC')->get();
-            });
+            $extensionMain = ExtensionRequest::with([
+                'extendingBooks',
+                'extendingBooks.bookReservation',
+                'extendingBooks.bookReservation.books',
+                'extendingBooks.bookReservation.books.catalog',
+                'extendingBooks.bookReservation.books.catalog.genre'
+            ])->where([
+                'book_res_id' => $request->libraryId,
+                'user_id' => $request->userId
+            ])->orderBy('created_at', 'DESC')->get();
 
             return response()->json(['extensionRequests' => $extensionMain], 200);
         });
@@ -408,17 +419,15 @@ class LibraryController extends Controller
 
     public function get_books_that_can_extend (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
-            $booksThatCanExtend = Cache::remember('get_books_that_can_extend_' . ($request->libraryId . '_' . $request->userId), env('CACHE_DURATION'), function () use($request) {
-                return BookReservation::with([
-                    'bookRes',
-                    'books',
-                    'books.catalog',
-                    'books.catalog.genre'
-                ])->where([
-                    'book_res_id' => $request->libraryId,
-                    'status' => "RECEIVED"
-                ])->whereRaw("DATEDIFF(to_date, from_date) < 12")->get();
-            });
+            $booksThatCanExtend = BookReservation::with([
+                'bookRes',
+                'books',
+                'books.catalog',
+                'books.catalog.genre'
+            ])->where([
+                'book_res_id' => $request->libraryId,
+                'status' => "RECEIVED"
+            ])->whereRaw("DATEDIFF(to_date, from_date) < 12")->get();
 
             return response()->json(['booksThatCanExtend' => $booksThatCanExtend], 200);
         });
@@ -552,75 +561,67 @@ class LibraryController extends Controller
 
     public function get_available_books (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
+            $user = User::findOrFail($request->userId);
 
-            $adjustedBooks = Cache::remember('available_books_cache', env('CACHE_DURATION'), function () use($request) {
-                $user = User::findOrFail($request->userId);
+            $record = EnrolledCourse::where('user_id', $user->id)
+                ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
+                ->pluck('training_id');
 
-                $record = EnrolledCourse::where('user_id', $user->id)
-                    ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
-                    ->pluck('training_id');
+            $books = Book::with([
+                'catalog.genre',
+                'copies' => function($query) {
+                    return $query->where('status', 'AVAILABLE');
+                }
+            ])->where('status', 'ACTIVE')->get()
+            ->map(function ($self) use ($record, $user) {
+                    $brQuery = BookTrainingRelated::with('training.module')->where('book_id', $self->id);
+                    $relatedBookTrainings = $brQuery->clone()
+                        ->whereIn('training_id', $record)
+                        ->get();
 
-                $books = Book::with([
-                    'catalog.genre',
-                    'copies' => function($query) {
-                        return $query->where('status', 'AVAILABLE');
-                    }
-                ])->where('status', 'ACTIVE');
+                    $related = $relatedBookTrainings->count() > 0 ? 1 : 0;
+                    $relatedTrainingsData = $relatedBookTrainings->map(function ($bookTraining) {
+                        return $bookTraining->training;
+                    })->toArray();
 
-                return $books->get()
-                    ->map(function ($self) use ($record, $user) {
-                        $brQuery = BookTrainingRelated::with('training.module')->where('book_id', $self->id);
-                        $relatedBookTrainings = $brQuery->clone()
-                            ->whereIn('training_id', $record)
-                            ->get();
+                    $availabilityStatus = (function() use ($self, $brQuery, $related, $user) {
+                        $checkIfReserved = $self->hasData()
+                            ->forNotInUse()
+                            ->whereHas('bookRes', function ($q) use ($user) {
+                                $q->where('user_id', $user->id);
+                            })->exists();
 
-                        $related = $relatedBookTrainings->count() > 0 ? 1 : 0;
-                        $relatedTrainingsData = $relatedBookTrainings->map(function ($bookTraining) {
-                            return $bookTraining->training;
-                        })->toArray();
+                        if ($brQuery->count() > 0 && $related === 1 && !$checkIfReserved) {
+                            return 'RECOMMENDED';
+                        } else if ($checkIfReserved) {
+                            return 'REQUESTED';
+                        } else if ($self->copies()->whereIn('status', ['AVAILABLE'])->exists() || $self->pdf_copy) {
+                            return 'AVAILABLE';
+                        } else {
+                            return 'OUT OF STOCK';
+                        }
+                    })();
 
-                        $availabilityStatus = (function() use ($self, $brQuery, $related, $user) {
-                            $checkIfReserved = $self->hasData()
-                                ->forNotInUse()
-                                ->whereHas('bookRes', function ($q) use ($user) {
-                                    $q->where('user_id', $user->id);
-                                })->exists();
+                    $self->availabilityStatus = $availabilityStatus;
+                    $self->related_trainings = $relatedTrainingsData;
+                    return $self;
+                })->sortBy(function ($book) {
+                    $order = [
+                        'RECOMMENDED' => 2,
+                        'AVAILABLE' => 4,
+                        'REQUESTED' => 1,
+                        'OUT OF STOCK' => 3,
+                    ];
 
-                            if ($brQuery->count() > 0 && $related === 1 && !$checkIfReserved) {
-                                return 'RECOMMENDED';
-                            } else if ($checkIfReserved) {
-                                return 'REQUESTED';
-                            } else if ($self->copies()->whereIn('status', ['AVAILABLE'])->exists() || $self->pdf_copy) {
-                                return 'AVAILABLE';
-                            } else {
-                                return 'OUT OF STOCK';
-                            }
-                        })();
+                    return $order[$book->availabilityStatus] ?? 99;
+                })->values();
 
-                        $self->availabilityStatus = $availabilityStatus;
-                        $self->related_trainings = $relatedTrainingsData;
-                        return $self;
-                    })
-                    ->sortBy(function ($book) {
-                        $order = [
-                            'RECOMMENDED' => 2,
-                            'AVAILABLE' => 4,
-                            'REQUESTED' => 1,
-                            'OUT OF STOCK' => 3,
-                        ];
-                        return $order[$book->availabilityStatus] ?? 99;
-                    })
-                    ->values();
-            });
-
-            return response()->json(['books' => $adjustedBooks], 200);
+            return response()->json(['books' => $books], 200);
         });
     }
 
     public function create_walkin_request (CreateWalkInRequest $request) {
         return TransactionUtil::transact($request, function() use ($request) {
-            \Log::info($request->all());
-
             $bookReservations = BookReservation::forUser($request->user()->role === "TRAINER" ? $request->user()->id : $request->borrower)
                 ->whereNotIn('status', ['CANCELLED', 'RETURNED', 'REJECTED'])
                 ->whereIn('book_id', collect($request->data)->pluck('bookId')->toArray())

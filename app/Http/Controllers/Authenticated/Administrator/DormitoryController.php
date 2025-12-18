@@ -121,19 +121,78 @@ class DormitoryController extends Controller
         });
     }
 
-    public function get_available_rooms (GetAvailableRooms $request) {
+    public function get_available_rooms(GetAvailableRooms $request) {
         return TransactionUtil::transact($request, function() use ($request) {
-            $rooms = Cache::remember('get_available_rooms', env('CACHE_DURATION'), function () use ($request) {
-                return Dormitory::with([
-                    'room_images',
-                    'rooms'
-                ])->where([
-                    'room_for_type' => $request->room_for_type,
-                    'is_air_conditioned' => $request->room_type
-                ])->get();
+            $today = now()->startOfDay();
+
+            $dorms = Dormitory::with([
+                'room_images',
+                'rooms' => function($query) use ($request) {
+                    if ($request->roomId) {
+                        $query->where('id', $request->roomId);
+                    }
+                    // IMPORTANT: Ensure we load tenants with both statuses
+                    $query->with(['hasData' => function($q) {
+                        $q->whereIn('tenant_status', ['ACTIVE', 'APPROVED']);
+                    }]);
+                }
+            ])->where([
+                'room_for_type' => $request->room_for_type,
+                'is_air_conditioned' => $request->room_type
+            ]);
+
+            if ($request->roomId) {
+                $dorms->whereHas('rooms', function($q) use ($request) {
+                    $q->where('id', $request->roomId);
+                });
+            }
+
+            $results = $dorms->get()->map(function ($dorm) use ($today) {
+                $dorm->rooms->transform(function ($room) use ($today) {
+                    // hasData now contains both ACTIVE and APPROVED tenants
+                    $tenants = $room->hasData;
+                    $todayStr = $today->format('Y-m-d');
+
+                    // 1. Calculate occupancy for TODAY (Active + Approved)
+                    $occupancyToday = $tenants->filter(function ($t) use ($todayStr) {
+                        return $todayStr >= $t->tenant_from_date && $todayStr <= $t->tenant_to_date;
+                    })->count();
+
+                    if ($occupancyToday < $room->room_slot) {
+                        // If there is a free bed TODAY, return today.
+                        // Note: The user might still be blocked by an APPROVED booking later.
+                        $room->available_from = $todayStr;
+                        $room->available_to = null;
+                    } else {
+                        // 2. APPLY CHECKER: Find the first day a bed opens up
+                        // and is NOT immediately taken by an APPROVED reservation.
+                        $nextAvailableDate = $tenants->pluck('tenant_to_date')
+                            ->map(fn($date) => \Carbon\Carbon::parse($date)->addDay())
+                            ->filter(fn($date) => $date >= $today)
+                            ->sort()
+                            ->first(function ($potentialDate) use ($tenants, $room) {
+                                $pDateStr = $potentialDate->format('Y-m-d');
+
+                                // Count everyone (ACTIVE + APPROVED) on this future date
+                                $count = $tenants->filter(function($t) use ($pDateStr) {
+                                    return $pDateStr >= $t->tenant_from_date &&
+                                        $pDateStr <= $t->tenant_to_date;
+                                })->count();
+
+                                return $count < $room->room_slot;
+                            });
+
+                        $room->available_from = $nextAvailableDate ? $nextAvailableDate->format('Y-m-d') : 'No dates available';
+                        $room->available_to = null;
+                    }
+
+                    return $room;
+                });
+                return $dorm;
             });
 
-            return response()->json(['rooms' => $rooms], 200);
+            \Log::info($results);
+            return response()->json(['rooms' => $results], 200);
         });
     }
 
