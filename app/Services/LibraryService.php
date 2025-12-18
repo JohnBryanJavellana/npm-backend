@@ -59,7 +59,6 @@ class LibraryService {
         \Log::info("validateBook2", [$available]);
 
         $unavailable = collect($physical_books)->reject(fn($book) => ($available[$book] ?? 0) > 0);
-        // $unavailable = collect($physical_books)->reject(fn($book) => \Log::info("validateBook3", [$available[$book]]));
 
         if($unavailable->isNotEmpty()) {
             throw new \DomainException("The following books have no available copies: ", $unavailable->implode(', '));
@@ -88,7 +87,7 @@ class LibraryService {
         }
 
         return $books->map(function($book) use($copies) {
-            return [
+            return [    
                 "book" => $book,
                 "copy" => $book->pdf_copy ? null : $copies[$book->id]->first()
             ];

@@ -8,11 +8,11 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\File;
-use Intervention\Image\Facades\Image;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use App\Utils\TransactionUtil;
+use App\Utils\{
+    TransactionUtil,
+    GenerateQR
+};
 use Carbon\Carbon;
 use App\Http\Requests\Admin\Library\{
     CreateOrUpdateBookRequest,
@@ -132,31 +132,10 @@ class LibraryController extends Controller
             if($request->copies) {
                 for ($i = 0; $i < $request->copies; $i++) {
                     $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
-
                     $filename = $new_book_ui . ".png";
-                    $qr_path = public_path("qr/book/" . $filename);
 
-                    QrCode::format('png')
-                        ->size(500)
-                        ->style('round')
-                        ->margin(1)
-                        ->backgroundColor(255, 255, 255)
-                        ->merge('/public/system-images/62334fcadd0d9e6d0a152aca.png', 0.19, true)
-                        ->generate($new_book_ui, $qr_path);
-
-                    $img = Image::make($qr_path);
-
-                    $img->resizeCanvas(500, 560, 'top', false, 'ffffff');
-
-                    $img->text($new_book_ui, 250, 540, function($font) {
-                        $font->file(public_path('fonts/Roboto-Bold.ttf'));
-                        $font->size(28);
-                        $font->color('#000000');
-                        $font->align('center');
-                        $font->valign('bottom');
-                    });
-
-                    $img->save($qr_path);
+                    $qr = new GenerateQR();
+                    $qr->generate($filename, $new_book_ui, $new_book_ui, "qr/book/");
 
                     $book_copy = new BookCopy;
                     $book_copy->unique_identifier = $new_book_ui;

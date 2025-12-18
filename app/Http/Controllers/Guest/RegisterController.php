@@ -11,9 +11,9 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Auth\Events\Registered;
 use App\Mail\WelcomeAboard;
+use App\Utils\GenerateQR;
 
 /**
  * Handles user registration, supporting both standard and social login flows.
@@ -125,14 +125,10 @@ class RegisterController extends Controller
                 if (Auth::attempt(['email' => $request->email, 'password' => ''])){
                     $user = Auth::user();
 
+                    $filename = "$user->id.png";
                     $qr_path = public_path("qr/user/$user->id.png");
-                    QrCode::format('png')
-                        ->size(500)
-                        ->style('round')
-                        ->margin(1)
-                        ->backgroundColor(255, 255, 255)
-                        ->merge('/public/system-images/62334fcadd0d9e6d0a152aca.png', 0.19)
-                        ->generate($user->id, $qr_path);
+                    $qr = new GenerateQR();
+                    $qr->generate($filename, $user->id, $user->id, "qr/user/");
 
                     \Mail::to($request->email)->send(new WelcomeAboard(['portal_link' => '', 'image_path' => $qr_path]));
                     AuditHelper::log($request->user()->id, "Logged in account");
