@@ -97,6 +97,8 @@ class TraineeLibrary extends Controller
             $status = $request->type;
             $user_id = $request->user()->id;
             $cache_key = "user_id:$user_id:status:$status";
+            $this->library_service->updateOverDue($user_id);
+
             \Log::info("CACHE: ", [Cache::has($cache_key), $cache_key]);
 
             $records = Cache::remember($cache_key, $this->ttl, function () use ($user_id, $status) {
@@ -252,14 +254,13 @@ class TraineeLibrary extends Controller
 
             // foreach($validated['book_id'] as $book) {
             //     $is_e_copy = Book::whereKey($book)->whereNotNull('pdf_copy')->first();
-            //     $record = BookCopy::where(['book_id' => $book, 'status' => "AVAILABLE"])->first();
+            //     $record = BookCopy::where(['book_id' => $book, 'status' => "AVAILABLE"])->lockForUpdate()->first();
 
             //     if(!$is_e_copy && $record == null) {
             //         DB::rollBack();
             //         return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
             //     }
-
-            //     $record->lockForUpdate();
+                
             //     $book_record = new BookReservation();
             //     $book_record->book_res_id = $book_res->id;
             //     $book_record->book_copy_id = $record?->id;
@@ -279,6 +280,22 @@ class TraineeLibrary extends Controller
             //         $record->save();
             //     }
             // }
+
+
+//             use DomainException;
+
+// public function render($request, Throwable $e)
+// {
+//     if ($e instanceof DomainException) {
+//         return response()->json([
+//             'message' => $e->getMessage()
+//         ], 422);
+//     }
+
+//     return parent::render($request, $e);
+// }
+
+
 
             if(env("USE_EVENT")) {
                 event(new BELibrary(''));
@@ -300,7 +317,7 @@ class TraineeLibrary extends Controller
             return response()->json(['message' => 'Your book request was sent successfully!'], 200);
         }
         catch (\DomainException $d) {
-            return response()->json(["message" => $d], 422);
+            throw $d;
         }
         catch (\Exception $e) {
             // DB::rollBack();
@@ -475,21 +492,6 @@ class TraineeLibrary extends Controller
         })
         ->get();
         return BookResource::collection($books);
-    }
-
-    public function view_over_due(Request $request)
-    {
-        $overDues = BookReservation::with([
-            "books.catalog.genre",
-            "book",
-            "bookRes"
-        ])
-        ->forUser($request->user()->id)
-        ->where("status", "EXPIRED")
-        ->where("to_date", "<" , now())
-        ->get();
-
-        return BookOverDueResource::collection($overDues);
     }
 
     public function add_book_items(Request $request)

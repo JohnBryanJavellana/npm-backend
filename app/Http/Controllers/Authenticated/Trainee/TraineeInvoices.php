@@ -42,7 +42,8 @@ class TraineeInvoices extends Controller
         $records = LibraryInvoice::with([
             "payee",
             "BookRes",
-            "selectedBooks.bookReservation.books.catalog.genre"
+            "selectedBooks.bookReservation.books.catalog.genre",
+            "selectedBooks.bookReservation.book",
             ])
         ->where("user_id", $request->user()->id)
         ->get();

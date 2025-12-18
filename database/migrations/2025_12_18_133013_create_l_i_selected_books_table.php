@@ -20,6 +20,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(LibraryInvoice::class)->constrained()->onDelete("cascade");
             $table->foreignIdFor(BookReservation::class)->constrained()->onDelete("cascade");
+            $table->string('remarks');
             $table->timestamps();
         });
     }

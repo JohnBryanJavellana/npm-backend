@@ -359,8 +359,7 @@ class LibraryController extends Controller
                     $query->where('status', "PENDING");
                 },
                 'library.borrowedBooks' => function ($query) {
-                    $query->where('status', 'EXPIRED')
-                            ->where('to_date', '<=', Carbon::now());
+                    $query->where('status', 'EXPIRED')->where('to_date', '<=', Carbon::now()->toDateString());
                 }
             ])->first();
 
@@ -705,7 +704,11 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, function() use ($request) {
             $fines = LibraryInvoice::with([
                 'bookRes',
-                'selectedBooks'
+                'selectedBooks',
+                'selectedBooks.bookReservation',
+                'selectedBooks.bookReservation.book',
+                'selectedBooks.bookReservation.books',
+                'selectedBooks.bookReservation.books.catalog',
             ])->where([
                 'book_res_id' => $request->libraryId,
                 'user_id' => $request->userId
@@ -752,9 +755,12 @@ class LibraryController extends Controller
 
             LISelectedBook::where('library_invoice_id', $new_fine->id)->delete();
             foreach ($request->selectedBookReservations as $bookReservation) {
+                $bookReserv = BookReservation::find($bookReservation);
+
                 $new_fine_selected_book_reservation = new LISelectedBook;
                 $new_fine_selected_book_reservation->library_invoice_id = $new_fine->id;
                 $new_fine_selected_book_reservation->book_reservation_id = $bookReservation;
+                $new_fine_selected_book_reservation->remarks = $bookReserv->status;
                 $new_fine_selected_book_reservation->save();
             }
 

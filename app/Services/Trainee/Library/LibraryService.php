@@ -11,11 +11,22 @@ use Illuminate\Support\Facades\DB;
 class LibraryService {
 
     protected $bookModel;
+    protected $bookResModel;
+    protected $bookReservationModel;
 
-    public function __construct(Book $bookModel , BookRes $bookResModel)
+    public function __construct(Book $bookModel , BookRes $bookResModel, BookReservation $bookReservationModel)
     {
         $this->bookModel = $bookModel;
-        $this->BookResModel = $bookResModel;
+        $this->bookResModel = $bookResModel;
+        $this->bookReservationModel = $bookReservationModel;
+    }
+
+    public function updateOverDue($userId)
+    {
+        $this->bookReservationModel::where("status", "RECEIVED")
+        ->whereRelation("bookRes", "user_id", "=", $userId)
+        ->where('to_date', '<', now())
+        ->update(["status" => "EXPIRED"]);
     }
 
     public function createReservation($validated, $user)
@@ -96,7 +107,7 @@ class LibraryService {
     }
 
     private function prepareData(array $book_id) {
-        $books = Book::whereIn("id" , $book_id)
+        $books = $this->bookModel::whereIn("id" , $book_id)
         ->select("id", "pdf_copy")
         ->get()
         ->keyBy("id");
@@ -123,11 +134,11 @@ class LibraryService {
     }
 
     private function createBookRes($userId, $purpose) {
-        return  BookRes::create([
+        return  $this->bookResModel::create([
             "user_id" => $userId,
             "trace_number" => GenerateTrace::createTraceNumber(BookRes::class),
             "purpose" => $purpose,
-            "type" => BookRes::TYPE_ONLINE,
+            "type" => $this->bookResModel::TYPE_ONLINE,
         ]);
     }
 
