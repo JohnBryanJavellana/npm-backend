@@ -15,7 +15,7 @@ class LibraryService {
     public function __construct(Book $bookModel , BookRes $bookResModel)
     {
         $this->bookModel = $bookModel;
-        $this->model = $bookResModel;
+        $this->BookResModel = $bookResModel;
     }
 
     public function createReservation($validated, $user)
@@ -148,6 +148,4 @@ class LibraryService {
 
         BookCart::where(['book_id' => $book_id, 'user_id' => $user->id])->delete();
     }
-
-
 }
