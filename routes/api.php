@@ -45,7 +45,7 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPasswor
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 /** authenticated routes */
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::post('/broadcasting/auth', function (Request $request) {
         return Broadcast::auth($request);
     });
@@ -147,6 +147,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::prefix('/invoices/')->group(function() {
             Route::get('get_all_invoices', [TraineeInvoices::class, 'get_all_trainee_invoices']);
+            Route::get('view/penalties', [TraineeInvoices::class, 'library_penalties']);
         });
     });
 
@@ -209,6 +210,9 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::post('create_walkin_request', [LibraryController::class, 'create_walkin_request']);
                 Route::post('create_or_update_book', [LibraryController::class, 'create_or_update_book'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
                 Route::match(['GET', 'POST'], 'get_book_reservation', [LibraryController::class, 'get_book_reservation']);
+                Route::post('get_book_reservation/get_fines', [LibraryController::class, 'get_fines']);
+                Route::post('get_book_reservation/create_fine', [LibraryController::class, 'create_fine']);
+                Route::post('get_book_reservation/get_book_reservation_that_needs_fine', [LibraryController::class, 'get_book_reservation_that_needs_fine']);
                 Route::post('get_book_reservation/get_extension_request', [LibraryController::class, 'get_extension_request']);
                 Route::post('get_book_reservation/get_books_that_can_extend', [LibraryController::class, 'get_books_that_can_extend']);
                 Route::post('get_book_reservation/submit_extension_request', [LibraryController::class, 'submit_extension_request']);

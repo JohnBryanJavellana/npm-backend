@@ -38,6 +38,10 @@ class BookRes extends Model
         return $this->hasMany(ExtensionRequest::class, 'book_res_id', 'id');
     }
 
+    public function fines() {
+        return $this->hasMany(LibraryInvoice::class, 'book_res_id', 'id');
+    }
+
     //SCOPES
     public function scopeForUser($query, $userId)
     {

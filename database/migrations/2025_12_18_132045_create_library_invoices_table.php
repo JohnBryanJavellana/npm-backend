@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->constrained()->onDelete("cascade");
             $table->foreignIdFor(BookRes::class)->constrained()->onDelete("cascade");
             $table->decimal("amount", 10, 2);
+            $table->longText("details");
             $table->enum("status", ["PENDING", "PAID"]);
             $table->timestamps();
         });
