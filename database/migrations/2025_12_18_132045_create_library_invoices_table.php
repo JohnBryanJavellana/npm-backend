@@ -19,9 +19,10 @@ return new class extends Migration
             $table->longText("reference_number")->nullable();
             $table->foreignIdFor(User::class)->constrained()->onDelete("cascade");
             $table->foreignIdFor(BookRes::class)->constrained()->onDelete("cascade");
-            $table->decimal("amount", 10, 2);
+            $table->decimal("amount", 65, 2);
             $table->longText("details");
-            $table->enum("status", ["PENDING", "PAID"]);
+            $table->enum("status", ["PENDING", "PAID", "VERIFICATION"])->default("PENDING");
+            $table->enum("payment_type", ["ONLINE", "WALK-IN"])->nullable();
             $table->timestamps();
         });
     }
