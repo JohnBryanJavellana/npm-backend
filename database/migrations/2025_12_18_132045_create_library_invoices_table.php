@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\{User,BookRes};
+use App\Models\{User,BookRes, TrainingFeeCategory};
 
 return new class extends Migration
 {
@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->longText("trace_number");
             $table->longText("reference_number")->nullable();
+            $table->foreignIdFor(TrainingFeeCategory::class)->constrained()->onDelete("cascade");
             $table->foreignIdFor(User::class)->constrained()->onDelete("cascade");
             $table->foreignIdFor(BookRes::class)->constrained()->onDelete("cascade");
             $table->decimal("amount", 65, 2);

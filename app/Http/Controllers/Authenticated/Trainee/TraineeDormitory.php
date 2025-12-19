@@ -21,6 +21,7 @@ use Illuminate\Support\Str;
 class TraineeDormitory extends Controller
 {
     
+    
     public function get_all_dormitories(Request $request) {
         $dormitories = DormitoryRoom::where("room_status", "ACTIVE")->get();
         return response()->json(['dormitories' => $dormitories], 200);
@@ -42,20 +43,9 @@ class TraineeDormitory extends Controller
         }
     }
 
-    public function applied_dormitories (Request $request) {
+    public function view_room_application (Request $request) {
         try {
-            $dormitories = DormitoryTenant::with('dormitory_room')
-                ->where('user_id', $request->user()->id)
-                ->orderBy('created_at', 'DESC')
-                ->get()
-                ->map(function ($self) {
-                    return [
-                        'hasActiveRecord' => !in_array($self->tenant_status, ['CANCELLED', 'COMPLETED']),
-                        'dormitories' => $self,
-                        'balance' => $self->tenant_invoices->sortByDesc('created_at')->first()?->invoice_balance
-                    ];
-                })->values();
-
+            $applications = 
             return response()->json(['dormitories' => $dormitories]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);

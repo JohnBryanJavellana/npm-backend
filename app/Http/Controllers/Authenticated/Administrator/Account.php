@@ -35,19 +35,16 @@ class Account extends Controller
 {
     public function trainee_info (Request $request, int $traineeId) {
         return TransactionUtil::transact(null, function() use ($traineeId) {
-            $ttl = now()->addMinutes(env('CACHE_DURATION'));
-            $traineeInfo = Cache::remember("user_profile_$traineeId", $ttl, function () use ($traineeId) {
-                return User::with([
-                    'additional_trainee_info.general_info',
-                    'additional_trainee_info.contact',
-                    'additional_trainee_info.trainee_registration_file',
-                    'additional_trainee_info.trainee_registration_file.requirement',
-                    'additional_trainee_info.educational_attainment.main_course',
-                    'additional_trainee_info.educational_attainment.main_school',
-                    'additional_trainee_info.educational_attainment',
-                    'additional_trainee_info.latest_shipboard_attainment'
-                ])->where('id', $traineeId)->first();
-            });
+            $traineeInfo = User::with([
+                'additional_trainee_info.general_info',
+                'additional_trainee_info.contact',
+                'additional_trainee_info.trainee_registration_file',
+                'additional_trainee_info.trainee_registration_file.requirement',
+                'additional_trainee_info.educational_attainment.main_course',
+                'additional_trainee_info.educational_attainment.main_school',
+                'additional_trainee_info.educational_attainment',
+                'additional_trainee_info.latest_shipboard_attainment'
+            ])->where('id', $traineeId)->first();
 
             return response()->json(['traineeInfo' => $traineeInfo], 200);
         });
@@ -88,8 +85,6 @@ class Account extends Controller
     }
 
     public function update_personal(Request $request) {
-        // 1. Define validation rules. The email rule ensures the new email is unique,
-        // excluding the current user's ID.
         $validation = [
             'firstName' => 'required|string',
             'middleName' => 'string',
@@ -110,51 +105,37 @@ class Account extends Controller
                 $reloggin = false;
                 $user = User::findOrFail($request->user()->id);
 
-                // 2. Update basic personal fields.
                 $user->fname = $request->firstName;
                 $user->mname = $request->middleName;
                 $user->lname = $request->lastName;
                 $user->suffix = $request->suffix;
                 $user->birthdate = $request->birthdate;
 
-                // 3. Special handling for email change: Reset password and trigger email notification.
                 if ($user->email !== $request->email) {
-                    // Generate a temporary 6-character random password.
                     $random_password = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
                     $user->password = bcrypt($random_password);
 
-                    // Send the temporary password via email.
                     \Mail::to($request->email)->send(new UpdatePasswordMail(['password' => $random_password]));
-
-                    // Flag that the client needs to force a re-login.
                     $reloggin = true;
                 }
 
                 $user->email = $request->email;
 
-                // 4. Handle avatar (profile picture) upload/update.
                 if ($request->avatar) {
-                    // Check if the avatar changed AND it's not the default image.
                     if (($request->avatar !== $user->profile_picture) && $user->profile_picture !== 'default-avatar.png') {
-                        // Delete the old file from the public directory if it exists.
                         if (file_exists(public_path('user-images/' . $user->profile_picture))){
                             unlink(public_path('user-images/' . $user->profile_picture));
                         }
                     }
 
-                    // Save the new avatar, $request->avatar is a base64 string.
                     $image_name = Str::uuid() . '.png';
                     ConvertToBase64::generate($request->avatar, 'image', "user_images/$image_name");
                     $user->profile_picture = $image_name;
                 }
 
-                // 5. Save the updated user record.
                 $user->save();
 
-                // 6. Log the action in the Audit Trail.
                 AuditHelper::log($request->user()->id, "Updated personal account information.");
-
-                // 7. Fire an event to notify relevant listeners (e.g., frontend via websockets).
                 if(env('USE_EVENT')) {
                     event(
                         new BEAccount(''),
@@ -165,15 +146,14 @@ class Account extends Controller
                 $cacheKey = 'user_profile_' . $request->user()->id;
                 Cache::forget($cacheKey);
 
-                DB::commit(); // Commit the transaction.
+                DB::commit();
 
-                // 8. Return success response.
                 return response()->json([
                     'message' => "You've updated your account personal information.",
-                    'reloggin' => $reloggin // Inform the client if re-login is required.
+                    'reloggin' => $reloggin
                 ], 200);
             } catch (\Exception $e) {
-                DB::rollback(); // Rollback changes if any error occurs.
+                DB::rollback();
                 return response()->json(['message' => $e->getMessage()], 500);
             }
         }
