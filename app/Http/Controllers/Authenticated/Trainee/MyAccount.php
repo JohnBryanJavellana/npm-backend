@@ -24,7 +24,7 @@ use App\Models\{
 use App\Utils\AuditHelper;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
-
+use Illuminate\Support\Facades\Cache;
 
 class MyAccount extends Controller
 {
@@ -82,6 +82,7 @@ class MyAccount extends Controller
                 }
 
                 AuditHelper::log($request->user()->id, "User {$request->user()->id} have posted your new information!");
+                Cache::forget('user_profile_' . $request->user()->id);
 
                 if(env("USE_EVENT")) {
                     event(new BEAccount(''));
@@ -95,7 +96,6 @@ class MyAccount extends Controller
     }
     public function create_or_update_additional_info (Request $request) {
         \Log::info("Send Info", $request->all());
-        // return response()->json(["yepiii"], 200);
 
        $validations = [
             'fname' => 'nullable|string|max:255',
@@ -267,10 +267,8 @@ class MyAccount extends Controller
                     }
                 }   
 
-                $new_log = new AuditTrail;
-                $new_log->user_id = $request->user()->id;
-                $new_log->actions = "You have posted your new information!";
-                $new_log->save();
+                AuditHelper::log($request->user()->id, "You have posted your new information!");
+                Cache::forget('user_profile_' . $request->user()->id);
 
                 if(env("USE_EVENT")) {
                     event(new BEAccount(''));

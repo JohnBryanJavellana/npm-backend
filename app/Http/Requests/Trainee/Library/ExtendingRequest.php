@@ -45,7 +45,10 @@ class ExtendingRequest extends FormRequest
             "purpose" => "required|string",
             "data" => "required|array",
             "data.*.book_res_id" => [
-                "required", "integer", "exists:book_reservations,id"
+                "required",
+                "integer", 
+                "exists:book_reservations,id", 
+                new BookLibraryRule($this->user())
             ],
             "data.*.to_date" => "required|date",
             "data.*.extension_date" => "required|date"

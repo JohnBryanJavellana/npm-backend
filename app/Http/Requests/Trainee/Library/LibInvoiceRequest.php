@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Admin\Library;
+namespace App\Http\Requests\Trainee\Library;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RequestFine extends FormRequest
+class LibInvoiceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,14 +21,12 @@ class RequestFine extends FormRequest
      */
     public function rules(): array
     {
+        \Log::info("qwerty", $this->all());
+
         return [
-            'amount' => ['required', 'numeric'],
-            'httpMethod' => ['required', 'string'],
-            'details' => ['required', 'string'],
-            'category' => ['required'],
-            'book_res_id' => ['required'],
-            'user_id' => ['required'],
-            'selectedBookReservations' => ['required', 'array'],
+            "inv_id" => "required",
+            "inv_trace_number" => "required",
+            "inv_reference_number" => "required",
         ];
     }
 }

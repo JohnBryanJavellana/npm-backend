@@ -9,6 +9,8 @@ class LibraryInvoice extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function payee () {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
@@ -17,7 +19,26 @@ class LibraryInvoice extends Model
         return $this->belongsTo(BookRes::class, 'book_res_id', 'id');
     }
 
+    public function feeCategory () {
+        return $this->belongsTo(TrainingFeeCategory::class, 'training_fee_category_id', 'id');
+    }
+
     public function selectedBooks () {
         return $this->hasMany(LISelectedBook::class);
+    }
+
+    /**
+     * SCOPES
+     */
+
+
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where("user_id", $userId);
+    }
+
+    public function scopeByTraceId($query, $traceNum, $inv_id)
+    {
+        return $query->whereKey($inv_id)->where("trace_number", $traceNum);
     }
 }

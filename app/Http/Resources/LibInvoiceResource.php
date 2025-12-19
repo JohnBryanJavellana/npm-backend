@@ -16,6 +16,7 @@ class LibInvoiceResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
+            "inv_id" => $this->id,
             "inv_trace_number" => $this->trace_number,
             "inv_reference_number" => $this->reference_number,
             "inv_amount" => $this->amount,

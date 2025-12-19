@@ -9,6 +9,11 @@ class BookCart extends Model
 {
     use HasFactory;
 
+    protected $guarded = ["id"];
+    protected $fillable = [
+        "user_id",
+        "book_id",
+    ];
     public function books()
     {
         return $this->belongsTo(Book::class, 'book_id', 'id');

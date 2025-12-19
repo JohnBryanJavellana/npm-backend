@@ -10,7 +10,7 @@ class TrainingRegFile extends Model
     use HasFactory;
 
     public function requirement() {
-        return $this->hasOne(Requirement::class, 'id', 'requirement_id');
+        return $this->belongsTo(Requirement::class, 'requirement_id', 'id');
     }
 
     public function additional_info()

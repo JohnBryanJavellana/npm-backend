@@ -11,7 +11,7 @@ use App\Http\Requests\Trainee\Library\BookRequest;
 use App\Http\Requests\Trainee\Library\CancelBookRequest;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use App\Mail\BookReservationStatus;
-use App\Utils\{AuditHelper, GenerateTrace, Notifications, TransactionUtil};
+use App\Utils\{AuditHelper, Notifications, TransactionUtil};
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use App\Http\Resources\{BookResource, BookRequestResource, PdfCopyResource, BookExtensionResource, AvailableBooksResource, BookOverDueResource};
@@ -240,87 +240,24 @@ class TraineeLibrary extends Controller
 
         try {
             $user = $request->user();
-            // DB::beginTransaction();
-            \Log::info("micro start:" ,[microtime(true)]);
+            DB::beginTransaction();
+
             $this->library_service->createReservation($validated, $user);
-
-            //create book
-            // $book_res = new BookRes();
-            // $book_res->user_id = $user->id;
-            // $book_res->trace_number = GenerateTrace::createTraceNumber(BookRes::class);
-            // $book_res->purpose = $validated['purpose'];
-            // $book_res->type = 'ONLINE';
-            // $book_res->save();
-
-            // foreach($validated['book_id'] as $book) {
-            //     $is_e_copy = Book::whereKey($book)->whereNotNull('pdf_copy')->first();
-            //     $record = BookCopy::where(['book_id' => $book, 'status' => "AVAILABLE"])->lockForUpdate()->first();
-
-            //     if(!$is_e_copy && $record == null) {
-            //         DB::rollBack();
-            //         return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
-            //     }
-                
-            //     $book_record = new BookReservation();
-            //     $book_record->book_res_id = $book_res->id;
-            //     $book_record->book_copy_id = $record?->id;
-            //     $book_record->from_date = Carbon::parse($validated['from'])->format('Y-m-d');
-            //     $book_record->to_date = Carbon::parse($validated['to'])->format('Y-m-d');
-                
-            //     $book_record->book_id = $book;
-
-            //     $book_record->save();
-
-            //     $cart_record = BookCart::where(['book_id' => $book, 'user_id' => $user->id])->first();
-            //     if($cart_record !==  null) {
-            //         $cart_record->delete();
-            //     }
-            //     if($record !== null) {
-            //         $record->status = "RESERVED";
-            //         $record->save();
-            //     }
-            // }
-
-
-//             use DomainException;
-
-// public function render($request, Throwable $e)
-// {
-//     if ($e instanceof DomainException) {
-//         return response()->json([
-//             'message' => $e->getMessage()
-//         ], 422);
-//     }
-
-//     return parent::render($request, $e);
-// }
-
-
 
             if(env("USE_EVENT")) {
                 event(new BELibrary(''));
             }
 
-            Cache::forget("count_book_reservation:{$user->id}");
-            Cache::forget("user_id:{$user->id}:status:");
-            Cache::forget("user_id:{$user->id}:status:ACTIVE");
-            Cache::forget("user_id:{$user->id}:status:FOR CSM");
-            Cache::forget("user_id:{$user->id}:status:COMPLETED");
-            Cache::forget("user_id:{$user->id}:status:EXTENDING");
+            $this->forgetCache($user->id);
 
             //EMAIL ABOUT SENDING A BORROWING A BOOK
             SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
             AuditHelper::log($user->id, "User {$user->id} sent a book request.");
             Notifications::notify($user->id, null, 'LIBRARY', 'has sent a book request.');
-            // DB::commit();
-            \Log::info("micro end:" ,[microtime(as_float: true)]);
+
             return response()->json(['message' => 'Your book request was sent successfully!'], 200);
-        }
-        catch (\DomainException $d) {
-            throw $d;
-        }
+        } 
         catch (\Exception $e) {
-            // DB::rollBack();
             \Log::error('error send_request_book', [$e]);
             return response()->json(['message' => "Something went wrong, Please try again!"], 500);
         }
@@ -357,12 +294,7 @@ class TraineeLibrary extends Controller
             $bookRes->status = "EXTENDING";
             $bookRes->save();
 
-            Cache::forget("count_book_reservation:{$user_id}");
-            Cache::forget("user_id:{$user_id}:status:");
-            Cache::forget("user_id:{$user_id}:status:ACTIVE");
-            Cache::forget("user_id:{$user_id}:status:FOR CSM");
-            Cache::forget("user_id:{$user_id}:status:COMPLETED");
-            Cache::forget("user_id:{$user_id}:status:EXTENDING");
+            $this->forgetCache($user_id);
 
             DB::commit();
             return response()->json(["message" => "Extension request has sent successfully!"], 201);
@@ -444,7 +376,7 @@ class TraineeLibrary extends Controller
             foreach($books as $book) {
                 if (!in_array($book->status, ["CANCELLED", "RECEIVED", "LOST", "RETURNED", "REJECTED"])) {
                     $book->status = "CANCELLED";
-                    $book->save();
+                    $book->save(); 
 
                     if($book->book_copy_id) {
                         BookCopy::find($book->book_copy_id)->update(['status' => "AVAILABLE"]);
@@ -512,26 +444,29 @@ class TraineeLibrary extends Controller
                 DB::beginTransaction();
                 $userId = $request->user()->id;
 
-                $bookReservations = BookReservation::forUser($userId)
-                ->whereNotIn('status', ["CANCELLED", "RETURNED", "REJECTED", "LOST", "DAMAGED"])
-                ->where('book_id', $request->book_id)
-                ->exists();
+                // $revExists = BookReservation::forUser($userId)
+                // ->whereNotIn('status', ["CANCELLED", "RETURNED", "REJECTED", "LOST", "DAMAGED"])
+                // ->where('book_id', $request->book_id)
+                // ->exists();
 
-                \Log::info("test add_book_items", [$bookReservations]);
 
-                $exist = BookCart::where([
+                // \Log::info("test add_book_items", [$revExists]);
+
+                $exists = BookCart::select("id")
+                ->where([
                     'user_id' => $userId,
                     'book_id' => $request->book_id
-                    ])->exists();
+                ])
+                ->exists();
 
-                    if ($exist) {
+                if ($exists) {
                     return response()->json(["You already added this book to your cart."], 400);
                 }
 
-                $book = new BookCart;
-                $book->user_id = $userId;
-                $book->book_id = $request->book_id;
-                $book->save();
+                BookCart::create([
+                    "user_id" => $userId,
+                    "book_id" => $request->book_id
+                ]);
 
                 AuditHelper::log($userId, "User {$userId} added a book to cart.");
 
@@ -661,5 +596,15 @@ class TraineeLibrary extends Controller
                 }
             // });
         });
+    }
+
+    public function forgetCache($user_id)
+    {
+        Cache::forget("count_book_reservation:{$user_id}");
+        Cache::forget("user_id:{$user_id}:status:");
+        Cache::forget("user_id:{$user_id}:status:ACTIVE");
+        Cache::forget("user_id:{$user_id}:status:FOR CSM");
+        Cache::forget("user_id:{$user_id}:status:COMPLETED");
+        Cache::forget("user_id:{$user_id}:status:EXTENDING");
     }
 }

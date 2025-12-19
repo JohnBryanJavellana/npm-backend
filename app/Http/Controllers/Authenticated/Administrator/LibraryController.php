@@ -352,26 +352,27 @@ class LibraryController extends Controller
     public function check_for_book_reservation (Request $request){
         return TransactionUtil::transact(null, function() use ($request) {
             $bookReservationCheck = ExtensionRequest::where([
-                'book_res_id' => $request?->libraryId,
-                'user_id' => $request?->userId
+                'book_res_id' => $request->libraryId,
+                'user_id' => $request->userId
             ])->with([
                 'extendingBooks' => function ($query) {
                     $query->where('status', "PENDING");
                 },
                 'library.borrowedBooks' => function ($query) {
-                    $query->where('status', 'EXPIRED')->where('to_date', '<=', Carbon::now()->toDateString());
+                    $query->where('status', 'EXPIRED')
+                          ->orWhere('to_date', '<=', Carbon::now()->toDateString());
                 }
             ])->first();
 
             $pendingFines = LibraryInvoice::where([
-                'book_res_id' => $request?->libraryId,
-                'user_id' => $request?->userId
-            ])->exists();
+                'book_res_id' => $request->libraryId,
+                'user_id' => $request->userId
+            ])->whereIn('status', ['PENDING', 'VERIFICATION'])->exists();
 
             $count =  [
                 'hasBooksNeedAction' => $bookReservationCheck && count($bookReservationCheck->library->borrowedBooks) > 0,
                 'hasPendingReservation' => $bookReservationCheck && ($bookReservationCheck->extendingBooks && count($bookReservationCheck->extendingBooks) > 0),
-                'hasPendingFines' => $bookReservationCheck && $pendingFines
+                'hasPendingFines' => $pendingFines
             ];
 
             return response()->json(['bookReservationCheck' => $count], 200);
@@ -588,7 +589,7 @@ class LibraryController extends Controller
 
                     $availabilityStatus = (function() use ($self, $brQuery, $related, $user) {
                         $checkIfReserved = $self->hasData()
-                            ->forNotInUse()
+                            ->whereNotIn('status', ["CANCELLED", "RETURNED", "REJECTED", "LOST", "DAMAGED"])
                             ->whereHas('bookRes', function ($q) use ($user) {
                                 $q->where('user_id', $user->id);
                             })->exists();
@@ -703,6 +704,7 @@ class LibraryController extends Controller
     public function get_fines(Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
             $fines = LibraryInvoice::with([
+                'feeCategory',
                 'bookRes',
                 'selectedBooks',
                 'selectedBooks.bookReservation',
@@ -726,14 +728,29 @@ class LibraryController extends Controller
             ])->with([
                 'borrowedBooks' => function($query) {
                     $query->whereIn('status', ['EXPIRED', 'DAMAGED', 'LOST'])
-                        ->whereHas('books', fn($q) => $q->where('pdf_copy', null))
-                        ->whereDoesntHave('fines', fn($q) => $q->whereNotIn('status', ['PENDING', 'PAID']));
+                        ->whereHas('books', fn($q) => $q->where('pdf_copy', null));
                 },
                 'borrowedBooks.books',
+                'borrowedBooks.book',
                 'borrowedBooks.books.catalog'
             ])->first();
 
             return response()->json(['booksThatNeedsFine' => $booksThatNeedsFine], 200);
+        });
+    }
+
+    public function remove_fine (Request $request, int $id) {
+        return TransactionUtil::transact(null, function() use ($request, $id) {
+            $libraryInvoice = LibraryInvoice::find($id);
+
+            if($libraryInvoice->status !== "PENDING") {
+                return response()->json(['message' => "Can't delete book reservation fine."], 400);
+            } else {
+                $libraryInvoice->delete();
+
+                AuditHelper::log($request->user()->id, "Removed a request fine. ID#$id");
+                return response()->json(['message' => "You've deleted a book reservation fine."], 200);
+            }
         });
     }
 
@@ -749,6 +766,7 @@ class LibraryController extends Controller
 
             $new_fine->user_id = $request->user_id;
             $new_fine->book_res_id = $request->book_res_id;
+            $new_fine->training_fee_category_id = $request->category;
             $new_fine->details = $request->details;
             $new_fine->amount = $request->amount;
             $new_fine->save();
