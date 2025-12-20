@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Jobs;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Http;
+
+class SaveAvatar implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public function __construct(
+        public string $avatar,
+        public string $filename,
+        public string $path,
+        public bool $isUrl = false,
+        public bool $isBase64 = false
+    ) {}
+
+    public function handle() {
+        if ($this->avatar) {
+            if($this->isUrl) {
+                $response = Http::get($this->avatar);
+                if ($response->successful()) {
+                    file_put_contents(public_path($this->path . $this->filename), $response->body());
+                }
+            } else {
+
+            }
+        }
+    }
+}

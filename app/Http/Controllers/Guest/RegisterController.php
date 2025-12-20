@@ -11,9 +11,18 @@ use Illuminate\Auth\Events\Registered;
 use App\Mail\WelcomeAboard;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\{DB, Hash, Mail};
-use App\Utils\{AuditHelper, GenerateQR};
+
+use App\Utils\{
+    AuditHelper,
+    GenerateQR
+};
+use App\Jobs\{
+    SendingEmail,
+    SaveAvatar
+};
+use Illuminate\Support\Facades\{
+    DB, Hash
+};
 
 class RegisterController extends Controller
 {
@@ -34,8 +43,12 @@ class RegisterController extends Controller
                         $user->password = Hash::make(Str::random(24));
                         $user->isSocial = 'YES';
                         $user->role = 'TRAINEE';
-                        $user->qr = $this->processAssets($user, $socialUser->getAvatar());
                         $user->email_verified_at = now();
+                        $user->save();
+
+                        // update QR
+                        $user->qr = $this->processEmail($user);
+                        $user->profile_picture = $this->processAvatar($socialUser->getAvatar());
                         $user->save();
                     }
 
@@ -68,9 +81,12 @@ class RegisterController extends Controller
             $user->email = $request->email;
             $user->password = bcrypt($request->password);
             $user->isSocial = 'NO';
-            $user->qr = $this->processAssets($user, null);
             $user->birthdate = $request->birthdate;
             $user->role = 'TRAINEE';
+            $user->save();
+
+            // update QR
+            $user->qr = $this->processAssets($user, null);
             $user->save();
 
             event(new Registered($user));
@@ -84,20 +100,19 @@ class RegisterController extends Controller
         return Carbon::now()->year . str_pad($next_id_suffix, 5, '0', STR_PAD_LEFT);
     }
 
-    private function processAssets($user, $avatarUrl) {
+    private function processEmail($user) {
         $filename = "{$user->id}.png";
         $qrPath = public_path("qr/user/$filename");
+
         (new GenerateQR())->generate($filename, $user->id, $user->id, "qr/user/");
+        SendingEmail::dispatch($user, new WelcomeAboard(['image_path' => $qrPath]));
 
-        if ($avatarUrl) {
-            $response = Http::get($avatarUrl);
+        return $filename;
+    }
 
-            if ($response->successful()) {
-                file_put_contents(public_path('user_images/' . $filename), $response->body());
-            }
-        }
-
-        Mail::to($user->email)->send(new WelcomeAboard(['image_path' => $qrPath]));
+    private function processAvatar($avatarUrl, $isBase64 = false) {
+        $filename = Str::uuid() . '.png';
+        SaveAvatar::dispatch($avatarUrl, $filename, "user_images/", true, $isBase64);
         return $filename;
     }
 }
