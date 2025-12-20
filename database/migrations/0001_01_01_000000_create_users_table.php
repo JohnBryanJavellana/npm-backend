@@ -23,11 +23,11 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->date('birthdate')->nullable();
             $table->enum('role', [
-                'SUPERADMIN', 
-                'TRAINEE', 
-                'ADMIN-DORMITORY', 
-                'ADMIN-ENROLLMENT', 
-                'ADMIN-LIBRARY', 
+                'SUPERADMIN',
+                'TRAINEE',
+                'ADMIN-DORMITORY',
+                'ADMIN-ENROLLMENT',
+                'ADMIN-LIBRARY',
                 'TRAINER',
                 'CASHIER'
             ])->default('SUPERADMIN');
@@ -36,7 +36,8 @@ return new class extends Migration
             $table->enum('isSocial', ['YES', 'NO'])->default(value: 'NO');
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default(value: 'ACTIVE');
             $table->string('profile_picture', 255)->default('default-avatar.png');
-            $table->rememberToken(); 
+            $table->string('qr', 255);
+            $table->rememberToken();
             $table->timestamps();
         });
     }

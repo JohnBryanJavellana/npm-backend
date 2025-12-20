@@ -4,24 +4,48 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BEDormitory;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Trainee\Dormitory\DApplicationResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Utils\{AuditHelper, GenerateUniqueFilename, GenerateTrace};
-use App\Models\{DormitoryRoom, 
-    DormitoryTenant, 
-    User, 
-    AuditTrail, 
-    DormitoryInvoice, 
-    DormitoryTenantHistory, 
-    DormitoryTransfer, 
+use App\Utils\{AuditHelper, GenerateUniqueFilename, GenerateTrace, TransactionUtil};
+use App\Models\{DormitoryRoom,
+    DormitoryTenant,
+    User,
+    AuditTrail,
+    DormitoryInvoice,
+    DormitoryTenantHistory,
+    DormitoryTransfer,
     DormitoryExtendRequest};
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class TraineeDormitory extends Controller
 {
-    
-    
+
+    protected $short_ttl = 60;
+
+    public const IN_PROGRESS = [
+        'PENDING',
+        'EXTENDING',
+        'TRANSFERRED',
+        'FOR PAYMENT',
+        'PROCESSING PAYMENT',
+    ];
+
+    public const SUCCESS = [
+        'APPROVED',
+        'PAID',
+    ];
+
+    public const FAILED = [
+        'REJECTED',
+        'CANCELLED',
+    ];
+
+    public const CLOSED = [
+        'TERMINATED',
+    ];
+
     public function get_all_dormitories(Request $request) {
         $dormitories = DormitoryRoom::where("room_status", "ACTIVE")->get();
         return response()->json(['dormitories' => $dormitories], 200);
@@ -33,7 +57,7 @@ class TraineeDormitory extends Controller
             $dormitories = DormitoryRoom::with("room_images")
                 ->where('room_status', 'ACTIVE')
                 ->where('room_available_slot', '>', 0);
-            
+
             if($cost) $dormitories = $dormitories->where('room_cost', '<=', $cost);
 
             $dorms = $dormitories->get();
@@ -45,11 +69,37 @@ class TraineeDormitory extends Controller
 
     public function view_room_application (Request $request) {
         try {
-            $applications = 
-            return response()->json(['dormitories' => $dormitories]);
+            \Log::info($request->type);
+
+            $applications = DormitoryTenant::forUser($request->user()->id)
+            ->with([
+                "dormitory_room.images",
+                "dormitory_room.dormitory"
+            ]);
+
+            if($request->type) $applications->forStatus($request->type);
+
+            $applications->latest("created_at")->get();
+            return DApplicationResource::collection($applications);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+    }
+
+    public function count_book_reservation (Request $request){
+        $reservations = DormitoryTenant::where('user_id', $request->user()->id);
+
+        $get_count = function ($collection) {
+            $count = $collection->count();
+            return $count > 99 ? '99+' : $count;
+        };
+
+        $count = [
+            'total'     => $get_count($reservations),
+            'settled'   => $get_count($reservations->clone()->whereIn('tenant_status', ['CANCELLED', 'REJECTED', 'TERMINATED'])),
+        ];
+
+        return response()->json(['reservationCount' => $count], 200);
     }
 
     public function view_applied_dormitories (Request $request, int $dormitory_id) {
@@ -91,7 +141,7 @@ class TraineeDormitory extends Controller
     public function remove_applied_dormitories (Request $request, int $dormitory_id) {
         try {
             $this_record = DormitoryTenant::find( $dormitory_id);
-    
+
             DB::beginTransaction();
             $this_record->tenant_status = "CANCELLED";
             $this_record->save();
@@ -113,7 +163,7 @@ class TraineeDormitory extends Controller
 
     public function dormitory_record (Request $request) {
         $dorm_record = DormitoryTenant::with(
-            'dormitory_room', 
+            'dormitory_room',
             'tenant_invoices'
         )->where('user_id', $request->user()->id)->get()
         ->map(function($query) {
@@ -153,7 +203,7 @@ class TraineeDormitory extends Controller
 
             return response()->json(['data' => $dormitory]);
         } catch (\Exception $e) {
-            
+
             return response()->json(["error"=> $e->getMessage()], 500);
         }
     }
@@ -210,7 +260,7 @@ class TraineeDormitory extends Controller
                 $dormitory_tenant_history->history_reason = "A Dormitory Extension Request has been created, extending the stay until {$request->date}.";
                 $dormitory_tenant_history->save();
 
-                if(env("USE_EVENT")) { 
+                if(env("USE_EVENT")) {
                     event(new BEDormitory(''));
                 }
 
@@ -274,7 +324,7 @@ class TraineeDormitory extends Controller
                 $record->save();
 
                 event(new BEDormitory(''));
-                
+
                 AuditHelper::log($request->user()->id, "User {$request->user()->id} requested a dorm transfer request.");
 
                 DB::commit();
@@ -345,7 +395,7 @@ class TraineeDormitory extends Controller
             }
             $dormitory_tenant_history->save();
 
-            if(env("USE_EVENT")) { 
+            if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
             }
 
@@ -368,7 +418,7 @@ class TraineeDormitory extends Controller
             'roomType' => 'required',
             'file' => 'mimes:jpg,jpeg,png,pdf,doc,docx|max:5120'
         ];
-        
+
         $user = $request->user();
         $existing_request = DormitoryTenant::where(['user_id' => $request->user()->id, 'tenant_status' => "PENDING"])->exists();
 
@@ -405,7 +455,7 @@ class TraineeDormitory extends Controller
                 $dormitory_tenant_history->history_reason = "Requested";
                 $dormitory_tenant_history->save();
 
-                if(env("USE_EVENT")) { 
+                if(env("USE_EVENT")) {
                     event(new BEDormitory(''));
                 }
 
@@ -415,8 +465,8 @@ class TraineeDormitory extends Controller
                 DB::rollBack();
                 return response()->json(["message"=> $e->getMessage()],500);
             }
-        }   
-    } 
+        }
+    }
 
     public function update_status_dormitory (Request $request){
         $validations = [
@@ -432,10 +482,10 @@ class TraineeDormitory extends Controller
                 $dormitory_record = DormitoryTenant::where([
                     'id' => $request->document_id,
                     'user_id' => $request->user()->id
-                ])->first(); 
+                ])->first();
 
-                if ($dormitory_record->room_for_type === "COUPLE" && 
-                    $request->status === "CANCELLED" && 
+                if ($dormitory_record->room_for_type === "COUPLE" &&
+                    $request->status === "CANCELLED" &&
                     file_exists(public_path('marriage-files/' . $dormitory_record->filename))
                 ) {
                     unlink(public_path('marriage-files/' . $dormitory_record->filename));
@@ -444,7 +494,7 @@ class TraineeDormitory extends Controller
                 $dormitory_record->tenant_status = $request->status;
                 $dormitory_record->save();
 
-                if(env("USE_EVENT")) { 
+                if(env("USE_EVENT")) {
                     event(new BEDormitory(''));
                 }
 
@@ -484,7 +534,7 @@ class TraineeDormitory extends Controller
                 if($exist) {
                     return response()->json(["message" => "You still have a pending request under verification. Please wait for approval before submitting a new one."]);
                 }
-            
+
                 $record = DormitoryInvoice::with(['room'])->find($request->id);
                 $room_request = $request->httpMethod === "POST" ? new DormitoryInvoice : $record;
                 $days = $request->number_of_days_to_pay;
@@ -501,10 +551,10 @@ class TraineeDormitory extends Controller
                 $room_request->invoice_status = "FOR-VERIFICATION";
                 $room_request->invoice_amount = $request->total_cost;
                 $room_request->invoice_days = $days;
-                $room_request->invoice_balance = $record->invoice_balance > 0 
-                        ? ($record->invoice_balance - $request->total_cost) 
+                $room_request->invoice_balance = $record->invoice_balance > 0
+                        ? ($record->invoice_balance - $request->total_cost)
                         : $request->total_cost * ($record->invoice_completedays - $days);
-                $room_request->invoice_reference = $request->ref_number;    
+                $room_request->invoice_reference = $request->ref_number;
                 $room_request->save();
 
                 $inv2 = DormitoryTenant::find($record->dormitory_tenant_id);
@@ -516,7 +566,7 @@ class TraineeDormitory extends Controller
                 $dormitory_tenant_history->history_reason = "Your payment of ₱{$request->total_cost} has been sent for verification. This request covers {$days} day(s).";
                 $dormitory_tenant_history->save();
 
-                if(env("USE_EVENT")) { 
+                if(env("USE_EVENT")) {
                     event(new BEDormitory(''));
                 }
 
@@ -527,7 +577,7 @@ class TraineeDormitory extends Controller
             } catch (\Exception $e) {
                 DB::rollBack();
                 return response()->json(['message'=> $e->getMessage()],500);
-            }  
+            }
         }
     }
 }
