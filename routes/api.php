@@ -59,7 +59,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 ->with([
                     'additional_trainee_info.general_info',
                     'additional_trainee_info.contact',
-                    'additional_trainee_info.trainee_registration_file'
+                    'additional_trainee_info.trainee_registration_file',
+                    'additional_trainee_info.trainee_registration_file.requirement',
                 ]);
         }
 
