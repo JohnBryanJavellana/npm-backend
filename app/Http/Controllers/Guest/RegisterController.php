@@ -29,6 +29,10 @@ class RegisterController extends Controller
     public function register_user(Request $request){
         return DB::transaction(function () use ($request) {
             if ($request->is_from_social_login === 'YES') {
+                if (User::where('email', $request->email)->whereNull('email_verified_at')->orWhere('isSocial', 'NO')->exists()) {
+                    return response()->json(['message' => 'Account already exists.'], 422);
+                }
+
                 try {
                     $socialUser = Socialite::driver($request->provider)->stateless()->userFromToken($request->token);
 
@@ -57,6 +61,7 @@ class RegisterController extends Controller
 
                     return response()->json(['token' => $token, 'role' => $user->role, 'autoLogin' => true], 200);
                 } catch (\Exception $e) {
+                    \Log::error($e->getMessage());
                     return response()->json(['message' => 'Social authentication failed'], 401);
                 }
             }
