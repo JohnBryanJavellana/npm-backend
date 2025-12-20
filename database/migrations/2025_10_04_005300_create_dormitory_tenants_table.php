@@ -25,15 +25,15 @@ return new class extends Migration
             $table->date('tenant_from_date')->nullable();
             $table->date('tenant_to_date')->nullable();
             $table->enum('tenant_status', [
-                'PENDING', 
-                'TERMINATED', 
-                'APPROVED', 
-                'CANCELLED', 
+                'PENDING',
+                'TERMINATED',
+                'APPROVED',
+                'CANCELLED',
                 'EXTENDING',
                 'TRANSFERRED',
-                'FOR PAYMENT', 
-                'REJECTED', 
-                'PAID', 
+                'FOR PAYMENT',
+                'REJECTED',
+                'PAID',
                 "PROCESSING PAYMENT"
             ])->default('PENDING');
             $table->timestamps();

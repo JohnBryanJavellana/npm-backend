@@ -52,21 +52,18 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     /** current user */
     Route::get('/user', function(Request $request) {
-        $user = Cache::remember('user_profile_' . $request->user()->id, env('CACHE_DURATION'), function () use ($request) {
-            $user = User::where('id', $request->user()->id);
+        $user = User::where('id', $request->user()->id);
 
-            if ($user && $request->user()->role === "TRAINEE") {
-                $user->withCount('trainee_enrolled_courses')
-                    ->with([
-                        'additional_trainee_info.general_info',
-                        'additional_trainee_info.contact',
-                        'additional_trainee_info.trainee_registration_file'
-                    ]);
-            }
-            return $user->first();
-        });
+        if ($user && $request->user()->role === "TRAINEE") {
+            $user->withCount('trainee_enrolled_courses')
+                ->with([
+                    'additional_trainee_info.general_info',
+                    'additional_trainee_info.contact',
+                    'additional_trainee_info.trainee_registration_file'
+                ]);
+        }
 
-        return response()->json(['user' => $user]);
+        return response()->json(['user' => $user->first()]);
     });
 
     /** trainee routes
@@ -104,7 +101,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix('/dormitories/')->group(function() {
             Route::get('get_all_dormitories', [TraineeDormitory::class, 'get_all_dormitories']);
-            Route::get('applied_dormitories', [TraineeDormitory::class, 'applied_dormitories']);
+            Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
             Route::get('applied_dormitories/view/getAllHistories/{dormitory_id}', [TraineeDormitory::class, 'applied_dormitory_histories']);
             Route::get('remove_applied_dormitories/{dormitory_id}', [TraineeDormitory::class, 'remove_applied_dormitories']);
@@ -118,6 +115,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('dormitory_transfer_request', [TraineeDormitory::class, 'create_transfer_request']);
             Route::post('cancel_request/{id}', [TraineeDormitory::class, 'cancel_request']);
             Route::post('extension_request', [TraineeDormitory::class, 'create_extend_request']);
+            Route::post('count_book_reservation', [TraineeDormitory::class, 'count_book_reservation']);
         });
 
         Route::prefix('/libraries/')->group(function() {
@@ -312,7 +310,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
-        Route::post('change-theme', [Account::class, 'change_theme']);
         Route::post('submit-csm', [Account::class, 'submit_csm']);
 
         Route::prefix('/my-account/')->group(function() {
@@ -322,6 +319,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
+    Route::post('change-theme', [Account::class, 'change_theme']);
     Route::get('logout', [Logout::class, 'logoutUser']);
 });
 
