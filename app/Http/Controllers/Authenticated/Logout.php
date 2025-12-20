@@ -3,26 +3,29 @@
 namespace App\Http\Controllers\Authenticated;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Models\{ 
-    AuditTrail
+use App\Utils\{
+    AuditHelper
 };
 
 class Logout extends Controller
 {
-    public function logout_user(Request $request) {
+   public function logout_user(Request $request) {
         try {
-            if(Auth::check() && $request->user()) {
-                Auth::logout();
-                $request->user()->currentAccessToken()->delete();
-                $request->user()->logout();
+            $user = $request->user();
 
-                $new_log = new AuditTrail;
-                $new_log->user_id = $request->user()->id;
-                $new_log->actions = "You've logged out to your account";
-                $new_log->save();
+            if ($user) {
+                AuditHelper::log($request->user()->id, "Logged out account.");
+
+                if ($user->currentAccessToken()) {
+                    $user->currentAccessToken()->delete();
+                }
+
+                return response()->json(['message' => 'Successfully logged out'], 200);
             }
+
+            return response()->json(['message' => 'No active session found'], 401);
+
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

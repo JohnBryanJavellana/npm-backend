@@ -320,6 +320,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     });
 
     Route::post('change-theme', [Account::class, 'change_theme']);
-    Route::get('logout', [Logout::class, 'logoutUser']);
+    Route::post('logout', [Logout::class, 'logout_user']);
 });
 

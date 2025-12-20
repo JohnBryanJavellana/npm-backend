@@ -68,19 +68,19 @@ class TraineeDormitory extends Controller
     }
 
     public function view_room_application (Request $request) {
-        try {
-            \Log::info($request->type);
+        \Log::info($request->type);
 
+        try {
             $applications = DormitoryTenant::forUser($request->user()->id)
             ->with([
-                "dormitory_room.images",
+                "dormitory_room.dormitory.room_images",
                 "dormitory_room.dormitory"
             ]);
 
-            if($request->type) $applications->forStatus($request->type);
+            if($request->type) $applications->whereIn("tenant_status", $request->type);
 
-            $applications->latest("created_at")->get();
-            return DApplicationResource::collection($applications);
+            $apps = $applications->latest("created_at")->get();
+            return DApplicationResource::collection($apps);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }

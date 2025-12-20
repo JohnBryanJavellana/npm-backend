@@ -10,12 +10,8 @@ class DormitoryRoom extends Model
         return $this->hasMany(DormitoryTenant::class);
     }
 
-    public function images () {
-        return $this->hasMany(DormitoryRoomImage::class);
-    }
-
     public function dormitory()
     {
-        return $this->hasOne(Dormitory::class, "dormitory_id", "id");
+        return $this->hasOne(Dormitory::class, "id", "dormitory_id");
     }
 }
