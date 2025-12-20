@@ -29,14 +29,14 @@ class RegisterController extends Controller
     public function register_user(Request $request){
         return DB::transaction(function () use ($request) {
             if ($request->is_from_social_login === 'YES') {
-                if (User::where(['email' => $request->email, 'isSocial' => "NO"])->exists()) {
-                    return response()->json(['message' => 'Account already exists.'], 422);
-                }
-
                 try {
                     $socialUser = Socialite::driver($request->provider)->stateless()->userFromToken($request->token);
 
                     $user = User::where('email', $socialUser->getEmail())->first();
+
+                    if (User::where(['email' => $user->email, 'isSocial' => "NO"])->exists()) {
+                        return response()->json(['message' => 'Account already exists.'], 422);
+                    }
 
                     if (!$user) {
                         $user = new User;
