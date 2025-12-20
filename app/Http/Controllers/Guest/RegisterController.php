@@ -61,7 +61,6 @@ class RegisterController extends Controller
 
                     return response()->json(['token' => $token, 'role' => $user->role, 'autoLogin' => true], 200);
                 } catch (\Exception $e) {
-                    \Log::error($e->getMessage());
                     return response()->json(['message' => 'Social authentication failed'], 401);
                 }
             }
