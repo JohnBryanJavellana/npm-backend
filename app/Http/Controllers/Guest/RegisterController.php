@@ -29,10 +29,7 @@ class RegisterController extends Controller
     public function register_user(Request $request){
         return DB::transaction(function () use ($request) {
             if ($request->is_from_social_login === 'YES') {
-                if (User::where([
-                    'email' => $request->email,
-                    'isSocial' => 'NO'
-                ])) {
+                if (User::where(['email' => $request->email, 'isSocial' => "NO"])->exists()) {
                     return response()->json(['message' => 'Account already exists.'], 422);
                 }
 
