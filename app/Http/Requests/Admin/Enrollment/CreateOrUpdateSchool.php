@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Admin\Training;
+namespace App\Http\Requests\Admin\Enrollment;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateTrainingFee extends FormRequest
+class CreateOrUpdateSchool extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +24,7 @@ class CreateOrUpdateTrainingFee extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'amount' => ['required', 'numeric'],
-            'category' => ['required'],
-            'module' => ['required'],
+            'address' => ['required', 'string'],
             'httpMethod' => ['required'],
             'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
             'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Admin\Training;
+namespace App\Http\Requests\Admin\Enrollment;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateModuleType extends FormRequest
+class CreateOrUpdateCourse extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

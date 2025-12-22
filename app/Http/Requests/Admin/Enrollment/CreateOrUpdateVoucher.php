@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin\Masterlist;
+namespace App\Http\Requests\Admin\Enrollment;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
