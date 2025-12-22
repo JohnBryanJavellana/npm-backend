@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
         ResetPassword::createUrlUsing(function ($user, string $token) {
             return config('app.frontend_url') . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
-        });    
+        });
 
         // VerifyEmail::toMailUsing(function ($notifiable, $url) {
         //     $frontendUrl = config('app.frontend_url');
@@ -36,5 +36,17 @@ class AppServiceProvider extends ServiceProvider
         //         ->action('Verify Email Address', $verificationUrl);
         // });
 
+        \Validator::extend('base64_image', function ($attribute, $value, $parameters, $validator) {
+            try {
+                if (base64_encode(base64_decode(explode(',', $value)[1] ?? $value, true)) === (explode(',', $value)[1] ?? $value)) {
+                    $data = explode(',', $value);
+                    $img = imagecreatefromstring(base64_decode($data[1] ?? $data[0]));
+                    return $img !== false;
+                }
+                return false;
+            } catch (\Exception $e) {
+                return false;
+            }
+        });
     }
 }

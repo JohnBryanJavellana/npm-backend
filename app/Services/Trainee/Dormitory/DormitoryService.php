@@ -16,7 +16,5 @@ class DormitoryService {
         $this->tenantModel =$tenantModel;
         $this->roomModel = $roomModel;
     }
-
-    
     
 }

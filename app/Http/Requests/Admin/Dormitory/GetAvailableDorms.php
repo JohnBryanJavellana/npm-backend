@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin\Dormitory;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetAvailableRooms extends FormRequest
+class GetAvailableDorms extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

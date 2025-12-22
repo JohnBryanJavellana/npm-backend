@@ -8,8 +8,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use App\Http\Requests\Admin\Dormitory\{
-    GetAvailableRooms,
-    CreateOrUpdateDormitory
+    GetAvailableDorms,
+    CreateOrUpdateDormitory,
+    CreateOrUpdateRequest
 };
 use Illuminate\Http\Request;
 use App\Utils\{
@@ -18,6 +19,7 @@ use App\Utils\{
     TransactionUtil
 };
 use App\Events\{BEDormitory, BEAuditTrail};
+use App\Jobs\SaveAvatar;
 use App\Models\{
     Dormitory,
     DormitoryRoom,
@@ -121,78 +123,64 @@ class DormitoryController extends Controller
         });
     }
 
-    public function get_available_rooms(GetAvailableRooms $request) {
+    public function get_available_dorms (GetAvailableDorms $request) {
         return TransactionUtil::transact($request, function() use ($request) {
-            $today = now()->startOfDay();
-
-            $dorms = Dormitory::with([
-                'room_images',
-                'rooms' => function($query) use ($request) {
-                    if ($request->roomId) {
-                        $query->where('id', $request->roomId);
-                    }
-                    // IMPORTANT: Ensure we load tenants with both statuses
-                    $query->with(['hasData' => function($q) {
-                        $q->whereIn('tenant_status', ['ACTIVE', 'APPROVED']);
-                    }]);
-                }
-            ])->where([
+            $dorms = Dormitory::withCount('rooms')
+            ->where([
                 'room_for_type' => $request->room_for_type,
                 'is_air_conditioned' => $request->room_type
-            ]);
+            ])->get();
 
-            if ($request->roomId) {
-                $dorms->whereHas('rooms', function($q) use ($request) {
-                    $q->where('id', $request->roomId);
-                });
+            return response()->json(['dorms' => $dorms], 200);
+        });
+    }
+
+    public function get_available_rooms(Request $request) {
+        return TransactionUtil::transact(null, function() use ($request) {
+            $dorms = DormitoryRoom::where('dormitory_id', $request->dormId)
+                ->orderBy('room_available_slot', 'DESC')
+                ->get();
+
+            return response()->json(['rooms' => $dorms], 200);
+        });
+    }
+
+    public function create_or_update_request (CreateOrUpdateRequest $request) {
+        return TransactionUtil::transact($request, function() use ($request) {
+            $this_dormitory_request = $request->httpMethod === "POST"
+                ? new DormitoryTenant
+                : DormitoryTenant::find($request->documentId);
+
+            $this_dormitory_request->dormitory_room_id = $request->roomId;
+            $this_dormitory_request->user_id = $request->userId;
+            $this_dormitory_request->room_for_type = $request->forType;
+            $this_dormitory_request->single_occupancy = $request->single_occupancy;
+            $this_dormitory_request->is_air_conditioned = $request->isAirConditioned;
+            $this_dormitory_request->purpose = $request->purpose;
+            $this_dormitory_request->process_type = $request->processType;
+            $this_dormitory_request->tenant_from_date = $request->fromDate;
+            $this_dormitory_request->tenant_to_date = $request->toDate;
+
+            if($request->forType === "COUPLE") {
+                $this_dormitory_request->filename = $request->filename;
+
+                $image_name = Str::uuid() . '.png';
+                SaveAvatar::dispatch($request->filename, $image_name, "dormitory/supporting-document/", false, true);
+                $this_dormitory_request->filename = $image_name;
             }
 
-            $results = $dorms->get()->map(function ($dorm) use ($today) {
-                $dorm->rooms->transform(function ($room) use ($today) {
-                    // hasData now contains both ACTIVE and APPROVED tenants
-                    $tenants = $room->hasData;
-                    $todayStr = $today->format('Y-m-d');
+            $this_dormitory_request->save();
 
-                    // 1. Calculate occupancy for TODAY (Active + Approved)
-                    $occupancyToday = $tenants->filter(function ($t) use ($todayStr) {
-                        return $todayStr >= $t->tenant_from_date && $todayStr <= $t->tenant_to_date;
-                    })->count();
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory request. ID#" . $this_dormitory_request->id);
 
-                    if ($occupancyToday < $room->room_slot) {
-                        // If there is a free bed TODAY, return today.
-                        // Note: The user might still be blocked by an APPROVED booking later.
-                        $room->available_from = $todayStr;
-                        $room->available_to = null;
-                    } else {
-                        // 2. APPLY CHECKER: Find the first day a bed opens up
-                        // and is NOT immediately taken by an APPROVED reservation.
-                        $nextAvailableDate = $tenants->pluck('tenant_to_date')
-                            ->map(fn($date) => \Carbon\Carbon::parse($date)->addDay())
-                            ->filter(fn($date) => $date >= $today)
-                            ->sort()
-                            ->first(function ($potentialDate) use ($tenants, $room) {
-                                $pDateStr = $potentialDate->format('Y-m-d');
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
 
-                                // Count everyone (ACTIVE + APPROVED) on this future date
-                                $count = $tenants->filter(function($t) use ($pDateStr) {
-                                    return $pDateStr >= $t->tenant_from_date &&
-                                        $pDateStr <= $t->tenant_to_date;
-                                })->count();
-
-                                return $count < $room->room_slot;
-                            });
-
-                        $room->available_from = $nextAvailableDate ? $nextAvailableDate->format('Y-m-d') : 'No dates available';
-                        $room->available_to = null;
-                    }
-
-                    return $room;
-                });
-                return $dorm;
-            });
-
-            \Log::info($results);
-            return response()->json(['rooms' => $results], 200);
+            return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory request. ID# " . $this_dormitory_request->id], 201);
         });
     }
 
