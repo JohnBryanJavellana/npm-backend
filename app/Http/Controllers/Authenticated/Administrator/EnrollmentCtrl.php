@@ -301,7 +301,7 @@ class EnrollmentCtrl extends Controller
         }
     }
 
-    public function schedules (Request $request) {
+    public function get_schedules (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
             $schedules = Training::withCount(['hasData'])->get()->map(function($self) {
                 return [
