@@ -27,7 +27,6 @@ use App\Http\Controllers\Authenticated\Administrator\{
     Account,
     DormitoryController,
     EnrollmentCtrl,
-    TrainingCtrl,
     LibraryController,
     Cashier,
     Masterlist
@@ -155,45 +154,36 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::prefix('/admin/')->group(function() {
         Route::middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY')->group(function() {
             Route::prefix('/enrollment/')->group(function() {
-                Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::post('get_applications/requirement_remark', [EnrollmentCtrl::class, 'requirement_remark'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::post('get_applications/set_training_status', [EnrollmentCtrl::class, 'set_training_status'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::post('get_applications/set_expired_status', [EnrollmentCtrl::class, 'set_expired_status'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::get('get_applications/remove_training_request/{training_request_id}', [EnrollmentCtrl::class, 'remove_training_request'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::get('get_enrolled', [EnrollmentCtrl::class, 'get_enrolled'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-            })->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-
-            Route::prefix('/trainings/')->group(function() {
-                Route::get('get', [TrainingCtrl::class, 'schedules'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::post('create_or_update_schedule', [TrainingCtrl::class, 'create_or_update_schedule'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::delete('remove_schedule/{schedule_id}', [TrainingCtrl::class, 'remove_schedule'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-
-                Route::get('get_modules', [TrainingCtrl::class, 'get_modules'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::post('create_or_update_module', [TrainingCtrl::class, 'create_or_update_module'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::delete('remove_module/{module_id}', [TrainingCtrl::class, 'remove_module'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-
-                Route::get('get_module_types', [TrainingCtrl::class, 'get_module_types'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::post('create_or_update_module_type', [TrainingCtrl::class, 'create_or_update_module_type'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::delete('remove_module_type/{module_type_id}', [TrainingCtrl::class, 'remove_module_type'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-
-                Route::get('get_training_fees', [TrainingCtrl::class, 'get_training_fees'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::get('get_training_fees/get_training_fees_predata', [TrainingCtrl::class, 'get_training_fees_predata'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::post('create_or_update_training_fee', [TrainingCtrl::class, 'create_or_update_training_fee'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::delete('remove_training_fee/{fee_id}', [TrainingCtrl::class, 'remove_training_fee'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-
-                Route::get('get_training_fees_category', [TrainingCtrl::class, 'get_training_fees_category']);
-                Route::post('create_or_update_training_fee_category', [TrainingCtrl::class, 'create_or_update_training_fee_category'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::delete('remove_training_fee_category/{fee_category_id}', [TrainingCtrl::class, 'remove_training_fee_category'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-
-                Route::get('get_certificates', [TrainingCtrl::class, 'get_certificates'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::post('create_or_update_certificate', [TrainingCtrl::class, 'create_or_update_certificate'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::delete('remove_certificate/{certificate_id}', [TrainingCtrl::class, 'remove_certificate'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-
-                Route::get('get_requirements', [TrainingCtrl::class, 'get_requirements'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::post('create_or_update_requirement', [TrainingCtrl::class, 'create_or_update_requirement'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
-                Route::delete('training-requirements/remove_trequirement/{requirement_id}', [TrainingCtrl::class, 'remove_requirement'])->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT');
+                Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications']);
+                Route::post('get_applications/requirement_remark', [EnrollmentCtrl::class, 'requirement_remark']);
+                Route::post('get_applications/set_training_status', [EnrollmentCtrl::class, 'set_training_status']);
+                Route::post('get_applications/set_expired_status', [EnrollmentCtrl::class, 'set_expired_status']);
+                Route::get('get_applications/remove_training_request/{training_request_id}', [EnrollmentCtrl::class, 'remove_training_request']);
+                Route::get('get_enrolled', [EnrollmentCtrl::class, 'get_enrolled']);
+                Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished']);
+                Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
+                Route::get('get', [EnrollmentCtrl::class, 'schedules']);
+                Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
+                Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
+                Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
+                Route::post('create_or_update_module', [EnrollmentCtrl::class, 'create_or_update_module']);
+                Route::delete('remove_module/{module_id}', [EnrollmentCtrl::class, 'remove_module']);
+                Route::get('get_module_types', [EnrollmentCtrl::class, 'get_module_types']);
+                Route::post('create_or_update_module_type', [EnrollmentCtrl::class, 'create_or_update_module_type']);
+                Route::delete('remove_module_type/{module_type_id}', [EnrollmentCtrl::class, 'remove_module_type']);
+                Route::get('get_training_fees', [EnrollmentCtrl::class, 'get_training_fees']);
+                Route::get('get_training_fees/get_training_fees_predata', [EnrollmentCtrl::class, 'get_training_fees_predata']);
+                Route::post('create_or_update_training_fee', [EnrollmentCtrl::class, 'create_or_update_training_fee']);
+                Route::delete('remove_training_fee/{fee_id}', [EnrollmentCtrl::class, 'remove_training_fee']);
+                Route::get('get_training_fees_category', [EnrollmentCtrl::class, 'get_training_fees_category']);
+                Route::post('create_or_update_training_fee_category', [EnrollmentCtrl::class, 'create_or_update_training_fee_category']);
+                Route::delete('remove_training_fee_category/{fee_category_id}', [EnrollmentCtrl::class, 'remove_training_fee_category']);
+                Route::get('get_certificates', [EnrollmentCtrl::class, 'get_certificates']);
+                Route::post('create_or_update_certificate', [EnrollmentCtrl::class, 'create_or_update_certificate']);
+                Route::delete('remove_certificate/{certificate_id}', [EnrollmentCtrl::class, 'remove_certificate']);
+                Route::get('get_requirements', [EnrollmentCtrl::class, 'get_requirements']);
+                Route::post('create_or_update_requirement', [EnrollmentCtrl::class, 'create_or_update_requirement']);
+                Route::delete('training-requirements/remove_trequirement/{requirement_id}', [EnrollmentCtrl::class, 'remove_requirement']);
             });
         });
 

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class BETraining implements ShouldBroadcastNow
+class BEEnrollment implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
     public $message;
@@ -31,7 +31,7 @@ class BETraining implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('initialize-training-updates'),
+            new PrivateChannel('initialize-enrollment-updates'),
         ];
     }
 }
