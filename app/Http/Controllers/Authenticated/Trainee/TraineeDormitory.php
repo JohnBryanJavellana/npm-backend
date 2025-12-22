@@ -441,7 +441,7 @@ class TraineeDormitory extends Controller
 
         if ($existing_request) {
             throw new \DomainException("A request is already existing!");
-            return response()->json(["message" => "A request is already existing!"], 401);
+            // return response()->json(["message" => "A request is already existing!"], 422);
         }
 
         $validator = \Validator::make($request->all(), $validations);

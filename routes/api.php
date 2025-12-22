@@ -162,28 +162,72 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::get('get_enrolled', [EnrollmentCtrl::class, 'get_enrolled']);
                 Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished']);
                 Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
-                Route::get('get', [EnrollmentCtrl::class, 'schedules']);
+
+                // schedules
+                Route::get('get_schedules', [EnrollmentCtrl::class, 'get_schedules']);
                 Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
                 Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
+
+                // modules
                 Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
                 Route::post('create_or_update_module', [EnrollmentCtrl::class, 'create_or_update_module']);
                 Route::delete('remove_module/{module_id}', [EnrollmentCtrl::class, 'remove_module']);
+
+                // module type
                 Route::get('get_module_types', [EnrollmentCtrl::class, 'get_module_types']);
                 Route::post('create_or_update_module_type', [EnrollmentCtrl::class, 'create_or_update_module_type']);
                 Route::delete('remove_module_type/{module_type_id}', [EnrollmentCtrl::class, 'remove_module_type']);
+
+                // fees
                 Route::get('get_training_fees', [EnrollmentCtrl::class, 'get_training_fees']);
                 Route::get('get_training_fees/get_training_fees_predata', [EnrollmentCtrl::class, 'get_training_fees_predata']);
                 Route::post('create_or_update_training_fee', [EnrollmentCtrl::class, 'create_or_update_training_fee']);
                 Route::delete('remove_training_fee/{fee_id}', [EnrollmentCtrl::class, 'remove_training_fee']);
+
+                // fee category
                 Route::get('get_training_fees_category', [EnrollmentCtrl::class, 'get_training_fees_category']);
                 Route::post('create_or_update_training_fee_category', [EnrollmentCtrl::class, 'create_or_update_training_fee_category']);
                 Route::delete('remove_training_fee_category/{fee_category_id}', [EnrollmentCtrl::class, 'remove_training_fee_category']);
+
+                // certificates
                 Route::get('get_certificates', [EnrollmentCtrl::class, 'get_certificates']);
                 Route::post('create_or_update_certificate', [EnrollmentCtrl::class, 'create_or_update_certificate']);
                 Route::delete('remove_certificate/{certificate_id}', [EnrollmentCtrl::class, 'remove_certificate']);
+
+                // requirements
                 Route::get('get_requirements', [EnrollmentCtrl::class, 'get_requirements']);
                 Route::post('create_or_update_requirement', [EnrollmentCtrl::class, 'create_or_update_requirement']);
                 Route::delete('training-requirements/remove_trequirement/{requirement_id}', [EnrollmentCtrl::class, 'remove_requirement']);
+
+                // schools
+                Route::get('get_schools', [EnrollmentCtrl::class, 'get_schools']);
+                Route::post('create_or_update_school', [EnrollmentCtrl::class, 'create_or_update_school']);
+                Route::delete('remove_school/{school_id}', [EnrollmentCtrl::class, 'remove_school']);
+
+                // courses
+                Route::get('get_courses', [EnrollmentCtrl::class, 'get_courses']);
+                Route::post('create_or_update_course', [EnrollmentCtrl::class, 'create_or_update_course']);
+                Route::delete('remove_course/{course_id}', [EnrollmentCtrl::class, 'remove_course']);
+
+                // vouchers
+                Route::get('get_vouchers', [EnrollmentCtrl::class, 'get_vouchers']);
+                Route::post('create_or_update_voucher', [EnrollmentCtrl::class, 'create_or_update_voucher']);
+                Route::delete('remove_voucher/{voucher_id}', [EnrollmentCtrl::class, 'remove_voucher']);
+
+                // sponsors
+                Route::get('get_sponsors', [EnrollmentCtrl::class, 'get_sponsors']);
+                Route::post('create_or_update_sponsor', [EnrollmentCtrl::class, 'create_or_update_sponsor']);
+                Route::delete('remove_sponsor/{sponsor_id}', [EnrollmentCtrl::class, 'remove_sponsor']);
+
+                // licenses
+                Route::get('get_licenses', [EnrollmentCtrl::class, 'get_licenses']);
+                Route::post('create_or_update_license', [EnrollmentCtrl::class, 'create_or_update_license']);
+                Route::delete('remove_license/{license_id}', [EnrollmentCtrl::class, 'remove_license']);
+
+                // ranks
+                Route::get('get_ranks', [EnrollmentCtrl::class, 'get_ranks']);
+                Route::post('create_or_update_rank', [EnrollmentCtrl::class, 'create_or_update_rank']);
+                Route::delete('remove_rank/{rank_id}', [EnrollmentCtrl::class, 'remove_rank']);
             });
         });
 
@@ -238,36 +282,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->prefix('/masterlist/')->group(function() {
-            Route::prefix('/school/')->middleware('user_role:SUPERADMIN')->group(function() {
-                Route::get('get_schools', [Masterlist::class, 'get_schools']);
-                Route::post('create_or_update_school', [Masterlist::class, 'create_or_update_school']);
-                Route::delete('remove_school/{school_id}', [Masterlist::class, 'remove_school']);
-            });
-
-            Route::prefix('/course/')->middleware('user_role:SUPERADMIN')->group(function() {
-                Route::get('get_courses', [Masterlist::class, 'get_courses']);
-                Route::post('create_or_update_course', [Masterlist::class, 'create_or_update_course']);
-                Route::delete('remove_course/{course_id}', [Masterlist::class, 'remove_course']);
-            });
-
             Route::prefix('/user/')->group(function() {
                 Route::get('get_users', [Masterlist::class, 'get_users']);
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info'])->middleware('user_role:SUPERADMIN');
                 Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities'])->middleware('user_role:SUPERADMIN');
                 Route::post('create_or_update_user', [Masterlist::class, 'create_or_update_user'])->middleware('user_role:SUPERADMIN');
                 Route::delete('remove_user/{user_id}', [Masterlist::class, 'remove_user'])->middleware('user_role:SUPERADMIN');
-            });
-
-            Route::prefix('/voucher/')->middleware('user_role:SUPERADMIN')->group(function() {
-                Route::get('get_vouchers', [Masterlist::class, 'get_vouchers']);
-                Route::post('create_or_update_voucher', [Masterlist::class, 'create_or_update_voucher']);
-                Route::delete('remove_voucher/{voucher_id}', [Masterlist::class, 'remove_voucher']);
-            });
-
-            Route::prefix('/sponsor/')->middleware('user_role:SUPERADMIN')->group(function() {
-                Route::get('get_sponsors', [Masterlist::class, 'get_sponsors']);
-                Route::post('create_or_update_sponsor', [Masterlist::class, 'create_or_update_sponsor']);
-                Route::delete('remove_sponsor/{sponsor_id}', [Masterlist::class, 'remove_sponsor']);
             });
 
             Route::prefix('/employer/')->middleware('user_role:SUPERADMIN')->group(function() {
@@ -280,18 +300,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::get('get_positions', [Masterlist::class, 'get_positions']);
                 Route::post('create_or_update_position', [Masterlist::class, 'create_or_update_position']);
                 Route::delete('remove_position/{position_id}', [Masterlist::class, 'remove_position']);
-            });
-
-            Route::prefix('/license/')->middleware('user_role:SUPERADMIN')->group(function() {
-                Route::get('get_licenses', [Masterlist::class, 'get_licenses']);
-                Route::post('create_or_update_license', [Masterlist::class, 'create_or_update_license']);
-                Route::delete('remove_license/{license_id}', [Masterlist::class, 'remove_license']);
-            });
-
-            Route::prefix('/rank/')->middleware('user_role:SUPERADMIN')->group(function() {
-                Route::get('get_ranks', [Masterlist::class, 'get_ranks']);
-                Route::post('create_or_update_rank', [Masterlist::class, 'create_or_update_rank']);
-                Route::delete('remove_rank/{rank_id}', [Masterlist::class, 'remove_rank']);
             });
         });
 
