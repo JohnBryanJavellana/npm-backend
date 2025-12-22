@@ -17,6 +17,7 @@ class DApplicationResource extends JsonResource
         // return parent::toArray($request);
         return [
             "app_id" => $this->id,
+            "app_trace_number" => $this->trace_number,
             "app_room_for_type" => $this->room_for_type,
             "app_room_type" => $this->room_type,
             "app_purpose" => $this->purpose,
@@ -24,6 +25,7 @@ class DApplicationResource extends JsonResource
             "app_tenant_from_date" => $this->tenant_from_date,
             "app_tenant_to_date" => $this->tenant_to_date,
             "app_tenant_status" => $this->tenant_status,
+            "app_tenant_process" => $this->process_type,
             // "room_name" => $this->dormitory_room?->dormitory?->room_name,
             // "room_description" => $this->dormitory_room?->dormitory?->room_description,
             // "room_cost" => $this->dormitory_room?->dormitory?->room_cost,

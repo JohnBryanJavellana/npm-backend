@@ -65,7 +65,7 @@ class TraineeDormitory extends Controller
     }
 
     public function view_room_application (Request $request) {
-        \Log::info($request->type);
+        \Log::info($request);
         try {
             $applications = DormitoryTenant::forUser($request->user()->id)
             ->with([
@@ -119,7 +119,6 @@ class TraineeDormitory extends Controller
                 'id' => $dormitory_id,
                 'user_id' => $request->user()->id
             ])
-            ->whereNotIn('tenant_status', ['PENDING', 'CANCELLED'])
             ->get();
 
             return response()->json(['dormitory_info' => $dormitory_info]);
@@ -140,17 +139,18 @@ class TraineeDormitory extends Controller
 
     public function remove_applied_dormitories (Request $request, int $dormitory_id) {
         try {
+            \Log::info("cancel dorm", [$dormitory_id]);
             $this_record = DormitoryTenant::find( $dormitory_id);
 
             DB::beginTransaction();
+
+            if ($this_record->room_for_type === "COUPLE" && file_exists(public_path('marriage-files/' . $this_record->filename)) ) {
+                unlink(public_path('marriage-files/' . $this_record->filename));
+            }
+
             $this_record->tenant_status = "CANCELLED";
             $this_record->save();
-
-            $new_log = new AuditTrail;
-            $new_log->user_id = $request->user()->id;
-            $new_log->actions = "You've cancelled dormitory request application. ID# $dormitory_id";
-            $new_log->save();
-
+            
             AuditHelper::log($request->user()->id, "You've cancelled dormitory request application. ID# $dormitory_id");
 
             event(new BEDormitory(''));
@@ -158,6 +158,7 @@ class TraineeDormitory extends Controller
             DB::commit();
             return response()->json(['message' => "You've cancelled dormitory request application. ID# $dormitory_id"], 200);
         } catch (\Exception $e) {
+            \Log::error("error cancel dorm", [$dormitory_id]);
             DB::rollback();
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -452,6 +453,7 @@ class TraineeDormitory extends Controller
                 $tenant_dormitory = new DormitoryTenant();
                 $tenant_dormitory->user_id = $user->id;
                 $tenant_dormitory->room_for_type = $request->forType;
+                $tenant_dormitory->trace_number = GenerateTrace::createTraceNumber(DormitoryTenant::class, "-DR-");
 
                 if ($request->forType === 'COUPLE') {
                     $file_requested = $request->file;

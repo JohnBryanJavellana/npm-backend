@@ -34,8 +34,7 @@ class DormitoryTenant extends Model{
     {
         return $this->hasOne(DormitoryExtendRequest::class, 'dormitory_tenant_id', 'id');
     }
-
-
+    
     /**
      * SCOPES
      */
