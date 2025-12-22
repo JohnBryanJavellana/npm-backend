@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Admin\Masterlist;
+namespace App\Http\Requests\Admin\Enrollment;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateLicense extends FormRequest
+class CreateOrUpdateCertificate extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,10 +23,14 @@ class CreateOrUpdateLicense extends FormRequest
     public function rules(): array
     {
         return [
+            'module' => ['required'],
             'name' => ['required', 'string'],
-            'license' => ['required', 'string'],
+            'header' => ['required', 'string'],
+            'header_1' => ['required', 'string'],
+            'header_2' => ['required', 'string'],
+            'body' => ['required', 'string'],
             'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
+            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
         ];
     }
 }

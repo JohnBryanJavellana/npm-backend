@@ -11,7 +11,7 @@ use App\Events\{
     BEAuditTrail,
     BEEnrollment
 };
-use App\Http\Requests\Admin\Training\{
+use App\Http\Requests\Admin\Enrollment\{
     CreateOrUpdateSchedule,
     CreateOrUpdateModule,
     CreateOrUpdateModuleType,
@@ -19,12 +19,12 @@ use App\Http\Requests\Admin\Training\{
     CreateOrUpdateFeeCategory,
     CreateOrUpdateCertificate,
     CreateOrUpdateRequirement,
-    CreateOrUpdateSchool,
     CreateOrUpdateCourse,
     CreateOrUpdateVoucher,
     CreateOrUpdateSponsor,
     CreateOrUpdateLicense,
-    CreateOrUpdateRank
+    CreateOrUpdateRank,
+    CreateOrUpdateSchool
 };
 use App\Utils\{
     AuditHelper,

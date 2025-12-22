@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Admin\Masterlist;
+namespace App\Http\Requests\Admin\Enrollment;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateRank extends FormRequest
+class CreateOrUpdateModuleType extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,10 +24,9 @@ class CreateOrUpdateRank extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'short_name' => ['required', 'string'],
-            'type' => ['required', 'string'],
             'httpMethod' => ['required'],
             'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
+            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
         ];
     }
 }
