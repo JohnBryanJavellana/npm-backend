@@ -19,7 +19,8 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->constrained()->ondelete('cascade');
             $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);
             $table->enum('transfer_type', ['ROOM', 'CLASS'])->nullable();
-            $table->enum('room_type', ["AIR-CONDITIONED", "NON-AIRCON"]);
+            $table->enum('single_occupancy', ['YES', 'NO'])->default('NO');
+            $table->enum('is_air_conditioned', ["YES", "NO"]);
             $table->longText("purpose")->nullable();
             $table->longText("filename")->nullable();
             $table->date('tenant_from_date')->nullable();
@@ -36,6 +37,7 @@ return new class extends Migration
                 'PAID',
                 "PROCESSING PAYMENT"
             ])->default('PENDING');
+            $table->enum('process_type', ["ONLINE", "WALK-IN"])->default("ONLINE");
             $table->timestamps();
         });
     }

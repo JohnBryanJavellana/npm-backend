@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class DormitoryTenant extends Model{
+
+    protected $guarded = ['id'];
+
+
     public function trainee() {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
@@ -25,6 +29,7 @@ class DormitoryTenant extends Model{
     {
         return $this->hasOne(DormitoryTransfer::class, 'dormitory_tenant_id', 'id');
     }
+
     public function extendRequest()
     {
         return $this->hasOne(DormitoryExtendRequest::class, 'dormitory_tenant_id', 'id');

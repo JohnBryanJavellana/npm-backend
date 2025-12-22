@@ -37,13 +37,10 @@ class TraineeDormitory extends Controller
         'PAID',
     ];
 
-    public const FAILED = [
-        'REJECTED',
-        'CANCELLED',
-    ];
-
     public const CLOSED = [
         'TERMINATED',
+        'REJECTED',
+        'CANCELLED',
     ];
 
     public function get_all_dormitories(Request $request) {
@@ -69,7 +66,6 @@ class TraineeDormitory extends Controller
 
     public function view_room_application (Request $request) {
         \Log::info($request->type);
-
         try {
             $applications = DormitoryTenant::forUser($request->user()->id)
             ->with([
@@ -96,7 +92,9 @@ class TraineeDormitory extends Controller
 
         $count = [
             'total'     => $get_count($reservations),
-            'settled'   => $get_count($reservations->clone()->whereIn('tenant_status', ['CANCELLED', 'REJECTED', 'TERMINATED'])),
+            'in_progress'   => $get_count($reservations->clone()->whereIn('tenant_status', $this::IN_PROGRESS)),
+            'success'   => $get_count($reservations->clone()->whereIn('tenant_status', $this::SUCCESS)),
+            'closed'   => $get_count($reservations->clone()->whereIn('tenant_status', $this::CLOSED)),
         ];
 
         return response()->json(['reservationCount' => $count], 200);
@@ -104,12 +102,10 @@ class TraineeDormitory extends Controller
 
     public function view_applied_dormitories (Request $request, int $dormitory_id) {
         try {
+            \Log::info("view", [$dormitory_id]);
             $dormitory_info = DormitoryTenant::with([
-                'dormitory_room',
+                'dormitory_room.dormitory',
                 'transferRequest' => function($q) {
-                    $q->where('status', 'PENDING');
-                },
-                'extendRequest' => function($q) {
                     $q->where('status', 'PENDING');
                 },
                 'tenant_invoices' => function($self) {
@@ -125,6 +121,7 @@ class TraineeDormitory extends Controller
 
             return response()->json(['dormitory_info' => $dormitory_info]);
         } catch (\Exception $e) {
+            \Log::info("error", [$e]);
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
@@ -150,6 +147,8 @@ class TraineeDormitory extends Controller
             $new_log->user_id = $request->user()->id;
             $new_log->actions = "You've cancelled dormitory request application. ID# $dormitory_id";
             $new_log->save();
+
+            AuditHelper::log($request->user()->id, "You've cancelled dormitory request application. ID# $dormitory_id");
 
             event(new BEDormitory(''));
 
@@ -412,19 +411,32 @@ class TraineeDormitory extends Controller
         }
     }
 
+    /**
+     * Summary of request_tenant_room
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * 
+     * CHECK IF:
+     * 
+     * HAS EXISTING REQUEST OR ACTIVE OCCUPANCY
+     * 
+     */
     public function request_tenant_room(Request $request) {
+        \Log::info("request dorm", [$request->all()]);
         $validations = [
-            'forType' => 'required',
-            'roomType' => 'required',
-            'file' => 'mimes:jpg,jpeg,png,pdf,doc,docx|max:5120'
+            "forType" => "required|in:MALE,FEMALE,COUPLE",
+            "is_air_conditioned" => "required|in:YES,NO",
+            "single_occupancy" => "required|in:YES,NO",
+            "file" => "mimes:jpg,jpeg,png,pdf,doc,docx|max:5120",
+            "purpose" => "required|string|max:255"
         ];
 
         $user = $request->user();
-        $existing_request = DormitoryTenant::where(['user_id' => $request->user()->id, 'tenant_status' => "PENDING"])->exists();
+        // $existing_request = DormitoryTenant::where(['user_id' => $request->user()->id, 'tenant_status' => "PENDING"])->exists();
 
-        if ($existing_request) {
-            return response()->json(["message" => "A request is already existing!"], 401);
-        }
+        // if ($existing_request) {
+        //     return response()->json(["message" => "A request is already existing!"], 401);
+        // }
 
         $validator = \Validator::make($request->all(), $validations);
 
@@ -445,7 +457,11 @@ class TraineeDormitory extends Controller
                     $tenant_dormitory->filename = $filename;
                 }
 
-                $tenant_dormitory->room_type = $request->roomType;
+                $tenant_dormitory->is_air_conditioned = $request->is_air_conditioned;
+                $tenant_dormitory->single_occupancy = $request->single_occupancy;
+                $tenant_dormitory->tenant_from_date = $request->startDate;
+                $tenant_dormitory->tenant_to_date = $request->endDate;
+                $tenant_dormitory->purpose = $request->purpose;
                 $tenant_dormitory->save();
 
                 AuditHelper::log($user->id, "User {$user->id} sent a dorm request.");

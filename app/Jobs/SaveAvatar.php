@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
+use App\Utils\ConvertToBase64;
 
 class SaveAvatar implements ShouldQueue
 {
@@ -29,7 +30,9 @@ class SaveAvatar implements ShouldQueue
                     file_put_contents(public_path($this->path . $this->filename), $response->body());
                 }
             } else {
-
+                if($this->isBase64) {
+                    ConvertToBase64::generate($this->avatar, 'image', "$this->path/$this->filename");
+                }
             }
         }
     }
