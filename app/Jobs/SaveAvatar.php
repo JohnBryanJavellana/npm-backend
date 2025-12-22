@@ -19,7 +19,8 @@ class SaveAvatar implements ShouldQueue
         public string $filename,
         public string $path,
         public bool $isUrl = false,
-        public bool $isBase64 = false
+        public bool $isBase64 = false,
+        public string $deletableFile = ""
     ) {}
 
     public function handle() {
