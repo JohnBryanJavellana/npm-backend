@@ -16,7 +16,8 @@ use Illuminate\Http\Request;
 use App\Utils\{
     AuditHelper,
     ConvertToBase64,
-    TransactionUtil
+    TransactionUtil,
+    GenerateTrace
 };
 use App\Events\{BEDormitory, BEAuditTrail};
 use App\Jobs\SaveAvatar;
@@ -152,6 +153,7 @@ class DormitoryController extends Controller
                 : DormitoryTenant::find($request->documentId);
 
             $this_dormitory_request->dormitory_room_id = $request->roomId;
+            if($request->httpMethod === "POST") $this_dormitory_request->trace_number = GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DR-');
             $this_dormitory_request->user_id = $request->userId;
             $this_dormitory_request->room_for_type = $request->forType;
             $this_dormitory_request->single_occupancy = $request->single_occupancy;

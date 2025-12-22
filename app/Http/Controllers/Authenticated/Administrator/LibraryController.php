@@ -635,7 +635,7 @@ class LibraryController extends Controller
             } else {
                 $book_res = new BookRes();
                 $book_res->user_id = $request->user()->role === "TRAINER" ? $request->user()->id : $request->borrower;
-                $book_res->trace_number = GenerateTrace::createTraceNumber(BookRes::class);
+                $book_res->trace_number = GenerateTrace::createTraceNumber(BookRes::class, '-LR-');
                 $book_res->purpose = $request->purpose;
                 $book_res->type = $request->type;
                 $book_res->save();
