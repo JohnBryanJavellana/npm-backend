@@ -164,9 +164,18 @@ class DormitoryController extends Controller
             if($request->forType === "COUPLE") {
                 $this_dormitory_request->filename = $request->filename;
 
-                $image_name = Str::uuid() . '.png';
-                SaveAvatar::dispatch($request->filename, $image_name, "dormitory/supporting-document/", false, true);
-                $this_dormitory_request->filename = $image_name;
+                if($request->filename) {
+                    $image_name = Str::uuid() . '.png';
+                    SaveAvatar::dispatch(
+                        $request->filename,
+                        $image_name,
+                        "dormitory/supporting-document/",
+                        false,
+                        true,
+                        $request->httpMethod === "UPDATE" ? 'dormitory/supporting-document/' . $this_dormitory_request->filename : ''
+                    );
+                    $this_dormitory_request->filename = $image_name;
+                }
             }
 
             $this_dormitory_request->save();

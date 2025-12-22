@@ -114,10 +114,13 @@ class TraineeDormitory extends Controller
                 'dormitory_histories' => function($self) {
                     return $self->limit(5)->orderBy('created_at', 'DESC');
                 }
-            ])->where([
+            ])
+            ->where([
                 'id' => $dormitory_id,
                 'user_id' => $request->user()->id
-            ])->whereNotIn('tenant_status', ['PENDING', 'CANCELLED'])->get();
+            ])
+            ->whereNotIn('tenant_status', ['PENDING', 'CANCELLED'])
+            ->get();
 
             return response()->json(['dormitory_info' => $dormitory_info]);
         } catch (\Exception $e) {
