@@ -34,6 +34,7 @@ class Handler extends ExceptionHandler
     {
         if ($e instanceof DomainException) {
             return response()->json([
+                'error' => true,
                 'message' => $e->getMessage()
             ], 422);
         }

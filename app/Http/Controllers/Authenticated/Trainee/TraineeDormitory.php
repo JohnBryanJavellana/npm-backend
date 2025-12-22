@@ -65,7 +65,7 @@ class TraineeDormitory extends Controller
     }
 
     public function view_room_application (Request $request) {
-        \Log::info($request);
+        \Log::info("status_view", [$request->all()]);
         try {
             $applications = DormitoryTenant::forUser($request->user()->id)
             ->with([
@@ -100,7 +100,7 @@ class TraineeDormitory extends Controller
         return response()->json(['reservationCount' => $count], 200);
     }
 
-    public function view_applied_dormitories (Request $request, int $dormitory_id) {
+    public function view_applied_dormitories (Request $request, $dormitory_id) {
         try {
             \Log::info("view", [$dormitory_id]);
             $dormitory_info = DormitoryTenant::with([
@@ -116,7 +116,7 @@ class TraineeDormitory extends Controller
                 }
             ])
             ->where([
-                'id' => $dormitory_id,
+                'trace_number' => $dormitory_id,
                 'user_id' => $request->user()->id
             ])
             ->get();
@@ -427,6 +427,7 @@ class TraineeDormitory extends Controller
      */
     public function request_tenant_room(Request $request) {
         \Log::info("request dorm", [$request->all()]);
+
         $validations = [
             "forType" => "required|in:MALE,FEMALE,COUPLE",
             "is_air_conditioned" => "required|in:YES,NO",
@@ -436,11 +437,12 @@ class TraineeDormitory extends Controller
         ];
 
         $user = $request->user();
-        // $existing_request = DormitoryTenant::where(['user_id' => $request->user()->id, 'tenant_status' => "PENDING"])->exists();
+        $existing_request = DormitoryTenant::where(['user_id' => $request->user()->id, 'tenant_status' => "PENDING"])->exists();
 
-        // if ($existing_request) {
-        //     return response()->json(["message" => "A request is already existing!"], 401);
-        // }
+        if ($existing_request) {
+            throw new \DomainException("A request is already existing!");
+            return response()->json(["message" => "A request is already existing!"], 401);
+        }
 
         $validator = \Validator::make($request->all(), $validations);
 
@@ -450,24 +452,25 @@ class TraineeDormitory extends Controller
             try {
                 DB::beginTransaction();
 
-                $tenant_dormitory = new DormitoryTenant();
-                $tenant_dormitory->user_id = $user->id;
-                $tenant_dormitory->room_for_type = $request->forType;
-                $tenant_dormitory->trace_number = GenerateTrace::createTraceNumber(DormitoryTenant::class, "-DR-");
+                $data = [
+                    "user_id" => $user->id,
+                    "room_for_type" => $request->forType,
+                    "trace_number" => GenerateTrace::createTraceNumber(DormitoryTenant::class, "-DR-"),
+                    "is_air_conditioned" => $request->is_air_conditioned,
+                    "single_occupancy" => $request->single_occupancy,
+                    "tenant_from_date" => $request->startDate,
+                    "tenant_to_date" => $request->endDate,
+                    "purpose" => $request->purpose,
+                ];
 
                 if ($request->forType === 'COUPLE') {
                     $file_requested = $request->file;
                     $filename = GenerateUniqueFilename::generate($file_requested);
                     $file_requested->move(public_path('marriage-files'), $filename);
-                    $tenant_dormitory->filename = $filename;
+                    $data["filename"] = $filename;
                 }
 
-                $tenant_dormitory->is_air_conditioned = $request->is_air_conditioned;
-                $tenant_dormitory->single_occupancy = $request->single_occupancy;
-                $tenant_dormitory->tenant_from_date = $request->startDate;
-                $tenant_dormitory->tenant_to_date = $request->endDate;
-                $tenant_dormitory->purpose = $request->purpose;
-                $tenant_dormitory->save();
+                $tenant_dormitory = DormitoryTenant::create($data);
 
                 AuditHelper::log($user->id, "User {$user->id} sent a dorm request.");
 
