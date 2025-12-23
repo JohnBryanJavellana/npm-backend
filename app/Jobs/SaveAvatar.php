@@ -25,6 +25,12 @@ class SaveAvatar implements ShouldQueue
 
     public function handle() {
         if ($this->avatar) {
+            if($this->deletableFile) {
+                if(file_exists(public_path("$this->path/$this->filename"))) {
+                    unlink(public_path("$this->path/$this->filename"));
+                }
+            }
+
             if($this->isUrl) {
                 $response = Http::get($this->avatar);
                 if ($response->successful()) {
@@ -33,12 +39,6 @@ class SaveAvatar implements ShouldQueue
             } else {
                 if($this->isBase64) {
                     ConvertToBase64::generate($this->avatar, 'image', "$this->path/$this->filename");
-                }
-            }
-
-            if($this->deletableFile) {
-                if(file_exists(public_path("$this->path/$this->filename"))) {
-                    unlink(public_path("$this->path/$this->filename"));
                 }
             }
         }

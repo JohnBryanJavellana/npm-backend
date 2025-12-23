@@ -182,8 +182,13 @@ class DormitoryController extends Controller
                 'stock',
                 'stock as available_stock' => fn($query) => $query->whereIn('status', ["AVAILABLE", "DAMAGED"]),
                 'borrowings'
-            ])->get();
-            return response()->json(['dormInventory' => $dorm_inventory], 200);
+            ]);
+
+            $di = $request->controlNumber
+                ? $dorm_inventory->where('control_number', $request->controlNumber)->first()
+                : $dorm_inventory->get();
+
+            return response()->json(['dormInventory' => $di], 200);
         });
     }
 
@@ -193,7 +198,7 @@ class DormitoryController extends Controller
                 for($i = 0; $i < $request->stock; $i++) {
                     $room = new DormitoryInventoryItem;
                     $room->dormitory_inventory_id = $request->dormitoryInventoryId;
-                    $room->unique_identifier = GenerateTrace::createTraceNumber(DormitoryInventoryItem::class, 'DI', 'unique_identifier');
+                    $room->unique_identifier = GenerateTrace::createTraceNumber(DormitoryInventoryItem::class, '-DIS-', 'unique_identifier');
                     $room->save();
                 }
             }
@@ -209,9 +214,11 @@ class DormitoryController extends Controller
                 : DormitoryInventory::find($request->documentId);
 
             $dorm_inventory->name = $request->name;
+            $dorm_inventory->description = $request->description;
+            $dorm_inventory->is_consumable = $request->isConsumable;
 
-            if($request->httpMethod === "POST") $dorm_inventory->trace_number = GenerateTrace::createTraceNumber(DormitoryInventory::class, "-DI-");
-            if($request->filename) {
+            if($request->httpMethod === "POST") $dorm_inventory->control_number = GenerateTrace::createTraceNumber(DormitoryInventory::class, "-DI-", 'control_number');
+            if(!is_null($request->filename)) {
                 $filename = Str::uuid() . '.png';
                 SaveAvatar::dispatch($request->filename, $filename, "dormitory/inventory/", false, true, $dorm_inventory->filename ?? '');
                 $dorm_inventory->filename = $filename;
@@ -238,6 +245,39 @@ class DormitoryController extends Controller
             }
 
             return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " dormitory room. ID#$dorm_inventory->id"], 200);
+        });
+    }
+
+    public function get_dormitory_inventory_stock (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $stock = DormitoryInventoryItem::withCount('borrowed')
+                ->where('dormitory_inventory_id', $request->documentId)
+                ->orderBy('status', 'ASC')
+                ->get();
+
+            return response()->json(['stocks' => $stock], 200);
+        });
+    }
+
+    public function remove_dorm_inventory_stock (Request $request, int $stock_id) {
+        return TransactionUtil::transact(null, ["inventoryItems"], function() use ($request, $stock_id) {
+            $this_stock = DormitoryInventoryItem::withCount(['borrowed'])->where('id', $stock_id)->first();
+
+            if($this_stock->borrowed_count > 0) {
+                return response()->json(['message' => "Can't remove item. It already has connected data."], 200);
+            } else {
+                $this_stock->delete();
+                AuditHelper::log($request->user()->id, "Removed a dormitory inventory item stock. ID#$stock_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEDormitory(''),
+                        new BEAuditTrail('')
+                    );
+                }
+
+                return response()->json(['message' => "You've removed dormitory inventory item stock. ID#$stock_id"], 200);
+            }
         });
     }
 
@@ -277,7 +317,8 @@ class DormitoryController extends Controller
             if($request->httpMethod === "POST") $this_dormitory_request->trace_number = GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DR-');
             $this_dormitory_request->user_id = $request->userId;
             $this_dormitory_request->room_for_type = $request->forType;
-            $this_dormitory_request->single_occupancy = $request->single_occupancy;
+            $this_dormitory_request->single_accommodation = $request->single_accommodation;
+            $this_dormitory_request->status_of_occupancy = $request->status_of_occupancy;
             $this_dormitory_request->is_air_conditioned = $request->isAirConditioned;
             $this_dormitory_request->purpose = $request->purpose;
             $this_dormitory_request->process_type = $request->processType;
@@ -329,7 +370,7 @@ class DormitoryController extends Controller
     }
 
     public function get_all_requests (Request $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $room_requests = DormitoryTenant::with([
                 'boarder',
                 'dormitory_room',

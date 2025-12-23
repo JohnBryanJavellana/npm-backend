@@ -15,17 +15,15 @@ use Illuminate\Support\Facades\Cache;
 class DormitoryService {
 
 
-    protected $tenantModel;
-    protected $roomModel;
-    protected $inventoryModel;
 
     protected $long_ttl = 600;
 
-    public function __construct(DormitoryRoom $roomModel, DormitoryTenant $tenantModel, DormitoryTenantHistory $dormitoryTenantHistory, DormitoryInventory $dormitoryInventory)
+    public function __construct(
+        protected DormitoryRoom $roomModel,
+        protected DormitoryTenant $tenantModel,
+        protected DormitoryTenantHistory $dormitoryTenantHistory,
+        protected DormitoryInventory $dormitoryInventory)
     {
-        $this->tenantModel =$tenantModel;
-        $this->roomModel = $roomModel;
-        $this->inventoryModel = $dormitoryInventory;
     }
     
 
@@ -38,10 +36,11 @@ class DormitoryService {
                 "room_for_type" => $validated["forType"],
                 "trace_number" => GenerateTrace::createTraceNumber($this->tenantModel, "-DR-"),
                 "is_air_conditioned" => $validated["is_air_conditioned"],
-                "single_occupancy" => $validated["single_occupancy"],
+                "single_accomodation" => $validated["single_accomodation"],
                 "tenant_from_date" => $validated["startDate"],
                 "tenant_to_date" => $validated["endDate"],
-                "purpose" => $validated["purpose"]
+                "purpose" => $validated["purpose"],
+                "remarks" => $validated["remarks"]
             ];
 
             if($validated["forType"] === $this->tenantModel::COUPLE) {
@@ -51,11 +50,15 @@ class DormitoryService {
                 $data["filename"] = $filename;
             }
 
-            foreach($validated["items"] as $item) {
+            $record = $this->tenantModel->create($data);
 
+            foreach($validated["items"] as $item) {
+                $this->dormitoryInventory->create([
+                    "dormitory_tenant_id" => $record->id,
+                    "dormitory_inventory_id" => $item
+                ]);
             }
 
-            $record = $this->tenantModel->create($data);
             $this->loggingDetails($record, $userId);
 
         });
@@ -66,7 +69,7 @@ class DormitoryService {
         //might change, if will return based on stocks
         $cache_key = "inventoryItems";
         $items = Cache::remember($cache_key, $this->long_ttl, function() {
-            return DormitoryInventory::all();
+            return $this->dormitoryInventory::all();
         });
 
         return $items;
@@ -76,9 +79,9 @@ class DormitoryService {
 
         AuditHelper::log($userId, "User {$userId} sent a dorm request.");
 
-        $dormitory_tenant_history = new DormitoryTenantHistory;
-        $dormitory_tenant_history->dormitory_tenant_id = $record->id;
-        $dormitory_tenant_history->history_reason = "Requested";
-        $dormitory_tenant_history->save();
+        $this->dormitoryTenantHistory->create([
+            "dormitory_tenant_id" => $record->id,
+            "history_reason" => "Requested",
+        ]);
     }
 }

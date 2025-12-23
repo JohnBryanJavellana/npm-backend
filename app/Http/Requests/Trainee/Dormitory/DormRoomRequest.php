@@ -14,9 +14,7 @@ class DormRoomRequest extends FormRequest
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
-    {
-        \Log::info("request dorm", [$this->all()]);
-        
+    {        
         return $this->user() !== null;
     }
 
@@ -30,11 +28,14 @@ class DormRoomRequest extends FormRequest
         return [
             "forType" => "required|in:MALE,FEMALE,COUPLE",
             "is_air_conditioned" => "required|in:YES,NO",
-            "single_occupancy" => "required|in:YES,NO",
-            "file" => "mimes:jpg,jpeg,png,pdf,doc,docx|max:5120",
+            "single_accomodation" => "required|in:YES,NO",
             "purpose" => "required|string|max:255",
+            "remarks" => "required|string|max:255",
             "startDate" => "required|date",
-            "toDate" => "required|date|after:startDate"
+            "toDate" => "required|date|after:startDate",
+            "file" => "mimes:jpg,jpeg,png,pdf,doc,docx|max:5120",
+            "addsOn" => "required|array",
+            "addsOn.*" => "exists:dormitory_inventories, id"
         ];
     }
 

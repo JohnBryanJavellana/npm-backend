@@ -16,7 +16,7 @@ use App\Models\{DormitoryRoom,
     DormitoryInvoice,
     DormitoryTenantHistory,
     DormitoryTransfer,
-    DormitoryExtendRequest, DormitoryInventory};
+    DormitoryExtendRequest, DormitoryInventory, DormitoryItemBorrowing};
 use App\Services\Trainee\Dormitory\DormitoryService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -129,7 +129,8 @@ class TraineeDormitory extends Controller
                 'dormitory_histories' => function($self) {
                     return $self->limit(5)->orderBy('created_at', 'DESC');
                 },
-                'borrowedItems',
+                'borrowedItems.inventory',
+                'borrowedItems.item',
             ])
             ->where([
                 'trace_number' => $dormitory_id,
@@ -436,9 +437,9 @@ class TraineeDormitory extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function request_tenant_room(DormRoomRequest $request) {
+    public function request_tenant_room(Request $request) {
         \Log::info("controller dorm", [$request->all()]);
-        // return response()->json(["wow"], 500);
+        // return response()->json(["wow" => $request->all()], 200);
         $user = $request->user();
 
         // $existing_request = DormitoryTenant::where(['user_id' => $request->user()->id, 'tenant_status' => "PENDING"])->exists();
@@ -455,10 +456,11 @@ class TraineeDormitory extends Controller
                 "room_for_type" => $request->forType,
                 "trace_number" => GenerateTrace::createTraceNumber(DormitoryTenant::class, "-DR-"),
                 "is_air_conditioned" => $request->is_air_conditioned,
-                "single_occupancy" => $request->single_occupancy,
+                "single_accomodation" => $request->single_accomodation,
                 "tenant_from_date" => $request->startDate,
                 "tenant_to_date" => $request->endDate,
                 "purpose" => $request->purpose,
+                "remarks" => $request->remarks,
             ];
 
             if ($request->forType === 'COUPLE') {
@@ -470,12 +472,19 @@ class TraineeDormitory extends Controller
 
             $tenant_dormitory = DormitoryTenant::create($data);
 
+            foreach($request->addsOn as $item) {
+                DormitoryItemBorrowing::create(attributes: [
+                    "dormitory_tenant_id" => $tenant_dormitory->id,
+                    "dormitory_inventory_id" => $item
+                ]);
+            }
+
             AuditHelper::log($user->id, "User {$user->id} sent a dorm request.");
 
-            $dormitory_tenant_history = new DormitoryTenantHistory;
-            $dormitory_tenant_history->dormitory_tenant_id = $tenant_dormitory->id;
-            $dormitory_tenant_history->history_reason = "Requested";
-            $dormitory_tenant_history->save();
+            DormitoryTenantHistory::create([
+                "dormitory_tenant_id" => $tenant_dormitory->id,
+                "history_reason" => "Requested"
+            ]);
 
             if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
@@ -484,6 +493,7 @@ class TraineeDormitory extends Controller
             DB::commit();
             return response()->json(["message"=> 'Dormitory request sent successfully.'], 200);
         } catch (\Exception $e) {
+            \Log::error("error-send-reqesut", [$e]);
             DB::rollBack();
             return response()->json(["message"=> $e->getMessage()],500);
         }
