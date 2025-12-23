@@ -22,6 +22,7 @@ return new class extends Migration
             $table->enum('transfer_type', ['ROOM', 'CLASS'])->nullable();
             $table->enum('single_occupancy', ['YES', 'NO'])->default('NO');
             $table->enum('is_air_conditioned', ["YES", "NO"]);
+            $table->enum('paying_guest', ["YES", "NO"])->nullable();
             $table->longText("purpose")->nullable();
             $table->longText("filename")->nullable();
             $table->date('tenant_from_date')->nullable();

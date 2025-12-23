@@ -28,6 +28,7 @@ class CreateOrUpdateRequest extends FormRequest
             'roomId' => ['required'],
             'processType' => ['required'],
             'forType' => ['required'],
+            'payingGuest' => ['required'],
             'isAirConditioned' => ['required'],
             'single_occupancy' => ['required'],
             'filename' => [ Rule::when($this->forType === "COUPLE", ['required', 'base64_image'], ['nullable']) ],

@@ -80,14 +80,5 @@ class BookRequest extends FormRequest
             ], 422)
         );
     }
-
-    // protected function failedValidation(Validator $validator)
-    // {
-    //     $errors = $validator->errors()->all();
-    //     throw new HttpResponseException(
-    //         response()->json([
-    //             'message' => implode(', ', $errors)
-    //         ], 422)
-    //     );
-    // }
+    
 }

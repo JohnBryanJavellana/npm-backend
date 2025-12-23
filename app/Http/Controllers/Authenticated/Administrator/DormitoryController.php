@@ -162,6 +162,7 @@ class DormitoryController extends Controller
             $this_dormitory_request->process_type = $request->processType;
             $this_dormitory_request->tenant_from_date = $request->fromDate;
             $this_dormitory_request->tenant_to_date = $request->toDate;
+            $this_dormitory_request->paying_guest = $request->payingGuest;
 
             if($request->forType === "COUPLE") {
                 $this_dormitory_request->filename = $request->filename;
@@ -234,18 +235,14 @@ class DormitoryController extends Controller
 
     public function get_all_requests (Request $request) {
         $room_requests = DormitoryTenant::with([
-            'trainee.additional_trainee_info',
-            'trainee.additional_trainee_info.general_info',
-            'trainee.additional_trainee_info.contact',
-            'trainee.additional_trainee_info.trainee_registration_file',
-            'trainee.additional_trainee_info.educational_attainment.main_course',
-            'trainee.additional_trainee_info.educational_attainment.main_school',
-            'trainee.additional_trainee_info.latest_shipboard_attainment',
-            'trainee.latest_trainee_enrolled_courses.training_schedule',
+            'boarder',
             'dormitory_room',
-            'extendRequest'
-        ])->whereIn('tenant_status', $request->tenantStatus)->orderBy('created_at', 'DESC')->get();
+            'dormitory_room.dormitory'
+        ]);
 
-        return response()->json(['room_requests' => $room_requests], 200);
+        if($request->tenantStatus) $room_requests->whereIn('tenant_status', $request->tenantStatus);
+
+        $rr = $room_requests->orderBy('created_at', 'DESC')->get();
+        return response()->json(['room_requests' => $rr], 200);
     }
 }
