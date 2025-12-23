@@ -15,8 +15,6 @@ return new class extends Migration
             $table->engine = "InnoDB";
             $table->id();
             $table->string("name", 255);
-            $table->integer("stock")->default(0);
-            $table->integer("available_stock")->default(0);
             $table->longText("filename")->nullable();
             $table->timestamps();
         });

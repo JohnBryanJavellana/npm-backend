@@ -46,7 +46,7 @@ class DormitoryService {
             }
 
             $record = $this->tenantModel->create($data);
-
+            $this->loggingDetails($record, $userId);
 
         });
     }
@@ -55,7 +55,7 @@ class DormitoryService {
         AuditHelper::log($userId, "User {$userId} sent a dorm request.");
 
         $dormitory_tenant_history = new DormitoryTenantHistory;
-        $dormitory_tenant_history->dormitory_tenant_id = $tenant_dormitory->id;
+        $dormitory_tenant_history->dormitory_tenant_id = $record->id;
         $dormitory_tenant_history->history_reason = "Requested";
         $dormitory_tenant_history->save();
     }

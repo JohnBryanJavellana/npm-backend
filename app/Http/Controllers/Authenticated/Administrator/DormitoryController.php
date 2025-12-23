@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Models\DormitoryInventoryItem;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -10,7 +11,8 @@ use Illuminate\Support\Str;
 use App\Http\Requests\Admin\Dormitory\{
     GetAvailableDorms,
     CreateOrUpdateDormitory,
-    CreateOrUpdateRequest
+    CreateOrUpdateRequest,
+    CreateOrUpdateDormitoryInv
 };
 use Illuminate\Http\Request;
 use App\Utils\{
@@ -26,6 +28,7 @@ use App\Models\{
     DormitoryRoom,
     DormitoryTenant,
     DormitoryRoomImage,
+    DormitoryInventory
 };
 
 class DormitoryController extends Controller
@@ -108,6 +111,28 @@ class DormitoryController extends Controller
         });
     }
 
+    public function get_available_dorms (GetAvailableDorms $request) {
+        return TransactionUtil::transact($request, function() use ($request) {
+            $dorms = Dormitory::withCount('rooms')
+            ->where([
+                'room_for_type' => $request->room_for_type,
+                'is_air_conditioned' => $request->room_type
+            ])->get();
+
+            return response()->json(['dorms' => $dorms], 200);
+        });
+    }
+
+    public function get_available_rooms (Request $request) {
+        return TransactionUtil::transact(null, function() use ($request) {
+            $dorms = DormitoryRoom::where('dormitory_id', $request->dormId)
+                ->orderBy('room_available_slot', 'DESC')
+                ->get();
+
+            return response()->json(['rooms' => $dorms], 200);
+        });
+    }
+
     public function create_dormitory_rooms (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
             if($request->room_count) {
@@ -124,25 +149,115 @@ class DormitoryController extends Controller
         });
     }
 
-    public function get_available_dorms (GetAvailableDorms $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
-            $dorms = Dormitory::withCount('rooms')
-            ->where([
-                'room_for_type' => $request->room_for_type,
-                'is_air_conditioned' => $request->room_type
-            ])->get();
+    public function remove_room (Request $request, int $room_id) {
+        return TransactionUtil::transact($request, function() use ($request, $room_id) {
+            $this_dorm = DormitoryRoom::withCount(['hasData'])->where('id', $room_id)->first();
 
-            return response()->json(['dorms' => $dorms], 200);
+            if($this_dorm->has_data_count > 0) {
+                return response()->json(['message' => "Can't remove room. It already has connected data."], 200);
+            } else {
+                $this_dorm->delete();
+
+                AuditHelper::log($request->user()->id, "Removed a dormitory room. ID#$room_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEDormitory(''),
+                        new BEAuditTrail('')
+                    );
+                }
+
+                return response()->json(['message' => "You've removed dormitory room. ID#$room_id"], 200);
+            }
         });
     }
 
-    public function get_available_rooms(Request $request) {
+    public function get_dorm_inventories (Request $request) {
         return TransactionUtil::transact(null, function() use ($request) {
-            $dorms = DormitoryRoom::where('dormitory_id', $request->dormId)
-                ->orderBy('room_available_slot', 'DESC')
-                ->get();
+            $dorm_inventory = DormitoryInventory::withCount('borrowed', 'items')->get();
+            return response()->json(['dormInventory' => $dorm_inventory], 200);
+        });
+    }
 
-            return response()->json(['rooms' => $dorms], 200);
+    public function create_dormitory_inventory_stock (Request $request) {
+        return TransactionUtil::transact(null, function() use ($request) {
+            if($request->stock_count) {
+                for($i = 0; $i < $request->stock_count; $i++) {
+                    $room = new DormitoryInventoryItem;
+                    $room->dormitory_inventory_id = $request->dormitoryInventoryId;
+                    $room->unique_identifier = GenerateTrace::createTraceNumber(DormitoryInventoryItem::class, 'DI', 'unique_identifier');
+                    $room->save();
+                }
+            }
+
+            return $request->insideJob ? true : response()->json(['message' => "You've added a dormitory inventory stock."], 201);
+        });
+    }
+
+    public function create_or_update_dormitory_inventory (CreateOrUpdateDormitoryInv $request) {
+        return TransactionUtil::transact($request, function() use ($request) {
+            $dorm_inventory = $request->httpMethod === "POST"
+                ? new DormitoryInventory
+                : DormitoryInventory::find($request->documentId);
+
+            $dorm_inventory->name = $request->name;
+            if($request->filename) {
+                $filename = Str::uuid() . '.png';
+
+                SaveAvatar::dispatch(
+                    $request->filename,
+                    $filename,
+                    "dormitory/inventory/",
+                    false,
+                    true,
+                    $dorm_inventory->filename
+                );
+            }
+
+            $dorm_inventory->save();
+
+            if($request->stock) {
+                $adjustedRequest = $request->merge([
+                    "insideJob" => true,
+                    "dormitoryInventoryId" => $dorm_inventory->id,
+                ]);
+
+                $this->create_dormitory_inventory_stock($adjustedRequest);
+            }
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory inventory. ID#$dorm_inventory->id");
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " dormitory room. ID#$dorm_inventory->id"], 200);
+        });
+    }
+
+    public function remove_dorm_inventory (Request $request, int $inv_id) {
+        return TransactionUtil::transact($request, function() use ($request, $inv_id) {
+            $this_dorm = DormitoryRoom::withCount(['hasData'])->where('id', $inv_id)->first();
+
+            if($this_dorm->has_data_count > 0) {
+                return response()->json(['message' => "Can't remove room. It already has connected data."], 200);
+            } else {
+                $this_dorm->delete();
+
+                AuditHelper::log($request->user()->id, "Removed a dormitory room. ID#$inv_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEDormitory(''),
+                        new BEAuditTrail('')
+                    );
+                }
+
+                return response()->json(['message' => "You've removed dormitory room. ID#$inv_id"], 200);
+            }
         });
     }
 
@@ -203,34 +318,6 @@ class DormitoryController extends Controller
             }])->where('id', $room_id)->get();
 
         return response()->json(['dormitory' => $dormitory], 200);
-    }
-
-    public function remove_room (Request $request, int $room_id) {
-        try {
-            DB::beginTransaction();
-
-            $this_dorm = DormitoryRoom::withCount(['hasData'])->where('id', $room_id)->first();
-            if($this_dorm->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove room. It already has connected data."], 200);
-            } else {
-                $this_dorm->delete();
-
-                AuditHelper::log($request->user()->id, "Removed a dormitory room. ID#$room_id");
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEDormitory(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                DB::commit();
-                return response()->json(['message' => "You've removed dormitory room. ID#$room_id"], 200);
-            }
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
     }
 
     public function get_all_requests (Request $request) {

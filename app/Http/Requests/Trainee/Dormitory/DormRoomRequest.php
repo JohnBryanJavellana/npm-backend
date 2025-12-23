@@ -15,7 +15,9 @@ class DormRoomRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        \Log::info("request dorm", [$this->all()]);
+        
+        return $this->user() !== null;
     }
 
     /**

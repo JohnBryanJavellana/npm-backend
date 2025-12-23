@@ -278,6 +278,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::post('create-walk-in-request/create_or_update_request', [DormitoryController::class, 'create_or_update_request']);
                 Route::post('get_all_requests', [DormitoryController::class, 'get_all_requests']);
                 Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room']);
+
+                Route::get('get_inventories', [DormitoryController::class, 'get_dorm_inventories']);
+                Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
+                Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);
             });
         });
 
