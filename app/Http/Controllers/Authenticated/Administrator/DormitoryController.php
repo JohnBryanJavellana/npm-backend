@@ -118,12 +118,31 @@ class DormitoryController extends Controller
     public function get_available_dorms (GetAvailableDorms $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $dorms = Dormitory::withCount('rooms')
-            ->where([
-                'room_for_type' => $request->room_for_type,
-                'is_air_conditioned' => $request->room_type
+                ->where([
+                    'room_for_type' => $request->room_for_type,
+                    'is_air_conditioned' => $request->room_type
+                ])->get();
+
+            $availableSupplies = DormitoryInventory::withCount([
+                'stock' => fn($query) => $query->whereIn('status', ['AVAILABLE', 'DAMAGED'])
             ])->get();
 
-            return response()->json(['dorms' => $dorms], 200);
+            return response()->json([
+                'dorms' => $dorms,
+                'availableSupplies' => $availableSupplies
+            ], 200);
+        });
+    }
+
+    public function get_available_supplies (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $availableSupplies = DormitoryInventory::withCount([
+                'stock' => fn($query) => $query->whereIn('status', ['AVAILABLE'])
+            ])->get();
+
+            return response()->json([
+                'availableSupplies' => $availableSupplies
+            ], 200);
         });
     }
 
