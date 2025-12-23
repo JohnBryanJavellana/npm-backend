@@ -24,6 +24,8 @@ class CreateOrUpdateDormitoryInv extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
+            'isConsumable' => ['required'],
+            'description' => ['required', 'string'],
             'stock' => [ Rule::when($this->httpMethod === "POST", ['required'], ['nullable']) ],
             'filename' => [ Rule::when($this->httpMethod === "POST", ['required', 'base64_image'], ['nullable']) ],
             'httpMethod' => ['required']

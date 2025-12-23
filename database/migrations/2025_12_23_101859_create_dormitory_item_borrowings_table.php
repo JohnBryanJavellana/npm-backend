@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\{DormitoryInventoryItem,DormitoryTenant};
+use App\Models\{DormitoryInventoryItem,DormitoryTenant,DormitoryInventory};
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +16,8 @@ return new class extends Migration
             $table->engine = 'InnoDB';
             $table->id();
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(DormitoryInventoryItem::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(DormitoryInventory::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(DormitoryInventoryItem::class)->nullable()->constrained()->onDelete('cascade');
             $table->enum("status", ["RETURNED", "DAMAGED", "APPROVED", "PENDING", "LOST"])->default("PENDING");
             $table->timestamps();
         });

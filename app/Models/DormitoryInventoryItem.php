@@ -13,4 +13,9 @@ class DormitoryInventoryItem extends Model
     {
         return $this->hasMany(DormitoryItemBorrowing::class);
     }
+
+    public function itemInfo()
+    {
+        return $this->belongsTo(DormitoryInventory::class);
+    }
 }

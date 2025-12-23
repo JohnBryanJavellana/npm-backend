@@ -18,11 +18,11 @@ return new class extends Migration
             $table->foreignIdFor(DormitoryRoom::class)->nullable()->constrained()->ondelete('cascade');
             $table->foreignIdFor(User::class)->constrained()->ondelete('cascade');
             $table->string('trace_number', 255)->nullable();
+            $table->enum('status_of_occupancy', ['TRAINEE', 'NON-PAYING GUEST/VISITOR', 'NMP PERSONNEL (REGULAR/JOW)', 'PAYING GUEST/VISITOR'])->default('TRAINEE');
             $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);
             $table->enum('transfer_type', ['ROOM', 'CLASS'])->nullable();
-            $table->enum('single_occupancy', ['YES', 'NO'])->default('NO');
+            $table->enum('single_accommodation', ['YES', 'NO'])->default('NO');
             $table->enum('is_air_conditioned', ["YES", "NO"]);
-            $table->enum('paying_guest', ["YES", "NO"])->nullable();
             $table->longText("purpose")->nullable();
             $table->longText("remarks")->nullable();
             $table->longText("filename")->nullable();

@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('dormitory_inventories', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->longText("trace_number");
+            $table->longText("control_number");
             $table->string("name", 255);
+            $table->enum("is_consumable", ['YES', 'NO']);
+            $table->longText("description");
             $table->longText("filename")->nullable();
             $table->timestamps();
         });
