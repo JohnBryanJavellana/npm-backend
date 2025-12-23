@@ -2,6 +2,7 @@
 
 namespace App\Services\Trainee\Dormitory;
 
+use App\Models\DormitoryInventory;
 use App\Models\DormitoryRoom;
 use App\Models\DormitoryTenant;
 use App\Models\DormitoryTenantHistory;
@@ -9,17 +10,22 @@ use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use App\Utils\GenerateUniqueFilename;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class DormitoryService {
 
 
     protected $tenantModel;
     protected $roomModel;
+    protected $inventoryModel;
 
-    public function __construct(DormitoryRoom $roomModel, DormitoryTenant $tenantModel, DormitoryTenantHistory $dormitoryTenantHistory)
+    protected $long_ttl = 600;
+
+    public function __construct(DormitoryRoom $roomModel, DormitoryTenant $tenantModel, DormitoryTenantHistory $dormitoryTenantHistory, DormitoryInventory $dormitoryInventory)
     {
         $this->tenantModel =$tenantModel;
         $this->roomModel = $roomModel;
+        $this->inventoryModel = $dormitoryInventory;
     }
     
 
@@ -45,11 +51,27 @@ class DormitoryService {
                 $data["filename"] = $filename;
             }
 
+            foreach($validated["items"] as $item) {
+
+            }
+
             $record = $this->tenantModel->create($data);
             $this->loggingDetails($record, $userId);
 
         });
     }
+
+    public function allInvItems()
+    {
+        //might change, if will return based on stocks
+        $cache_key = "inventoryItems";
+        $items = Cache::remember($cache_key, $this->long_ttl, function() {
+            return DormitoryInventory::all();
+        });
+
+        return $items;
+    }
+
     private function loggingDetails($record, $userId) {
 
         AuditHelper::log($userId, "User {$userId} sent a dorm request.");

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\DormitoryInventoryItem;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use App\Http\Requests\Admin\Dormitory\{
     GetAvailableDorms,
@@ -34,22 +33,27 @@ use App\Models\{
 class DormitoryController extends Controller
 {
     public function dormitories (Request $request) {
-        $dormitories = Dormitory::withCount(['rooms' => function ($query) {
-            $query->where("room_status", "AVAILABLE");
-        }])->get();
-        return response()->json(['dormitories' => $dormitories], 200);
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $dormitories = Dormitory::withCount(['rooms' => function ($query) {
+                $query->where("room_status", "AVAILABLE");
+            }])->get();
+
+            return response()->json(['dormitories' => $dormitories], 200);
+        });
     }
 
     public function get_dormitory_rooms (Request $request, int $room_id) {
-        $rooms = DormitoryRoom::withCount('hasData')
-            ->where('dormitory_id', $room_id)
-            ->get();
+        return TransactionUtil::transact($request, [], function() use ($request, $room_id) {
+            $rooms = DormitoryRoom::withCount('hasData')
+                ->where('dormitory_id', $room_id)
+                ->get();
 
-        return response()->json(['rooms' => $rooms], 200);
+            return response()->json(['rooms' => $rooms], 200);
+        });
     }
 
     public function create_or_update_dormitory (CreateOrUpdateDormitory $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_dormitory = $request->httpMethod === "POST"
                 ? new Dormitory
                 : Dormitory::find($request->documentId);
@@ -112,7 +116,7 @@ class DormitoryController extends Controller
     }
 
     public function get_available_dorms (GetAvailableDorms $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $dorms = Dormitory::withCount('rooms')
             ->where([
                 'room_for_type' => $request->room_for_type,
@@ -124,7 +128,7 @@ class DormitoryController extends Controller
     }
 
     public function get_available_rooms (Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $dorms = DormitoryRoom::where('dormitory_id', $request->dormId)
                 ->orderBy('room_available_slot', 'DESC')
                 ->get();
@@ -134,7 +138,7 @@ class DormitoryController extends Controller
     }
 
     public function create_dormitory_rooms (Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             if($request->room_count) {
                 for($i = 0; $i < $request->room_count; $i++) {
                     $room = new DormitoryRoom;
@@ -150,7 +154,7 @@ class DormitoryController extends Controller
     }
 
     public function remove_room (Request $request, int $room_id) {
-        return TransactionUtil::transact($request, function() use ($request, $room_id) {
+        return TransactionUtil::transact($request, [], function() use ($request, $room_id) {
             $this_dorm = DormitoryRoom::withCount(['hasData'])->where('id', $room_id)->first();
 
             if($this_dorm->has_data_count > 0) {
@@ -173,16 +177,20 @@ class DormitoryController extends Controller
     }
 
     public function get_dorm_inventories (Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
-            $dorm_inventory = DormitoryInventory::withCount('borrowed', 'items')->get();
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $dorm_inventory = DormitoryInventory::withCount([
+                'stock',
+                'stock as available_stock' => fn($query) => $query->whereIn('status', ["AVAILABLE", "DAMAGED"]),
+                'borrowings'
+            ])->get();
             return response()->json(['dormInventory' => $dorm_inventory], 200);
         });
     }
 
     public function create_dormitory_inventory_stock (Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
-            if($request->stock_count) {
-                for($i = 0; $i < $request->stock_count; $i++) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            if($request->stock) {
+                for($i = 0; $i < $request->stock; $i++) {
                     $room = new DormitoryInventoryItem;
                     $room->dormitory_inventory_id = $request->dormitoryInventoryId;
                     $room->unique_identifier = GenerateTrace::createTraceNumber(DormitoryInventoryItem::class, 'DI', 'unique_identifier');
@@ -195,23 +203,18 @@ class DormitoryController extends Controller
     }
 
     public function create_or_update_dormitory_inventory (CreateOrUpdateDormitoryInv $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, ["inventoryItems"], function() use ($request) {
             $dorm_inventory = $request->httpMethod === "POST"
                 ? new DormitoryInventory
                 : DormitoryInventory::find($request->documentId);
 
             $dorm_inventory->name = $request->name;
+
+            if($request->httpMethod === "POST") $dorm_inventory->trace_number = GenerateTrace::createTraceNumber(DormitoryInventory::class, "-DI-");
             if($request->filename) {
                 $filename = Str::uuid() . '.png';
-
-                SaveAvatar::dispatch(
-                    $request->filename,
-                    $filename,
-                    "dormitory/inventory/",
-                    false,
-                    true,
-                    $dorm_inventory->filename
-                );
+                SaveAvatar::dispatch($request->filename, $filename, "dormitory/inventory/", false, true, $dorm_inventory->filename ?? '');
+                $dorm_inventory->filename = $filename;
             }
 
             $dorm_inventory->save();
@@ -239,15 +242,18 @@ class DormitoryController extends Controller
     }
 
     public function remove_dorm_inventory (Request $request, int $inv_id) {
-        return TransactionUtil::transact($request, function() use ($request, $inv_id) {
-            $this_dorm = DormitoryRoom::withCount(['hasData'])->where('id', $inv_id)->first();
+        return TransactionUtil::transact(null, ["inventoryItems"], function() use ($request, $inv_id) {
+            $this_dorm = DormitoryInventory::withCount(['borrowings'])->where('id', $inv_id)->first();
 
-            if($this_dorm->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove room. It already has connected data."], 200);
+            if($this_dorm->borrowings_count > 0) {
+                return response()->json(['message' => "Can't remove item. It already has connected data."], 200);
             } else {
-                $this_dorm->delete();
+                if(file_exists(public_path("dormitory/inventory/" . $this_dorm->filename))) {
+                    unlink(public_path("dormitory/inventory/" . $this_dorm->filename));
+                }
 
-                AuditHelper::log($request->user()->id, "Removed a dormitory room. ID#$inv_id");
+                $this_dorm->delete();
+                AuditHelper::log($request->user()->id, "Removed a dormitory inventory item. ID#$inv_id");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -256,13 +262,13 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed dormitory room. ID#$inv_id"], 200);
+                return response()->json(['message' => "You've removed dormitory inventory item. ID#$inv_id"], 200);
             }
         });
     }
 
     public function create_or_update_request (CreateOrUpdateRequest $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_dormitory_request = $request->httpMethod === "POST"
                 ? new DormitoryTenant
                 : DormitoryTenant::find($request->documentId);
@@ -312,24 +318,28 @@ class DormitoryController extends Controller
     }
 
     public function get_dormitory_info (Request $request, int $room_id) {
-        $dormitory = Dormitory::with(['room_images'])
-            ->withCount(['rooms' => function ($query) {
-                $query->where("room_status", "AVAILABLE");
-            }])->where('id', $room_id)->get();
+        return TransactionUtil::transact($request, [], function() use ($request, $room_id) {
+            $dormitory = Dormitory::with(['room_images'])
+                ->withCount(['rooms' => function ($query) {
+                    $query->where("room_status", "AVAILABLE");
+                }])->where('id', $room_id)->get();
 
-        return response()->json(['dormitory' => $dormitory], 200);
+            return response()->json(['dormitory' => $dormitory], 200);
+        });
     }
 
     public function get_all_requests (Request $request) {
-        $room_requests = DormitoryTenant::with([
-            'boarder',
-            'dormitory_room',
-            'dormitory_room.dormitory'
-        ]);
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $room_requests = DormitoryTenant::with([
+                'boarder',
+                'dormitory_room',
+                'dormitory_room.dormitory'
+            ]);
 
-        if($request->tenantStatus) $room_requests->whereIn('tenant_status', $request->tenantStatus);
+            if($request->tenantStatus) $room_requests->whereIn('tenant_status', $request->tenantStatus);
 
-        $rr = $room_requests->orderBy('created_at', 'DESC')->get();
-        return response()->json(['room_requests' => $rr], 200);
+            $rr = $room_requests->orderBy('created_at', 'DESC')->get();
+            return response()->json(['room_requests' => $rr], 200);
+        });
     }
 }

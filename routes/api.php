@@ -101,6 +101,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix('/dormitories/')->group(function() {
             Route::get('get_all_dormitories', [TraineeDormitory::class, 'get_all_dormitories']);
+            Route::get('get_items', [TraineeDormitory::class, 'get_items']);
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
             Route::get('applied_dormitories/view/getAllHistories/{dormitory_id}', [TraineeDormitory::class, 'applied_dormitory_histories']);
@@ -280,6 +281,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room']);
 
                 Route::get('get_inventories', [DormitoryController::class, 'get_dorm_inventories']);
+                Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock']);
                 Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
                 Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);
             });

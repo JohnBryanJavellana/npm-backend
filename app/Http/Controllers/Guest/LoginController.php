@@ -11,7 +11,7 @@ use App\Utils\TransactionUtil;
 class LoginController extends Controller
 {
     public function login_user(LoginRequest $request) {
-        return TransactionUtil::transact($request, function () use ($request) {
+        return TransactionUtil::transact($request, [], function () use ($request) {
             if(Auth::attempt($request->only('email', 'password'))){
                 $user = Auth::user();
 

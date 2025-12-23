@@ -9,14 +9,19 @@ class DormitoryInventory extends Model
 {
     use HasFactory;
 
-
-    public function borrowed()
-    {
-        return $this->hasMany(DormitoryItemBorrowing::class);
-    }
+    // moved to dormitory item model
+    // public function borrowed()
+    // {
+    //     return $this->hasMany(DormitoryItemBorrowing::class);
+    // }
 
     public function stock ()
     {
         return $this->hasMany(DormitoryInventoryItem::class);
+    }
+
+    public function borrowings()
+    {
+        return $this->hasManyThrough(DormitoryItemBorrowing::class, DormitoryInventoryItem::class);
     }
 }

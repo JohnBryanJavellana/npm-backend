@@ -16,7 +16,7 @@ use App\Models\{DormitoryRoom,
     DormitoryInvoice,
     DormitoryTenantHistory,
     DormitoryTransfer,
-    DormitoryExtendRequest};
+    DormitoryExtendRequest, DormitoryInventory};
 use App\Services\Trainee\Dormitory\DormitoryService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -24,6 +24,9 @@ use Illuminate\Support\Str;
 class TraineeDormitory extends Controller
 {
 
+    
+
+    protected $long_ttl = 600;
     protected $short_ttl = 60;
     protected $dormitory_service;
 
@@ -125,7 +128,8 @@ class TraineeDormitory extends Controller
                 },
                 'dormitory_histories' => function($self) {
                     return $self->limit(5)->orderBy('created_at', 'DESC');
-                }
+                },
+                'borrowedItems',
             ])
             ->where([
                 'trace_number' => $dormitory_id,
@@ -431,11 +435,7 @@ class TraineeDormitory extends Controller
      * Summary of request_tenant_room
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
-     * 
-     * 
-     * 
      */
-
     public function request_tenant_room(DormRoomRequest $request) {
         \Log::info("controller dorm", [$request->all()]);
         // return response()->json(["wow"], 500);
@@ -600,5 +600,18 @@ class TraineeDormitory extends Controller
                 return response()->json(['message'=> $e->getMessage()],500);
             }
         }
+    }
+
+    public function get_items(Request $request)
+    {
+        try
+        {
+            return response()->json(["items" => $this->dormitory_service->allInvItems()], 200);
+        }
+        catch (\Exception $e) {
+            \Log::error("error-get-items", [$e]);
+            return response()->json(["message" => "Something went wrong, Please try again!"], 500);
+        }
+
     }
 }

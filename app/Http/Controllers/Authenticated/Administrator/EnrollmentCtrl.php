@@ -314,7 +314,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_schedules (Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $schedules = Training::withCount(['hasData'])->get()->map(function($self) {
                 return [
                     'main' => $self->toArray(),
@@ -366,7 +366,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_schedule (Request $request, int $schedule_id) {
-        return TransactionUtil::transact(null, function() use ($request, $schedule_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $schedule_id) {
             $this_schedule = Training::withCount(['hasData'])->where('id', $schedule_id)->first();
 
             if($this_schedule->has_data_count > 0) {
@@ -389,7 +389,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_modules (Request $request) {
-        return TransactionUtil::transact(null, function() {
+        return TransactionUtil::transact(null, [], function() {
             $modules = CourseModule::withCount(['hasData'])->with('moduleType')->get();
             return response()->json(['modules' => $modules], 200);
         });
@@ -422,7 +422,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_module (Request $request, int $module_id) {
-        return TransactionUtil::transact(null, function() use ($request, $module_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $module_id) {
             $this_module = CourseModule::withCount(['hasData'])->where('id', $module_id)->first();
 
             if($this_module->has_data_count > 0) {
@@ -444,7 +444,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_module_types (Request $request) {
-        return TransactionUtil::transact(null, function()  {
+        return TransactionUtil::transact(null, [], function()  {
             $moduleTypes = ModuleType::withCount(['hasData'])->get();
             return response()->json(['moduleTypes' => $moduleTypes], 200);
         });
@@ -474,7 +474,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_module_type (Request $request, int $module_type_id) {
-        return TransactionUtil::transact(null, function() use ($request, $module_type_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $module_type_id) {
             $this_module_type = ModuleType::withCount(['hasData'])->where('id', $module_type_id)->first();
 
             if($this_module_type->has_data_count > 0) {
@@ -496,7 +496,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_training_fees (Request $request) {
-        return TransactionUtil::transact(null, function()  {
+        return TransactionUtil::transact(null, [], function()  {
             $training_fees = TrainingFee::withCount(['module' => function($query) {
                 return $query->whereHas('schedules', function ($schedulesQuery) {
                     return $schedulesQuery->whereHas('hasData');
@@ -508,7 +508,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_training_fees_predata (Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             return response()->json([
                 'categories' => json_decode($this->get_training_fees_category($request)->getContent(), true)['categories'],
                 'modules' => json_decode($this->get_modules($request)->getContent(), true)['modules'],
@@ -543,7 +543,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_training_fee (Request $request, int $fee_id) {
-        return TransactionUtil::transact(null, function() use ($request, $fee_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $fee_id) {
             $this_fee = TrainingFee::withCount(['module' => function($query) {
                 return $query->whereHas('schedules', function ($schedulesQuery) {
                     return $schedulesQuery->whereHas('hasData');
@@ -568,7 +568,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_training_fees_category (Request $request) {
-        return TransactionUtil::transact(null, function()  {
+        return TransactionUtil::transact(null, [], function()  {
             $categories = TrainingFeeCategory::withCount(['hasData'])->get();
             return response()->json(['categories' => $categories], 200);
         });
@@ -597,7 +597,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_training_fee_category (Request $request, int $fee_category_id) {
-        return TransactionUtil::transact(null, function() use ($request, $fee_category_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $fee_category_id) {
             $this_fee = TrainingFeeCategory::withCount(['hasData'])->where('id', $fee_category_id)->first();
 
             if($this_fee->has_data_count > 0) {
@@ -618,7 +618,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_certificates (Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $certificates = MainCertificate::withCount(['module' => function($query) {
                 return $query->whereHas('schedules', function ($schedulesQuery) {
                     return $schedulesQuery->whereHas('hasData');
@@ -657,7 +657,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_certificate (Request $request, int $certificate_id) {
-        return TransactionUtil::transact(null, function() use ($request, $certificate_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $certificate_id) {
             $this_certificate = MainCertificate::withCount(['module' => function($query) {
                 return $query->whereHas('schedules', function ($schedulesQuery) {
                     return $schedulesQuery->whereHas('hasData');
@@ -683,7 +683,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_requirements (Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $requirements = Requirement::withCount(['hasData', 'trainee_file'])->with('forModules')->get();
             return response()->json(['requirements' => $requirements], 200);
         });
@@ -732,7 +732,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_requirement (Request $request, int $requirement_id) {
-        return TransactionUtil::transact(null, function() use ($request, $requirement_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $requirement_id) {
             $this_requirement = Requirement::withCount(['hasData', 'trainee_file'])->where('id', $requirement_id)->first();
 
             if($this_requirement->has_data_count > 0 || $this_requirement->trainee_file_count > 0) {
@@ -754,7 +754,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_schools (Request $request) {
-        return TransactionUtil::transact(null, function() {
+        return TransactionUtil::transact(null, [], function() {
             $schools = MainSchool::withCount(['hasData'])->get();
             return response()->json(['schools' => $schools], 200);
         });
@@ -785,7 +785,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_school (Request $request, int $school_id) {
-        return TransactionUtil::transact(null, function() use ($request, $school_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $school_id) {
             $this_school = MainSchool::withCount(['hasData'])->where('id', $school_id)->first();
 
             if($this_school->has_data_count > 0) {
@@ -808,7 +808,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_courses (Request $request) {
-        return TransactionUtil::transact(null, function() {
+        return TransactionUtil::transact(null, [], function() {
             $courses = MainCourse::withCount(['hasData'])->get();
             return response()->json(['courses' => $courses], 200);
         });
@@ -838,7 +838,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_course (Request $request, int $course_id) {
-        return TransactionUtil::transact(null, function() use ($request, $course_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $course_id) {
             $this_course = MainCourse::withCount(['hasData'])->where('id', $course_id)->first();
 
             if($this_course->has_data_count > 0) {
@@ -860,7 +860,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_vouchers (Request $request) {
-        return TransactionUtil::transact(null, function() {
+        return TransactionUtil::transact(null, [], function() {
             $vouchers = Voucher::all();
             return response()->json(['vouchers' => $vouchers], 200);
         });
@@ -891,7 +891,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_voucher (Request $request, int $voucher_id) {
-        return TransactionUtil::transact(null, function() use ($request, $voucher_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $voucher_id) {
             $this_voucher = Voucher::where('id', $voucher_id)->first();
 
             if($this_voucher->has_data_count > 0 && $this_voucher->has_data_count > 0) {
@@ -914,7 +914,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_sponsors (Request $request) {
-        return TransactionUtil::transact(null, function() {
+        return TransactionUtil::transact(null, [], function() {
             $sponsors = Sponsor::all();
             return response()->json(['sponsors' => $sponsors], 200);
         });
@@ -945,7 +945,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_sponsor (Request $request, int $sponsor_id) {
-        return TransactionUtil::transact(null, function() use ($request, $sponsor_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $sponsor_id) {
             $this_sponsor = Sponsor::where('id', $sponsor_id)->first();
 
             if(!$this_sponsor) {
@@ -967,7 +967,7 @@ class EnrollmentCtrl extends Controller
     }
 
      public function get_licenses (Request $request) {
-        return TransactionUtil::transact(null, function() {
+        return TransactionUtil::transact(null, [], function() {
             $licenses = License::withCount(['hasData'])->get();
             return response()->json(['licenses' => $licenses], 200);
         });
@@ -997,7 +997,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_license (Request $request, int $license_id) {
-        return TransactionUtil::transact(null, function() use ($request, $license_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $license_id) {
             $this_license = License::withCount(['hasData'])->where('id', $license_id)->first();
 
             if($this_license->has_data_count > 0) {
@@ -1019,7 +1019,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function get_ranks (Request $request) {
-        return TransactionUtil::transact(null, function() {
+        return TransactionUtil::transact(null, [], function() {
             $ranks = Rank::withCount(['hasData'])->get();
             return response()->json(['ranks' => $ranks], 200);
         });
@@ -1050,7 +1050,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_rank (Request $request, int $rank_id) {
-        return TransactionUtil::transact(null, function() use ($request, $rank_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $rank_id) {
             $this_rank = Rank::withCount(['hasData'])->where('id', $rank_id)->first();
 
             if($this_rank->has_data_count > 0) {
