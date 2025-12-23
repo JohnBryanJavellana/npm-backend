@@ -12,6 +12,8 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 class ExtendingRequest extends FormRequest
 {
+
+    protected $stopOnFirstFailure = true;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -26,16 +28,6 @@ class ExtendingRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    // protected function prepareForValidation()
-    // {
-    //     if (is_string($this->data)) {
-    //         $this->merge([
-    //             'data' => json_decode($this->data, true),
-    //         ]);
-    //     }
-
-    //     return [];
-    // }
 
 
     public function rules(): array
@@ -71,10 +63,13 @@ class ExtendingRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors()->all();
+        $errors = $validator->errors();
+        $firstError = $errors->first();
+        
         throw new HttpResponseException(
             response()->json([
-                "message" => implode(',', $errors)
+                "message" => $firstError,
+                "errors" => $errors->toArray()
             ], 422)
         );
     }

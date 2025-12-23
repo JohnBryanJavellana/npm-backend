@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BEDormitory;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Trainee\Dormitory\DormRoomRequest;
 use App\Http\Resources\Trainee\Dormitory\DApplicationResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ use App\Models\{DormitoryRoom,
     DormitoryTenantHistory,
     DormitoryTransfer,
     DormitoryExtendRequest};
+use App\Services\Trainee\Dormitory\DormitoryService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -23,6 +25,7 @@ class TraineeDormitory extends Controller
 {
 
     protected $short_ttl = 60;
+    protected $dormitory_service;
 
     public const IN_PROGRESS = [
         'PENDING',
@@ -42,6 +45,15 @@ class TraineeDormitory extends Controller
         'REJECTED',
         'CANCELLED',
     ];
+
+    /**
+     * Dependency injection
+     * @param DormitoryService $dormitoryService
+     */
+    public function __construct(DormitoryService $dormitoryService)
+    {
+        $this->dormitory_service = $dormitoryService;
+    }
 
     public function get_all_dormitories(Request $request) {
         $dormitories = DormitoryRoom::where("room_status", "ACTIVE")->get();
@@ -420,76 +432,61 @@ class TraineeDormitory extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * 
-     * CHECK IF:
      * 
-     * HAS EXISTING REQUEST OR ACTIVE OCCUPANCY
      * 
      */
-    
-    public function request_tenant_room(Request $request) {
+
+    public function request_tenant_room(DormRoomRequest $request) {
         \Log::info("request dorm", [$request->all()]);
 
-        $validations = [
-            "forType" => "required|in:MALE,FEMALE,COUPLE",
-            "is_air_conditioned" => "required|in:YES,NO",
-            "single_occupancy" => "required|in:YES,NO",
-            "file" => "mimes:jpg,jpeg,png,pdf,doc,docx|max:5120",
-            "purpose" => "required|string|max:255"
-        ];
-
         $user = $request->user();
+
         $existing_request = DormitoryTenant::where(['user_id' => $request->user()->id, 'tenant_status' => "PENDING"])->exists();
 
         if ($existing_request) {
             throw new \DomainException("A request is already existing!");
             // return response()->json(["message" => "A request is already existing!"], 422);
         }
+        
+        try {
+            DB::beginTransaction();
 
-        $validator = \Validator::make($request->all(), $validations);
+            $data = [
+                "user_id" => $user->id,
+                "room_for_type" => $request->forType,
+                "trace_number" => GenerateTrace::createTraceNumber(DormitoryTenant::class, "-DR-"),
+                "is_air_conditioned" => $request->is_air_conditioned,
+                "single_occupancy" => $request->single_occupancy,
+                "tenant_from_date" => $request->startDate,
+                "tenant_to_date" => $request->endDate,
+                "purpose" => $request->purpose,
+            ];
 
-        if($validator->fails()) {
-            return response()->json(['message'=> implode(',', $validator->errors()->all())],400);
-        } else {
-            try {
-                DB::beginTransaction();
-
-                $data = [
-                    "user_id" => $user->id,
-                    "room_for_type" => $request->forType,
-                    "trace_number" => GenerateTrace::createTraceNumber(DormitoryTenant::class, "-DR-"),
-                    "is_air_conditioned" => $request->is_air_conditioned,
-                    "single_occupancy" => $request->single_occupancy,
-                    "tenant_from_date" => $request->startDate,
-                    "tenant_to_date" => $request->endDate,
-                    "purpose" => $request->purpose,
-                ];
-
-                if ($request->forType === 'COUPLE') {
-                    $file_requested = $request->file;
-                    $filename = GenerateUniqueFilename::generate($file_requested);
-                    $file_requested->move(public_path('marriage-files'), $filename);
-                    $data["filename"] = $filename;
-                }
-
-                $tenant_dormitory = DormitoryTenant::create($data);
-
-                AuditHelper::log($user->id, "User {$user->id} sent a dorm request.");
-
-                $dormitory_tenant_history = new DormitoryTenantHistory;
-                $dormitory_tenant_history->dormitory_tenant_id = $tenant_dormitory->id;
-                $dormitory_tenant_history->history_reason = "Requested";
-                $dormitory_tenant_history->save();
-
-                if(env("USE_EVENT")) {
-                    event(new BEDormitory(''));
-                }
-
-                DB::commit();
-                return response()->json(["message"=> 'Dormitory request sent successfully.'], 200);
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return response()->json(["message"=> $e->getMessage()],500);
+            if ($request->forType === 'COUPLE') {
+                $file_requested = $request->file;
+                $filename = GenerateUniqueFilename::generate($file_requested);
+                $file_requested->move(public_path('marriage-files'), $filename);
+                $data["filename"] = $filename;
             }
+
+            $tenant_dormitory = DormitoryTenant::create($data);
+
+            AuditHelper::log($user->id, "User {$user->id} sent a dorm request.");
+
+            $dormitory_tenant_history = new DormitoryTenantHistory;
+            $dormitory_tenant_history->dormitory_tenant_id = $tenant_dormitory->id;
+            $dormitory_tenant_history->history_reason = "Requested";
+            $dormitory_tenant_history->save();
+
+            if(env("USE_EVENT")) {
+                event(new BEDormitory(''));
+            }
+
+            DB::commit();
+            return response()->json(["message"=> 'Dormitory request sent successfully.'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(["message"=> $e->getMessage()],500);
         }
     }
 

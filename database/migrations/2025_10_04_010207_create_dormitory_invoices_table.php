@@ -23,7 +23,7 @@ return new class extends Migration
             $table->longText('trace_number');
             $table->decimal('total_amount');
             $table->longText('description');
-            $table->enum('invoice_status', ['PENDING', 'PAID', 'CANCELLED', 'FOR-VERIFICATION', 'DECLINED'])->default('PENDING');
+            $table->enum('invoice_status', ['PENDING', 'PAID','FOR-VERIFICATION'])->default('PENDING');
             $table->timestamps();
         });
     }
