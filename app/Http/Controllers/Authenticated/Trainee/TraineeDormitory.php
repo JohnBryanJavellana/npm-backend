@@ -425,6 +425,7 @@ class TraineeDormitory extends Controller
      * HAS EXISTING REQUEST OR ACTIVE OCCUPANCY
      * 
      */
+    
     public function request_tenant_room(Request $request) {
         \Log::info("request dorm", [$request->all()]);
 
