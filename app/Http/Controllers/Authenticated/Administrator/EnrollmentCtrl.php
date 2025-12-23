@@ -733,9 +733,9 @@ class EnrollmentCtrl extends Controller
 
     public function remove_requirement (Request $request, int $requirement_id) {
         return TransactionUtil::transact(null, function() use ($request, $requirement_id) {
-            $this_requirement = Requirement::withCount(['hasData', 'forModules'])->where('id', $requirement_id)->first();
+            $this_requirement = Requirement::withCount(['hasData', 'trainee_file'])->where('id', $requirement_id)->first();
 
-            if($this_requirement->has_data_count > 0 || $this_requirement->for_modules_count > 0) {
+            if($this_requirement->has_data_count > 0 || $this_requirement->trainee_file_count > 0) {
                 return response()->json(['message' => "Can't remove requirement. It already has connected data."], 200);
             } else {
                 $this_requirement->delete();

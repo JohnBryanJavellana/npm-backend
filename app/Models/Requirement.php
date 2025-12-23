@@ -19,11 +19,11 @@ class Requirement extends Model
 
     public function trainee_file()
     {
-        return $this->hasOne(TrainingRegFile::class, 'requirement_id', 'id');
+        return $this->hasMany(TrainingRegFile::class);
     }
 
     public function uploaded_specific_requirement()
     {
-        return $this->hasOne(TraineeRequirement::class);
+        return $this->hasMany(TraineeRequirement::class);
     }
 }

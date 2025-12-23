@@ -64,7 +64,6 @@ class TraineeLibrary extends Controller
             ])
             ->withCount([
                 'copies' => function ($q) {
-                    // added
                     $q->where('status', 'AVAILABLE');
                 },
                 'carts' => function ($q) use ($user) {
