@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\{
 class Account extends Controller
 {
     public function trainee_info (Request $request, int $traineeId) {
-        return TransactionUtil::transact(null, function() use ($traineeId) {
+        return TransactionUtil::transact(null, [], function() use ($traineeId) {
             $traineeInfo = User::with([
                 'additional_trainee_info.general_info',
                 'additional_trainee_info.contact',
@@ -51,7 +51,7 @@ class Account extends Controller
     }
 
     public function get_activities (Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $activities = AuditTrail::orderBy('created_at', 'DESC');
             if ($request->user()->role !== "SUPERADMIN") $activities->where('user_id', $request->user()->id);
 
@@ -60,7 +60,7 @@ class Account extends Controller
     }
 
     public function submit_csm (SubmitCSM $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $new_csm = new CSM;
             $new_csm->user_id = $request->user()->id;
             $new_csm->reference_id = $request->refNumber;
@@ -160,7 +160,7 @@ class Account extends Controller
     }
 
     public function update_password(UpdatePassword $request){
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $user = User::findOrFail($request->user()->id);
 
             if ($user->isSocial === 'NO' && !Hash::check($request->current_password, $user->password)) {
@@ -188,12 +188,10 @@ class Account extends Controller
     }
 
     public function change_theme(Request $request) {
-        return TransactionUtil::transact(null, function() use ($request) {
+        return TransactionUtil::transact(null, ['user_profile_' . $request->user()->id], function() use ($request) {
             $user = User::find($request->user()->id);
             $user->dark_mode = $user->dark_mode === 'dark' ? 'light' : 'dark';
             $user->save();
-
-            Cache::forget('user_profile_' . $request->user()->id);
         });
     }
 }

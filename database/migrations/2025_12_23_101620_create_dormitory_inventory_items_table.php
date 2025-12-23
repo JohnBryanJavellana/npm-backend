@@ -21,7 +21,8 @@ return new class extends Migration
                 'AVAILABLE',
                 'BORROWED',
                 'LOST',
-                'DAMAGED'
+                'DAMAGED',
+                'UNAVAILABLE'
             ])->default('AVAILABLE');
             $table->timestamps();
         });
