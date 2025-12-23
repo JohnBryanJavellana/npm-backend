@@ -35,6 +35,12 @@ class SaveAvatar implements ShouldQueue
                     ConvertToBase64::generate($this->avatar, 'image', "$this->path/$this->filename");
                 }
             }
+
+            if($this->deletableFile) {
+                if(file_exists(public_path("$this->path/$this->filename"))) {
+                    unlink(public_path("$this->path/$this->filename"));
+                }
+            }
         }
     }
 }

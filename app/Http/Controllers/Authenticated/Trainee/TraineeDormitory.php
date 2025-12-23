@@ -437,16 +437,15 @@ class TraineeDormitory extends Controller
      */
 
     public function request_tenant_room(DormRoomRequest $request) {
-        \Log::info("request dorm", [$request->all()]);
-
+        \Log::info("controller dorm", [$request->all()]);
+        // return response()->json(["wow"], 500);
         $user = $request->user();
 
-        $existing_request = DormitoryTenant::where(['user_id' => $request->user()->id, 'tenant_status' => "PENDING"])->exists();
+        // $existing_request = DormitoryTenant::where(['user_id' => $request->user()->id, 'tenant_status' => "PENDING"])->exists();
 
-        if ($existing_request) {
-            throw new \DomainException("A request is already existing!");
-            // return response()->json(["message" => "A request is already existing!"], 422);
-        }
+        // if ($existing_request) {
+        //     throw new \DomainException("A request is already existing!");
+        // }
         
         try {
             DB::beginTransaction();

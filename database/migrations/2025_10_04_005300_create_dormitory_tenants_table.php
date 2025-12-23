@@ -24,6 +24,7 @@ return new class extends Migration
             $table->enum('is_air_conditioned', ["YES", "NO"]);
             $table->enum('paying_guest', ["YES", "NO"])->nullable();
             $table->longText("purpose")->nullable();
+            $table->longText("remarks")->nullable();
             $table->longText("filename")->nullable();
             $table->date('tenant_from_date')->nullable();
             $table->date('tenant_to_date')->nullable();

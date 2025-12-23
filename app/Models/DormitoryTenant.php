@@ -48,7 +48,7 @@ class DormitoryTenant extends Model{
 
     public function borrowedItems()
     {
-        
+        return $this->hasMany(DormitoryItemBorrowing::class);
     }
 
     /**
