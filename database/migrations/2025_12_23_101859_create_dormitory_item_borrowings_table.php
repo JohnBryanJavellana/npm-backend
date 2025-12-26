@@ -17,8 +17,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(DormitoryInventory::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(DormitoryInventoryItem::class)->nullable()->constrained()->onDelete('cascade');
-            $table->enum("status", ["RETURNED", "DAMAGED", "APPROVED", "PENDING", "LOST"])->default("PENDING");
+            $table->integer('count');
+            $table->longText('remarks')->nullable();
+            $table->enum("status", ["PENDING", "ACTIVE"])->default("PENDING");
             $table->timestamps();
         });
     }
