@@ -23,14 +23,14 @@ class CreateOrUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'dormId' => ['required'],
             'userId' => ['required'],
-            'roomId' => ['required'],
             'status_of_occupancy' => ['required'],
             'processType' => ['required'],
             'forType' => ['required'],
             'isAirConditioned' => ['required'],
             'single_accommodation' => ['required'],
+            'roomId' => [ Rule::when($this->processType === "WALK-IN", ['required'], ['nullable']) ],
+            'dormId' => [ Rule::when($this->processType === "WALK-IN", ['required'], ['nullable']) ],
             'filename' => [ Rule::when($this->forType === "COUPLE", ['required', 'base64_image'], ['nullable']) ],
             'fromDate' => ['required', 'date'],
             'toDate' => ['required', 'date'],
