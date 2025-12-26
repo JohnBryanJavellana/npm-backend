@@ -267,26 +267,26 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             });
         });
 
-        Route::middleware('user_role:SUPERADMIN,ADMIN-DORMITORY')->group(function() {
+        Route::middleware('user_role:SUPERADMIN,ADMIN-DORMITORY,TRAINER')->group(function() {
             Route::prefix('/dormitory/')->group(function() {
-                Route::get('get', [DormitoryController::class, 'dormitories']);
-                Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
-                Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
-                Route::post('create_or_update_dormitory', [DormitoryController::class, 'create_or_update_dormitory']);
-                Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms']);
-                Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms']);
-                Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms']);
+                Route::get('get', [DormitoryController::class, 'dormitories'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::post('create_or_update_dormitory', [DormitoryController::class, 'create_or_update_dormitory'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
                 Route::post('create-walk-in-request/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
                 Route::post('create-walk-in-request/create_or_update_request', [DormitoryController::class, 'create_or_update_request']);
-                Route::post('get_all_requests', [DormitoryController::class, 'get_all_requests']);
-                Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room']);
+                Route::post('get_all_requests', [DormitoryController::class, 'get_all_requests'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
 
-                Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories']);
-                Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock']);
-                Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock']);
-                Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
-                Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock']);
-                Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);
+                Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
             });
         });
 

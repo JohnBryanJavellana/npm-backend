@@ -513,7 +513,7 @@ class TraineeLibrary extends Controller
     }
 
     public function count_book_reservation (Request $request){
-        return TransactionUtil::transact(null, function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $userId = $request->user()->id;
             $cache_key = "count_book_reservation:{$userId}";
             $reservationCount = Cache::remember($cache_key, $this->short_ttl, function () use($request, $userId) {
@@ -542,7 +542,7 @@ class TraineeLibrary extends Controller
     }
 
     public function get_book_info (Request $request, int $book_id){
-            return TransactionUtil::transact(null, function() use($request, $book_id) {
+            return TransactionUtil::transact(null,[], function() use($request, $book_id) {
             // $ttl = now()->addMinutes(env('CACHE_DURATION'));
             // return Cache::remember("book_info_cache_$book_id:{$request->user()->id}", $ttl, function () use($request, $book_id) {
                 \Log::info($request->all());

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use App\Models\DormitoryInventoryItem;
+use App\Models\DormitoryItemBorrowing;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -233,6 +234,7 @@ class DormitoryController extends Controller
                 : DormitoryInventory::find($request->documentId);
 
             $dorm_inventory->name = $request->name;
+            $dorm_inventory->price = $request->amount;
             $dorm_inventory->description = $request->description;
             $dorm_inventory->is_consumable = $request->isConsumable;
 
@@ -344,6 +346,7 @@ class DormitoryController extends Controller
             $this_dormitory_request->tenant_from_date = $request->fromDate;
             $this_dormitory_request->tenant_to_date = $request->toDate;
             $this_dormitory_request->paying_guest = $request->payingGuest;
+            $this_dormitory_request->process_type = $request->processType;
 
             if($request->forType === "COUPLE") {
                 $this_dormitory_request->filename = $request->filename;
@@ -363,6 +366,16 @@ class DormitoryController extends Controller
             }
 
             $this_dormitory_request->save();
+
+            if($request->supply) {
+                foreach($request->supply as $supply) {
+                    $new_supply = new DormitoryItemBorrowing;
+                    $new_supply->dormitory_tenant_id = $this_dormitory_request->id;
+                    $new_supply->dormitory_inventory_id = $supply['id'];
+                    $new_supply->count = $supply['count'];
+                    $new_supply->save();
+                }
+            }
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory request. ID#" . $this_dormitory_request->id);
 

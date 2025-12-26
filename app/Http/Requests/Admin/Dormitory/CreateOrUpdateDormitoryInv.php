@@ -24,6 +24,7 @@ class CreateOrUpdateDormitoryInv extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
+            'amount' => ['required'],
             'isConsumable' => ['required'],
             'description' => ['required', 'string'],
             'stock' => [ Rule::when($this->httpMethod === "POST", ['required'], ['nullable']) ],

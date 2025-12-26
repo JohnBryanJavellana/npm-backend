@@ -22,6 +22,6 @@ class DormitoryInventory extends Model
 
     public function borrowings()
     {
-        return $this->hasManyThrough(DormitoryItemBorrowing::class, DormitoryInventoryItem::class);
+        return $this->hasMany(DormitoryItemBorrowing::class);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BEDormitory;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Trainee\Dormitory\CreateTransferRequest;
 use App\Http\Requests\Trainee\Dormitory\DormRoomRequest;
 use App\Http\Resources\Trainee\Dormitory\DApplicationResource;
 use Illuminate\Http\Request;
@@ -17,9 +18,9 @@ use App\Models\{DormitoryRoom,
     DormitoryTenantHistory,
     DormitoryTransfer,
     DormitoryExtendRequest, DormitoryInventory, DormitoryItemBorrowing};
-use App\Services\Trainee\Dormitory\DormitoryService;
-use Carbon\Carbon;
-use Illuminate\Support\Str;
+use App\Services\Trainee\Dormitory\DormitoryExtendService;
+use App\Services\Trainee\Dormitory\DormitoryRequestService;
+use App\Services\Trainee\Dormitory\DormitoryTransferService;
 
 class TraineeDormitory extends Controller
 {
@@ -28,7 +29,6 @@ class TraineeDormitory extends Controller
 
     protected $long_ttl = 600;
     protected $short_ttl = 60;
-    protected $dormitory_service;
 
     public const IN_PROGRESS = [
         'PENDING',
@@ -51,12 +51,12 @@ class TraineeDormitory extends Controller
 
     /**
      * Dependency injection
-     * @param DormitoryService $dormitoryService
+     * @param DormitoryRequestService $dormitoryService
      */
-    public function __construct(DormitoryService $dormitoryService)
-    {
-        $this->dormitory_service = $dormitoryService;
-    }
+    public function __construct(
+        protected DormitoryRequestService $dormitory_service,
+        protected DormitoryTransferService $dormitoryTransferService
+    ){}
 
     public function get_all_dormitories(Request $request) {
         $dormitories = DormitoryRoom::where("room_status", "ACTIVE")->get();
@@ -119,7 +119,7 @@ class TraineeDormitory extends Controller
         try {
             \Log::info("view", [$dormitory_id]);
             $dormitory_info = DormitoryTenant::with([
-                'dormitory_room.dormitory',
+                'dormitory_room.dormitory.room_images',
                 'transferRequest' => function($q) {
                     $q->where('status', 'PENDING');
                 },
@@ -157,26 +157,14 @@ class TraineeDormitory extends Controller
     public function remove_applied_dormitories (Request $request, int $dormitory_id) {
         try {
             \Log::info("cancel dorm", [$dormitory_id]);
-            $this_record = DormitoryTenant::find( $dormitory_id);
 
-            DB::beginTransaction();
-
-            if ($this_record->room_for_type === "COUPLE" && file_exists(public_path('marriage-files/' . $this_record->filename)) ) {
-                unlink(public_path('marriage-files/' . $this_record->filename));
-            }
-
-            $this_record->tenant_status = "CANCELLED";
-            $this_record->save();
-            
-            AuditHelper::log($request->user()->id, "You've cancelled dormitory request application. ID# $dormitory_id");
+            $this->dormitory_service->cancelRequest($request, $dormitory_id);                                 
 
             event(new BEDormitory(''));
 
-            DB::commit();
             return response()->json(['message' => "You've cancelled dormitory request application. ID# $dormitory_id"], 200);
         } catch (\Exception $e) {
             \Log::error("error cancel dorm", [$dormitory_id]);
-            DB::rollback();
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
@@ -215,7 +203,7 @@ class TraineeDormitory extends Controller
             return response()->json(["message"=> $e->getMessage()], 500);
         }
     }
-
+    
     public function get_personal_dormitory (Request $request) {
         try {
             $user = User::findOrFail($request->user()->id);
@@ -244,9 +232,12 @@ class TraineeDormitory extends Controller
             try {
                 DB::beginTransaction();
 
+                //validations
                 $pending_request = DormitoryTransfer::whereHas("tenant", function ($query) use ($request) {
                     $query->where('user_id', $request->user()->id);
-                })->whereIn('status', ['PENDING','APPROVED'])->exists();
+                })
+                ->whereIn('status', ['PENDING','APPROVED'])
+                ->exists();
 
                 if($pending_request) {
                     return response()->json([
@@ -266,15 +257,18 @@ class TraineeDormitory extends Controller
                     ], 400);
                 }
 
+                //tenant update
                 $dorm_record = DormitoryTenant::findOrFail($request->document_id);
                 $dorm_record->tenant_status = "EXTENDING";
                 $dorm_record->save();
 
+                //create request
                 $record = new DormitoryExtendRequest;
                 $record->dormitory_tenant_id = $request->document_id;
                 $record->date_of_extension = $request->date;
                 $record->save();
 
+                //create history
                 $dormitory_tenant_history = new DormitoryTenantHistory;
                 $dormitory_tenant_history->dormitory_tenant_id = $request->document_id;
                 $dormitory_tenant_history->history_reason = "A Dormitory Extension Request has been created, extending the stay until {$request->date}.";
@@ -283,6 +277,8 @@ class TraineeDormitory extends Controller
                 if(env("USE_EVENT")) {
                     event(new BEDormitory(''));
                 }
+
+                //additional email for sending a extension request
 
                 AuditHelper::log($request->user()->id, "User {$request->user()->id} sent a dorm extension request.");
 
@@ -297,65 +293,21 @@ class TraineeDormitory extends Controller
         }
     }
 
-    public function create_transfer_request(Request $request)
+    public function create_transfer_request(CreateTransferRequest $request)
     {
-        $validations = [
-            'document_id' => 'required',
-            'transfer_type' => 'required|in:ROOM,CLASS',
-            'type' => 'required',
-            'reason' => 'required|string|max:500'
-        ];
+        try {
+            $userId = $request->user()->id;
+            $validated = $request->validated();
 
-        $validator = \Validator::make($request->all(), $validations);
+            $this->dormitoryTransferService->createTransfer($validated, $userId);
+        
+            event(new BEDormitory(''));
 
-        if ($validator->fails()) {
-            return response()->json(['message', implode(',', $validator->errors()->all())], 400);
-        } else {
-            try {
-                DB::beginTransaction();
+            return response()->json(['message' => "Transfer request sent! We're processing your request and will update you soon."], 200);
 
-                $pending_request = DormitoryTransfer::whereHas("tenant", function ($query) use ($request) {
-                    $query->where('user_id', $request->user()->id);
-                })->where('status', 'PENDING')->exists();
-
-                if($pending_request) {
-                    return response()->json([
-                        "message" => "A pending transfer request already exists. You may only submit a new request once the current one has been resolved."
-                    ], 400);
-                }
-
-                $exist = DormitoryTenant::where([
-                    "id" => $request->document_id,
-                    "tenant_status" => "APPROVED",
-                    "user_id" => $request->user()->id
-                ])->exists();
-
-                if(!$exist) {
-                    return response()->json([
-                        "message" => "No active tenant record was found. Room transfer requests can only be made by active tenants."
-                    ], 400);
-                }
-
-                $record = new DormitoryTransfer;
-                $record->dormitory_tenant_id = $request->document_id;
-                $record->transfer_type = $request->transfer_type;
-                $record->room_type = $request->type;
-                $record->reason = $request->reason;
-                $record->save();
-
-                event(new BEDormitory(''));
-
-                AuditHelper::log($request->user()->id, "User {$request->user()->id} requested a dorm transfer request.");
-
-                DB::commit();
-                return response()->json(['message' => "Transfer request sent! We're processing your request and will update you soon."], 200);
-
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return response()->json(['message' => $e->getMessage()], 500);
-            }
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-
     }
 
     public function cancel_request(Request $request, Int $id)
@@ -363,9 +315,10 @@ class TraineeDormitory extends Controller
         try {
             DB::beginTransaction();
 
+            $user_id = $request->user()->id;
             $allowedTypes = [
-                'DormitoryTransfer' => DormitoryTransfer::class,
-                'DormitoryExtendRequest' => DormitoryExtendRequest::class,
+                'DormitoryTransfer' => "DormitoryTransfer",
+                'DormitoryExtendRequest' => $this->dormitoryTransferService,
             ];
 
             if (!array_key_exists($request->type, $allowedTypes)) {
@@ -374,46 +327,15 @@ class TraineeDormitory extends Controller
                 ], 404);
             }
 
-            $record_type = $allowedTypes[$request->type];
-            $record = $record_type::findOrFail($id);
-
-            if (!$record) {
-                return response()->json([
-                    'message' => 'Transfer request not found.'
-                ], 404);
-            }
-
-            if($record->status == 'APPROVED') {
-                return response()->json([
-                    'message' => 'Transfer cancellation is not permitted. This request was previously.'
-                ], 422);
-            }
-
-            $record->delete();
-
-            // $dorm_record = DormitoryTenant::findOrFail($request->document_id);
-            // $dorm_record->tenant_status = "EXTENDING";
-            // $dorm_record->save();
-
-            $dormitory_tenant_history = new DormitoryTenantHistory;
-            $dormitory_tenant_history->dormitory_tenant_id = $record->dormitory_tenant_id;
             switch ($allowedTypes[$request->type]) {
                 case 'DormitoryTransfer':
-                    $dormitory_tenant_history->history_reason =
-                        "You cancelled your room transfer request. No changes were made to your current room assignment.";
+                    $this->dormitoryTransferService->cancelTransfer($id, $user_id);
                     break;
-
                 case 'DormitoryExtendRequest':
-                    $dormitory_tenant_history->history_reason =
-                        "You cancelled your room extension request. Your original checkout schedule remains unchanged.";
-                    break;
-
-                default:
-                    $dormitory_tenant_history->history_reason =
-                        "You cancelled a request on your account.";
+                    //change for extension
+                    $this->dormitoryTransferService->cancelTransfer($id, $user_id);
                     break;
             }
-            $dormitory_tenant_history->save();
 
             if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
@@ -441,13 +363,6 @@ class TraineeDormitory extends Controller
         \Log::info("controller dorm", [$request->all()]);
         // return response()->json(["wow" => $request->all()], 200);
         $user = $request->user();
-
-        // $existing_request = DormitoryTenant::where(['user_id' => $request->user()->id, 'tenant_status' => "PENDING"])->exists();
-
-        // if ($existing_request) {
-        //     throw new \DomainException("A request is already existing!");
-        // }
-        
         try {
             DB::beginTransaction();
 
@@ -460,7 +375,6 @@ class TraineeDormitory extends Controller
                 "tenant_from_date" => $request->startDate,
                 "tenant_to_date" => $request->endDate,
                 "purpose" => $request->purpose,
-                "remarks" => $request->remarks,
             ];
 
             if ($request->forType === 'COUPLE') {
