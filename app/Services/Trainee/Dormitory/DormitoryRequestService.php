@@ -14,21 +14,37 @@ use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use App\Utils\GenerateUniqueFilename;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use Svg\Tag\Rect;
-use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Support\Facades\DB;
+use DomainException;
+
+
+
 
 class DormitoryRequestService {
 
-    protected $long_ttl = 600;
+    private const LONG_TTL = 600;
+    private const SHORT_TTL = 30;
 
     public function __construct(
         protected DormitoryRoom $roomModel,
         protected DormitoryTenant $tenantModel,
         protected DormitoryTenantHistory $dormitoryTenantHistory,
         protected DormitoryInventory $dormitoryInventory,
-        ){}
+    ){}
+
+    public function viewUserRequest($userId, $traceNumber)
+    {
+        $cacheKey = "a$userId";
+        return Cache::remember($cacheKey, self::LONG_TTL, function() {
+
+        });
+    }
+
+    public function viewApplication()
+    {
+        
+    }
 
     public function createDormRequest($validated, $userId)
     {
@@ -56,13 +72,6 @@ class DormitoryRequestService {
 
             $record = $this->tenantModel->create($data);
 
-            foreach($validated["items"] as $item) {
-                $this->dormitoryInventory->create([
-                    "dormitory_tenant_id" => $record->id,
-                    "dormitory_inventory_id" => $item
-                ]);
-            }
-
             $this->loggingDetails($record, $userId, "requested");
 
         });
@@ -76,8 +85,10 @@ class DormitoryRequestService {
             ->lockForUpdate()
             ->firstOrFail();
 
-            if($record->tenant_status === RequestStatus::CANCELLED) {
-                throw new \DomainException(
+            \Log::info("cancelRequest", [RequestStatus::CANCELLED->value, $record]);
+
+            if($record->tenant_status === RequestStatus::CANCELLED->value) {
+                throw new DomainException(
                     "Dormitory request is already cancelled."
                 );
             }
@@ -90,8 +101,10 @@ class DormitoryRequestService {
                 unlink(public_path('marriage-files/' . $record->filename));
             }
 
+            \Log::info("cancelRequest", [RequestStatus::CANCELLED->value, $record]);
+
             $record->update([
-                $record->tenant_status => RequestStatus::CANCELLED
+                $record->tenant_status => RequestStatus::CANCELLED->value
             ]);
 
             $this->loggingDetails(
@@ -102,25 +115,14 @@ class DormitoryRequestService {
         });
     }
 
-    public function allInvItems()
-    {
-        //might change, if will return based on stocks
-        $cache_key = "inventoryItems";
-        $items = Cache::remember($cache_key, $this->long_ttl, function() {
-            return $this->dormitoryInventory::all();
-        });
-
-        return $items;
-    }
-
     private function validateData($userId) {
         
         $existing_request = $this->tenantModel
-        ->where(['user_id' => $userId, 'tenant_status' => "PENDING"])
+        ->where(['user_id' => $userId, 'tenant_status' => RequestStatus::PENDING->value])
         ->exists();
 
         if ($existing_request) {
-            throw new \DomainException("A request is already existing!");
+            throw new DomainException("A request is already existing!");
         }
     }
 

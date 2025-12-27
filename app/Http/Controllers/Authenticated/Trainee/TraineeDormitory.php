@@ -359,46 +359,43 @@ class TraineeDormitory extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function request_tenant_room(Request $request) {
+    public function request_tenant_room(DormRoomRequest $request) {
         \Log::info("controller dorm", [$request->all()]);
         // return response()->json(["wow" => $request->all()], 200);
         $user = $request->user();
+        $validated = $request->validated();
+
         try {
             DB::beginTransaction();
 
-            $data = [
-                "user_id" => $user->id,
-                "room_for_type" => $request->forType,
-                "trace_number" => GenerateTrace::createTraceNumber(DormitoryTenant::class, "-DR-"),
-                "is_air_conditioned" => $request->is_air_conditioned,
-                "single_accomodation" => $request->single_accomodation,
-                "tenant_from_date" => $request->startDate,
-                "tenant_to_date" => $request->endDate,
-                "purpose" => $request->purpose,
-            ];
+            $this->dormitory_service->createDormRequest($validated, $user->id);
 
-            if ($request->forType === 'COUPLE') {
-                $file_requested = $request->file;
-                $filename = GenerateUniqueFilename::generate($file_requested);
-                $file_requested->move(public_path('marriage-files'), $filename);
-                $data["filename"] = $filename;
-            }
+            // $data = [
+            //     "user_id" => $user->id,
+            //     "room_for_type" => $request->forType,
+            //     "trace_number" => GenerateTrace::createTraceNumber(DormitoryTenant::class, "-DR-"),
+            //     "is_air_conditioned" => $request->is_air_conditioned,
+            //     "single_accomodation" => $request->single_accomodation,
+            //     "tenant_from_date" => $request->startDate,
+            //     "tenant_to_date" => $request->endDate,
+            //     "purpose" => $request->purpose,
+            // ];
 
-            $tenant_dormitory = DormitoryTenant::create($data);
+            // if ($request->forType === 'COUPLE') {
+            //     $file_requested = $request->file;
+            //     $filename = GenerateUniqueFilename::generate($file_requested);
+            //     $file_requested->move(public_path('marriage-files'), $filename);
+            //     $data["filename"] = $filename;
+            // }
 
-            foreach($request->addsOn as $item) {
-                DormitoryItemBorrowing::create(attributes: [
-                    "dormitory_tenant_id" => $tenant_dormitory->id,
-                    "dormitory_inventory_id" => $item
-                ]);
-            }
+            // $tenant_dormitory = DormitoryTenant::create($data);
 
-            AuditHelper::log($user->id, "User {$user->id} sent a dorm request.");
+            // AuditHelper::log($user->id, "User {$user->id} sent a dorm request.");
 
-            DormitoryTenantHistory::create([
-                "dormitory_tenant_id" => $tenant_dormitory->id,
-                "history_reason" => "Requested"
-            ]);
+            // DormitoryTenantHistory::create([
+            //     "dormitory_tenant_id" => $tenant_dormitory->id,
+            //     "history_reason" => "Requested"
+            // ]);
 
             if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
@@ -406,7 +403,11 @@ class TraineeDormitory extends Controller
 
             DB::commit();
             return response()->json(["message"=> 'Dormitory request sent successfully.'], 200);
-        } catch (\Exception $e) {
+
+        } catch (\DomainException $e) {
+            throw $e;
+        }
+        catch (\Exception $e) {
             \Log::error("error-send-reqesut", [$e]);
             DB::rollBack();
             return response()->json(["message"=> $e->getMessage()],500);
@@ -524,18 +525,5 @@ class TraineeDormitory extends Controller
                 return response()->json(['message'=> $e->getMessage()],500);
             }
         }
-    }
-
-    public function get_items(Request $request)
-    {
-        try
-        {
-            return response()->json(["items" => $this->dormitory_service->allInvItems()], 200);
-        }
-        catch (\Exception $e) {
-            \Log::error("error-get-items", [$e]);
-            return response()->json(["message" => "Something went wrong, Please try again!"], 500);
-        }
-
     }
 }

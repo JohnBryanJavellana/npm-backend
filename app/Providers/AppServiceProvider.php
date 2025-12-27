@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\BookReservation;
+use App\Observers\BookReservationObserver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -25,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
         ResetPassword::createUrlUsing(function ($user, string $token) {
             return config('app.frontend_url') . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
         });
+
+        BookReservation::observe(BookReservationObserver::class);
 
         // VerifyEmail::toMailUsing(function ($notifiable, $url) {
         //     $frontendUrl = config('app.frontend_url');

@@ -87,6 +87,7 @@ class Account extends Controller
     public function update_personal(Request $request) {
         $validation = [
             'firstName' => 'required|string',
+            'gender' => 'required|string',
             'middleName' => 'string',
             'lastName' => 'required|string',
             'birthdate' => 'required|date|before:today',
@@ -108,6 +109,7 @@ class Account extends Controller
                 $user->fname = $request->firstName;
                 $user->mname = $request->middleName;
                 $user->lname = $request->lastName;
+                $user->gender = $request->gender;
                 $user->suffix = $request->suffix;
                 $user->birthdate = $request->birthdate;
 
