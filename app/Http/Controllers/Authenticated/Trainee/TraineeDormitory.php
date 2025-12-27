@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainee\Dormitory\CreateTransferRequest;
 use App\Http\Requests\Trainee\Dormitory\DormRoomRequest;
 use App\Http\Resources\Trainee\Dormitory\DApplicationResource;
+use App\Http\Resources\Trainee\Dormitory\DAppliedRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Utils\{AuditHelper, GenerateUniqueFilename, GenerateTrace, TransactionUtil};
@@ -21,6 +22,7 @@ use App\Models\{DormitoryRoom,
 use App\Services\Trainee\Dormitory\DormitoryExtendService;
 use App\Services\Trainee\Dormitory\DormitoryRequestService;
 use App\Services\Trainee\Dormitory\DormitoryTransferService;
+use DomainException;
 
 class TraineeDormitory extends Controller
 {
@@ -124,13 +126,12 @@ class TraineeDormitory extends Controller
                     $q->where('status', 'PENDING');
                 },
                 'tenant_invoices' => function($self) {
-                    return $self->orderBy('created_at', 'DESC');
+                    $self->orderBy('created_at', 'DESC');
                 },
                 'dormitory_histories' => function($self) {
-                    return $self->limit(5)->orderBy('created_at', 'DESC');
+                    $self->limit(5)->orderBy('created_at', 'DESC');
                 },
-                'borrowedItems.inventory',
-                'borrowedItems.item',
+                'borrowedItems.items.item.itemInfo'
             ])
             ->where([
                 'trace_number' => $dormitory_id,
@@ -138,7 +139,8 @@ class TraineeDormitory extends Controller
             ])
             ->get();
 
-            return response()->json(['dormitory_info' => $dormitory_info]);
+            return DAppliedRequest::collection($dormitory_info);
+
         } catch (\Exception $e) {
             \Log::info("error", [$e]);
             return response()->json(['message' => $e->getMessage()], 500);
@@ -163,7 +165,11 @@ class TraineeDormitory extends Controller
             event(new BEDormitory(''));
 
             return response()->json(['message' => "You've cancelled dormitory request application. ID# $dormitory_id"], 200);
-        } catch (\Exception $e) {
+        }
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (\Exception $e) {
             \Log::error("error cancel dorm", [$dormitory_id]);
             return response()->json(['message' => $e->getMessage()], 500);
         }

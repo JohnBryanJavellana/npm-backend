@@ -22,7 +22,6 @@ class GetAvailableDorms extends FormRequest
     public function rules(): array
     {
         return [
-            'userId' => ['required', 'numeric'],
             'room_for_type' => ['required'],
             'room_type' => ['required'],
         ];

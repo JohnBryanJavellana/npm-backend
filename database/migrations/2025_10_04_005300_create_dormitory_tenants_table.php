@@ -38,7 +38,8 @@ return new class extends Migration
                 'FOR PAYMENT',
                 'REJECTED',
                 'PAID',
-                "PROCESSING PAYMENT"
+                "PROCESSING PAYMENT",
+                "RESERVED"
             ])->default('PENDING');
             $table->enum('process_type', ["ONLINE", "WALK-IN"])->default("ONLINE");
             $table->timestamps();
