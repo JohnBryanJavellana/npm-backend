@@ -120,19 +120,12 @@ class DormitoryController extends Controller
     public function get_available_dorms (GetAvailableDorms $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $dorms = Dormitory::withCount('rooms')
-                ->where([
-                    'room_for_type' => $request->room_for_type,
-                    'is_air_conditioned' => $request->room_type
-                ])->get();
-
-            $availableSupplies = DormitoryInventory::withCount([
-                'stock' => fn($query) => $query->whereIn('status', ['AVAILABLE', 'DAMAGED'])
+            ->where([
+                'room_for_type' => $request->room_for_type,
+                'is_air_conditioned' => $request->room_type
             ])->get();
 
-            return response()->json([
-                'dorms' => $dorms,
-                'availableSupplies' => $availableSupplies
-            ], 200);
+            return response()->json(['dorms' => $dorms], 200);
         });
     }
 
@@ -428,7 +421,10 @@ class DormitoryController extends Controller
                 if(!is_null($this_dorm_request->dormitory_room_id)) {
                     $dorm = DormitoryRoom::find($this_dorm_request->dormitory_room_id);
 
-                    $dorm->room_available_slot = $this_dorm_request->room_for_type === "COUPLE" ? 2 : 1;
+                    $dorm->room_available_slot = ($this_dorm_request->room_for_type === "COUPLE" || $this_dorm_request->single_accommodation)
+                        ? 2
+                        : 1;
+
                     $dorm->room_status = "AVAILABLE";
                     $dorm->save();
                 }

@@ -96,17 +96,17 @@ class DormitoryTransferService {
                 $record->dormitory_tenant_id,
                 $userId, 
                 "cancelled",
-                "You cancelled your room transfer request. No changes were made to your current room assignment."
+                "You cancelled your room transfer request."
             );
         });
     }
     private function loggingDetails(int $tenant_id, int $userId, string $action, string $reason) {
 
-        AuditHelper::log($userId, "User $userId $action a dorm transfer request.");
+        AuditHelper::log($userId, "User $userId has $action a dorm transfer request.");
 
         $this->dormitoryTenantHistory->create([
             "dormitory_tenant_id" => $tenant_id,
-            "history_reason" => $action,
+            "history_reason" => $reason,
         ]);
     }
 }

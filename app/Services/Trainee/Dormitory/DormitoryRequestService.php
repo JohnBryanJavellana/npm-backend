@@ -18,8 +18,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use DomainException;
 
-
-
+use function PHPUnit\Framework\isNull;
 
 class DormitoryRequestService {
 
@@ -72,7 +71,12 @@ class DormitoryRequestService {
 
             $record = $this->tenantModel->create($data);
 
-            $this->loggingDetails($record, $userId, "requested");
+            $this->loggingDetails(
+                $record, 
+                $userId, 
+                "requested",
+                "You’ve sent your dormitory request."
+            );
 
         });
     }
@@ -85,12 +89,22 @@ class DormitoryRequestService {
             ->lockForUpdate()
             ->firstOrFail();
 
-            \Log::info("cancelRequest", [RequestStatus::CANCELLED->value, $record]);
-
             if($record->tenant_status === RequestStatus::CANCELLED->value) {
                 throw new DomainException(
                     "Dormitory request is already cancelled."
                 );
+            }
+
+            if(!is_null($record->dormitory_room_id)) {
+                $dorm = $this->roomModel
+                ->find($record->dormitory_room_id)
+                ->lockForUpdate();
+
+                $dorm->update([
+                    "room_available_slot" =>  $record->room_for_type === "COUPLE" 
+                        || $record->single_accommodation === "YES" ? 2 : 1,
+                    "room_status" => RequestStatus::AVAILABLE->value
+                ]);
             }
 
             if (
@@ -101,16 +115,15 @@ class DormitoryRequestService {
                 unlink(public_path('marriage-files/' . $record->filename));
             }
 
-            \Log::info("cancelRequest", [RequestStatus::CANCELLED->value, $record]);
-
             $record->update([
-                $record->tenant_status => RequestStatus::CANCELLED->value
+                "tenant_status" => RequestStatus::CANCELLED->value
             ]);
 
             $this->loggingDetails(
                 $record, 
                 $request->user()->id, 
                 "cancelled",
+                "You cancelled your room dorm request."
             );
         });
     }
@@ -126,7 +139,7 @@ class DormitoryRequestService {
         }
     }
 
-    private function loggingDetails($record, $userId, $action) {
+    private function loggingDetails($record, $userId, $action, $reason) {
 
         AuditHelper::log($userId, "User $userId has $action a dorm room request.");
 
