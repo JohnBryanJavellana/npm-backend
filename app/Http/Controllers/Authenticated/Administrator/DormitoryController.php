@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use App\Models\DormitoryInventoryItem;
+use App\Models\DormitoryItemBI;
 use App\Models\DormitoryItemBorrowing;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -374,6 +375,21 @@ class DormitoryController extends Controller
                     $new_supply->dormitory_inventory_id = $supply['id'];
                     $new_supply->count = $supply['count'];
                     $new_supply->save();
+
+                    for($i = 0; $i < $supply['count']; $i++) {
+                        $getItem = DormitoryInventoryItem::where([
+                            'dormitory_inventory_id' => $supply['id'],
+                            'status' => 'AVAILABLE'
+                        ])->lockForUpdate()->first();
+
+                        $new_item = new DormitoryItemBI;
+                        $new_item->dormitory_item_borrowing_id = $new_supply->id;
+                        $new_item->dormitory_inventory_item_id = $getItem->id;
+                        $new_item->save();
+
+                        $getItem->status = "RESERVED";
+                        $getItem->save();
+                    }
                 }
             }
 
@@ -406,10 +422,15 @@ class DormitoryController extends Controller
             $room_requests = DormitoryTenant::with([
                 'boarder',
                 'dormitory_room',
-                'dormitory_room.dormitory'
+                'dormitory_room.dormitory',
+                'borrowedItems',
+                'borrowedItems.items',
+                'borrowedItems.items.item'
             ]);
 
+            if($request->userId) $room_requests->where('user_id', $request->userId);
             if($request->tenantStatus) $room_requests->whereIn('tenant_status', $request->tenantStatus);
+            if($request->traceNumber) $room_requests->whereIn('trace_number', $request->traceNumber);
 
             $rr = $room_requests->orderBy('created_at', 'DESC')->get();
             return response()->json(['room_requests' => $rr], 200);

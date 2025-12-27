@@ -10,6 +10,7 @@ use App\Models\{
     DormitoryTransfer,
     DormitoryExtendRequest
 };
+use App\Enums\RequestStatus;
 
 class DormitoryExtendService {
 
