@@ -10,11 +10,14 @@ use App\Models\{
     DormitoryTransfer,
     DormitoryExtendRequest
 };
+use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use App\Utils\GenerateUniqueFilename;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Svg\Tag\Rect;
+use Symfony\Component\HttpFoundation\Request;
 
 class DormitoryRequestService {
 
@@ -73,7 +76,7 @@ class DormitoryRequestService {
             ->lockForUpdate()
             ->firstOrFail();
 
-            if($record->tenant_status === "CANCELLED") {
+            if($record->tenant_status === RequestStatus::CANCELLED) {
                 throw new \DomainException(
                     "Dormitory request is already cancelled."
                 );
@@ -88,7 +91,7 @@ class DormitoryRequestService {
             }
 
             $record->update([
-                $record->tenant_status => "CANCELLED"
+                $record->tenant_status => RequestStatus::CANCELLED
             ]);
 
             $this->loggingDetails(

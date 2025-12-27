@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Enums;
+
+enum RequestStatus: string {
+    case PENDING = 'PENDING';
+    case APPROVED = 'APPROVED';
+    case CANCELLED = 'CANCELLED';
+    case EXTENDING = 'EXTENDING';
+    case TERMINATED = 'TERMINATED';
+    case TRANSFERRED = 'TRANSFERRED';
+    case FOR_PAYMENT = 'FOR PAYMENT';
+    case REJECTED = 'REJECTED';
+    case PAID = 'PAID'; 
+    case PROCESSING_PAYMENT = 'PROCESSING PAYMENT';
+
+    //DORM
+    case AVAILABLE = 'AVAILABLE';
+    case UNAVAILALBLE = 'UNAVAILALBLE';
+    case OCCUPIED = 'OCCUPIED'; 
+    case RESERVED = 'RESERVED'; 
+
+    //LIBRARY
+    case COMPLETED = 'COMPLETED';
+    case ACTIVE = 'ACTIVE';
+    case INACTIVE = 'INACTIVE';
+    case FOR_CSM = 'FOR CSM';
+}

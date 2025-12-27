@@ -15,14 +15,14 @@ class DormitoryItemBorrowing extends Model
     {
         return $this->belongsTo(DormitoryTenant::class, 'dormitory_tenant_id', 'id');
     }
-    
+
     public function inventory()
     {
         return $this->belongsTo(DormitoryInventory::class, 'dormitory_inventory_id', 'id');
     }
 
-    public function item()
+    public function items ()
     {
-        return $this->belongsTo(DormitoryInventoryItem::class, 'dormitory_inventory_item_id', 'id');
+        return $this->hasMany(DormitoryItemBI::class, 'dormitory_item_borrowing_id', 'id');
     }
 }
