@@ -368,31 +368,6 @@ class DormitoryController extends Controller
 
             $this_dormitory_request->save();
 
-            if($request->supply) {
-                foreach($request->supply as $supply) {
-                    $new_supply = new DormitoryItemBorrowing;
-                    $new_supply->dormitory_tenant_id = $this_dormitory_request->id;
-                    $new_supply->dormitory_inventory_id = $supply['id'];
-                    $new_supply->count = $supply['count'];
-                    $new_supply->save();
-
-                    for($i = 0; $i < $supply['count']; $i++) {
-                        $getItem = DormitoryInventoryItem::where([
-                            'dormitory_inventory_id' => $supply['id'],
-                            'status' => 'AVAILABLE'
-                        ])->lockForUpdate()->first();
-
-                        $new_item = new DormitoryItemBI;
-                        $new_item->dormitory_item_borrowing_id = $new_supply->id;
-                        $new_item->dormitory_inventory_item_id = $getItem->id;
-                        $new_item->save();
-
-                        $getItem->status = "RESERVED";
-                        $getItem->save();
-                    }
-                }
-            }
-
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory request. ID#" . $this_dormitory_request->id);
 
             if(env('USE_EVENT')) {
@@ -424,16 +399,59 @@ class DormitoryController extends Controller
                 'dormitory_room',
                 'dormitory_room.dormitory',
                 'borrowedItems',
+                'borrowedItems.inventory',
                 'borrowedItems.items',
                 'borrowedItems.items.item'
             ]);
 
             if($request->userId) $room_requests->where('user_id', $request->userId);
             if($request->tenantStatus) $room_requests->whereIn('tenant_status', $request->tenantStatus);
-            if($request->traceNumber) $room_requests->whereIn('trace_number', $request->traceNumber);
 
-            $rr = $room_requests->orderBy('created_at', 'DESC')->get();
+            $rr = $request->traceNumber
+                ? $room_requests->where('trace_number', $request->traceNumber)->first()
+                : $room_requests->orderBy('created_at', 'DESC')->get();
+
             return response()->json(['room_requests' => $rr], 200);
+        });
+    }
+
+    public function cancel_dorm_request (Request $request, int $dormReqId) {
+        return TransactionUtil::transact(null, [], function() use ($request, $dormReqId) {
+            $this_dorm_request = DormitoryTenant::where('id', $dormReqId)->lockForUpdate()->first();
+
+            if(!in_array($this_dorm_request->tenant_status, ["APPROVED", "PENDING", "CANCELLED"])) {
+                return response()->json(['message' => "Can't cancel request."], 200);
+            } else {
+                $this_dorm_request->tenant_status = "CANCELLED";
+                $this_dorm_request->save();
+
+                if(!is_null($this_dorm_request->dormitory_room_id)) {
+                    $dorm = DormitoryRoom::find($this_dorm_request->dormitory_room_id);
+
+                    $dorm->room_available_slot = $this_dorm_request->room_for_type === "COUPLE" ? 2 : 1;
+                    $dorm->room_status = "AVAILABLE";
+                    $dorm->save();
+                }
+
+                foreach($this_dorm_request->borrowedItems() as $item) {
+                    foreach($item->items() as $item2) {
+                        $this_item = DormitoryInventoryItem::find($item2->id);
+                        $this_item->status = "AVAILABLE";
+                        $this_item->save();
+                    }
+                }
+
+                AuditHelper::log($request->user()->id, "Cancelled a dormitory inventory item. ID#$dormReqId");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEDormitory(''),
+                        new BEAuditTrail('')
+                    );
+                }
+
+                return response()->json(['message' => "You've cancelled dormitory inventory item. ID#$dormReqId"], 200);
+            }
         });
     }
 }

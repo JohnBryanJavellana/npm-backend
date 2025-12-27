@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Services\Trainee\Library\LibraryService;
+use App\Enums\RequestStatus;
 
 class TraineeLibrary extends Controller
 {
@@ -118,7 +119,7 @@ class TraineeLibrary extends Controller
 
                 if ($status) $book_record->where('status',$status);
 
-                    return $book_record->get();
+                return $book_record->get();
 
             });
             return BookRequestResource::collection($records);
@@ -135,7 +136,8 @@ class TraineeLibrary extends Controller
             \Log::info("data", [$request->all()]);
             $user_id = $request->user()->id;
             $trac = $request->trace_number;
-            $cache_key = "user_id:$user_id:$trac";
+            $version = Cache::get("user_id:$user_id:version", 1);
+            $cache_key = "user_id:$user_id:v:$version:$trac";
 
             $records = Cache::remember($cache_key, $this->short_ttl, function () use ($user_id, $trac) {
                 $record = EnrolledCourse::where('user_id', $user_id)
@@ -374,11 +376,13 @@ class TraineeLibrary extends Controller
 
             foreach($books as $book) {
                 if (!in_array($book->status, ["CANCELLED", "RECEIVED", "LOST", "RETURNED", "REJECTED"])) {
-                    $book->status = "CANCELLED";
-                    $book->save(); 
+                    
+                    $book->update(["status" => RequestStatus::CANCELLED]);
+                    // $book->status = RequestStatus::CANCELLED;
+                    // $book->save();
 
                     if($book->book_copy_id) {
-                        BookCopy::find($book->book_copy_id)->update(['status' => "AVAILABLE"]);
+                        BookCopy::find($book->book_copy_id)->update(['status' => RequestStatus::APPROVED]);
                     }
                 }
             }
@@ -390,9 +394,10 @@ class TraineeLibrary extends Controller
             ->exists();
 
             if(!$book_res) {
-                $record = BookRes::where(['id' => $res_id, 'user_id' => $user_id])->first();
-                $record->status = "FOR CSM";
-                $record->save();
+                BookRes::where(['id' => $res_id, 'user_id' => $user_id])->update(['status' => RequestStatus::FOR_CSM]);
+                // $record = BookRes::where(['id' => $res_id, 'user_id' => $user_id])->first();
+                // $record->status = "FOR CSM";
+                // $record->save();
             }
 
             if(env("USE_EVENT")) {

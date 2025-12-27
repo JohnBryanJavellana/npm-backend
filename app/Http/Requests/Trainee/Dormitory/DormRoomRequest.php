@@ -30,12 +30,9 @@ class DormRoomRequest extends FormRequest
             "is_air_conditioned" => "required|in:YES,NO",
             "single_accomodation" => "required|in:YES,NO",
             "purpose" => "required|string|max:255",
-            "remarks" => "required|string|max:255",
             "startDate" => "required|date",
-            "toDate" => "required|date|after:startDate",
+            "endDate" => "required|date|after:startDate",
             "file" => "mimes:jpg,jpeg,png,pdf,doc,docx|max:5120",
-            "addsOn" => "required|array",
-            "addsOn.*" => "exists:dormitory_inventories, id"
         ];
     }
 
@@ -47,7 +44,7 @@ class DormRoomRequest extends FormRequest
             response()->json([
                 "message" => $firstError,
                 "errors" => $errors 
-            ])
+            ], 422)
         );
     }
 }
