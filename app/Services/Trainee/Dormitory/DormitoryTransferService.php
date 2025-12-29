@@ -12,6 +12,7 @@ use App\Models\{
 };
 use App\Utils\AuditHelper;
 use Illuminate\Support\Facades\DB;
+use DomainException;
 
 class DormitoryTransferService {
 
@@ -39,15 +40,15 @@ class DormitoryTransferService {
         ->first(["id", "user_id", "tenant_status"]);
 
         if(!$record) {
-            throw new \DomainException("Invalid tenant record or unauthorized access.");
+            throw new DomainException("Invalid tenant record or unauthorized access.");
         }
 
         if($record->tenant_status !== "APPROVED") {
-            throw new \DomainException("No active tenant record was found. Room transfer requests can only be made by active tenants.");
+            throw new DomainException("No active tenant record was found. Room transfer requests can only be made by active tenants.");
         }
 
         if($record->transfers->isNotEmpty()) {
-            throw new \DomainException("A pending transfer request already exists. You may only submit a new request once the current one has been resolved.");
+            throw new DomainException("A pending transfer request already exists. You may only submit a new request once the current one has been resolved.");
         }
     }
 
@@ -83,11 +84,11 @@ class DormitoryTransferService {
             ->findOrFail($id);
 
             if(!$record || $userId != $record->tenant->user_id) {
-                throw new \DomainException("Transfer request not found or unauthorized access.");
+                throw new DomainException("Transfer request not found or unauthorized access.");
             }
 
             if($record->status === "APPROVED") {
-                throw new \DomainException("Transfer request cancellation is not permitted.");
+                throw new DomainException("Transfer request cancellation is not permitted.");
             }
 
             $record->delete();
