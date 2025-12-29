@@ -50,6 +50,8 @@ class DormitoryRequestService {
     public function get_inclusions(string $documentId)
     {
         //validate
+
+        
         return $this->dormitoryItemBorrowing
         ->with([
             "items.item.itemInfo"
@@ -98,7 +100,7 @@ class DormitoryRequestService {
     {
         DB::transaction(function() use ($request, $dormitory_id) {
             $record = $this->tenantModel
-            ->where('id', $dormitory_id)
+            ->whereKey($dormitory_id)
             ->lockForUpdate()
             ->firstOrFail();
 

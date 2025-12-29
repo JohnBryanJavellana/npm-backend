@@ -16,7 +16,7 @@ enum RequestStatus: string {
 
     //DORM
     case AVAILABLE = 'AVAILABLE';
-    case UNAVAILALBLE = 'UNAVAILALBLE';
+    case UNAVAILABLE = 'UNAVAILABLE';
     case OCCUPIED = 'OCCUPIED'; 
     case RESERVED = 'RESERVED'; 
 

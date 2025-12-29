@@ -11,6 +11,11 @@ class DormitoryReqService extends Model
 
     protected $guarded = ["id"];
 
+    public function services()
+    {
+        return $this->belongsTo(DormitoryService::class);
+    }
+
     /** Scopes */
 
     public function scopeForStatus($query, array $status)

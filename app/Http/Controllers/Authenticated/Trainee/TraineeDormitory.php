@@ -18,7 +18,7 @@ use App\Models\{DormitoryRoom,
     DormitoryTransfer,
     DormitoryExtendRequest, DormitoryInventory, DormitoryItemBorrowing};
 use App\Services\Trainee\Dormitory\{DormitoryRequestService, DormitoryTransferService, DormitoryExtraService, DormitoryExtendService};
-
+use App\Http\Resources\Trainee\Dormitory\ServiceRequestResource;
 use DomainException;
 
 class TraineeDormitory extends Controller
@@ -146,25 +146,6 @@ class TraineeDormitory extends Controller
             $histories = DormitoryTenantHistory::where('dormitory_tenant_id', $dormitory_id)->orderBy('created_at', 'DESC')->get();
             return response()->json(['histories' => $histories]);
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
-    }
-
-    public function remove_applied_dormitories (Request $request, int $dormitory_id) {
-        try {
-            \Log::info("cancel dorm", [$dormitory_id]);
-
-            $this->dormitory_service->cancelRequest($request, $dormitory_id);                                 
-
-            event(new BEDormitory(''));
-
-            return response()->json(['message' => "You've cancelled dormitory request application. ID# $dormitory_id"], 200);
-        }
-        catch (DomainException $e) {
-            throw $e;
-        }
-        catch (\Exception $e) {
-            \Log::error("error cancel dorm", [$dormitory_id]);
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
@@ -360,7 +341,7 @@ class TraineeDormitory extends Controller
     }
 
     /**
-     * Summary of request_tenant_room
+     * Methods for Dorm Occupancy
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -388,6 +369,24 @@ class TraineeDormitory extends Controller
             \Log::error("error-send-reqesut", [$e]);
             DB::rollBack();
             return response()->json(["message"=> $e->getMessage()],500);
+        }
+    }
+    public function remove_applied_dormitories (Request $request, int $dormitory_id) {
+        try {
+            \Log::info("cancel dorm", [$dormitory_id]);
+
+            $this->dormitory_service->cancelRequest($request, $dormitory_id);                                 
+
+            event(new BEDormitory(''));
+
+            return response()->json(['message' => "You've cancelled dormitory request application. ID# $dormitory_id"], 200);
+        }
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (\Exception $e) {
+            \Log::error("error cancel dorm", [$dormitory_id]);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
@@ -514,11 +513,26 @@ class TraineeDormitory extends Controller
         }
     }
 
-    public function view_service(Request $request, string $documentId)
+    /**
+     * Methods for Dorm Service
+     */
+    public function view_service()
     {
         try {
             $services = $this->dormitoryExtraService->viewServices();
+            
             return response()->json(["services" => $services], 200);
+        } catch (\Exception $e) {
+            return response()->json([$e->getMessage()], 500);
+        }
+    }
+
+    public function user_service_request(Request $request, $document_id)
+    {
+        try {
+            $records = $this->dormitoryExtraService->getUserServiceRequest($document_id, $request->status);
+
+            return ServiceRequestResource::collection($records);
         } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
         }
@@ -528,14 +542,34 @@ class TraineeDormitory extends Controller
     {
         $user_id = $request->user()->id;
         $validated = $request->validated();
+
+        \Log::info("type: ", [gettype($validated)]);
         try {
             $this->dormitoryExtraService->createService($validated, $user_id);
+
+            return response()->json(["message" => "Your service request has been sent successfully!"], 200);
         } 
         catch (DomainException $e) {
             throw $e;
         }
-        catch (\Throwable $th) {
-            //throw $th;
+        catch (\Exception $e) {
+            return response()->json([$e->getMessage()], 500);
+        }
+    }
+
+    public function cancel_service_request(Request $request, $document_id)
+    {
+        $user_id = $request->user()->id;
+        try {
+            $this->dormitoryExtraService->cancelService($document_id, $user_id);
+
+            return response()->json(["message" => "Service request has cancelled successfully"], 200);
+        } 
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (\Exception $e) {
+            return response()->json([$e->getMessage()], 500);
         }
     }
 }
