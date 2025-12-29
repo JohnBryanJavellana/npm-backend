@@ -8,7 +8,8 @@ use App\Models\{
     DormitoryTenant,
     DormitoryTenantHistory,
     DormitoryTransfer,
-    DormitoryExtendRequest
+    DormitoryExtendRequest,
+    DormitoryItemBorrowing
 };
 use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
@@ -30,7 +31,8 @@ class DormitoryRequestService {
         protected DormitoryTenant $tenantModel,
         protected DormitoryTenantHistory $dormitoryTenantHistory,
         protected DormitoryInventory $dormitoryInventory,
-    ){}
+        protected DormitoryItemBorrowing $dormitoryItemBorrowing,
+    ) {}
 
     public function viewUserRequest($userId, $traceNumber)
     {
@@ -42,10 +44,21 @@ class DormitoryRequestService {
 
     public function viewApplication()
     {
-        
+        return;
+    }   
+
+    public function get_inclusions(string $documentId)
+    {
+        //validate
+        return $this->dormitoryItemBorrowing
+        ->with([
+            "items.item.itemInfo"
+        ])
+        ->whereRelation("tenant", "trace_number", "=", $documentId)
+        ->get();
     }
 
-    public function createDormRequest($validated, $userId)
+    public function createRequest($validated, $userId)
     {
         DB::transaction(function() use ($validated, $userId) {
             
@@ -129,7 +142,6 @@ class DormitoryRequestService {
     }
 
     private function validateData($userId) {
-        
         $existing_request = $this->tenantModel
         ->where(['user_id' => $userId, 'tenant_status' => RequestStatus::PENDING->value])
         ->exists();

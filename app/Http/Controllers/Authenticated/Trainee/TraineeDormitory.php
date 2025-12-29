@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BEDormitory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Trainee\Dormitory\CreateTransferRequest;
-use App\Http\Requests\Trainee\Dormitory\DormRoomRequest;
-use App\Http\Resources\Trainee\Dormitory\DApplicationResource;
-use App\Http\Resources\Trainee\Dormitory\DAppliedRequest;
+use App\Http\Requests\Trainee\Dormitory\{CreateServiceRequest, CreateTransferRequest, DormRoomRequest};
+use App\Http\Resources\Trainee\Dormitory\{DApplicationResource, DAppliedRequest};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Utils\{AuditHelper, GenerateUniqueFilename, GenerateTrace, TransactionUtil};
@@ -19,16 +17,12 @@ use App\Models\{DormitoryRoom,
     DormitoryTenantHistory,
     DormitoryTransfer,
     DormitoryExtendRequest, DormitoryInventory, DormitoryItemBorrowing};
-use App\Services\Trainee\Dormitory\DormitoryExtendService;
-use App\Services\Trainee\Dormitory\DormitoryRequestService;
-use App\Services\Trainee\Dormitory\DormitoryTransferService;
+use App\Services\Trainee\Dormitory\{DormitoryRequestService, DormitoryTransferService, DormitoryExtraService, DormitoryExtendService};
+
 use DomainException;
 
 class TraineeDormitory extends Controller
 {
-
-    
-
     protected $long_ttl = 600;
     protected $short_ttl = 60;
 
@@ -57,7 +51,8 @@ class TraineeDormitory extends Controller
      */
     public function __construct(
         protected DormitoryRequestService $dormitory_service,
-        protected DormitoryTransferService $dormitoryTransferService
+        protected DormitoryTransferService $dormitoryTransferService,
+        protected DormitoryExtraService $dormitoryExtraService 
     ){}
 
     public function get_all_dormitories(Request $request) {
@@ -131,7 +126,6 @@ class TraineeDormitory extends Controller
                 'dormitory_histories' => function($self) {
                     $self->limit(5)->orderBy('created_at', 'DESC');
                 },
-                'borrowedItems.items.item.itemInfo'
             ])
             ->where([
                 'trace_number' => $dormitory_id,
@@ -251,6 +245,7 @@ class TraineeDormitory extends Controller
                     ], 400);
                 }
 
+                //validations
                 $exist = DormitoryTenant::where([
                     "id" => $request->document_id,
                     "tenant_status" => "APPROVED",
@@ -371,14 +366,13 @@ class TraineeDormitory extends Controller
      */
     public function request_tenant_room(DormRoomRequest $request) {
         \Log::info("controller dorm", [$request->all()]);
-        // return response()->json(["wow" => $request->all()], 200);
+        // return response()->json(["wow" => $request->all()], 200);s
         $user = $request->user();
         $validated = $request->validated();
-
         try {
             DB::beginTransaction();
 
-            $this->dormitory_service->createDormRequest($validated, $user->id);
+            $this->dormitory_service->createRequest($validated, $user->id);
 
             if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
@@ -387,7 +381,7 @@ class TraineeDormitory extends Controller
             DB::commit();
             return response()->json(["message"=> 'Dormitory request sent successfully.'], 200);
 
-        } catch (\DomainException $e) {
+        } catch (DomainException $e) {
             throw $e;
         }
         catch (\Exception $e) {
@@ -507,6 +501,41 @@ class TraineeDormitory extends Controller
                 DB::rollBack();
                 return response()->json(['message'=> $e->getMessage()],500);
             }
+        }
+    }
+
+    public function view_inclusion(Request $request, string $documentId)
+    {
+        try {
+            $items = $this->dormitory_service->get_inclusions($documentId);
+            return response()->json(["items" => $items], 200);
+        } catch (\Exception $e) {
+            return response()->json([$e->getMessage()], 500);
+        }
+    }
+
+    public function view_service(Request $request, string $documentId)
+    {
+        try {
+            $services = $this->dormitoryExtraService->viewServices();
+            return response()->json(["services" => $services], 200);
+        } catch (\Exception $e) {
+            return response()->json([$e->getMessage()], 500);
+        }
+    }
+
+    public function create_service_request(CreateServiceRequest $request)
+    {
+        $user_id = $request->user()->id;
+        $validated = $request->validated();
+        try {
+            $this->dormitoryExtraService->createService($validated, $user_id);
+        } 
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (\Throwable $th) {
+            //throw $th;
         }
     }
 }

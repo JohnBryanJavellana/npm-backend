@@ -104,6 +104,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_items', [TraineeDormitory::class, 'get_items']);
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
+            Route::get('applied_dormitories/view/{dormitory_id}/inclusions', [TraineeDormitory::class, 'view_inclusion']);
+            Route::get('applied_dormitories/view/{dormitory_id}/services', [TraineeDormitory::class, 'view_service']);
             Route::get('applied_dormitories/view/getAllHistories/{dormitory_id}', [TraineeDormitory::class, 'applied_dormitory_histories']);
             Route::post('remove_applied_dormitories/{dormitory_id}', [TraineeDormitory::class, 'remove_applied_dormitories']);
             Route::get('check_pending_request', [TraineeDormitory::class, 'check_pending_request']);
@@ -288,6 +290,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
                 Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
                 Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+
+                Route::get('services', [DormitoryController::class, 'services'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::post('create_or_update_service', [DormitoryController::class, 'create_or_update_service'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::delete('remove_service/{service_id}', [DormitoryController::class, 'remove_service'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
             });
         });
 
