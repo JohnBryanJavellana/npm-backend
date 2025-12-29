@@ -122,10 +122,11 @@ class DormitoryController extends Controller
     public function get_available_dorms (GetAvailableDorms $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $dorms = Dormitory::withCount('rooms')
-            ->where([
-                'room_for_type' => $request->room_for_type,
-                'is_air_conditioned' => $request->room_type
-            ])->get();
+                ->with('rooms')
+                ->where([
+                    'room_for_type' => $request->room_for_type,
+                    'is_air_conditioned' => $request->room_type
+                ])->get();
 
             return response()->json(['dorms' => $dorms], 200);
         });
@@ -143,11 +144,15 @@ class DormitoryController extends Controller
         });
     }
 
-    public function get_available_rooms (Request $request) {
+    public function get_available_rooms(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
+            $targetRoomId = $request->roomId;
+
             $rooms = DormitoryRoom::where('dormitory_id', $request->dormId)
+                ->orderByRaw("id = ? DESC", [$targetRoomId])
                 ->orderBy('room_available_slot', 'DESC')
-                ->get()->map(function($room) {
+                ->get()
+                ->map(function($room) {
                     $disabled = $room->hasData->filter(function($tenant) {
                         return !in_array($tenant->tenant_status, ["PENDING", "TERMINATED", "CANCELLED", "DECLINED"]);
                     })->map(function($d) {
@@ -162,7 +167,7 @@ class DormitoryController extends Controller
                         'room' => $room,
                         'disabled_dates' => $disabled
                     ];
-                })->values();
+                });
 
             return response()->json(['rooms' => $rooms], 200);
         });
@@ -340,12 +345,12 @@ class DormitoryController extends Controller
     }
 
     public function create_or_update_request (CreateOrUpdateRequest $request) {
+        \Log::info($request->all());
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_dormitory_request = $request->httpMethod === "POST"
                 ? new DormitoryTenant
                 : DormitoryTenant::find($request->documentId);
 
-            $this_dormitory_request->dormitory_room_id = $request->roomId;
             if($request->httpMethod === "POST") $this_dormitory_request->trace_number = GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DR-');
             $this_dormitory_request->user_id = $request->userId;
             $this_dormitory_request->room_for_type = $request->forType;
@@ -353,30 +358,72 @@ class DormitoryController extends Controller
             $this_dormitory_request->status_of_occupancy = $request->status_of_occupancy;
             $this_dormitory_request->is_air_conditioned = $request->isAirConditioned;
             $this_dormitory_request->purpose = $request->purpose;
-            $this_dormitory_request->process_type = $request->processType;
-            $this_dormitory_request->tenant_from_date = $request->fromDate;
-            $this_dormitory_request->tenant_to_date = $request->toDate;
             $this_dormitory_request->paying_guest = $request->payingGuest;
             $this_dormitory_request->process_type = $request->processType;
 
-            if($request->forType === "COUPLE") {
-                $this_dormitory_request->filename = $request->filename;
+            if($request->status) $this_dormitory_request->tenant_status = $request->status;
 
-                if($request->filename) {
-                    $image_name = Str::uuid() . '.png';
-                    SaveAvatar::dispatch(
-                        $request->filename,
-                        $image_name,
-                        "dormitory/supporting-document/",
-                        false,
-                        true,
-                        $request->httpMethod === "UPDATE" ? 'dormitory/supporting-document/' . $this_dormitory_request->filename : ''
-                    );
-                    $this_dormitory_request->filename = $image_name;
+            if($request->processType === "WALK-IN" && $request->choosenRoom) {
+                $this_dormitory_request->tenant_from_date = $request->choosenRoom[0]['start'];
+                $this_dormitory_request->tenant_to_date = $request->choosenRoom[0]['end'];
+                $this_dormitory_request->dormitory_room_id = $request->choosenRoom[0]['roomId'];
+                $this_dormitory_request->for_slot = ($request->single_accommodation === "YES" || $request->forType === "COUPLE")
+                    ? '3'
+                    : $request->choosenRoom[0]['slot'];
+            }
+
+            if($request->forType === "COUPLE") {
+                if(!is_null($request->filename)) {
+                    $this_dormitory_request->filename = $request->filename;
+
+                    if($request->filename) {
+                        $image_name = Str::uuid() . '.png';
+                        SaveAvatar::dispatch(
+                            $request->filename,
+                            $image_name,
+                            "dormitory/supporting-document/",
+                            false,
+                            true,
+                            $request->httpMethod === "UPDATE" ? 'dormitory/supporting-document/' . $this_dormitory_request->filename : ''
+                        );
+                        $this_dormitory_request->filename = $image_name;
+                    }
                 }
             }
 
             $this_dormitory_request->save();
+
+            if($request->providedItem) {
+                DormitoryItemBorrowing::where('dormitory_tenant_id', $this_dormitory_request->id)->delete();
+
+                foreach($request->providedItem as $item) {
+                    $checkIfCanAdd = DormitoryInventoryItem::where([
+                        'dormitory_inventory_id' => $item['id'],
+                        'status' => 'AVAILABLE'
+                    ])->count();
+
+                    if($checkIfCanAdd > $item['count']) {
+                        $this_dormitory_item_request = new DormitoryItemBorrowing;
+                        $this_dormitory_item_request->dormitory_tenant_id = $this_dormitory_request->id;
+                        $this_dormitory_item_request->dormitory_inventory_id = $item['id'];
+                        $this_dormitory_item_request->count = $item['count'];
+                        $this_dormitory_item_request->status = "ACTIVE";
+                        $this_dormitory_item_request->save();
+
+                        for($i = 0; $i < $item["count"]; $i++) {
+                            $addItemCopy = DormitoryInventoryItem::where([
+                                'dormitory_inventory_id' => $item['id'],
+                                'status' => 'AVAILABLE'
+                            ])->lockForUpdate()->first();
+
+                            $addNow = new DormitoryItemBI;
+                            $addNow->dormitory_item_borrowing_id = $this_dormitory_item_request->id;
+                            $addNow->dormitory_inventory_item_id = $addItemCopy->id;
+                            $addNow->save();
+                        }
+                    }
+                }
+            }
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory request. ID#" . $this_dormitory_request->id);
 
