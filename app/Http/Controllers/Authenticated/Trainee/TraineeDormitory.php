@@ -311,7 +311,11 @@ class TraineeDormitory extends Controller
 
             return response()->json(['message' => "Transfer request sent! We're processing your request and will update you soon."], 200);
 
-        } catch (\Exception $e) {
+        }
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
@@ -375,33 +379,6 @@ class TraineeDormitory extends Controller
             DB::beginTransaction();
 
             $this->dormitory_service->createDormRequest($validated, $user->id);
-
-            // $data = [
-            //     "user_id" => $user->id,
-            //     "room_for_type" => $request->forType,
-            //     "trace_number" => GenerateTrace::createTraceNumber(DormitoryTenant::class, "-DR-"),
-            //     "is_air_conditioned" => $request->is_air_conditioned,
-            //     "single_accomodation" => $request->single_accomodation,
-            //     "tenant_from_date" => $request->startDate,
-            //     "tenant_to_date" => $request->endDate,
-            //     "purpose" => $request->purpose,
-            // ];
-
-            // if ($request->forType === 'COUPLE') {
-            //     $file_requested = $request->file;
-            //     $filename = GenerateUniqueFilename::generate($file_requested);
-            //     $file_requested->move(public_path('marriage-files'), $filename);
-            //     $data["filename"] = $filename;
-            // }
-
-            // $tenant_dormitory = DormitoryTenant::create($data);
-
-            // AuditHelper::log($user->id, "User {$user->id} sent a dorm request.");
-
-            // DormitoryTenantHistory::create([
-            //     "dormitory_tenant_id" => $tenant_dormitory->id,
-            //     "history_reason" => "Requested"
-            // ]);
 
             if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
