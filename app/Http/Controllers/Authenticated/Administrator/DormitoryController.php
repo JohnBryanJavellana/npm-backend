@@ -145,7 +145,17 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $dorms = DormitoryRoom::where('dormitory_id', $request->dormId)
                 ->orderBy('room_available_slot', 'DESC')
-                ->get();
+                ->get()->map(function($self) {
+                    return [
+                        'room' => $self->toArray(),
+                        'date_ranges' => $self->hasData()->map(function($d) {
+                            return [
+                                'date' => "{$d->tenant_from_date} to {$d->tenant_to_date}",
+                                'status' => $d->tenant_status
+                            ];
+                        })
+                    ];
+                })->values();
 
             return response()->json(['rooms' => $dorms], 200);
         });
