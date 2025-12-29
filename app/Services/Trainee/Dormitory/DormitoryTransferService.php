@@ -23,7 +23,7 @@ class DormitoryTransferService {
         protected DormitoryInventory $dormitoryInventory,
         protected DormitoryTransfer $dormitoryTransfer,
         protected DormitoryExtendRequest $dormitoryExtendRequest,
-    ){}
+    ) {}
 
     private function validateData($userId, $documentId) {
 

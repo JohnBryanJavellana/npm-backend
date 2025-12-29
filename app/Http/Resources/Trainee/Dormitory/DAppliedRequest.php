@@ -55,7 +55,6 @@ class DAppliedRequest extends JsonResource
                     "created_at" => $history->created_at,
                 ];
             }),
-            "borrowed_items" => $this->borrowed_items?->map(fn ($image) => $image),
         ];
     }
 }

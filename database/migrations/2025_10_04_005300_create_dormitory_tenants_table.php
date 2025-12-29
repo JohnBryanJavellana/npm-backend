@@ -42,6 +42,9 @@ return new class extends Migration
                 "RESERVED"
             ])->default('PENDING');
             $table->enum('process_type', ["ONLINE", "WALK-IN"])->default("ONLINE");
+
+            // DO NOT REMOVE
+            $table->enum('for_slot', ["1", "2", "3"]);
             $table->timestamps();
         });
     }

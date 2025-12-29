@@ -11,6 +11,8 @@ use App\Models\{
     DormitoryExtendRequest
 };
 use App\Enums\RequestStatus;
+use Illuminate\Support\Facades\DB;
+use Intervention\Image\Colors\Rgb\Channels\Red;
 
 class DormitoryExtendService {
 
@@ -27,15 +29,38 @@ class DormitoryExtendService {
     private function validateData($userId, $documentId)
     {
         $record = $this->tenantModel
-        ->with("transferRequest")
-        ->where([
-            "id" => $documentId,
-            "user_id" => $userId
-        ])->first();
+        ->with([
+            "transferRequest"=> function ($query)use ($documentId, $userId) {
+                $query->forUser($userId)
+                    ->where("dormitory_tenant_id", $documentId)
+                    ->status([RequestStatus::PENDING->value, RequestStatus::APPROVED->value]);
+            },
+            "extendRequest" => function ($query)use ($documentId, $userId) {
+                $query->forUser($userId)
+                    ->where("dormitory_tenant_id", $documentId)
+                    ->status([RequestStatus::PENDING->value, RequestStatus::APPROVED->value]);
+            }
+        ])
+        ->forUser($userId)
+        ->forStatus([RequestStatus::APPROVED->value])
+        ->whereKey($documentId)
+        ->first();
 
         if(!$record) {
-            throw new \DomainException("");
+            throw new \DomainException("No active tenant record was found. Room extension requests can only be made by active tenants.");
         }
 
+        if(!$record->transferRequest->isNotEmpty()) {
+            throw new \DomainException("A pending or approved transfer request already exists.");
+        }
+    }
+
+    public function createExtend($userId, $documentId)
+    {
+        DB::transaction(function () use ($userId, $documentId) {
+            $this->validateData($userId, $documentId);
+            
+
+        });
     }
 }

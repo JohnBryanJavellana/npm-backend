@@ -13,8 +13,13 @@ class DormitoryRoom extends Model
         return $this->hasMany(DormitoryTenant::class);
     }
 
+    // public function dormitory()
+    // {
+    //     return $this->hasOne(Dormitory::class, "id", "dormitory_id");
+    // }
+
     public function dormitory()
     {
-        return $this->hasOne(Dormitory::class, "id", "dormitory_id");
+        return $this->belongsTo(Dormitory::class);
     }
 }

@@ -8,7 +8,6 @@ class DormitoryTenant extends Model{
 
     protected $guarded = ['id'];
 
-
     public const MALE = "MALE";
     public const FEMALE = "FEMALE";
     public const COUPLE = "COUPLE";
@@ -51,14 +50,19 @@ class DormitoryTenant extends Model{
         return $this->hasMany(DormitoryItemBorrowing::class, 'dormitory_tenant_id', 'id');
     }
 
+    public function services()
+    {
+        return $this->hasMany(DormitoryReqService::class, 'dormitory_tenant_id', 'id');
+    }
+
     /**
      * SCOPES
      */
-    public function scopeForUser($query, $userId)
+    public function scopeForUser($query, int $userId)
     {
         return $query->where("user_id", $userId);
     }
-    public function scopeForStatus($query, $status)
+    public function scopeForStatus($query, array $status)
     {
         return $query->whereIn("tenant_status", $status);
     }

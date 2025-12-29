@@ -13,7 +13,8 @@ use App\Http\Requests\Admin\Dormitory\{
     GetAvailableDorms,
     CreateOrUpdateDormitory,
     CreateOrUpdateRequest,
-    CreateOrUpdateDormitoryInv
+    CreateOrUpdateDormitoryInv,
+    CreateOrUpdateService
 };
 use Illuminate\Http\Request;
 use App\Utils\{
@@ -29,7 +30,8 @@ use App\Models\{
     DormitoryRoom,
     DormitoryTenant,
     DormitoryRoomImage,
-    DormitoryInventory
+    DormitoryInventory,
+    DormitoryService
 };
 
 class DormitoryController extends Controller
@@ -143,21 +145,26 @@ class DormitoryController extends Controller
 
     public function get_available_rooms (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $dorms = DormitoryRoom::where('dormitory_id', $request->dormId)
+            $rooms = DormitoryRoom::where('dormitory_id', $request->dormId)
                 ->orderBy('room_available_slot', 'DESC')
-                ->get()->map(function($self) {
+                ->get()->map(function($room) {
+                    $disabled = $room->hasData->filter(function($tenant) {
+                        return !in_array($tenant->tenant_status, ["PENDING", "TERMINATED", "CANCELLED", "DECLINED"]);
+                    })->map(function($d) {
+                        return [
+                            'from' => $d->tenant_from_date,
+                            'to' => $d->tenant_to_date,
+                            'slot' => $d->for_slot
+                        ];
+                    })->values();
+
                     return [
-                        'room' => $self->toArray(),
-                        'date_ranges' => $self->hasData()->map(function($d) {
-                            return [
-                                'date' => "{$d->tenant_from_date} to {$d->tenant_to_date}",
-                                'status' => $d->tenant_status
-                            ];
-                        })
+                        'room' => $room,
+                        'disabled_dates' => $disabled
                     ];
                 })->values();
 
-            return response()->json(['rooms' => $dorms], 200);
+            return response()->json(['rooms' => $rooms], 200);
         });
     }
 
@@ -457,6 +464,60 @@ class DormitoryController extends Controller
                 }
 
                 return response()->json(['message' => "You've cancelled dormitory inventory item. ID#$dormReqId"], 200);
+            }
+        });
+    }
+
+    public function services (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $services = DormitoryService::withCount('requestedService')->get();
+            return response()->json(['services' => $services], 200);
+        });
+    }
+
+    public function create_or_update_service (CreateOrUpdateService $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $this_service = $request->httpMethod === "POST"
+                ? new DormitoryService
+                : DormitoryService::find($request->documentId);
+
+            $this_service->name = $request->name;
+            $this_service->description = $request->description;
+            $this_service->charge = $request->charge;
+            if($request->status) $this_service->status = $request->status;
+            $this_service->save();
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory service. ID#" . $this_service->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory service. ID# " . $this_service->id], 201);
+        });
+    }
+
+    public function remove_service (Request $request, int $service_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $service_id) {
+            $this_service = DormitoryService::withCount(['requestedService'])->where('id', $service_id)->first();
+
+            if($this_service->requested_service_count > 0) {
+                return response()->json(['message' => "Can't remove service. It already has connected data."], 200);
+            } else {
+                $this_service->delete();
+                AuditHelper::log($request->user()->id, "Removed a dormitory service. ID#$service_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEDormitory(''),
+                        new BEAuditTrail('')
+                    );
+                }
+
+                return response()->json(['message' => "You've removed dormitory service. ID#$service_id"], 200);
             }
         });
     }
