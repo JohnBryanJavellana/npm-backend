@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::create('book_carts', function (Blueprint $table) {
            $table->engine = "InnoDB";
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(Book::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Book::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

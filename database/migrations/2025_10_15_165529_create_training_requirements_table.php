@@ -18,8 +18,8 @@ return new class extends Migration
         Schema::create('training_requirements', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->foreignIdFor(Training::class)->constrained()->onDelete('CASCADE');
-            $table->foreignIdFor(Requirement::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(Training::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Requirement::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

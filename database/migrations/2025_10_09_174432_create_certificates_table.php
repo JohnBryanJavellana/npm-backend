@@ -18,8 +18,8 @@ return new class extends Migration
         Schema::create('certificates', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(MainCertificate::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(EnrolledCourse::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(MainCertificate::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(EnrolledCourse::class)->constrained()->cascadeOnDelete();
             $table->dateTime('cert_date_received');
             $table->timestamps();
         });

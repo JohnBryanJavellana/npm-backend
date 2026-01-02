@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('dormitory_rooms', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(Dormitory::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(Dormitory::class)->constrained()->cascadeOnDelete();
             $table->integer('room_slot');
             $table->integer('room_available_slot');
             $table->enum('room_status', ['AVAILABLE', 'OCCUPIED', 'RESERVED'])->default('AVAILABLE');

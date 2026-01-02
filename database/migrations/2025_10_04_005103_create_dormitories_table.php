@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('dormitories', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->ondelete('cascade');
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->string('room_name');
             $table->longText('room_description');
             $table->decimal('room_cost', 10, 2)->default(0.00);

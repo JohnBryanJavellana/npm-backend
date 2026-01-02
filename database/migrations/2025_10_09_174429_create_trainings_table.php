@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('trainings', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(CourseModule::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(CourseModule::class)->constrained()->cascadeOnDelete();
             $table->integer('daily_hours');
             $table->date('schedule_from');
             $table->date('schedule_to');

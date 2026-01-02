@@ -17,9 +17,9 @@ return new class extends Migration
             $table->id();
             $table->longText("trace_number");
             $table->longText("reference_number")->nullable();
-            $table->foreignIdFor(TrainingFeeCategory::class)->constrained()->onDelete("cascade");
-            $table->foreignIdFor(User::class)->constrained()->onDelete("cascade");
-            $table->foreignIdFor(BookRes::class)->constrained()->onDelete("cascade");
+            $table->foreignIdFor(TrainingFeeCategory::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(BookRes::class)->constrained()->cascadeOnDelete();
             $table->decimal("amount", 65, 2);
             $table->longText("details");
             $table->enum("status", ["PENDING", "PAID", "VERIFICATION"])->default("PENDING");

@@ -15,11 +15,11 @@ return new class extends Migration
         Schema::create('dormitory_item_borrowings', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(DormitoryTenant::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(DormitoryInventory::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(DormitoryInventory::class)->constrained()->cascadeOnDelete();
             $table->integer('count');
             $table->longText('remarks')->nullable();
-            $table->enum("status", ["PENDING", "ACTIVE"])->default("PENDING");
+            $table->enum("status", ["PENDING", "ACTIVE", "DONE"])->default("PENDING");
             $table->timestamps();
         });
     }

@@ -29,9 +29,7 @@ class CreateOrUpdateRequest extends FormRequest
             'forType' => ['required'],
             'isAirConditioned' => ['required'],
             'single_accommodation' => ['required'],
-            // 'choosenRoom' => [ Rule::when($this->processType === "WALK-IN", ['required'], ['nullable']) ],
             'dormId' => [ Rule::when($this->processType === "WALK-IN", ['required'], ['nullable']) ],
-            'filename' => [ Rule::when($this->forType === "COUPLE", ['required', 'base64_image'], ['nullable']) ],
             'purpose' => ['required'],
             'httpMethod' => ['required']
         ];

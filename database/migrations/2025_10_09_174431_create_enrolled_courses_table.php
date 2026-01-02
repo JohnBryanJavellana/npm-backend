@@ -19,19 +19,19 @@ return new class extends Migration
         Schema::create('enrolled_courses', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->onDelete('CASCADE');
-            $table->foreignIdFor(Training::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Training::class)->constrained()->cascadeOnDelete();
             $table->string('bgColor')->nullable();
             $table->enum('enrolled_course_status', [
-                'PENDING', 
-                'RESERVED', 
-                'ENROLLED', 
-                'COMPLETED', 
-                'CANCELLED', 
-                'DECLINED', 
-                'FOR-PAYMENT', 
-                'IR', 
-                'CSFB', 
+                'PENDING',
+                'RESERVED',
+                'ENROLLED',
+                'COMPLETED',
+                'CANCELLED',
+                'DECLINED',
+                'FOR-PAYMENT',
+                'IR',
+                'CSFB',
                 'PROCESSING PAYMENT'
             ])->default('PENDING');
             $table->enum('isExpired', ['YES', 'NO'])->default('NO');

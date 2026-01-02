@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('main_certificates', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(CourseModule::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(CourseModule::class)->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->longText('header');
             $table->longText('header_1');

@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('c_s_m_s', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdfor(User::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdfor(User::class)->constrained()->cascadeOnDelete();
             $table->string('reference_id');
             $table->enum('service', [
                 'ENROLLMENT',
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->integer('sqd5');
             $table->integer('sqd6');
             $table->integer('sqd7');
-            $table->integer('sqd8');                                                             
+            $table->integer('sqd8');
             $table->longText('suggestion')->nullable();
             $table->timestamps();
         });

@@ -18,8 +18,8 @@ return new class extends Migration
     {
         Schema::create('l_i_selected_books', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(LibraryInvoice::class)->constrained()->onDelete("cascade");
-            $table->foreignIdFor(BookReservation::class)->constrained()->onDelete("cascade");
+            $table->foreignIdFor(LibraryInvoice::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(BookReservation::class)->constrained()->cascadeOnDelete();
             $table->string('remarks');
             $table->timestamps();
         });

@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('dormitory_inventory_items', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->foreignIdFor(DormitoryInventory::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(DormitoryInventory::class)->constrained()->cascadeOnDelete();
             $table->string('unique_identifier');
             $table->enum('status', [
                 'AVAILABLE',

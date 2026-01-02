@@ -15,8 +15,8 @@ return new class extends Migration
         Schema::create('book_extension_requests', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(BookReservation::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(ExtensionRequest::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(BookReservation::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(ExtensionRequest::class)->constrained()->cascadeOnDelete();
             $table->date('current_to_date');
             $table->date('date_of_extension');
             $table->enum('status', ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'])->default('PENDING');

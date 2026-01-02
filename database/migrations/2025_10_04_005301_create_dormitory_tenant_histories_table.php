@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('dormitory_tenant_histories', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(DormitoryTenant::class)->constrained()->ondelete('cascade');
+            $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
             $table->longText('history_reason');
             $table->timestamps();
         });

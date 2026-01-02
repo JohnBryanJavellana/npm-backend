@@ -15,8 +15,8 @@ return new class extends Migration
         Schema::create('training_reg_files', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(Requirement::class)->constrained()->ondelete('cascade');
-            $table->foreignIdFor(AdditionalTraineeInfo::class)->constrained()->ondelete('cascade');
+            $table->foreignIdFor(Requirement::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(AdditionalTraineeInfo::class)->constrained()->cascadeOnDelete();
             $table->longText('filename');
             $table->longText('remarks')->nullable();
             $table->enum('locked', ['Y', 'N'])->nullable();

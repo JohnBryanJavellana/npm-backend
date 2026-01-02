@@ -17,8 +17,8 @@ return new class extends Migration
     {
         Schema::create('requirement_specific_modules', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Requirement::class)->constrained()->onDelete('CASCADE');
-            $table->foreignIdFor(CourseModule::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(Requirement::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(CourseModule::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

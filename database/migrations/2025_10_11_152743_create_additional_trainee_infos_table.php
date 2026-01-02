@@ -21,11 +21,11 @@ return new class extends Migration
         Schema::create('additional_trainee_infos', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(EducationalAttainment::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(GeneralInformation::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(LatestSBExp::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(Contact::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(EducationalAttainment::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(GeneralInformation::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(LatestSBExp::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Contact::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

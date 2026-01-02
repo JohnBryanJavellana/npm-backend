@@ -297,6 +297,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::get('services', [DormitoryController::class, 'services'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
                 Route::post('create_or_update_service', [DormitoryController::class, 'create_or_update_service'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
                 Route::delete('remove_service/{service_id}', [DormitoryController::class, 'remove_service'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+
+                Route::post('update_provided_stock_status', [DormitoryController::class, 'update_provided_stock_status']);
+                Route::post('update_provided_stock_list', [DormitoryController::class, 'update_provided_stock_list']);
+
+                Route::post('count_dorm_reservation', [DormitoryController::class, 'count_dorm_reservation']);
             });
         });
 

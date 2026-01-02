@@ -18,8 +18,8 @@ return new class extends Migration
         Schema::create('training_fees', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(CourseModule::class)->constrained()->onDelete('CASCADE');
-            $table->foreignIdFor(TrainingFeeCategory::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(CourseModule::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(TrainingFeeCategory::class)->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->decimal('amount');
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');

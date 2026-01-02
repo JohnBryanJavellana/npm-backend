@@ -14,8 +14,8 @@ return new class extends Migration
     {
         Schema::create('trainee_requirements', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(EnrolledCourse::class)->constrained()->onDelete('CASCADE');
-            $table->foreignIdFor(Requirement::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(EnrolledCourse::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Requirement::class)->constrained()->cascadeOnDelete();
             $table->longText('filename')->nullable();
             $table->longText('remarks')->nullable();
             $table->enum('locked', ['Y', 'N'])->nullable();
