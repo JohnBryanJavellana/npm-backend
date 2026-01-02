@@ -230,16 +230,23 @@ class DormitoryController extends Controller
 
     public function create_dormitory_inventory_stock (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
+            $dataToReturn = [];
+
             if($request->stock) {
                 for($i = 0; $i < $request->stock; $i++) {
                     $room = new DormitoryInventoryItem;
                     $room->dormitory_inventory_id = $request->dormitoryInventoryId;
                     $room->unique_identifier = GenerateTrace::createTraceNumber(DormitoryInventoryItem::class, '-DIS-', 'unique_identifier');
                     $room->save();
+
+                    array_push($dataToReturn, $room->unique_identifier);
                 }
             }
 
-            return $request->insideJob ? true : response()->json(['message' => "You've added a dormitory inventory stock."], 201);
+            return $request->insideJob ? $dataToReturn : response()->json([
+                'message' => "You've added a dormitory inventory stock.",
+                'returnedData' => $dataToReturn
+            ], 201);
         });
     }
 
@@ -255,13 +262,14 @@ class DormitoryController extends Controller
             $dorm_inventory->is_consumable = $request->isConsumable;
 
             if($request->httpMethod === "POST") $dorm_inventory->control_number = GenerateTrace::createTraceNumber(DormitoryInventory::class, "-DI-", 'control_number');
-            if(!is_null($request->filename)) {
+            if(!is_null($request->filename) && $request->filename) {
                 $filename = Str::uuid() . '.png';
                 SaveAvatar::dispatch($request->filename, $filename, "dormitory/inventory/", false, true, $dorm_inventory->filename ?? '');
                 $dorm_inventory->filename = $filename;
             }
 
             $dorm_inventory->save();
+            $dataToReturn = [];
 
             if($request->stock) {
                 $adjustedRequest = $request->merge([
@@ -269,7 +277,7 @@ class DormitoryController extends Controller
                     "dormitoryInventoryId" => $dorm_inventory->id,
                 ]);
 
-                $this->create_dormitory_inventory_stock($adjustedRequest);
+                $dataToReturn = $this->create_dormitory_inventory_stock($adjustedRequest);
             }
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory inventory. ID#$dorm_inventory->id");
@@ -281,7 +289,10 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " dormitory room. ID#$dorm_inventory->id"], 200);
+            return response()->json([
+                'message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " dormitory room. ID#$dorm_inventory->id",
+                'returnedData' => $dataToReturn
+            ], 200);
         });
     }
 
@@ -345,7 +356,6 @@ class DormitoryController extends Controller
     }
 
     public function create_or_update_request (CreateOrUpdateRequest $request) {
-        \Log::info($request->all());
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_dormitory_request = $request->httpMethod === "POST"
                 ? new DormitoryTenant
