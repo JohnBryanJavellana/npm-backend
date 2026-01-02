@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('book_copies', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Book::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(Book::class)->constrained()->cascadeOnDelete();
             $table->string('unique_identifier');
             $table->longText('qr');
             $table->enum('status', [

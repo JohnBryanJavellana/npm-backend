@@ -14,12 +14,12 @@ return new class extends Migration
     {
         Schema::create('book_catalogs', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(BookGenre::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(BookGenre::class)->constrained()->cascadeOnDelete();
             $table->longText('title');
             $table->longText('author');
             $table->string('language');
             $table->string('isbn')->nullable();
-            $table->longText('edition'); 
+            $table->longText('edition');
             $table->longText('bibliography')->nullable();
             $table->longText('description');
             $table->year('publication_year');

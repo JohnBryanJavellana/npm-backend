@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdfor(User::class)->constrained()->onDelete('cascade');
+            $table->foreignIdfor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdfor(User::class, 'to_user')->nullable();
             $table->enum('type', ['LIBRARY', 'ENROLLMENT', 'DORMITORY', 'ACCOUNT', 'INVOICES']);
             $table->longText('message');

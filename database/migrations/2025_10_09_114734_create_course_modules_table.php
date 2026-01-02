@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('course_modules', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(ModuleType::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(ModuleType::class)->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('acronym');
             $table->longText('compendium');

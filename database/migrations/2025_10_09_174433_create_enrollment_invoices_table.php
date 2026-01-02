@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('enrollment_invoices', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(EnrolledCourse::class)->constrained()->ondelete('cascade');
+            $table->foreignIdFor(EnrolledCourse::class)->constrained()->cascadeOnDelete();
             $table->longText('trace_number')->nullable();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
             $table->decimal('invoice_amount', 10, 2)->default(0.00);

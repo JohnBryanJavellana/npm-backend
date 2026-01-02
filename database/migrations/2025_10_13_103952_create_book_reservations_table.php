@@ -19,9 +19,9 @@ return new class extends Migration
         Schema::create('book_reservations', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->foreignIdFor(BookRes::class)->constrained()->onDelete('CASCADE');
-            $table->foreignIdFor(BookCopy::class)->nullable()->constrained()->onDelete('CASCADE');
-            $table->foreignIdFor(Book::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(BookRes::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(BookCopy::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Book::class)->constrained()->cascadeOnDelete();
             $table->enum('status', [
                 'PENDING',
                 'APPROVED',

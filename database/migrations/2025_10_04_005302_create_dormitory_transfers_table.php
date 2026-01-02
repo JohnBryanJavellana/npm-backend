@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('dormitory_transfers', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(DormitoryTenant::class)->constrained()->ondelete("cascade");
+            $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class,'processed_by')->nullable();
             $table->string('trace_number', 255)->nullable();
             $table->enum('transfer_type', ['ROOM', 'CLASS']);

@@ -14,8 +14,8 @@ return new class extends Migration
     {
         Schema::create('trainee_licenses', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->onDelete('CASCADE');
-            $table->foreignIdFor(License::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(License::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

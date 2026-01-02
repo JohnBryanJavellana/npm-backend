@@ -18,7 +18,7 @@ return new class extends Migration
         Schema::create('book_res', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->longText('trace_number')->nullable();
             $table->longText('purpose');
             $table->enum('status', ["COMPLETED", "ACTIVE", "FOR CSM", "EXTENDING"])->default("ACTIVE");

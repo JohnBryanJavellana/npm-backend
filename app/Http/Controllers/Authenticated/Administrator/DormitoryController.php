@@ -37,7 +37,7 @@ use App\Models\{
 class DormitoryController extends Controller
 {
     public function dormitories (Request $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $dormitories = Dormitory::withCount(['rooms' => function ($query) {
                 $query->where("room_status", "AVAILABLE");
             }])->get();
@@ -47,7 +47,7 @@ class DormitoryController extends Controller
     }
 
     public function get_dormitory_rooms (Request $request, int $room_id) {
-        return TransactionUtil::transact($request, [], function() use ($request, $room_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $room_id) {
             $rooms = DormitoryRoom::withCount('hasData')
                 ->where('dormitory_id', $room_id)
                 ->get();
@@ -136,7 +136,33 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $availableSupplies = DormitoryInventory::withCount([
                 'stock' => fn($query) => $query->whereIn('status', ['AVAILABLE'])
-            ])->get();
+            ])->get()->map(function ($self) use ($request) {
+                $availabilityStatus = (function() use ($self, $request) {
+                    $checkIfReserved = $self->borrowings()
+                        ->where('status', '!=', "DONE")
+                        ->where('dormitory_tenant_id', $request->userId)
+                        ->exists();
+
+                    if ($checkIfReserved) {
+                        return 'ADDED';
+                    } else if ($self->stock()->whereIn('status', ['AVAILABLE'])->exists()) {
+                        return 'AVAILABLE';
+                    } else {
+                        return 'OUT OF STOCK';
+                    }
+                })();
+
+                $self->availabilityStatus = $availabilityStatus;
+                return $self;
+            })->sortBy(function ($item) {
+                $order = [
+                    'AVAILABLE' => 2,
+                    'ADDED' => 1,
+                    'OUT OF STOCK' => 3,
+                ];
+
+                return $order[$item->availabilityStatus] ?? 99;
+            })->values();
 
             return response()->json([
                 'availableSupplies' => $availableSupplies
@@ -382,7 +408,7 @@ class DormitoryController extends Controller
                     : $request->choosenRoom[0]['slot'];
             }
 
-            if($request->forType === "COUPLE") {
+            if($request->forType === "COUPLE" && is_null($this_dormitory_request->filename)) {
                 if(!is_null($request->filename)) {
                     $this_dormitory_request->filename = $request->filename;
 
@@ -404,33 +430,19 @@ class DormitoryController extends Controller
             $this_dormitory_request->save();
 
             if($request->providedItem) {
-                DormitoryItemBorrowing::where('dormitory_tenant_id', $this_dormitory_request->id)->delete();
-
                 foreach($request->providedItem as $item) {
                     $checkIfCanAdd = DormitoryInventoryItem::where([
                         'dormitory_inventory_id' => $item['id'],
                         'status' => 'AVAILABLE'
                     ])->count();
 
-                    if($checkIfCanAdd > $item['count']) {
+                    if($checkIfCanAdd) {
                         $this_dormitory_item_request = new DormitoryItemBorrowing;
                         $this_dormitory_item_request->dormitory_tenant_id = $this_dormitory_request->id;
                         $this_dormitory_item_request->dormitory_inventory_id = $item['id'];
-                        $this_dormitory_item_request->count = $item['count'];
-                        $this_dormitory_item_request->status = "ACTIVE";
+                        $this_dormitory_item_request->count = 0;
+                        $this_dormitory_item_request->status = "PENDING";
                         $this_dormitory_item_request->save();
-
-                        for($i = 0; $i < $item["count"]; $i++) {
-                            $addItemCopy = DormitoryInventoryItem::where([
-                                'dormitory_inventory_id' => $item['id'],
-                                'status' => 'AVAILABLE'
-                            ])->lockForUpdate()->first();
-
-                            $addNow = new DormitoryItemBI;
-                            $addNow->dormitory_item_borrowing_id = $this_dormitory_item_request->id;
-                            $addNow->dormitory_inventory_item_id = $addItemCopy->id;
-                            $addNow->save();
-                        }
                     }
                 }
             }
@@ -449,7 +461,7 @@ class DormitoryController extends Controller
     }
 
     public function get_dormitory_info (Request $request, int $room_id) {
-        return TransactionUtil::transact($request, [], function() use ($request, $room_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $room_id) {
             $dormitory = Dormitory::with(['room_images'])
                 ->withCount(['rooms' => function ($query) {
                     $query->where("room_status", "AVAILABLE");
@@ -503,11 +515,21 @@ class DormitoryController extends Controller
                     $dorm->save();
                 }
 
-                foreach($this_dorm_request->borrowedItems() as $item) {
-                    foreach($item->items() as $item2) {
-                        $this_item = DormitoryInventoryItem::find($item2->id);
-                        $this_item->status = "AVAILABLE";
-                        $this_item->save();
+                foreach($this_dorm_request->borrowedItems as $item) {
+                    $this_item1 = DormitoryItemBorrowing::find($item->id);
+                    $this_item1->status = "CANCELLED";
+                    $this_item1->save();
+
+                    foreach($item->items as $item2) {
+                        $this_item2 = DormitoryItemBI::find($item2->id);
+                        $this_item2->status = "CANCELLED";
+                        $this_item2->save();
+
+                        $this_item3 = DormitoryInventoryItem::where('id', $item2->dormitory_inventory_item_id)->get();
+                        foreach($this_item3 as $item3) {
+                            $item3->status = "AVAILABLE";
+                            $item3->save();
+                        }
                     }
                 }
 
@@ -576,6 +598,96 @@ class DormitoryController extends Controller
 
                 return response()->json(['message' => "You've removed dormitory service. ID#$service_id"], 200);
             }
+        });
+    }
+
+    public function update_provided_stock_status (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            foreach ($request->item as $item) {
+                $this_stock = DormitoryItemBI::where('id', $item['id'])->first();
+                $this_main_stock = DormitoryInventoryItem::where('id', $this_stock->dormitory_inventory_item_id)->lockForUpdate()->first();
+                $this_main_stock->status = match ($item["status"]) {
+                    "PENDING", "APPROVED" => "RESERVED",
+                    "CANCELLED" => "AVAILABLE",
+                    "RECEIVED" => "BORROWED",
+                    default => $item["status"],
+                };
+                $this_main_stock->save();
+
+                $this_stock->status = $item["status"];
+                $this_stock->save();
+            }
+
+            AuditHelper::log($request->user()->id, "Updated provided item stock status.");
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've updated provided item stock status"], 200);
+        });
+    }
+
+    public function update_provided_stock_list (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $borrowing = DormitoryItemBorrowing::find($request->documentId);
+            $borrowing->count = count($request->item);
+            $borrowing->status = "ACTIVE";
+            $borrowing->save();
+
+            foreach ($request->item as $item) {
+                $this_main_stock = DormitoryInventoryItem::where('id', $item)->lockForUpdate()->first();
+
+                if($this_main_stock->status === "AVAILABLE") {
+                    $this_main_stock->status = "RESERVED";
+                    $this_main_stock->save();
+
+                    $this_stock = new DormitoryItemBI;
+                    $this_stock->dormitory_item_borrowing_id = $borrowing->id;
+                    $this_stock->dormitory_inventory_item_id = $item;
+                    $this_stock->save();
+                }
+            }
+
+            AuditHelper::log($request->user()->id, "Updated provided item stock list.");
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've updated provided item stock list"], 200);
+        });
+    }
+
+    public function count_dorm_reservation (Request $request){
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $reservations = DormitoryTenant::query();
+
+            if($request->userId) {
+                $reservations->where('user_id', $request->userId);
+            }
+
+            $get_count = function ($collection) {
+                $count = $collection->count();
+                return $count > 99 ? '99+' : $count;
+            };
+
+            $count = [
+                'total'     => $get_count($reservations),
+                'pending'   => $get_count($reservations->clone()->where('tenant_status', 'PENDING')),
+                'approved'  => $get_count($reservations->clone()->whereIn('tenant_status', ['APPROVED', 'RESERVED'])),
+                'active'    => $get_count($reservations->clone()->whereIn('tenant_status', ['ACTIVE', 'FOR PAYMENT', 'PAID', 'PROCESSING PAYMENT'])),
+                'extending' => $get_count($reservations->clone()->where('tenant_status', 'EXTENDING')),
+                'settled' => $get_count($reservations->clone()->whereIn('tenant_status', ['CANCELLED', 'REJECTED', 'TERMINATED'])),
+            ];
+
+            return response()->json(['reservationCount' => $count], 200);
         });
     }
 }

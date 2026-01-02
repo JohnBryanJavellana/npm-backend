@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('books', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->foreignIdFor(BookCatalog::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(BookCatalog::class)->constrained()->cascadeOnDelete();
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->longText('photo');
             $table->string('pdf_copy')->nullable();

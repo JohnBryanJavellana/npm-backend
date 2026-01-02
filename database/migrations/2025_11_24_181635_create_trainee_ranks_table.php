@@ -14,8 +14,8 @@ return new class extends Migration
     {
         Schema::create('trainee_ranks', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->onDelete('CASCADE');
-            $table->foreignIdFor(Rank::class)->constrained()->onDelete('CASCADE');
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Rank::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

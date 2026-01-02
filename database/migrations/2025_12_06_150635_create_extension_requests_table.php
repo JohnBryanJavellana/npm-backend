@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::create('extension_requests', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(BookRes::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(BookRes::class)->constrained()->cascadeOnDelete();
             $table->string('purpose');
             $table->timestamps();
         });

@@ -15,8 +15,8 @@ return new class extends Migration
         Schema::create('dormitory_tenants', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(DormitoryRoom::class)->nullable()->constrained()->ondelete('cascade');
-            $table->foreignIdFor(User::class)->constrained()->ondelete('cascade');
+            $table->foreignIdFor(DormitoryRoom::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->string('trace_number', 255)->nullable();
             $table->enum('status_of_occupancy', ['TRAINEE', 'NON-PAYING GUEST/VISITOR', 'NMP PERSONNEL (REGULAR/JOW)', 'PAYING GUEST/VISITOR'])->default('TRAINEE');
             $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);

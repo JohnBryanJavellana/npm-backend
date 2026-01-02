@@ -18,8 +18,8 @@ return new class extends Migration
         Schema::create('educational_attainments', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(MainCourse::class)->nullable()->constrained()->onDelete('CASCADE');
-            $table->foreignIdFor(MainSchool::class)->nullable()->constrained()->onDelete('CASCADE');    
+            $table->foreignIdFor(MainCourse::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(MainSchool::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string('school_graduated')->nullable();
             $table->timestamps();
         });

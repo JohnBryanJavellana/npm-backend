@@ -18,9 +18,9 @@ return new class extends Migration
         Schema::create('dormitory_item_b_i_s', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(DormitoryItemBorrowing::class)->nullable()->constrained()->onDelete('cascade');
-            $table->foreignIdFor(DormitoryInventoryItem::class)->nullable()->constrained()->onDelete('cascade');
-            $table->enum("status", ["RETURNED", "DAMAGED", "APPROVED", "LOST", "RECEIVED", "PENDING"])->default('PENDING');
+            $table->foreignIdFor(DormitoryItemBorrowing::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(DormitoryInventoryItem::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->enum("status", ["RETURNED", "DAMAGED", "APPROVED", "LOST", "RECEIVED", "PENDING", "CANCELLED"])->default('PENDING');
             $table->timestamps();
         });
     }

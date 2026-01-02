@@ -15,9 +15,9 @@ return new class extends Migration
         Schema::create('dormitory_invoices', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->ondelete('cascade');               
-            $table->foreignIdFor(DormitoryTenant::class)->constrained()->ondelete('cascade');
-            $table->foreignIdFor(DormitoryRoom::class)->constrained()->ondelete('cascade');
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(DormitoryRoom::class)->constrained()->cascadeOnDelete();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
             $table->longText('invoice_reference')->nullable();
             $table->longText('trace_number');
