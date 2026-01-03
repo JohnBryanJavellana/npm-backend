@@ -46,26 +46,23 @@ class DormitoryExtraService {
             $query->where("dormitory_service_id", $validated["service_id"])
                 ->forStatus([RequestStatus::APPROVED->value, RequestStatus::PENDING->value]);
         },
-        "services.servicesInfo"
+        "services.services"
         ])
         ->select("id")
         ->whereKey($validated["dormitory_id"])
         ->forStatus([RequestStatus::APPROVED->value])
         ->forUser($userId)
         ->first();
-        \Log::info("existing:", [$existing]);
-
 
         if(!$existing) {
             throw new DomainException("No active tenant record found");
         }
 
-        if(!empty($existing->services)) {
-            \Log::info("services:", [$existing->services]);
-            $services = $existing->services->servicesInfo->pluck("name")->filter()->implode(', ');
+        if($existing->services->isNotEmpty()) {
+            $services = $existing->services->pluck("services")->flatten()->pluck("name")->filter()->implode(', ');
             throw new DomainException("You already have an active request for this service. Please wait for the current request to be completed before submitting a new one. Service: $services");
-        }
-        
+        } 
+
         $service = $this->dormitoryService
         ->select("id", "name", "status")
         ->whereKey($validated["service_id"])
@@ -97,11 +94,15 @@ class DormitoryExtraService {
     {
         DB::transaction(function () use ($documentId, $userId) {
 
+            \Log::info("id cancel service: ", [$record]);
+
             $record = $this->dormitoryReqService
             ->whereKey($documentId)
             ->whereRelation("tenant", "user_id", "=", $userId)
             ->lockForUpdate()
             ->first();
+
+            \Log::info("record cancel service: ", [$record]);
             
             if(!$record) {
                 throw new DomainException("Service record not found!");
