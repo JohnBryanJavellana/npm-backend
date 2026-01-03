@@ -10,4 +10,9 @@ class DormitoryTenantHistory extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    public function tenants()
+    {
+        return $this->belongsTo(DormitoryTenant::class);
+    }
 }
