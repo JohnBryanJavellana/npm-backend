@@ -42,10 +42,12 @@ class DormitoryExtraService {
 
     private function validateData($validated, int $userId) {
         $existing = $this->tenantModel
-        ->with(["services." => function($query) use($validated) {
+        ->with(["services" => function($query) use($validated) {
             $query->where("dormitory_service_id", $validated["service_id"])
                 ->forStatus([RequestStatus::APPROVED->value, RequestStatus::PENDING->value]);
-        }])
+        },
+        "services.servicesInfo"
+        ])
         ->select("id")
         ->whereKey($validated["dormitory_id"])
         ->forStatus([RequestStatus::APPROVED->value])
@@ -60,7 +62,7 @@ class DormitoryExtraService {
 
         if(!empty($existing->services)) {
             \Log::info("services:", [$existing->services]);
-            $services = $existing->services->pluck("name")->filter()->implode(', ');
+            $services = $existing->services->servicesInfo->pluck("name")->filter()->implode(', ');
             throw new DomainException("You already have an active request for this service. Please wait for the current request to be completed before submitting a new one. Service: $services");
         }
         

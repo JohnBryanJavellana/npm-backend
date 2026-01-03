@@ -702,6 +702,7 @@ class DormitoryController extends Controller
             $this_service->dormitory_tenant_id = $request->user_id;
             $this_service->dormitory_service_id = $request->service_id;
             $this_service->charge = $request->charge;
+            $this_service->remarks = $request->remarks;
             if($request->status) $this_service->status = $request->status;
             $this_service->save();
 
