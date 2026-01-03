@@ -116,8 +116,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
             //INCLUSIONS
             Route::get('applied_dormitories/view/{dormitory_id}/inclusions', [TraineeDormitory::class, 'view_inclusion']);
+            Route::get('inclusion/requests/{dormitory_id}', [TraineeDormitory::class, 'view_inclusion_request']);
             Route::get('inclusion/view', [TraineeDormitory::class, 'view_available_items']);
-            Route::get('inclusion/requests/{document_id}', [TraineeDormitory::class, 'view_inclusion_request']);
             Route::post("inclusion/create", [TraineeDormitory::class, 'request_inclusion']);
             Route::post("inclusion/cancel", [TraineeDormitory::class, 'cancel_request_inclusion']);
             //SERVICES
@@ -251,7 +251,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             });
         });
 
-        Route::middleware('user_role:SUPERADMIN,ADMIN-LIBRARY,TRAINER')->group(function() {
+        Route::middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function() {
             Route::prefix('/books/')->group(function() {
                 Route::get('get_books', [LibraryController::class, 'get_books'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
                 Route::get('get_pre_data', [LibraryController::class, 'get_pre_data'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
@@ -286,62 +286,59 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             });
         });
 
-        Route::middleware('user_role:SUPERADMIN,ADMIN-DORMITORY,TRAINER')->group(function() {
+        Route::middleware('user_role:SUPERADMIN,ADMIN-DORMITORY')->group(function() {
             Route::prefix('/dormitory/')->group(function() {
-                Route::get('get', [DormitoryController::class, 'dormitories'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::post('create_or_update_dormitory', [DormitoryController::class, 'create_or_update_dormitory'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
+                Route::get('get', [DormitoryController::class, 'dormitories']);
+                Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
+                Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
+                Route::post('create_or_update_dormitory', [DormitoryController::class, 'create_or_update_dormitory']);
+                Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms']);
+                Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms']);
+                Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms']);
                 Route::post('create-walk-in-request/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
                 Route::post('create-walk-in-request/create_or_update_request', [DormitoryController::class, 'create_or_update_request']);
                 Route::post('get_all_requests', [DormitoryController::class, 'get_all_requests']);
                 Route::delete('cancel_dorm_request/{dormReqId}', [DormitoryController::class, 'cancel_dorm_request']);
-                Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-
-                Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-
-                Route::get('services', [DormitoryController::class, 'services'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::post('create_or_update_service', [DormitoryController::class, 'create_or_update_service'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-                Route::delete('remove_service/{service_id}', [DormitoryController::class, 'remove_service'])->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY');
-
+                Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room']);
+                Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories']);
+                Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock']);
+                Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock']);
+                Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
+                Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock']);
+                Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);
+                Route::get('services', [DormitoryController::class, 'services']);
+                Route::post('create_or_update_service', [DormitoryController::class, 'create_or_update_service']);
+                Route::delete('remove_service/{service_id}', [DormitoryController::class, 'remove_service']);
                 Route::post('update_provided_stock_status', [DormitoryController::class, 'update_provided_stock_status']);
                 Route::post('update_provided_stock_list', [DormitoryController::class, 'update_provided_stock_list']);
-
                 Route::post('count_dorm_reservation', [DormitoryController::class, 'count_dorm_reservation']);
-
                 Route::post('get_requested_service', [DormitoryController::class, 'get_requested_service']);
                 Route::post('request_service', [DormitoryController::class, 'request_service']);
                 Route::post('update_requested_service', [DormitoryController::class, 'update_requested_service']);
             });
         });
 
-        Route::middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->prefix('/masterlist/')->group(function() {
-            Route::prefix('/user/')->group(function() {
-                Route::get('get_users', [Masterlist::class, 'get_users']);
-                Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info'])->middleware('user_role:SUPERADMIN');
-                Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities'])->middleware('user_role:SUPERADMIN');
-                Route::post('create_or_update_user', [Masterlist::class, 'create_or_update_user'])->middleware('user_role:SUPERADMIN');
-                Route::delete('remove_user/{user_id}', [Masterlist::class, 'remove_user'])->middleware('user_role:SUPERADMIN');
-            });
+        Route::middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function() {
+            Route::prefix('/masterlist/')->group(function() {
+                Route::prefix('/user/')->group(function() {
+                    Route::get('get_users', [Masterlist::class, 'get_users']);
+                    Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info'])->middleware('user_role:SUPERADMIN');
+                    Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities'])->middleware('user_role:SUPERADMIN');
+                    Route::post('create_or_update_user', [Masterlist::class, 'create_or_update_user'])->middleware('user_role:SUPERADMIN');
+                    Route::delete('remove_user/{user_id}', [Masterlist::class, 'remove_user'])->middleware('user_role:SUPERADMIN');
+                });
 
-            Route::prefix('/employer/')->middleware('user_role:SUPERADMIN')->group(function() {
-                Route::get('get_employers', [Masterlist::class, 'get_employers']);
-                Route::post('create_or_update_employer', [Masterlist::class, 'create_or_update_employer']);
-                Route::delete('remove_employer/{employer_id}', [Masterlist::class, 'remove_employer']);
-            });
+                Route::prefix('/employer/')->middleware('user_role:SUPERADMIN')->group(function() {
+                    Route::get('get_employers', [Masterlist::class, 'get_employers']);
+                    Route::post('create_or_update_employer', [Masterlist::class, 'create_or_update_employer']);
+                    Route::delete('remove_employer/{employer_id}', [Masterlist::class, 'remove_employer']);
+                });
 
-            Route::prefix('/position/')->middleware('user_role:SUPERADMIN')->group(function() {
-                Route::get('get_positions', [Masterlist::class, 'get_positions']);
-                Route::post('create_or_update_position', [Masterlist::class, 'create_or_update_position']);
-                Route::delete('remove_position/{position_id}', [Masterlist::class, 'remove_position']);
+                Route::prefix('/position/')->middleware('user_role:SUPERADMIN')->group(function() {
+                    Route::get('get_positions', [Masterlist::class, 'get_positions']);
+                    Route::post('create_or_update_position', [Masterlist::class, 'create_or_update_position']);
+                    Route::delete('remove_position/{position_id}', [Masterlist::class, 'remove_position']);
+                });
             });
         });
 

@@ -11,8 +11,12 @@ class DormitoryInclusionRequest extends Model
 
     protected $guarded = ["id"];
 
-    /** Scopes */
+    public function itemInfo()
+    {
+        return $this->belongsTo(DormitoryInventory::class, "dormitory_inventory_id", "id");
+    }
 
+    /** Scopes */
     public function scopeStatus($query, array $status)
     {
         return $query->whereIn("status", $status);
