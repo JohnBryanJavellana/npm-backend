@@ -14,7 +14,7 @@ use App\Utils\AuditHelper;
 use Illuminate\Support\Facades\DB;
 use DomainException;
 
-class DormitoryTransferService {
+class DormitoryTransferService extends DormitoryHistoryService {
 
     public function __construct(
         protected DormitoryRoom $roomModel,

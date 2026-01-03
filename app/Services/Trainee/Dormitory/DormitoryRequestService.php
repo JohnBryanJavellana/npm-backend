@@ -50,8 +50,6 @@ class DormitoryRequestService {
     public function get_inclusions(string $documentId)
     {
         //validate
-
-        
         return $this->dormitoryItemBorrowing
         ->with([
             "items.item.itemInfo"
@@ -80,7 +78,7 @@ class DormitoryRequestService {
             if($validated["forType"] === $this->tenantModel::COUPLE) {
                 $file_requested = $validated["file"];
                 $filename = GenerateUniqueFilename::generate($file_requested);
-                $file_requested->move(public_path('marriage-files'), $filename);
+                $file_requested->move(public_path('dormitory/supporting-document'), $filename);
                 $data["filename"] = $filename;
             }
 

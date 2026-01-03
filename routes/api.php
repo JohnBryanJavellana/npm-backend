@@ -100,16 +100,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::prefix('/dormitories/')->group(function() {
+            //DORM REQUEST
             Route::get('get_all_dormitories', [TraineeDormitory::class, 'get_all_dormitories']);
-            Route::get('get_items', [TraineeDormitory::class, 'get_items']);
+            // Route::get('get_items', [TraineeDormitory::class, 'get_items']);
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
             Route::get('applied_dormitories/view/{dormitory_id}/inclusions', [TraineeDormitory::class, 'view_inclusion']);
-            Route::get('services', [TraineeDormitory::class, 'view_service']);
-            Route::get('services/{document_id}', [TraineeDormitory::class, 'user_service_request']);
-            Route::post('services/{document_id}/create', [TraineeDormitory::class, 'create_service_request']);
-            Route::post('services/{document_id}/cancel', [TraineeDormitory::class, 'cancel_service_request']);
-            Route::get('applied_dormitories/view/getAllHistories/{dormitory_id}', [TraineeDormitory::class, 'applied_dormitory_histories']);
             Route::post('remove_applied_dormitories/{dormitory_id}', [TraineeDormitory::class, 'remove_applied_dormitories']);
             Route::get('check_pending_request', [TraineeDormitory::class, 'check_pending_request']);
             Route::get('get_personal_dormitory', [TraineeDormitory::class, 'get_personal_dormitory']);
@@ -117,10 +113,21 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('update_status_dormitory', [TraineeDormitory::class,'update_status_dormitory']);
             Route::post('get_filtered_dorms', [TraineeDormitory::class, 'get_filtered_dorms']);
             Route::get('dormitory_record', [TraineeDormitory::class, 'dormitory_record']);
+            //SERVICES
+            Route::get('services', [TraineeDormitory::class, 'view_service']);
+            Route::get('services/{document_id}', [TraineeDormitory::class, 'user_service_request']);
+            Route::post('services/{document_id}/create', [TraineeDormitory::class, 'create_service_request']);
+            Route::post('services/{document_id}/cancel', [TraineeDormitory::class, 'cancel_service_request']);
+            //HISTORY
+            Route::get('applied_dormitories/view/getAllHistories/{dormitory_id}', [TraineeDormitory::class, 'applied_dormitory_histories']);
+            //PAYMENT?
             Route::post('dormitory_payment_request', [TraineeDormitory::class, 'update_dorm_invoice']);
+            //DORM TRANSFER
             Route::post('dormitory_transfer_request', [TraineeDormitory::class, 'create_transfer_request']);
-            Route::post('cancel_request/{id}', [TraineeDormitory::class, 'cancel_request']);
+            //DORM EXTENSION
             Route::post('extension_request', [TraineeDormitory::class, 'create_extend_request']);
+            //MISCELLANEOUS
+            Route::post('cancel_request/{id}', [TraineeDormitory::class, 'cancel_request']);
             Route::post('count_book_reservation', [TraineeDormitory::class, 'count_book_reservation']);
         });
 
@@ -302,6 +309,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::post('update_provided_stock_list', [DormitoryController::class, 'update_provided_stock_list']);
 
                 Route::post('count_dorm_reservation', [DormitoryController::class, 'count_dorm_reservation']);
+
+                Route::post('get_requested_service', [DormitoryController::class, 'get_requested_service']);
+                Route::post('request_service', [DormitoryController::class, 'request_service']);
+                Route::post('update_requested_service', [DormitoryController::class, 'update_requested_service']);
             });
         });
 

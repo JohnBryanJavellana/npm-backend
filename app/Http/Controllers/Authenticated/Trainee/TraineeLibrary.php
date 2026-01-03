@@ -196,7 +196,6 @@ class TraineeLibrary extends Controller
     public function view_available_extension(Request $request)
     {
         \Log::info("data view_available_extension", [$request->all(), $request->user()->id]);
-
         try {
             $userId = $request->user()->id;
             $traceNum = $request->trace_number;
