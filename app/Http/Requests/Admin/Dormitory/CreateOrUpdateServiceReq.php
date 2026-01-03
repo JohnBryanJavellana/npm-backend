@@ -27,6 +27,7 @@ class CreateOrUpdateServiceReq extends FormRequest
             'service_id' => ['required'],
             'charge' => ['required'],
             'httpMethod' => ['required'],
+            'remarks' => [ Rule::when($this->status === "DECLINED", ['required'], ['nullable']) ],
             'documentId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ]
         ];
     }
