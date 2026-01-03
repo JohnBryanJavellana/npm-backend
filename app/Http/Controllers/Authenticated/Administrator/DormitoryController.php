@@ -408,6 +408,9 @@ class DormitoryController extends Controller
                 $this_dormitory_request->for_slot = ($request->single_accommodation === "YES" || $request->forType === "COUPLE")
                     ? '3'
                     : $request->choosenRoom[0]['slot'];
+            } else {
+                $this_dormitory_request->tenant_from_date = $request->fromDate;
+                $this_dormitory_request->tenant_to_date = $request->toDate;
             }
 
             if($request->forType === "COUPLE" && is_null($this_dormitory_request->filename)) {

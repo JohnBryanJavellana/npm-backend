@@ -94,7 +94,7 @@ class DormitoryExtraService {
     {
         DB::transaction(function () use ($documentId, $userId) {
 
-            \Log::info("id cancel service: ", [$record]);
+            \Log::info("id cancel service: ", [$documentId]);
 
             $record = $this->dormitoryReqService
             ->whereKey($documentId)
@@ -111,6 +111,8 @@ class DormitoryExtraService {
             if($record->status === RequestStatus::CANCELLED->value) {
                 throw new DomainException("Service request was already cancelled.");
             }
+
+            //enum for done
 
             $record->update([
                 "status" => RequestStatus::CANCELLED->value

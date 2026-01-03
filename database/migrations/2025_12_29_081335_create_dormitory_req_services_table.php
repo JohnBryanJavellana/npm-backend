@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignIdFor(DormitoryService::class)->constrained()->cascadeOnDelete();
             $table->double('charge', 65, 2)->default(0);
             $table->longText('remarks')->nullable();
-            $table->enum("status", ["PENDING", "APPROVED", "DECLINED", "DONE", "CANCELLED"])->default('PENDING');
+            $table->enum("status", ["PENDING", "APPROVED", "DECLINED", "DONE", "CANCELLED", "PAID"])->default('PENDING');
             $table->timestamps();
         });
     }
