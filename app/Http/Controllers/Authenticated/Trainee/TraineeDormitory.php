@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 use App\Events\BEDormitory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainee\Dormitory\{CreateInclusionRequest, CreateServiceRequest, CreateTransferRequest, DormRoomRequest};
-use App\Http\Resources\Trainee\Dormitory\{AvailableItemsResource, DApplicationResource, DAppliedRequest};
+use App\Http\Resources\Trainee\Dormitory\{AvailableItemsResource, DApplicationResource, DAppliedRequest, InclusionRequestsResource};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Utils\{AuditHelper, GenerateUniqueFilename, GenerateTrace, TransactionUtil};
@@ -511,8 +511,8 @@ class TraineeDormitory extends Controller
     public function view_inclusion_request(Request $request, string $document_id)
     {
         try {
-            $items = $this->dormitoryInclusionService->getUserInclusionRequest($documentId);
-            return response()->json(["items" => $items], 200);
+            $items = $this->dormitoryInclusionService->getUserInclusionRequest($document_id);
+            return InclusionRequestsResource::collection($items);
         } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
         }

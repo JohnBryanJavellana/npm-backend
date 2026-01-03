@@ -22,7 +22,11 @@ class DormitoryInclusionService {
 
     public function getUserInclusionRequest($documentId)
     {
-        return $this->dormitoryInclusionRequest->where("dormitory_tenant_id", $documentId)->get();
+        return $this->dormitoryInclusionRequest
+        ->with([
+            "itemInfo"
+        ])
+        ->where("dormitory_tenant_id", $documentId)->get();
     }
 
     public function getAllItems()
