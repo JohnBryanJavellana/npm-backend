@@ -16,6 +16,6 @@ class DormitoryInventoryItem extends Model
 
     public function itemInfo()
     {
-        return $this->belongsTo(DormitoryInventory::class);
+        return $this->belongsTo(DormitoryInventory::class, "dormitory_inventory_id", "id");
     }
 }

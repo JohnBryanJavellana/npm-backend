@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BEDormitory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Trainee\Dormitory\{CreateServiceRequest, CreateTransferRequest, DormRoomRequest};
-use App\Http\Resources\Trainee\Dormitory\{DApplicationResource, DAppliedRequest};
+use App\Http\Requests\Trainee\Dormitory\{CreateInclusionRequest, CreateServiceRequest, CreateTransferRequest, DormRoomRequest};
+use App\Http\Resources\Trainee\Dormitory\{AvailableItemsResource, DApplicationResource, DAppliedRequest};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Utils\{AuditHelper, GenerateUniqueFilename, GenerateTrace, TransactionUtil};
@@ -17,7 +17,7 @@ use App\Models\{DormitoryRoom,
     DormitoryTenantHistory,
     DormitoryTransfer,
     DormitoryExtendRequest, DormitoryInventory, DormitoryItemBorrowing};
-use App\Services\Trainee\Dormitory\{DormitoryRequestService, DormitoryTransferService, DormitoryExtraService, DormitoryExtendService};
+use App\Services\Trainee\Dormitory\{DormitoryRequestService, DormitoryTransferService, DormitoryExtraService, DormitoryExtendService, DormitoryInclusionService};
 use App\Http\Resources\Trainee\Dormitory\ServiceRequestResource;
 use DomainException;
 
@@ -52,7 +52,8 @@ class TraineeDormitory extends Controller
     public function __construct(
         protected DormitoryRequestService $dormitory_service,
         protected DormitoryTransferService $dormitoryTransferService,
-        protected DormitoryExtraService $dormitoryExtraService 
+        protected DormitoryExtraService $dormitoryExtraService,
+        protected DormitoryInclusionService $dormitoryInclusionService,
     ){}
 
     public function get_all_dormitories(Request $request) {
@@ -503,13 +504,71 @@ class TraineeDormitory extends Controller
         }
     }
 
-    public function view_inclusion(Request $request, string $documentId)
+    /**
+     * Methods for Dorm Inclusions
+     */
+
+    public function view_inclusion_request(Request $request, string $document_id)
     {
         try {
-            $items = $this->dormitory_service->get_inclusions($documentId);
+            $items = $this->dormitoryInclusionService->getUserInclusionRequest($documentId);
             return response()->json(["items" => $items], 200);
         } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
+        }
+    }
+
+    public function view_available_items(Request $request)
+    {
+        try
+        {
+            $items = $this->dormitoryInclusionService->getAllItems();
+            
+            return AvailableItemsResource::collection($items);
+        }
+        catch (\Exception $e) {
+        }
+    }
+    public function view_inclusion(Request $request, string $documentId)
+    {
+        try {
+            $items = $this->dormitoryInclusionService->getInclusions($documentId);
+            return response()->json(["items" => $items], 200);
+        } catch (\Exception $e) {
+            return response()->json([$e->getMessage()], 500);
+        }
+    }
+
+    public function request_inclusion(CreateInclusionRequest $request)
+    {
+        $user_id = $request->user()->id;
+        $validated = $request->validated();
+        \Log::info("request_inclusion_all", [$request->all()]);
+        // return response()->json(["Success.................joke la"], 200);
+        try
+        {
+            $this->dormitoryInclusionService->createInclusionRequest($validated, $user_id);
+            return response()->json(["message" => "You've have successfully sent items request!"], 200);
+        }
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (\Exception $e) {
+            \Log::error("error_request_inclusion", [$e->getMessage()]);
+            return response()->json(["message" => "Something went wrong, please try again!"], 500);
+        }
+    }
+
+    public function cancel_request_inclusion(Request $request)
+    {
+        $user_id = $request->user()->id;
+        \Log::info("cancel_request_inclusion", [$request->all()]);
+        return response()->json(["Success.................joke la"], 200);
+        try
+        {            
+            $this->dormitoryInclusionService->cancelInclusionRequest($request->all(), $user_id);
+        }
+        catch (\Exception $e) {
         }
     }
 
@@ -562,7 +621,10 @@ class TraineeDormitory extends Controller
     {
         $user_id = $request->user()->id;
         try {
-            $this->dormitoryExtraService->cancelService($document_id, $user_id);
+            \Log::info("api id: ", [$document_id]);
+            \Log::info("api id request: ", [$request->all()]);
+
+            $this->dormitoryExtraService->cancelService($request->request_id, $user_id);
 
             return response()->json(["message" => "Service request has cancelled successfully"], 200);
         } 

@@ -12,7 +12,7 @@ class DormitoryHistoryService {
 
     public function getUserDormHistory($userId, $documentId)
     {
-        return $this->dormitoryTenantHistory
+        return$this->dormitoryTenantHistory
         ->whereRelation("tenants", "user_id", "=", $userId)
         ->where([
             "dormitory_tenant_id" => $documentId,

@@ -376,12 +376,12 @@ class TraineeLibrary extends Controller
             foreach($books as $book) {
                 if (!in_array($book->status, ["CANCELLED", "RECEIVED", "LOST", "RETURNED", "REJECTED"])) {
                     
-                    $book->update(["status" => RequestStatus::CANCELLED]);
+                    $book->update(["status" => RequestStatus::CANCELLED->value]);
                     // $book->status = RequestStatus::CANCELLED;
                     // $book->save();
 
                     if($book->book_copy_id) {
-                        BookCopy::find($book->book_copy_id)->update(['status' => RequestStatus::APPROVED]);
+                        BookCopy::find($book->book_copy_id)->update(['status' => RequestStatus::AVAILABLE->value]);
                     }
                 }
             }
@@ -393,7 +393,7 @@ class TraineeLibrary extends Controller
             ->exists();
 
             if(!$book_res) {
-                BookRes::where(['id' => $res_id, 'user_id' => $user_id])->update(['status' => RequestStatus::FOR_CSM]);
+                BookRes::where(['id' => $res_id, 'user_id' => $user_id])->update(['status' => RequestStatus::FOR_CSM->value]);
                 // $record = BookRes::where(['id' => $res_id, 'user_id' => $user_id])->first();
                 // $record->status = "FOR CSM";
                 // $record->save();
@@ -403,6 +403,7 @@ class TraineeLibrary extends Controller
                 event(new BELibrary(''));
             }
 
+            $this->forgetCache($user_id);
             SendingEmail::dispatch($request->user(), new BookReservationStatus(['status' => "CANCELLED"], $request->user()));
             AuditHelper::log($user_id, "User {$user_id} cancelled a book request.");
 

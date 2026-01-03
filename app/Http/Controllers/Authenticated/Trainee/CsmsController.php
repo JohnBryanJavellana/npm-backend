@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\{CSM, BookRes};
 use App\Utils\AuditHelper;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 
 class CsmsController extends Controller
@@ -57,6 +58,14 @@ class CsmsController extends Controller
             
             AuditHelper::log($userId, "User {$userId} has successfully submitted a service survey.");
             DB::commit();
+
+            Cache::forget("count_book_reservation:{$userId}");
+            Cache::forget("user_id:{$userId}:status:");
+            Cache::forget("user_id:{$userId}:status:ACTIVE");
+            Cache::forget("user_id:{$userId}:status:FOR CSM");
+            Cache::forget("user_id:{$userId}:status:COMPLETED");
+            Cache::forget("user_id:{$userId}:status:EXTENDING");
+
             return response()->json(["Successfully Submitted!"], 200);
         }
         catch (\Exception $e) {

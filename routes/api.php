@@ -69,7 +69,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     /** trainee routes
      * MUST HAVE A THROTTLE
     */
-    Route::middleware('trainee')->group(function () {
+    Route::middleware('user_role:TRAINEE,TRAINER')->group(function () {
         Route::prefix('/my-account/')->group(function() {
             Route::post('create_or_update_additional_info', [MyAccount::class,'create_or_update_additional_info']);
             Route::post('upload_profile_picture', [MyAccount::class,'upload_profile_picture']);
@@ -105,7 +105,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             // Route::get('get_items', [TraineeDormitory::class, 'get_items']);
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
-            Route::get('applied_dormitories/view/{dormitory_id}/inclusions', [TraineeDormitory::class, 'view_inclusion']);
+
             Route::post('remove_applied_dormitories/{dormitory_id}', [TraineeDormitory::class, 'remove_applied_dormitories']);
             Route::get('check_pending_request', [TraineeDormitory::class, 'check_pending_request']);
             Route::get('get_personal_dormitory', [TraineeDormitory::class, 'get_personal_dormitory']);
@@ -113,6 +113,13 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('update_status_dormitory', [TraineeDormitory::class,'update_status_dormitory']);
             Route::post('get_filtered_dorms', [TraineeDormitory::class, 'get_filtered_dorms']);
             Route::get('dormitory_record', [TraineeDormitory::class, 'dormitory_record']);
+
+            //INCLUSIONS
+            Route::get('applied_dormitories/view/{dormitory_id}/inclusions', [TraineeDormitory::class, 'view_inclusion']);
+            Route::get('inclusion/view', [TraineeDormitory::class, 'view_available_items']);
+            Route::get('inclusion/requests/{document_id}', [TraineeDormitory::class, 'view_inclusion_request']);
+            Route::post("inclusion/create", [TraineeDormitory::class, 'request_inclusion']);
+            Route::post("inclusion/cancel", [TraineeDormitory::class, 'cancel_request_inclusion']);
             //SERVICES
             Route::get('services', [TraineeDormitory::class, 'view_service']);
             Route::get('services/{document_id}', [TraineeDormitory::class, 'user_service_request']);

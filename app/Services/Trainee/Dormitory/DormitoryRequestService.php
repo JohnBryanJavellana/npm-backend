@@ -47,17 +47,6 @@ class DormitoryRequestService {
         return;
     }   
 
-    public function get_inclusions(string $documentId)
-    {
-        //validate
-        return $this->dormitoryItemBorrowing
-        ->with([
-            "items.item.itemInfo"
-        ])
-        ->whereRelation("tenant", "trace_number", "=", $documentId)
-        ->get();
-    }
-
     public function createRequest($validated, $userId)
     {
         DB::transaction(function() use ($validated, $userId) {

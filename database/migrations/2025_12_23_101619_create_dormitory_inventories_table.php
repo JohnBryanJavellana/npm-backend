@@ -19,6 +19,7 @@ return new class extends Migration
             $table->enum("is_consumable", ['YES', 'NO']);
             $table->longText("description");
             $table->longText("filename")->nullable();
+            $table->double("price", 65, 2)->default(0.0);
             $table->timestamps();
         });
     }
