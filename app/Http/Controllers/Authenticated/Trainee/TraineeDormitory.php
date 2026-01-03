@@ -131,9 +131,9 @@ class TraineeDormitory extends Controller
                 'trace_number' => $dormitory_id,
                 'user_id' => $request->user()->id
             ])
-            ->get();
+            ->first();
 
-            return DAppliedRequest::collection($dormitory_info);
+            return new DAppliedRequest($dormitory_info);
 
         } catch (\Exception $e) {
             \Log::info("error", [$e]);
@@ -536,7 +536,7 @@ class TraineeDormitory extends Controller
         } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
         }
-    }
+    } 
 
     public function create_service_request(CreateServiceRequest $request)
     {
@@ -545,7 +545,8 @@ class TraineeDormitory extends Controller
 
         \Log::info("type: ", [gettype($validated)]);
         try {
-            $this->dormitoryExtraService->createService($validated, $user_id);
+            $rr = $this->dormitoryExtraService->createService($validated, $user_id);
+            \Log::info("rr: ", [$rr]);
 
             return response()->json(["message" => "Your service request has been sent successfully!"], 200);
         } 

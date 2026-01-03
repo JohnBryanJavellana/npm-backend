@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryItemBI;
 use App\Models\DormitoryItemBorrowing;
+use App\Models\DormitoryReqService;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -14,7 +15,8 @@ use App\Http\Requests\Admin\Dormitory\{
     CreateOrUpdateDormitory,
     CreateOrUpdateRequest,
     CreateOrUpdateDormitoryInv,
-    CreateOrUpdateService
+    CreateOrUpdateService,
+    CreateOrUpdateServiceReq
 };
 use Illuminate\Http\Request;
 use App\Utils\{
@@ -555,7 +557,7 @@ class DormitoryController extends Controller
     }
 
     public function create_or_update_service (CreateOrUpdateService $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+        return TransactionUtil::transact($request, ["dormitory:services:all"], function() use ($request) {
             $this_service = $request->httpMethod === "POST"
                 ? new DormitoryService
                 : DormitoryService::find($request->documentId);
@@ -688,6 +690,75 @@ class DormitoryController extends Controller
             ];
 
             return response()->json(['reservationCount' => $count], 200);
+        });
+    }
+
+    public function request_service (CreateOrUpdateServiceReq $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $this_service = $request->httpMethod === "POST"
+                ? new DormitoryReqService()
+                : DormitoryReqService::where('id', $request->documentId)->lockForUpdate()->first();
+
+            $this_service->dormitory_tenant_id = $request->user_id;
+            $this_service->dormitory_service_id = $request->service_id;
+            $this_service->charge = $request->charge;
+            if($request->status) $this_service->status = $request->status;
+            $this_service->save();
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory service request. ID#" . $this_service->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory service request. ID# " . $this_service->id], 201);
+        });
+    }
+
+    public function get_requested_service (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $reqTemp = DormitoryReqService::with([
+                'services'
+            ]);
+
+            if($request->userId) {
+                $reqTemp->where('dormitory_tenant_id', $request->userId);
+            }
+
+            if($request->status) {
+                $reqTemp->where('status', $request->status);
+            }
+
+            $requestedServices = $reqTemp->get();
+
+            return response()->json([
+                'requestedServices' => $requestedServices
+            ], 200);
+        });
+    }
+
+    public function update_requested_service (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $reqTemp = DormitoryReqService::where('id', $request->documentId)
+                ->lockForUpdate()
+                ->first();
+
+            $reqTemp->status = $request->status;
+            $reqTemp->save();
+
+            AuditHelper::log($request->user()->id, "Updated requested service. ID#$request->documentId");
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've updated requested service."], 200);
         });
     }
 }

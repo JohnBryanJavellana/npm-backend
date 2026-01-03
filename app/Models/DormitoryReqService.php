@@ -13,7 +13,7 @@ class DormitoryReqService extends Model
 
     public function services()
     {
-        return $this->belongsTo(DormitoryService::class);
+        return $this->hasOne(DormitoryService::class, 'id', 'dormitory_service_id');
     }
 
     /** Scopes */

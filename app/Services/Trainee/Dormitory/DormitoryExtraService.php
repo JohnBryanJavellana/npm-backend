@@ -33,7 +33,7 @@ class DormitoryExtraService {
         ])
         ->where("dormitory_tenant_id", $documentId);
 
-        if($status->isNotEmpty()) {
+        if(!empty($status)) {
             $record->forStatus([$status]);
         }
 
@@ -42,22 +42,25 @@ class DormitoryExtraService {
 
     private function validateData($validated, int $userId) {
         $existing = $this->tenantModel
-        ->with(["services" => function($query) use($validated) {
+        ->with(["services." => function($query) use($validated) {
             $query->where("dormitory_service_id", $validated["service_id"])
                 ->forStatus([RequestStatus::APPROVED->value, RequestStatus::PENDING->value]);
         }])
         ->select("id")
-        ->whereKey($validated["document_id"])
+        ->whereKey($validated["dormitory_id"])
         ->forStatus([RequestStatus::APPROVED->value])
         ->forUser($userId)
         ->first();
+        \Log::info("existing:", [$existing]);
+
 
         if(!$existing) {
             throw new DomainException("No active tenant record found");
         }
 
-        if($existing->services->isNotEmpty()) {
-            $services = $existing->pluck("services.name")->filter()->implode(', ');
+        if(!empty($existing->services)) {
+            \Log::info("services:", [$existing->services]);
+            $services = $existing->services->pluck("name")->filter()->implode(', ');
             throw new DomainException("You already have an active request for this service. Please wait for the current request to be completed before submitting a new one. Service: $services");
         }
         
@@ -77,13 +80,13 @@ class DormitoryExtraService {
 
     public function createService($validated, int $userId)
     {
-        DB::transaction(function() use ($userId, $validated) {
+        return DB::transaction(function() use ($userId, $validated) {
+            \Log::info("validated inside service:", $validated);
             $this->validateData($validated, $userId);
 
             $this->dormitoryReqService->create([
                 "dormitory_tenant_id" => $validated["dormitory_id"],
                 "dormitory_service_id" => $validated["service_id"],
-                "remarks" => $validated["remarks"]
             ]);
         });
     }
