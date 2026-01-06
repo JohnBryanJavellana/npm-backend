@@ -108,7 +108,6 @@ class DormitoryRequestService {
                     "room_status" => RequestStatus::AVAILABLE->value
                 ]);
             }
-
             if (
                 $record->room_for_type === "COUPLE" && 
                 $record->filename &&

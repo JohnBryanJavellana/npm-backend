@@ -115,12 +115,10 @@ class TraineeDormitory extends Controller
 
     public function view_applied_dormitories (Request $request, $dormitory_id) {
         try {
-            \Log::info("view", [$dormitory_id]);
             $dormitory_info = DormitoryTenant::with([
                 'dormitory_room.dormitory.room_images',
-                'transferRequest' => function($q) {
-                    $q->where('status', 'PENDING');
-                },
+                'transferRequest',
+                'extendRequest',
                 'tenant_invoices' => function($self) {
                     $self->orderBy('created_at', 'DESC');
                 },
@@ -198,6 +196,9 @@ class TraineeDormitory extends Controller
         }
     }
 
+    /**
+     * Methods for Dorm Extension
+     */
     public function create_extend_request(Request $request)
     {
         \Log::info("Dorm.......: ", [$request->all(), $request->user()->id]);
@@ -275,6 +276,10 @@ class TraineeDormitory extends Controller
             }
         }
     }
+
+    /**
+     * Methods for Dorm Transfer
+     */
 
     public function create_transfer_request(CreateTransferRequest $request)
     {
@@ -507,7 +512,6 @@ class TraineeDormitory extends Controller
     /**
      * Methods for Dorm Inclusions
      */
-
     public function view_inclusion_request(Request $request, string $document_id)
     {
         try {
@@ -523,7 +527,6 @@ class TraineeDormitory extends Controller
         try
         {
             $items = $this->dormitoryInclusionService->getAllItems();
-            
             return AvailableItemsResource::collection($items);
         }
         catch (\Exception $e) {
@@ -620,6 +623,7 @@ class TraineeDormitory extends Controller
     public function cancel_service_request(Request $request, $document_id)
     {
         $user_id = $request->user()->id;
+        
         try {
             \Log::info("api id: ", [$document_id]);
             \Log::info("api id request: ", [$request->all()]);

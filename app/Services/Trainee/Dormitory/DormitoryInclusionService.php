@@ -9,10 +9,15 @@ use App\Models\ {
     DormitoryItemBorrowing
 };
 use DomainException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 
 class DormitoryInclusionService {
+
+    protected const SHORT_TTL = 300;
+    protected const LONG_TTL = 600;
+
     public function __construct(
         protected DormitoryInventory $dormitoryInventory,
         protected DormitoryItemBorrowing $dormitoryItemBorrowing,
@@ -31,12 +36,12 @@ class DormitoryInclusionService {
 
     public function getAllItems()
     {
-        //ADD CACHE
-        return $this->dormitoryInventory
-        ->whereHas("stock", function($query) {
-            $query->where("status", "AVAILABLE");
-        })
-        ->get();
+        $cacheKey = "dormitory:inclusions:all";
+        return  Cache::remember($cacheKey, self::LONG_TTL, function () {
+            return $this->dormitoryInventory
+            ->whereHas("stock", fn($q) => $q->available())
+            ->get();    
+        });    
     }
 
     public function getInclusions(string $documentId)
@@ -52,8 +57,8 @@ class DormitoryInclusionService {
 
     public function createInclusionRequest($validated, $userId)
     {
-        DB::transaction(function () use ($validated, $userId) {
-            $this->dormitoryInclusionRequest->create([
+        return DB::transaction(function () use ($validated, $userId) {
+            return $this->dormitoryInclusionRequest->create([
                 "dormitory_inventory_id" => $validated["inclusion_id"],
                 "dormitory_tenant_id" => $validated["request_id"],
                 "quantity" => $validated["quantity"]

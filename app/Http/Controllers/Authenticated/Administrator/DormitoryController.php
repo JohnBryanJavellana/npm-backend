@@ -196,7 +196,7 @@ class DormitoryController extends Controller
                         'disabled_dates' => $disabled
                     ];
                 });
-
+ 
             return response()->json(['rooms' => $rooms], 200);
         });
     }
@@ -257,7 +257,7 @@ class DormitoryController extends Controller
     }
 
     public function create_dormitory_inventory_stock (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+        return TransactionUtil::transact(null, ["dormitory:inclusions:all"], function() use ($request) {
             $dataToReturn = [];
 
             if($request->stock) {
@@ -279,7 +279,7 @@ class DormitoryController extends Controller
     }
 
     public function create_or_update_dormitory_inventory (CreateOrUpdateDormitoryInv $request) {
-        return TransactionUtil::transact($request, ["inventoryItems"], function() use ($request) {
+        return TransactionUtil::transact($request, ["inventoryItems", "dormitory:inclusions:all"], function() use ($request) {
             $dorm_inventory = $request->httpMethod === "POST"
                 ? new DormitoryInventory
                 : DormitoryInventory::find($request->documentId);

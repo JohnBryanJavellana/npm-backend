@@ -47,7 +47,10 @@ class DAppliedRequest extends JsonResource
             "room_images" => $this->dormitory_room?->dormitory?->room_images->map(function ($image) {
                 return ["filename" => $image->filename];
             }),
-            "transfer_request" => $this->transfer_request?->map(fn ($image) => $image),
+
+            "transfer_request" => $this->transferRequest?->map(fn ($image) => $image),
+            "extension_request" => $this->extendRequest?->map(fn ($image) => $image),
+
             "tenant_invoices" => $this->tenant_invoices?->map(fn ($image) => $image),
             "dormitory_histories" => $this->dormitory_histories?->map(function ($history){
                 return [

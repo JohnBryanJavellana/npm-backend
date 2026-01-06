@@ -21,9 +21,13 @@ class DormitoryTransfer extends Model
 
     public function scopeForUser(Builder $query, int $userId)
     {
-        return $query->where("user_id", $userId);
+        return $query->whereRelation("tenant","dormitory_tenant_id", "=", $userId);
     }
 
+    public function scopeForTenant(Builder $query, int $documentId)
+    {
+        return $query->where("dormitory_tenant_id", $documentId);
+    }
     public function scopeStatus(Builder $query, array $status)
     {
         return $query->whereIn("status", $status);

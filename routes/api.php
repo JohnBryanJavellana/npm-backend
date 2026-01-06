@@ -121,6 +121,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("inclusion/create", [TraineeDormitory::class, 'request_inclusion']);
             Route::post("inclusion/cancel", [TraineeDormitory::class, 'cancel_request_inclusion']);
             //SERVICES
+
             Route::get('services', [TraineeDormitory::class, 'view_service']);
             Route::get('services/{document_id}', [TraineeDormitory::class, 'user_service_request']);
             Route::post('services/{document_id}/create', [TraineeDormitory::class, 'create_service_request']);
@@ -131,6 +132,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('dormitory_payment_request', [TraineeDormitory::class, 'update_dorm_invoice']);
             //DORM TRANSFER
             Route::post('dormitory_transfer_request', [TraineeDormitory::class, 'create_transfer_request']);
+            Route::get('transfers', [TraineeDormitory::class, 'view_transfer_request']);
             //DORM EXTENSION
             Route::post('extension_request', [TraineeDormitory::class, 'create_extend_request']);
             //MISCELLANEOUS

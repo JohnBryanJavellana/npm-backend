@@ -8,9 +8,10 @@ use App\Models\{
     DormitoryTenantHistory,
     DormitoryInventory,
     DormitoryTransfer,
-    DormitoryExtendRequest
+    DormitoryExtensionRequest
 };
 use App\Enums\RequestStatus;
+use App\Utils\GenerateTrace;
 use Illuminate\Support\Facades\DB;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 
@@ -22,7 +23,7 @@ class DormitoryExtendService {
         protected DormitoryTenantHistory $dormitoryTenantHistory,
         protected DormitoryInventory $dormitoryInventory,
         protected DormitoryTransfer $dormitoryTransfer,
-        protected DormitoryExtendRequest $dormitoryExtendRequest,
+        protected DormitoryExtensionRequest $dormitoryExtensionRequest,
     ) {}
 
      
@@ -60,7 +61,9 @@ class DormitoryExtendService {
         DB::transaction(function () use ($userId, $documentId) {
             $this->validateData($userId, $documentId);
             
-
+            $this->dormitoryExtensionRequest->create([
+                "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryTransfer, "-TR-"),
+            ]);
         });
     }
 }
