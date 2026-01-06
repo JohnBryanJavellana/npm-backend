@@ -2,10 +2,14 @@
 
 namespace App\Http\Requests\Trainee\Dormitory;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CreateExtendRequest extends FormRequest
 {
+
+    protected $stopOnFirstFailure = true;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -26,5 +30,19 @@ class CreateExtendRequest extends FormRequest
             "to_date" => "required|date",
             "extension_date" => "required|date|after:to_date",
         ];
+    }
+
+
+    protected function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors();
+        $firstError = $errors->first();
+
+        throw new HttpResponseException(
+            response()->json([
+                "message" => $firstError,
+                "errors" => $errors
+            ])
+        );
     }
 }

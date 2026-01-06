@@ -18,7 +18,8 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->string('room_name');
             $table->longText('room_description');
-            $table->decimal('room_cost', 10, 2)->default(0.00);
+            $table->decimal('room_cost', 65, 2)->default(0.00);
+            $table->decimal('room_guest_cost', 65, 2)->default(0.00);
             $table->enum('room_fee_type',["OFFICERS", "RATINGS"])->nullable();
             $table->enum('is_air_conditioned',["YES", "NO"]);
             $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);

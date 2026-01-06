@@ -15,7 +15,6 @@ class CreateServiceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("service create: ", [$this->all()]);
         return $this->user() !== null;
     }
 

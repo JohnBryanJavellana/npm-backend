@@ -68,6 +68,7 @@ class DormitoryController extends Controller
             $this_dormitory->room_name = $request->room_name;
             $this_dormitory->room_description = $request->room_description;
             $this_dormitory->room_cost = $request->room_cost;
+            $this_dormitory->room_guest_cost = $request->room_guest_cost;
             $this_dormitory->room_fee_type = $request->room_fee_type;
             $this_dormitory->is_air_conditioned = $request->room_type;
             $this_dormitory->room_for_type = $request->room_for_type;

@@ -28,6 +28,7 @@ class CreateOrUpdateDormitory extends FormRequest
             'room_for_type' => ['required', 'string'],
             'room_description' => ['required', 'string'],
             'room_cost' => ['required', 'numeric'],
+            'room_guest_cost' => ['required', 'numeric'],
             'documentId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ],
             'room_status' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ],
             'room_image' => [ Rule::when($this->httpMethod === "POST", ['required'], ['nullable']) ],

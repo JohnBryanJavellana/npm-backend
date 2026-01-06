@@ -14,7 +14,7 @@ class DormitoryTransfer extends Model
 
     public function tenant()
     {
-        return $this->hasOne(DormitoryTenant::class, 'id', 'dormitory_tenant_id');
+        return $this->belongsTo(DormitoryTenant::class);
     }
 
     /** Scopes */

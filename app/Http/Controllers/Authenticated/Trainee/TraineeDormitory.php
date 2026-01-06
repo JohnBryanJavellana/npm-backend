@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BEDormitory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Trainee\Dormitory\{CreateInclusionRequest, CreateServiceRequest, CreateTransferRequest, DormRoomRequest};
+use App\Http\Requests\Trainee\Dormitory\{CreateExtendRequest, CreateInclusionRequest, CreateServiceRequest, CreateTransferRequest, DormRoomRequest};
 use App\Http\Resources\Trainee\Dormitory\{AvailableItemsResource, DApplicationResource, DAppliedRequest, InclusionRequestsResource};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -52,6 +52,7 @@ class TraineeDormitory extends Controller
     public function __construct(
         protected DormitoryRequestService $dormitory_service,
         protected DormitoryTransferService $dormitoryTransferService,
+        protected DormitoryExtendService $dormitoryExtendService,
         protected DormitoryExtraService $dormitoryExtraService,
         protected DormitoryInclusionService $dormitoryInclusionService,
     ){}
@@ -118,7 +119,7 @@ class TraineeDormitory extends Controller
             $dormitory_info = DormitoryTenant::with([
                 'dormitory_room.dormitory.room_images',
                 'transferRequest',
-                // 'extendRequest',
+                'extendRequest',
                 'tenant_invoices' => function($self) {
                     $self->orderBy('created_at', 'DESC');
                 },
@@ -199,98 +200,82 @@ class TraineeDormitory extends Controller
     /**
      * Methods for Dorm Extension
      */
-    public function create_extend_request(Request $request)
+    public function create_extend_request(CreateExtendRequest $request)
     {
-        \Log::info("Dorm.......extend: ", [$request->all()]);
-        return response()->json(["message"=>"sheesh"], 200);
-        $validations = [
-            'document_id' => 'required',
-            'date' => 'required|date',
-        ];
+        $validated = $request->validated();
+        $userId = $request->user()->id;
+        try {
 
-        $validator = \Validator::make($request->all(), $validations);
+            $this->dormitoryExtendService->createExtendRequest($userId, $validated);
+            // DB::beginTransaction();
 
-        if($validator->fails()) {
-            return response()->json(['message' => implode(',', $validator->errors()->getMessages())], 422);
-        } else {
-            try {
-                DB::beginTransaction();
+            // //validations
+            // $pending_request = DormitoryTransfer::whereHas("tenant", function ($query) use ($request) {
+            //     $query->where('user_id', $request->user()->id);
+            // })
+            // ->whereIn('status', ['PENDING','APPROVED'])
+            // ->exists();
 
-                //validations
-                $pending_request = DormitoryTransfer::whereHas("tenant", function ($query) use ($request) {
-                    $query->where('user_id', $request->user()->id);
-                })
-                ->whereIn('status', ['PENDING','APPROVED'])
-                ->exists();
+            // if($pending_request) {
+            //     return response()->json([
+            //         "message" => "A pending or approved transfer request already exists. You may only submit a new request once the current one has been resolved."
+            //     ], 400);
+            // }
 
-                if($pending_request) {
-                    return response()->json([
-                        "message" => "A pending or approved transfer request already exists. You may only submit a new request once the current one has been resolved."
-                    ], 400);
-                }
+            // //validations
+            // $exist = DormitoryTenant::where([
+            //     "id" => $request->document_id,
+            //     "tenant_status" => "APPROVED",
+            //     "user_id" => $request->user()->id
+            // ])->exists();
 
-                //validations
-                $exist = DormitoryTenant::where([
-                    "id" => $request->document_id,
-                    "tenant_status" => "APPROVED",
-                    "user_id" => $request->user()->id
-                ])->exists();
+            // if(!$exist) {
+            //     return response()->json([
+            //         "message" => "No active tenant record was found. Room transfer requests can only be made by active tenants."
+            //     ], 400);
+            // }
 
-                if(!$exist) {
-                    return response()->json([
-                        "message" => "No active tenant record was found. Room transfer requests can only be made by active tenants."
-                    ], 400);
-                }
+            // //tenant update
+            // $dorm_record = DormitoryTenant::findOrFail($request->document_id);
+            // $dorm_record->tenant_status = "EXTENDING";
+            // $dorm_record->save();
 
-                //tenant update
-                $dorm_record = DormitoryTenant::findOrFail($request->document_id);
-                $dorm_record->tenant_status = "EXTENDING";
-                $dorm_record->save();
+            // //create request
+            // $record = new DormitoryExtendRequest;
+            // $record->dormitory_tenant_id = $request->document_id;
+            // $record->date_of_extension = $request->date;
+            // $record->save();
 
-                //create request
-                $record = new DormitoryExtendRequest;
-                $record->dormitory_tenant_id = $request->document_id;
-                $record->date_of_extension = $request->date;
-                $record->save();
+            // //create history
+            // $dormitory_tenant_history = new DormitoryTenantHistory;
+            // $dormitory_tenant_history->dormitory_tenant_id = $request->document_id;
+            // $dormitory_tenant_history->history_reason = "A Dormitory Extension Request has been created, extending the stay until {$request->date}.";
+            // $dormitory_tenant_history->save();
 
-                //create history
-                $dormitory_tenant_history = new DormitoryTenantHistory;
-                $dormitory_tenant_history->dormitory_tenant_id = $request->document_id;
-                $dormitory_tenant_history->history_reason = "A Dormitory Extension Request has been created, extending the stay until {$request->date}.";
-                $dormitory_tenant_history->save();
-
-                if(env("USE_EVENT")) {
-                    event(new BEDormitory(''));
-                }
-
-                //additional email for sending a extension request
-
-                AuditHelper::log($request->user()->id, "User {$request->user()->id} sent a dorm extension request.");
-
-                DB::commit();
-                return response()->json(['message' => "Your extension request has been successfully submitted for review."]);
-
-            } catch (\Exception $e) {
-                \Log::error("Error: ", [$e->getMessage()]);
-                DB::rollBack();
-                return response()->json(['message' => $e->getMessage()], 500);
+            if(env("USE_EVENT")) {
+                event(new BEDormitory(''));
             }
+
+            //additional email for sending a extension request
+
+            AuditHelper::log($request->user()->id, "User {$request->user()->id} sent a dorm extension request.");
+            return response()->json(['message' => "Your extension request has been successfully submitted for review."]);
+        } catch (\Exception $e) {
+            \Log::error("Error: ", [$e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
     /**
      * Methods for Dorm Transfer
      */
-
     public function create_transfer_request(CreateTransferRequest $request)
     {
         try {
-            \Log::info("Dorm.......transfer: ", [$request->all()]);
-            return response()->json(["message"=>"sheesh"], 200);
             $userId = $request->user()->id;
             $validated = $request->validated();
 
-            $this->dormitoryTransferService->createTransfer($validated, $userId);
+            $this->dormitoryTransferService->createTransferRequest($validated, $userId);
         
             event(new BEDormitory(''));
 
@@ -313,7 +298,7 @@ class TraineeDormitory extends Controller
             $user_id = $request->user()->id;
             $allowedTypes = [
                 'DormitoryTransfer' => "DormitoryTransfer",
-                'DormitoryExtendRequest' => $this->dormitoryTransferService,
+                'DormitoryExtendRequest' => "DormitoryExtendRequest",
             ];
 
             if (!array_key_exists($request->type, $allowedTypes)) {
@@ -324,11 +309,11 @@ class TraineeDormitory extends Controller
 
             switch ($allowedTypes[$request->type]) {
                 case 'DormitoryTransfer':
-                    $this->dormitoryTransferService->cancelTransfer($id, $user_id);
+                    $this->dormitoryTransferService->cancelTransferRequest($id, $user_id);
                     break;
                 case 'DormitoryExtendRequest':
                     //change for extension
-                    $this->dormitoryTransferService->cancelTransfer($id, $user_id);
+                    $this->dormitoryExtendService->cancelExtendRequest($id, $user_id);
                     break;
             }
 
