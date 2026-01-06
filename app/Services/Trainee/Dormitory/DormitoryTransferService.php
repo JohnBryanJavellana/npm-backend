@@ -11,6 +11,7 @@ use App\Models\{
     DormitoryExtendRequest
 };
 use App\Utils\AuditHelper;
+use App\Utils\GenerateTrace;
 use Illuminate\Support\Facades\DB;
 use DomainException;
 
@@ -52,6 +53,24 @@ class DormitoryTransferService extends DormitoryHistoryService {
         }
     }
 
+    public function viewTransferRequests($documentId, $userId, array $status = [])
+    {
+
+        try {
+        $query = $this->dormitoryTransfer
+            ->forUser($userId)
+            ->forTenant($documentId);
+
+        if(!empty($status)) {
+            $query->status($status);
+        }
+
+        return $query->get();
+        }
+        catch (\Exception $e) {
+        }
+    }
+
     public function createTransfer($validated, $userId)
     {
         DB::transaction(function() use ($userId, $validated) {
@@ -59,6 +78,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
 
             $this->dormitoryTransfer->create([
                 "dormitory_tenant_id" => $validated["document_id"],
+                "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryTransfer, "-TR-"),
                 "transfer_type" => $validated["transfer_type"],
                 "room_type" => $validated["type"],
                 "reason" => $validated["reason"]
