@@ -20,6 +20,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(DormitoryItemBorrowing::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryInventoryItem::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->enum("withFee", ["Y", "N"])->default('N');
             $table->enum("status", ["RETURNED", "DAMAGED", "APPROVED", "LOST", "RECEIVED", "PENDING", "CANCELLED"])->default('PENDING');
             $table->timestamps();
         });

@@ -16,9 +16,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
             $table->string('trace_number', 255)->nullable();
-            $table->enum("status", ['PENDING', 'CANCELLED', 'APPROVED', 'FOR-PAYMENT'])->default('PENDING');
-            $table->date('current_to_date');
-            $table->date("date_of_extension");
+            $table->date('old_end_date');
+            $table->date("new_end_date");
+            $table->enum("status", ['PENDING', 'CANCELLED', 'APPROVED', 'FOR-PAYMENT', 'COMPLETED'])->default('PENDING');
             $table->timestamps();
         });
     }

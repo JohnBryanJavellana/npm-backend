@@ -196,7 +196,7 @@ class DormitoryController extends Controller
                         'disabled_dates' => $disabled
                     ];
                 });
- 
+
             return response()->json(['rooms' => $rooms], 200);
         });
     }

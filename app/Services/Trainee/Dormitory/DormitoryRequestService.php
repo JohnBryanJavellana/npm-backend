@@ -15,6 +15,7 @@ use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use App\Utils\GenerateUniqueFilename;
+use App\Utils\SaveFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use DomainException;
@@ -25,6 +26,7 @@ class DormitoryRequestService {
 
     private const LONG_TTL = 600;
     private const SHORT_TTL = 30;
+    private const PREFIX = "-DR-";
 
     public function __construct(
         protected DormitoryRoom $roomModel,
@@ -56,7 +58,7 @@ class DormitoryRequestService {
             $data = [
                 "user_id" => $userId,
                 "room_for_type" => $validated["forType"],
-                "trace_number" => GenerateTrace::createTraceNumber($this->tenantModel, "-DR-"),
+                "trace_number" => GenerateTrace::createTraceNumber($this->tenantModel, self::PREFIX),
                 "is_air_conditioned" => $validated["is_air_conditioned"],
                 "single_accomodation" => $validated["single_accomodation"],
                 "tenant_from_date" => $validated["startDate"],
@@ -65,10 +67,11 @@ class DormitoryRequestService {
             ];
 
             if($validated["forType"] === $this->tenantModel::COUPLE) {
-                $file_requested = $validated["file"];
-                $filename = GenerateUniqueFilename::generate($file_requested);
-                $file_requested->move(public_path('dormitory/supporting-document'), $filename);
-                $data["filename"] = $filename;
+                
+                // $file_requested = $validated["file"];
+                // $filename = GenerateUniqueFilename::generate($file_requested);
+                // $file_requested->move(public_path('dormitory/supporting-document'), $filename);
+                $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document');
             }
 
             $record = $this->tenantModel->create($data);

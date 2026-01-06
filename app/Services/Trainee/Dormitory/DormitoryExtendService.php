@@ -12,11 +12,14 @@ use App\Models\{
 };
 use App\Enums\RequestStatus;
 use App\Utils\GenerateTrace;
+use DomainException;
 use Illuminate\Support\Facades\DB;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 
 class DormitoryExtendService {
 
+
+    private const PREFIX = "-TR-";
     public function __construct(
         protected DormitoryRoom $roomModel,
         protected DormitoryTenant $tenantModel,
@@ -27,7 +30,7 @@ class DormitoryExtendService {
     ) {}
 
      
-    private function validateData($userId, $documentId)
+    private function prepareData($userId, $documentId)
     {
         $record = $this->tenantModel
         ->with([
@@ -48,22 +51,55 @@ class DormitoryExtendService {
         ->first();
 
         if(!$record) {
-            throw new \DomainException("No active tenant record was found. Room extension requests can only be made by active tenants.");
+            throw new DomainException("No active tenant record was found. Room extension requests can only be made by active tenants.");
         }
 
         if(!$record->transferRequest->isNotEmpty()) {
-            throw new \DomainException("A pending or approved transfer request already exists.");
+            throw new DomainException("A pending or approved transfering request already exists.");
+        }
+
+        if(!$record->extendRequest->isNotEmpty()) {
+            throw new DomainException("A pending or approved extending request already exists.");
         }
     }
 
-    public function createExtend($userId, $documentId)
+    public function createExtendRequest($userId, $validated)
     {
-        DB::transaction(function () use ($userId, $documentId) {
-            $this->validateData($userId, $documentId);
+        return DB::transaction(function () use ($userId, $validated) {
+            $this->prepareData($userId, $validated["document_id"]);
             
-            $this->dormitoryExtensionRequest->create([
-                "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryTransfer, "-TR-"),
+            $record = $this->dormitoryExtensionRequest->create([
+                "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryTransfer, self::PREFIX),
+                "old_end_date" => $validated["to_date"],
+                "new_end_date" => $validated["extension_date"],
             ]);
+
+            $this->updateTenantRecord($validated["document_id"], RequestStatus::EXTENDING->value);
+
+            return $record;
         });
+    }
+
+    public function cancelExtendRequest(DormitoryExtensionRequest $extend)
+    {
+        if (!in_array($extend->status, [
+            RequestStatus::PENDING->value,
+            RequestStatus::APPROVED->value,
+            RequestStatus::FOR_PAYMENT->value
+        ])) {
+            throw new DomainException('Extending request cannot be cancelled.');
+        }
+        
+        $extend->update([
+            "status" => RequestStatus::CANCELLED->value
+        ]);
+
+        $this->updateTenantRecord($extend->dormitory_tenant_id, RequestStatus::APPROVED->value);
+    }
+
+    private function updateTenantRecord(DormitoryTenant $tenant, $status) {
+        $tenant->update([
+            "tenant_status" => $status
+        ]);
     }
 }

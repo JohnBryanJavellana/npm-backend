@@ -68,6 +68,7 @@ class DormitoryInclusionService {
 
     public function cancelInclusionRequest($validated, $userId)
     {
+        // validate the owner
         DB::transaction(function () use ($validated, $userId) {
             $record = $this->dormitoryInclusionRequest
             ->whereKey($validated["document_id"])

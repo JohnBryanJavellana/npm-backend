@@ -118,7 +118,7 @@ class TraineeDormitory extends Controller
             $dormitory_info = DormitoryTenant::with([
                 'dormitory_room.dormitory.room_images',
                 'transferRequest',
-                'extendRequest',
+                // 'extendRequest',
                 'tenant_invoices' => function($self) {
                     $self->orderBy('created_at', 'DESC');
                 },
@@ -201,7 +201,8 @@ class TraineeDormitory extends Controller
      */
     public function create_extend_request(Request $request)
     {
-        \Log::info("Dorm.......: ", [$request->all(), $request->user()->id]);
+        \Log::info("Dorm.......extend: ", [$request->all()]);
+        return response()->json(["message"=>"sheesh"], 200);
         $validations = [
             'document_id' => 'required',
             'date' => 'required|date',
@@ -284,6 +285,8 @@ class TraineeDormitory extends Controller
     public function create_transfer_request(CreateTransferRequest $request)
     {
         try {
+            \Log::info("Dorm.......transfer: ", [$request->all()]);
+            return response()->json(["message"=>"sheesh"], 200);
             $userId = $request->user()->id;
             $validated = $request->validated();
 
@@ -357,33 +360,29 @@ class TraineeDormitory extends Controller
         $user = $request->user();
         $validated = $request->validated();
         try {
-            DB::beginTransaction();
-
             $this->dormitory_service->createRequest($validated, $user->id);
-
+            
             if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
             }
 
-            DB::commit();
             return response()->json(["message"=> 'Dormitory request sent successfully.'], 200);
-
         } catch (DomainException $e) {
             throw $e;
         }
         catch (\Exception $e) {
-            \Log::error("error-send-reqesut", [$e]);
-            DB::rollBack();
-            return response()->json(["message"=> $e->getMessage()],500);
+            \Log::error("error-send-reqesut", [$e->getMessage()]);
+            return response()->json(["message"=> "An unexpected error occurred. Please try again."],500);
         }
     }
     public function remove_applied_dormitories (Request $request, int $dormitory_id) {
         try {
-            \Log::info("cancel dorm", [$dormitory_id]);
 
             $this->dormitory_service->cancelRequest($request, $dormitory_id);                                 
 
-            event(new BEDormitory(''));
+            if(env("USE_EVENT")) {
+                event(new BEDormitory(''));
+            }
 
             return response()->json(['message' => "You've cancelled dormitory request application. ID# $dormitory_id"], 200);
         }
@@ -391,8 +390,8 @@ class TraineeDormitory extends Controller
             throw $e;
         }
         catch (\Exception $e) {
-            \Log::error("error cancel dorm", [$dormitory_id]);
-            return response()->json(['message' => $e->getMessage()], 500);
+            \Log::error("error cancel dorm", [$e->getMessage()]);
+            return response()->json(['message' => "An unexpected error occurred. Please try again. "], 500);
         }
     }
 
@@ -518,18 +517,20 @@ class TraineeDormitory extends Controller
             $items = $this->dormitoryInclusionService->getUserInclusionRequest($document_id);
             return InclusionRequestsResource::collection($items);
         } catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+            \Log::error("error_view_inclusion_request", [$e->getMessage()]);
+            return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
         }
     }
 
     public function view_available_items(Request $request)
     {
-        try
-        {
+        try {
             $items = $this->dormitoryInclusionService->getAllItems();
             return AvailableItemsResource::collection($items);
         }
         catch (\Exception $e) {
+            \Log::error("error_view_available_items", [$e->getMessage()]);
+            return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
         }
     }
     public function view_inclusion(Request $request, string $documentId)
@@ -538,6 +539,7 @@ class TraineeDormitory extends Controller
             $items = $this->dormitoryInclusionService->getInclusions($documentId);
             return response()->json(["items" => $items], 200);
         } catch (\Exception $e) {
+            \Log::error("error_view_inclusion", [$e->getMessage()]);
             return response()->json([$e->getMessage()], 500);
         }
     }
@@ -546,8 +548,6 @@ class TraineeDormitory extends Controller
     {
         $user_id = $request->user()->id;
         $validated = $request->validated();
-        \Log::info("request_inclusion_all", [$request->all()]);
-        // return response()->json(["Success.................joke la"], 200);
         try
         {
             $this->dormitoryInclusionService->createInclusionRequest($validated, $user_id);
@@ -558,20 +558,20 @@ class TraineeDormitory extends Controller
         }
         catch (\Exception $e) {
             \Log::error("error_request_inclusion", [$e->getMessage()]);
-            return response()->json(["message" => "Something went wrong, please try again!"], 500);
+            return response()->json(["message" => "An unexpected error occurred. Please try again. "], 500);
         }
     }
 
     public function cancel_request_inclusion(Request $request)
     {
         $user_id = $request->user()->id;
-        \Log::info("cancel_request_inclusion", [$request->all()]);
-        return response()->json(["Success.................joke la"], 200);
         try
         {            
             $this->dormitoryInclusionService->cancelInclusionRequest($request->all(), $user_id);
         }
         catch (\Exception $e) {
+            \Log::error("error_cancel_request_inclusion", [$e->getMessage()]);
+            return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
         }
     }
 
@@ -585,6 +585,7 @@ class TraineeDormitory extends Controller
             
             return response()->json(["services" => $services], 200);
         } catch (\Exception $e) {
+            \Log::error("error_view_service", [$e->getMessage()]);
             return response()->json([$e->getMessage()], 500);
         }
     }
@@ -596,6 +597,7 @@ class TraineeDormitory extends Controller
 
             return ServiceRequestResource::collection($records);
         } catch (\Exception $e) {
+            \Log::error("error_user_service_request", [$e->getMessage()]);
             return response()->json([$e->getMessage()], 500);
         }
     } 
@@ -605,7 +607,6 @@ class TraineeDormitory extends Controller
         $user_id = $request->user()->id;
         $validated = $request->validated();
 
-        \Log::info("type: ", [gettype($validated)]);
         try {
             $rr = $this->dormitoryExtraService->createService($validated, $user_id);
             \Log::info("rr: ", [$rr]);
@@ -616,7 +617,8 @@ class TraineeDormitory extends Controller
             throw $e;
         }
         catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+            \Log::error("error_create_service_request", [$e->getMessage()]);
+            return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
         }
     }
 
@@ -625,9 +627,6 @@ class TraineeDormitory extends Controller
         $user_id = $request->user()->id;
         
         try {
-            \Log::info("api id: ", [$document_id]);
-            \Log::info("api id request: ", [$request->all()]);
-
             $this->dormitoryExtraService->cancelService($request->request_id, $user_id);
 
             return response()->json(["message" => "Service request has cancelled successfully"], 200);
@@ -636,7 +635,8 @@ class TraineeDormitory extends Controller
             throw $e;
         }
         catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+            \Log::error("error_cancel_service_request", [$e->getMessage()]);
+            return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
         }
     }
 }
