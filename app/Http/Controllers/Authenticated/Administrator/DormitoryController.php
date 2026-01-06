@@ -125,7 +125,7 @@ class DormitoryController extends Controller
     public function get_available_dorms (GetAvailableDorms $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $dorms = Dormitory::withCount('rooms')
-                ->with('rooms')
+                ->has('rooms')
                 ->where([
                     'room_for_type' => $request->room_for_type,
                     'is_air_conditioned' => $request->room_type
