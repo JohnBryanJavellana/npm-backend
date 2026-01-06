@@ -22,7 +22,9 @@ class CreateExtendRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            "document_id" => "required|exists:dormitory_tenants,id",
+            "to_date" => "required|date",
+            "extension_date" => "required|date|after:to_date",
         ];
     }
 }
