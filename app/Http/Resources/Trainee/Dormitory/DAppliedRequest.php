@@ -49,7 +49,7 @@ class DAppliedRequest extends JsonResource
             }),
 
             "transfer_request" => $this->transferRequest?->map(fn ($image) => $image),
-            // "extension_request" => $this->extendRequest?->map(fn ($image) => $image),
+            "extension_request" => $this->extendRequest?->map(fn ($image) => $image),
 
             "tenant_invoices" => $this->tenant_invoices?->map(fn ($image) => $image),
             "dormitory_histories" => $this->dormitory_histories?->map(function ($history){

@@ -37,12 +37,12 @@ class DormitoryTenant extends Model{
 
     public function transferRequest()
     {
-        return $this->hasOne(DormitoryTransfer::class, 'dormitory_tenant_id', 'id');
+        return $this->hasMany(DormitoryTransfer::class, 'dormitory_tenant_id', 'id');
     }
 
     public function extendRequest()
     {
-        return $this->hasOne(DormitoryExtendRequest::class, 'dormitory_tenant_id', 'id');
+        return $this->hasMany(DormitoryExtensionRequest::class, 'dormitory_tenant_id', 'id');
     }
 
     public function borrowedItems()

@@ -48,7 +48,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
             throw new DomainException("No active tenant record was found. Room transfer requests can only be made by active tenants.");
         }
 
-        if($record->transfers->isNotEmpty()) {
+        if($record->transfers !== null) {
             throw new DomainException("A pending transfer request already exists. You may only submit a new request once the current one has been resolved.");
         }
     }
@@ -71,7 +71,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
         }
     }
 
-    public function createTransfer($validated, $userId)
+    public function createTransferRequest($validated, $userId)
     {
         DB::transaction(function() use ($userId, $validated) {
             $this->validateData($userId, $validated["document_id"]);
@@ -94,7 +94,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
     }
 
 
-    public function cancelTransfer(int $id, int $userId)
+    public function cancelTransferRequest(int $id, int $userId)
     {
         DB::transaction(function() use($id, $userId) {
             $record = $this->dormitoryTransfer

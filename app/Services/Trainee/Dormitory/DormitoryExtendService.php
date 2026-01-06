@@ -30,76 +30,92 @@ class DormitoryExtendService {
     ) {}
 
      
-    private function prepareData($userId, $documentId)
-    {
-        $record = $this->tenantModel
-        ->with([
-            "transferRequest"=> function ($query)use ($documentId, $userId) {
-                $query->forUser($userId)
-                    ->where("dormitory_tenant_id", $documentId)
-                    ->status([RequestStatus::PENDING->value, RequestStatus::APPROVED->value]);
-            },
-            "extendRequest" => function ($query)use ($documentId, $userId) {
-                $query->forUser($userId)
-                    ->where("dormitory_tenant_id", $documentId)
-                    ->status([RequestStatus::PENDING->value, RequestStatus::APPROVED->value]);
-            }
-        ])
-        ->forUser($userId)
-        ->forStatus([RequestStatus::APPROVED->value])
-        ->whereKey($documentId)
-        ->first();
+    // private function prepareData($userId, $documentId)
+    // {
+    //     $record = $this->tenantModel
+    //     ->with([
+    //         "transferRequest"=> function ($query)use ($documentId, $userId) {
+    //             $query->forUser($userId)
+    //                 ->where("dormitory_tenant_id", $documentId)
+    //                 ->status([RequestStatus::PENDING->value, RequestStatus::APPROVED->value]);
+    //         },
+    //         "extendRequest" => function ($query)use ($documentId, $userId) {
+    //             $query->forUser($userId)
+    //                 ->where("dormitory_tenant_id", $documentId)
+    //                 ->status([RequestStatus::PENDING->value, RequestStatus::APPROVED->value]);
+    //         }
+    //     ])
+    //     ->forUser($userId)
+    //     ->forStatus([RequestStatus::APPROVED->value])
+    //     ->whereKey($documentId)
+    //     ->first();
 
-        if(!$record) {
-            throw new DomainException("No active tenant record was found. Room extension requests can only be made by active tenants.");
-        }
+    //     if(!$record) {
+    //         throw new DomainException("No active tenant record was found. Room extension requests can only be made by active tenants.");
+    //     }
 
-        if(!$record->transferRequest->isNotEmpty()) {
-            throw new DomainException("A pending or approved transfering request already exists.");
-        }
+    //     if(!$record->transferRequest !== null) {
+    //         throw new DomainException("A pending or approved transfering request already exists.");
+    //     }
 
-        if(!$record->extendRequest->isNotEmpty()) {
-            throw new DomainException("A pending or approved extending request already exists.");
-        }
-    }
+    //     if(!$record->extendRequest !== null) {
+    //         throw new DomainException("A pending or approved extending request already exists.");
+    //     }
+    // }
 
     public function createExtendRequest($userId, $validated)
     {
         return DB::transaction(function () use ($userId, $validated) {
-            $this->prepareData($userId, $validated["document_id"]);
+            // $this->prepareData($userId, $validated["document_id"]);
             
             $record = $this->dormitoryExtensionRequest->create([
-                "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryTransfer, self::PREFIX),
+                "dormitory_tenant_id" => $validated["document_id"],
+                "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryExtensionRequest, self::PREFIX),
                 "old_end_date" => $validated["to_date"],
                 "new_end_date" => $validated["extension_date"],
             ]);
 
-            $this->updateTenantRecord($validated["document_id"], RequestStatus::EXTENDING->value);
+            // $this->updateTenantRecord($validated["document_id"], RequestStatus::EXTENDING->value);
 
             return $record;
         });
     }
 
-    public function cancelExtendRequest(DormitoryExtensionRequest $extend)
+    public function cancelExtendRequest($documentId, $userId)
     {
-        if (!in_array($extend->status, [
-            RequestStatus::PENDING->value,
-            RequestStatus::APPROVED->value,
-            RequestStatus::FOR_PAYMENT->value
-        ])) {
-            throw new DomainException('Extending request cannot be cancelled.');
-        }
-        
-        $extend->update([
-            "status" => RequestStatus::CANCELLED->value
-        ]);
+        DB::transaction(function() use ($documentId, $userId) {
+            $extend = $this->dormitoryExtensionRequest
+            ->whereRelation("tenant", "user_id", "=", $userId)
+            ->wherekey($documentId)
+            ->lockForUpdate()
+            ->first();
 
-        $this->updateTenantRecord($extend->dormitory_tenant_id, RequestStatus::APPROVED->value);
+            if (!in_array($extend->status, [
+                RequestStatus::PENDING->value,
+                RequestStatus::APPROVED->value,
+                RequestStatus::FOR_PAYMENT->value
+            ])) {
+                throw new DomainException('Extending request cannot be cancelled.');
+            }
+            
+            $extend->update([
+                "status" => RequestStatus::CANCELLED->value
+            ]);
+
+            // $this->updateTenantRecord($extend->dormitory_tenant_id, RequestStatus::APPROVED->value);
+        });
     }
 
-    private function updateTenantRecord(DormitoryTenant $tenant, $status) {
-        $tenant->update([
-            "tenant_status" => $status
-        ]);
-    }
+    // private function updateTenantRecord($tenant, $status) {
+    //     $record = $this->dormitoryTransfer
+    //         ->whereRelation("tenant", "user_id", "=", $userId)
+    //         ->with("tenant")
+    //         ->lockForUpdate()
+    //         ->findOrFail($id);
+
+
+    //     $tenant->update([
+    //         "tenant_status" => $status
+    //     ]);
+    // }
 }
