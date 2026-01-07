@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use App\Models\DormitoryInventoryItem;
+use App\Models\DormitoryInvoice;
 use App\Models\DormitoryItemBI;
 use App\Models\DormitoryItemBorrowing;
 use App\Models\DormitoryReqService;
@@ -174,7 +175,7 @@ class DormitoryController extends Controller
         });
     }
 
-    public function get_available_rooms(Request $request) {
+    public function get_available_rooms (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $targetRoomId = $request->roomId;
 
@@ -184,7 +185,7 @@ class DormitoryController extends Controller
                 ->get()
                 ->map(function($room) {
                     $disabled = $room->hasData->filter(function($tenant) {
-                        return !in_array($tenant->tenant_status, ["PENDING", "TERMINATED", "CANCELLED", "DECLINED"]);
+                        return !in_array($tenant->tenant_status, ["PENDING", "TERMINATED", "CANCELLED", "DECLINED", "RESERVED"]);
                     })->map(function($d) {
                         return [
                             'from' => $d->tenant_from_date,
@@ -387,11 +388,12 @@ class DormitoryController extends Controller
 
     public function create_or_update_request (CreateOrUpdateRequest $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
+            \Log::info("🌵🌵🌵🌵🌵🌵🌵: ------→", ['data' => $request->all()]);
+
             $this_dormitory_request = $request->httpMethod === "POST"
                 ? new DormitoryTenant
                 : DormitoryTenant::find($request->documentId);
 
-            if($request->httpMethod === "POST") $this_dormitory_request->trace_number = GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DR-');
             $this_dormitory_request->user_id = $request->userId;
             $this_dormitory_request->room_for_type = $request->forType;
             $this_dormitory_request->single_accommodation = $request->single_accommodation;
@@ -401,19 +403,13 @@ class DormitoryController extends Controller
             $this_dormitory_request->paying_guest = $request->payingGuest;
             $this_dormitory_request->process_type = $request->processType;
 
+            if($request->httpMethod === "POST") $this_dormitory_request->trace_number = GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DR-');
             if($request->status) $this_dormitory_request->tenant_status = $request->status;
 
-            if($request->processType === "WALK-IN" && $request->choosenRoom) {
-                $this_dormitory_request->tenant_from_date = $request->choosenRoom[0]['start'];
-                $this_dormitory_request->tenant_to_date = $request->choosenRoom[0]['end'];
-                $this_dormitory_request->dormitory_room_id = $request->choosenRoom[0]['roomId'];
-                $this_dormitory_request->for_slot = ($request->single_accommodation === "YES" || $request->forType === "COUPLE")
-                    ? '3'
-                    : $request->choosenRoom[0]['slot'];
-            } else {
-                $this_dormitory_request->tenant_from_date = $request->fromDate;
-                $this_dormitory_request->tenant_to_date = $request->toDate;
-            }
+            $this_dormitory_request->tenant_from_date = $request->chosenRoom['start'];
+            $this_dormitory_request->tenant_to_date = $request->chosenRoom['end'];
+            $this_dormitory_request->dormitory_room_id = $request->chosenRoom['roomId'];
+            $this_dormitory_request->for_slot = ($request->single_accommodation === "YES" || $request->forType === "COUPLE") ? '3' : $request->chosenRoom['slot'];
 
             if($request->forType === "COUPLE" && is_null($this_dormitory_request->filename)) {
                 if(!is_null($request->filename)) {
@@ -436,22 +432,83 @@ class DormitoryController extends Controller
 
             $this_dormitory_request->save();
 
-            if($request->providedItem) {
-                foreach($request->providedItem as $item) {
-                    $checkIfCanAdd = DormitoryInventoryItem::where([
-                        'dormitory_inventory_id' => $item['id'],
-                        'status' => 'AVAILABLE'
-                    ])->count();
+            if ($request->providedItem) {
+                $groupedItems = collect($request->providedItem)->groupBy('mainObjectId');
 
-                    if($checkIfCanAdd) {
-                        $this_dormitory_item_request = new DormitoryItemBorrowing;
-                        $this_dormitory_item_request->dormitory_tenant_id = $this_dormitory_request->id;
-                        $this_dormitory_item_request->dormitory_inventory_id = $item['id'];
-                        $this_dormitory_item_request->count = 0;
-                        $this_dormitory_item_request->status = "PENDING";
-                        $this_dormitory_item_request->save();
+                foreach ($groupedItems as $mainObjectId => $items) {
+                    $borrowing = new DormitoryItemBorrowing;
+                    $borrowing->dormitory_tenant_id = $this_dormitory_request->id;
+                    $borrowing->dormitory_inventory_id = $mainObjectId;
+                    $borrowing->count = $items->count();
+                    $borrowing->status = "PENDING";
+                    $borrowing->save();
+
+                    foreach ($items as $itemData) {
+                        $inventoryItem = DormitoryInventoryItem::where([
+                            'status' => 'AVAILABLE',
+                            'id' => $itemData['itemId']
+                        ])->lockForUpdate()->first();
+
+                        if ($inventoryItem) {
+                            $detail = new DormitoryItemBI();
+                            $detail->dormitory_item_borrowing_id = $borrowing->id;
+                            $detail->dormitory_inventory_item_id = $inventoryItem->id;
+                            $detail->withFee = $itemData['withFee'];
+                            $detail->status = "PENDING";
+                            $detail->save();
+
+                            $inventoryItem->status = "RESERVED";
+                            $inventoryItem->save();
+                        }
                     }
                 }
+            }
+
+            if ($request->updatedTotalData) {
+                $guestCount = count($request->input('fetchDates.guest', []));
+                $traineeCount = count($request->input('fetchDates.trainee', []));
+
+                $guestRate = (float) $request->input('updatedTotalData.guestCost', 0);
+                $traineeRate = (float) $request->input('updatedTotalData.traineeCost', 0);
+                $inclusionCharge = (float) ($request->inclusionCharge ?? 0);
+
+                $totalGuestCharge = $guestCount * $guestRate;
+                $totalTraineeCharge = $traineeCount * $traineeRate;
+
+                $descriptionHtml = "
+                    <div style='font-family: sans-serif; color: #333; max-width: 400px;'>
+                        <h3 style='border-bottom: 1px solid #ddd; padding-bottom: 8px;'>Payable Amount</h3>
+                        <table style='width: 100%; border-collapse: collapse;'>
+                            <tr>
+                                <td colspan='2' style='padding-top: 10px;'><strong>Dormitory Charge</strong></td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 4px 0;'>Paying Guest ($guestCount days)</td>
+                                <td style='text-align: right;'>₱ " . number_format($totalGuestCharge, 2) . "</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 4px 0;'>Paying Trainee ($traineeCount days)</td>
+                                <td style='text-align: right;'>₱ " . number_format($totalTraineeCharge, 2) . "</td>
+                            </tr>
+                            <tr>
+                                <td colspan='2' style='padding-top: 10px; border-top: 1px solid #eee;'><strong>Inclusion Charge</strong></td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 4px 0;'>All Items</td>
+                                <td style='text-align: right;'>₱ " . number_format($inclusionCharge, 2) . "</td>
+                            </tr>
+                        </table>
+                    </div>";
+
+                $new_payment = new DormitoryInvoice();
+                $new_payment->user_id = $request->userId;
+                $new_payment->dormitory_tenant_id = $this_dormitory_request->id;
+                $new_payment->dormitory_room_id = $request->input('chosenRoom.roomId');
+                $new_payment->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
+                $new_payment->invoice_amount = $request->input('updatedTotalData.updatedTotal');
+                $new_payment->description = $descriptionHtml;
+                $new_payment->remarks = $request->input('updatedTotalData.remarks') ?? '';
+                $new_payment->save();
             }
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory request. ID#" . $this_dormitory_request->id);
@@ -772,26 +829,38 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $user = User::findOrFail($request->userId);
 
+            $enrolledDaysList = $user->trainee_enrolled_courses()
+                ->whereIn('enrolled_course_status', ['RESERVED', 'ENROLLED', 'FOR-PAYMENT', 'PROCESSING PAYMENT'])
+                ->with('training')
+                ->get()
+                ->flatMap(function($enrollment) {
+                    return CarbonPeriod::create(
+                        Carbon::parse($enrollment->training->schedule_from),
+                        Carbon::parse($enrollment->training->schedule_to)
+                    )->toArray();
+                })
+                ->map(fn($date) => $date->format('Y-m-d'))
+                ->unique()
+                ->values();
+
+            $searchStart = Carbon::parse($request->dateFrom);
+            $searchEnd = Carbon::parse($request->dateTo);
+            $searchPeriod = CarbonPeriod::create($searchStart, $searchEnd);
+
             $dateRanges = [
-                'trainee' => $user->whereHas('trainee_enrolled_courses', function($query) {
-                    $query->whereIn('enrolled_course_status', ['RESERVED', 'ENROLLED', 'FOR-PAYMENT', 'PROCESSING PAYMENT'])
-                        ->get()
-                        ->map(function($self) {
-                            $schedule_from = $self->training->schedule_from;
-                            $schedule_to = $self->training->schedule_to;
-
-                            $a = Carbon::parse($schedule_from);
-                            $b = Carbon::parse($schedule_to);
-                            $c = Carbon::create($a, $b);
-
-                            collect($c)->map(function ($date) {
-                                return $date->format('d');
-                            });
-                        })->values();
-                }),
-                'guest' => []
+                'trainee' => [],
+                'guest'   => []
             ];
 
+            foreach ($searchPeriod as $date) {
+                $formattedDate = $date->format('Y-m-d');
+
+                if ($enrolledDaysList->contains($formattedDate)) {
+                    $dateRanges['trainee'][] = $formattedDate;
+                } else {
+                    $dateRanges['guest'][] = $formattedDate;
+                }
+            }
 
             return response()->json(['dateRanges' => $dateRanges], 200);
         });

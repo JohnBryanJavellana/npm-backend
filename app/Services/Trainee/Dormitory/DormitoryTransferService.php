@@ -2,6 +2,7 @@
 
 namespace App\Services\Trainee\Dormitory;
 
+use App\Enums\RequestStatus;
 use App\Models\{
     DormitoryInventory,
     DormitoryRoom,
@@ -14,6 +15,7 @@ use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use Illuminate\Support\Facades\DB;
 use DomainException;
+use Symfony\Component\HttpFoundation\Request;
 
 class DormitoryTransferService extends DormitoryHistoryService {
 
@@ -73,7 +75,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
     public function createTransferRequest($validated, $userId)
     {
         DB::transaction(function() use ($userId, $validated) {
-            $this->validateData($userId, $validated["document_id"]);
+            // $this->validateData($userId, $validated["document_id"]);
 
             $this->dormitoryTransfer->create([
                 "dormitory_tenant_id" => $validated["document_id"],
@@ -86,19 +88,19 @@ class DormitoryTransferService extends DormitoryHistoryService {
             $this->loggingDetails(
                 $validated["document_id"], 
                 $userId, 
-                "requested",
+                "sent",
                 "You’ve sent your dormitory transfer request."
             );
         });
     }
 
-
     public function cancelTransferRequest(int $id, int $userId)
     {
         DB::transaction(function() use($id, $userId) {
             $record = $this->dormitoryTransfer
-            ->whereRelation("tenant", "user_id", "=", $userId)
             ->with("tenant")
+            ->whereRelation("tenant", "user_id", "=", $userId)
+            ->whereNot("status", RequestStatus::CANCELLED->value)
             ->lockForUpdate()
             ->findOrFail($id);
 
@@ -106,11 +108,15 @@ class DormitoryTransferService extends DormitoryHistoryService {
                 throw new DomainException("Transfer request not found.");
             }
 
-            if($record->status === "APPROVED") {
+            if($record->status === RequestStatus::CANCELLED->value) {
+                throw new DomainException(("This transfer request has already been cancelled."));
+            }
+
+            if($record->status === RequestStatus::APPROVED->value) {
                 throw new DomainException("Transfer request cancellation is not permitted.");
             }
 
-            $record->delete();
+            $record->update(["status" => RequestStatus::CANCELLED->value]);
 
             $this->loggingDetails(
                 $record->dormitory_tenant_id,

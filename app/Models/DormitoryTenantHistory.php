@@ -15,4 +15,14 @@ class DormitoryTenantHistory extends Model
     {
         return $this->belongsTo(DormitoryTenant::class);
     }
+
+
+    /**
+     * Scopes
+     */
+
+    public function scopeTenant($query, $tenantId)
+    {
+        return $query->where('dormitory_tenant_id', $tenantId);
+    }
 }

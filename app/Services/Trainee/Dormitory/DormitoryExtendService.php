@@ -11,6 +11,7 @@ use App\Models\{
     DormitoryExtensionRequest
 };
 use App\Enums\RequestStatus;
+use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use DomainException;
 use Illuminate\Support\Facades\DB;
@@ -46,19 +47,19 @@ class DormitoryExtendService {
             }
         ])
         ->forUser($userId)
-        ->forStatus([RequestStatus::APPROVED->value])
+        ->forStatus([RequestStatus::APPROVED->value, RequestStatus::EXTENDING->value])
         ->whereKey($documentId)
         ->first();
 
         if(!$record) {
-            throw new DomainException("No active tenant record was found. Room extension requests can only be made by active tenants.");
+            throw new DomainException("Dormitory request is not approved yet or a extending request is already existing.");
         }
 
-        if(!$record->transferRequest !== null) {
+        if(!$record->transferRequest()->exists()) {
             throw new DomainException("A pending or approved transfering request already exists.");
         }
 
-        if(!$record->extendRequest !== null) {
+        if(!$record->extendRequest()->exists()) {
             throw new DomainException("A pending or approved extending request already exists.");
         }
     }
@@ -66,7 +67,7 @@ class DormitoryExtendService {
     public function createExtendRequest($userId, $validated)
     {
         return DB::transaction(function () use ($userId, $validated) {
-            $this->prepareData($userId, $validated["document_id"]);
+            // $this->prepareData($userId, $validated["document_id"]);
             
             $record = $this->dormitoryExtensionRequest->create([
                 "dormitory_tenant_id" => $validated["document_id"],
@@ -77,25 +78,36 @@ class DormitoryExtendService {
 
             $this->updateTenantRecord($validated["document_id"], RequestStatus::EXTENDING->value);
 
+            $this->loggingDetails(
+                $validated["document_id"], 
+                $userId, 
+                "sent",
+                "You’ve sent your dormitory extend request."
+            );
+
             return $record;
         });
     }
 
-    public function cancelExtendRequest($documentId, $userId)
+    public function cancelExtendRequest($requestId, $userId)
     {
-        DB::transaction(function() use ($documentId, $userId) {
+        DB::transaction(function() use ($requestId, $userId) {
             $extend = $this->dormitoryExtensionRequest
             ->whereRelation("tenant", "user_id", "=", $userId)
-            ->wherekey($documentId)
+            ->wherekey($requestId)
             ->lockForUpdate()
             ->first();
+
+            if($extend->status === RequestStatus::CANCELLED) {
+                throw new DomainException('This extending request has already been cancelled.');
+            }
 
             if (!in_array($extend->status, [
                 RequestStatus::PENDING->value,
                 RequestStatus::APPROVED->value,
                 RequestStatus::FOR_PAYMENT->value
             ])) {
-                throw new DomainException('Extending request cannot be cancelled.');
+                throw new DomainException('Extending request cancellation is not permitted.');
             }
             
             $extend->update([
@@ -103,6 +115,13 @@ class DormitoryExtendService {
             ]);
 
             $this->updateTenantRecord($extend->dormitory_tenant_id, RequestStatus::APPROVED->value);
+        
+            $this->loggingDetails(
+                $extend->dormitory_tenant_id,
+                $userId, 
+                "cancelled",
+                "You cancelled your room extend request."
+            );
         });
     }
 
@@ -113,6 +132,16 @@ class DormitoryExtendService {
 
         $record->update([
             "tenant_status" => $status
+        ]);
+    }
+
+    private function loggingDetails(int $tenant_id, int $userId, string $action, string $reason) {
+
+        AuditHelper::log($userId, "User $userId has $action a dorm extend request.");
+
+        $this->dormitoryTenantHistory->create([
+            "dormitory_tenant_id" => $tenant_id,
+            "history_reason" => $reason,
         ]);
     }
 }

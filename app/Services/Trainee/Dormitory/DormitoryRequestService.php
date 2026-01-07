@@ -79,7 +79,7 @@ class DormitoryRequestService {
             $this->loggingDetails(
                 $record, 
                 $userId, 
-                "requested",
+                "sent",
                 "You’ve sent your dormitory request."
             );
 
@@ -96,8 +96,16 @@ class DormitoryRequestService {
 
             if($record->tenant_status === RequestStatus::CANCELLED->value) {
                 throw new DomainException(
-                    "Dormitory request is already cancelled."
+                    "This dormitory request has already been cancelled."
                 );
+            }
+
+            if(!in_array($record->tenant_status, [
+                RequestStatus::PENDING->value,
+                RequestStatus::APPROVED->value,
+                RequestStatus::FOR_PAYMENT->value,
+            ])) {
+                throw new DomainException("Dormitory request cancellation is not permitted.");
             }
 
             if(!is_null($record->dormitory_room_id)) {

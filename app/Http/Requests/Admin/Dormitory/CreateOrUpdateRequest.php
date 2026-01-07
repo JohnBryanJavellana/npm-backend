@@ -29,7 +29,6 @@ class CreateOrUpdateRequest extends FormRequest
             'forType' => ['required'],
             'isAirConditioned' => ['required'],
             'single_accommodation' => ['required'],
-            'dormId' => [ Rule::when($this->processType === "WALK-IN", ['required'], ['nullable']) ],
             'purpose' => ['required'],
             'httpMethod' => ['required']
         ];
