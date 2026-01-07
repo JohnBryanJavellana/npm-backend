@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryRoom::class)->constrained()->cascadeOnDelete();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
+            $table->enum('isInitial', ['Y', 'N']);
             $table->longText('invoice_reference')->nullable();
             $table->longText('trace_number');
             $table->decimal('total_amount');

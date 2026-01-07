@@ -17,4 +17,13 @@ class DormitoryInvoice extends Model
     public function tenant() {
         return $this->hasOne(DormitoryTenant::class, 'id', 'dormitory_tenant_id');
     }
+
+    /**
+     * Scopes
+     */
+
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where("user_id", $userId);
+    }
 }

@@ -3,15 +3,23 @@
 namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Trainee\Invoice\DormitoryInvoiceRequest;
 use App\Http\Requests\Trainee\Library\LibInvoiceRequest;
 use App\Http\Resources\LibInvoiceResource;
+use App\Http\Resources\Trainee\Invoices\DormitoryInvoiceResource;
 use Illuminate\Http\Request;
 use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice};
+use App\Services\Trainee\Dormitory\DormitoryInvoiceService;
 use Illuminate\Support\Facades\DB;
 // use ParagonIE\Sodium\Core\Curve25519\Ge\P2;
 
 class TraineeInvoices extends Controller
 {
+
+    public function __construct(
+        private DormitoryInvoiceService $dormitoryInvoiceService
+    )
+    {}
     public function get_all_trainee_invoices(Request $request) {
         $all_user_invoices = User::forUser($request->user()->id)
             ->with([
@@ -62,6 +70,37 @@ class TraineeInvoices extends Controller
         catch (\Exception $e) {
             return response()->json(["message" => "Something went wrong, Please try again!"], 500);
         }
-        
+    }
+
+    public function updateDormInvoice(DormitoryInvoiceRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+            $user_id = $request->user()->id;
+
+            $this->dormitoryInvoiceService->update_status($validated, $user_id);
+      
+            return response()->json(["message" => "Successfully Paid!"], 200);
+        }
+        catch (\Exception $e) {
+            \Log::info("updateDormInvoiceError", [$e]);
+            return response()->json(["message" => "Something went wrong, Please try again!"], 500);
+        }
+    }
+
+    public function view_dormitory_invoices(Request $request, $id)
+    {
+        $user_id = $request->user()->id;
+        try {
+            $invoices = $this->dormitoryInvoiceService->getUserInvoice($id, $user_id);
+
+            // return response()->json(["invoices" => $invoices], 200)
+
+            return DormitoryInvoiceResource::collection($invoices);
+        }
+        catch (\Exception $e) {
+            \Log::info("error_view_dormitory_invoices", [$e]);
+            return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
+        }
     }
 }

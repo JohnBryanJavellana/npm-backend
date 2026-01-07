@@ -153,6 +153,7 @@ class DormitoryController extends Controller
             ], 200);
         });
     }
+
     public function get_available_supplies (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $availableSupplies = DormitoryInventory::withCount([
@@ -408,7 +409,7 @@ class DormitoryController extends Controller
                 ->whereIn('tenant_status', ['PENDING', 'APPROVED', 'EXTENDING', 'FOR PAYMENT', 'PAID', 'PROCESSING PAYMENT', 'ACTIVE', 'RESERVED'])
                 ->exists();
 
-            if($checkForPending) {
+            if($checkForPending && !$request->documentId) {
                 return response()->json(['message' => "Our records indicate that this user is currently associated with an existing active dormitory request. Consequently, the system is unable to process a duplicate application at this time. Please verify the status of the current dormitory request and ensure the previous request is finalized or terminated before proceeding with a new submission."], 400);
             }
 
@@ -486,7 +487,9 @@ class DormitoryController extends Controller
                 }
             }
 
-            if ($request->updatedTotalData) {
+            $checkIfHasInitial = $this_dormitory_request->tenant_invoices()->where('isInitial', 'Y')->exists();
+
+            if ($request->updatedTotalData && !$checkIfHasInitial) {
                 $guestCount = count($request->input('fetchDates.guest', []));
                 $traineeCount = count($request->input('fetchDates.trainee', []));
 
@@ -571,7 +574,10 @@ class DormitoryController extends Controller
                 'borrowedItems',
                 'borrowedItems.inventory',
                 'borrowedItems.items',
-                'borrowedItems.items.item'
+                'borrowedItems.items.item',
+                'tenant_invoices' => function($query) {
+                    $query->where("isInitial", "Y");
+                }
             ]);
 
             if($request->userId) $room_requests->where('user_id', $request->userId);

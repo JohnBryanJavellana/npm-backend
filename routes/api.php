@@ -171,6 +171,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_all_invoices', [TraineeInvoices::class, 'get_all_trainee_invoices']);
             Route::get('view/penalties', [TraineeInvoices::class, 'library_penalties']);
             Route::post('update/penalties', [TraineeInvoices::class, 'updateLibInvoice']);
+            Route::get('view/{id}', [TraineeInvoices::class, 'view_dormitory_invoices']);
+            Route::post('billing/update', [TraineeInvoices::class, 'updateDormInvoice']);
         });
     });
 
