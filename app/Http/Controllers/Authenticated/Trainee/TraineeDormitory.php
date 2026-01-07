@@ -118,8 +118,8 @@ class TraineeDormitory extends Controller
         try {
             $dormitory_info = DormitoryTenant::with([
                 'dormitory_room.dormitory.room_images',
-                'transferRequest',
-                'extendRequest',
+                'transferRequest' => fn($q) => $q->latest("created_at"),
+                'extendRequest' => fn($q) => $q->latest("created_at"),
                 'tenant_invoices' => function($self) {
                     $self->orderBy('created_at', 'DESC');
                 },
@@ -143,7 +143,7 @@ class TraineeDormitory extends Controller
 
     public function applied_dormitory_histories (Request $request, int $dormitory_id) {
         try {
-            $histories = DormitoryTenantHistory::where('dormitory_tenant_id', $dormitory_id)->orderBy('created_at', 'DESC')->get();
+            $histories = DormitoryTenantHistory::tenant($dormitory_id)->orderBy('created_at', 'DESC')->get();
             return response()->json(['histories' => $histories]);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
@@ -204,6 +204,9 @@ class TraineeDormitory extends Controller
     {
         $validated = $request->validated();
         $userId = $request->user()->id;
+
+        \Log::info("create_extend_request", [$request->all()]);
+
         try {
 
             $this->dormitoryExtendService->createExtendRequest($userId, $validated);
@@ -213,12 +216,28 @@ class TraineeDormitory extends Controller
             }
 
             //additional email for sending a extension request
-
             AuditHelper::log($request->user()->id, "User {$request->user()->id} sent a dorm extension request.");
             return response()->json(['message' => "Your extension request has been successfully submitted for review."]);
-        } catch (\Exception $e) {
+        }
+        catch (DomainException $e) {
+            throw $e;
+        }
+         catch (\Exception $e) {
             \Log::error("Error: ", [$e->getMessage()]);
             return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function cancel_extend_request(Request $request, $id)
+    {
+        $user_id = $request->user()->id;
+        try {
+            $this->dormitoryExtendService->cancelExtendRequest($id, $user_id);
+
+            return response()->json(["message" => "Your transfer request has been successfully cancelled."], 200);
+        }
+        catch (\Exception $e) {
+            \Log::info("cancel_extend_request", [$e->getMessage()]);
+            return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
         }
     }
 
@@ -245,55 +264,67 @@ class TraineeDormitory extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
-
-    public function cancel_request(Request $request, Int $id)
+    public function cancel_transfer_request(Request $request, $id)
     {
+        $user_id = $request->user()->id;
         try {
-            DB::beginTransaction();
+            $this->dormitoryTransferService->cancelTransferRequest($id, $user_id);
 
-            $user_id = $request->user()->id;
-            $allowedTypes = [
-                'DormitoryTransfer' => "DormitoryTransfer",
-                'DormitoryExtendRequest' => "DormitoryExtendRequest",
-            ];
-
-            if (!array_key_exists($request->type, $allowedTypes)) {
-                return response()->json([
-                    'message' => 'Cancellation failed due to an unexpected error. Please try again.'
-                ], 404);
-            }
-
-            switch ($allowedTypes[$request->type]) {
-                case 'DormitoryTransfer':
-                    $this->dormitoryTransferService->cancelTransferRequest($id, $user_id);
-                    break;
-                case 'DormitoryExtendRequest':
-                    //change for extension
-                    $this->dormitoryExtendService->cancelExtendRequest($id, $user_id);
-                    break;
-            }
-
-            if(env("USE_EVENT")) {
-                event(new BEDormitory(''));
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'message' => "Your transfer request has been successfully cancelled."
-            ], 200);
-        } catch (\Exception $e){
-            DB::rollBack();
-            return response()->json([
-                'message' => "Cancellation failed due to an unexpected error. Please try again."
-            ], 500);
+            return response()->json(["message" => "Your transfer request has been successfully cancelled."], 200);
+        }
+        catch (\Exception $e) {
+            \Log::info("cancel_extend_request", [$e->getMessage()]);
+            return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
         }
     }
 
+
+    // public function cancel_request(Request $request, Int $id)
+    // {
+    //     try {
+    //         DB::beginTransaction();
+
+    //         $user_id = $request->user()->id;
+    //         $allowedTypes = [
+    //             'DormitoryTransfer' => "DormitoryTransfer",
+    //             'DormitoryExtendRequest' => "DormitoryExtendRequest",
+    //         ];
+
+    //         if (!array_key_exists($request->type, $allowedTypes)) {
+    //             return response()->json([
+    //                 'message' => 'Cancellation failed due to an unexpected error. Please try again.'
+    //             ], 404);
+    //         }
+
+    //         switch ($allowedTypes[$request->type]) {
+    //             case 'DormitoryTransfer':
+    //                 $this->dormitoryTransferService->cancelTransferRequest($id, $user_id);
+    //                 break;
+    //             case 'DormitoryExtendRequest':
+    //                 //change for extension
+    //                 $this->dormitoryExtendService->cancelExtendRequest($id, $user_id);
+    //                 break;
+    //         }
+
+    //         if(env("USE_EVENT")) {
+    //             event(new BEDormitory(''));
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'message' => "Your transfer request has been successfully cancelled."
+    //         ], 200);
+    //     } catch (\Exception $e){
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'message' => "Cancellation failed due to an unexpected error. Please try again."
+    //         ], 500);
+    //     }
+    // }
+
     /**
      * Methods for Dorm Occupancy
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function request_tenant_room(DormRoomRequest $request) {
         \Log::info("controller dorm", [$request->all()]);
@@ -325,7 +356,7 @@ class TraineeDormitory extends Controller
                 event(new BEDormitory(''));
             }
 
-            return response()->json(['message' => "You've cancelled dormitory request application. ID# $dormitory_id"], 200);
+            return response()->json(['message' => "Dormitory request cancelled successfully."], 200);
         }
         catch (DomainException $e) {
             throw $e;

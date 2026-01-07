@@ -31,7 +31,8 @@ class DormitoryExtraService {
         ->with([
             "services"
         ])
-        ->where("dormitory_tenant_id", $documentId);
+        ->where("dormitory_tenant_id", $documentId)
+        ->latest("created_at");
 
         if(!empty($status)) {
             $record->forStatus([$status]);
@@ -50,7 +51,7 @@ class DormitoryExtraService {
         ])
         ->select("id")
         ->whereKey($validated["dormitory_id"])
-        ->forStatus([RequestStatus::APPROVED->value])
+        ->forStatus([RequestStatus::APPROVED->value, RequestStatus::EXTENDING->value])
         ->forUser($userId)
         ->first();
 
@@ -109,7 +110,15 @@ class DormitoryExtraService {
             }
 
             if($record->status === RequestStatus::CANCELLED->value) {
-                throw new DomainException("Service request was already cancelled.");
+                throw new DomainException("This service request has already been cancelled.");
+            }
+
+            if(!in_array($record->tenant_status, [
+                RequestStatus::PENDING->value,
+                RequestStatus::APPROVED->value,
+                RequestStatus::FOR_PAYMENT->value,
+            ])) {
+                throw new DomainException("Service request cancellation is not permitted.");
             }
 
             //enum for done
