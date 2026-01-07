@@ -31,7 +31,9 @@ class DormitoryInclusionService {
         ->with([
             "itemInfo"
         ])
-        ->where("dormitory_tenant_id", $documentId)->get();
+        ->where("dormitory_tenant_id", $documentId)
+        ->latest("created_at")
+        ->get();
     }
 
     public function getAllItems()
@@ -52,6 +54,7 @@ class DormitoryInclusionService {
             "items.item.itemInfo"
         ])
         ->whereRelation("tenant", "trace_number", "=", $documentId)
+        ->latest("created_at")
         ->get();
     }
 
@@ -71,7 +74,8 @@ class DormitoryInclusionService {
         // validate the owner
         DB::transaction(function () use ($validated, $userId) {
             $record = $this->dormitoryInclusionRequest
-            ->whereKey($validated["document_id"])
+            ->whereRelation("tenant", "user_id", "=", $userId)
+            ->whereKey($validated["request_id"])
             ->status([RequestStatus::APPROVED->value, RequestStatus::PENDING->value])
             ->first();
 

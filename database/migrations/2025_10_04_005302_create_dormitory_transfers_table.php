@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class,'processed_by')->nullable();
-            $table->string('trace_number', 255)->nullable();
+            $table->longText('trace_number')->nullable();
             $table->enum('transfer_type', ['ROOM', 'CLASS']);
             $table->enum('room_type', ["AIR-CONDITIONED", "NON-AIRCON"]);
             $table->enum("status", ['PENDING', 'CANCELLED', 'APPROVED'])->default('PENDING');
