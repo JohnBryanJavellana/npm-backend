@@ -35,7 +35,8 @@ use App\Models\{
     DormitoryRoomImage,
     DormitoryInventory,
     DormitoryService,
-    User
+    User,
+    DormitoryTenantHistory
 };
 
 class DormitoryController extends Controller
@@ -126,6 +127,19 @@ class DormitoryController extends Controller
 
     public function get_available_dorms (GetAvailableDorms $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
+            if($request->userId) {
+                $checkForPending = DormitoryTenant::where('user_id', $request->userId)
+                    ->whereIn('tenant_status', ['PENDING', 'APPROVED', 'EXTENDING', 'FOR PAYMENT', 'PAID', 'PROCESSING PAYMENT', 'ACTIVE', 'RESERVED'])
+                    ->exists();
+
+                if($checkForPending) {
+                    return response()->json([
+                        'dorms' => [],
+                        'isValid' => false
+                    ], 200);
+                }
+            }
+
             $dorms = Dormitory::withCount('rooms')
                 ->has('rooms')
                 ->where([
@@ -133,10 +147,12 @@ class DormitoryController extends Controller
                     'is_air_conditioned' => $request->room_type
                 ])->get();
 
-            return response()->json(['dorms' => $dorms], 200);
+            return response()->json([
+                'dorms' => $dorms,
+                'isValid' => true
+            ], 200);
         });
     }
-
     public function get_available_supplies (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $availableSupplies = DormitoryInventory::withCount([
@@ -388,7 +404,13 @@ class DormitoryController extends Controller
 
     public function create_or_update_request (CreateOrUpdateRequest $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            \Log::info("🌵🌵🌵🌵🌵🌵🌵: ------→", ['data' => $request->all()]);
+            $checkForPending = DormitoryTenant::where('user_id', $request->userId)
+                ->whereIn('tenant_status', ['PENDING', 'APPROVED', 'EXTENDING', 'FOR PAYMENT', 'PAID', 'PROCESSING PAYMENT', 'ACTIVE', 'RESERVED'])
+                ->exists();
+
+            if($checkForPending) {
+                return response()->json(['message' => "Our records indicate that this user is currently associated with an existing active dormitory request. Consequently, the system is unable to process a duplicate application at this time. Please verify the status of the current dormitory request and ensure the previous request is finalized or terminated before proceeding with a new submission."], 400);
+            }
 
             $this_dormitory_request = $request->httpMethod === "POST"
                 ? new DormitoryTenant
@@ -510,6 +532,11 @@ class DormitoryController extends Controller
                 $new_payment->remarks = $request->input('updatedTotalData.remarks') ?? '';
                 $new_payment->save();
             }
+
+            $dormitory_tenant_history = new DormitoryTenantHistory;
+            $dormitory_tenant_history->dormitory_tenant_id = $this_dormitory_request->id;
+            $dormitory_tenant_history->history_reason = ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory request.";
+            $dormitory_tenant_history->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory request. ID#" . $this_dormitory_request->id);
 

@@ -16,6 +16,7 @@ class DormitoryExtraService {
         protected DormitoryTenant $tenantModel,
         protected DormitoryReqService $dormitoryReqService,
         protected DormitoryService $dormitoryService,
+        
     ) {}
 
     public function viewServices()

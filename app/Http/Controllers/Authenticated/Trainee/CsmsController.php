@@ -49,9 +49,19 @@ class CsmsController extends Controller
         try {
             \Log::info("csm", $request->all());
             $userId = $request->user()->id;
+
+            $CSM = CSM::forUser($userId)
+            ->where('reference_id' , $request->reference_id)
+            ->exists();
+
+            if($CSM) {
+                return response()->json(["message" => "A CSM is already existing for this request."], 422);
+            }
+
             DB::beginTransaction();
 
             CSM::create(["user_id" => $userId, ...$request->all()]);
+
             if(strtoupper($request->service) === 'LIBRARY' && $request->has('reference_id')) {
                 BookRes::where('id' , $request->reference_id)->update(['status' => 'COMPLETED']);
             }
