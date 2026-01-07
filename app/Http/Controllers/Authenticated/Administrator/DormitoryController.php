@@ -456,6 +456,7 @@ class DormitoryController extends Controller
             $this_dormitory_request->save();
 
             if ($request->providedItem) {
+                // $this_dormitory_request->borrowedItems <- eager loading
                 $groupedItems = collect($request->providedItem)->groupBy('mainObjectId');
 
                 foreach ($groupedItems as $mainObjectId => $items) {
@@ -463,7 +464,7 @@ class DormitoryController extends Controller
                     $borrowing->dormitory_tenant_id = $this_dormitory_request->id;
                     $borrowing->dormitory_inventory_id = $mainObjectId;
                     $borrowing->count = $items->count();
-                    $borrowing->status = "PENDING";
+                    $borrowing->status = "ACTIVE";
                     $borrowing->save();
 
                     foreach ($items as $itemData) {
@@ -477,7 +478,7 @@ class DormitoryController extends Controller
                             $detail->dormitory_item_borrowing_id = $borrowing->id;
                             $detail->dormitory_inventory_item_id = $inventoryItem->id;
                             $detail->withFee = $itemData['withFee'];
-                            $detail->status = "PENDING";
+                            $detail->status = "APPROVED";
                             $detail->save();
 
                             $inventoryItem->status = "RESERVED";
@@ -700,6 +701,10 @@ class DormitoryController extends Controller
 
     public function update_provided_stock_status (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
+            $a = DormitoryItemBorrowing::where('id', $request->documentId)->lockForUpdate()->first();
+            $a->status = "ACTIVE";
+            $a->save();
+
             foreach ($request->item as $item) {
                 $this_stock = DormitoryItemBI::where('id', $item['id'])->first();
                 $this_main_stock = DormitoryInventoryItem::where('id', $this_stock->dormitory_inventory_item_id)->lockForUpdate()->first();
