@@ -351,6 +351,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             });
         });
 
+        Route::post('get_trainee_enrolled_trainings', [Account::class, 'get_trainee_enrolled_trainings']);
         Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
         Route::post('submit-csm', [Account::class, 'submit_csm']);
 

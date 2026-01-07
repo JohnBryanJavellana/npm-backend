@@ -207,51 +207,7 @@ class TraineeDormitory extends Controller
         try {
 
             $this->dormitoryExtendService->createExtendRequest($userId, $validated);
-            // DB::beginTransaction();
-
-            // //validations
-            // $pending_request = DormitoryTransfer::whereHas("tenant", function ($query) use ($request) {
-            //     $query->where('user_id', $request->user()->id);
-            // })
-            // ->whereIn('status', ['PENDING','APPROVED'])
-            // ->exists();
-
-            // if($pending_request) {
-            //     return response()->json([
-            //         "message" => "A pending or approved transfer request already exists. You may only submit a new request once the current one has been resolved."
-            //     ], 400);
-            // }
-
-            // //validations
-            // $exist = DormitoryTenant::where([
-            //     "id" => $request->document_id,
-            //     "tenant_status" => "APPROVED",
-            //     "user_id" => $request->user()->id
-            // ])->exists();
-
-            // if(!$exist) {
-            //     return response()->json([
-            //         "message" => "No active tenant record was found. Room transfer requests can only be made by active tenants."
-            //     ], 400);
-            // }
-
-            // //tenant update
-            // $dorm_record = DormitoryTenant::findOrFail($request->document_id);
-            // $dorm_record->tenant_status = "EXTENDING";
-            // $dorm_record->save();
-
-            // //create request
-            // $record = new DormitoryExtendRequest;
-            // $record->dormitory_tenant_id = $request->document_id;
-            // $record->date_of_extension = $request->date;
-            // $record->save();
-
-            // //create history
-            // $dormitory_tenant_history = new DormitoryTenantHistory;
-            // $dormitory_tenant_history->dormitory_tenant_id = $request->document_id;
-            // $dormitory_tenant_history->history_reason = "A Dormitory Extension Request has been created, extending the stay until {$request->date}.";
-            // $dormitory_tenant_history->save();
-
+           
             if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
             }
@@ -533,6 +489,7 @@ class TraineeDormitory extends Controller
     {
         $user_id = $request->user()->id;
         $validated = $request->validated();
+        // \Log::info("request_inclusion", [$request->all()]);
         try
         {
             $this->dormitoryInclusionService->createInclusionRequest($validated, $user_id);
@@ -550,6 +507,7 @@ class TraineeDormitory extends Controller
     public function cancel_request_inclusion(Request $request)
     {
         $user_id = $request->user()->id;
+        \Log::info("cancel_request_inclusion_passed", [$request->all()]);
         try
         {            
             $this->dormitoryInclusionService->cancelInclusionRequest($request->all(), $user_id);

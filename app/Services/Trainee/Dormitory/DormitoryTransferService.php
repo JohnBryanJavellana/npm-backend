@@ -55,9 +55,8 @@ class DormitoryTransferService extends DormitoryHistoryService {
 
     public function viewTransferRequests($documentId, $userId, array $status = [])
     {
-
         try {
-        $query = $this->dormitoryTransfer
+            $query = $this->dormitoryTransfer
             ->forUser($userId)
             ->forTenant($documentId);
 
@@ -103,8 +102,8 @@ class DormitoryTransferService extends DormitoryHistoryService {
             ->lockForUpdate()
             ->findOrFail($id);
 
-            if(!$record || $userId != $record->tenant->user_id) {
-                throw new DomainException("Transfer request not found or unauthorized access.");
+            if(!$record) {
+                throw new DomainException("Transfer request not found.");
             }
 
             if($record->status === "APPROVED") {

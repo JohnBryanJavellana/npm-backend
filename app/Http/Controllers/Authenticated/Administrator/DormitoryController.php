@@ -7,9 +7,9 @@ use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryItemBI;
 use App\Models\DormitoryItemBorrowing;
 use App\Models\DormitoryReqService;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use App\Http\Requests\Admin\Dormitory\{
     GetAvailableDorms,
     CreateOrUpdateDormitory,
@@ -33,7 +33,8 @@ use App\Models\{
     DormitoryTenant,
     DormitoryRoomImage,
     DormitoryInventory,
-    DormitoryService
+    DormitoryService,
+    User
 };
 
 class DormitoryController extends Controller
@@ -764,6 +765,35 @@ class DormitoryController extends Controller
             }
 
             return response()->json(['message' => "You've updated requested service."], 200);
+        });
+    }
+
+    public function get_trainee_enrolled_trainings (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $user = User::findOrFail($request->userId);
+
+            $dateRanges = [
+                'trainee' => $user->whereHas('trainee_enrolled_courses', function($query) {
+                    $query->whereIn('enrolled_course_status', ['RESERVED', 'ENROLLED', 'FOR-PAYMENT', 'PROCESSING PAYMENT'])
+                        ->get()
+                        ->map(function($self) {
+                            $schedule_from = $self->training->schedule_from;
+                            $schedule_to = $self->training->schedule_to;
+
+                            $a = Carbon::parse($schedule_from);
+                            $b = Carbon::parse($schedule_to);
+                            $c = Carbon::create($a, $b);
+
+                            collect($c)->map(function ($date) {
+                                return $date->format('d');
+                            });
+                        })->values();
+                }),
+                'guest' => []
+            ];
+
+
+            return response()->json(['dateRanges' => $dateRanges], 200);
         });
     }
 }
