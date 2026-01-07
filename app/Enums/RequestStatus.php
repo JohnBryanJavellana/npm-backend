@@ -19,6 +19,7 @@ enum RequestStatus: string {
     case UNAVAILABLE = 'UNAVAILABLE';
     case OCCUPIED = 'OCCUPIED'; 
     case RESERVED = 'RESERVED'; 
+    case FOR_VERIFICATION = "FOR VERIFICATION";
 
     //LIBRARY
     case COMPLETED = 'COMPLETED';
