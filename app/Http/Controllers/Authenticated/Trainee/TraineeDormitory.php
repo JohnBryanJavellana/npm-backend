@@ -95,7 +95,7 @@ class TraineeDormitory extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
-
+    
     public function count_book_reservation (Request $request){
         $reservations = DormitoryTenant::where('user_id', $request->user()->id);
 

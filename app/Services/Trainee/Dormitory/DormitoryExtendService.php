@@ -63,7 +63,6 @@ class DormitoryExtendService {
             throw new DomainException("A pending or approved extending request already exists.");
         }
     }
-
     public function createExtendRequest($userId, $validated)
     {
         return DB::transaction(function () use ($userId, $validated) {
