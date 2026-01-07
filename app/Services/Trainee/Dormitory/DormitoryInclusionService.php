@@ -44,7 +44,7 @@ class DormitoryInclusionService {
         });    
     }
 
-    public function getInclusions(string $documentId)
+    public function getUserInclusions(string $documentId)
     {
         //VALIDATE & ADD CACHE
         return $this->dormitoryItemBorrowing

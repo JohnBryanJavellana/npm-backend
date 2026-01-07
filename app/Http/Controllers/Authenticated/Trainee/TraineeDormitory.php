@@ -521,7 +521,7 @@ class TraineeDormitory extends Controller
     public function view_inclusion(Request $request, string $documentId)
     {
         try {
-            $items = $this->dormitoryInclusionService->getInclusions($documentId);
+            $items = $this->dormitoryInclusionService->getUserInclusions($documentId);
             return response()->json(["items" => $items], 200);
         } catch (\Exception $e) {
             \Log::error("error_view_inclusion", [$e->getMessage()]);
