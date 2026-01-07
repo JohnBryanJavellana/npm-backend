@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 class DormitoryInvoiceService {
     public function __construct(
         private DormitoryInvoice $dormitoryInvoice,
-
     )
     {}
 
