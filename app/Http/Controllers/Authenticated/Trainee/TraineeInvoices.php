@@ -79,11 +79,13 @@ class TraineeInvoices extends Controller
             $validated = $request->validated();
             $user_id = $request->user()->id;
 
-            $this->dormitoryInvoiceService->update_status($validated, $user_id);
-      
-            return response()->json(["message" => "Successfully Paid!"], 200);
+            $total = $this->dormitoryInvoiceService->update_status($validated, $user_id);
+            \Log::info("updateDormInvoice", [$total]);
+
+            return response()->json(["balance" => $total], 200);
         }
         catch (DomainException $e) {
+            \Log::info("updateDormInvoiceErrorDomainException", [$e]);
             throw $e;
         }
         catch (\Exception $e) {
