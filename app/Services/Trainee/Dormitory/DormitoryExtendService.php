@@ -15,7 +15,6 @@ use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use DomainException;
 use Illuminate\Support\Facades\DB;
-use Intervention\Image\Colors\Rgb\Channels\Red;
 
 class DormitoryExtendService {
 

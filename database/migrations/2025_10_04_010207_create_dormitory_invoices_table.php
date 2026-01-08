@@ -26,6 +26,7 @@ return new class extends Migration
             $table->longText('description');
             $table->longText('remarks')->nullable();
             $table->enum('invoice_status', ['PENDING', 'PAID','FOR-VERIFICATION', 'CANCELLED'])->default('PENDING');
+            $table->timestamp('datePaid')->nullable();
             $table->timestamps();
         });
     }

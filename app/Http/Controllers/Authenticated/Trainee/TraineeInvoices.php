@@ -10,6 +10,7 @@ use App\Http\Resources\Trainee\Invoices\DormitoryInvoiceResource;
 use Illuminate\Http\Request;
 use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice};
 use App\Services\Trainee\Dormitory\DormitoryInvoiceService;
+use DomainException;
 use Illuminate\Support\Facades\DB;
 // use ParagonIE\Sodium\Core\Curve25519\Ge\P2;
 
@@ -82,6 +83,9 @@ class TraineeInvoices extends Controller
       
             return response()->json(["message" => "Successfully Paid!"], 200);
         }
+        catch (DomainException $e) {
+            throw $e;
+        }
         catch (\Exception $e) {
             \Log::info("updateDormInvoiceError", [$e]);
             return response()->json(["message" => "Something went wrong, Please try again!"], 500);
@@ -93,8 +97,6 @@ class TraineeInvoices extends Controller
         $user_id = $request->user()->id;
         try {
             $invoices = $this->dormitoryInvoiceService->getUserInvoice($id, $user_id);
-
-            // return response()->json(["invoices" => $invoices], 200)
 
             return DormitoryInvoiceResource::collection($invoices);
         }

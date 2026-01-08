@@ -23,7 +23,9 @@ class CreateOrUpdateServiceReq extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required'],
+            'userId' => ['required'],
+            'roomId' => ['required'],
+            'tenantId' => ['required'],
             'service_id' => ['required'],
             'charge' => ['required'],
             'httpMethod' => ['required'],

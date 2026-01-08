@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Http\Requests\Trainee\Invoice;
+namespace App\Http\Requests\Trainee\Dormitory;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DormitoryInvoiceRequest extends FormRequest
+class CancelExtendRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        \Log::info("new_payment", [$this->all()]);
         return false;
     }
 
@@ -23,10 +22,7 @@ class DormitoryInvoiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "credit_amount" => "number",
-            "billing_id" => "required|exists:dormitory_invoices,id",
-            "tenant_id" => "required|exists:dormitory_tenants,id",
-            "ref_number" => "required",
+            //
         ];
     }
 }

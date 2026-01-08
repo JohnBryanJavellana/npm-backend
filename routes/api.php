@@ -20,7 +20,8 @@ use App\Http\Controllers\Authenticated\Trainee\{
     TraineeEnrollment,
     TraineeLibrary,
     TraineeInvoices,
-    CsmsController
+    CsmsController,
+    CreditController
 };
 /** administrator controllers */
 use App\Http\Controllers\Authenticated\Administrator\{
@@ -33,6 +34,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
 };
 /** other controllers */
 use App\Http\Controllers\Authenticated\Logout;
+
 /** imported models */
 use App\Models\User;
 
@@ -173,6 +175,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('update/penalties', [TraineeInvoices::class, 'updateLibInvoice']);
             Route::get('view/{id}', [TraineeInvoices::class, 'view_dormitory_invoices']);
             Route::post('billing/update', [TraineeInvoices::class, 'updateDormInvoice']);
+        });
+
+        Route::prefix('/credits/')->group(function() {
+            Route::get("audits", [CreditController::class, "show"]);
+            Route::post("audits/create", [CreditController::class, "store"]);
+
         });
     });
 
@@ -321,6 +329,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::post('get_requested_service', [DormitoryController::class, 'get_requested_service']);
                 Route::post('request_service', [DormitoryController::class, 'request_service']);
                 Route::post('update_requested_service', [DormitoryController::class, 'update_requested_service']);
+
+                Route::post('get_dormitory_charges', [DormitoryController::class, 'get_dormitory_charges']);
             });
         });
 
