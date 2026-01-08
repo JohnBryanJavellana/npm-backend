@@ -10,9 +10,11 @@ use DomainException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class DormitoryInvoiceService extends CreditService {
+class DormitoryInvoiceService {
     public function __construct(
         private DormitoryInvoice $dormitoryInvoice,
+        private User $user,
+        private CreditController $creditController
     )
     {}
 
@@ -27,30 +29,35 @@ class DormitoryInvoiceService extends CreditService {
         ->get();
     }
 
-    public function update_status($validated, $userId)
+    public function update_status($validated, $userId): float
     {
-        DB::transaction(function() use ($validated, $userId) {
+        return DB::transaction(function() use ($validated, $userId) {
+            $this->prepareData($validated, $userId);
+            if($validated["total_amount"] === $validated["credit_amount"]) {
+                $this->dormitoryInvoice->forUser($userId)
+                ->where("dormitory_tenant_id", $validated["tenant_id"])
+                ->whereKey($validated["billing_id"])
+                ->update([
+                    "invoice_reference" => $validated["ref_number"],
+                    "invoice_status" => RequestStatus::FOR_VERIFICATION->value,
+                    "payment_type" => "ONLINE",
+                    "datePaid" => Carbon::now()
+                ]);
+            }
+            $this->creditController->store($validated, $userId);
 
-            $this->prepareData($validated["billing_id"], $userId);
-
-            $this->dormitoryInvoice->forUser($userId)
-            ->where("dormitory_tenant_id", $validated["tenant_id"])
-            ->whereKey($validated["billing_id"])
-            ->update([
-                "invoice_reference" => $validated["ref_number"],
-                "invoice_status" => RequestStatus::FOR_VERIFICATION->value,
-                "payment_type" => "ONLINE",
-                "datePaid" => Carbon::now()
-            ]);
-
-            $this->storeUserAudit($validated, $userId);
-
+            return (float) (
+              $validated["total_amount"] - $validated["credit_amount"]
+            );
         });
     }
 
-    private function prepareData($validated, User $user){
+    private function prepareData($validated, $userId){
         // Validate if credit amount is greater than the users' credit
-        if($user->credit_amount > $validated["credit_amount"]) {
+     
+        $userRec = $this->user->find($userId);
+
+        if($userRec->credit_amount < $validated["credit_amount"]) {
             throw new DomainException("Insufficient credit.");
         }
     }

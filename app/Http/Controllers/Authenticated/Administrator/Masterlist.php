@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Models\Credit;
 use Illuminate\Http\Request;
 use App\Utils\TransactionUtil;
 use Illuminate\Auth\Events\Registered;
@@ -42,6 +43,13 @@ class Masterlist extends Controller
         return TransactionUtil::transact(null, [], function() use ($user_id) {
             $user_info = User::find($user_id);
             return response()->json(['user_info' => $user_info], 200);
+        });
+    }
+
+    public function get_user_credits (Request $request, int $user_id) {
+        return TransactionUtil::transact(null, [], function() use ($user_id) {
+            $credits = Credit::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
+            return response()->json(['credits' => $credits], 200);
         });
     }
 

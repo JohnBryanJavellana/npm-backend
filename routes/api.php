@@ -68,10 +68,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         return response()->json(['user' => $user->first()]);
     });
 
-    /** trainee routes
-     * MUST HAVE A THROTTLE
-    */
-    Route::middleware('user_role:TRAINEE,TRAINER')->group(function () {
+    // SUPERADMIN: needs access for updating user details
+    // reuse trainee user profile update functionalities
+    Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN')->group(function () {
         Route::prefix('/my-account/')->group(function() {
             Route::post('create_or_update_additional_info', [MyAccount::class,'create_or_update_additional_info']);
             Route::post('upload_profile_picture', [MyAccount::class,'upload_profile_picture']);
@@ -331,6 +330,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::post('update_requested_service', [DormitoryController::class, 'update_requested_service']);
 
                 Route::post('get_dormitory_charges', [DormitoryController::class, 'get_dormitory_charges']);
+                Route::post('created_or_update_dormitory_charge', [DormitoryController::class, 'created_or_update_dormitory_charge']);
+                Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
             });
         });
 
@@ -339,6 +340,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::prefix('/user/')->group(function() {
                     Route::get('get_users', [Masterlist::class, 'get_users']);
                     Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info'])->middleware('user_role:SUPERADMIN');
+                    Route::get('get_user_credits/{user_id}', [Masterlist::class, 'get_user_credits'])->middleware('user_role:SUPERADMIN');
                     Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities'])->middleware('user_role:SUPERADMIN');
                     Route::post('create_or_update_user', [Masterlist::class, 'create_or_update_user'])->middleware('user_role:SUPERADMIN');
                     Route::delete('remove_user/{user_id}', [Masterlist::class, 'remove_user'])->middleware('user_role:SUPERADMIN');

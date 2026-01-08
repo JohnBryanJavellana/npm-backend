@@ -17,7 +17,8 @@ use App\Http\Requests\Admin\Dormitory\{
     CreateOrUpdateRequest,
     CreateOrUpdateDormitoryInv,
     CreateOrUpdateService,
-    CreateOrUpdateServiceReq
+    CreateOrUpdateServiceReq,
+    CreateOrUpdateDormitoryCharge
 };
 use Illuminate\Http\Request;
 use App\Utils\{
@@ -835,6 +836,7 @@ class DormitoryController extends Controller
                 $new_payment->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
                 $new_payment->invoice_amount = $request->charge;
                 $new_payment->description = $descriptionHtml;
+                if($request->charge <= 0) $new_payment->status = "PAID";
                 $new_payment->isInitial = "N";
                 $new_payment->remarks = '';
                 $new_payment->save();
@@ -952,6 +954,65 @@ class DormitoryController extends Controller
             ])->where('dormitory_tenant_id', $request->userId)->get();
 
             return response()->json(['dormitoryInvoices' => $reqTemp], 200);
+        });
+    }
+
+    public function created_or_update_dormitory_charge (CreateOrUpdateDormitoryCharge $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $charge = new DormitoryInvoice();
+
+            $descriptionHtml = $this->addDescription(
+           "<div style='display: flex; align-items: center; justify-content: space-between;'>
+                    <div style='color: #6c757d;'>$request->details</div>
+                    <div>₱" . number_format((float) $request->charge) . "</div>
+                </div>"
+            );
+
+            $charge->user_id = $request->userId;
+            $charge->dormitory_tenant_id = $request->tenantId;
+            $charge->dormitory_room_id = $request->roomId;
+            $charge->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
+            $charge->invoice_amount = $request->charge;
+            $charge->description = $descriptionHtml;
+            $charge->isInitial = "N";
+            $charge->remarks = $request->remarks ?? '';
+            if($request->charge <= 0) $charge->status = "PAID";
+            $charge->save();
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory charge. ID#" . $charge->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory charge. ID# " . $charge->id], 201);
+        });
+    }
+
+    public function cancel_charge (Request $request, int $chargeId) {
+        return TransactionUtil::transact(null, [], function() use ($request, $chargeId) {
+            $this_charge = DormitoryInvoice::where('id', $chargeId)->lockForUpdate()->first();
+
+            if(!in_array($this_charge->invoice_status, ["PENDING"])) {
+                return response()->json(['message' => "Can't cancel charge."], 200);
+            } else {
+                $this_charge->invoice_status = "CANCELLED";
+                $this_charge->save();
+
+                AuditHelper::log($request->user()->id, "Cancelled a dormitory charge. ID#$chargeId");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEDormitory(''),
+                        new BEAuditTrail('')
+                    );
+                }
+
+                return response()->json(['message' => "You've cancelled dormitory charge. ID#$chargeId"], 200);
+            }
         });
     }
 }

@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class CreditController extends Controller
 {
     public function __construct(
-        private CreditService $creditService,
+        public CreditService $creditService,
     )
     {}
 
@@ -18,8 +18,13 @@ class CreditController extends Controller
         return response()->json(["data" => $this->creditService->getUserAudit($request->user()->id)], 200);
     }
 
-    protected function store(Request $request)
+    public function store($validated, $userId)
     {
-        $this->creditService->storeUserAudit($validated, $userId)
+        try {
+            $this->creditService->storeUserAudit($validated, $userId);
+        }
+        catch (\Exception $e) {
+            \Log::error("storeUserAudit", [$e]);
+        }
     }
 }
