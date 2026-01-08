@@ -576,7 +576,7 @@ class TraineeDormitory extends Controller
         }
     } 
 
-    public function create_service_request(CreateServiceRequest $request)
+    public function create_service_request  (CreateServiceRequest $request)
     {
         $user_id = $request->user()->id;
         $validated = $request->validated();

@@ -41,6 +41,15 @@ use App\Models\{
 
 class DormitoryController extends Controller
 {
+    private function addDescription (string $content) {
+        return "<div style='margin-top: 8px; padding: 16px; border: 1px dashed lightgrey; background-color: #FFFDD0;'>
+            <div style='font-weight: bold; font-size: 1.25rem;'>Payable Amount</div>
+            <div style='margin-top: 10px; line-height: 20px;'>
+                $content
+            </div>
+        </div>";
+    }
+
     public function dormitories (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $dormitories = Dormitory::withCount(['rooms' => function ($query) {
@@ -456,33 +465,45 @@ class DormitoryController extends Controller
             $this_dormitory_request->save();
 
             if ($request->providedItem) {
-                // $this_dormitory_request->borrowedItems <- eager loading
                 $groupedItems = collect($request->providedItem)->groupBy('mainObjectId');
 
                 foreach ($groupedItems as $mainObjectId => $items) {
-                    $borrowing = new DormitoryItemBorrowing;
-                    $borrowing->dormitory_tenant_id = $this_dormitory_request->id;
-                    $borrowing->dormitory_inventory_id = $mainObjectId;
-                    $borrowing->count = $items->count();
-                    $borrowing->status = "ACTIVE";
-                    $borrowing->save();
+                    $checkIfBorrowingExists = DormitoryItemBorrowing::where([
+                        'dormitory_tenant_id' => $this_dormitory_request->id,
+                        'dormitory_inventory_id' => $mainObjectId
+                    ])->first();
+
+                    $borrowingId = $checkIfBorrowingExists?->id;
+
+                    if(!$checkIfBorrowingExists) {
+                        $borrowing = new DormitoryItemBorrowing;
+                        $borrowing->dormitory_tenant_id = $this_dormitory_request->id;
+                        $borrowing->dormitory_inventory_id = $mainObjectId;
+                        $borrowing->count = $items->count();
+                        $borrowing->status = "ACTIVE";
+                        $borrowing->save();
+
+                        $borrowingId = $borrowing->id;
+                    }
 
                     foreach ($items as $itemData) {
-                        $inventoryItem = DormitoryInventoryItem::where([
-                            'status' => 'AVAILABLE',
-                            'id' => $itemData['itemId']
-                        ])->lockForUpdate()->first();
+                        if($itemData['isNew']) {
+                            $inventoryItem = DormitoryInventoryItem::where([
+                                'status' => 'AVAILABLE',
+                                'id' => $itemData['itemId']
+                            ])->lockForUpdate()->first();
 
-                        if ($inventoryItem) {
-                            $detail = new DormitoryItemBI();
-                            $detail->dormitory_item_borrowing_id = $borrowing->id;
-                            $detail->dormitory_inventory_item_id = $inventoryItem->id;
-                            $detail->withFee = $itemData['withFee'];
-                            $detail->status = "APPROVED";
-                            $detail->save();
+                            if ($inventoryItem) {
+                                $detail = new DormitoryItemBI();
+                                $detail->dormitory_item_borrowing_id = $borrowingId;
+                                $detail->dormitory_inventory_item_id = $inventoryItem->id;
+                                $detail->withFee = $itemData['withFee'];
+                                $detail->status = "APPROVED";
+                                $detail->save();
 
-                            $inventoryItem->status = "RESERVED";
-                            $inventoryItem->save();
+                                $inventoryItem->status = "RESERVED";
+                                $inventoryItem->save();
+                            }
                         }
                     }
                 }
@@ -501,30 +522,30 @@ class DormitoryController extends Controller
                 $totalGuestCharge = $guestCount * $guestRate;
                 $totalTraineeCharge = $traineeCount * $traineeRate;
 
-                $descriptionHtml = "
-                    <div style='font-family: sans-serif; color: #333; max-width: 400px;'>
-                        <h3 style='border-bottom: 1px solid #ddd; padding-bottom: 8px;'>Payable Amount</h3>
-                        <table style='width: 100%; border-collapse: collapse;'>
-                            <tr>
-                                <td colspan='2' style='padding-top: 10px;'><strong>Dormitory Charge</strong></td>
-                            </tr>
-                            <tr>
-                                <td style='padding: 4px 0;'>Paying Guest ($guestCount days)</td>
-                                <td style='text-align: right;'>₱ " . number_format($totalGuestCharge, 2) . "</td>
-                            </tr>
-                            <tr>
-                                <td style='padding: 4px 0;'>Paying Trainee ($traineeCount days)</td>
-                                <td style='text-align: right;'>₱ " . number_format($totalTraineeCharge, 2) . "</td>
-                            </tr>
-                            <tr>
-                                <td colspan='2' style='padding-top: 10px; border-top: 1px solid #eee;'><strong>Inclusion Charge</strong></td>
-                            </tr>
-                            <tr>
-                                <td style='padding: 4px 0;'>All Items</td>
-                                <td style='text-align: right;'>₱ " . number_format($inclusionCharge, 2) . "</td>
-                            </tr>
-                        </table>
-                    </div>";
+                $descriptionHtml = $this->addDescription(
+           "<div style='font-weight: bold;'>
+                        <span style='color: #6c757d;'>Dormitory Charge</span>
+                    </div>
+
+                    <div style='display: flex; align-items: center; justify-content: space-between;'>
+                        <span style='color: #6c757d;'>Paying Guest ($guestCount days)</span>
+                        <span>₱" . number_format($totalGuestCharge, 2) . "</span>
+                    </div>
+
+                    <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;'>
+                        <span style='color: #6c757d;'>Paying Trainee ($traineeCount days)</span>
+                        <span>₱" . number_format($totalTraineeCharge, 2) . "</span>
+                    </div>
+
+                    <div style='font-weight: bold;'>
+                        <span style='color: #6c757d;'>Inclusion Charge</span>
+                    </div>
+
+                    <div style='display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;'>
+                        <span style='color: #6c757d;'>All Items</span>
+                        <span>₱" . number_format($inclusionCharge, 2) . "</span>
+                    </div>"
+                );
 
                 $new_payment = new DormitoryInvoice();
                 $new_payment->user_id = $request->userId;
@@ -799,11 +820,31 @@ class DormitoryController extends Controller
                 ? new DormitoryReqService()
                 : DormitoryReqService::where('id', $request->documentId)->lockForUpdate()->first();
 
-            $this_service->dormitory_tenant_id = $request->user_id;
+            if (!$this_service->charge || $this_service->charge <= 0) {
+                $descriptionHtml = $this->addDescription(
+           "<div style='display: flex; align-items: center; justify-content: space-between;'>
+                        <div style='font-weight: bold; color: #6c757d;'>Service Charge</div>
+                        <div>₱" . number_format((float) $request->charge) . "</div>
+                    </div>"
+                );
+
+                $new_payment = new DormitoryInvoice();
+                $new_payment->user_id = $request->userId;
+                $new_payment->dormitory_tenant_id = $request->tenantId;
+                $new_payment->dormitory_room_id = $request->roomId;
+                $new_payment->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
+                $new_payment->invoice_amount = $request->charge;
+                $new_payment->description = $descriptionHtml;
+                $new_payment->isInitial = "N";
+                $new_payment->remarks = '';
+                $new_payment->save();
+            }
+
+            $this_service->dormitory_tenant_id = $request->tenantId;
             $this_service->dormitory_service_id = $request->service_id;
             $this_service->charge = $request->charge;
             $this_service->remarks = $request->remarks;
-            if($request->status) $this_service->status = $request->status;
+            $this_service->status = $request->httpMethod === "POST" ? "APPROVED" : $request->status;
             $this_service->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory service request. ID#" . $this_service->id);
@@ -901,6 +942,16 @@ class DormitoryController extends Controller
             }
 
             return response()->json(['dateRanges' => $dateRanges], 200);
+        });
+    }
+
+    public function get_dormitory_charges (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $reqTemp = DormitoryInvoice::with([
+                'tenant.boarder'
+            ])->where('dormitory_tenant_id', $request->userId)->get();
+
+            return response()->json(['dormitoryInvoices' => $reqTemp], 200);
         });
     }
 }
