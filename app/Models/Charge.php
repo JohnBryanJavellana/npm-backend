@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Charge extends Model
 {
     use HasFactory;
+
+    public function chargeCategory() {
+        return $this->hasOne(ChargeCategory::class, 'id', 'charge_category_id');
+    }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Requests\Admin\Cashier;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateTrainingFee extends FormRequest
+class CreateOrUpdateCharge extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +26,7 @@ class CreateOrUpdateTrainingFee extends FormRequest
             'name' => ['required', 'string'],
             'amount' => ['required', 'numeric'],
             'category' => ['required'],
-            'module' => ['required'],
+            'serviceType' => ['required'],
             'httpMethod' => ['required'],
             'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
             'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]

@@ -17,9 +17,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(ChargeCategory::class)->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->decimal('amount');
+            $table->decimal('amount', 65, 2);
             $table->longText('description')->nullable();
-            $table->enum('service_type', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+            $table->enum('service_type', ['DORMITORY', 'LIBRARY', 'ENROLLMENT']);
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->timestamps();
         });
