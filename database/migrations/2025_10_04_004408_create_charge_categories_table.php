@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('training_fee_categories', function (Blueprint $table) {
+        Schema::create('charge_categories', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
             $table->longText('name');
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('training_fee_categories');
+        Schema::dropIfExists('charge_categories');
     }
 };
