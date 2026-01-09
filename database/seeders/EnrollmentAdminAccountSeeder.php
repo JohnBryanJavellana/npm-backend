@@ -23,6 +23,8 @@ class EnrollmentAdminAccountSeeder extends Seeder
                 'email_verified_at' => Carbon::now(),
                 'birthdate' => Carbon::parse('07-11-2002'),
                 'role' => "SUPERADMIN",
+                'qr' => "",
+                'dark_mode' => "light",
                 'password' => bcrypt("123456")
             ]
         ];
@@ -36,7 +38,8 @@ class EnrollmentAdminAccountSeeder extends Seeder
             $enrollment_admin_account->email_verified_at = $user['email_verified_at'];
             $enrollment_admin_account->birthdate = $user['birthdate'];
             $enrollment_admin_account->role = $user['role'];
-            $enrollment_admin_account->qr = "";
+            $enrollment_admin_account->qr = $user['qr'];
+            $enrollment_admin_account->dark_mode = $user['dark_mode'];
             $enrollment_admin_account->password = $user['password'];
             $enrollment_admin_account->save();
         }
