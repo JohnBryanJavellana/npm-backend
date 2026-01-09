@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Trainee\Library;
+namespace App\Http\Requests\Admin\Cashier;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LibInvoiceRequest extends FormRequest
+class CreateOrUpdateFeeCategory extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,14 +22,10 @@ class LibInvoiceRequest extends FormRequest
      */
     public function rules(): array
     {
-        \Log::info("libraryPenalties", $this->all());
-
         return [
-            "inv_id" => "required",
-            "inv_trace_number" => "required",
-            "inv_reference_number" => "required",
-            "total_amount" => "required",
-            "credit_amount" => "required"
+            'name' => ['required', 'string'],
+            'httpMethod' => ['required'],
+            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
         ];
     }
 }

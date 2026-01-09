@@ -26,4 +26,5 @@ enum RequestStatus: string {
     case ACTIVE = 'ACTIVE';
     case INACTIVE = 'INACTIVE';
     case FOR_CSM = 'FOR CSM';
+    case VERIFICATION = 'VERIFICATION';
 }

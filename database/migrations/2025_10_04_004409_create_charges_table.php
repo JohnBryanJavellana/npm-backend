@@ -1,10 +1,9 @@
 <?php
 
-use App\Models\Charge;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\ModuleType;
+use App\Models\TrainingFeeCategory;
 
 return new class extends Migration
 {
@@ -13,14 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('course_modules', function (Blueprint $table) {
+        Schema::create('charges', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(Charge::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(ModuleType::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(TrainingFeeCategory::class)->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('acronym');
-            $table->longText('compendium');
+            $table->decimal('amount');
+            $table->longText('description')->nullable();
+            $table->enum('service_type', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->timestamps();
         });
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('course_modules');
+        Schema::dropIfExists('charges');
     }
 };

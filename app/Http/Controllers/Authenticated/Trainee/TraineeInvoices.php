@@ -10,16 +10,17 @@ use App\Http\Resources\Trainee\Invoices\DormitoryInvoiceResource;
 use Illuminate\Http\Request;
 use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice};
 use App\Services\Trainee\Dormitory\DormitoryInvoiceService;
+use App\Services\Trainee\Library\LibraryInvoiceService;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
-// use ParagonIE\Sodium\Core\Curve25519\Ge\P2;
 
 class TraineeInvoices extends Controller
 {
 
     public function __construct(
-        private DormitoryInvoiceService $dormitoryInvoiceService
+        private DormitoryInvoiceService $dormitoryInvoiceService,
+        private LibraryInvoiceService $libraryInvoiceService 
     )
     {}
     public function get_all_trainee_invoices(Request $request) {
@@ -53,22 +54,24 @@ class TraineeInvoices extends Controller
 
     public function updateLibInvoice(LibInvoiceRequest $request)
     {
-        try
-        {
-            DB::transaction(function() use ($request) {
-
+        try {
             $validated = $request->validated();
             $user_id = $request->user()->id;
 
-            LibraryInvoice::forUser($user_id)
-            ->byTraceId($validated["inv_trace_number"], $validated["inv_id"])
-            ->update([
-                "reference_number" => $validated["inv_reference_number"],
-                "status" => "VERIFICATION",
-                "payment_type" => "ONLINE"
-            ]);
-        });
-            return response()->json(["message" => "Successfully Paid!"], 200);
+            $balance = $this->libraryInvoiceService->updateLibraryInvoice($validated, $user_id);
+        //     DB::transaction(function() use ($request) {
+        //         $validated = $request->validated();
+        //         $user_id = $request->user()->id;
+
+        //         LibraryInvoice::forUser($user_id)
+        //         ->byTraceId($validated["inv_trace_number"], $validated["inv_id"])
+        //         ->update([
+        //             "reference_number" => $validated["inv_reference_number"],
+        //             "status" => "VERIFICATION",
+        //             "payment_type" => "ONLINE"
+        //         ]);
+        // });
+            return response()->json(["message" => "Successfully Paid!", "balance" => $balance], 200);
         }
         catch (\Exception $e) {
             return response()->json(["message" => "Something went wrong, Please try again!"], 500);
@@ -86,9 +89,6 @@ class TraineeInvoices extends Controller
 
             return response()->json(["balance" => $total], 200);
         }
-        // catch (ModelNotFoundException $e) {
-        //     throw new DomainException("Not found!");
-        // }
         catch (DomainException $e) {
             \Log::info("updateDormInvoiceErrorDomainException", [$e]);
             throw $e;

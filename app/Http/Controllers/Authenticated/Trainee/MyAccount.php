@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Cache;
 
 class MyAccount extends Controller
 {
-    public function get_trainee_general_info(Request $request) {
+    public function get_trainee_general_info(Request $request, $user) {
         try {
             $trainee_general_info = User::with([
                 'additional_trainee_info',
@@ -39,7 +39,7 @@ class MyAccount extends Controller
                 'additional_trainee_info.educational_attainment.main_school',
                 'additional_trainee_info.educational_attainment',
                 'additional_trainee_info.latest_shipboard_attainment'
-            ])->where('id', $request->user()->id)->get();
+            ])->where('id', $user)->get();
             
             $requirements = Requirement::where(['isBasic' => 'YES', 'status' => 'ACTIVE'])->get();
 
@@ -53,7 +53,10 @@ class MyAccount extends Controller
     }
     
     public function upload_profile_picture (Request $request) {
+
+        \Log::info("usser", [$request->all()]);
         $validation = [
+            "user_id" => "required|exists:users,id",
             'avatar' => 'required',
         ];
 
@@ -64,7 +67,7 @@ class MyAccount extends Controller
             return response()->json(['message' => implode(', ', $errors)], 422);
         } else {
             try {
-                $user = User::findOrFail($request->user()->id);
+                $user = User::findOrFail($request->user_id);
 
                 if ($request->hasFile('avatar')){
                     $filePath = public_path('user_images/' . $user->profile_picture);
@@ -81,8 +84,8 @@ class MyAccount extends Controller
                     $user->save();
                 }
 
-                AuditHelper::log($request->user()->id, "User {$request->user()->id} have posted your new information!");
-                Cache::forget('user_profile_' . $request->user()->id);
+                AuditHelper::log($request->user_id, "User {$request->user_id} profile picture has been updated!");
+                Cache::forget('user_profile_' . $request->user_id);
 
                 if(env("USE_EVENT")) {
                     event(new BEAccount(''));
@@ -98,13 +101,14 @@ class MyAccount extends Controller
         \Log::info("Send Info", $request->all());
 
        $validations = [
+            "user_id" => "required|exists:users,id",
             'fname' => 'nullable|string|max:255',
             'lname' => 'nullable|string|max:255',
             'gender' => 'nullable|in:MALE,FEMALE',
             'birthdate' => 'nullable|date',
             'email' => 'nullable|string|email',
             'gen_info_status' => 'nullable|in:NEW,RETURNEE',
-            'gen_info_trainee_id' => 'nullable|integer',
+            'gen_info_trainee_id' => 'nullable',
             'gen_info_srn' => 'nullable|integer',
             'gen_info_citizenship' => 'nullable|string|max:255',
             'gen_info_civil_status' => 'nullable|in:SINGLE,MARRIED,WIDOWED,DIVORCED,SEPARATED',
@@ -145,7 +149,7 @@ class MyAccount extends Controller
             'file_upload.*.file' => 'file|mimes:jpg,png,pdf,docx|max:5120', 
         ];  
 
-        $user = User::with(['additional_trainee_info'])->find($request->user()->id);
+        $user = User::with(['additional_trainee_info'])->find($request->user_id);
 
         $validator = \Validator::make($request->all(), $validations);
 
@@ -241,7 +245,7 @@ class MyAccount extends Controller
                 $additional_info = $user?->additional_trainee_info?->id;
                 $this_additional_info = $general_info ? AdditionalTraineeInfo::findOrFail($additional_info) : new AdditionalTraineeInfo();
 
-                $this_additional_info->user_id = $request->user()->id;        
+                $this_additional_info->user_id = $request->user_id;        
                 $this_additional_info->general_information_id = $this_gen_info->id;
                 $this_additional_info->contact_id = $this_contact_info->id;
                 $this_additional_info->latest_s_b_exp_id = $this_latest_disembarkment_info->id;
@@ -267,8 +271,8 @@ class MyAccount extends Controller
                     }
                 }   
 
-                AuditHelper::log($request->user()->id, "You have posted your new information!");
-                Cache::forget('user_profile_' . $request->user()->id);
+                AuditHelper::log($request->user_id, "You have posted your new information!");
+                Cache::forget('user_profile_' . $request->user_id);
 
                 if(env("USE_EVENT")) {
                     event(new BEAccount(''));

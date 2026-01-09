@@ -15,8 +15,6 @@ use App\Http\Requests\Admin\Enrollment\{
     CreateOrUpdateSchedule,
     CreateOrUpdateModule,
     CreateOrUpdateModuleType,
-    CreateOrUpdateTrainingFee,
-    CreateOrUpdateFeeCategory,
     CreateOrUpdateCertificate,
     CreateOrUpdateRequirement,
     CreateOrUpdateCourse,
@@ -39,11 +37,9 @@ use App\Models\{
     MainCertificate,
     CourseModule,
     Training,
-    TrainingFee,
     ModuleType,
     RequirementSpecificModule,
     Requirement,
-    TrainingFeeCategory,
     MainCourse,
     MainSchool,
     Voucher,
@@ -330,7 +326,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_schedule (CreateOrUpdateSchedule $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_schedule = $request->httpMethod === "POST"
                 ? new Training
                 : Training::find($request->documentId);
@@ -396,7 +392,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_module (CreateOrUpdateModule $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_module = $request->httpMethod === "POST"
                 ? new CourseModule
                 : CourseModule::find($request->documentId);
@@ -451,7 +447,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_module_type (CreateOrUpdateModuleType $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_module_type = $request->httpMethod === "POST"
                 ? new ModuleType
                 : ModuleType::find($request->documentId);
@@ -495,128 +491,6 @@ class EnrollmentCtrl extends Controller
         });
     }
 
-    public function get_training_fees (Request $request) {
-        return TransactionUtil::transact(null, [], function()  {
-            $training_fees = TrainingFee::withCount(['module' => function($query) {
-                return $query->whereHas('schedules', function ($schedulesQuery) {
-                    return $schedulesQuery->whereHas('hasData');
-                });
-            }])->with('category', 'module')->get();
-
-            return response()->json(['training_fees' => $training_fees], 200);
-        });
-    }
-
-    public function get_training_fees_predata (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            return response()->json([
-                'categories' => json_decode($this->get_training_fees_category($request)->getContent(), true)['categories'],
-                'modules' => json_decode($this->get_modules($request)->getContent(), true)['modules'],
-            ], 200);
-        });
-    }
-
-    public function create_or_update_training_fee (CreateOrUpdateTrainingFee $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
-            $this_training_fee = $request->httpMethod === "POST"
-                ? new TrainingFee
-                : TrainingFee::find($request->documentId);
-
-            $this_training_fee->course_module_id = $request->module;
-            $this_training_fee->training_fee_category_id = $request->category;
-            $this_training_fee->name = $request->name;
-            $this_training_fee->amount = $request->amount;
-            if($request->status) $this_training_fee->status = $request->status;
-            $this_training_fee->save();
-
-            AuditHelper::log($request->user()->id,($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a training fee. ID#" . $this_training_fee->id);
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail('')
-                );
-            }
-
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a training fee. ID#" . $this_training_fee->id], 201);
-        });
-    }
-
-    public function remove_training_fee (Request $request, int $fee_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $fee_id) {
-            $this_fee = TrainingFee::withCount(['module' => function($query) {
-                return $query->whereHas('schedules', function ($schedulesQuery) {
-                    return $schedulesQuery->whereHas('hasData');
-                });
-            }])->where('id', $fee_id)->first();
-
-            if($this_fee->module_count > 0) {
-                return response()->json(['message' => "Can't remove training fee. It already has connected data."], 200);
-            } else {
-                $this_fee->delete();
-                AuditHelper::log($request->user()->id, "Removed a training fee. ID#$fee_id");
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail('')
-                    );
-                }
-                return response()->json(['message' => "You've removed a training fee. ID#$fee_id"], 200);
-            }
-        });
-    }
-
-    public function get_training_fees_category (Request $request) {
-        return TransactionUtil::transact(null, [], function()  {
-            $categories = TrainingFeeCategory::withCount(['hasData'])->get();
-            return response()->json(['categories' => $categories], 200);
-        });
-    }
-
-    public function create_or_update_training_fee_category (CreateOrUpdateFeeCategory $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
-            $fee_category = $request->httpMethod === "POST"
-                ? new TrainingFeeCategory
-                : TrainingFeeCategory::find($request->documentId);
-
-            $fee_category->name = $request->name;
-            $fee_category->save();
-
-            AuditHelper::log($request->user()->id,($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a fee category. ID#" . $fee_category->id);
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail('')
-                );
-            }
-
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a fee category. ID#" . $fee_category->id], 201);
-        });
-    }
-
-    public function remove_training_fee_category (Request $request, int $fee_category_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $fee_category_id) {
-            $this_fee = TrainingFeeCategory::withCount(['hasData'])->where('id', $fee_category_id)->first();
-
-            if($this_fee->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove fee category. It already has connected data."], 200);
-            } else {
-                $this_fee->delete();
-                AuditHelper::log($request->user()->id, "Removed a fee category. ID#$fee_category_id");
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail('')
-                    );
-                }
-                return response()->json(['message' => "You've removed a fee category. ID#$fee_category_id"], 200);
-            }
-        });
-    }
-
     public function get_certificates (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $certificates = MainCertificate::withCount(['module' => function($query) {
@@ -630,7 +504,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_certificate (CreateOrUpdateCertificate $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_certificate = $request->httpMethod === "POST"
                 ? new MainCertificate
                 : MainCertificate::find($request->documentId);
@@ -690,7 +564,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_requirement (CreateOrUpdateRequirement $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_requirement = $request->httpMethod === "POST"
                 ? new Requirement
                 : Requirement::find($request->documentId);
@@ -761,7 +635,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_school (CreateOrUpdateSchool $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_school = $request->httpMethod === "POST"
                 ? new MainSchool
                 : MainSchool::find($request->documentId);
@@ -815,7 +689,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_course (CreateOrUpdateCourse $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_course = $request->httpMethod === "POST"
                 ? new MainCourse
                 : MainCourse::find($request->documentId);
@@ -867,7 +741,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_voucher (CreateOrUpdateVoucher $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_voucher = $request->httpMethod === "POST"
                 ? new Voucher
                 : Voucher::find($request->documentId);
@@ -921,7 +795,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_sponsor (CreateOrUpdateSponsor $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_sponsor = $request->httpMethod === "POST"
                 ? new Sponsor
                 : Sponsor::find($request->documentId);
@@ -974,7 +848,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_license (CreateOrUpdateLicense $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_license = $request->httpMethod === "POST"
                 ? new License
                 : License::find($request->documentId);
@@ -1026,7 +900,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_rank (CreateOrUpdateRank $request) {
-        return TransactionUtil::transact($request, function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $this_rank = $request->httpMethod === "POST"
                 ? new Rank
                 : Rank::find($request->documentId);

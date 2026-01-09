@@ -18,6 +18,13 @@ class CreateServiceRequest extends FormRequest
         return $this->user() !== null;
     }
 
+
+    protected function prepareForValidation()
+    {
+        return $this->merge([
+            "dormitory_id" => $this->route("dormitory_id")
+        ]);
+    }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -32,6 +39,13 @@ class CreateServiceRequest extends FormRequest
         ];
     }
 
+    public function attributes()
+    {
+        return [
+            "document_id" => "dormitory request",
+            "service_id" => "service request",
+        ];
+    }
 
     protected function failedValidation(Validator $validator)
     {
