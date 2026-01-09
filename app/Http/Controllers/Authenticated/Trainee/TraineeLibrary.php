@@ -22,17 +22,17 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Services\Trainee\Library\LibraryService;
 use App\Enums\RequestStatus;
+use App\Services\Trainee\Library\LibraryExtendService;
 
 class TraineeLibrary extends Controller
 {
     protected $ttl = 300;
     protected $short_ttl = 60;
-    protected $library_service;
 
-    public function __construct(LibraryService $library_service)
-    {
-        $this->library_service = $library_service;
-    }
+    public function __construct(
+        protected LibraryService $library_service,
+        protected LibraryExtendService $libraryExtendService
+        ) {}
 
     /** GET ALL AVAILABLE BOOKS */
     public function view_books(Request $request)
@@ -267,7 +267,6 @@ class TraineeLibrary extends Controller
     public function extend(ExtendingRequest $request)
     {
         \Log::info("extending...", [$request->all()]);
-        // return response()->json(["message" => $request->all()], 200);
         try {
             DB::beginTransaction();
             $validated = $request->validated();

@@ -60,5 +60,9 @@ class DormitoryInvoiceService {
         if($userRec->credit_amount < $validated["credit_amount"]) {
             throw new DomainException("Insufficient credit.");
         }
+
+        $userRec->update([
+            "credit_amount" => $userRec->credit_amount - $validated["credit_amount"]
+        ]);
     }
 }
