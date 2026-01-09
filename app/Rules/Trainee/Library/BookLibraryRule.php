@@ -17,7 +17,7 @@ class BookLibraryRule implements ValidationRule, DataAwareRule
      * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
 
-    protected $data;
+    protected $data;    
     protected $max = 12;
 
     public function __construct(public User $user) { }
