@@ -3,7 +3,11 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\{User,BookRes, TrainingFeeCategory};
+use App\Models\{
+    User,
+    BookRes,
+    Charge
+};
 
 return new class extends Migration
 {
@@ -15,11 +19,11 @@ return new class extends Migration
         Schema::create('library_invoices', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->longText("trace_number");
-            $table->longText("reference_number")->nullable();
-            $table->foreignIdFor(TrainingFeeCategory::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Charge::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(BookRes::class)->constrained()->cascadeOnDelete();
+            $table->longText("trace_number");
+            $table->longText("reference_number")->nullable();
             $table->decimal("amount", 65, 2);
             $table->longText("details");
             $table->enum("status", ["PENDING", "PAID", "VERIFICATION"])->default("PENDING");

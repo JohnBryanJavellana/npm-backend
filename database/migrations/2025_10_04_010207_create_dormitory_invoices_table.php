@@ -3,7 +3,12 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\{DormitoryTenant, DormitoryRoom, User};
+use App\Models\{
+    DormitoryTenant,
+    DormitoryRoom,
+    User,
+    Charge
+};
 
 return new class extends Migration
 {
@@ -18,6 +23,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryRoom::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Charge::class)->constrained()->cascadeOnDelete();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
             $table->enum('isInitial', ['Y', 'N']);
             $table->longText('invoice_reference')->nullable();
