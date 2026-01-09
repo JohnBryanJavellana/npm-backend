@@ -33,8 +33,9 @@ return new class extends Migration
             ])->default('SUPERADMIN');
             $table->string('password');
             $table->decimal('credit_amount', 10, 2)->default(0);
-            $table->enum('isSocial', ['YES', 'NO'])->default(value: 'NO');
-            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default(value: 'ACTIVE');
+            $table->enum('isSocial', ['YES', 'NO'])->default('NO');
+            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+            $table->enum('dark_mode', ['dark', 'light'])->default('light');
             $table->string('profile_picture', 255)->default('default-avatar.png');
             $table->string('qr', 255);
             $table->rememberToken();
