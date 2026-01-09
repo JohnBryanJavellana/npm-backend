@@ -30,6 +30,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
     EnrollmentCtrl,
     LibraryController,
     Cashier,
+    NotificationCtrl,
     Masterlist
 };
 /** other controllers */
@@ -378,6 +379,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
+    Route::post('get_notifications', [NotificationCtrl::class, 'get_notifications']);
     Route::post('change-theme', [Account::class, 'change_theme']);
     Route::post('logout', [Logout::class, 'logout_user']);
 });

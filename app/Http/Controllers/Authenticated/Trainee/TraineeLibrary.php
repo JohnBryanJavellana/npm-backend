@@ -23,6 +23,7 @@ use Carbon\Carbon;
 use App\Services\Trainee\Library\LibraryService;
 use App\Enums\RequestStatus;
 use App\Services\Trainee\Library\LibraryExtendService;
+use DomainException;
 
 class TraineeLibrary extends Controller
 {
@@ -240,7 +241,6 @@ class TraineeLibrary extends Controller
 
         try {
             $user = $request->user();
-            DB::beginTransaction();
 
             $this->library_service->createReservation($validated, $user);
 
@@ -272,12 +272,14 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $user_id = $request->user()->id;
 
+            //separate
             $extension_req = ExtensionRequest::create([
                 "user_id" => $user_id,
                 "book_res_id" => $validated["reference_id"],
                 "purpose" => $validated["purpose"],
             ]);
 
+            //separate
             foreach($validated['data'] as $data) {
                 BookExtensionRequest::create([
                     "book_reservation_id" => $data['book_res_id'],
@@ -289,6 +291,7 @@ class TraineeLibrary extends Controller
                 BookReservation::find($data["book_res_id"])->update(["status" => "EXTENDING"]);
             }
 
+            //separate
             $bookRes = BookRes::find($validated["reference_id"]);
             $bookRes->status = "EXTENDING";
             $bookRes->save();
@@ -297,6 +300,9 @@ class TraineeLibrary extends Controller
 
             DB::commit();
             return response()->json(["message" => "Extension request has sent successfully!"], 201);
+        }
+        catch (DomainException$e) {
+            throw $e;
         }
         catch (\Exception $e) {
         DB::rollBack();

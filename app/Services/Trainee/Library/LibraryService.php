@@ -78,7 +78,7 @@ class LibraryService {
         return $query;
     }
 
-    private function validateBook(array     $book_id) {
+    private function validateBook(array $book_id) {
         $books = $this->getBooks(["id", "pdf_copy"], ['catalog:id,title'])
         ->whereIn("id", $book_id)
         ->get()

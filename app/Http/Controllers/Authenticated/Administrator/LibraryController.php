@@ -606,7 +606,7 @@ class LibraryController extends Controller
 
     public function create_walkin_request (CreateWalkInRequest $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $bookReservations = BookReservation::forUser($request->user()->role === "TRAINER" ? $request->user()->id : $request->borrower)
+            $bookReservations = BookReservation::forUser($request->borrower)
                 ->whereNotIn('status', ['CANCELLED', 'RETURNED', 'REJECTED'])
                 ->whereIn('book_id', collect($request->data)->pluck('bookId')->toArray())
                 ->exists();
@@ -615,7 +615,7 @@ class LibraryController extends Controller
                 return response()->json(['message' => "Duplicate request detected. Borrower can only request each book once, check request list."],  412);
             } else {
                 $book_res = new BookRes();
-                $book_res->user_id = $request->user()->role === "TRAINER" ? $request->user()->id : $request->borrower;
+                $book_res->user_id = $request->borrower;
                 $book_res->trace_number = GenerateTrace::createTraceNumber(BookRes::class, '-LR-');
                 $book_res->purpose = $request->purpose;
                 $book_res->type = $request->type;
@@ -666,6 +666,7 @@ class LibraryController extends Controller
             }
         });
     }
+
     public function get_pre_data (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $genres = BookGenre::withCount(['hasData'])->where('status', 'ACTIVE')->get();
@@ -718,6 +719,7 @@ class LibraryController extends Controller
             return response()->json(['booksThatNeedsFine' => $booksThatNeedsFine], 200);
         });
     }
+
     public function remove_fine (Request $request, int $id) {
         return TransactionUtil::transact(null, [], function() use ($request, $id) {
             $libraryInvoice = LibraryInvoice::find($id);

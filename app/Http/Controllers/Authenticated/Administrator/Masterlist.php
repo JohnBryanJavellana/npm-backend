@@ -48,7 +48,14 @@ class Masterlist extends Controller
 
     public function get_user_credits (Request $request, int $user_id) {
         return TransactionUtil::transact(null, [], function() use ($user_id) {
-            $credits = Credit::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
+            $owner = User::find($user_id);
+            $credits = [
+                'credits' => $owner->creditAmount()->orderBy('created_at', 'DESC')->get()->map(function($credit) {
+                    return $credit;
+                })->values(),
+                'credit_amount' => $owner->credit_amount
+            ];
+
             return response()->json(['credits' => $credits], 200);
         });
     }

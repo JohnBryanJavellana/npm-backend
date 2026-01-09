@@ -33,7 +33,9 @@ class DormitoryInvoiceService {
     {
         return DB::transaction(function() use ($validated, $userId) {
             $this->prepareData($validated, $userId);
-            if($validated["total_amount"] === $validated["credit_amount"]) {
+
+            //temporary
+            if(round($validated["total_amount"], 2) === round($validated["credit_amount"], 2)) {
                 $this->dormitoryInvoice->forUser($userId)
                 ->where("dormitory_tenant_id", $validated["tenant_id"])
                 ->whereKey($validated["billing_id"])
@@ -53,16 +55,20 @@ class DormitoryInvoiceService {
     }
 
     private function prepareData($validated, $userId){
-        // Validate if credit amount is greater than the users' credit
-     
-        $userRec = $this->user->find($userId);
+        $userRec = $this->user
+        ->whereKey($userId)
+        ->lockForUpdate()
+        ->first();
+
+        if(!$userRec) {
+        throw new DomainException("User not found.");
+        }
 
         if($userRec->credit_amount < $validated["credit_amount"]) {
             throw new DomainException("Insufficient credit.");
         }
 
-        $userRec->update([
-            "credit_amount" => $userRec->credit_amount - $validated["credit_amount"]
-        ]);
+        //onSuccess from the Paymaya
+        $userRec->decrement("credit_amount", $validated["credit_amount"]);
     }
 }

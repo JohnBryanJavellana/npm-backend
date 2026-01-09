@@ -618,7 +618,7 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request, $dormReqId) {
             $this_dorm_request = DormitoryTenant::where('id', $dormReqId)->lockForUpdate()->first();
 
-            if(!in_array($this_dorm_request->tenant_status, ["APPROVED", "PENDING", "CANCELLED"])) {
+            if(in_array($this_dorm_request->tenant_status, ["APPROVED", "CANCELLED"])) {
                 return response()->json(['message' => "Can't cancel request."], 200);
             } else {
                 $this_dorm_request->tenant_status = "CANCELLED";
