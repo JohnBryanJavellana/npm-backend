@@ -175,7 +175,6 @@ class TraineeLibrary extends Controller
     public function view_extend_request(Request $request)
     {
         try {
-            \Log::info("data view_extend_request", $request->all());
             $record = ExtensionRequest::with([
                 "extendingBooks.bookReservation.books.catalog.genre",
                 "extendingBooks.bookReservation.book",

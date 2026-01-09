@@ -5,9 +5,18 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Utils\{
+    TransactionUtil,
+    AuditHelper
+};
 use App\Events\{
     BeDormitory,
-    BEInvoice
+    BEInvoice,
+    BEAuditTrail
+};
+use App\Http\Requests\Admin\Cashier\{
+    CreateOrUpdateTrainingFee,
+    CreateOrUpdateFeeCategory,
 };
 use App\Models\{
     EnrolledCourse,
@@ -18,11 +27,21 @@ use App\Models\{
     DormitoryInvoice,
     DormitoryTenantHistory,
     DormitoryRoom,
-    AuditTrail
+    AuditTrail,
+    TrainingFee,
+    TrainingFeeCategory
 };
 
 class Cashier extends Controller
 {
+    protected $trainingFeeInstance;
+    protected $enrollmentCtrlInstance;
+
+    public function __construct(TrainingFee $trainingFee, EnrollmentCtrl $enrollmentCtrl) {
+        $this->trainingFeeInstance = $trainingFee;
+        $this->enrollmentCtrlInstance = $enrollmentCtrl;
+    }
+
     public function get_invoices (Request $request) {
         $enrollmentInvoices = EnrollmentInvoice::with([
                 'training.trainee',
@@ -158,5 +177,127 @@ class Cashier extends Controller
                 return response()->json(['message' => $e->getMessage()], 500);
             }
         }
+    }
+
+    public function get_training_fees (Request $request) {
+        return TransactionUtil::transact(null, [], function()  {
+            $training_fees = TrainingFee::withCount(['module' => function($query) {
+                return $query->whereHas('schedules', function ($schedulesQuery) {
+                    return $schedulesQuery->whereHas('hasData');
+                });
+            }])->with('category', 'module')->get();
+
+            return response()->json(['training_fees' => $training_fees], 200);
+        });
+    }
+
+    public function get_training_fees_predata (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            return response()->json([
+                'categories' => json_decode($this->get_training_fees_category($request)->getContent(), true)['categories'],
+                'modules' => json_decode($this->enrollmentCtrlInstance->get_modules($request)->getContent(), true)['modules'],
+            ], 200);
+        });
+    }
+
+    public function create_or_update_training_fee (CreateOrUpdateTrainingFee $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $this_training_fee = $request->httpMethod === "POST"
+                ? new TrainingFee
+                : TrainingFee::find($request->documentId);
+
+            $this_training_fee->course_module_id = $request->module;
+            $this_training_fee->training_fee_category_id = $request->category;
+            $this_training_fee->name = $request->name;
+            $this_training_fee->amount = $request->amount;
+            if($request->status) $this_training_fee->status = $request->status;
+            $this_training_fee->save();
+
+            AuditHelper::log($request->user()->id,($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a training fee. ID#" . $this_training_fee->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEInvoice(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a training fee. ID#" . $this_training_fee->id], 201);
+        });
+    }
+
+    public function remove_training_fee (Request $request, int $fee_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $fee_id) {
+            $this_fee = TrainingFee::withCount(['module' => function($query) {
+                return $query->whereHas('schedules', function ($schedulesQuery) {
+                    return $schedulesQuery->whereHas('hasData');
+                });
+            }])->where('id', $fee_id)->first();
+
+            if($this_fee->module_count > 0) {
+                return response()->json(['message' => "Can't remove training fee. It already has connected data."], 200);
+            } else {
+                $this_fee->delete();
+                AuditHelper::log($request->user()->id, "Removed a training fee. ID#$fee_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEInvoice(''),
+                        new BEAuditTrail('')
+                    );
+                }
+                return response()->json(['message' => "You've removed a training fee. ID#$fee_id"], 200);
+            }
+        });
+    }
+
+    public function get_training_fees_category (Request $request) {
+        return TransactionUtil::transact(null, [], function()  {
+            $categories = TrainingFeeCategory::withCount(['hasData'])->get();
+            return response()->json(['categories' => $categories], 200);
+        });
+    }
+
+    public function create_or_update_training_fee_category (CreateOrUpdateFeeCategory $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $fee_category = $request->httpMethod === "POST"
+                ? new TrainingFeeCategory
+                : TrainingFeeCategory::find($request->documentId);
+
+            $fee_category->name = $request->name;
+            $fee_category->save();
+
+            AuditHelper::log($request->user()->id,($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a fee category. ID#" . $fee_category->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEInvoice(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a fee category. ID#" . $fee_category->id], 201);
+        });
+    }
+
+    public function remove_training_fee_category (Request $request, int $fee_category_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $fee_category_id) {
+            $this_fee = TrainingFeeCategory::withCount(['hasData'])->where('id', $fee_category_id)->first();
+
+            if($this_fee->has_data_count > 0) {
+                return response()->json(['message' => "Can't remove fee category. It already has connected data."], 200);
+            } else {
+                $this_fee->delete();
+                AuditHelper::log($request->user()->id, "Removed a fee category. ID#$fee_category_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEInvoice(''),
+                        new BEAuditTrail('')
+                    );
+                }
+                return response()->json(['message' => "You've removed a fee category. ID#$fee_category_id"], 200);
+            }
+        });
     }
 }

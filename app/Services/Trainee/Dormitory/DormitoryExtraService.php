@@ -57,7 +57,7 @@ class DormitoryExtraService {
         ->first();
 
         if(!$existing) {
-            throw new DomainException("No active tenant record found");
+            throw new DomainException("Not active tenant record found");
         }
 
         if($existing->services->isNotEmpty()) {
@@ -83,7 +83,7 @@ class DormitoryExtraService {
     {
         return DB::transaction(function() use ($userId, $validated) {
             \Log::info("validated inside service:", $validated);
-            $this->validateData($validated, $userId);
+            // $this->validateData($validated, $userId);
 
             $this->dormitoryReqService->create([
                 "dormitory_tenant_id" => $validated["dormitory_id"],

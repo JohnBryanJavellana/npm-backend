@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Trainee\Dormitory;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CancelServiceRequest extends FormRequest
 {
@@ -12,6 +14,7 @@ class CancelServiceRequest extends FormRequest
     public function authorize(): bool
     {
         //check if the Auth::user and $this->user() is the same.
+        \Log::info("isaac", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -30,8 +33,28 @@ class CancelServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "document_id" => "required",
-            "request_id" => "required"
+            "document_id" => "required|exists:dormitory_tenants,id",
+            "request_id" => "required|integer|exists:dormitory_req_services,id"
         ];
+    }
+
+    public function attributes()
+    {
+        return [
+            "document_id" => "Record",
+            "request_id" => "Service request"
+        ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors();
+        $firstError = $errors->first();
+        throw new HttpResponseException(
+            response()->json([
+                "message" => $firstError,
+                "errors" => $errors
+            ], 422)
+        );
     }
 }

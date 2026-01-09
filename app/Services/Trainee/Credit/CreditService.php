@@ -24,7 +24,7 @@ class CreditService {
                 "reference_number" => $validated["ref_number"],
                 "reason" => config("creditReason.deduct.0"),
                 "type" => "DEDUCT",
-                "total_amount" => $validated["total_amount"],
+                "amount" => $validated["total_amount"],
             ]);
         });
     }

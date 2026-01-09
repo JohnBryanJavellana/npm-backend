@@ -38,4 +38,13 @@ class NotificationCtrl extends Controller
             return response()->json(['notifications' => $finalNotifications], 200);
         });
     }
+
+    public function update_notification (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this_notification = $this->notificationInstance->find($request->notificationId);
+            $this_notification->is_read = "YES";
+            $this_notification->save();
+            return response()->json(['message' => "OK"], 200);
+        });
+    }
 }

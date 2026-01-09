@@ -75,7 +75,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         Route::prefix('/my-account/')->group(function() {
             Route::post('create_or_update_additional_info', [MyAccount::class,'create_or_update_additional_info']);
             Route::post('upload_profile_picture', [MyAccount::class,'upload_profile_picture']);
-            Route::get('get_trainee_general_info', [MyAccount::class, 'get_trainee_general_info']);
+            Route::get('get_trainee_general_info/{user}', [MyAccount::class, 'get_trainee_general_info']);
             Route::post('update_password', [Account::class, 'update_password']);
             Route::get('get_activities', [Account::class, 'get_activities']);
             Route::get('get_all_courses_and_schools', [MyAccount::class, 'get_all_courses_and_schools']);
@@ -125,22 +125,22 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             //SERVICES
             Route::get('services', [TraineeDormitory::class, 'view_service']);
             Route::get('services/{document_id}', [TraineeDormitory::class, 'user_service_request']);
-            Route::post('services/{document_id}/create', [TraineeDormitory::class, 'create_service_request']);
-            Route::post('services/{document_id}/cancel', [TraineeDormitory::class, 'cancel_service_request']);
+            Route::post('services/{document_id}/create', [TraineeDormitory::class, 'create_service_request'])->whereNumber("document_id");
+            Route::post('services/{document_id}/cancel', [TraineeDormitory::class, 'cancel_service_request'])->whereNumber("document_id");
             //HISTORY
             Route::get('applied_dormitories/view/getAllHistories/{dormitory_id}', [TraineeDormitory::class, 'applied_dormitory_histories']);
             //PAYMENT?
             Route::post('dormitory_payment_request', [TraineeDormitory::class, 'update_dorm_invoice']);
             //DORM TRANSFER
             Route::post('dormitory_transfer_request', [TraineeDormitory::class, 'create_transfer_request']);
-            Route::post('transfer_request/cancel/{id}', [TraineeDormitory::class, 'cancel_transfer_request']);
+            Route::post('transfer_request/cancel/{tenant}', [TraineeDormitory::class, 'cancel_transfer_request']);
             Route::get('transfers', [TraineeDormitory::class, 'view_transfer_request']);
             //DORM EXTENSION
             Route::post('extension_request', [TraineeDormitory::class, 'create_extend_request']);
-            Route::post('extension_request/cancel/{id}', [TraineeDormitory::class, 'cancel_extend_request']);
+            Route::post('extension_request/cancel/{tenant}', [TraineeDormitory::class, 'cancel_extend_request']);
 
             //MISCELLANEOUS
-            Route::post('cancel_request/{id}', [TraineeDormitory::class, 'cancel_request']);
+            Route::post('cancel_request/{tenant}', [TraineeDormitory::class, 'cancel_request']);
             Route::post('count_book_reservation', [TraineeDormitory::class, 'count_book_reservation']);
         });
 
@@ -186,186 +186,154 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     /** administrator routes */
     Route::prefix('/admin/')->group(function() {
-        Route::middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY')->group(function() {
-            Route::prefix('/enrollment/')->group(function() {
-                Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications']);
-                Route::post('get_applications/requirement_remark', [EnrollmentCtrl::class, 'requirement_remark']);
-                Route::post('get_applications/set_training_status', [EnrollmentCtrl::class, 'set_training_status']);
-                Route::post('get_applications/set_expired_status', [EnrollmentCtrl::class, 'set_expired_status']);
-                Route::get('get_applications/remove_training_request/{training_request_id}', [EnrollmentCtrl::class, 'remove_training_request']);
-                Route::get('get_enrolled', [EnrollmentCtrl::class, 'get_enrolled']);
-                Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished']);
-                Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
+        Route::prefix('/enrollment/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+            Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications']);
+            Route::post('get_applications/requirement_remark', [EnrollmentCtrl::class, 'requirement_remark']);
+            Route::post('get_applications/set_training_status', [EnrollmentCtrl::class, 'set_training_status']);
+            Route::post('get_applications/set_expired_status', [EnrollmentCtrl::class, 'set_expired_status']);
+            Route::get('get_applications/remove_training_request/{training_request_id}', [EnrollmentCtrl::class, 'remove_training_request']);
+            Route::get('get_enrolled', [EnrollmentCtrl::class, 'get_enrolled']);
+            Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished']);
+            Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
+            Route::get('get_schedules', [EnrollmentCtrl::class, 'get_schedules']);
+            Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
+            Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
+            Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
+            Route::post('create_or_update_module', [EnrollmentCtrl::class, 'create_or_update_module']);
+            Route::delete('remove_module/{module_id}', [EnrollmentCtrl::class, 'remove_module']);
+            Route::get('get_module_types', [EnrollmentCtrl::class, 'get_module_types']);
+            Route::post('create_or_update_module_type', [EnrollmentCtrl::class, 'create_or_update_module_type']);
+            Route::delete('remove_module_type/{module_type_id}', [EnrollmentCtrl::class, 'remove_module_type']);
+            Route::get('get_certificates', [EnrollmentCtrl::class, 'get_certificates']);
+            Route::post('create_or_update_certificate', [EnrollmentCtrl::class, 'create_or_update_certificate']);
+            Route::delete('remove_certificate/{certificate_id}', [EnrollmentCtrl::class, 'remove_certificate']);
+            Route::get('get_requirements', [EnrollmentCtrl::class, 'get_requirements']);
+            Route::post('create_or_update_requirement', [EnrollmentCtrl::class, 'create_or_update_requirement']);
+            Route::delete('training-requirements/remove_trequirement/{requirement_id}', [EnrollmentCtrl::class, 'remove_requirement']);
+            Route::get('get_schools', [EnrollmentCtrl::class, 'get_schools']);
+            Route::post('create_or_update_school', [EnrollmentCtrl::class, 'create_or_update_school']);
+            Route::delete('remove_school/{school_id}', [EnrollmentCtrl::class, 'remove_school']);
+            Route::get('get_courses', [EnrollmentCtrl::class, 'get_courses']);
+            Route::post('create_or_update_course', [EnrollmentCtrl::class, 'create_or_update_course']);
+            Route::delete('remove_course/{course_id}', [EnrollmentCtrl::class, 'remove_course']);
+            Route::get('get_vouchers', [EnrollmentCtrl::class, 'get_vouchers']);
+            Route::post('create_or_update_voucher', [EnrollmentCtrl::class, 'create_or_update_voucher']);
+            Route::delete('remove_voucher/{voucher_id}', [EnrollmentCtrl::class, 'remove_voucher']);
+            Route::get('get_sponsors', [EnrollmentCtrl::class, 'get_sponsors']);
+            Route::post('create_or_update_sponsor', [EnrollmentCtrl::class, 'create_or_update_sponsor']);
+            Route::delete('remove_sponsor/{sponsor_id}', [EnrollmentCtrl::class, 'remove_sponsor']);
+            Route::get('get_licenses', [EnrollmentCtrl::class, 'get_licenses']);
+            Route::post('create_or_update_license', [EnrollmentCtrl::class, 'create_or_update_license']);
+            Route::delete('remove_license/{license_id}', [EnrollmentCtrl::class, 'remove_license']);
+            Route::get('get_ranks', [EnrollmentCtrl::class, 'get_ranks']);
+            Route::post('create_or_update_rank', [EnrollmentCtrl::class, 'create_or_update_rank']);
+            Route::delete('remove_rank/{rank_id}', [EnrollmentCtrl::class, 'remove_rank']);
+        });
 
-                // schedules
-                Route::get('get_schedules', [EnrollmentCtrl::class, 'get_schedules']);
-                Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
-                Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
+        Route::prefix('/books/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+            Route::get('get_books', [LibraryController::class, 'get_books']);
+            Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
+            Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
+            Route::get('get_book_info/get_copies/{book_id}', [LibraryController::class, 'get_copies']);
+            Route::post('create_book_copies', [LibraryController::class, 'create_book_copies']);
+            Route::get('get_book_total_reservations/{book_id}', [LibraryController::class, 'get_book_total_reservations']);
+            Route::post('update_reservation', [LibraryController::class, 'update_reservation']);
+            Route::post('get_available_books', [LibraryController::class, 'get_available_books']);
+            Route::post('create_walkin_request', [LibraryController::class, 'create_walkin_request']);
+            Route::post('create_or_update_book', [LibraryController::class, 'create_or_update_book']);
+            Route::match(['GET', 'POST'], 'get_book_reservation', [LibraryController::class, 'get_book_reservation']);
+            Route::post('get_book_reservation/get_fines', [LibraryController::class, 'get_fines']);
+            Route::post('get_book_reservation/create_fine', [LibraryController::class, 'create_fine']);
+            Route::delete('get_book_reservation/remove_fine/{id}', [LibraryController::class, 'remove_fine']);
+            Route::post('get_book_reservation/get_book_reservation_that_needs_fine', [LibraryController::class, 'get_book_reservation_that_needs_fine']);
+            Route::post('get_book_reservation/get_extension_request', [LibraryController::class, 'get_extension_request']);
+            Route::post('get_book_reservation/get_books_that_can_extend', [LibraryController::class, 'get_books_that_can_extend']);
+            Route::post('get_book_reservation/submit_extension_request', [LibraryController::class, 'submit_extension_request']);
+            Route::post('get_book_reservation/update_extension_request', [LibraryController::class, 'update_extension_request']);
+            Route::post('get_book_reservation/count_book_reservation', [LibraryController::class, 'count_book_reservation']);
+            Route::post('get_book_reservation/check_for_book_reservation', [LibraryController::class, 'check_for_book_reservation']);
+            Route::delete('get_book_info/remove_copy/{copy_id}', [LibraryController::class, 'remove_copy']);
+            Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book']);
+        });
 
-                // modules
-                Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
-                Route::post('create_or_update_module', [EnrollmentCtrl::class, 'create_or_update_module']);
-                Route::delete('remove_module/{module_id}', [EnrollmentCtrl::class, 'remove_module']);
+        Route::prefix('/genre/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+            Route::get('get_genres', [LibraryController::class, 'get_genres']);
+            Route::get('get_active_genres', [LibraryController::class, 'get_active_genres']);
+            Route::post('create_or_update_genre', [LibraryController::class, 'create_or_update_genre']);
+            Route::delete('remove_genre/{genre_id}', [LibraryController::class, 'remove_genre']);
+        });
 
-                // module type
-                Route::get('get_module_types', [EnrollmentCtrl::class, 'get_module_types']);
-                Route::post('create_or_update_module_type', [EnrollmentCtrl::class, 'create_or_update_module_type']);
-                Route::delete('remove_module_type/{module_type_id}', [EnrollmentCtrl::class, 'remove_module_type']);
+        Route::prefix('/dormitory/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+            Route::get('get', [DormitoryController::class, 'dormitories']);
+            Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
+            Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
+            Route::post('create_or_update_dormitory', [DormitoryController::class, 'create_or_update_dormitory']);
+            Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms']);
+            Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms']);
+            Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms']);
+            Route::post('create-walk-in-request/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
+            Route::post('create-walk-in-request/create_or_update_request', [DormitoryController::class, 'create_or_update_request']);
+            Route::post('get_all_requests', [DormitoryController::class, 'get_all_requests']);
+            Route::delete('cancel_dorm_request/{dormReqId}', [DormitoryController::class, 'cancel_dorm_request']);
+            Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room']);
+            Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories']);
+            Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock']);
+            Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock']);
+            Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
+            Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock']);
+            Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);
+            Route::get('services', [DormitoryController::class, 'services']);
+            Route::post('create_or_update_service', [DormitoryController::class, 'create_or_update_service']);
+            Route::delete('remove_service/{service_id}', [DormitoryController::class, 'remove_service']);
+            Route::post('update_provided_stock_status', [DormitoryController::class, 'update_provided_stock_status']);
+            Route::post('update_provided_stock_list', [DormitoryController::class, 'update_provided_stock_list']);
+            Route::post('count_dorm_reservation', [DormitoryController::class, 'count_dorm_reservation']);
+            Route::post('get_requested_service', [DormitoryController::class, 'get_requested_service']);
+            Route::post('request_service', [DormitoryController::class, 'request_service']);
+            Route::post('update_requested_service', [DormitoryController::class, 'update_requested_service']);
 
-                // fees
-                Route::get('get_training_fees', [EnrollmentCtrl::class, 'get_training_fees']);
-                Route::get('get_training_fees/get_training_fees_predata', [EnrollmentCtrl::class, 'get_training_fees_predata']);
-                Route::post('create_or_update_training_fee', [EnrollmentCtrl::class, 'create_or_update_training_fee']);
-                Route::delete('remove_training_fee/{fee_id}', [EnrollmentCtrl::class, 'remove_training_fee']);
+            Route::post('get_dormitory_charges', [DormitoryController::class, 'get_dormitory_charges']);
+            Route::post('created_or_update_dormitory_charge', [DormitoryController::class, 'created_or_update_dormitory_charge']);
+            Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
+        });
 
-                // fee category
-                Route::get('get_training_fees_category', [EnrollmentCtrl::class, 'get_training_fees_category']);
-                Route::post('create_or_update_training_fee_category', [EnrollmentCtrl::class, 'create_or_update_training_fee_category']);
-                Route::delete('remove_training_fee_category/{fee_category_id}', [EnrollmentCtrl::class, 'remove_training_fee_category']);
+        Route::prefix('/masterlist/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+            Route::prefix('/user/')->group(function() {
+                Route::get('get_users', [Masterlist::class, 'get_users']);
+                Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
+                Route::get('get_user_credits/{user_id}', [Masterlist::class, 'get_user_credits']);
+                Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities']);
+                Route::post('create_or_update_user', [Masterlist::class, 'create_or_update_user']);
+                Route::delete('remove_user/{user_id}', [Masterlist::class, 'remove_user']);
+            });
 
-                // certificates
-                Route::get('get_certificates', [EnrollmentCtrl::class, 'get_certificates']);
-                Route::post('create_or_update_certificate', [EnrollmentCtrl::class, 'create_or_update_certificate']);
-                Route::delete('remove_certificate/{certificate_id}', [EnrollmentCtrl::class, 'remove_certificate']);
+            Route::prefix('/employer/')->group(function() {
+                Route::get('get_employers', [Masterlist::class, 'get_employers']);
+                Route::post('create_or_update_employer', [Masterlist::class, 'create_or_update_employer']);
+                Route::delete('remove_employer/{employer_id}', [Masterlist::class, 'remove_employer']);
+            });
 
-                // requirements
-                Route::get('get_requirements', [EnrollmentCtrl::class, 'get_requirements']);
-                Route::post('create_or_update_requirement', [EnrollmentCtrl::class, 'create_or_update_requirement']);
-                Route::delete('training-requirements/remove_trequirement/{requirement_id}', [EnrollmentCtrl::class, 'remove_requirement']);
-
-                // schools
-                Route::get('get_schools', [EnrollmentCtrl::class, 'get_schools']);
-                Route::post('create_or_update_school', [EnrollmentCtrl::class, 'create_or_update_school']);
-                Route::delete('remove_school/{school_id}', [EnrollmentCtrl::class, 'remove_school']);
-
-                // courses
-                Route::get('get_courses', [EnrollmentCtrl::class, 'get_courses']);
-                Route::post('create_or_update_course', [EnrollmentCtrl::class, 'create_or_update_course']);
-                Route::delete('remove_course/{course_id}', [EnrollmentCtrl::class, 'remove_course']);
-
-                // vouchers
-                Route::get('get_vouchers', [EnrollmentCtrl::class, 'get_vouchers']);
-                Route::post('create_or_update_voucher', [EnrollmentCtrl::class, 'create_or_update_voucher']);
-                Route::delete('remove_voucher/{voucher_id}', [EnrollmentCtrl::class, 'remove_voucher']);
-
-                // sponsors
-                Route::get('get_sponsors', [EnrollmentCtrl::class, 'get_sponsors']);
-                Route::post('create_or_update_sponsor', [EnrollmentCtrl::class, 'create_or_update_sponsor']);
-                Route::delete('remove_sponsor/{sponsor_id}', [EnrollmentCtrl::class, 'remove_sponsor']);
-
-                // licenses
-                Route::get('get_licenses', [EnrollmentCtrl::class, 'get_licenses']);
-                Route::post('create_or_update_license', [EnrollmentCtrl::class, 'create_or_update_license']);
-                Route::delete('remove_license/{license_id}', [EnrollmentCtrl::class, 'remove_license']);
-
-                // ranks
-                Route::get('get_ranks', [EnrollmentCtrl::class, 'get_ranks']);
-                Route::post('create_or_update_rank', [EnrollmentCtrl::class, 'create_or_update_rank']);
-                Route::delete('remove_rank/{rank_id}', [EnrollmentCtrl::class, 'remove_rank']);
+            Route::prefix('/position/')->group(function() {
+                Route::get('get_positions', [Masterlist::class, 'get_positions']);
+                Route::post('create_or_update_position', [Masterlist::class, 'create_or_update_position']);
+                Route::delete('remove_position/{position_id}', [Masterlist::class, 'remove_position']);
             });
         });
 
-        Route::middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function() {
-            Route::prefix('/books/')->group(function() {
-                Route::get('get_books', [LibraryController::class, 'get_books'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
-                Route::get('get_pre_data', [LibraryController::class, 'get_pre_data'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
-                Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
-                Route::get('get_book_info/get_copies/{book_id}', [LibraryController::class, 'get_copies'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
-                Route::post('create_book_copies', [LibraryController::class, 'create_book_copies'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
-                Route::get('get_book_total_reservations/{book_id}', [LibraryController::class, 'get_book_total_reservations'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
-                Route::post('update_reservation', [LibraryController::class, 'update_reservation']);
-                Route::post('get_available_books', [LibraryController::class, 'get_available_books']);
-                Route::post('create_walkin_request', [LibraryController::class, 'create_walkin_request']);
-                Route::post('create_or_update_book', [LibraryController::class, 'create_or_update_book'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
-                Route::match(['GET', 'POST'], 'get_book_reservation', [LibraryController::class, 'get_book_reservation']);
-                Route::post('get_book_reservation/get_fines', [LibraryController::class, 'get_fines']);
-                Route::post('get_book_reservation/create_fine', [LibraryController::class, 'create_fine']);
-                Route::delete('get_book_reservation/remove_fine/{id}', [LibraryController::class, 'remove_fine']);
-                Route::post('get_book_reservation/get_book_reservation_that_needs_fine', [LibraryController::class, 'get_book_reservation_that_needs_fine']);
-                Route::post('get_book_reservation/get_extension_request', [LibraryController::class, 'get_extension_request']);
-                Route::post('get_book_reservation/get_books_that_can_extend', [LibraryController::class, 'get_books_that_can_extend']);
-                Route::post('get_book_reservation/submit_extension_request', [LibraryController::class, 'submit_extension_request']);
-                Route::post('get_book_reservation/update_extension_request', [LibraryController::class, 'update_extension_request']);
-                Route::post('get_book_reservation/count_book_reservation', [LibraryController::class, 'count_book_reservation']);
-                Route::post('get_book_reservation/check_for_book_reservation', [LibraryController::class, 'check_for_book_reservation']);
-                Route::delete('get_book_info/remove_copy/{copy_id}', [LibraryController::class, 'remove_copy'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
-                Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book'])->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY');
-            });
-
-            Route::prefix('/genre/')->group(function() {
-                Route::get('get_genres', [LibraryController::class, 'get_genres']);
-                Route::get('get_active_genres', [LibraryController::class, 'get_active_genres']);
-                Route::post('create_or_update_genre', [LibraryController::class, 'create_or_update_genre']);
-                Route::delete('remove_genre/{genre_id}', [LibraryController::class, 'remove_genre']);
-            });
+        Route::prefix('/invoice/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+            Route::post('get_invoices', [Cashier::class, 'get_invoices']);
+            Route::post('update_payment_status', [Cashier::class, 'update_payment_status']);
         });
 
-        Route::middleware('user_role:SUPERADMIN,ADMIN-DORMITORY')->group(function() {
-            Route::prefix('/dormitory/')->group(function() {
-                Route::get('get', [DormitoryController::class, 'dormitories']);
-                Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
-                Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
-                Route::post('create_or_update_dormitory', [DormitoryController::class, 'create_or_update_dormitory']);
-                Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms']);
-                Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms']);
-                Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms']);
-                Route::post('create-walk-in-request/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
-                Route::post('create-walk-in-request/create_or_update_request', [DormitoryController::class, 'create_or_update_request']);
-                Route::post('get_all_requests', [DormitoryController::class, 'get_all_requests']);
-                Route::delete('cancel_dorm_request/{dormReqId}', [DormitoryController::class, 'cancel_dorm_request']);
-                Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room']);
-                Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories']);
-                Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock']);
-                Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock']);
-                Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
-                Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock']);
-                Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);
-                Route::get('services', [DormitoryController::class, 'services']);
-                Route::post('create_or_update_service', [DormitoryController::class, 'create_or_update_service']);
-                Route::delete('remove_service/{service_id}', [DormitoryController::class, 'remove_service']);
-                Route::post('update_provided_stock_status', [DormitoryController::class, 'update_provided_stock_status']);
-                Route::post('update_provided_stock_list', [DormitoryController::class, 'update_provided_stock_list']);
-                Route::post('count_dorm_reservation', [DormitoryController::class, 'count_dorm_reservation']);
-                Route::post('get_requested_service', [DormitoryController::class, 'get_requested_service']);
-                Route::post('request_service', [DormitoryController::class, 'request_service']);
-                Route::post('update_requested_service', [DormitoryController::class, 'update_requested_service']);
+        Route::prefix('/cashier/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+            Route::get('get_training_fees', [Cashier::class, 'get_training_fees']);
+            Route::get('get_training_fees/get_training_fees_predata', [Cashier::class, 'get_training_fees_predata']);
+            Route::post('create_or_update_training_fee', [Cashier::class, 'create_or_update_training_fee']);
+            Route::delete('remove_training_fee/{fee_id}', [Cashier::class, 'remove_training_fee']);
 
-                Route::post('get_dormitory_charges', [DormitoryController::class, 'get_dormitory_charges']);
-                Route::post('created_or_update_dormitory_charge', [DormitoryController::class, 'created_or_update_dormitory_charge']);
-                Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
-            });
-        });
-
-        Route::middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function() {
-            Route::prefix('/masterlist/')->group(function() {
-                Route::prefix('/user/')->group(function() {
-                    Route::get('get_users', [Masterlist::class, 'get_users']);
-                    Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info'])->middleware('user_role:SUPERADMIN');
-                    Route::get('get_user_credits/{user_id}', [Masterlist::class, 'get_user_credits'])->middleware('user_role:SUPERADMIN');
-                    Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities'])->middleware('user_role:SUPERADMIN');
-                    Route::post('create_or_update_user', [Masterlist::class, 'create_or_update_user'])->middleware('user_role:SUPERADMIN');
-                    Route::delete('remove_user/{user_id}', [Masterlist::class, 'remove_user'])->middleware('user_role:SUPERADMIN');
-                });
-
-                Route::prefix('/employer/')->middleware('user_role:SUPERADMIN')->group(function() {
-                    Route::get('get_employers', [Masterlist::class, 'get_employers']);
-                    Route::post('create_or_update_employer', [Masterlist::class, 'create_or_update_employer']);
-                    Route::delete('remove_employer/{employer_id}', [Masterlist::class, 'remove_employer']);
-                });
-
-                Route::prefix('/position/')->middleware('user_role:SUPERADMIN')->group(function() {
-                    Route::get('get_positions', [Masterlist::class, 'get_positions']);
-                    Route::post('create_or_update_position', [Masterlist::class, 'create_or_update_position']);
-                    Route::delete('remove_position/{position_id}', [Masterlist::class, 'remove_position']);
-                });
-            });
-        });
-
-        Route::middleware('user_role:SUPERADMIN,CASHIER')->group(function() {
-            Route::prefix('/invoice/')->group(function() {
-                Route::post('get_invoices', [Cashier::class, 'get_invoices']);
-                Route::post('update_payment_status', [Cashier::class, 'update_payment_status']);
-            });
+            Route::get('get_training_fees_category', [Cashier::class, 'get_training_fees_category']);
+            Route::post('create_or_update_training_fee_category', [Cashier::class, 'create_or_update_training_fee_category']);
+            Route::delete('remove_training_fee_category/{fee_category_id}', [Cashier::class, 'remove_training_fee_category']);
         });
 
         Route::post('get_trainee_enrolled_trainings', [DormitoryController::class, 'get_trainee_enrolled_trainings']);
@@ -379,6 +347,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
+    Route::post('update_notification', [NotificationCtrl::class, 'update_notification']);
     Route::post('get_notifications', [NotificationCtrl::class, 'get_notifications']);
     Route::post('change-theme', [Account::class, 'change_theme']);
     Route::post('logout', [Logout::class, 'logout_user']);
