@@ -73,6 +73,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(AuditTrail::class);
     }
 
+    public function creditAmount () {
+        return $this->hasMany(Credit::class);
+    }
+
     public function trainee_enrolled_invoices() {
         return $this->hasManyThrough(
             EnrollmentInvoice::class,

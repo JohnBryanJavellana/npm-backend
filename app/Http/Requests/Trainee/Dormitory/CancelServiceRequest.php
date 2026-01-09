@@ -11,7 +11,15 @@ class CancelServiceRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        //check if the Auth::user and $this->user() is the same.
         return $this->user() !== null;
+    }
+
+    protected function prepareForValidation()
+    {
+        return $this->merge([
+            "document_id" => $this->route("document_id")
+        ]);
     }
 
     /**
@@ -22,7 +30,8 @@ class CancelServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            "document_id" => "required",
+            "request_id" => "required"
         ];
     }
 }

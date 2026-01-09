@@ -600,7 +600,7 @@ class TraineeDormitory extends Controller
     {
         $user_id = $request->user()->id;
         
-        try {
+        try {   
             $this->dormitoryExtraService->cancelService($request->request_id, $user_id);
 
             return response()->json(["message" => "Service request has cancelled successfully"], 200);

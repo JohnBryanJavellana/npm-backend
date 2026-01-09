@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice};
 use App\Services\Trainee\Dormitory\DormitoryInvoiceService;
 use DomainException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 // use ParagonIE\Sodium\Core\Curve25519\Ge\P2;
 
@@ -36,6 +37,7 @@ class TraineeInvoices extends Controller
 
     public function library_penalties(Request $request)
     {
+        
         $records = LibraryInvoice::with([
             "payee",
             "BookRes",
@@ -84,6 +86,9 @@ class TraineeInvoices extends Controller
 
             return response()->json(["balance" => $total], 200);
         }
+        // catch (ModelNotFoundException $e) {
+        //     throw new DomainException("Not found!");
+        // }
         catch (DomainException $e) {
             \Log::info("updateDormInvoiceErrorDomainException", [$e]);
             throw $e;

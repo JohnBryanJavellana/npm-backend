@@ -14,6 +14,10 @@ class Credit extends Model
      * Scopes
      */
 
+    public function creditOwner() {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
     public function scopeForUser($query, $userId)
     {
         return $query->where("user_id", $userId);
