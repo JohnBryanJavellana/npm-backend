@@ -326,14 +326,14 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::prefix('/cashier/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
-            Route::get('get_training_fees', [Cashier::class, 'get_training_fees']);
-            Route::get('get_training_fees/get_training_fees_predata', [Cashier::class, 'get_training_fees_predata']);
-            Route::post('create_or_update_training_fee', [Cashier::class, 'create_or_update_training_fee']);
-            Route::delete('remove_training_fee/{fee_id}', [Cashier::class, 'remove_training_fee']);
+            Route::get('get_charges', [Cashier::class, 'get_charges']);
+            Route::get('get_charges/get_charges_predata', [Cashier::class, 'get_charges_predata']);
+            Route::post('create_or_update_charge', [Cashier::class, 'create_or_update_charge']);
+            Route::delete('remove_charge/{chargeId}', [Cashier::class, 'remove_charge']);
 
-            Route::get('get_training_fees_category', [Cashier::class, 'get_training_fees_category']);
-            Route::post('create_or_update_training_fee_category', [Cashier::class, 'create_or_update_training_fee_category']);
-            Route::delete('remove_training_fee_category/{fee_category_id}', [Cashier::class, 'remove_training_fee_category']);
+            Route::get('get_charges_category', [Cashier::class, 'get_charges_category']);
+            Route::post('create_or_update_charge_category', [Cashier::class, 'create_or_update_charge_category']);
+            Route::delete('remove_charge_category/{fee_category_id}', [Cashier::class, 'remove_charge_category']);
         });
 
         Route::post('get_trainee_enrolled_trainings', [DormitoryController::class, 'get_trainee_enrolled_trainings']);

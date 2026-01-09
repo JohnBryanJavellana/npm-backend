@@ -9,5 +9,7 @@ class ChargeCategory extends Model
 {
     use HasFactory;
 
-    public function hasData() {}
+    public function hasData() {
+        return $this->hasMany(Charge::class);
+    }
 }

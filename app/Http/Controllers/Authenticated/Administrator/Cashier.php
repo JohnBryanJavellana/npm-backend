@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
-use App\Models\Charge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Utils\{
@@ -16,21 +15,12 @@ use App\Events\{
     BEAuditTrail
 };
 use App\Http\Requests\Admin\Cashier\{
-    CreateOrUpdateTrainingFee,
+    CreateOrUpdateCharge,
     CreateOrUpdateFeeCategory,
 };
 use App\Models\{
-    EnrolledCourse,
-    Training,
-    TrainingSchedule,
-    EnrollmentInvoice,
-    DormitoryTenant,
-    DormitoryInvoice,
-    DormitoryTenantHistory,
-    DormitoryRoom,
-    AuditTrail,
-    TrainingFee,
-    TrainingFeeCategory
+    Charge,
+    ChargeCategory
 };
 
 class Cashier extends Controller
@@ -173,35 +163,31 @@ class Cashier extends Controller
     // }
 
     public function get_charges (Request $request) {
-        return TransactionUtil::transact(null, [], function()  {
-            $training_fees = Charge::withCount(['module' => function($query) {
-                return $query->whereHas('schedules', function ($schedulesQuery) {
-                    return $schedulesQuery->whereHas('hasData');
-                });
-            }])->with('category', 'module')->get();
-
-            return response()->json(['training_fees' => $training_fees], 200);
+        return TransactionUtil::transact(null, [], function() use($request)  {
+            $charges = Charge::with('chargeCategory')->get();
+            return response()->json(['charges' => $charges], 200);
         });
     }
 
     public function get_charges_predata (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             return response()->json([
-                'categories' => json_decode($this->get_training_fees_category($request)->getContent(), true)['categories'],
+                'categories' => json_decode($this->get_charges_category($request)->getContent(), true)['categories'],
             ], 200);
         });
     }
 
-    public function create_or_update_charge (CreateOrUpdateTrainingFee $request) {
+    public function create_or_update_charge (CreateOrUpdateCharge $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_training_fee = $request->httpMethod === "POST"
-                ? new TrainingFee
-                : TrainingFee::find($request->documentId);
+                ? new Charge
+                : Charge::find($request->documentId);
 
-            $this_training_fee->course_module_id = $request->module;
-            $this_training_fee->training_fee_category_id = $request->category;
+            $this_training_fee->charge_category_id = $request->category;
             $this_training_fee->name = $request->name;
             $this_training_fee->amount = $request->amount;
+            $this_training_fee->description = $request->description;
+            $this_training_fee->service_type = $request->serviceType;
             if($request->status) $this_training_fee->status = $request->status;
             $this_training_fee->save();
 
@@ -219,18 +205,18 @@ class Cashier extends Controller
     }
 
     public function remove_charge (Request $request, int $chargeId) {
-        return TransactionUtil::transact(null, [], function() use ($request, $fee_id) {
-            $this_fee = TrainingFee::withCount(['module' => function($query) {
+        return TransactionUtil::transact(null, [], function() use ($request, $chargeId) {
+            $this_fee = Charge::withCount(['module' => function($query) {
                 return $query->whereHas('schedules', function ($schedulesQuery) {
                     return $schedulesQuery->whereHas('hasData');
                 });
-            }])->where('id', $fee_id)->first();
+            }])->where('id', $chargeId)->first();
 
             if($this_fee->module_count > 0) {
                 return response()->json(['message' => "Can't remove training fee. It already has connected data."], 200);
             } else {
                 $this_fee->delete();
-                AuditHelper::log($request->user()->id, "Removed a training fee. ID#$fee_id");
+                AuditHelper::log($request->user()->id, "Removed a training fee. ID#$chargeId");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -238,14 +224,14 @@ class Cashier extends Controller
                         new BEAuditTrail('')
                     );
                 }
-                return response()->json(['message' => "You've removed a training fee. ID#$fee_id"], 200);
+                return response()->json(['message' => "You've removed a training fee. ID#$chargeId"], 200);
             }
         });
     }
 
-    public function get_charge_category (Request $request) {
+    public function get_charges_category (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request)  {
-            $categories = TrainingFeeCategory::withCount(['hasData'])->get();
+            $categories = ChargeCategory::withCount(['hasData'])->get();
             return response()->json(['categories' => $categories], 200);
         });
     }
@@ -253,8 +239,8 @@ class Cashier extends Controller
     public function create_or_update_charge_category (CreateOrUpdateFeeCategory $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $fee_category = $request->httpMethod === "POST"
-                ? new TrainingFeeCategory
-                : TrainingFeeCategory::find($request->documentId);
+                ? new ChargeCategory()
+                : ChargeCategory::find($request->documentId);
 
             $fee_category->name = $request->name;
             $fee_category->save();
@@ -274,7 +260,7 @@ class Cashier extends Controller
 
     public function remove_charge_category (Request $request, int $fee_category_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $fee_category_id) {
-            $this_fee = TrainingFeeCategory::withCount(['hasData'])->where('id', $fee_category_id)->first();
+            $this_fee = ChargeCategory::withCount(['hasData'])->where('id', $fee_category_id)->first();
 
             if($this_fee->has_data_count > 0) {
                 return response()->json(['message' => "Can't remove fee category. It already has connected data."], 200);
