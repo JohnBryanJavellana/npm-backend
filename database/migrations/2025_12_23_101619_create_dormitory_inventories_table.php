@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Charge;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +20,7 @@ return new class extends Migration
             $table->enum("is_consumable", ['YES', 'NO']);
             $table->longText("description");
             $table->longText("filename")->nullable();
-            $table->double("price", 65, 2)->default(0.0);
+            $table->foreignIdFor(Charge::class);
             $table->timestamps();
         });
     }

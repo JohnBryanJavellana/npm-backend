@@ -268,6 +268,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
             Route::post('create_or_update_dormitory', [DormitoryController::class, 'create_or_update_dormitory']);
+            Route::get('get_charges_predata', [DormitoryController::class, 'get_charges_predata']);
             Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms']);
             Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms']);
             Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms']);

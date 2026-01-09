@@ -42,6 +42,12 @@ use App\Models\{
 
 class DormitoryController extends Controller
 {
+    protected $cashierCtrl;
+
+    public function __construct(Cashier $cashier) {
+        $this->cashierCtrl = $cashier;
+    }
+
     private function addDescription (string $content) {
         return "<div style='margin-top: 8px; padding: 16px; border: 1px dashed lightgrey; background-color: #FFFDD0;'>
             <div style='font-weight: bold; font-size: 1.25rem;'>Payable Amount</div>
@@ -53,9 +59,14 @@ class DormitoryController extends Controller
 
     public function dormitories (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $dormitories = Dormitory::withCount(['rooms' => function ($query) {
-                $query->where("room_status", "AVAILABLE");
-            }])->get();
+            $dormitories = Dormitory::withCount([
+                'rooms' => function ($query) {
+                    $query->where("room_status", "AVAILABLE");
+                }
+            ])->with([
+                'roomCharge',
+                'guestCharge'
+            ])->get();
 
             return response()->json(['dormitories' => $dormitories], 200);
         });
@@ -80,8 +91,8 @@ class DormitoryController extends Controller
             $this_dormitory->user_id = $request->user()->id;
             $this_dormitory->room_name = $request->room_name;
             $this_dormitory->room_description = $request->room_description;
-            $this_dormitory->room_cost = $request->room_cost;
-            $this_dormitory->room_guest_cost = $request->room_guest_cost;
+            $this_dormitory->charge_id_room_cost = $request->room_cost;
+            $this_dormitory->charge_id_guest_cost = $request->room_guest_cost;
             $this_dormitory->room_fee_type = $request->room_fee_type;
             $this_dormitory->is_air_conditioned = $request->room_type;
             $this_dormitory->room_for_type = $request->room_for_type;
@@ -132,6 +143,15 @@ class DormitoryController extends Controller
             }
 
             return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory. ID# " . $this_dormitory->id], 201);
+        });
+    }
+
+    public function get_charges_predata (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $charges = json_decode($this->cashierCtrl->get_charges($request)->getContent(), true)['charges'];
+            $filteredCharges = collect($charges)->where('service_type', 'DORMITORY')->all();
+
+            return response()->json(['charges' => $filteredCharges], 200);
         });
     }
 
@@ -276,6 +296,8 @@ class DormitoryController extends Controller
                 'stock',
                 'stock as available_stock' => fn($query) => $query->whereIn('status', ["AVAILABLE", "DAMAGED"]),
                 'borrowings'
+            ])->with([
+                'charge'
             ]);
 
             $di = $request->controlNumber
@@ -315,7 +337,7 @@ class DormitoryController extends Controller
                 : DormitoryInventory::find($request->documentId);
 
             $dorm_inventory->name = $request->name;
-            $dorm_inventory->price = $request->amount;
+            $dorm_inventory->charge_id = $request->amount;
             $dorm_inventory->description = $request->description;
             $dorm_inventory->is_consumable = $request->isConsumable;
 
@@ -579,10 +601,13 @@ class DormitoryController extends Controller
 
     public function get_dormitory_info (Request $request, int $room_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $room_id) {
-            $dormitory = Dormitory::with(['room_images'])
-                ->withCount(['rooms' => function ($query) {
-                    $query->where("room_status", "AVAILABLE");
-                }])->where('id', $room_id)->get();
+            $dormitory = Dormitory::with([
+                'room_images',
+                'roomCharge',
+                'guestCharge'
+            ])->withCount(['rooms' => function ($query) {
+                $query->where("room_status", "AVAILABLE");
+            }])->where('id', $room_id)->get();
 
             return response()->json(['dormitory' => $dormitory], 200);
         });
