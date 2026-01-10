@@ -21,8 +21,6 @@ class LibInvoiceRequest extends FormRequest
      */
     public function rules(): array
     {
-        \Log::info("libraryPenalties", $this->all());
-
         return [
             "inv_id" => "required",
             "inv_trace_number" => "required",
@@ -31,4 +29,6 @@ class LibInvoiceRequest extends FormRequest
             "credit_amount" => "required"
         ];
     }
+
+    //OVERRIDE VALIDATION RETURN
 }

@@ -35,7 +35,6 @@ class CreateServiceRequest extends FormRequest
         return [
             "dormitory_id" => "required|exists:dormitory_tenants,id",
             "service_id" => "required|exists:dormitory_services,id",
-            "remarks" => "string|max:255",
         ];
     }
 

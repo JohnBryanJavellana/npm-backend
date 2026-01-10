@@ -11,9 +11,10 @@ class LibraryInvoice extends Model
 
     protected $guarded = ['id'];
 
-    public function payee () {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+    public function payee() {
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
+
 
     public function bookRes () {
         return $this->belongsTo(BookRes::class, 'book_res_id', 'id');

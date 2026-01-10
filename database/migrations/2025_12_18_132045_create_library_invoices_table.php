@@ -27,6 +27,7 @@ return new class extends Migration
             $table->longText("reference_number")->nullable();
             $table->decimal("amount", 65, 2);
             $table->longText("details");
+            $table->longText("remarks")->nullable();
             $table->enum("status", ["PENDING", "PAID", "VERIFICATION"])->default("PENDING");
             $table->enum("payment_type", ["ONLINE", "WALK-IN"])->nullable();
             $table->timestamps();

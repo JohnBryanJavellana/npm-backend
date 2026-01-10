@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Models\DormitoryInvoice;
+use App\Models\EnrollmentInvoice;
+use App\Models\LibraryInvoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Utils\{
@@ -174,6 +177,34 @@ class Cashier extends Controller
             return response()->json([
                 'categories' => json_decode($this->get_charges_category($request)->getContent(), true)['categories'],
             ], 200);
+        });
+    }
+
+    public function get_payments (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $payments = null;
+
+            switch ($request->service) {
+                case 'DORMITORY':
+                    $payments = DormitoryInvoice::whereIn('invoice_status', $request->statuses);
+                    break;
+
+                case 'ENROLLMENT':
+                    $payments = EnrollmentInvoice::whereIn('invoice_status', $request->statuses);
+                    break;
+
+                case 'LIBRARY':
+                    $payments = LibraryInvoice::whereIn('status', $request->statuses);
+                    break;
+
+                default: break;
+            }
+
+            $paymentsData = $payments->with([
+                'payee'
+            ])->orderBy('created_at', 'DESC')->get();
+
+            return response()->json(['payments' => $paymentsData], 200);
         });
     }
 
