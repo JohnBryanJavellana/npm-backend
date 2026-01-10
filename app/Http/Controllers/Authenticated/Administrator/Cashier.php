@@ -248,7 +248,7 @@ class Cashier extends Controller
             $this_payment->datePaid = Carbon::now();
             $this_payment->save();
 
-            if($request->usedCredits) {
+            if($request->usedCredits > 0) {
                 $checkForCreditsUsed->credit_amount -= $request->usedCredits;
                 $checkForCreditsUsed->save();
 
