@@ -119,7 +119,7 @@ class TraineeEnrollment extends Controller
         }
     }
 
-    /** VIEW/GET AVAILABLE TRAININGS SCHEDULES */
+    /** VIEW/GET AVAILABLE TRAINING SCHEDULES */
     public function get_available_trainings (Request $request)   {
         try {
             $trainings = Training::with([
@@ -148,7 +148,10 @@ class TraineeEnrollment extends Controller
             $user_id = $request->user()->id;
 
             $addtional_info_id = AdditionalTraineeInfo::where('user_id', $user_id)->value('id');
-            $training = Training::where('id',$validated["training_id"])->lockForUpdate()->first();
+            $training = Training::query()
+            ->where('id',$validated["training_id"])
+            ->lockForUpdate()
+            ->first();
 
             if(!$training) {
                 return response()->json(['message' => 'Training not found.'], 404);

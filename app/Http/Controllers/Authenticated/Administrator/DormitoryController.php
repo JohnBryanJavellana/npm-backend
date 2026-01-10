@@ -873,6 +873,7 @@ class DormitoryController extends Controller
                 $new_payment->user_id = $request->userId;
                 $new_payment->dormitory_tenant_id = $request->tenantId;
                 $new_payment->dormitory_room_id = $request->roomId;
+                $new_payment->charge_id = $request->chargeId;
                 $new_payment->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
                 $new_payment->description = $descriptionHtml;
                 if($request->charge <= 0) $new_payment->status = "PAID";
@@ -1011,8 +1012,9 @@ class DormitoryController extends Controller
             $charge->user_id = $request->userId;
             $charge->dormitory_tenant_id = $request->tenantId;
             $charge->dormitory_room_id = $request->roomId;
+            $charge->charge_id = $request->charge;
             $charge->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
-            $charge->invoice_amount = $request->charge;
+            $charge->total_amount = $request->amount;
             $charge->description = $descriptionHtml;
             $charge->isInitial = "N";
             $charge->remarks = $request->remarks ?? '';

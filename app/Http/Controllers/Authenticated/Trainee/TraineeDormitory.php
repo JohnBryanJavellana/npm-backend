@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 use App\Events\BEDormitory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainee\Dormitory\{CancelServiceRequest, CreateExtendRequest, CreateInclusionRequest, CreateServiceRequest, CreateTransferRequest, DormRoomRequest};
-use App\Http\Resources\Trainee\Dormitory\{AvailableItemsResource, DApplicationResource, DAppliedRequest, InclusionRequestsResource};
+use App\Http\Resources\Trainee\Dormitory\{AvailableItemsResource, AvailableServicesResource, DApplicationResource, DAppliedRequest, InclusionRequestsResource};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Utils\{AuditHelper, GenerateUniqueFilename, GenerateTrace, TransactionUtil};
@@ -20,6 +20,7 @@ use App\Models\{DormitoryRoom,
 use App\Services\Trainee\Dormitory\{DormitoryRequestService, DormitoryTransferService, DormitoryExtraService, DormitoryExtendService, DormitoryInclusionService};
 use App\Http\Resources\Trainee\Dormitory\ServiceRequestResource;
 use DomainException;
+use Illuminate\Support\Facades\Cache;
 
 class TraineeDormitory extends Controller
 {
@@ -327,7 +328,6 @@ class TraineeDormitory extends Controller
      */
     public function request_tenant_room(DormRoomRequest $request) {
         \Log::info("controller dorm", [$request->all()]);
-        // return response()->json(["wow" => $request->all()], 200);s
         $user = $request->user();
         $validated = $request->validated();
         try {
@@ -518,7 +518,6 @@ class TraineeDormitory extends Controller
     {
         $user_id = $request->user()->id;
         $validated = $request->validated();
-        // \Log::info("request_inclusion", [$request->all()]);
         try {
             $this->dormitoryInclusionService->createInclusionRequest($validated, $user_id);
             return response()->json(["message" => "You've have successfully sent items request!"], 200);
@@ -551,8 +550,7 @@ class TraineeDormitory extends Controller
     public function view_service()
     {
         try {
-            $services = $this->dormitoryExtraService->viewServices();
-            return response()->json(["services" => $services], 200);
+            return AvailableServicesResource::collection($this->dormitoryExtraService->viewServices());
         } catch (\Exception $e) {
             \Log::error("error_view_service", [$e->getMessage()]);
             return response()->json([$e->getMessage()], 500);

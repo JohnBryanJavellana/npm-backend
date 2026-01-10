@@ -18,12 +18,16 @@ class DormitoryExtraService {
         protected DormitoryService $dormitoryService,
         
     ) {}
-
     public function viewServices()
     {
         $cacheKey = "dormitory:services:all";
-        return Cache::remember($cacheKey, self::LONG_TTL, fn() => $this->dormitoryService->all()
-        );
+        return Cache::remember($cacheKey, self::LONG_TTL, function() { 
+           return $this->dormitoryService
+           ->with([
+            "charge:id,charge_category_id,name,amount,description,service_type",
+            "charge.chargeCategory:id,name",
+            ])->get();
+        });
     }
 
     public function getUserServiceRequest($documentId, $status)
@@ -43,7 +47,7 @@ class DormitoryExtraService {
     }
 
     private function validateData($validated, int $userId) {
-        $existing = $this->tenantModel
+        $existing = $this->tenantModel->query()
         ->with(["services" => function($query) use($validated) {
             $query->where("dormitory_service_id", $validated["service_id"])
                 ->forStatus([RequestStatus::APPROVED->value, RequestStatus::PENDING->value]);
@@ -65,7 +69,7 @@ class DormitoryExtraService {
             throw new DomainException("You already have an active request for this service. Please wait for the current request to be completed before submitting a new one. Service: $services");
         } 
 
-        $service = $this->dormitoryService
+        $service = $this->dormitoryService->query()
         ->select("id", "name", "status")
         ->whereKey($validated["service_id"])
         ->first();
@@ -82,7 +86,6 @@ class DormitoryExtraService {
     public function createService($validated, int $userId)
     {
         return DB::transaction(function() use ($userId, $validated) {
-            \Log::info("validated inside service:", $validated);
             // $this->validateData($validated, $userId);
 
             $this->dormitoryReqService->create([
@@ -96,15 +99,11 @@ class DormitoryExtraService {
     {
         DB::transaction(function () use ($documentId, $userId) {
 
-            \Log::info("id cancel service: ", [$documentId]);
-
             $record = $this->dormitoryReqService
             ->whereKey($documentId)
             ->whereRelation("tenant", "user_id", "=", $userId)
             ->lockForUpdate()
             ->first();
-
-            \Log::info("record cancel service: ", [$record]);
             
             if(!$record) {
                 throw new DomainException("Service record not found!");

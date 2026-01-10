@@ -21,6 +21,10 @@ class DormitoryInvoiceService {
     public function getUserInvoice($documentId, $userId)
     {
         return $this->dormitoryInvoice
+        ->with([
+            "charge:id,charge_category_id,name,amount,description,service_type",
+            "charge.chargeCategory:id,name"
+         ])
         ->where([
             "dormitory_tenant_id" => $documentId,
             "user_id" => $userId
@@ -55,7 +59,7 @@ class DormitoryInvoiceService {
     }
 
     private function prepareData($validated, $userId){
-        $userRec = $this->user
+        $userRec = $this->user->query()
         ->whereKey($userId)
         ->lockForUpdate()
         ->first();

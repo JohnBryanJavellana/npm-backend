@@ -29,6 +29,7 @@ class DormitoryInclusionService {
     {
         return $this->dormitoryInclusionRequest
         ->with([
+
             "itemInfo"
         ])
         ->where("dormitory_tenant_id", $documentId)
@@ -41,6 +42,10 @@ class DormitoryInclusionService {
         $cacheKey = "dormitory:inclusions:all";
         return  Cache::remember($cacheKey, self::LONG_TTL, function () {
             return $this->dormitoryInventory
+            ->with([
+                "charge:id,charge_category_id,name,amount,description,service_type",
+                "charge.chargeCategory:id,name"
+                ])
             ->whereHas("stock", fn($q) => $q->available())
             ->get();    
         });    

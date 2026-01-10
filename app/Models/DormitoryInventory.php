@@ -15,7 +15,7 @@ class DormitoryInventory extends Model
     //     return $this->hasMany(DormitoryItemBorrowing::class);
     // }
 
-    public function stock ()
+    public function stock()
     {
         return $this->hasMany(DormitoryInventoryItem::class);
     }
@@ -25,7 +25,7 @@ class DormitoryInventory extends Model
         return $this->hasMany(DormitoryItemBorrowing::class);
     }
 
-    public function charge ()
+    public function charge()
     {
         return $this->hasOne(Charge::class, 'id', 'charge_id');
     }
