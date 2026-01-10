@@ -27,6 +27,6 @@ class DormitoryInventory extends Model
 
     public function charge ()
     {
-        return $this->hasOne(Charge::class);
+        return $this->hasOne(Charge::class, 'id', 'charge_id');
     }
 }

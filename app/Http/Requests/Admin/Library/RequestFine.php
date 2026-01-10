@@ -25,7 +25,7 @@ class RequestFine extends FormRequest
             'amount' => ['required', 'numeric'],
             'httpMethod' => ['required', 'string'],
             'details' => ['required', 'string'],
-            'category' => ['required'],
+            'charge' => ['required'],
             'book_res_id' => ['required'],
             'user_id' => ['required'],
             'selectedBookReservations' => ['required', 'array'],

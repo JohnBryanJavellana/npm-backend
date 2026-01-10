@@ -65,28 +65,26 @@ class TraineeLibrary extends Controller
                 "copies"
             ])
             ->withCount([
-                'copies' => function ($q) {
-                    $q->where('status', 'AVAILABLE');
-                },
+                'copies' => fn ($q) => $q->where('status', RequestStatus::AVAILABLE),
                 'carts' => function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 },
                 'hasData' => function ($q) use ($user) {
-                    $q->whereIn('status', ['RECEIVED', 'PENDING', 'APPROVED'])->whereRelation('bookRes', 'user_id', '=', $user->id);
+                    $q->whereIn('status', [RequestStatus::RECEIVED->value, RequestStatus::PENDING->value, RequestStatus::APPROVED->value])->whereRelation('bookRes', 'user_id', '=', $user->id);
                 },
                 'related as enrolled_trainings_count' => function ($query) use ($record) {
                     $query->whereIn('training_id', $record);
                 }
             ])
-            ->where('status', 'ACTIVE')
+            ->where('status', RequestStatus::ACTIVE->value)
             ->orderByDesc('enrolled_trainings_count')
             ->orderBy('id');;
 
-            $b = $books->get();
+            $bookList = $books->get();
 
-        return BookResource::collection($b);
+        return BookResource::collection($bookList);
         } catch (\Exception $e) {
-            // \Log::channel("errormonitor")->error("error view_books", [$e->getMessage()]);
+            \Log::info("view_books_error", [$e]);
             return response()->json(["Something went wrong, Please try again!"], 500);
         }
     }
