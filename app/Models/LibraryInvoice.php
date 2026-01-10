@@ -19,8 +19,13 @@ class LibraryInvoice extends Model
         return $this->belongsTo(BookRes::class, 'book_res_id', 'id');
     }
 
-    public function feeCategory () {
-        return $this->belongsTo(TrainingFeeCategory::class, 'training_fee_category_id', 'id');
+    // public function feeCategory () {
+    //     return $this->belongsTo(TrainingFeeCategory::class, 'training_fee_category_id', 'id');
+    // }
+
+    public function charge ()
+    {
+        return $this->hasOne(Charge::class, 'id', 'charge_id');
     }
 
     public function selectedBooks () {

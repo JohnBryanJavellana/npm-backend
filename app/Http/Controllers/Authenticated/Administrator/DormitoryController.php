@@ -149,7 +149,10 @@ class DormitoryController extends Controller
     public function get_charges_predata (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $charges = json_decode($this->cashierCtrl->get_charges($request)->getContent(), true)['charges'];
-            $filteredCharges = collect($charges)->where('service_type', 'DORMITORY')->all();
+            $filteredCharges = collect($charges)
+                ->where('service_type', $request->service)
+                ->values()
+                ->all();
 
             return response()->json(['charges' => $filteredCharges], 200);
         });
@@ -171,6 +174,10 @@ class DormitoryController extends Controller
             }
 
             $dorms = Dormitory::withCount('rooms')
+                ->with([
+                    'roomCharge',
+                    'guestCharge'
+                ])
                 ->has('rooms')
                 ->where([
                     'room_for_type' => $request->room_for_type,
@@ -188,6 +195,8 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $availableSupplies = DormitoryInventory::withCount([
                 'stock' => fn($query) => $query->whereIn('status', ['AVAILABLE'])
+            ])->with([
+                'charge'
             ])->get()->map(function ($self) use ($request) {
                 $availabilityStatus = (function() use ($self, $request) {
                     $checkIfReserved = $self->borrowings()
@@ -455,7 +464,7 @@ class DormitoryController extends Controller
             $this_dormitory_request->status_of_occupancy = $request->status_of_occupancy;
             $this_dormitory_request->is_air_conditioned = $request->isAirConditioned;
             $this_dormitory_request->purpose = $request->purpose;
-            $this_dormitory_request->paying_guest = $request->payingGuest;
+            // $this_dormitory_request->paying_guest = $request->payingGuest;
             $this_dormitory_request->process_type = $request->processType;
 
             if($request->httpMethod === "POST") $this_dormitory_request->trace_number = GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DR-');
@@ -550,6 +559,10 @@ class DormitoryController extends Controller
                         <span style='color: #6c757d;'>Dormitory Charge</span>
                     </div>
 
+                    <div style='margin-bottom: 10px;'>
+                        <span>" . $request->chosenRoom['start'] . " to " . $request->chosenRoom['end'] . "</span>
+                    </div>
+
                     <div style='display: flex; align-items: center; justify-content: space-between;'>
                         <span style='color: #6c757d;'>Paying Guest ($guestCount days)</span>
                         <span>₱" . number_format($totalGuestCharge, 2) . "</span>
@@ -575,7 +588,7 @@ class DormitoryController extends Controller
                 $new_payment->dormitory_tenant_id = $this_dormitory_request->id;
                 $new_payment->dormitory_room_id = $request->input('chosenRoom.roomId');
                 $new_payment->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
-                $new_payment->invoice_amount = $request->input('updatedTotalData.updatedTotal');
+                $new_payment->total_amount = $request->input('updatedTotalData.updatedTotal');
                 $new_payment->description = $descriptionHtml;
                 $new_payment->remarks = $request->input('updatedTotalData.remarks') ?? '';
                 $new_payment->save();
@@ -694,7 +707,9 @@ class DormitoryController extends Controller
 
     public function services (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $services = DormitoryService::withCount('requestedService')->get();
+            $services = DormitoryService::withCount('requestedService')->with([
+                'charge'
+            ])->get();
             return response()->json(['services' => $services], 200);
         });
     }
@@ -707,7 +722,7 @@ class DormitoryController extends Controller
 
             $this_service->name = $request->name;
             $this_service->description = $request->description;
-            $this_service->charge = $request->charge;
+            $this_service->charge_id = $request->charge;
             if($request->status) $this_service->status = $request->status;
             $this_service->save();
 
@@ -859,9 +874,9 @@ class DormitoryController extends Controller
                 $new_payment->dormitory_tenant_id = $request->tenantId;
                 $new_payment->dormitory_room_id = $request->roomId;
                 $new_payment->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
-                $new_payment->invoice_amount = $request->charge;
                 $new_payment->description = $descriptionHtml;
                 if($request->charge <= 0) $new_payment->status = "PAID";
+                $new_payment->total_amount = $request->charge;
                 $new_payment->isInitial = "N";
                 $new_payment->remarks = '';
                 $new_payment->save();

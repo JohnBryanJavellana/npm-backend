@@ -24,6 +24,7 @@ enum RequestStatus: string {
     //LIBRARY
     case COMPLETED = 'COMPLETED';
     case ACTIVE = 'ACTIVE';
+    case RECEIVED = 'RECEIVED';
     case INACTIVE = 'INACTIVE';
     case FOR_CSM = 'FOR CSM';
     case VERIFICATION = 'VERIFICATION';

@@ -12,4 +12,8 @@ class DormitoryService extends Model
     public function requestedService () {
         return $this->hasMany(DormitoryReqService::class);
     }
+
+    public function charge () {
+        return $this->hasOne(Charge::class, 'id', 'charge_id');
+    }
 }

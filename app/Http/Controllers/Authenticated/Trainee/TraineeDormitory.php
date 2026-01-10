@@ -47,9 +47,8 @@ class TraineeDormitory extends Controller
 
     /**
      * Dependency injection
-     * @param DormitoryRequestService $dormitoryService
      */
-    protected function __construct(
+    public function __construct(
         protected DormitoryRequestService $dormitory_service,
         protected DormitoryTransferService $dormitoryTransferService,
         protected DormitoryExtendService $dormitoryExtendService,

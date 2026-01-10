@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryRoom::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Charge::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Charge::class)->nullable()->constrained()->cascadeOnDelete();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
             $table->enum('isInitial', ['Y', 'N']);
             $table->longText('invoice_reference')->nullable();

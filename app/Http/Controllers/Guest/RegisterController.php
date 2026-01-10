@@ -31,36 +31,46 @@ class RegisterController extends Controller
             if ($request->is_from_social_login === 'YES') {
                 try {
                     $socialUser = Socialite::driver($request->provider)->stateless()->userFromToken($request->token);
+                    $socialData = $socialUser->getRaw();
+                    $email = $socialUser->getEmail();
 
-                    $user = User::where('email', $socialUser->getEmail())->first();
+                    $user = User::where('email', $email)->first();
 
-                    if (User::where(['email' => $user->email, 'isSocial' => "NO"])->exists()) {
-                        return response()->json(['message' => 'Account already exists.'], 422);
+                    if ($user && $user->isSocial === "NO") {
+                        return response()->json(['message' => 'Account already exists with standard login.'], 422);
                     }
 
                     if (!$user) {
                         $user = new User;
                         $user->id = $this->generateCustomId();
-                        $user->fname = strtoupper($socialUser->user['given_name'] ?? $socialUser->user['first_name'] ?? '');
-                        $user->lname = strtoupper($socialUser->user['family_name'] ?? $socialUser->user['last_name'] ?? '');
-                        $user->email = $socialUser->getEmail();
+                        $user->fname = strtoupper($socialData['given_name'] ?? $socialData['first_name'] ?? '');
+                        $user->lname = strtoupper($socialData['family_name'] ?? $socialData['last_name'] ?? '');
+                        $user->email = $email;
                         $user->password = Hash::make(Str::random(24));
                         $user->isSocial = 'YES';
                         $user->role = 'TRAINEE';
                         $user->email_verified_at = now();
-                        $user->save();
 
-                        // update QR
-                        $user->qr = $this->processEmail($user);
+                        $filename = "{$user->id}.png";
+                        $user->qr = $filename;
+
                         $user->profile_picture = $this->processAvatar($socialUser->getAvatar());
+
                         $user->save();
+                        $this->generateAndSendQR($user, $filename);
                     }
 
                     AuditHelper::log($user->id, "Logged in via Social Login");
                     $token = $user->createToken('auth_token')->plainTextToken;
 
-                    return response()->json(['token' => $token, 'role' => $user->role, 'autoLogin' => true], 200);
+                    return response()->json([
+                        'token' => $token,
+                        'role' => $user->role,
+                        'autoLogin' => true
+                    ], 200);
+
                 } catch (\Exception $e) {
+                    \Log::error("Social Login Error: " . $e->getMessage());
                     return response()->json(['message' => 'Social authentication failed'], 401);
                 }
             }
@@ -72,7 +82,7 @@ class RegisterController extends Controller
                     'lname' => $request->mname,
                     'suffix' => $request->suffix,
                     'birthdate' => Carbon::parse($request->birthdate)->toDateString(),
-                ])) {
+                ])->exists()) {
 
                 return response()->json(['message' => 'Account already exists.'], 422);
             }
@@ -104,8 +114,7 @@ class RegisterController extends Controller
         return Carbon::now()->year . str_pad($next_id_suffix, 5, '0', STR_PAD_LEFT);
     }
 
-    private function processEmail($user) {
-        $filename = "{$user->id}.png";
+    private function generateAndSendQR($user, $filename) {
         $qrPath = public_path("qr/user/$filename");
 
         (new GenerateQR())->generate($filename, $user->id, $user->id, "qr/user/");

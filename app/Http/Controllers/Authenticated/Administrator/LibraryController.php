@@ -685,7 +685,7 @@ class LibraryController extends Controller
     public function get_fines(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $fines = LibraryInvoice::with([
-                'feeCategory',
+                'charge',
                 'bookRes',
                 'selectedBooks',
                 'selectedBooks.bookReservation',
@@ -746,8 +746,8 @@ class LibraryController extends Controller
                 : $new_fine->trace_number;
 
             $new_fine->user_id = $request->user_id;
+            $new_fine->charge_id = $request->charge;
             $new_fine->book_res_id = $request->book_res_id;
-            $new_fine->training_fee_category_id = $request->category;
             $new_fine->details = $request->details;
             $new_fine->amount = $request->amount;
             $new_fine->save();

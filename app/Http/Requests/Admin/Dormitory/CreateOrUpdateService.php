@@ -24,6 +24,7 @@ class CreateOrUpdateService extends FormRequest
     {
         return [
             'name' => ['required'],
+            'charge' => ['required'],
             'description' => ['required'],
             'httpMethod' => ['required'],
             'documentId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ],

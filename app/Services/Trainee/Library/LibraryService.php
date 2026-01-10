@@ -55,7 +55,6 @@ class LibraryService {
         });
     }
 
-    //uselesssz start
     public function getOverDue()
     {
         $books = $this->getBooks(["*"],[
