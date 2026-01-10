@@ -6,8 +6,10 @@ use App\Enums\RequestStatus;
 use App\Models\ {
     DormitoryInclusionRequest,
     DormitoryInventory,
+    DormitoryInvoice,
     DormitoryItemBorrowing
 };
+use App\Utils\GenerateTrace;
 use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +24,7 @@ class DormitoryInclusionService {
         protected DormitoryInventory $dormitoryInventory,
         protected DormitoryItemBorrowing $dormitoryItemBorrowing,
         protected DormitoryInclusionRequest $dormitoryInclusionRequest,
+        protected DormitoryInvoice $dormitoryInvoiceModel
     )
     {}
 
@@ -65,10 +68,20 @@ class DormitoryInclusionService {
 
     public function createInclusionRequest($validated, $userId)
     {
-        return DB::transaction(function () use ($validated, $userId) {
-            return $this->dormitoryInclusionRequest->create([
+         DB::transaction(function () use ($validated, $userId) {
+
+            $invoice =$this->dormitoryInvoiceModel->create([
+                "user_id" => $userId,
+                "dormitory_tenant_id" => $validated["request_id"],
+                "isInitial" => "N",
+                "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
+
+            ]);
+
+             $this->dormitoryInclusionRequest->create([
                 "dormitory_inventory_id" => $validated["inclusion_id"],
                 "dormitory_tenant_id" => $validated["request_id"],
+                "dormitory_invoices_id" => $invoice->id,
                 "quantity" => $validated["quantity"]
             ]);
         });

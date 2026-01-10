@@ -586,6 +586,7 @@ class DormitoryController extends Controller
                 $new_payment = new DormitoryInvoice();
                 $new_payment->user_id = $request->userId;
                 $new_payment->dormitory_tenant_id = $this_dormitory_request->id;
+                $new_payment->charge_id = $request->charge;
                 $new_payment->dormitory_room_id = $request->input('chosenRoom.roomId');
                 $new_payment->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
                 $new_payment->total_amount = $request->input('updatedTotalData.updatedTotal');
@@ -861,33 +862,35 @@ class DormitoryController extends Controller
                 ? new DormitoryReqService()
                 : DormitoryReqService::where('id', $request->documentId)->lockForUpdate()->first();
 
-            if (!$this_service->charge || $this_service->charge <= 0) {
-                $descriptionHtml = $this->addDescription(
-           "<div style='display: flex; align-items: center; justify-content: space-between;'>
-                        <div style='font-weight: bold; color: #6c757d;'>Service Charge</div>
-                        <div>₱" . number_format((float) $request->charge) . "</div>
-                    </div>"
-                );
+            $invoiceId = $request->httpMethod === "POST"
+                ? new DormitoryInvoice()
+                : DormitoryInvoice::find($this_service->dormitory_invoices_id);
 
-                $new_payment = new DormitoryInvoice();
-                $new_payment->user_id = $request->userId;
-                $new_payment->dormitory_tenant_id = $request->tenantId;
-                $new_payment->dormitory_room_id = $request->roomId;
-                $new_payment->charge_id = $request->chargeId;
-                $new_payment->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
-                $new_payment->description = $descriptionHtml;
-                if($request->charge <= 0) $new_payment->status = "PAID";
-                $new_payment->total_amount = $request->charge;
-                $new_payment->isInitial = "N";
-                $new_payment->remarks = '';
-                $new_payment->save();
-            }
+            $descriptionHtml = $this->addDescription(
+        "<div style='display: flex; align-items: center; justify-content: space-between;'>
+                    <div style='font-weight: bold; color: #6c757d;'>Service Charge</div>
+                    <div>₱" . number_format((float) $request->charge) . "</div>
+                </div>"
+            );
+
+            $invoiceId->user_id = $request->userId;
+            $invoiceId->dormitory_tenant_id = $request->tenantId;
+            // $invoiceId->dormitory_room_id = $request->roomId;
+            $invoiceId->charge_id = $request->chargeId;
+            $invoiceId->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
+            $invoiceId->description = $descriptionHtml;
+            if($request->charge <= 0) $invoiceId->status = "PAID";
+            $invoiceId->total_amount = $request->charge;
+            $invoiceId->isInitial = "N";
+            $invoiceId->remarks = '';
+            $invoiceId->save();
 
             $this_service->dormitory_tenant_id = $request->tenantId;
             $this_service->dormitory_service_id = $request->service_id;
             $this_service->charge = $request->charge;
             $this_service->remarks = $request->remarks;
             $this_service->status = $request->httpMethod === "POST" ? "APPROVED" : $request->status;
+            $this_service->dormitory_invoices_id = $invoiceId->id;
             $this_service->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory service request. ID#" . $this_service->id);

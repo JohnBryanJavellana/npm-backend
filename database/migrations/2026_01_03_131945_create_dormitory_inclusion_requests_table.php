@@ -2,6 +2,7 @@
 
 use App\Models\DormitoryInventory;
 use App\Models\DormitoryTenant;
+use App\Models\DormitoryInvoice;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +19,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(DormitoryInventory::class)->constrained()->onDelete("cascade");
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->onDelete("cascade");
+            $table->foreignIdFor(DormitoryInvoice::class)->constrained()->cascadeOnDelete();
             $table->integer("quantity")->default(1);
             $table->enum("status", ["PENDING", "APPROVED", "CANCELLED", "COMPLETED"])->default("PENDING");
             $table->timestamps();

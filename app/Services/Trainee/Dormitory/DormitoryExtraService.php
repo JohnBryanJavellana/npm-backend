@@ -3,7 +3,8 @@
 namespace App\Services\Trainee\Dormitory;
 
 use App\Enums\RequestStatus;
-use App\Models\{DormitoryReqService, DormitoryService, DormitoryTenant};
+use App\Models\{DormitoryInvoice, DormitoryReqService, DormitoryService, DormitoryTenant};
+use App\Utils\GenerateTrace;
 use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ class DormitoryExtraService {
         protected DormitoryTenant $tenantModel,
         protected DormitoryReqService $dormitoryReqService,
         protected DormitoryService $dormitoryService,
+        protected DormitoryInvoice $dormitoryInvoiceModel
         
     ) {}
     public function viewServices()
@@ -87,10 +89,18 @@ class DormitoryExtraService {
     {
         return DB::transaction(function() use ($userId, $validated) {
             // $this->validateData($validated, $userId);
+            $invoice =$this->dormitoryInvoiceModel->create([
+                "user_id" => $userId,
+                "dormitory_tenant_id" => $validated["dormitory_id"],
+                "isInitial" => "N",
+                "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
+
+            ]);
 
             $this->dormitoryReqService->create([
                 "dormitory_tenant_id" => $validated["dormitory_id"],
                 "dormitory_service_id" => $validated["service_id"],
+                "dormitory_invoices_id" => $invoice->id
             ]);
         });
     }
@@ -99,7 +109,7 @@ class DormitoryExtraService {
     {
         DB::transaction(function () use ($documentId, $userId) {
 
-            $record = $this->dormitoryReqService
+            $record = $this->dormitoryReqService->query()
             ->whereKey($documentId)
             ->whereRelation("tenant", "user_id", "=", $userId)
             ->lockForUpdate()
@@ -113,15 +123,13 @@ class DormitoryExtraService {
                 throw new DomainException("This service request has already been cancelled.");
             }
 
-            if(!in_array($record->tenant_status, [
+            if(!in_array($record->status, [
                 RequestStatus::PENDING->value,
                 RequestStatus::APPROVED->value,
                 RequestStatus::FOR_PAYMENT->value,
             ])) {
                 throw new DomainException("Service request cancellation is not permitted.");
             }
-
-            //enum for done
 
             $record->update([
                 "status" => RequestStatus::CANCELLED->value

@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Models\Credit;
 use App\Models\DormitoryInvoice;
 use App\Models\EnrollmentInvoice;
 use App\Models\LibraryInvoice;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Utils\{
     TransactionUtil,
@@ -205,6 +208,69 @@ class Cashier extends Controller
             ])->orderBy('created_at', 'DESC')->get();
 
             return response()->json(['payments' => $paymentsData], 200);
+        });
+    }
+
+    public function pay_walkin (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this_payment = null;
+
+            switch ($request->service) {
+                case 'DORMITORY':
+                    $this_payment = DormitoryInvoice::find($request->documentId);
+                    $this_payment->invoice_status = "PAID";
+                    break;
+
+                case 'ENROLLMENT':
+                    $this_payment = EnrollmentInvoice::find($request->documentId);
+                    $this_payment->invoice_status = "PAID";
+                    break;
+
+                case 'LIBRARY':
+                    $this_payment = LibraryInvoice::find($request->documentId);
+                    $this_payment->status = "PAID";
+                    break;
+
+                default: break;
+            }
+
+            $checkForCreditsUsed = User::where('id', $request->userId)
+                ->where('credit_amount', '>=', $request->usedCredits)
+                ->lockForUpdate()
+                ->first();
+
+            if(!$checkForCreditsUsed) {
+                return response()->json(['message' => "Insufficient credits to complete this transaction."], 400);
+            }
+
+            $this_payment->credit_deduction = $request->usedCredits;
+            $this_payment->received_amount = $request->receivedAmount;
+            $this_payment->datePaid = Carbon::now();
+            $this_payment->save();
+
+            if($request->usedCredits) {
+                $checkForCreditsUsed->credit_amount -= $request->usedCredits;
+                $checkForCreditsUsed->save();
+
+                $new_credit_deduction = new Credit();
+                $new_credit_deduction->user_id = $request->userId;
+                $new_credit_deduction->reference_number = $this_payment->trace_number;
+                $new_credit_deduction->reason = config('creditReason.deduct.0');
+                $new_credit_deduction->type = "DEDUCT";
+                $new_credit_deduction->amount = $request->usedCredits;
+                $new_credit_deduction->save();
+            }
+
+            AuditHelper::log($request->user()->id, "Updated payment details.");
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEInvoice(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've updated payment details."], 201);
         });
     }
 
