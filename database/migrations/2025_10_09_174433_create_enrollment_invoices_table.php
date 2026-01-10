@@ -28,6 +28,9 @@ return new class extends Migration
             $table->dateTime('invoice_date')->nullable();
             $table->dateTime('verification_date')->nullable();
             $table->enum('isExpired', ['YES', 'NO'])->default('NO');
+            $table->decimal("received_amount", 65, 2)->nullable();
+            $table->decimal("credit_deduction", 65, 2)->nullable();
+            $table->timestamp('datePaid')->nullable();
             $table->timestamps();
         });
     }

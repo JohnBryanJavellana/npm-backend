@@ -80,7 +80,6 @@ class TraineeEnrollment extends Controller
     /** GET/VIEW TRAINEE REQUESTS */
     public function trainee_selected_training (Request $request, $status) {
         try {
-            \Log::info("isArray", [$status]);
             $lst = [
                 'FOR-PAYMENT' => 'FOR-PAYMENT',
                 'PROCESSING_PAYMENT' => 'PROCESSING PAYMENT',
@@ -105,7 +104,7 @@ class TraineeEnrollment extends Controller
             ->whereIn('enrolled_course_status', $stat)
             ->get();
 
-            $data = $selected_courses->map( function ($course) use ($request, $userId)  {
+            $data = $selected_courses->map( function ($course) use ($request)  {
                 $course_module_id = $course->training->course_module_id ?? null;
                 $req = $this->view_module_requirements_v2($request, $course_module_id, enrolled_id: $course->id);
                 $course->requirement = $req;

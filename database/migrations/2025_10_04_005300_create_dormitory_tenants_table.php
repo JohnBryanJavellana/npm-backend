@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\{DormitoryRoom, User};
+use App\Models\{DormitoryRoom, User, DormitoryInvoice};
 
 return new class extends Migration
 {
@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(DormitoryRoom::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(DormitoryInvoice::class)->constrained()->cascadeOnDelete();
             $table->string('trace_number', 255)->nullable();
             $table->enum('status_of_occupancy', ['TRAINEE', 'NON-PAYING GUEST/VISITOR', 'NMP PERSONNEL (REGULAR/JOW)', 'PAYING GUEST/VISITOR'])->default('TRAINEE');
             $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);

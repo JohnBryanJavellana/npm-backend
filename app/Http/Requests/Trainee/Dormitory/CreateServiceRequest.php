@@ -18,11 +18,10 @@ class CreateServiceRequest extends FormRequest
         return $this->user() !== null;
     }
 
-
     protected function prepareForValidation()
     {
-        return $this->merge([
-            "dormitory_id" => $this->route("dormitory_id")
+        $this->merge([
+            "dormitory_id" => $this->route("document_id")
         ]);
     }
     /**

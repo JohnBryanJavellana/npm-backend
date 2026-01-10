@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DormitoryInvoice extends Model
 {
+    protected $guarded = ["id"];
+
     public function trainee() {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
