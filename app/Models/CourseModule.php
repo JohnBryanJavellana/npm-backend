@@ -17,9 +17,8 @@ class CourseModule extends Model
         return $this->hasMany(Training::class, 'course_module_id', 'id');
     }
 
-    public function fee()
-    {
-        return $this->hasOne(TrainingFee::class);
+    public function charge(){
+        return $this->hasOne(Charge::class, 'id', 'charge_id');
     }
 
     public function moduleType() {

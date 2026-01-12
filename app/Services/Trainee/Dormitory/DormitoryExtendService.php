@@ -52,7 +52,7 @@ class DormitoryExtendService {
         ->first();
 
         if(!$record) {
-            throw new DomainException("Dormitory request is not approved yet or a extending request is already existing.");
+            throw new DomainException("Dormitory request is not approved yet or an extending request is already existing.");
         }
 
         if(!$record->transferRequest()->exists()) {
@@ -75,7 +75,7 @@ class DormitoryExtendService {
                 "new_end_date" => $validated["extension_date"],
             ]);
 
-            $this->dormitoryTenantService->updateTenantRecordById($validated["document_id"], $userId);
+            $this->dormitoryTenantService->updateTenantRecordById($validated["document_id"], $userId, RequestStatus::ACTIVE->value);
 
             $this->loggingDetails(
                 $validated["document_id"], 
@@ -113,7 +113,7 @@ class DormitoryExtendService {
                 "status" => RequestStatus::CANCELLED->value
             ]);
 
-            $this->updateTenantRecord($extend->dormitory_tenant_id, RequestStatus::APPROVED->value);
+            $this->dormitoryTenantService->updateTenantRecordById($extend->dormitory_tenant_id, $userId, RequestStatus::ACTIVE->value);
         
             $this->loggingDetails(
                 $extend->dormitory_tenant_id,

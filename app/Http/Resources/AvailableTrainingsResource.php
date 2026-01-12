@@ -14,6 +14,9 @@ class AvailableTrainingsResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
+        // return parent::toArray($request);
+
         return [
             'id' => $this->id,
             'daily_hours' => $this->daily_hours,
@@ -37,10 +40,10 @@ class AvailableTrainingsResource extends JsonResource
                 'status' => $this?->module?->moduleType?->status,
             ],
             'fee' => [
-                'id' => $this->module?->fee?->id,
-                'name' => $this->module?->fee?->name,
-                'amount' => $this->module?->fee?->amount,
-                'category_name' => $this->module?->fee?->category?->name,
+                'id' => $this->module?->charge?->id,
+                'name' => $this->module?->charge?->name,
+                'amount' => $this->module?->charge?->amount,
+                'category_name' => $this->module?->charge?->chargeCategory?->name,
             ],
         ];
     }

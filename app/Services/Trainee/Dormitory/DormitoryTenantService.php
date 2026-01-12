@@ -2,6 +2,7 @@
 
 namespace App\Services\Trainee\Dormitory;
 
+use App\Enums\RequestStatus;
 use App\Models\DormitoryTenant;
 
 class DormitoryTenantService {
@@ -25,12 +26,17 @@ class DormitoryTenantService {
         return $record->first($columns);
     }
     
-    public function updateTenantRecordById($tenantId, $userId)
+    public function updateTenantRecordById($tenantId, $userId, $status)
     {
-        $this->dormitoryTenantModel->query()
+        $record = $this->dormitoryTenantModel->query()
         ->lockForUpdate()
         ->whereKey($tenantId)
         ->forUser($userId)
-        ->updateOrFail();
+        ->get();
+
+        $record->update([
+            "tenant_status" => $status
+        ]);
+
     }
 }

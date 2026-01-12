@@ -94,7 +94,7 @@ class TraineeEnrollment extends Controller
             $selected_courses = EnrolledCourse::with([
                 "training",
                 "training.module.moduleType",
-                "training.module.fee",
+                "training.module.charge",
                 "invoice",
             ])
             ->where([
@@ -123,7 +123,7 @@ class TraineeEnrollment extends Controller
         try {
             $trainings = Training::with([
                 "module.moduleType",
-                "module.fee"
+                "module.charge.chargeCategory"
             ])
             ->whereDoesntHave('hasData', function($q) use($request){
                 $q->where('user_id', $request->user()->id)
