@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CashierOR;
 use App\Models\Charge;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
@@ -20,6 +21,7 @@ return new class extends Migration
             $table->foreignIdFor(EnrolledCourse::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Charge::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(CashierOR::class)->nullable()->constrained()->cascadeOnDelete();
             $table->longText('trace_number')->nullable();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
             $table->decimal('invoice_amount', 10, 2)->default(0.00);
