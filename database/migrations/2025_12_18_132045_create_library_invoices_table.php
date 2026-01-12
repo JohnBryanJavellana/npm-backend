@@ -26,8 +26,8 @@ return new class extends Migration
             $table->foreignIdFor(BookRes::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(CashierOR::class)->nullable()->constrained()->cascadeOnDelete();
             $table->longText("trace_number");
-            $table->longText("reference_number")->nullable();
-            $table->decimal("amount", 65, 2);
+            $table->longText("invoice_reference")->nullable();
+            $table->decimal("amount", 65, 2)->default(0.0);
             $table->longText("details");
             $table->longText("remarks")->nullable();
             $table->enum("invoice_status", ["PENDING", "PAID", "FOR-VERIFICATION", "CANCELLED"])->default("PENDING");

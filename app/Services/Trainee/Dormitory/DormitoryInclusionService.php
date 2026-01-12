@@ -30,7 +30,7 @@ class DormitoryInclusionService {
 
     public function getUserInclusionRequest($documentId)
     {
-        return $this->dormitoryInclusionRequest
+        return $this->dormitoryInclusionRequest->query()
         ->with([
 
             "itemInfo"
@@ -57,7 +57,7 @@ class DormitoryInclusionService {
     public function getUserInclusions(string $documentId)
     {
         //VALIDATE & ADD CACHE
-        return $this->dormitoryItemBorrowing
+        return $this->dormitoryItemBorrowing->query()
         ->with([
             "items.item.itemInfo"
         ])
@@ -70,15 +70,18 @@ class DormitoryInclusionService {
     {
          DB::transaction(function () use ($validated, $userId) {
 
+            //prepareData
             $invoice =$this->dormitoryInvoiceModel->create([
                 "user_id" => $userId,
                 "dormitory_tenant_id" => $validated["request_id"],
+                "charge_id" => $validated["charge_id"],
                 "isInitial" => "N",
+                "type" => RequestStatus::INCLUSION->value,
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
 
             ]);
 
-             $this->dormitoryInclusionRequest->create([
+            $this->dormitoryInclusionRequest->create([
                 "dormitory_inventory_id" => $validated["inclusion_id"],
                 "dormitory_tenant_id" => $validated["request_id"],
                 "dormitory_invoices_id" => $invoice->id,
@@ -91,10 +94,10 @@ class DormitoryInclusionService {
     {
         // validate the owner
         DB::transaction(function () use ($validated, $userId) {
-            $record = $this->dormitoryInclusionRequest
+            $record = $this->dormitoryInclusionRequest->query()
+            ->status([RequestStatus::APPROVED->value, RequestStatus::PENDING->value])
             ->whereRelation("tenant", "user_id", "=", $userId)
             ->whereKey($validated["request_id"])
-            ->status([RequestStatus::APPROVED->value, RequestStatus::PENDING->value])
             ->first();
 
             if(!$record) {

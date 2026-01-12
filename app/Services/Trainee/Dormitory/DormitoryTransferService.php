@@ -77,7 +77,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
     public function createTransferRequest($validated, $userId)
     {
         DB::transaction(function() use ($userId, $validated) {
-            // $this->prepareData($userId, $validated["document_id"]);
+            $this->prepareData($userId, $validated["document_id"]);
 
             $this->dormitoryTransfer->create([
                 "dormitory_tenant_id" => $validated["document_id"],

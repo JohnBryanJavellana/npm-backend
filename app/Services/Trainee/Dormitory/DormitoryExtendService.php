@@ -23,6 +23,7 @@ class DormitoryExtendService {
     public function __construct(
         protected DormitoryRoom $roomModel,
         protected DormitoryTenant $tenantModel,
+        protected DormitoryTenantService $dormitoryTenantService,
         protected DormitoryTenantHistory $dormitoryTenantHistory,
         protected DormitoryInventory $dormitoryInventory,
         protected DormitoryTransfer $dormitoryTransfer,
@@ -65,7 +66,7 @@ class DormitoryExtendService {
     public function createExtendRequest($userId, $validated)
     {
         return DB::transaction(function () use ($userId, $validated) {
-            // $this->prepareData($userId, $validated["document_id"]);
+            $this->prepareData($userId, $validated["document_id"]);
             
             $record = $this->dormitoryExtensionRequest->create([
                 "dormitory_tenant_id" => $validated["document_id"],
@@ -74,11 +75,11 @@ class DormitoryExtendService {
                 "new_end_date" => $validated["extension_date"],
             ]);
 
-            $this->updateTenantRecord($validated["document_id"], RequestStatus::EXTENDING->value);
+            $this->dormitoryTenantService->updateTenantRecordById($validated["document_id"], $userId);
 
             $this->loggingDetails(
                 $validated["document_id"], 
-                $userId, 
+                $userId,
                 "sent",
                 "You’ve sent your dormitory extend request."
             );
@@ -124,7 +125,7 @@ class DormitoryExtendService {
     }
 
     private function updateTenantRecord($tenantId, $status) {
-        $record = $this->tenantModel
+        $record = $this->tenantModel->query()
             ->lockForUpdate()
             ->findOrFail($tenantId);
 

@@ -33,7 +33,7 @@ use App\Models\{
 
 class Cashier extends Controller
 {
-    protected function getTable(string $service, int|null $referenceId, array|null $whereIns) {
+    protected function getTable(string $service, ?int $referenceId, ?array $whereIns) {
         $modelMap = [
             'DORMITORY'  => DormitoryInvoice::class,
             'ENROLLMENT' => EnrollmentInvoice::class,
@@ -50,9 +50,11 @@ class Cashier extends Controller
             $query->where('id', $referenceId);
         }
 
-        foreach ($whereIns as $column => $values) {
-            if (!empty($values)) {
-                $query->whereIn($column, $values);
+        if(!is_null($whereIns)) {
+            foreach ($whereIns as $column => $values) {
+                if (!empty($values)) {
+                    $query->whereIn($column, $values);
+                }
             }
         }
 
@@ -214,7 +216,7 @@ class Cashier extends Controller
     public function get_payments (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $payments = self::getTable($request->service, null, ['invoice_status' => $request->statuses]);
-            $paymentsData = $payments->with(['payee'])->orderBy('created_at', 'DESC')->get();
+            $paymentsData = $payments->with(['payee', 'orNumber'])->orderBy('created_at', 'DESC')->get();
 
             return response()->json(['payments' => $paymentsData], 200);
         });
@@ -222,7 +224,9 @@ class Cashier extends Controller
 
     public function pay_walkin (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $this_payment = self::getTable($request->service, $request->documentId, null);
+            $this_payment = self::getTable($request->service, $request->documentId, null)->first();
+
+            \Log::info('', ['' => $request->all()]);
             $checkForCreditsUsed = User::where('id', $request->userId)
                 ->where('credit_amount', '>=', $request->usedCredits)
                 ->lockForUpdate()
@@ -235,6 +239,7 @@ class Cashier extends Controller
             $this_payment->invoice_status = "PAID";
             $this_payment->credit_deduction = $request->usedCredits;
             $this_payment->received_amount = $request->receivedAmount;
+            $this_payment->cashier_o_r_id = $request->orNumber;
             $this_payment->payment_type = 'WALK-IN';
             $this_payment->datePaid = Carbon::now();
             $this_payment->save();
@@ -250,6 +255,12 @@ class Cashier extends Controller
                 $new_credit_deduction->type = "DEDUCT";
                 $new_credit_deduction->amount = $request->usedCredits;
                 $new_credit_deduction->save();
+            }
+
+            if($request->orNumber) {
+                $this_or_parent = CashierOR::find($request->orNumber);
+                $this_or_parent->status = "UNAVAILABLE";
+                $this_or_parent->save();
             }
 
             AuditHelper::log($request->user()->id, "Updated payment details.");
@@ -393,7 +404,16 @@ class Cashier extends Controller
 
     public function get_or_numbers (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $orNumbers = CashierOR::all();
+            $orNumbersTemp = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment']);
+
+            if($request->service) {
+                $orNumbersTemp->where([
+                    "service_type" => $request->service,
+                    'status' => "AVAILABLE"
+                ]);
+            }
+
+            $orNumbers = $orNumbersTemp->get();
             return response()->json(['orNumbers' => $orNumbers], 200);
         });
     }
@@ -405,6 +425,7 @@ class Cashier extends Controller
                 : CashierOR::find($request->documentId);
 
             $this_or->name = $request->name;
+            $this_or->service_type = $request->service;
             $this_or->save();
 
             AuditHelper::log($request->user()->id,($request->httpMethod === "POST" ? 'Created' : 'Updated') . " an OR Number. ID#" . $this_or->id);
@@ -424,7 +445,7 @@ class Cashier extends Controller
         return TransactionUtil::transact(null, [], function() use ($request, $orNumber) {
             $this_or = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment'])->where('id', $orNumber)->first();
 
-            if($this_or->connection_in_library_count > 0 || $this_or->connection_in_dormitory_count > 0 || $this_or->connection_in_enrollment_count > 0) {
+            if($this_or->connection_in_library_count > 0 || $this_or->connection_in_dormitory_count > 0 || $this_or->connection_in_enrollment_count > 0 || $this_or->status === "UNAVAILABLE") {
                 return response()->json(['message' => "Can't remove OR Number. It already has connected data."], 200);
             } else {
                 $this_or->delete();

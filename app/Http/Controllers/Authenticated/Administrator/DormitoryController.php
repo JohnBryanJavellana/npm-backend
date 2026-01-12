@@ -549,7 +549,7 @@ class DormitoryController extends Controller
 
                 $guestRate = (float) $request->input('updatedTotalData.guestCost', 0);
                 $traineeRate = (float) $request->input('updatedTotalData.traineeCost', 0);
-                $inclusionCharge = (float) ($request->inclusionCharge ?? 0);
+                $inclusionCharge = (float) $request->input('updatedTotalData.inclusionCharge', 0);
 
                 $totalGuestCharge = $guestCount * $guestRate;
                 $totalTraineeCharge = $traineeCount * $traineeRate;
@@ -862,10 +862,6 @@ class DormitoryController extends Controller
                 ? new DormitoryReqService()
                 : DormitoryReqService::where('id', $request->documentId)->lockForUpdate()->first();
 
-            $invoiceId = $request->httpMethod === "POST"
-                ? new DormitoryInvoice()
-                : DormitoryInvoice::find($this_service->dormitory_invoices_id);
-
             $descriptionHtml = $this->addDescription(
         "<div style='display: flex; align-items: center; justify-content: space-between;'>
                     <div style='font-weight: bold; color: #6c757d;'>Service Charge</div>
@@ -873,16 +869,27 @@ class DormitoryController extends Controller
                 </div>"
             );
 
+            $invoiceId = $request->httpMethod === "POST"
+                ? new DormitoryInvoice()
+                : DormitoryInvoice::find($this_service->dormitory_invoices_id);
+
             $invoiceId->user_id = $request->userId;
             $invoiceId->dormitory_tenant_id = $request->tenantId;
-            // $invoiceId->dormitory_room_id = $request->roomId;
             $invoiceId->charge_id = $request->chargeId;
-            $invoiceId->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
+
+            if($request->httpMethod === "POST") {
+                $invoiceId->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
+                $invoiceId->isInitial = "N";
+            }
+
             $invoiceId->description = $descriptionHtml;
-            if($request->charge <= 0) $invoiceId->status = "PAID";
+            if($request->charge <= 0 && !in_array($request->status, ["CANCELLED", "DECLINED"])) $invoiceId->invoice_status = "PAID";
+            if($request->status === "CANCELLED") {;
+                $invoiceId->invoice_status = "CANCELLED";
+            }
+
             $invoiceId->total_amount = $request->charge;
-            $invoiceId->isInitial = "N";
-            $invoiceId->remarks = '';
+            $invoiceId->remarks = $request->remarks;
             $invoiceId->save();
 
             $this_service->dormitory_tenant_id = $request->tenantId;
@@ -936,6 +943,12 @@ class DormitoryController extends Controller
 
             $reqTemp->status = $request->status;
             $reqTemp->save();
+
+            if($request->status === "CANCELLED") {
+                $invoice = DormitoryInvoice::find($reqTemp->invoice()->id);
+                $invoice->invoice_status = "CANCELLED";
+                $invoice->save();
+            }
 
             AuditHelper::log($request->user()->id, "Updated requested service. ID#$request->documentId");
 
@@ -994,7 +1007,8 @@ class DormitoryController extends Controller
     public function get_dormitory_charges (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reqTemp = DormitoryInvoice::with([
-                'tenant.boarder'
+                'tenant.boarder',
+                'orNumber'
             ])->where('dormitory_tenant_id', $request->userId)->get();
 
             return response()->json(['dormitoryInvoices' => $reqTemp], 200);

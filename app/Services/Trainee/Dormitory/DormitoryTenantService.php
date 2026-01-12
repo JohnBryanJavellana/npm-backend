@@ -12,8 +12,25 @@ class DormitoryTenantService {
     )
     {}
 
-    public function getTenantRecordById($tenant)
+    public function getTenantRecordById($tenantId, $userId, $columns = ["*"], $with = [])
     {
-        
+        $record = $this->dormitoryTenantModel->query()
+        ->whereKey($tenantId)
+        ->forUser($userId);
+
+        if(!empty($with)) {
+            $record->with($columns);
+        }
+
+        return $record->first($columns);
+    }
+    
+    public function updateTenantRecordById($tenantId, $userId)
+    {
+        $this->dormitoryTenantModel->query()
+        ->lockForUpdate()
+        ->whereKey($tenantId)
+        ->forUser($userId)
+        ->updateOrFail();
     }
 }

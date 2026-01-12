@@ -48,9 +48,10 @@ class DormitoryExtraService {
         return $record->get();
     }
 
-    private function validateData($validated, int $userId) {
+    private function prepareData($validated, int $userId) {
         $existing = $this->tenantModel->query()
-        ->with(["services" => function($query) use($validated) {
+        ->with([
+            "services" => function($query) use($validated) {
             $query->where("dormitory_service_id", $validated["service_id"])
                 ->forStatus([RequestStatus::APPROVED->value, RequestStatus::PENDING->value]);
         },
@@ -71,6 +72,7 @@ class DormitoryExtraService {
             throw new DomainException("You already have an active request for this service. Please wait for the current request to be completed before submitting a new one. Service: $services");
         } 
 
+        //service validation
         $service = $this->dormitoryService->query()
         ->select("id", "name", "status")
         ->whereKey($validated["service_id"])
@@ -88,13 +90,14 @@ class DormitoryExtraService {
     public function createService($validated, int $userId)
     {
         return DB::transaction(function() use ($userId, $validated) {
-            // $this->validateData($validated, $userId);
+            $this->prepareData($validated, $userId);
             $invoice =$this->dormitoryInvoiceModel->create([
                 "user_id" => $userId,
                 "dormitory_tenant_id" => $validated["dormitory_id"],
                 "isInitial" => "N",
+                "charge_id" => $validated["charge_id"],
+                "type" => RequestStatus::SERVICE->value,
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
-
             ]);
 
             $this->dormitoryReqService->create([

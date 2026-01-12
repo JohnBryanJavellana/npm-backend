@@ -29,7 +29,8 @@ class DormitoryInvoiceService {
             "dormitory_tenant_id" => $documentId,
             "user_id" => $userId
             ])
-            ->latest("created_at")
+        ->whereNotNull("description")
+        ->latest("created_at")
         ->get();
     }
 

@@ -29,10 +29,11 @@ return new class extends Migration
             $table->enum('isInitial', ['Y', 'N']);
             $table->longText('invoice_reference')->nullable();
             $table->longText('trace_number');
-            $table->decimal('total_amount')->nullable();
+            $table->decimal('total_amount')->default(0.0);
             $table->longText('description')->nullable();
             $table->longText('remarks')->nullable();
             $table->enum('invoice_status', ['PENDING', 'PAID','FOR-VERIFICATION', 'CANCELLED'])->default('PENDING');
+            $table->enum('type', ['INCLUSION', 'SERVICE','DORMITORY']);
             $table->decimal("received_amount", 65, 2)->nullable();
             $table->decimal("credit_deduction", 65, 2)->nullable();
             $table->timestamp('datePaid')->nullable();

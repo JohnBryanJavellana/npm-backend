@@ -21,6 +21,7 @@ class AvailableServicesResource extends JsonResource
             "name" => $this->name,
             "description" => $this->description,
             "status" => $this->status,
+            "charge_id" => $this->charge_id,
             "charge_name" => $this->charge?->name,
             "charge_amount" => $this->charge?->amount,
             "charge_description" => $this->charge?->description,
