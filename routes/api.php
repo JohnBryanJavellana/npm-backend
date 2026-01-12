@@ -185,8 +185,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     });
 
     /** administrator routes */
-    Route::prefix('/admin/')->group(function() {
-        Route::prefix('/enrollment/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+    Route::prefix('/admin/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+        Route::prefix('/enrollment/')->group(function() {
             Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications']);
             Route::post('get_applications/requirement_remark', [EnrollmentCtrl::class, 'requirement_remark']);
             Route::post('get_applications/set_training_status', [EnrollmentCtrl::class, 'set_training_status']);
@@ -230,7 +230,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('remove_rank/{rank_id}', [EnrollmentCtrl::class, 'remove_rank']);
         });
 
-        Route::prefix('/books/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+        Route::prefix('/books/')->group(function() {
             Route::get('get_books', [LibraryController::class, 'get_books']);
             Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
             Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
@@ -256,14 +256,14 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book']);
         });
 
-        Route::prefix('/genre/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+        Route::prefix('/genre/')->group(function() {
             Route::get('get_genres', [LibraryController::class, 'get_genres']);
             Route::get('get_active_genres', [LibraryController::class, 'get_active_genres']);
             Route::post('create_or_update_genre', [LibraryController::class, 'create_or_update_genre']);
             Route::delete('remove_genre/{genre_id}', [LibraryController::class, 'remove_genre']);
         });
 
-        Route::prefix('/dormitory/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+        Route::prefix('/dormitory/')->group(function() {
             Route::get('get', [DormitoryController::class, 'dormitories']);
             Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
@@ -297,7 +297,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
         });
 
-        Route::prefix('/masterlist/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+        Route::prefix('/masterlist/')->group(function() {
             Route::prefix('/user/')->group(function() {
                 Route::get('get_users', [Masterlist::class, 'get_users']);
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
@@ -320,14 +320,15 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             });
         });
 
-        Route::prefix('/invoice/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+        Route::prefix('/invoice/')->group(function() {
             Route::post('get_invoices', [Cashier::class, 'get_invoices']);
             Route::post('update_payment_status', [Cashier::class, 'update_payment_status']);
         });
 
-        Route::prefix('/cashier/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
+        Route::prefix('/cashier/')->group(function() {
             Route::post('get_payments', [Cashier::class, 'get_payments']);
             Route::post('pay-walk-in', [Cashier::class, 'pay_walkin']);
+            Route::post('verify_payment', [Cashier::class, 'verify_payment']);
 
             Route::get('get_charges', [Cashier::class, 'get_charges']);
             Route::get('get_charges/get_charges_predata', [Cashier::class, 'get_charges_predata']);

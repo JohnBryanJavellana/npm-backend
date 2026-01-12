@@ -85,7 +85,6 @@ class TraineeInvoices extends Controller
             $user_id = $request->user()->id;
 
             $total = $this->dormitoryInvoiceService->update_status($validated, $user_id);
-            \Log::info("updateDormInvoice", [$total]);
 
             return response()->json(["balance" => $total], 200);
         }

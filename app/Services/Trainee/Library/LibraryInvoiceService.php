@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Services\Trainee\Credit\CreditService;
 use DomainException;
+use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\Request;
 
 class LibraryInvoiceService {
@@ -31,7 +32,8 @@ class LibraryInvoiceService {
                 ->update([
                     "reference_number" => $validated["inv_reference_number"],
                     "status" => RequestStatus::VERIFICATION->value,
-                    "payment_type" => "ONLINE"
+                    "payment_type" => "ONLINE",
+                    "datePaid" => Carbon::now()
                 ]);
             }
 
@@ -43,7 +45,7 @@ class LibraryInvoiceService {
     }
 
     private function prepareData($validated, $userId){
-        $userRec = $this->userModel
+        $userRec = $this->userModel->query()
         ->whereKey($userId)
         ->lockForUpdate()
         ->first();

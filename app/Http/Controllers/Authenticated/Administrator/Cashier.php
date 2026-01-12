@@ -31,6 +31,32 @@ use App\Models\{
 
 class Cashier extends Controller
 {
+    protected function getTable(string $service, int|null $referenceId, array|null $whereIns) {
+        $modelMap = [
+            'DORMITORY'  => DormitoryInvoice::class,
+            'ENROLLMENT' => EnrollmentInvoice::class,
+            'LIBRARY'    => LibraryInvoice::class,
+        ];
+
+        if (!array_key_exists($service, $modelMap)) {
+            throw new \InvalidArgumentException("Invalid service type: $service", 500);
+        }
+
+        $query = $modelMap[$service]::query();
+
+        if ($referenceId) {
+            $query->where('id', $referenceId);
+        }
+
+        foreach ($whereIns as $column => $values) {
+            if (!empty($values)) {
+                $query->whereIn($column, $values);
+            }
+        }
+
+        return $query;
+    }
+
     // public function get_invoices (Request $request) {
     //     $enrollmentInvoices = EnrollmentInvoice::with([
     //             'training.trainee',
@@ -185,27 +211,8 @@ class Cashier extends Controller
 
     public function get_payments (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $payments = null;
-
-            switch ($request->service) {
-                case 'DORMITORY':
-                    $payments = DormitoryInvoice::whereIn('invoice_status', $request->statuses);
-                    break;
-
-                case 'ENROLLMENT':
-                    $payments = EnrollmentInvoice::whereIn('invoice_status', $request->statuses);
-                    break;
-
-                case 'LIBRARY':
-                    $payments = LibraryInvoice::whereIn('status', $request->statuses);
-                    break;
-
-                default: break;
-            }
-
-            $paymentsData = $payments->with([
-                'payee'
-            ])->orderBy('created_at', 'DESC')->get();
+            $payments = self::getTable($request->service, null, ['invoice_status' => $request->statuses]);
+            $paymentsData = $payments->with(['payee'])->orderBy('created_at', 'DESC')->get();
 
             return response()->json(['payments' => $paymentsData], 200);
         });
@@ -213,27 +220,7 @@ class Cashier extends Controller
 
     public function pay_walkin (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $this_payment = null;
-
-            switch ($request->service) {
-                case 'DORMITORY':
-                    $this_payment = DormitoryInvoice::find($request->documentId);
-                    $this_payment->invoice_status = "PAID";
-                    break;
-
-                case 'ENROLLMENT':
-                    $this_payment = EnrollmentInvoice::find($request->documentId);
-                    $this_payment->invoice_status = "PAID";
-                    break;
-
-                case 'LIBRARY':
-                    $this_payment = LibraryInvoice::find($request->documentId);
-                    $this_payment->status = "PAID";
-                    break;
-
-                default: break;
-            }
-
+            $this_payment = self::getTable($request->service, $request->documentId, null);
             $checkForCreditsUsed = User::where('id', $request->userId)
                 ->where('credit_amount', '>=', $request->usedCredits)
                 ->lockForUpdate()
@@ -243,8 +230,10 @@ class Cashier extends Controller
                 return response()->json(['message' => "Insufficient credits to complete this transaction."], 400);
             }
 
+            $this_payment->invoice_status = "PAID";
             $this_payment->credit_deduction = $request->usedCredits;
             $this_payment->received_amount = $request->receivedAmount;
+            $this_payment->payment_type = 'WALK-IN';
             $this_payment->datePaid = Carbon::now();
             $this_payment->save();
 
@@ -372,6 +361,30 @@ class Cashier extends Controller
                     );
                 }
                 return response()->json(['message' => "You've removed a fee category. ID#$fee_category_id"], 200);
+            }
+        });
+    }
+
+    public function verify_payment (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this_payment = self::getTable($request->service, $request->documentId, null);
+            $this_fee = $this_payment->lockForUpdate()->first();
+
+            if(in_array($this_fee->invoice_status, ["CANCELLED", "PAID"])) {
+                return response()->json(['message' => "Can't update payment."], 200);
+            } else {
+                $this_fee->invoice_status = $request->verificationStatus;
+                $this_fee->save();
+
+                AuditHelper::log($request->user()->id, "Updated a payment. ID#$$this_fee->id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEInvoice(''),
+                        new BEAuditTrail('')
+                    );
+                }
+                return response()->json(['message' => "You've updated a payment. ID#$$this_fee->id"], 200);
             }
         });
     }

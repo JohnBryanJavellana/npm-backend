@@ -35,6 +35,7 @@ return new class extends Migration
                 'APPROVED',
                 'CANCELLED',
                 'EXTENDING',
+                'TRANSFERRING',
                 'TRANSFERRED',
                 'FOR PAYMENT',
                 'REJECTED',

@@ -28,7 +28,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
         protected DormitoryExtendRequest $dormitoryExtendRequest,
     ) {}
 
-    private function validateData($userId, $documentId) {
+    private function prepareData($userId, $documentId) {
 
         $record = $this->tenantModel
         ->with([
@@ -75,7 +75,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
     public function createTransferRequest($validated, $userId)
     {
         DB::transaction(function() use ($userId, $validated) {
-            // $this->validateData($userId, $validated["document_id"]);
+            // $this->prepareData($userId, $validated["document_id"]);
 
             $this->dormitoryTransfer->create([
                 "dormitory_tenant_id" => $validated["document_id"],
@@ -83,6 +83,14 @@ class DormitoryTransferService extends DormitoryHistoryService {
                 "transfer_type" => $validated["transfer_type"],
                 "room_type" => $validated["type"],
                 "reason" => $validated["reason"]
+            ]);
+
+            //temporary
+            $this->tenantModel->query()
+            ->whereKey($validated["document_id"])
+            ->lockForUpdate()
+            ->update([
+                "tenant_status" => RequestStatus::TRANSFERRING->value
             ]);
 
             $this->loggingDetails(
