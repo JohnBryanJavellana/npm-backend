@@ -7,20 +7,16 @@ use App\Models\{
     DormitoryRoom,
     DormitoryTenant,
     DormitoryTenantHistory,
-    DormitoryTransfer,
-    DormitoryExtendRequest,
     DormitoryItemBorrowing
 };
 use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
-use App\Utils\GenerateUniqueFilename;
 use App\Utils\SaveFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use DomainException;
 
-use function PHPUnit\Framework\isNull;
 
 class DormitoryRequestService {
 

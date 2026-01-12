@@ -211,6 +211,7 @@ class LibraryController extends Controller
             return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a book genre. ID#" . $this_genre->id], 201);
         });
     }
+
     public function remove_genre (Request $request, int $genre_id) {
         return TransactionUtil::transact(null, ['genres_cache'], function() use ($request, $genre_id) {
             $this_book_genre = BookGenre::withCount(['hasData'])->where('id', $genre_id)->first();
@@ -279,6 +280,7 @@ class LibraryController extends Controller
             }
         });
     }
+
     public function get_copies (Request $request, int $book_id) {
         return TransactionUtil::transact(null, [], function() use ($book_id) {
             $bookCopies = BookCopy::withCount('hasData')->where('book_id', operator: $book_id)->get();
@@ -307,6 +309,7 @@ class LibraryController extends Controller
             }
         });
     }
+
     public function count_book_reservation (Request $request){
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = BookRes::query();
@@ -350,7 +353,7 @@ class LibraryController extends Controller
             $pendingFines = LibraryInvoice::where([
                 'book_res_id' => $request->libraryId,
                 'user_id' => $request->userId
-            ])->whereIn('status', ['PENDING', 'VERIFICATION'])->exists();
+            ])->whereIn('invoice_status', ['PENDING', 'VERIFICATION'])->exists();
 
             $count =  [
                 'hasBooksNeedAction' => $bookReservationCheck && count($bookReservationCheck->library->borrowedBooks) > 0,
@@ -361,6 +364,7 @@ class LibraryController extends Controller
             return response()->json(['bookReservationCheck' => $count], 200);
         });
     }
+
     public function get_book_reservation (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = BookRes::with([
@@ -543,6 +547,7 @@ class LibraryController extends Controller
             return response()->json(['message' => "You've updated a book request. ID#" . $request->documentId], 200);
         });
     }
+
     public function get_available_books (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $user = User::findOrFail($request->userId);

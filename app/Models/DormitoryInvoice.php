@@ -29,6 +29,10 @@ class DormitoryInvoice extends Model
         return $this->belongsTo(Charge::class);
     }
 
+    public function orNumber(){
+        return $this->hasOne(CashierOR::class, 'id', 'cashier_o_r_id');
+    }
+
     /**
      * Scopes
      */

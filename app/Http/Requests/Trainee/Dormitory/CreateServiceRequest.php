@@ -33,6 +33,7 @@ class CreateServiceRequest extends FormRequest
     {
         return [
             "dormitory_id" => "required|exists:dormitory_tenants,id",
+            "charge_id" => "required|exists:charges,id",
             "service_id" => "required|exists:dormitory_services,id",
         ];
     }
@@ -42,6 +43,7 @@ class CreateServiceRequest extends FormRequest
         return [
             "document_id" => "dormitory request",
             "service_id" => "service request",
+            "charge_id" => "charge",
         ];
     }
 

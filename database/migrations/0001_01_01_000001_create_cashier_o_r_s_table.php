@@ -15,6 +15,15 @@ return new class extends Migration
             $table->engine = "innoDB";
             $table->id();
             $table->string("name", 255);
+            $table->enum("service_type", [
+                "DORMITORY",
+                "ENROLLMENT",
+                "LIBRARY"
+            ]);
+            $table->enum("status", [
+                "AVAILABLE",
+                "UNAVAILABLE"
+            ])->default("AVAILABLE");
             $table->timestamps();
         });
     }

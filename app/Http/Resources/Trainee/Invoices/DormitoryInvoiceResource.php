@@ -28,6 +28,7 @@ class DormitoryInvoiceResource extends JsonResource
             "remarks" => $this->remarks,
             "status" => $this->invoice_status,  
             "datePaid" => $this->datePaid,
+            "type" => $this->type,
             "charge_name" => $this->charge?->name,
             "charge_amount" => $this->charge?->amount,
             "charge_description" => $this->charge?->description,

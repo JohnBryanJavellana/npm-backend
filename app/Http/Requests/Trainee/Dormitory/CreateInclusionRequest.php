@@ -11,6 +11,7 @@ class CreateInclusionRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        \Log::info("inclusionRequest", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -24,6 +25,7 @@ class CreateInclusionRequest extends FormRequest
         return [
             "request_id" => "required|exists:dormitory_tenants,id",
             "inclusion_id" => "required|exists:dormitory_inventories,id",
+            "charge_id" => "required|exists:charges,id",
             "quantity" => "required|integer",
         ];
     }

@@ -21,6 +21,10 @@ enum RequestStatus: string {
     case RESERVED = 'RESERVED'; 
     case FOR_VERIFICATION = "FOR-VERIFICATION";
     case TRANSFERRING = "TRANSFERRING";
+    //DORM INVOICE TYPE
+    case INCLUSION = "INCLUSION";
+    case SERVICE = "SERVICE";
+    case DORMITORY = "DORMITORY";
 
     //LIBRARY
     case COMPLETED = 'COMPLETED';

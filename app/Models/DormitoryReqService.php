@@ -21,6 +21,11 @@ class DormitoryReqService extends Model
         return $this->belongsTo(DormitoryTenant::class, 'dormitory_tenant_id', 'id');
     }
 
+    public function invoice()
+    {
+        return $this->hasOne(DormitoryInvoice::class, 'id', 'dormitory_invoices_id');
+    }
+
     /** Scopes */
 
     public function scopeForStatus($query, array $status)
