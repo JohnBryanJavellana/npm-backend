@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Models\CashierOR;
 use App\Models\Credit;
 use App\Models\DormitoryInvoice;
 use App\Models\EnrollmentInvoice;
@@ -23,6 +24,7 @@ use App\Events\{
 use App\Http\Requests\Admin\Cashier\{
     CreateOrUpdateCharge,
     CreateOrUpdateFeeCategory,
+    CreateOrUpdateOR
 };
 use App\Models\{
     Charge,
@@ -385,6 +387,56 @@ class Cashier extends Controller
                     );
                 }
                 return response()->json(['message' => "You've updated a payment. ID#$$this_fee->id"], 200);
+            }
+        });
+    }
+
+    public function get_or_numbers (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $orNumbers = CashierOR::all();
+            return response()->json(['orNumbers' => $orNumbers], 200);
+        });
+    }
+
+    public function create_or_update_or_number (CreateOrUpdateOR $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $this_or = $request->httpMethod === "POST"
+                ? new CashierOR()
+                : CashierOR::find($request->documentId);
+
+            $this_or->name = $request->name;
+            $this_or->save();
+
+            AuditHelper::log($request->user()->id,($request->httpMethod === "POST" ? 'Created' : 'Updated') . " an OR Number. ID#" . $this_or->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEInvoice(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " an OR Number. ID#" . $this_or->id], 201);
+        });
+    }
+
+    public function remove_or_number (Request $request, int $orNumber) {
+        return TransactionUtil::transact(null, [], function() use ($request, $orNumber) {
+            $this_or = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment'])->where('id', $orNumber)->first();
+
+            if($this_or->connection_in_library_count > 0 || $this_or->connection_in_dormitory_count > 0 || $this_or->connection_in_enrollment_count > 0) {
+                return response()->json(['message' => "Can't remove OR Number. It already has connected data."], 200);
+            } else {
+                $this_or->delete();
+                AuditHelper::log($request->user()->id, "Removed an OR Number. ID#$orNumber");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEInvoice(''),
+                        new BEAuditTrail('')
+                    );
+                }
+                return response()->json(['message' => "You've removed an OR Number. ID#$orNumber"], 200);
             }
         });
     }

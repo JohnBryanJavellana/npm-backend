@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CashierOR;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,6 +24,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Charge::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(CashierOR::class)->nullable()->constrained()->cascadeOnDelete();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
             $table->enum('isInitial', ['Y', 'N']);
             $table->longText('invoice_reference')->nullable();

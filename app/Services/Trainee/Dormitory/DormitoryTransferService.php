@@ -35,6 +35,8 @@ class DormitoryTransferService extends DormitoryHistoryService {
             "transferRequest" => function($query) {
                 $query->where("status", "PENDING")->select("id", "dormitory_tenant_id", "status");
             }
+
+            //include the extending requests
         ])
         ->where([
             "id" => $documentId,
