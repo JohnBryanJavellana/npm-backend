@@ -397,6 +397,7 @@ class EnrollmentCtrl extends Controller
                 ? new CourseModule
                 : CourseModule::find($request->documentId);
 
+            $this_module->charge_id = $request->charge;
             $this_module->module_type_id = $request->module;
             $this_module->name = $request->name;
             $this_module->acronym = $request->short_name;

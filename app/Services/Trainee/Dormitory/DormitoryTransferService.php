@@ -21,6 +21,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
 
     public function __construct(
         protected DormitoryRoom $roomModel,
+        protected DormitoryTenantService $dormitoryTenantService,
         protected DormitoryTenant $tenantModel,
         protected DormitoryTenantHistory $dormitoryTenantHistory,
         protected DormitoryInventory $dormitoryInventory,
@@ -127,6 +128,8 @@ class DormitoryTransferService extends DormitoryHistoryService {
             }
 
             $record->update(["status" => RequestStatus::CANCELLED->value]);
+
+            $this->dormitoryTenantService->updateTenantRecordById($record->dormitory_tenant_id, $userId);
 
             $this->loggingDetails(
                 $record->dormitory_tenant_id,

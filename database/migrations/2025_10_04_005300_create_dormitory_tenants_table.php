@@ -33,6 +33,7 @@ return new class extends Migration
                 'PENDING',
                 'TERMINATED',
                 'APPROVED',
+                'ACTIVE',
                 'CANCELLED',
                 'EXTENDING',
                 'TRANSFERRING',

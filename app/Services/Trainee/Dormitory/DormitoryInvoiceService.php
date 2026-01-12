@@ -12,9 +12,9 @@ use Carbon\Carbon;
 
 class DormitoryInvoiceService {
     public function __construct(
-        private DormitoryInvoice $dormitoryInvoice,
-        private User $user,
-        private CreditController $creditController
+        protected DormitoryInvoice $dormitoryInvoice,
+        protected User $user,
+        protected CreditController $creditController
     )
     {}
 
@@ -22,6 +22,7 @@ class DormitoryInvoiceService {
     {
         return $this->dormitoryInvoice->query()
         ->with([
+            "orNumber",
             "charge:id,charge_category_id,name,amount,description,service_type",
             "charge.chargeCategory:id,name"
          ])
