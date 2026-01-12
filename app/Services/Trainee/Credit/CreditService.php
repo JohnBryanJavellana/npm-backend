@@ -28,4 +28,11 @@ class CreditService {
             ]);
         });
     }
+
+    public function udpateUserCredit()
+    {
+        
+    }
+
+    private function checkUserCredit(){}
 }

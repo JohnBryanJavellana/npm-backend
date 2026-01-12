@@ -20,7 +20,7 @@ class DormitoryInvoiceService {
 
     public function getUserInvoice($documentId, $userId)
     {
-        return $this->dormitoryInvoice
+        return $this->dormitoryInvoice->query()
         ->with([
             "charge:id,charge_category_id,name,amount,description,service_type",
             "charge.chargeCategory:id,name"
@@ -40,7 +40,8 @@ class DormitoryInvoiceService {
 
             //temporary
             if(round($validated["total_amount"], 2) === round($validated["credit_amount"], 2)) {
-                $this->dormitoryInvoice->forUser($userId)
+                $this->dormitoryInvoice->query()
+                ->forUser($userId)
                 ->where("dormitory_tenant_id", $validated["tenant_id"])
                 ->whereKey($validated["billing_id"])
                 ->update([

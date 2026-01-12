@@ -28,7 +28,7 @@ return new class extends Migration
             $table->decimal("amount", 65, 2);
             $table->longText("details");
             $table->longText("remarks")->nullable();
-            $table->enum("status", ["PENDING", "PAID", "VERIFICATION"])->default("PENDING");
+            $table->enum("invoice_status", ["PENDING", "PAID", "FOR-VERIFICATION", "CANCELLED"])->default("PENDING");
             $table->enum("payment_type", ["ONLINE", "WALK-IN"])->nullable();
             $table->decimal("received_amount", 65, 2)->nullable();
             $table->decimal("credit_deduction", 65, 2)->nullable();

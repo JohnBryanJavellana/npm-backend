@@ -20,6 +20,7 @@ enum RequestStatus: string {
     case OCCUPIED = 'OCCUPIED'; 
     case RESERVED = 'RESERVED'; 
     case FOR_VERIFICATION = "FOR-VERIFICATION";
+    case TRANSFERRING = "TRANSFERRING";
 
     //LIBRARY
     case COMPLETED = 'COMPLETED';
