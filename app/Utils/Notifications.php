@@ -7,7 +7,7 @@ use App\Models\Notification;
 
 class Notifications
 {
-    public static function notify($userId, $to_user, $type, $message){
+    public static function notify($userId, $to_user, $type = "DORMITORY" | "ENROLLMENT" | "LIBRARY", $message){
         return TransactionUtil::transact(null, [], function() use ($userId, $to_user, $type, $message) {
             $notif = new Notification();
             $notif->user_id = $userId;

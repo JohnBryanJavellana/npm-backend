@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class ViewTraineeRecRequest extends FormRequest
+class ViewApplicationRequest extends FormRequest
 {
 
     protected $stopOnFirstFailure = true;
@@ -20,9 +20,10 @@ class ViewTraineeRecRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-       $this->merge([
-            "userId" => $this->has("userId") && !is_null($this->userId) ? $this->userId : $this->user()->id,
-       ]);
+        $this->merge([
+            "courseId" => $this->route("course"),
+            "userId" => $this->user()->id
+        ]);
     }
 
     /**
@@ -33,19 +34,20 @@ class ViewTraineeRecRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "userId" => "required|exists:users,id",
-            "status" => "required|in:COMPLETED,ENROLLED"
+            "courseId" => "required|exists:enrolled_courses,id",
+            "userId" => "required|exists:users,id"
         ];
     }
 
     protected function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors();
-        $firstError = $errors->first();
+        $erorrs = $validator->errors();
+        $firstError = $erorrs->first();
+
         throw new HttpResponseException(
             response()->json([
                 "message" => $firstError,
-                "errors" => $errors
+                "errors" => $erorrs
             ], 422)
         );
     }

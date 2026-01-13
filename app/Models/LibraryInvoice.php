@@ -33,6 +33,10 @@ class LibraryInvoice extends Model
         return $this->hasMany(LISelectedBook::class);
     }
 
+    public function orNumber(){
+        return $this->hasOne(CashierOR::class, 'id', 'cashier_o_r_id');
+    }
+
     /**
      * SCOPES
      */

@@ -16,12 +16,28 @@ class ViewTraineeRecResource extends JsonResource
     {
         // return parent::toArray($request);
 
-
         return [
             "enrolled_course_id" => $this->id,
             "bgColor" => $this->bgColor,
             "enrolled_course_status" => $this->enrolled_course_status,
             "training_id" => $this->training_id,
+            "training_instructor" => [
+                    [
+                        "name" => "Allen Alfred Beato",
+                        "email" => "allenExample@gmail.com",
+                        "type" => "instructor"
+                    ],
+                    [
+                        "name" => "Bryan Aguncilio",
+                        "email" => "bryanExample@gmail.com",
+                        "type" => "instructor-III"
+                    ],
+                    [
+                        "name" => "Saac",
+                        "email" => "saacExample@gmail.com",
+                        "type" => "instructor-IV"
+                    ],
+                 ],
             "training_status" => $this->training?->status,
             "daily_hours" => $this->training?->daily_hours,
             "schedule_from" => $this->training?->schedule_from,
@@ -29,6 +45,7 @@ class ViewTraineeRecResource extends JsonResource
             "venue" => $this->training?->venue,
             "room" => $this->training?->room,
             "schedule_preference" => $this->training?->schedule_preference,
+            "batch_number" => $this->training?->batch_number,
             "course_module_id" => $this->training?->course_module_id,
             "module_name" => $this->training?->module?->name,
             "acronym" => $this->training?->module?->acronym,

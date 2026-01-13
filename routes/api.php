@@ -80,6 +80,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_activities', [Account::class, 'get_activities']);
             Route::get('get_all_courses_and_schools', [MyAccount::class, 'get_all_courses_and_schools']);
             Route::get('get_all_requirements', [MyAccount::class, '']);
+            Route::get("dropdown_values", [TraineeEnrollment::class, "viewRanksLicenses"]);
+
         });
 
         Route::prefix('/enrollment/')->group(function () {
@@ -93,6 +95,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('update_invoice_trainings', [TraineeEnrollment::class,'update_invoice_trainings']);
             Route::post('get_all_trainee_invoices_two', [TraineeEnrollment::class,'get_all_trainee_invoices_two']);
             Route::post('get_applications', [TraineeEnrollment::class, 'get_applications']);
+            Route::get('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
         });
 

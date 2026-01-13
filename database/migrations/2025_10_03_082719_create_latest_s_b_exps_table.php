@@ -3,6 +3,10 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\{
+    Rank,
+    License
+};
 
 return new class extends Migration
 {
@@ -15,8 +19,8 @@ return new class extends Migration
             $table->engine = 'InnoDB';
             $table->id();
             $table->enum('ship_status', ['WithShipboardExperience', 'NoShipboardExperience'])->nullable();
-            $table->string('ship_license')->nullable();
-            $table->string('ship_rank')->nullable();
+            $table->foreignIdFor(Rank::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(License::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string('ship_date_of_disembarkment')->nullable();
             $table->string('ship_principal')->nullable();
             $table->string('ship_manning')->nullable();

@@ -44,6 +44,8 @@ class Account extends Controller
                 'additional_trainee_info.educational_attainment.main_school',
                 'additional_trainee_info.educational_attainment',
                 'additional_trainee_info.latest_shipboard_attainment',
+                'additional_trainee_info.latest_shipboard_attainment.licensesssssss',
+                'additional_trainee_info.latest_shipboard_attainment.rankkkkkkkkkkkkkkkkk',
                 'trainee_enrolled_courses' => function($query) {
                     $query->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'IR', 'CSFB', 'PENDING']);
                 },

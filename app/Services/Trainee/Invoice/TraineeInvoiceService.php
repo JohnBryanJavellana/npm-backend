@@ -19,11 +19,21 @@ class TraineeInvoiceService {
         DB::transaction(function() use ($validated){
             $this->enrollmentInvoiceModel->create([
                 "enrolled_course_id" => $validated["enrolled_course_id"],
-                "user_id" => $validated["user_id"],
+                "user_id" => $validated["userId"],
                 "charge_id" => $validated["charge_id"],
                 "trace_number" => GenerateTrace::createTraceNumber($this->enrollmentInvoiceModel, self::prefix),
-                "payment_type" => RequestStatus::ONLINE->value,
             ]);
         });
     }
+
+    public function storePayment()
+    {
+        
+    }
 }
+
+//credit deduction
+//received amount
+//invoice reference
+//payment type
+//date paid

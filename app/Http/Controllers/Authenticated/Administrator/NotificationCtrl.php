@@ -30,7 +30,7 @@ class NotificationCtrl extends Controller
 
             $notifications = $isNotAdmin
                 ? $notificationsTemp->where('to_user', $currentUserInstance->id)
-                : $notificationsTemp->whereIn('type', $userDesignation);
+                : $notificationsTemp->whereNull('to_user')->whereIn('type', $userDesignation);
 
             if($request->limit) $notifications->limit($request->limit);
             $finalNotifications = $notifications->orderBy('created_at', 'DESC')->get();

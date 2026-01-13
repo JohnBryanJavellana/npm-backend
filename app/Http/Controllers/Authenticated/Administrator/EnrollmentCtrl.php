@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Utils\GenerateTrace;
+use App\Utils\Notifications;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -62,6 +64,7 @@ class EnrollmentCtrl extends Controller
                     'training' => [
                         'main' => [
                             'info' => $self->toArray(),
+                            'charge' => $self->training->module->charge->toArray(),
                             'name' => [
                                 'module' => $self->training->module,
                                 'moduleType' => $self->training->moduleType
@@ -197,48 +200,33 @@ class EnrollmentCtrl extends Controller
     }
 
     public function set_training_status (Request $request) {
-        $validations = [
-            'status' => 'required|string'
-        ];
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this_training_status = EnrolledCourse::find($request->documentId);
+            $this_training_status->enrolled_course_status = $request->status;
+            $this_training_status->save();
 
-        $validator = \Validator::make($request->all(), $validations);
-
-        if($validator->fails()) {
-            $errors = $validator->messages()->all();
-            return response()->json(['message' => implode(', ', $errors)], 422);
-        } else {
-            try {
-                DB::beginTransaction();
-
-                $this_training_status = EnrolledCourse::find($request->documentId);
-                $this_training_status->enrolled_course_status = $request->status;
-                $this_training_status->save();
-
-                if($request->status === 'FOR-PAYMENT') {
-                    $premade_record = new EnrollmentInvoice;
-                    $premade_record->enrolled_course_id = $request->documentId;
-                    $premade_record->save();
-                }
-
-                $new_log = new AuditTrail;
-                $new_log->user_id = $request->user()->id;
-                $new_log->actions = "User has updated an enrolled course status. ID# " . $this_training_status->id;
-                $new_log->save();
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BETraineeApplication(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                DB::commit();
-                return response()->json(['message' => "You've updated an enrolled course status. ID# " . $this_training_status->id], 201);
-            } catch (\Exception $e) {
-                DB::rollback();
-                return response()->json(['message' => $e->getMessage()], 500);
+            if($request->status === 'FOR-PAYMENT') {
+                $premade_record = new EnrollmentInvoice;
+                $premade_record->enrolled_course_id = $request->documentId;
+                $premade_record->user_id = $this_training_status->user_id;
+                $premade_record->charge_id = $this_training_status->training->module->charge->id;
+                $premade_record->trace_number = GenerateTrace::createTraceNumber(EnrollmentInvoice::class, "-EAINV-");
+                $premade_record->invoice_amount = $request->invoiceAmount;
+                $premade_record->save();
             }
-        }
+
+            Notifications::notify($request->user()->id, $this_training_status->user_id, "DORMITORY", "updated your enrollment application status.");
+            AuditHelper::log($request->user()->id, "Updated enrollment application status. ID#" . $this_training_status->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEEnrollment(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've Updated enrollment application status. ID#" . $this_training_status->id], 201);
+        });
     }
 
     public function set_expired_status (Request $request) {
@@ -849,7 +837,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_license (CreateOrUpdateLicense $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+        return TransactionUtil::transact($request, ["rank:license:all"], function() use ($request) {
             $this_license = $request->httpMethod === "POST"
                 ? new License
                 : License::find($request->documentId);
@@ -872,7 +860,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_license (Request $request, int $license_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $license_id) {
+        return TransactionUtil::transact(null, ["rank:license:all"], function() use ($request, $license_id) {
             $this_license = License::withCount(['hasData'])->where('id', $license_id)->first();
 
             if($this_license->has_data_count > 0) {
@@ -901,7 +889,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function create_or_update_rank (CreateOrUpdateRank $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+        return TransactionUtil::transact($request, ["rank:license:all"], function() use ($request) {
             $this_rank = $request->httpMethod === "POST"
                 ? new Rank
                 : Rank::find($request->documentId);
@@ -925,7 +913,7 @@ class EnrollmentCtrl extends Controller
     }
 
     public function remove_rank (Request $request, int $rank_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $rank_id) {
+        return TransactionUtil::transact(null, ["rank:license:all"], function() use ($request, $rank_id) {
             $this_rank = Rank::withCount(['hasData'])->where('id', $rank_id)->first();
 
             if($this_rank->has_data_count > 0) {
