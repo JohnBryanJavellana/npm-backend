@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class EnrolledCourse extends Model
 {
 
+    protected $guarded = ["id"];
+
     /** RELATIONS */
     public function enrolled_course_certificate() {
         return $this->hasMany(Certificate::class);
@@ -36,5 +38,10 @@ class EnrolledCourse extends Model
     public function scopeForUser($query, $user_id)
     {
         return $query->where('user_id', $user_id);
+    }
+
+    public function scopeStatus($query, $status)
+    {
+        return $query->where("enrolled_course_status", $status);
     }
 }

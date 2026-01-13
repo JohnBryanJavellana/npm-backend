@@ -24,10 +24,10 @@ return new class extends Migration
             $table->foreignIdFor(CashierOR::class)->nullable()->constrained()->cascadeOnDelete();
             $table->longText('trace_number')->nullable();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
-            $table->decimal('invoice_amount', 10, 2)->default(0.00);
+            $table->decimal('invoice_amount', 65, 2)->default(0.00);
             $table->enum('invoice_status', ['PENDING', 'PAID', 'CANCELLED', 'FOR-VERIFICATION'])->default('PENDING');
             $table->string('invoice_reference')->nullable();
-            $table->dateTime('invoice_date')->nullable();
+            $table->dateTime('datePaid')->nullable();
             $table->dateTime('verification_date')->nullable();
             $table->enum('isExpired', ['YES', 'NO'])->default('NO');
             $table->decimal("received_amount", 65, 2)->nullable();

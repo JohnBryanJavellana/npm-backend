@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Requirement::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(AdditionalTraineeInfo::class)->constrained()->cascadeOnDelete();
-            $table->longText('filename');
+            $table->longText('filename')->nullable();
             $table->longText('remarks')->nullable();
             $table->enum('locked', ['Y', 'N'])->nullable();
             $table->timestamps();

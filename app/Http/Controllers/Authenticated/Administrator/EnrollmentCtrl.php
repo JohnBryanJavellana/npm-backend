@@ -67,7 +67,7 @@ class EnrollmentCtrl extends Controller
                                 'moduleType' => $self->training->moduleType
                             ]
                         ],
-                        'schedule' => $self->training_schedule
+                        'schedule' => $self->training
                     ],
                     'trainee_info' => [
                         'account' => $self->trainee->additional_trainee_info->user,

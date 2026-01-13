@@ -1,28 +1,26 @@
 <?php
 
-namespace App\Http\Requests\Trainee\Dormitory;
+namespace App\Http\Requests\Trainee\Enrollment;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CancelServiceRequest extends FormRequest
+class ViewTraineeRecRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        //check if the Auth::user and $this->user() is the same.
-        \Log::info("isaac", [$this->all()]);
         return $this->user() !== null;
     }
 
     protected function prepareForValidation()
     {
-        $this->merge([
-            "document_id" => $this->route("document_id")
-        ]);
+       $this->merge([
+            "userId" => $this->has("userId") && !is_null($this->userId) ? $this->userId : $this->user()->id,
+       ]);
     }
 
     /**
@@ -33,16 +31,8 @@ class CancelServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "document_id" => "required|exists:dormitory_tenants,id",
-            "request_id" => "required|integer|exists:dormitory_req_services,id"
-        ];
-    }
-
-    public function attributes()
-    {
-        return [
-            "document_id" => "Record",
-            "request_id" => "Service request"
+            "userId" => "required|exists:users,id",
+            "status" => "required|in:COMPLETED,ENROLLED"
         ];
     }
 
@@ -54,7 +44,7 @@ class CancelServiceRequest extends FormRequest
             response()->json([
                 "message" => $firstError,
                 "errors" => $errors
-            ], 422)
+            ])
         );
     }
 }

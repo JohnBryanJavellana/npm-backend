@@ -25,21 +25,21 @@ class TrainingListResource extends JsonResource
             'requirement_is_basic' => $this->isBasic,
             'trainee_file_id' => $this->isBasic === 'YES' 
                 //hasMany
-                ? $this->trainee_file()->latest()->first()?->id
-                : $this->uploaded_specific_requirement()->latest()->first()?->id,
+                ? $this->trainee_file->first()?->id
+                : $this->uploaded_specific_requirement->first()?->id,
             'requirement_is_locked' => $this->isBasic === 'YES' 
                 //hasMany
-                ? $this->trainee_file()->latest()->first()?->locked
-                : $this->uploaded_specific_requirement()->latest()->first()?->locked,
+                ? $this->trainee_file->first()?->locked
+                : $this->uploaded_specific_requirement->first()?->locked,
             'requirement_remarks' => $this->isBasic === 'YES' 
                 //hasMany
-                ? $this->trainee_file()->latest()->first()?->remarks
-                : $this->uploaded_specific_requirement()->latest()->first()?->remarks,
+                ? $this->trainee_file->first()?->remarks
+                : $this->uploaded_specific_requirement->first()?->remarks,
             'requirement_status' => $this->status,
             'trainee_requirement' => $this->isBasic === 'YES' 
                 //hasMany
-                ? $this->trainee_file()->latest()->first()?->filename
-                : $this->uploaded_specific_requirement()->latest()->first()?->filename
+                ? $this->trainee_file->first()?->filename
+                : $this->uploaded_specific_requirement->first()?->filename
         ];
     }
 }

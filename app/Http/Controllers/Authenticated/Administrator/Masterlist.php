@@ -34,8 +34,14 @@ class Masterlist extends Controller
                 'trainee_enrolled_courses' => function($query) {
                     $query->whereNotIn('status', ['CANCELLED', 'COMPLETED', 'DECLINED', 'IR', 'CSFB']);
                 }
-            ])->where('id', '!=', $request->user()->id)->withCount(['hasData'])->get();
-            return response()->json(['users' => $users], 200);
+            ])->where('id', '!=', $request->user()->id)->withCount(['hasData']);
+
+            if($request->role) {
+                $users->whereIn('role', $request->role);
+            }
+
+            $usersData = $users->get();
+            return response()->json(['users' => $usersData], 200);
         });
     }
 
