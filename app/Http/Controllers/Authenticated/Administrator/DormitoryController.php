@@ -25,7 +25,8 @@ use App\Utils\{
     AuditHelper,
     ConvertToBase64,
     TransactionUtil,
-    GenerateTrace
+    GenerateTrace,
+    Notifications
 };
 use App\Events\{BEDormitory, BEAuditTrail};
 use App\Jobs\SaveAvatar;
@@ -692,7 +693,8 @@ class DormitoryController extends Controller
                     }
                 }
 
-                AuditHelper::log($request->user()->id, "Cancelled a dormitory inventory item. ID#$dormReqId");
+                Notifications::notify($request->user()->id, $this_dorm_request->boarder()->id, "DORMITORY", "Your dormitory request has been cancelled.");
+                AuditHelper::log($request->user()->id, "Cancelled a dormitory request. ID#$dormReqId");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -701,7 +703,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've cancelled dormitory inventory item. ID#$dormReqId"], 200);
+                return response()->json(['message' => "You've cancelled dormitory request. ID#$dormReqId"], 200);
             }
         });
     }
@@ -900,6 +902,7 @@ class DormitoryController extends Controller
             $this_service->dormitory_invoices_id = $invoiceId->id;
             $this_service->save();
 
+            Notifications::notify($request->user()->id, $request->userId, "DORMITORY", "We have ". ($request->httpMethod === "POST" ? 'created' : 'updated') . " a dormitory service request for you.");
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory service request. ID#" . $this_service->id);
 
             if(env('USE_EVENT')) {

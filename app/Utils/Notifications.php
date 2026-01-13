@@ -2,27 +2,27 @@
 
 namespace App\Utils;
 
+use App\Events\BENotification;
 use App\Models\Notification;
-use Illuminate\Support\Facades\DB;
 
 class Notifications
 {
-    public static function notify($userId, $to_user, $type, $message)
-    {
-        try {
-
-            DB::beginTransaction();
+    public static function notify($userId, $to_user, $type, $message){
+        return TransactionUtil::transact(null, [], function() use ($userId, $to_user, $type, $message) {
             $notif = new Notification();
             $notif->user_id = $userId;
             $notif->to_user = $to_user;
             $notif->type = $type;
             $notif->message = $message;
             $notif->save();
-            DB::commit();
 
-        } catch(\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => "Something went wrong! Please try again"], 422);
-        }
+            if(env('USE_EVENT')) {
+                event(
+                    new BENotification(''),
+                );
+            }
+
+            return response()->json(['message' => ""], 201);
+        });
     }
 }

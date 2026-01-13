@@ -47,9 +47,9 @@ class TraineeEnrollment extends Controller
     {
         try {
             \Log::info('MODULE ID', [$moduleId, $enrolled_id]);
-            $userId = $request->user()->id ?? auth()->id();
-            $requirements = Requirement::
-                with([
+            $userId = $request->has("user_id") ? $request->user_id : $request->user()->id ?? auth()->id();
+            $requirements = Requirement::query()
+                ->with([
                     'trainee_file' => function ($q) use ($userId) {
                         $q->whereRelation('additional_info', 'user_id', '=', $userId);
                     },
@@ -62,14 +62,13 @@ class TraineeEnrollment extends Controller
                 if($enrolled_id !== null) {
                     $requirements->with([
                         'uploaded_specific_requirement' => function ($q) use ($enrolled_id, $userId) {
-                        $q->where('enrolled_course_id', $enrolled_id, )->whereRelation('enrolled_course', 'user_id', '=', $userId);
+                        $q->where('enrolled_course_id', $enrolled_id, )->whereRelation('enrolled_course', 'user_id', '=', $userId)->latest()->first();
                         }
                     ]);
                 }
 
                 $data = $requirements->get();
 
-            \Log::info('sameReq', [$requirements, $data]);
             return TrainingListResource::collection($data);
         } catch (\Exception $e) {
             \Log::error("error view_module_requirements_v2", [$e->getMessage()]);
