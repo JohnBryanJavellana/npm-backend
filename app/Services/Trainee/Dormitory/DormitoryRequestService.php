@@ -43,14 +43,14 @@ class DormitoryRequestService {
     public function viewApplication()
     {
         return;
-    }   
+    }
 
     public function createRequest($validated, $userId)
     {
         DB::transaction(function() use ($validated, $userId) {
-            
+
             $this->validateData($userId);
-            
+
             $data = [
                 "user_id" => $userId,
                 "room_for_type" => $validated["forType"],
@@ -63,7 +63,7 @@ class DormitoryRequestService {
             ];
 
             if($validated["forType"] === $this->tenantModel::COUPLE) {
-                
+
                 // $file_requested = $validated["file"];
                 // $filename = GenerateUniqueFilename::generate($file_requested);
                 // $file_requested->move(public_path('dormitory/supporting-document'), $filename);
@@ -73,10 +73,10 @@ class DormitoryRequestService {
             $record = $this->tenantModel->create($data);
 
             $this->loggingDetails(
-                $record, 
-                $userId, 
+                $record,
+                $userId,
                 "sent",
-                "You’ve sent your dormitory request."
+                "You’ve sent a dormitory request."
             );
 
         });
@@ -110,13 +110,13 @@ class DormitoryRequestService {
                 ->lockForUpdate();
 
                 $dorm->update([
-                    "room_available_slot" =>  $record->room_for_type === "COUPLE" 
+                    "room_available_slot" =>  $record->room_for_type === "COUPLE"
                         || $record->single_accommodation === "YES" ? 2 : 1,
                     "room_status" => RequestStatus::AVAILABLE->value
                 ]);
             }
             if (
-                $record->room_for_type === "COUPLE" && 
+                $record->room_for_type === "COUPLE" &&
                 $record->filename &&
                 file_exists(public_path('marriage-files/' . $record->filename))
             ) {
@@ -128,8 +128,8 @@ class DormitoryRequestService {
             ]);
 
             $this->loggingDetails(
-                $record, 
-                $request->user()->id, 
+                $record,
+                $request->user()->id,
                 "cancelled",
                 "You cancelled your room dorm request."
             );

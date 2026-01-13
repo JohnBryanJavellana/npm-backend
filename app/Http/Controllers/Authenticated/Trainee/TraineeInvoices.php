@@ -59,18 +59,7 @@ class TraineeInvoices extends Controller
             $user_id = $request->user()->id;
 
             $balance = $this->libraryInvoiceService->updateLibraryInvoice($validated, $user_id);
-        //     DB::transaction(function() use ($request) {
-        //         $validated = $request->validated();
-        //         $user_id = $request->user()->id;
 
-        //         LibraryInvoice::forUser($user_id)
-        //         ->byTraceId($validated["inv_trace_number"], $validated["inv_id"])
-        //         ->update([
-        //             "reference_number" => $validated["inv_reference_number"],
-        //             "status" => "VERIFICATION",
-        //             "payment_type" => "ONLINE"
-        //         ]);
-        // });
             return response()->json(["message" => "Successfully Paid!", "balance" => $balance], 200);
         }
         catch (\Exception $e) {

@@ -16,4 +16,8 @@ class EnrollmentInvoice extends Model
     public function payee() {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
+
+    public function orNumber(){
+        return $this->hasOne(CashierOR::class, 'id', 'cashier_o_r_id');
+    }
 }

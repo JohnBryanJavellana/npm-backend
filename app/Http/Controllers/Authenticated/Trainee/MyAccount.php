@@ -232,8 +232,8 @@ class MyAccount extends Controller
                 $this_latest_disembarkment_info = $latest_disembarkment_info ? LatestSBExp::find( $latest_disembarkment_info) : new LatestSBExp();
 
                 $this_latest_disembarkment_info->ship_status = $request->ship_status;
-                $this_latest_disembarkment_info->ship_license = $request->ship_license;
-                $this_latest_disembarkment_info->ship_rank = $request->ship_rank;
+                $this_latest_disembarkment_info->license_id = $request->ship_license;
+                $this_latest_disembarkment_info->rank_id = $request->ship_rank;
                 $this_latest_disembarkment_info->ship_date_of_disembarkment = $request->ship_date_of_embarkment;
                 $this_latest_disembarkment_info->ship_principal = $request->ship_principal;
                 $this_latest_disembarkment_info->ship_manning = $request->ship_manning;

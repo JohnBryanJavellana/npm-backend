@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Authenticated\Trainee;
 
+use App\Enums\RequestStatus;
 use App\Events\BEAccount;
 use App\Events\BEAuditTrail;
 use App\Events\BENotification;
 use App\Events\BETraineeApplication;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EnrollmentRequest;
+use App\Http\Requests\Trainee\Enrollment\ViewApplicationRequest;
 use App\Http\Requests\Trainee\Enrollment\ViewTraineeRecRequest;
 use App\Http\Resources\Trainee\Enrollment\ViewTraineeRecResource;
 use Illuminate\Http\Request;
@@ -172,11 +174,11 @@ class TraineeEnrollment extends Controller
             if ( !$addtional_info_id ) {
                 return response()->json(['message' => 'To get started, open My Account and enter some of your information.'], 422);
             }
-            
+
             $selected_training = new EnrolledCourse();
             $selected_training->user_id = $user_id;
             $selected_training->training_id = $validated["training_id"];
-            $selected_training->enrolled_course_status = 'RESERVED';
+            $selected_training->enrolled_course_status = RequestStatus::RESERVED->value;
             $selected_training->save();
 
             foreach($validated["file_upload"] as $up_file) {
@@ -200,11 +202,23 @@ class TraineeEnrollment extends Controller
                 }
             }
 
-            $this->traineeInvoiceService->createEnrollmentInvoice($validated);
+            $data = [ 
+                "userId" => $user_id,
+                "enrolled_course_id" => $selected_training->id,
+                "charge_id" => $training->module?->charge?->id
+            ];
+
+            $this->traineeInvoiceService->createEnrollmentInvoice($data);
 
             $training->decrement('schedule_slot', 1);
             AuditHelper::log($user_id, "User " . $user_id . " sent an enrollment request.");
-            Notifications::notify($user_id, null, "ENROLLMENT", "has sent their enrollement request");
+            
+            Notifications::notify(
+                $request->has("userId") && !is_null($request->userId) ? $request->user()->id : $user_id,
+                 $request->has("userId") && !is_null($request->userId) ? $user_id : null,
+                "ENROLLMENT",
+                $request->has("userId") && !is_null($request->userId) ? "has created your enrollment request." : "has sent an enrollment request."
+                );
 
             if(env("USE_EVENT")) {
                 event (
@@ -360,6 +374,31 @@ class TraineeEnrollment extends Controller
         }
     }
 
+    public function get_application(ViewApplicationRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+            $record = $this->enrollmentService->getUserTrainingById($validated);
+
+            // return response()->json([], 200);
+            return ViewTraineeRecResource::collection($record);
+        }
+        catch (\Exception $e) {
+            \Log::error("get_application", [$e]);
+            return response()->json([], 500);
+        }
+    }
+
+    public function viewRanksLicenses()
+    {
+        try {
+            return response()->json(["data" => $this->enrollmentService->getRankLicense()], 200);
+        }
+        catch (\Exception $e) {
+            \Log::error("viewRanksLicenses", [$e]);
+        }
+    }
+
     public function change_card_color (Request $request) {
         $validations = [
             'documentId' => 'required',
@@ -387,11 +426,4 @@ class TraineeEnrollment extends Controller
             }
         }
     }
-
-    public function forgetCache(Request $request)
-    {
-        
-    }
 }
-
-
