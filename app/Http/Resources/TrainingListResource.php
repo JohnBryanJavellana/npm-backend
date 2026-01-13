@@ -15,7 +15,7 @@ class TrainingListResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        return parent::toArray($request);
+        // return parent::toArray($request);
 
           return [
             'requirement_id' => $this->id,
@@ -24,18 +24,22 @@ class TrainingListResource extends JsonResource
             'requirement_is_required' => $this->isRequired,
             'requirement_is_basic' => $this->isBasic,
             'trainee_file_id' => $this->isBasic === 'YES' 
-                ? $this->trainee_file?->id
-                : $this->uploaded_specific_requirement?->id,
+                //hasMany
+                ? $this->trainee_file()->latest()->first()?->id
+                : $this->uploaded_specific_requirement()->latest()->first()?->id,
             'requirement_is_locked' => $this->isBasic === 'YES' 
-                ? $this->trainee_file?->locked
-                : $this->uploaded_specific_requirement?->locked,
+                //hasMany
+                ? $this->trainee_file()->latest()->first()?->locked
+                : $this->uploaded_specific_requirement()->latest()->first()?->locked,
             'requirement_remarks' => $this->isBasic === 'YES' 
-                ? $this->trainee_file?->remarks
-                : $this->uploaded_specific_requirement?->remarks,
+                //hasMany
+                ? $this->trainee_file()->latest()->first()?->remarks
+                : $this->uploaded_specific_requirement()->latest()->first()?->remarks,
             'requirement_status' => $this->status,
             'trainee_requirement' => $this->isBasic === 'YES' 
-                ? $this->trainee_file?->filename
-                : $this->uploaded_specific_requirement?->filename
+                //hasMany
+                ? $this->trainee_file()->latest()->first()?->filename
+                : $this->uploaded_specific_requirement()->latest()->first()?->filename
         ];
     }
 }
