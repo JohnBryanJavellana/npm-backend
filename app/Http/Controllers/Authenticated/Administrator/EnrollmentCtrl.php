@@ -67,7 +67,7 @@ class EnrollmentCtrl extends Controller
                             'charge' => $self->training->module->charge->toArray(),
                             'name' => [
                                 'module' => $self->training->module,
-                                'moduleType' => $self->training->moduleType
+                                'moduleType' => $self->training->module->moduleType
                             ]
                         ],
                         'schedule' => $self->training
