@@ -14,7 +14,8 @@ use Illuminate\Support\Str;
 
 use App\Utils\{
     AuditHelper,
-    GenerateQR
+    GenerateQR,
+    RemoveSpecialCharactersInString
 };
 use App\Jobs\{
     SendingEmail,
@@ -28,6 +29,10 @@ class RegisterController extends Controller
 {
     public function register_user(Request $request){
         return DB::transaction(function () use ($request) {
+            $fname = RemoveSpecialCharactersInString::remove(strtoupper($socialData['given_name'] ?? $socialData['first_name'] ?? ''));
+            $mname = RemoveSpecialCharactersInString::remove(strtoupper($request->mname ?? ''));
+            $lname = RemoveSpecialCharactersInString::remove(strtoupper($socialData['family_name'] ?? $socialData['last_name'] ?? ''));
+
             if ($request->is_from_social_login === 'YES') {
                 try {
                     $socialUser = Socialite::driver($request->provider)->stateless()->userFromToken($request->token);
@@ -43,8 +48,8 @@ class RegisterController extends Controller
                     if (!$user) {
                         $user = new User;
                         $user->id = $this->generateCustomId();
-                        $user->fname = strtoupper($socialData['given_name'] ?? $socialData['first_name'] ?? '');
-                        $user->lname = strtoupper($socialData['family_name'] ?? $socialData['last_name'] ?? '');
+                        $user->fname = $fname;
+                        $user->lname = $lname;
                         $user->email = $email;
                         $user->password = Hash::make(Str::random(24));
                         $user->isSocial = 'YES';
@@ -77,9 +82,9 @@ class RegisterController extends Controller
 
             if (User::where('email', $request->email)->exists() ||
                 User::where([
-                    'fname' => $request->fname,
-                    'mname' => $request->lname,
-                    'lname' => $request->mname,
+                    'fname' => $fname,
+                    'mname' => $mname,
+                    'lname' => $lname,
                     'suffix' => $request->suffix,
                     'birthdate' => Carbon::parse($request->birthdate)->toDateString(),
                 ])->exists()) {
@@ -89,9 +94,9 @@ class RegisterController extends Controller
 
             $user = new User;
             $user->id = $this->generateCustomId();
-            $user->fname = $request->fname;
-            $user->mname = $request->mname;
-            $user->lname = $request->lname;
+            $user->fname = $fname;
+            $user->mname = $mname;
+            $user->lname = $lname;
             $user->email = $request->email;
             $user->password = bcrypt($request->password);
             $user->isSocial = 'NO';
@@ -114,7 +119,7 @@ class RegisterController extends Controller
         return Carbon::now()->year . str_pad($next_id_suffix, 5, '0', STR_PAD_LEFT);
     }
 
-    private function generateAndSendQR($user, $filename) {
+    public function generateAndSendQR($user, $filename) {
         $qrPath = public_path("qr/user/$filename");
 
         (new GenerateQR())->generate($filename, $user->id, $user->id, "qr/user/");

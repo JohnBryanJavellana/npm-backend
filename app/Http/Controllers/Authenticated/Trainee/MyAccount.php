@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Cache;
 
 class MyAccount extends Controller
 {
-    public function get_trainee_general_info(Request $request, $user) {
+    public function get_trainee_general_info($user) {
         try {
             $trainee_general_info = User::with([
                 'additional_trainee_info',

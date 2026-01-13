@@ -71,7 +71,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     // SUPERADMIN: needs access for updating user details
     // reuse trainee user profile update functionalities
-    Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN')->group(function () {
+    Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () {
         Route::prefix('/my-account/')->group(function() {
             Route::post('create_or_update_additional_info', [MyAccount::class,'create_or_update_additional_info']);
             Route::post('upload_profile_picture', [MyAccount::class,'upload_profile_picture']);
@@ -83,9 +83,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::prefix('/enrollment/')->group(function () {
-            Route::get('get_requirements/{moduleId}', [TraineeEnrollment::class, 'view_module_requirements_v2']);
+            Route::match(["GET", "POST"],'get_requirements/{moduleId}', [TraineeEnrollment::class, 'view_module_requirements_v2']);
             Route::post('remove_training_request/{training_request_id}', [TraineeEnrollment::class, 'remove_training_request']);
-            Route::get('get_available_trainings', [TraineeEnrollment::class,'get_available_trainings']);
+            Route::match(['POST', 'GET'],'get_available_trainings', [TraineeEnrollment::class,'get_available_trainings']);
             Route::get('trainee_selected_training/{status}', [TraineeEnrollment::class,'trainee_selected_training']);
             Route::post('send_enrollment_request', [TraineeEnrollment::class,'send_enrollment_request']);
             Route::post('send_training_requirements', [TraineeEnrollment::class,'send_training_requirements']);
@@ -299,7 +299,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix('/masterlist/')->group(function() {
             Route::prefix('/user/')->group(function() {
-                Route::get('get_users', [Masterlist::class, 'get_users']);
+                Route::match(['GET', 'POST'], 'get_users', [Masterlist::class, 'get_users']);
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
                 Route::get('get_user_credits/{user_id}', [Masterlist::class, 'get_user_credits']);
                 Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities']);

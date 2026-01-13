@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Http\Controllers\Guest\RegisterController;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
@@ -9,6 +10,12 @@ use Carbon\Carbon;
 
 class EnrollmentAdminAccountSeeder extends Seeder
 {
+    protected $registerCtrlInstance;
+
+    public function __construct(RegisterController $registerCtrl) {
+        $this->registerCtrlInstance = $registerCtrl;
+    }
+
     /**
      * Run the database seeds.
      */
@@ -23,7 +30,7 @@ class EnrollmentAdminAccountSeeder extends Seeder
                 'email_verified_at' => Carbon::now(),
                 'birthdate' => Carbon::parse('07-11-2002'),
                 'role' => "SUPERADMIN",
-                'qr' => "",
+                'qr' => "1.png",
                 'dark_mode' => "light",
                 'password' => bcrypt("123456")
             ]
@@ -42,6 +49,8 @@ class EnrollmentAdminAccountSeeder extends Seeder
             $enrollment_admin_account->dark_mode = $user['dark_mode'];
             $enrollment_admin_account->password = $user['password'];
             $enrollment_admin_account->save();
+
+            $this->registerCtrlInstance->generateAndSendQR($user, $user['qr']);
         }
     }
 }
