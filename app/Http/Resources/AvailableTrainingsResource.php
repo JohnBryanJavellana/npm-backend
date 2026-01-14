@@ -45,7 +45,14 @@ class AvailableTrainingsResource extends JsonResource
                 'amount' => $this->module?->charge?->amount,
                 'category_name' => $this->module?->charge?->chargeCategory?->name,
             ],
-        ];
+            'facilitator' => $this->module?->facilitator->map(function($f) {
+                return [
+                    "name" => $f->facilitator->name,
+                    "email" => $f->facilitator->email,
+                    "role" => $f->role
+                ];
+            })
+        ]; 
     }
 }
 
