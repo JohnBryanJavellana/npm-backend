@@ -23,14 +23,9 @@ use App\Models\{
     Training,
     Requirement,
     EnrolledCourse,
-    AuditTrail,
-    CourseModule,
-    RequirementSpecificModule,
-    User,
     TrainingRegFile,
     TraineeRequirement,
     EnrollmentInvoice,
-    TrainingSchedule
 };
 use App\Services\Trainee\Enrollment\EnrollmentService;
 use App\Services\Trainee\Invoice\TraineeInvoiceService;
@@ -108,6 +103,7 @@ class TraineeEnrollment extends Controller
                 "training",
                 "training.module.moduleType",
                 "training.module.charge",
+                "training.module.facilitator.facilitator",
                 "invoice",
             ])
             ->where([
@@ -138,7 +134,8 @@ class TraineeEnrollment extends Controller
 
             $trainings = Training::with([
                 "module.moduleType",
-                "module.charge.chargeCategory"
+                "module.charge.chargeCategory",
+                "module.facilitator.facilitator"
             ])
             ->whereDoesntHave('hasData', function($q) use($userId){
                 $q->where('user_id', $userId)
@@ -243,6 +240,8 @@ class TraineeEnrollment extends Controller
         \Log::info("inputs", [$request->all(), $training_request_id]);
         try {
             DB::beginTransaction();
+            
+
             $training_request = EnrolledCourse::find($training_request_id);
             $training_request->enrolled_course_status = 'CANCELLED';
             $training_request->save();
