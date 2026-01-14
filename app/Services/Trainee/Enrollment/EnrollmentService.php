@@ -41,6 +41,7 @@ class EnrollmentService {
         ->where("user_id", $validated["userId"])
         ->get();
     }
+    
     public function getRankLicense()
     {
         $cacheKey = "rank:license:all";

@@ -314,12 +314,14 @@ class MyAccount extends Controller
 
                 return $file_requested ? $filename_requested : null;
             }
+            //Exception instance
         } catch(\Exception $e) {
+            throw $e;
             return response()->json(['message' => "Something went wrong! Please try again"], 422);
         }
     }
 
-    public function get_all_courses_and_schools (Request $request) {
+    public function get_all_courses_and_schools () {
         $courses = MainCourse::where('course_status', 'ACTIVE')->get();
         $schools = MainSchool::where('school_status', 'ACTIVE')->get();
         return response()->json(['courses' => $courses, 'schools' => $schools], 200);

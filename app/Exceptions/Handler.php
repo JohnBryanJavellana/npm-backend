@@ -40,6 +40,7 @@ class Handler extends ExceptionHandler
                 'message' => $e->getMessage()
             ], 422);
         }
+
         return parent::render($request, $e);
     }
 }

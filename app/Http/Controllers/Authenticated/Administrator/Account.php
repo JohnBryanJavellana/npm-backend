@@ -91,6 +91,8 @@ class Account extends Controller
     }
 
     public function update_personal(Request $request) {
+        \Log::info($request->all());
+
         $validation = [
             'firstName' => 'required|string',
             'gender' => 'required|string',
@@ -116,7 +118,7 @@ class Account extends Controller
                 $user->mname = $request->middleName;
                 $user->lname = $request->lastName;
                 $user->gender = $request->gender;
-                $user->suffix = $request->suffix;
+                $user->suffix = $request?->suffix;
                 $user->birthdate = $request->birthdate;
 
                 if ($user->email !== $request->email) {

@@ -23,10 +23,13 @@ class LibraryService {
 
     public function updateOverDue($userId)
     {
-        $this->bookReservationModel::where("status", "RECEIVED")
-        ->whereRelation("bookRes", "user_id", "=", $userId)
-        ->where('to_date', '<', now())
-        ->update(["status" => "EXPIRED"]);
+        DB::transaction(function() use ($userId){
+            $this->bookReservationModel::where("status", "RECEIVED")
+            ->whereRelation("bookRes", "user_id", "=", $userId)
+            ->whereNull("book_copy_id")
+            ->where('to_date', '<', now())
+            ->update(["status" => "EXPIRED"]);
+        });
     }
 
     public function createReservation($validated, $user)
@@ -160,6 +163,6 @@ class LibraryService {
 
     public function cancelBookReservation()
     {
-        
+        return;
     }
 }

@@ -130,15 +130,17 @@ class TraineeLibrary extends Controller
         }
     }
 
+    /** GET TRAINEE RECORD BY ID */
     public function view_request_details(Request $request){
         try {
             \Log::info("view_request_details", [$request->all()]);
             $user_id = $request->user()->id;
             $trac = $request->trace_number;
+
             // $version = Cache::get("user_id:$user_id:version", 1);
             // $cache_key = "user_id:$user_id:v:$version:$trac";
-
             // $records = Cache::remember($cache_key, $this->short_ttl, function () use ($user_id, $trac) {
+
             $record = EnrolledCourse::query()
                 ->where('user_id', $user_id)
                 ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
@@ -376,7 +378,7 @@ class TraineeLibrary extends Controller
             ->get();
 
             //get all cancelled use to filter flatten and pluck the names of the books and implode?
-            $cancellables = $books->filter(fn($book) => !$book->status === RequestStatus::CANCELLED)
+            $cancellables = $books->filter(fn($book) => !$book->status === RequestStatus::CANCELLED->value)
             ->pluck('id')
             ->toArray();
 

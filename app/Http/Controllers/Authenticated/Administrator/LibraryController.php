@@ -448,7 +448,7 @@ class LibraryController extends Controller
             $bookRes->status = 'EXTENDING';
             $bookRes->save();
 
-            Notifications::notify($request->user()->id, $request->userId, "LIBRARY", "We have created a book reservation extension request for you.");
+            Notifications::notify($request->user()->id, $request->userId, "LIBRARY", "created a book reservation extension request for you.");
             AuditHelper::log($request->user()->id, "Submitted a book reservation extension request. ID#" . $this_request->id);
 
             if(env('USE_EVENT')) {
@@ -484,7 +484,7 @@ class LibraryController extends Controller
                 $bookRes->save();
             }
 
-            Notifications::notify($request->user()->id, $request->bookReservation->bookRes->trainee->id, "LIBRARY", "We have updated your book reservation extension request.");
+            Notifications::notify($request->user()->id, $this_request->bookReservation->bookRes->trainee->id, "LIBRARY", "updated your book reservation extension request.");
             AuditHelper::log($request->user()->id, "Updated a book reservation extension request.");
 
             if(env('USE_EVENT')) {
@@ -499,7 +499,7 @@ class LibraryController extends Controller
     }
 
     public function update_reservation (UpdateBookRequest $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+        return TransactionUtil::transact($request, ["book_reservations_cache"], function() use ($request) {
             $this_book = BookReservation::find($request->documentId);
             $this_book->status = $request->status;
             $this_book->save();
@@ -537,7 +537,7 @@ class LibraryController extends Controller
                 $record->save();
             }
 
-            Notifications::notify($request->user()->id, $request->bookRes->trainee->id, "LIBRARY", "We have updated your book reservation status.");
+            Notifications::notify($request->user()->id, $this_book->bookRes->trainee->id, "LIBRARY", "updated your book reservation status.");
             AuditHelper::log($request->user()->id, "Updated book reservation status. ID#" . $request->documentId);
 
             if(env('USE_EVENT')) {
@@ -547,7 +547,6 @@ class LibraryController extends Controller
                 );
             }
 
-            Cache::forget('book_reservations_cache');
             return response()->json(['message' => "You've updated a book request. ID#" . $request->documentId], 200);
         });
     }
@@ -666,7 +665,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                Notifications::notify($request->user()->id, $request->borrower, "LIBRARY", "We have created a library request for you.");
+                Notifications::notify($request->user()->id, $request->borrower, "LIBRARY", "created a library request for you.");
                 $action = $request->type === "WALK-IN"
                         ? strtolower($request->type) . " library request for User ID#" . ($request->user()->role === "TRAINER" ? $request->user()->id : $request->borrower)
                         : strtolower($request->type) . " library request";
@@ -774,7 +773,7 @@ class LibraryController extends Controller
                 $new_fine_selected_book_reservation->save();
             }
 
-            Notifications::notify($request->user()->id, $request->user_id, "LIBRARY", "We're sorry. We have " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a request fine for you.");
+            Notifications::notify($request->user()->id, $request->user_id, "LIBRARY", ($request->httpMethod === "POST" ? 'created' : 'updated') . " a request fine for you.");
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a request fine. ID#" . $new_fine->id);
 
             if(env('USE_EVENT')) {
