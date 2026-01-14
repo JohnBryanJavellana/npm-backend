@@ -31,7 +31,8 @@ return new class extends Migration
                 'RECEIVED',
                 'LOST',
                 'DAMAGED',
-                'EXPIRED'
+                'EXPIRED',
+                'EXTENDING'
             ])->default('PENDING');
             $table->date('from_date');
             $table->date('to_date');

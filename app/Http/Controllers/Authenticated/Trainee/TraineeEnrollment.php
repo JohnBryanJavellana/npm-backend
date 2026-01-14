@@ -208,7 +208,7 @@ class TraineeEnrollment extends Controller
                 "charge_id" => $training->module?->charge?->id
             ];
 
-            $this->traineeInvoiceService->createEnrollmentInvoice($data);
+            // $this->traineeInvoiceService->createEnrollmentInvoice($data);
 
             $training->decrement('schedule_slot', 1);
             AuditHelper::log($user_id, "User " . $user_id . " sent an enrollment request.");

@@ -2,7 +2,7 @@
 namespace App\Utils;
 
 use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Imagick\Driver;
+use Intervention\Image\Drivers\Gd\Driver;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class GenerateQR {
