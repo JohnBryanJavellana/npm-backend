@@ -45,13 +45,13 @@ class TraineeEnrollment extends Controller
         'FOR-PAYMENT',
         'IR',
         'CSFB',
-        'PROCESSING PAYMENT'
+        'PROCESSING PAYMENT',
     ];
 
 
     public function __construct(
         protected EnrollmentService $enrollmentService,
-        protected TraineeInvoiceService $traineeInvoiceService
+        // protected TraineeInvoiceService $traineeInvoiceService
     )
     {}
 
@@ -202,11 +202,11 @@ class TraineeEnrollment extends Controller
                 }
             }
 
-            $data = [ 
-                "userId" => $user_id,
-                "enrolled_course_id" => $selected_training->id,
-                "charge_id" => $training->module?->charge?->id
-            ];
+            // $data = [ 
+            //     "userId" => $user_id,
+            //     "enrolled_course_id" => $selected_training->id,
+            //     "charge_id" => $training->module?->charge?->id
+            // ];
 
             // $this->traineeInvoiceService->createEnrollmentInvoice($data);
 
@@ -310,53 +310,44 @@ class TraineeEnrollment extends Controller
     }
 
     public function update_invoice_trainings (Request $request) {
-        \Log::info('proceed payment: ', $request->all());
+        \Log::info('update_invoice_trainings: ', $request->all());
+        return response()->json([$request->all()], 200);
+        try {
+            DB::beginTransaction();
 
-        $validations = [
-            'training_id' => 'required',
-            'training_id.training_id'=> 'required',
-        ];
+            $data = $request->training_id;
+            $tn = $this->createTraceNumber();
+            foreach ($data['training_id'] as $index => $trainingId) {
+                $record = EnrollmentInvoice::find($data['invoice_id'][$index]);
+                $record->enrolled_course_id = $trainingId;
+                $record->payment_type = $data['type'][$index];
+                $record->invoice_reference = $data['ref_Number'][$index];
+                $record->invoice_amount = $data['amount'][$index];
+                $record->invoice_status = 'FOR-VERIFICATION';
+                $record->invoice_date = Carbon::now();
+                $record->trace_number = $tn;
 
-        $validator = \Validator::make($request->all(), $validations);
+                $enrolled_training_update = EnrolledCourse::where('id', $trainingId)->first();
+                $enrolled_training_update->enrolled_course_status = "PROCESSING PAYMENT";
 
-        if($validator->fails()){
-            $errors = $validator->errors()->messages();
-            return response()->json(['message' => implode(', ', $errors)],400);
-        } else {
-            try {
-                DB::beginTransaction();
+                $enrolled_training_update->save();
+                $record->save();
 
-                $data = $request->training_id;
-                $tn = $this->createTraceNumber();
-                foreach ($data['training_id'] as $index => $trainingId) {
-                    $record = EnrollmentInvoice::find($data['invoice_id'][$index]);
-                    $record->enrolled_course_id = $trainingId;
-                    $record->payment_type = $data['type'][$index];
-                    $record->invoice_reference = $data['ref_Number'][$index];
-                    $record->invoice_amount = $data['amount'][$index];
-                    $record->invoice_status = 'FOR-VERIFICATION';
-                    $record->invoice_date = Carbon::now();
-                    $record->trace_number = $tn;
-
-                    $enrolled_training_update = EnrolledCourse::where('id', $trainingId)->first();
-                    $enrolled_training_update->enrolled_course_status = "PROCESSING PAYMENT";
-
-                    $enrolled_training_update->save();
-                    $record->save();
-
-                    AuditHelper::log($request->user()->id, "User " . $request->user()->id . " has proceed training/s for verification.");
-                }
-
-                event(new BETraineeApplication(''));
-
-                DB::commit();
-                return response()->json(['message'=> 'Successfully updated'], 200);
-            } catch (\Exception $e) {
-                DB::rollBack();
-                \Log::error("error update_invoice_trainings", [$e->getMessage()]);
-                return response()->json(["message" => "Something went wrong, Please try again."], 500);
+                AuditHelper::log($request->user()->id, "User " . $request->user()->id . " has proceed training/s for verification.");
             }
+
+            if(env("USE_EVENT")) {
+                event(new BETraineeApplication(''));
+            }    
+
+            DB::commit();
+            return response()->json(['message'=> 'Successfully updated'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error("error update_invoice_trainings", [$e->getMessage()]);
+            return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
+        
     }
 
     public function get_applications(ViewTraineeRecRequest $request)

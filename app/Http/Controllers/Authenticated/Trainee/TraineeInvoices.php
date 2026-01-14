@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Trainee\Enrollment\EnrollmentInvoiceRequest;
 use App\Http\Requests\Trainee\Invoice\DormitoryInvoiceRequest;
 use App\Http\Resources\Trainee\Invoices\DormitoryInvoiceResource;
 use App\Http\Requests\Trainee\Library\LibInvoiceRequest;
@@ -10,6 +11,7 @@ use App\Http\Resources\LibInvoiceResource;
 use Illuminate\Http\Request;
 use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice};
 use App\Services\Trainee\Dormitory\DormitoryInvoiceService;
+use App\Services\Trainee\Enrollment\EnrollmentInvoiceService;
 use App\Services\Trainee\Library\LibraryInvoiceService;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -21,6 +23,7 @@ class TraineeInvoices extends Controller
     public function __construct(
         protected DormitoryInvoiceService $dormitoryInvoiceService,
         protected LibraryInvoiceService $libraryInvoiceService,
+        protected EnrollmentInvoiceService $enrollmentInvoiceService
     )
     {}
     public function get_all_trainee_invoices(Request $request) {
@@ -36,9 +39,22 @@ class TraineeInvoices extends Controller
         return response()->json(['message' => 'Invoices Fetched Successfully!', 'data' => $invoices], 200);
     }
 
-    public function updateEnrollmentInvoice()
+    public function updateEnrollmentInvoice(EnrollmentInvoiceRequest $request)
     {
-        return;
+        // return response()->json([$request->all()], 200);
+        try
+        {
+            $validated = $request->validated();
+            $this->enrollmentInvoiceService->updateEnrollmentInvoice($validated);
+            
+        }
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (\Exception $e) {
+            \Log::error("updateEnrollmentInvoiceError", [$e]);
+            return response()->json(["message" => "Something went wrong, Please try again."], 500);
+        }
     }
 
     public function library_penalties(Request $request)

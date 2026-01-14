@@ -20,4 +20,10 @@ class EnrollmentInvoice extends Model
     public function orNumber(){
         return $this->hasOne(CashierOR::class, 'id', 'cashier_o_r_id');
     }
+
+    /** Scopes */
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where("user_id", $userId);
+    }
 }

@@ -53,6 +53,7 @@ class DormitoryInvoiceService {
                     "datePaid" => Carbon::now()
                 ]);
             }
+
             $this->creditController->store($validated, $userId);
 
             return (float) (

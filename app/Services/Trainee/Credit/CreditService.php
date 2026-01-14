@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class CreditService {   
     public function __construct(
-        private Credit $creditModel
+        protected Credit $creditModel
     )
     {}
 

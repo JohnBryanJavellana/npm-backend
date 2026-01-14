@@ -8,6 +8,7 @@ use App\Enums\UserRoleEnum;
 use App\Http\Requests\Trainee\Enrollment\UploadAvatarRequest;
 use App\Mail\UpdatePassword;
 use App\Mail\UpdatePasswordMail;
+use App\Utils\ConvertToBase64;
 use App\Utils\GenerateUniqueFilename;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,7 @@ use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Cache;
+use Str;
 
 class MyAccount extends Controller
 {
@@ -44,18 +46,18 @@ class MyAccount extends Controller
                 'additional_trainee_info.educational_attainment',
                 'additional_trainee_info.latest_shipboard_attainment'
             ])->where('id', $user)->get();
-            
+
             $requirements = Requirement::where(['isBasic' => 'YES', 'status' => 'ACTIVE'])->get();
 
             return response()->json([
                 'trainee_general_info'=> $trainee_general_info,
                 'requirements' => $requirements
             ], 200);
-        } catch (\Exception $e) { 
+        } catch (\Exception $e) {
             return response()->json(['message'=> $e->getMessage()], 500);
         }
     }
-    
+
     public function upload_profile_picture (UploadAvatarRequest $request) {
 
         \Log::info("usser", [$request->all()]);
@@ -76,22 +78,36 @@ class MyAccount extends Controller
             $user_id = $validated["user_id"];
             $user = User::findOrFail($user_id);
 
-            if ($request->hasFile('avatar')){
-                $filePath = public_path('user_images/' . $user->profile_picture);
+            if ($request->has('avatar')){
+                // $filePath = public_path('user_images/' . $user->profile_picture);
 
-                if (file_exists($filePath) && is_file($filePath) && $user->profile_picture !== "default-avatar.png") {
-                    unlink($filePath);
+                // if (file_exists($filePath) && is_file($filePath) && $user->profile_picture !== "default-avatar.png") {
+                //     unlink($filePath);
+                // }
+
+                // $avatar = $request->file('avatar');
+                // $filename = time() . '_' . uniqid() . '.' . $avatar->getClientOriginalExtension();
+                // $avatar->move(public_path('user_images'), $filename);
+
+                // $user->profile_picture = $filename;
+                // $user->save();
+
+                /**
+                 * @param string madapaka! 🍆💦
+                 */
+                if (($request->avatar !== $user->profile_picture) && $user->profile_picture !== 'default-avatar.png') {
+                    if (file_exists(public_path('user-images/' . $user->profile_picture))){
+                        unlink(public_path('user-images/' . $user->profile_picture));
+                    }
                 }
 
-                $avatar = $request->file('avatar');
-                $filename = time() . '_' . uniqid() . '.' . $avatar->getClientOriginalExtension();
-                $avatar->move(public_path('user_images'), $filename);
-
-                $user->profile_picture = $filename;
+                $image_name = Str::uuid() . '.png';
+                ConvertToBase64::generate($request->avatar, 'image', "user_images/$image_name");
+                $user->profile_picture = $image_name;
                 $user->save();
             }
 
-            AuditHelper::log($user_id, $request->user()->role === UserRoleEnum::SUPERADMIN->value 
+            AuditHelper::log($user_id, $request->user()->role === UserRoleEnum::SUPERADMIN->value
                 ? "An Admin has updated user's {$user_id} profile picture."
                 : "User {$user_id} profile picture has been updated.");
 
@@ -100,9 +116,9 @@ class MyAccount extends Controller
             if(env("USE_EVENT")) {
                 event(new BEAccount(''));
             }
-            
+
             return response()->json(['message' => "You have successfully updated the avatar!"], 200);
-        } 
+        }
         catch (ModelNotFoundException $e) {
             return response()->json(["User not found."], 404);
         }
@@ -162,8 +178,8 @@ class MyAccount extends Controller
             'school_year_graduated' => 'nullable|string|max:255',
             'file_upload' => 'nullable|array',
             'file_upload.*.req_id' => 'integer',
-            'file_upload.*.file' => 'file|mimes:jpg,png,pdf,docx|max:5120', 
-        ];  
+            'file_upload.*.file' => 'file|mimes:jpg,png,pdf,docx|max:5120',
+        ];
 
         $user = User::with(['additional_trainee_info'])->find($request->user_id);
 
@@ -194,9 +210,9 @@ class MyAccount extends Controller
                 }
                 $user->birthdate = $request->birthdate;
                 $user->save();
-                
+
                 //general info
-                $general_info = $user?->additional_trainee_info?->general_information_id;  
+                $general_info = $user?->additional_trainee_info?->general_information_id;
                 $this_gen_info = $general_info ? GeneralInformation::findOrFail($general_info) : new GeneralInformation();
 
                 $this_gen_info->gen_info_status = $request->gen_info_status;
@@ -222,7 +238,7 @@ class MyAccount extends Controller
                 $this_gen_info->save();
 
                 //contact
-                $contact_info = $user?->additional_trainee_info?->contact_id; 
+                $contact_info = $user?->additional_trainee_info?->contact_id;
                 $this_contact_info = $contact_info ? Contact::find($contact_info) : New Contact();
 
                 $this_contact_info->person_name = $request->person_name;
@@ -233,11 +249,11 @@ class MyAccount extends Controller
                 $this_contact_info->person_number_two = $request->person_number_two;
                 $this_contact_info->person_landline = $request->landline;
                 $this_contact_info->save();
-                
+
                 //education
                 $education_info = $user?->additional_trainee_info?->educational_attainment_id;
                 $this_education_info = $education_info ? EducationalAttainment::find($education_info) : new EducationalAttainment();
-            
+
                 $this_education_info->main_course_id= $request->school_course_taken;
                 $this_education_info->main_school_id = $request->school;
                 $this_education_info->school_graduated = $request->school_year_graduated;
@@ -261,20 +277,20 @@ class MyAccount extends Controller
                 $additional_info = $user?->additional_trainee_info?->id;
                 $this_additional_info = $general_info ? AdditionalTraineeInfo::findOrFail($additional_info) : new AdditionalTraineeInfo();
 
-                $this_additional_info->user_id = $request->user_id;        
+                $this_additional_info->user_id = $request->user_id;
                 $this_additional_info->general_information_id = $this_gen_info->id;
                 $this_additional_info->contact_id = $this_contact_info->id;
                 $this_additional_info->latest_s_b_exp_id = $this_latest_disembarkment_info->id;
                 $this_additional_info->educational_attainment_id = $this_education_info->id;
                 $this_additional_info->save();
-                
+
                 if ($request->has('file_upload')){
                     foreach($request->file_upload as $key => $file) {
                         $record = TrainingRegFile::where([
-                            'additional_trainee_info_id' => $this_additional_info->id, 
+                            'additional_trainee_info_id' => $this_additional_info->id,
                             'requirement_id' => $file['req_id']
                         ])->first();
-                        if ($record) {                            
+                        if ($record) {
                             $record->filename = $this->savefile("trainee-files", $file['file']);
                             $record->save();
                         } else {
@@ -285,7 +301,7 @@ class MyAccount extends Controller
                             $new_record->save();
                         }
                     }
-                }   
+                }
 
                 AuditHelper::log($request->user_id, "You have posted your new information!");
                 Cache::forget('user_profile_' . $request->user_id);
@@ -295,16 +311,16 @@ class MyAccount extends Controller
                 }
 
                 DB::commit();
-                
+
                 return response()->json(['message' => "You have posted your new information!", 'reloggin' => $reloggin], 201);
             } catch (\Exception $e) {
                 \Log::error("errorr", [$e]);
-                DB::rollback(); 
+                DB::rollback();
                 return response()->json(['message'=> $e->getMessage()], 400);
             }
         }
     }
-    
+
     public function savefile($path, $fileUploaded) {
         try {
             if($fileUploaded){
