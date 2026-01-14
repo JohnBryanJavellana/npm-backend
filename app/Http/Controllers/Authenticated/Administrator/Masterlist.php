@@ -3,21 +3,18 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
-use App\Models\Credit;
+use App\Http\Controllers\Guest\RegisterController;
 use Illuminate\Http\Request;
 use App\Utils\TransactionUtil;
-use Illuminate\Auth\Events\Registered;
 use App\Http\Requests\Admin\Masterlist\{
     CreateOrUpdateEmployer,
     CreateOrUpdatePosition
 };
-use Carbon\Carbon;
 use App\Utils\AuditHelper;
 use App\Events\{
     BEMasterlist,
     BEAuditTrail
 };
-use Illuminate\Support\Facades\DB;
 use App\Models\{
     AuditTrail,
     Employer,
@@ -27,6 +24,11 @@ use App\Models\{
 
 class Masterlist extends Controller
 {
+    protected $registerCtrlInstance;
+
+    public function __construct(RegisterController $registerController) {
+        $this->registerCtrlInstance = $registerController;
+    }
 
     public function get_users (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
@@ -74,85 +76,7 @@ class Masterlist extends Controller
     }
 
     public function create_or_update_user (Request $request) {
-        // 1. Base validation rules
-        $validations = [
-            // Ensure email is unique, ignoring the current documentId during update
-            'email' => 'required|email|unique:users,email,' . $request->documentId,
-            'birthdate' => 'required|date|before:today',
-            'fname' => 'required',
-            'lname' => 'required',
-            'role' => 'required'
-        ];
-
-        // 2. Add complex password validation if password is being set/updated
-        if($request->password) {
-            $validations['password'] = [
-                'required',
-                'confirmed',
-                'min:6',
-                'regex:/[a-z]/',
-                'regex:/[A-Z]/',
-                'regex:/[0-9]/',
-                'regex:/[@$!%*#?&]/'
-            ];
-            $validations['password_confirmation'] = "required";
-        }
-
-        $validator = \Validator::make($request->all(), $validations);
-
-        if($validator->fails()){
-            // 3. Handle validation failure
-            $errors = $validator->messages()->all();
-            return response()->json(['message' => implode(', ', $errors)], 422);
-        } else {
-            try {
-                // 4. Start Database Transaction
-                DB::beginTransaction();
-
-                // 5. Determine if creating or updating
-                $user = $request->httpMethod === "POST" ? new User : User::find($request->documentId);
-
-                // 6. Set ID (Custom ID generation logic for new users)
-                $user->id = $request->httpMethod === "POST"
-                    ? Carbon::now()->year . str_pad((int) substr(User::max('id'), 4) + 1, 5, '0', STR_PAD_LEFT)
-                    : $request->documentId; // Use existing ID for updates
-
-                // 7. Assign data
-                $user->fname = $request->fname;
-                $user->lname = $request->lname;
-                $user->mname = $request->mname;
-                $user->suffix = $request->suffix;
-                $user->email = $request->email;
-                $user->role = $request->role;
-                $user->birthdate = $request->birthdate;
-
-                // Hash and set password only if provided
-                if($request->password) {
-                    $user->password = bcrypt($request->password);
-                }
-
-                $user->save();
-
-                event(new Registered($user));
-
-                // 8. Log the action
-                AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a user. ID#" . $user->id);
-
-                // 9. Fire events
-                event(
-                    new BEMasterlist(''),
-                    new BEAuditTrail('')
-                );
-
-                // 10. Commit transaction and return success
-                DB::commit();
-                return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a user. ID#" . $user->id], 200);
-            } catch (\Exception $e) {
-                // 11. Handle exceptions and rollback transaction
-                DB::rollBack();
-                return response()->json(['message' => $e->getMessage()], 500);
-            }
-        }
+        $this->registerCtrlInstance->register_user($request);
     }
 
     public function remove_user (Request $request, int $user_id) {

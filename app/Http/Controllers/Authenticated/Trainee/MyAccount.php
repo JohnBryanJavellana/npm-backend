@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BEAccount;
 use App\Http\Controllers\Controller;
+use App\Enums\UserRoleEnum;
+use App\Http\Requests\Trainee\Enrollment\UploadAvatarRequest;
 use App\Mail\UpdatePassword;
 use App\Utils\GenerateUniqueFilename;
 use Illuminate\Http\Request;
@@ -24,6 +26,7 @@ use App\Models\{
 use App\Utils\AuditHelper;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Cache;
 
 class MyAccount extends Controller
@@ -52,50 +55,62 @@ class MyAccount extends Controller
         }
     }
     
-    public function upload_profile_picture (Request $request) {
+    public function upload_profile_picture (UploadAvatarRequest $request) {
 
         \Log::info("usser", [$request->all()]);
-        $validation = [
-            "user_id" => "required|exists:users,id",
-            'avatar' => 'required',
-        ];
+        // $validation = [
+        //     "user_id" => "required|exists:users,id",
+        //     'avatar' => 'required',
+        // ];
 
-        $validator = \Validator::make($request->all(), $validation);
+        // $validator = \Validator::make($request->all(), $validation);
 
-        if($validator->fails()) {
-            $errors = $validator->messages()->all();
-            return response()->json(['message' => implode(', ', $errors)], 422);
-        } else {
-            try {
-                $user = User::findOrFail($request->user_id);
+        // if($validator->fails()) {
+        //     $errors = $validator->messages()->all();
+        //     return response()->json(['message' => implode(', ', $errors)], 422);
+        // } else {
 
-                if ($request->hasFile('avatar')){
-                    $filePath = public_path('user_images/' . $user->profile_picture);
+        try {
+            $validated = $request->validated();
+            $user_id = $validated["user_id"];
+            $user = User::findOrFail($user_id);
 
-                    if (file_exists($filePath) && is_file($filePath) && $user->profile_picture !== "default-avatar.png") {
-                        unlink($filePath);
-                    }
+            if ($request->hasFile('avatar')){
+                $filePath = public_path('user_images/' . $user->profile_picture);
 
-                    $avatar = $request->file('avatar');
-                    $filename = time() . '_' . uniqid() . '.' . $avatar->getClientOriginalExtension();
-                    $avatar->move(public_path('user_images'), $filename);
-
-                    $user->profile_picture = $filename;
-                    $user->save();
+                if (file_exists($filePath) && is_file($filePath) && $user->profile_picture !== "default-avatar.png") {
+                    unlink($filePath);
                 }
 
-                AuditHelper::log($request->user_id, "User {$request->user_id} profile picture has been updated!");
-                Cache::forget('user_profile_' . $request->user_id);
+                $avatar = $request->file('avatar');
+                $filename = time() . '_' . uniqid() . '.' . $avatar->getClientOriginalExtension();
+                $avatar->move(public_path('user_images'), $filename);
 
-                if(env("USE_EVENT")) {
-                    event(new BEAccount(''));
-                }
-                
-                return response()->json(['message' => "You have successfully updated your avatar!"], 200);
-            } catch (\Exception $e) {
-                return response()->json(['message'=> $e->getMessage()], 500);
+                $user->profile_picture = $filename;
+                $user->save();
             }
+
+            AuditHelper::log($user_id, $request->user()->role === UserRoleEnum::SUPERADMIN->value 
+                ? "An Admin has updated user's {$user_id} profile picture."
+                : "User {$user_id} profile picture has been updated.");
+
+            Cache::forget('user_profile_' . $user_id);
+
+            if(env("USE_EVENT")) {
+                event(new BEAccount(''));
+            }
+            
+            return response()->json(['message' => "You have successfully updated the avatar!"], 200);
+        } 
+        catch (ModelNotFoundException $e) {
+            return response()->json(["User not found."], 404);
         }
+        catch (\Exception $e) {
+            \Log::error("error_upload_profile_picture", [$e]);
+            return response()->json(['message'=> "Something went wrong, Please try again."], 500);
+        }
+
+        // }
     }
     public function create_or_update_additional_info (Request $request) {
         \Log::info("Send Info", $request->all());

@@ -24,7 +24,8 @@ use App\Http\Requests\Admin\Enrollment\{
     CreateOrUpdateSponsor,
     CreateOrUpdateLicense,
     CreateOrUpdateRank,
-    CreateOrUpdateSchool
+    CreateOrUpdateSchool,
+    CreateOrUpdateFacilitator
 };
 use App\Utils\{
     AuditHelper,
@@ -48,6 +49,7 @@ use App\Models\{
     License,
     Rank,
     Sponsor,
+    TrainingFacilitator
 };
 
 class EnrollmentCtrl extends Controller
@@ -932,6 +934,64 @@ class EnrollmentCtrl extends Controller
 
                 DB::commit();
                 return response()->json(['message' => "You've removed rank. ID#$rank_id"], 200);
+            }
+        });
+    }
+
+    public function get_facilitators (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $facilitators = TrainingFacilitator::withCount(['hasData'])->with([
+                'facilitator',
+                'module'
+            ])->get();
+            return response()->json(['facilitators' => $facilitators], 200);
+        });
+    }
+
+    public function create_or_update_facilitator (CreateOrUpdateFacilitator $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $this_facilitator = $request->httpMethod === "POST"
+                ? new TrainingFacilitator()
+                : TrainingFacilitator::find($request->documentId);
+
+            $this_facilitator->course_module_id = $request->module;
+            $this_facilitator->user_id = $request->facilitator;
+            $this_facilitator->role = $request->role;
+            $this_facilitator->save();
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a facilitator. ID#" . $this_facilitator->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEEnrollment(''),
+                    new BEAuditTrail(''),
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a facilitator. ID# " . $this_facilitator->id], 201);
+        });
+    }
+
+    public function remove_facilitator (Request $request, int $facilitator_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $facilitator_id) {
+            $this_facilitator = TrainingFacilitator::withCount(['hasData'])->where('id', $facilitator_id)->first();
+
+            if($this_facilitator->has_data_count > 0) {
+                return response()->json(['message' => "Can't remove facilitator. It already has connected data."], 409);
+            } else {
+                $this_facilitator->delete();
+
+                AuditHelper::log($request->user()->id, "Removed a facilitator. ID#$facilitator_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEEnrollment(''),
+                        new BEAuditTrail('')
+                    );
+                }
+
+                DB::commit();
+                return response()->json(['message' => "You've removed facilitator. ID#$facilitator_id"], 200);
             }
         });
     }

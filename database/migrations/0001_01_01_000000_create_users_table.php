@@ -32,7 +32,7 @@ return new class extends Migration
                 'CASHIER'
             ])->default('SUPERADMIN');
             $table->string('password');
-            $table->decimal('credit_amount', 10, 2)->default(0);
+            $table->decimal('credit_amount', 65, 2)->default(0);
             $table->enum('isSocial', ['YES', 'NO'])->default('NO');
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->enum('dark_mode', ['dark', 'light'])->default('light');

@@ -231,6 +231,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_ranks', [EnrollmentCtrl::class, 'get_ranks']);
             Route::post('create_or_update_rank', [EnrollmentCtrl::class, 'create_or_update_rank']);
             Route::delete('remove_rank/{rank_id}', [EnrollmentCtrl::class, 'remove_rank']);
+
+            Route::get('get_facilitators', [EnrollmentCtrl::class, 'get_facilitators']);
+            Route::post('create_or_update_facilitator', [EnrollmentCtrl::class, 'create_or_update_facilitator']);
+            Route::delete('remove_facilitator/{facilitator_id}', [EnrollmentCtrl::class, 'remove_facilitator']);
         });
 
         Route::prefix('/books/')->group(function() {
