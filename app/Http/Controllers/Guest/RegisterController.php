@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
-use App\Http\Requests\Admin\Registration\Register;
 use Illuminate\Auth\Events\Registered;
 use App\Mail\WelcomeAboard;
 use Carbon\Carbon;

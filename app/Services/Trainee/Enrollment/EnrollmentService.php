@@ -22,7 +22,7 @@ class EnrollmentService {
             "training.module.charge:id,charge_category_id,name,amount,description,service_type",
             "training.module.charge.chargeCategory:id,name"
         ])
-        // ->status($validated["status"])
+        ->status($validated["status"])
         ->forUser($validated["userId"])
         ->get();
     }
