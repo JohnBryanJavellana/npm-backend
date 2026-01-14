@@ -178,6 +178,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('update/penalties', [TraineeInvoices::class, 'updateLibInvoice']);
             Route::get('view/{id}', [TraineeInvoices::class, 'view_dormitory_invoices']);
             Route::post('billing/update', [TraineeInvoices::class, 'updateDormInvoice']);
+            Route::post('enrollment/update', [TraineeInvoices::class, 'updateEnrollmentInvoice']);
         });
 
         Route::prefix('/credits/')->group(function() {

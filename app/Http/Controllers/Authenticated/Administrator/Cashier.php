@@ -144,6 +144,7 @@ class Cashier extends Controller
                 'message' => "We've successfully processed a walk-in payment for your " . strtolower($request->service) . " request."
             ], User::find($this_payment->user_id)));
 
+            Notifications::notify($request->user()->id, $this_payment->user_id, $request->service, "processed a walk-in payment for you.");
             AuditHelper::log($request->user()->id, "Processed a walk-in payment. ID# $this_payment->id");
 
             if(env('USE_EVENT')) {

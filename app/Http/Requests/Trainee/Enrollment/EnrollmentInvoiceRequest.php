@@ -2,29 +2,31 @@
 
 namespace App\Http\Requests\Trainee\Enrollment;
 
-use Illuminate\Foundation\Http\FormRequest;
-use App\Enums\UserRoleEnum;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class UploadAvatarRequest extends FormRequest
+use function PHPSTORM_META\map;
+
+class EnrollmentInvoiceRequest extends FormRequest
 {
+
     protected $stopOnFirstFailure = true;
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
+        \Log::info("updateEnrollmentInvoice", [$this->all()]);
         return $this->user() !== null;
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
-            "user_id" => $this->user()->role === UserRoleEnum::SUPERADMIN->value ? $this->user_id : $this->user()->id
+            "user_id" => $this->user()->id
         ]);
     }
-
 
     /**
      * Get the validation rules that apply to the request.
@@ -34,16 +36,11 @@ class UploadAvatarRequest extends FormRequest
     public function rules(): array
     {
         return [
+            "invoice_id" => "required|exists:enrollment_invoices,id",
             "user_id" => "required|exists:users,id",
-            // "avatar" => "required|file|mimes:jpeg,png,jpg"
-            "avatar" => "required"
-        ];
-    }
-
-    public function attributes()
-    {
-        return [
-            "user_id" => "User",
+            "enrolled_course_id" => "required|exists:enrolled_courses,id",
+            "credit_amount" => "nullable",
+            "ref_number" => "required",
         ];
     }
 
@@ -54,7 +51,7 @@ class UploadAvatarRequest extends FormRequest
         throw new HttpResponseException(
             response()->json([
                 "message" => $firstError,
-                "erorrs" => $errors
+                "errors" => $firstError
             ], 422)
         );
     }
