@@ -31,8 +31,11 @@ class EnrollmentService {
     {
         return $this->enrolledCourseModel->query()
         ->with([
-            "training.module.moduleType",
-            "training.module.charge.chargeCategory"
+            "training:id,course_module_id,status,daily_hours,schedule_from,schedule_to,venue,room,schedule_preference,batch_number",
+            "training.module:id,module_type_id,charge_id,name,acronym,compendium",
+            "training.module.moduleType:id,name",
+            "training.module.charge:id,charge_category_id,name,amount,description,service_type",
+            "training.module.charge.chargeCategory:id,name"
         ])
         ->whereKey($validated["courseId"])
         ->where("user_id", $validated["userId"])
@@ -43,8 +46,8 @@ class EnrollmentService {
         $cacheKey = "rank:license:all";
         return Cache::remember($cacheKey, 3600, function() {
             return [
-            "ranks" => $this->rankModel->all(),
-            "licenses" => $this->licenseModel->all(),
+            "ranks" => $this->rankModel->all("id", "name", "short_name", "type"),
+            "licenses" => $this->licenseModel->all("id", "license", "short_name"),
             ];
         });
     }
