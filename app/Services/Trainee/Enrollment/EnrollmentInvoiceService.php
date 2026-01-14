@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Trainee\Invoice;
+namespace App\Services\Trainee\Enrollment;
 
 use App\Enums\RequestStatus;
 use App\Models\EnrollmentInvoice;
@@ -14,6 +14,7 @@ class TraineeInvoiceService {
         protected EnrollmentInvoice $enrollmentInvoiceModel
     ){}
 
+    //REMOVE
     public function createEnrollmentInvoice($validated)
     {
         DB::transaction(function() use ($validated){
@@ -26,9 +27,13 @@ class TraineeInvoiceService {
         });
     }
 
-    public function storePayment()
+    public function updateEnrollmentInvoice($validated)
     {
-        
+        DB::transaction(function() use ($validated){
+            $this->enrollmentInvoiceModel->update([
+
+            ]);
+        });
     }
 }
 

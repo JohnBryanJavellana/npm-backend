@@ -48,10 +48,10 @@ class TraineeLibrary extends Controller
                 );
             }
 
-            $record = EnrolledCourse::where('user_id', $userId)
+            $record = EnrolledCourse::where('user_id', $userId)->query()
+                ->select('training_id')
                 ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
-                ->get()
-                ->select('training_id');
+                ->get();
 
             $books = Book::with([
                 'catalog.genre',
@@ -254,7 +254,7 @@ class TraineeLibrary extends Controller
             Notifications::notify($user->id, null, 'LIBRARY', 'has sent a book request.');
 
             return response()->json(['message' => 'Your book request was sent successfully!'], 200);
-        } 
+        }
         catch (\Exception $e) {
             \Log::error('error send_request_book', [$e]);
             return response()->json(['message' => "Something went wrong, Please try again!"], 500);
@@ -337,7 +337,7 @@ class TraineeLibrary extends Controller
                 $record = BookRes::find($res_id);
                 if (!$record) {
                     return;
-                }   
+                }
                 $date = Carbon::parse($record->to_date);
                 $status = $date->isPast()
                     ? 'EXPIRED'
@@ -374,7 +374,7 @@ class TraineeLibrary extends Controller
             ->whereHas('bookRes', function ($query) use ($res_id){
                 $query->where(['id' =>  $res_id]);
             })
-            ->lockForUpdate()   
+            ->lockForUpdate()
             ->get();
 
             //get all cancelled use to filter flatten and pluck the names of the books and implode?
@@ -388,7 +388,7 @@ class TraineeLibrary extends Controller
             //remove looping
             foreach($books as $book) {
                 if (!in_array($book->status, ["CANCELLED", "RECEIVED", "LOST", "RETURNED", "REJECTED"])) {
-                    
+
                     $book->update(["status" => RequestStatus::CANCELLED->value]);
                     // $book->status = RequestStatus::CANCELLED;
                     // $book->save();
@@ -455,7 +455,6 @@ class TraineeLibrary extends Controller
             return response()->json(['message' => implode(',', $validator->errors()->all())], 422);
         } else {
             try {
-
                 DB::beginTransaction();
                 $userId = $request->user()->id;
 
@@ -484,7 +483,6 @@ class TraineeLibrary extends Controller
                 ]);
 
                 AuditHelper::log($userId, "User {$userId} added a book to cart.");
-
                 DB::commit();
 
                 return response()->json(["message" => "Item added to the cart"], 201);

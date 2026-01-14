@@ -35,7 +35,7 @@ class DormitoryInvoiceService {
         ->get();
     }
 
-    public function update_status($validated, $userId): float
+    public function updateDormitoryInvoice($validated, $userId): float
     {
         return DB::transaction(function() use ($validated, $userId) {
             $this->prepareData($validated, $userId);

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendingEmail;
+use App\Mail\CashierEmail;
 use App\Models\CashierOR;
 use App\Models\Credit;
 use App\Models\DormitoryInvoice;
@@ -100,8 +102,6 @@ class Cashier extends Controller
     public function pay_walkin (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_payment = self::getTable($request->service, $request->documentId, null)->first();
-
-            \Log::info('', ['' => $request->all()]);
             $checkForCreditsUsed = User::where('id', $request->userId)
                 ->where('credit_amount', '>=', $request->usedCredits)
                 ->lockForUpdate()
@@ -138,7 +138,13 @@ class Cashier extends Controller
                 $this_or_parent->save();
             }
 
-            AuditHelper::log($request->user()->id, "Updated payment details.");
+            SendingEmail::dispatch(User::find($this_payment->user_id), new CashierEmail([
+                'status' => $request->verificationStatus,
+                'service' => strtolower($request->service),
+                'message' => "We've successfully processed a walk-in payment for your " . strtolower($request->service) . " request."
+            ], User::find($this_payment->user_id)));
+
+            AuditHelper::log($request->user()->id, "Processed a walk-in payment. ID# $this_payment->id");
 
             if(env('USE_EVENT')) {
                 event(
@@ -147,7 +153,7 @@ class Cashier extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've updated payment details."], 201);
+            return response()->json(['message' => "You've processed a walk-in payment."], 201);
         });
     }
 
@@ -263,6 +269,12 @@ class Cashier extends Controller
             } else {
                 $this_fee->invoice_status = $request->verificationStatus;
                 $this_fee->save();
+
+                SendingEmail::dispatch(User::find($this_fee->user_id), new CashierEmail([
+                    'status' => $request->verificationStatus,
+                    'service' => strtolower($request->service),
+                    'message' => "We've updated your " . strtolower($request->service) . " invoice status to $request->verificationStatus"
+                ], User::find($this_fee->user_id)));
 
                 Notifications::notify($request->user()->id, $this_fee->user_id, $request->service, "updated your " . strtolower($request->service) . " invoice status.");
                 AuditHelper::log($request->user()->id, "Updated a payment. ID#$$this_fee->id");
