@@ -22,7 +22,6 @@ class ViewTraineeRecResource extends JsonResource
             "enrolled_course_status" => $this->enrolled_course_status,
             "request_at" => $this->created_at,
             "training_id" => $this->training_id,
-
             "training_instructor" => [
                     [
                         "name" => "Allen Alfred Beato",

@@ -91,8 +91,6 @@ class Account extends Controller
     }
 
     public function update_personal(Request $request) {
-        \Log::info($request->all());
-
         $validation = [
             'firstName' => 'required|string',
             'gender' => 'required|string',

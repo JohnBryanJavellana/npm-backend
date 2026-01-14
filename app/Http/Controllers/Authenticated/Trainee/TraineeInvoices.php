@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainee\Invoice\DormitoryInvoiceRequest;
+use App\Http\Resources\Trainee\Invoices\DormitoryInvoiceResource;
 use App\Http\Requests\Trainee\Library\LibInvoiceRequest;
 use App\Http\Resources\LibInvoiceResource;
-use App\Http\Resources\Trainee\Invoices\DormitoryInvoiceResource;
 use Illuminate\Http\Request;
 use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice};
 use App\Services\Trainee\Dormitory\DormitoryInvoiceService;
@@ -19,8 +19,8 @@ class TraineeInvoices extends Controller
 {
 
     public function __construct(
-        private DormitoryInvoiceService $dormitoryInvoiceService,
-        private LibraryInvoiceService $libraryInvoiceService 
+        protected DormitoryInvoiceService $dormitoryInvoiceService,
+        protected LibraryInvoiceService $libraryInvoiceService,
     )
     {}
     public function get_all_trainee_invoices(Request $request) {
@@ -34,6 +34,11 @@ class TraineeInvoices extends Controller
         $invoices = $all_user_invoices->select('trainee_enrolled_invoices', 'trainee_dormitory_invoices');     
        
         return response()->json(['message' => 'Invoices Fetched Successfully!', 'data' => $invoices], 200);
+    }
+
+    public function updateEnrollmentInvoice()
+    {
+        return;
     }
 
     public function library_penalties(Request $request)
@@ -73,12 +78,12 @@ class TraineeInvoices extends Controller
             $validated = $request->validated();
             $user_id = $request->user()->id;
 
-            $total = $this->dormitoryInvoiceService->update_status($validated, $user_id);
+            $total = $this->dormitoryInvoiceService->updateDormitoryInvoice($validated, $user_id);
 
             return response()->json(["balance" => $total], 200);
         }
         catch (DomainException $e) {
-            \Log::info("updateDormInvoiceErrorDomainException", [$e]);
+            \Log::info("updateDormInvoiceDomainException", [$e]);
             throw $e;
         }
         catch (\Exception $e) {

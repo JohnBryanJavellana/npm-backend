@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Enums\UserRoleEnum;
 use App\Http\Requests\Trainee\Enrollment\UploadAvatarRequest;
 use App\Mail\UpdatePassword;
+use App\Mail\UpdatePasswordMail;
 use App\Utils\GenerateUniqueFilename;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -187,7 +188,7 @@ class MyAccount extends Controller
                     $random_password = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
                     $user->password = bcrypt($random_password);
 
-                    \Mail::to($request->email)->later(Carbon::now()->addSeconds(3), new UpdatePassword(['password' => $random_password]));
+                    \Mail::to($request->email)->later(Carbon::now()->addSeconds(3), new UpdatePasswordMail(['password' => $random_password]));
 
                     $reloggin = true;
                 }
@@ -274,13 +275,13 @@ class MyAccount extends Controller
                             'requirement_id' => $file['req_id']
                         ])->first();
                         if ($record) {                            
-                            $record->filename = $this->savefile($file['file']);
+                            $record->filename = $this->savefile("trainee-files", $file['file']);
                             $record->save();
                         } else {
                             $new_record = new TrainingRegFile;
                             $new_record->additional_trainee_info_id = $this_additional_info->id;
                             $new_record->requirement_id = (int) $file['req_id'];
-                            $new_record->filename = $this->savefile($file['file']);
+                            $new_record->filename = $this->savefile("trainee-files",$file['file']);
                             $new_record->save();
                         }
                     }
@@ -304,7 +305,7 @@ class MyAccount extends Controller
         }
     }
     
-    public function savefile($fileUploaded) {
+    public function savefile($path, $fileUploaded) {
         try {
             if($fileUploaded){
 

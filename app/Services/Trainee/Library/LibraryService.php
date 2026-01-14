@@ -165,4 +165,9 @@ class LibraryService {
     {
         return;
     }
+
+    public function updateBookRequest()
+    {
+        return;
+    }
 }
