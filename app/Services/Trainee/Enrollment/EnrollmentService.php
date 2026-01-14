@@ -12,13 +12,15 @@ class EnrollmentService {
         protected License $licenseModel
     ) {}
 
-
     public function getUserTrainings($validated)
     {
-        return $this->enrolledCourseModel->query()
+        return $this->enrolledCourseModel->query()->select("id", "training_id", "bgColor", "enrolled_course_status", "created_at")
         ->with([
-            "training.module.moduleType",
-            "training.module.charge.chargeCategory"
+            "training:id,course_module_id,status,daily_hours,schedule_from,schedule_to,venue,room,schedule_preference,batch_number",
+            "training.module:id,module_type_id,charge_id,name,acronym,compendium",
+            "training.module.moduleType:id,name",
+            "training.module.charge:id,charge_category_id,name,amount,description,service_type",
+            "training.module.charge.chargeCategory:id,name"
         ])
         // ->status($validated["status"])
         ->forUser($validated["userId"])

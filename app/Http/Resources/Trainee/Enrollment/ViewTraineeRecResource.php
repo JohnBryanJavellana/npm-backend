@@ -20,7 +20,9 @@ class ViewTraineeRecResource extends JsonResource
             "enrolled_course_id" => $this->id,
             "bgColor" => $this->bgColor,
             "enrolled_course_status" => $this->enrolled_course_status,
+            "request_at" => $this->created_at,
             "training_id" => $this->training_id,
+
             "training_instructor" => [
                     [
                         "name" => "Allen Alfred Beato",
@@ -47,11 +49,13 @@ class ViewTraineeRecResource extends JsonResource
             "schedule_preference" => $this->training?->schedule_preference,
             "batch_number" => $this->training?->batch_number,
             "course_module_id" => $this->training?->course_module_id,
+            
             "module_name" => $this->training?->module?->name,
             "acronym" => $this->training?->module?->acronym,
             "compendium" => $this->training?->module?->compendium,
             "module_type" => $this->training?->module->moduleType->name,
             "charge_id" => $this->training?->module?->charge_id,
+
             "charge_name" => $this->training?->module?->charge?->name,
             "charge_amount" => $this->training?->module?->charge?->amount,
             "charge_description" => $this->training?->module?->charge?->description,
