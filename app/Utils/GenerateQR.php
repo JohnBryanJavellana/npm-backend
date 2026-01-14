@@ -29,7 +29,7 @@ class GenerateQR {
 
         if(!is_null($qrText)) {
             $img->text($content, 250, 540, function($font) {
-                $font->file(public_path('fonts/Roboto/Roboto-VariableFont_wdth,wght.ttf'));
+                $font->file(public_path('fonts/Roboto/Roboto.ttf'));
                 $font->size(25);
                 $font->color('#000000');
                 $font->align('center');

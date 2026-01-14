@@ -24,19 +24,26 @@ use App\Jobs\{
 use Illuminate\Support\Facades\{
     DB, Hash
 };
+use App\Events\{
+    BEMasterlist,
+    BEAuditTrail
+};
 
 class RegisterController extends Controller
 {
     public function register_user(Request $request){
         return DB::transaction(function () use ($request) {
-            $fname = RemoveSpecialCharactersInString::remove(strtoupper($socialData['given_name'] ?? $socialData['first_name'] ?? ''));
+            if($request->token) {
+                $socialUser = Socialite::driver($request->provider)->stateless()->userFromToken($request->token);
+                $socialData = $socialUser->getRaw();
+            }
+
+            $fname = RemoveSpecialCharactersInString::remove(strtoupper($socialData['given_name'] ?? $socialData['first_name'] ?? $request->fname));
             $mname = RemoveSpecialCharactersInString::remove(strtoupper($request->mname ?? ''));
-            $lname = RemoveSpecialCharactersInString::remove(strtoupper($socialData['family_name'] ?? $socialData['last_name'] ?? ''));
+            $lname = RemoveSpecialCharactersInString::remove(strtoupper($socialData['family_name'] ?? $socialData['last_name'] ?? $request->lname));
 
             if ($request->is_from_social_login === 'YES') {
                 try {
-                    $socialUser = Socialite::driver($request->provider)->stateless()->userFromToken($request->token);
-                    $socialData = $socialUser->getRaw();
                     $email = $socialUser->getEmail();
 
                     $user = User::where('email', $email)->first();
@@ -101,19 +108,27 @@ class RegisterController extends Controller
             $user->password = bcrypt($request->password);
             $user->isSocial = 'NO';
             $user->birthdate = $request->birthdate;
-            $user->role = 'TRAINEE';
+            $user->role = $request->role ?? 'TRAINEE';
+            $user->qr = $this->generateAndSendQR($user, "{$user->id}.png");
             $user->save();
 
-            // update QR
-            $user->qr = $this->processAssets($user, null);
-            $user->save();
+            if($request->adminSettings) {
+                AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a user account. ID#" . $user->id);
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEMasterlist(''),
+                        new BEAuditTrail(''),
+                    );
+                }
+            }
 
             event(new Registered($user));
             return response()->json(['message' => 'Registration successful!'], 201);
         });
     }
 
-    private function generateCustomId() {
+    protected function generateCustomId() {
         $maxId = User::max('id');
         $next_id_suffix = $maxId ? (int) substr($maxId, 4) + 1 : 1;
         return Carbon::now()->year . str_pad($next_id_suffix, 5, '0', STR_PAD_LEFT);
@@ -128,7 +143,7 @@ class RegisterController extends Controller
         return $filename;
     }
 
-    private function processAvatar($avatarUrl, $isBase64 = false) {
+    protected function processAvatar($avatarUrl, $isBase64 = false) {
         $filename = Str::uuid() . '.png';
         SaveAvatar::dispatch($avatarUrl, $filename, "user_images/", true, $isBase64);
         return $filename;
