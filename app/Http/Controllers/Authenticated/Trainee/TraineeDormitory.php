@@ -303,7 +303,6 @@ class TraineeDormitory extends Controller
     }
     public function remove_applied_dormitories (Request $request, int $dormitory_id) {
         try {
-
             $this->dormitory_service->cancelRequest($request, $dormitory_id);                                 
 
             if(env("USE_EVENT")) {
@@ -316,7 +315,7 @@ class TraineeDormitory extends Controller
             throw $e;
         }
         catch (\Exception $e) {
-            \Log::error("error cancel dorm", [$e->getMessage()]);
+            \Log::error("errorcanceldorm", [$e->getMessage()]);
             return response()->json(['message' => "An unexpected error occurred. Please try again. "], 500);
         }
     }

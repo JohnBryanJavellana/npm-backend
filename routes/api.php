@@ -111,7 +111,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
 
-            Route::post('remove_applied_dormitories/{dormitory_id}', [TraineeDormitory::class, 'remove_applied_dormitories']);
+            Route::get('remove_applied_dormitories/{dormitory_id}', [TraineeDormitory::class, 'remove_applied_dormitories']);
             Route::get('check_pending_request', [TraineeDormitory::class, 'check_pending_request']);
             Route::get('get_personal_dormitory', [TraineeDormitory::class, 'get_personal_dormitory']);
             Route::post('request_tenant_room', [TraineeDormitory::class,'request_tenant_room']);
@@ -299,6 +299,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('get_requested_service', [DormitoryController::class, 'get_requested_service']);
             Route::post('request_service', [DormitoryController::class, 'request_service']);
             Route::post('update_requested_service', [DormitoryController::class, 'update_requested_service']);
+            Route::post('set_status', [DormitoryController::class, 'set_status']);
 
             Route::post('get_dormitory_charges', [DormitoryController::class, 'get_dormitory_charges']);
             Route::post('created_or_update_dormitory_charge', [DormitoryController::class, 'created_or_update_dormitory_charge']);

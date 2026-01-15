@@ -96,10 +96,10 @@ class DormitoryRequestService {
                 );
             }
 
+            \Log::info("enri", [$record->tenant_status]);
             if(!in_array($record->tenant_status, [
-                RequestStatus::PENDING,
-                RequestStatus::APPROVED,
-                RequestStatus::FOR_PAYMENT,
+                RequestStatus::PENDING->value,
+                RequestStatus::FOR_PAYMENT->value,
             ])) {
                 throw new DomainException("Dormitory request cancellation is not permitted.");
             }
