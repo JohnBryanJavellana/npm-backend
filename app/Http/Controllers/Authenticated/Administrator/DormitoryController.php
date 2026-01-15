@@ -555,6 +555,8 @@ class DormitoryController extends Controller
                 $totalGuestCharge = $guestCount * $guestRate;
                 $totalTraineeCharge = $traineeCount * $traineeRate;
 
+                \Log::info("$totalGuestCharge -- $guestCount");
+
                 $descriptionHtml = $this->addDescription(
            "<div style='font-weight: bold;'>
                         <span style='color: #6c757d;'>Dormitory Charge</span>
@@ -658,8 +660,8 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request, $dormReqId) {
             $this_dorm_request = DormitoryTenant::where('id', $dormReqId)->lockForUpdate()->first();
 
-            if(in_array($this_dorm_request->tenant_status, ["APPROVED", "CANCELLED"])) {
-                return response()->json(['message' => "Can't cancel request."], 200);
+            if(!in_array($this_dorm_request->tenant_status, ["PENDING", "CANCELLED", "FOR-PAYMENT"])) {
+                return response()->json(['message' => "Can't cancel request."], 422);
             } else {
                 $this_dorm_request->tenant_status = "CANCELLED";
                 $this_dorm_request->save();
@@ -677,7 +679,7 @@ class DormitoryController extends Controller
 
                 foreach($this_dorm_request->borrowedItems as $item) {
                     $this_item1 = DormitoryItemBorrowing::find($item->id);
-                    $this_item1->status = "CANCELLED";
+                    $this_item1->status = "DONE";
                     $this_item1->save();
 
                     foreach($item->items as $item2) {
@@ -693,7 +695,7 @@ class DormitoryController extends Controller
                     }
                 }
 
-                Notifications::notify($request->user()->id, $this_dorm_request->boarder()->id, "DORMITORY", "Your dormitory request has been cancelled.");
+                Notifications::notify($request->user()->id, $this_dorm_request->user_id, "DORMITORY", "has cancelled your dormitory request.");
                 AuditHelper::log($request->user()->id, "Cancelled a dormitory request. ID#$dormReqId");
 
                 if(env('USE_EVENT')) {
@@ -1075,6 +1077,26 @@ class DormitoryController extends Controller
 
                 return response()->json(['message' => "You've cancelled dormitory charge. ID#$chargeId"], 200);
             }
+        });
+    }
+
+    public function set_status (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this_dormitory_tenant = DormitoryTenant::where('id', $request->documentId)->lockForUpdate()->first();
+            $this_dormitory_tenant->tenant_status = $request->status;
+            $this_dormitory_tenant->save();
+
+            Notifications::notify($request->user()->id, $this_dormitory_tenant->user_id, "DORMITORY", "has updated your dormitory request.");
+            AuditHelper::log($request->user()->id, "Updated a dormitory request. ID#$request->documentId");
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => "You've updated dormitory request. ID#$request->documentId"], 200);
         });
     }
 }

@@ -13,7 +13,7 @@ class CreditService {
 
     public function getUserAudit($userId)
     {
-        return $this->creditModel->forUser($userId)->get();
+        return $this->creditModel->forUser($userId)->latest("created_at")->get();
     }
 
     public function storeUserAudit($validated, $userId)

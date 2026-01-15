@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendingEmail;
 use App\Mail\CashierEmail;
+use App\Models\BookRes;
 use App\Models\CashierOR;
 use App\Models\Credit;
 use App\Models\DormitoryInvoice;
+use App\Models\DormitoryTenant;
+use App\Models\EnrolledCourse;
 use App\Models\EnrollmentInvoice;
 use App\Models\LibraryInvoice;
 use App\Models\User;
@@ -36,11 +39,11 @@ use App\Models\{
 
 class Cashier extends Controller
 {
-    protected function getTable(string $service, ?int $referenceId, ?array $whereIns) {
+    protected function getTable(string $service, ?int $referenceId, ?array $whereIns, bool $isMainTable = false, bool $isInitialTable = false) {
         $modelMap = [
-            'DORMITORY'  => DormitoryInvoice::class,
-            'ENROLLMENT' => EnrollmentInvoice::class,
-            'LIBRARY'    => LibraryInvoice::class,
+            'DORMITORY'  => $isMainTable || $isInitialTable ? DormitoryTenant::class : DormitoryInvoice::class,
+            'ENROLLMENT' => $isMainTable || $isInitialTable ? EnrolledCourse::class : EnrollmentInvoice::class,
+            'LIBRARY'    => $isMainTable || $isInitialTable ? BookRes::class : LibraryInvoice::class,
         ];
 
         if (!array_key_exists($service, $modelMap)) {
@@ -86,11 +89,24 @@ class Cashier extends Controller
 
             if($request->service === "LIBRARY") {
                 $relations = array_merge($relations, [
+                    'bookRes',
                     'selectedBooks',
                     'selectedBooks.bookReservation',
                     'selectedBooks.bookReservation.book',
                     'selectedBooks.bookReservation.books',
                     'selectedBooks.bookReservation.books.catalog'
+                ]);
+            }
+
+            if($request->service === "ENROLLMENT") {
+                $relations = array_merge($relations, [
+                    'training'
+                ]);
+            }
+
+            if($request->service === "DORMITORY") {
+                $relations = array_merge($relations, [
+                    'tenant'
                 ]);
             }
 
@@ -101,8 +117,25 @@ class Cashier extends Controller
 
     public function pay_walkin (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            // update main table
             $this_payment = self::getTable($request->service, $request->documentId, null)->first();
+            if($request->isInitial) {
+                $this_main_table = self::getTable($request->service, $request->mainTable, null, true, true)->first();
+
+                switch($request->service) {
+                    case "DORMITORY":
+                        $this_main_table->tenant_status = "PAID";
+                        break;
+
+                    case "ENROLLMENT":
+                        $this_main_table->enrolled_course_status = "PAID";
+                        break;
+
+                    default: break;
+                }
+
+                $this_main_table->save();
+            }
+
             $checkForCreditsUsed = User::where('id', $request->userId)
                 ->where('credit_amount', '>=', $request->usedCredits)
                 ->lockForUpdate()
@@ -271,6 +304,24 @@ class Cashier extends Controller
             } else {
                 $this_fee->invoice_status = $request->verificationStatus;
                 $this_fee->save();
+
+                if($request->isInitial) {
+                    $this_main_table = self::getTable($request->service, $request->mainTable, null, true, true)->first();
+
+                    switch($request->service) {
+                        case "DORMITORY":
+                            $this_main_table->tenant_status = "PAID";
+                            break;
+
+                        case "ENROLLMENT":
+                            $this_main_table->enrolled_course_status = "PAID";
+                            break;
+
+                        default: break;
+                    }
+
+                    $this_main_table->save();
+                }
 
                 SendingEmail::dispatch(User::find($this_fee->user_id), new CashierEmail([
                     'status' => $request->verificationStatus,
