@@ -107,7 +107,7 @@ class MyAccount extends Controller
                 $user->save();
             }
 
-            AuditHelper::log($user_id, $request->user()->role === UserRoleEnum::SUPERADMIN->value
+            AuditHelper::log($user_id, $request->user()->role === UserRoleEnum::SUPERADMIN
                 ? "An Admin has updated user's {$user_id} profile picture."
                 : "User {$user_id} profile picture has been updated.");
 

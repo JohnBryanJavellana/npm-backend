@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\UserRoleEnum;
 use App\Rules\Trainee\Enrollment\UserEnrollmentRule;
 use GuzzleHttp\Exception\BadResponseException;
 use Illuminate\Contracts\Validation\Validator;
@@ -18,6 +19,13 @@ class EnrollmentRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            "userId" => $this->user()->role === UserRoleEnum::SUPERADMIN ? $this->userId : $this->user()->id
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,6 +34,7 @@ class EnrollmentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            "userId" => "required|exists:users,id",
             'training_id' => [
                 'required',
                 new UserEnrollmentRule($this->user())

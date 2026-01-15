@@ -31,7 +31,7 @@ class LibraryInvoiceService {
                 ->byTraceId($validated["inv_trace_number"], $validated["inv_id"])
                 ->update([
                     "reference_number" => $validated["inv_reference_number"],
-                    "status" => RequestStatus::VERIFICATION->value,
+                    "status" => RequestStatus::VERIFICATION,
                     "payment_type" => "ONLINE",
                     "datePaid" => Carbon::now()
                 ]);

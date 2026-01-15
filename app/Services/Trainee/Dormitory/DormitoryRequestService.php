@@ -90,16 +90,16 @@ class DormitoryRequestService {
             ->lockForUpdate()
             ->firstOrFail();
 
-            if($record->tenant_status === RequestStatus::CANCELLED->value) {
+            if($record->tenant_status === RequestStatus::CANCELLED) {
                 throw new DomainException(
                     "This dormitory request has already been cancelled."
                 );
             }
 
             if(!in_array($record->tenant_status, [
-                RequestStatus::PENDING->value,
-                RequestStatus::APPROVED->value,
-                RequestStatus::FOR_PAYMENT->value,
+                RequestStatus::PENDING,
+                RequestStatus::APPROVED,
+                RequestStatus::FOR_PAYMENT,
             ])) {
                 throw new DomainException("Dormitory request cancellation is not permitted.");
             }
@@ -112,7 +112,7 @@ class DormitoryRequestService {
                 $dorm->update([
                     "room_available_slot" =>  $record->room_for_type === "COUPLE"
                         || $record->single_accommodation === "YES" ? 2 : 1,
-                    "room_status" => RequestStatus::AVAILABLE->value
+                    "room_status" => RequestStatus::AVAILABLE
                 ]);
             }
             if (
@@ -124,7 +124,7 @@ class DormitoryRequestService {
             }
 
             $record->update([
-                "tenant_status" => RequestStatus::CANCELLED->value
+                "tenant_status" => RequestStatus::CANCELLED
             ]);
 
             $this->loggingDetails(
@@ -138,7 +138,7 @@ class DormitoryRequestService {
 
     private function validateData($userId) {
         $existing_request = $this->tenantModel
-        ->where(['user_id' => $userId, 'tenant_status' => RequestStatus::PENDING->value])
+        ->where(['user_id' => $userId, 'tenant_status' => RequestStatus::PENDING])
         ->exists();
 
         if ($existing_request) {

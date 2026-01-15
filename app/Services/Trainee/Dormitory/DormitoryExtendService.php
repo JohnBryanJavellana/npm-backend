@@ -38,16 +38,16 @@ class DormitoryExtendService {
             "transferRequest"=> function ($query)use ($userId, $documentId) {
                 $query->forUser($userId)
                     ->where("dormitory_tenant_id", $documentId)
-                    ->status([RequestStatus::PENDING->value, RequestStatus::APPROVED->value]);
+                    ->status([RequestStatus::PENDING, RequestStatus::APPROVED]);
             },
             "extendRequest" => function ($query)use ($userId, $documentId) {
                 $query->forUser($userId)
                     ->where("dormitory_tenant_id", $documentId)
-                    ->status([RequestStatus::PENDING->value, RequestStatus::APPROVED->value]);
+                    ->status([RequestStatus::PENDING, RequestStatus::APPROVED]);
             }
         ])
         ->forUser($userId)
-        ->forStatus([RequestStatus::APPROVED->value, RequestStatus::EXTENDING->value])
+        ->forStatus([RequestStatus::APPROVED, RequestStatus::EXTENDING])
         ->whereKey($documentId)
         ->first();
 
@@ -75,7 +75,7 @@ class DormitoryExtendService {
                 "new_end_date" => $validated["extension_date"],
             ]);
 
-            $this->dormitoryTenantService->updateTenantRecordById($validated["document_id"], $userId, RequestStatus::ACTIVE->value);
+            $this->dormitoryTenantService->updateTenantRecordById($validated["document_id"], $userId, RequestStatus::ACTIVE);
 
             $this->loggingDetails(
                 $validated["document_id"], 
@@ -102,18 +102,18 @@ class DormitoryExtendService {
             }
 
             if (!in_array($extend->status, [
-                RequestStatus::PENDING->value,
-                RequestStatus::APPROVED->value,
-                RequestStatus::FOR_PAYMENT->value
+                RequestStatus::PENDING,
+                RequestStatus::APPROVED,
+                RequestStatus::FOR_PAYMENT
             ])) {
                 throw new DomainException('Extending request cancellation is not permitted.');
             }
             
             $extend->update([
-                "status" => RequestStatus::CANCELLED->value
+                "status" => RequestStatus::CANCELLED
             ]);
 
-            $this->dormitoryTenantService->updateTenantRecordById($extend->dormitory_tenant_id, $userId, RequestStatus::ACTIVE->value);
+            $this->dormitoryTenantService->updateTenantRecordById($extend->dormitory_tenant_id, $userId, RequestStatus::ACTIVE);
         
             $this->loggingDetails(
                 $extend->dormitory_tenant_id,

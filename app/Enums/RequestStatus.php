@@ -3,6 +3,11 @@
 namespace App\Enums;
 
 enum RequestStatus: string {
+
+    case ENROLLED = "ENROLLED";
+    case DECLINED = "DECLINED";
+    case IR = "IR";
+    case CSFB = "CSFB";
     case PENDING = 'PENDING';
     case APPROVED = 'APPROVED';
     case CANCELLED = 'CANCELLED';
@@ -11,14 +16,14 @@ enum RequestStatus: string {
     case TRANSFERRED = 'TRANSFERRED';
     case FOR_PAYMENT = 'FOR PAYMENT';
     case REJECTED = 'REJECTED';
-    case PAID = 'PAID'; 
+    case PAID = 'PAID';
     case PROCESSING_PAYMENT = 'PROCESSING PAYMENT';
 
     //DORM
     case AVAILABLE = 'AVAILABLE';
     case UNAVAILABLE = 'UNAVAILABLE';
-    case OCCUPIED = 'OCCUPIED'; 
-    case RESERVED = 'RESERVED'; 
+    case OCCUPIED = 'OCCUPIED';
+    case RESERVED = 'RESERVED';
     case FOR_VERIFICATION = "FOR-VERIFICATION";
     case TRANSFERRING = "TRANSFERRING";
     //PAYMENT TYPE
