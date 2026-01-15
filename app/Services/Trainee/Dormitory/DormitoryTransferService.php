@@ -93,7 +93,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
             ->whereKey($validated["document_id"])
             ->lockForUpdate()
             ->update([
-                "tenant_status" => RequestStatus::TRANSFERRING->value
+                "tenant_status" => RequestStatus::TRANSFERRING
             ]);
 
             $this->loggingDetails(
@@ -111,7 +111,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
             $record = $this->dormitoryTransfer
             ->with("tenant")
             ->whereRelation("tenant", "user_id", "=", $userId)
-            ->whereNot("status", RequestStatus::CANCELLED->value)
+            ->whereNot("status", RequestStatus::CANCELLED)
             ->lockForUpdate()
             ->findOrFail($id);
 
@@ -119,15 +119,15 @@ class DormitoryTransferService extends DormitoryHistoryService {
                 throw new DomainException("Transfer request not found.");
             }
 
-            if($record->status === RequestStatus::CANCELLED->value) {
+            if($record->status === RequestStatus::CANCELLED) {
                 throw new DomainException(("This transfer request has already been cancelled."));
             }
 
-            if($record->status === RequestStatus::APPROVED->value) {
+            if($record->status === RequestStatus::APPROVED) {
                 throw new DomainException("Transfer request cancellation is not permitted.");
             }
 
-            $record->update(["status" => RequestStatus::CANCELLED->value]);
+            $record->update(["status" => RequestStatus::CANCELLED]);
 
             $this->dormitoryTenantService->updateTenantRecordById($record->dormitory_tenant_id, $userId);
 

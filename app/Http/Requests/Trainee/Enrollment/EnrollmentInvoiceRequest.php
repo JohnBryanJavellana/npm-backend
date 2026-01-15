@@ -40,6 +40,7 @@ class EnrollmentInvoiceRequest extends FormRequest
             "user_id" => "required|exists:users,id",
             "enrolled_course_id" => "required|exists:enrolled_courses,id",
             "credit_amount" => "nullable",
+            "total_amount" => "nullable",
             "ref_number" => "required",
         ];
     }

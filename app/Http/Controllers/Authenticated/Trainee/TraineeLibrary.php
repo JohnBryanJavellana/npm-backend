@@ -48,7 +48,8 @@ class TraineeLibrary extends Controller
                 );
             }
 
-            $record = EnrolledCourse::where('user_id', $userId)->query()
+            $record = EnrolledCourse::query()
+                ->where('user_id', $userId)
                 ->select('training_id')
                 ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
                 ->get();
@@ -70,13 +71,13 @@ class TraineeLibrary extends Controller
                     $q->where('user_id', $user->id);
                 },
                 'hasData' => function ($q) use ($user) {
-                    $q->whereIn('status', [RequestStatus::RECEIVED->value, RequestStatus::PENDING->value, RequestStatus::APPROVED->value])->whereRelation('bookRes', 'user_id', '=', $user->id);
+                    $q->whereIn('status', [RequestStatus::RECEIVED, RequestStatus::PENDING, RequestStatus::APPROVED])->whereRelation('bookRes', 'user_id', '=', $user->id);
                 },
                 'related as enrolled_trainings_count' => function ($query) use ($record) {
                     $query->whereIn('training_id', $record);
                 }
             ])
-            ->where('status', RequestStatus::ACTIVE->value)
+            ->where('status', RequestStatus::ACTIVE)
             ->orderByDesc('enrolled_trainings_count')
             ->orderBy('id');;
 
@@ -378,7 +379,7 @@ class TraineeLibrary extends Controller
             ->get();
 
             //get all cancelled use to filter flatten and pluck the names of the books and implode?
-            $cancellables = $books->filter(fn($book) => !$book->status === RequestStatus::CANCELLED->value)
+            $cancellables = $books->filter(fn($book) => !$book->status === RequestStatus::CANCELLED)
             ->pluck('id')
             ->toArray();
 
@@ -389,12 +390,12 @@ class TraineeLibrary extends Controller
             foreach($books as $book) {
                 if (!in_array($book->status, ["CANCELLED", "RECEIVED", "LOST", "RETURNED", "REJECTED"])) {
 
-                    $book->update(["status" => RequestStatus::CANCELLED->value]);
+                    $book->update(["status" => RequestStatus::CANCELLED]);
                     // $book->status = RequestStatus::CANCELLED;
                     // $book->save();
 
                     if($book->book_copy_id) {
-                        BookCopy::find($book->book_copy_id)->update(['status' => RequestStatus::AVAILABLE->value]);
+                        BookCopy::find($book->book_copy_id)->update(['status' => RequestStatus::AVAILABLE]);
                     }
                 }
             }
@@ -406,7 +407,7 @@ class TraineeLibrary extends Controller
             ->exists();
 
             if(!$book_res) {
-                BookRes::where(['id' => $res_id, 'user_id' => $user_id])->update(['status' => RequestStatus::FOR_CSM->value]);
+                BookRes::where(['id' => $res_id, 'user_id' => $user_id])->update(['status' => RequestStatus::FOR_CSM]);
             }
 
             if(env("USE_EVENT")) {

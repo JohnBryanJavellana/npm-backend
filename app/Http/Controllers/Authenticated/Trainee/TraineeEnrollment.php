@@ -9,6 +9,7 @@ use App\Events\BENotification;
 use App\Events\BETraineeApplication;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EnrollmentRequest;
+use App\Http\Requests\Trainee\Enrollment\CancelEnrollmentRequest;
 use App\Http\Requests\Trainee\Enrollment\ViewApplicationRequest;
 use App\Http\Requests\Trainee\Enrollment\ViewTraineeRecRequest;
 use App\Http\Resources\Trainee\Enrollment\ViewTraineeRecResource;
@@ -29,6 +30,7 @@ use App\Models\{
 };
 use App\Services\Trainee\Enrollment\EnrollmentService;
 use App\Services\Trainee\Invoice\TraineeInvoiceService;
+use DomainException;
 
 class TraineeEnrollment extends Controller
 {
@@ -156,7 +158,8 @@ class TraineeEnrollment extends Controller
 
             DB::beginTransaction();
             $validated = $request->validated();
-            $user_id = $request->has("userId") && !is_null($request->userId) ? $request->userId : $request->user()->id ?? auth()->id();
+            // $user_id = $request->has("userId") && !is_null($request->userId) ? $request->userId : $request->user()->id ?? auth()->id();
+            $user_id = $validated["userId"];
 
             $addtional_info_id = AdditionalTraineeInfo::where('user_id', $user_id)->value('id');
             $training = Training::query()
@@ -175,7 +178,7 @@ class TraineeEnrollment extends Controller
             $selected_training = new EnrolledCourse();
             $selected_training->user_id = $user_id;
             $selected_training->training_id = $validated["training_id"];
-            $selected_training->enrolled_course_status = RequestStatus::RESERVED->value;
+            $selected_training->enrolled_course_status = RequestStatus::RESERVED;
             $selected_training->save();
 
             foreach($validated["file_upload"] as $up_file) {
@@ -199,7 +202,7 @@ class TraineeEnrollment extends Controller
                 }
             }
 
-            // $data = [ 
+            // $data = [
             //     "userId" => $user_id,
             //     "enrolled_course_id" => $selected_training->id,
             //     "charge_id" => $training->module?->charge?->id
@@ -209,7 +212,7 @@ class TraineeEnrollment extends Controller
 
             $training->decrement('schedule_slot', 1);
             AuditHelper::log($user_id, "User " . $user_id . " sent an enrollment request.");
-            
+
             Notifications::notify(
                 $request->has("userId") && !is_null($request->userId) ? $request->user()->id : $user_id,
                  $request->has("userId") && !is_null($request->userId) ? $user_id : null,
@@ -236,30 +239,37 @@ class TraineeEnrollment extends Controller
     }
 
     /** CANCELLING ENROLLMENT REQUESTS */
-    public function remove_training_request (Request $request, int $training_request_id) {
-        \Log::info("inputs", [$request->all(), $training_request_id]);
+    public function remove_training_request (CancelEnrollmentRequest $request) {
+        \Log::info("inputs", [$request->validated()]);
         try {
-            DB::beginTransaction();
-            
+            $validated = $request->validated();
 
-            $training_request = EnrolledCourse::find($training_request_id);
-            $training_request->enrolled_course_status = 'CANCELLED';
-            $training_request->save();
+            $this->enrollmentService->cancelEnrollmentRequest($validated);
 
-            //TRAINING ID PASS
-            Training::where("id", $request->training_id)->increment('schedule_slot',1);
+            // DB::beginTransaction();
 
-            AuditHelper::log($request->user()->id, "User " . $request->user()->id . " has cancelled training request.");
+            // $training_request = EnrolledCourse::find($training_request_id);
+            // $training_request->enrolled_course_status = 'CANCELLED';
+            // $training_request->save();
+
+            // //TRAINING ID PASS
+            Training::where("id", $validated["training_id"])->increment('schedule_slot',1);
+
+            AuditHelper::log($validated["user_id"], "User " . $validated["user_id"] . " has cancelled training request. {$validated["training_id"]}");
 
             if(env("USE_EVENT")) {
                 event(new BETraineeApplication(''));
             }
 
-            DB::commit();
-            return response()->json(['message' => "You've removed training request. ID# $training_request_id"], 200);
-        } catch (\Exception $e) {
-            DB::rollback();
-            \Log::error("error remove_training_request", [$e]);
+            // DB::commit();
+            return response()->json(['message' => "You've removed training request. ID# {$validated["enrolled_course_id"]}"], 200);
+        }
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (\Exception $e) {
+            // DB::rollback();
+            \Log::error("error_remove_training_request", [$e]);
             return response()->json(['message' => "Something went wrong, Please try again"], 500);
         }
     }
@@ -302,7 +312,7 @@ class TraineeEnrollment extends Controller
                 return response()->json(['message' => 'Enrollment request updated successfully!'], 200);
             } catch (\Exception $e) {
                 DB::rollBack();
-                \Log::error('Error updating enrollment request: ' . $e->getMessage());
+                \Log::error('Error_updating_enrollment_request: ' . $e->getMessage());
                 return response()->json(['message' => $e->getMessage()], 500);
             }
         }
@@ -337,7 +347,7 @@ class TraineeEnrollment extends Controller
 
             if(env("USE_EVENT")) {
                 event(new BETraineeApplication(''));
-            }    
+            }
 
             DB::commit();
             return response()->json(['message'=> 'Successfully updated'], 200);
@@ -346,7 +356,7 @@ class TraineeEnrollment extends Controller
             \Log::error("error update_invoice_trainings", [$e->getMessage()]);
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
-        
+
     }
 
     public function get_applications(ViewTraineeRecRequest $request)

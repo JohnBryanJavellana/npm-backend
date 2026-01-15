@@ -28,6 +28,7 @@ return new class extends Migration
                 'ENROLLED',
                 'COMPLETED',
                 'CANCELLED',
+                'PAID',
                 'DECLINED',
                 'FOR-PAYMENT',
                 'IR',

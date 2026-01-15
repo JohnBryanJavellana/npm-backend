@@ -53,13 +53,13 @@ class DormitoryExtraService {
         ->with([
             "services" => function($query) use($validated) {
             $query->where("dormitory_service_id", $validated["service_id"])
-                ->forStatus([RequestStatus::APPROVED->value, RequestStatus::PENDING->value]);
+                ->forStatus([RequestStatus::APPROVED, RequestStatus::PENDING]);
         },
         "services.services"
         ])
         ->select("id")
         ->whereKey($validated["dormitory_id"])
-        ->forStatus([RequestStatus::APPROVED->value, RequestStatus::EXTENDING->value])
+        ->forStatus([RequestStatus::APPROVED, RequestStatus::EXTENDING])
         ->forUser($userId)
         ->first();
 
@@ -82,7 +82,7 @@ class DormitoryExtraService {
             throw new DomainException("Service not found");
         }
 
-        if($service->status === RequestStatus::UNAVAILABLE->value) {
+        if($service->status === RequestStatus::UNAVAILABLE) {
             throw new DomainException("Service in unavailable for the moment.");
         }
     }
@@ -96,7 +96,7 @@ class DormitoryExtraService {
                 "dormitory_tenant_id" => $validated["dormitory_id"],
                 "isInitial" => "N",
                 "charge_id" => $validated["charge_id"],
-                "type" => RequestStatus::SERVICE->value,
+                "type" => RequestStatus::SERVICE,
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
             ]);
 
@@ -122,20 +122,20 @@ class DormitoryExtraService {
                 throw new DomainException("Service record not found!");
             }
 
-            if($record->status === RequestStatus::CANCELLED->value) {
+            if($record->status === RequestStatus::CANCELLED) {
                 throw new DomainException("This service request has already been cancelled.");
             }
 
             if(!in_array($record->status, [
-                RequestStatus::PENDING->value,
-                RequestStatus::APPROVED->value,
-                RequestStatus::FOR_PAYMENT->value,
+                RequestStatus::PENDING,
+                RequestStatus::APPROVED,
+                RequestStatus::FOR_PAYMENT,
             ])) {
                 throw new DomainException("Service request cancellation is not permitted.");
             }
 
             $record->update([
-                "status" => RequestStatus::CANCELLED->value
+                "status" => RequestStatus::CANCELLED
             ]);
         });
     }

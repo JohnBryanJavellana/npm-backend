@@ -166,6 +166,8 @@ class EnrollmentCtrl extends Controller
     }
 
     public function set_training_status (Request $request) {
+        \Log::info($request->all());
+
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_training_status = EnrolledCourse::find($request->documentId);
             $this_training_status->enrolled_course_status = $request->status;

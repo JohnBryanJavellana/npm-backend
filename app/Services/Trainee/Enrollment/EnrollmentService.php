@@ -1,11 +1,24 @@
-<?php 
+<?php
 
 namespace App\Services\Trainee\Enrollment;
 
+use App\Enums\RequestStatus;
 use App\Models\{EnrolledCourse, Rank, License};
+use DomainException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class EnrollmentService {
+
+    public $notAllowedStatuses = [
+        RequestStatus::ENROLLED,
+        RequestStatus::COMPLETED,
+        RequestStatus::CANCELLED,
+        RequestStatus::DECLINED,
+        RequestStatus::IR,
+        RequestStatus::CSFB,
+    ];
+
     public function __construct(
         protected EnrolledCourse $enrolledCourseModel,
         protected Rank $rankModel,
@@ -41,7 +54,7 @@ class EnrollmentService {
         ->where("user_id", $validated["userId"])
         ->get();
     }
-    
+
     public function getRankLicense()
     {
         $cacheKey = "rank:license:all";
@@ -52,8 +65,37 @@ class EnrollmentService {
             ];
         });
     }
+
+    public function prepareDataForCancellation($record)
+    {
+        if(!$record) {
+            throw new DomainException("Enrollment request not found.");
+        }
+
+        if(in_array($record->enrolled_course_status, $this->notAllowedStatuses)) {
+            throw new DomainException("Cancellation is no longer available for this request.");
+        }
+    }
+
+    public function cancelEnrollmentRequest($validated)
+    {
+        DB::transaction(function() use ($validated){
+            $record = $this->enrolledCourseModel->query()
+                ->forUser($validated["user_id"])
+                ->whereKey($validated["enrolled_course_id"])
+                ->lockForUpdate()
+                ->first();
+
+            $this->prepareDataForCancellation($record);
+
+            $record->update([
+                "enrolled_course_status" => RequestStatus::CANCELLED
+            ]);
+        });
+    }
+
     public function forgetCache($userId)
     {
         return;
-    } 
+    }
 }

@@ -2,29 +2,32 @@
 
 namespace App\Http\Requests\Trainee\Enrollment;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Enums\UserRoleEnum;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class UploadAvatarRequest extends FormRequest
+class CancelEnrollmentRequest extends FormRequest
 {
+
     protected $stopOnFirstFailure = true;
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
+        \Log::info("CancelEnrollmentRequest", [$this->all()]);
+
         return $this->user() !== null;
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
-            "user_id" => $this->user()->role === UserRoleEnum::SUPERADMIN ? $this->user_id : $this->user()->id
+            "user_id" => $this->user()->role === UserRoleEnum::SUPERADMIN ? $this->userId : $this->user()->id,
+            "enrolled_course_id" => $this->route("training_request_id")
         ]);
     }
-
 
     /**
      * Get the validation rules that apply to the request.
@@ -35,8 +38,8 @@ class UploadAvatarRequest extends FormRequest
     {
         return [
             "user_id" => "required|exists:users,id",
-            // "avatar" => "required|file|mimes:jpeg,png,jpg"
-            "avatar" => "required"
+            "enrolled_course_id" => "required|exists:enrolled_courses,id",
+            "training_id" => "required|exists:trainings,id"
         ];
     }
 
@@ -44,17 +47,28 @@ class UploadAvatarRequest extends FormRequest
     {
         return [
             "user_id" => "User",
+            "enrolled_course_id" => "Enrollment Request",
+            "training_id" => "Training"
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            "user_id.exists" => "User not found.",
+            "enrolled_course_id.exists" => "Enrollment Request not found.",
+            "training_id.exists" => "Training does not exist anymore."
         ];
     }
 
     protected function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors();
-        $firstError = $errors->first();
+        $erorrs = $validator->errors();
+        $firstError = $erorrs->first();
         throw new HttpResponseException(
             response()->json([
                 "message" => $firstError,
-                "erorrs" => $errors
+                "errors" => $erorrs
             ], 422)
         );
     }

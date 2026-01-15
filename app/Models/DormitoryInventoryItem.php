@@ -26,6 +26,6 @@ class DormitoryInventoryItem extends Model
 
     public function scopeAvailable($query)
     {
-        return $query->where("status", RequestStatus::AVAILABLE->value);
+        return $query->where("status", RequestStatus::AVAILABLE);
     }
 }

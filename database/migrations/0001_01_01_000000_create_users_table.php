@@ -38,6 +38,7 @@ return new class extends Migration
             $table->enum('dark_mode', ['dark', 'light'])->default('light');
             $table->string('profile_picture', 255)->default('default-avatar.png');
             $table->string('qr', 255);
+            $table->string('phone_number', 255)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

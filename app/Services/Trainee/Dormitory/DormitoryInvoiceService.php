@@ -48,7 +48,7 @@ class DormitoryInvoiceService {
                 ->whereKey($validated["billing_id"])
                 ->update([
                     "invoice_reference" => $validated["ref_number"],
-                    "invoice_status" => RequestStatus::FOR_VERIFICATION->value,
+                    "invoice_status" => RequestStatus::FOR_VERIFICATION,
                     "payment_type" => "ONLINE",
                     "datePaid" => Carbon::now()
                 ]);

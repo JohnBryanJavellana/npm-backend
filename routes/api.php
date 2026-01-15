@@ -354,7 +354,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::post('get_charges_predata', [DormitoryController::class, 'get_charges_predata']);
         Route::post('get_trainee_enrolled_trainings', [DormitoryController::class, 'get_trainee_enrolled_trainings']);
-        Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
         Route::post('submit-csm', [Account::class, 'submit_csm']);
 
         Route::prefix('/my-account/')->group(function() {
@@ -364,6 +363,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
+    Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
     Route::post('update_notification', [NotificationCtrl::class, 'update_notification']);
     Route::post('get_notifications', [NotificationCtrl::class, 'get_notifications']);
     Route::post('change-theme', [Account::class, 'change_theme']);

@@ -76,7 +76,7 @@ class DormitoryInclusionService {
                 "dormitory_tenant_id" => $validated["request_id"],
                 "charge_id" => $validated["charge_id"],
                 "isInitial" => "N",
-                "type" => RequestStatus::INCLUSION->value,
+                "type" => RequestStatus::INCLUSION,
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
 
             ]);
@@ -95,7 +95,7 @@ class DormitoryInclusionService {
         // validate the owner
         DB::transaction(function () use ($validated, $userId) {
             $record = $this->dormitoryInclusionRequest->query()
-            ->status([RequestStatus::APPROVED->value, RequestStatus::PENDING->value])
+            ->status([RequestStatus::APPROVED, RequestStatus::PENDING])
             ->whereRelation("tenant", "user_id", "=", $userId)
             ->whereKey($validated["request_id"])
             ->first();
@@ -105,7 +105,7 @@ class DormitoryInclusionService {
             }
 
             $record->update([
-                "status" => RequestStatus::CANCELLED->value
+                "status" => RequestStatus::CANCELLED
             ]);
         });
     }
