@@ -40,8 +40,6 @@ class TraineeEnrollment extends Controller
         'RESERVED',
         'ENROLLED',
         'FOR-PAYMENT',
-        'IR',
-        'CSFB',
         'PROCESSING PAYMENT',
     ];
 
