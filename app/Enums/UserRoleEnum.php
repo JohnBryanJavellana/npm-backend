@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum UserRoleEnum: string 
+enum UserRoleEnum: string
 {
     case SUPERADMIN = "SUPERADMIN";
     case TRAINEE = "TRAINEE";
@@ -10,5 +10,5 @@ enum UserRoleEnum: string
     case ADMIN_LIBRARY = "ADMIN-LIBRARY";
     case ADMIN_DORMITORY = "ADMIN-DORMITORY";
     case TRAINER = "TRAINER";
-    case CASHIER = "CASHIER";
+    case CASHIER = "ADMIN-CASHIER";
 }

@@ -101,6 +101,7 @@ class Cashier extends Controller
 
     public function pay_walkin (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
+            // update main table
             $this_payment = self::getTable($request->service, $request->documentId, null)->first();
             $checkForCreditsUsed = User::where('id', $request->userId)
                 ->where('credit_amount', '>=', $request->usedCredits)

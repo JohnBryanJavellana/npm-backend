@@ -21,7 +21,7 @@ class LibInvoiceResource extends JsonResource
             "inv_reference_number" => $this->reference_number,
             "inv_amount" => $this->amount,
             "inv_details" => $this->details,
-            "inv_status" => $this->status,
+            "inv_status" => $this->invoice_status,
             "user_fname" => $this->payee?->fname,
             "user_lname" => $this->payee?->lname,
             "user_mname" => $this->payee?->mname,
