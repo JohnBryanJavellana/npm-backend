@@ -127,9 +127,9 @@ class DormitoryExtraService {
             }
 
             if(!in_array($record->status, [
-                RequestStatus::PENDING,
-                RequestStatus::APPROVED,
-                RequestStatus::FOR_PAYMENT,
+                RequestStatus::PENDING->value,
+                RequestStatus::APPROVED->value,
+                RequestStatus::FOR_PAYMENT->value,
             ])) {
                 throw new DomainException("Service request cancellation is not permitted.");
             }
