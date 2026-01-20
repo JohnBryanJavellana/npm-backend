@@ -127,9 +127,11 @@ class DormitoryTransferService extends DormitoryHistoryService {
                 throw new DomainException("Transfer request cancellation is not permitted.");
             }
 
+            // $status = $record->tenant->tenant_to_date->isPast() ? RequestStatus::ACTIVE : ;
+
             $record->update(["status" => RequestStatus::CANCELLED]);
 
-            $this->dormitoryTenantService->updateTenantRecordById($record->dormitory_tenant_id, $userId);
+            $this->dormitoryTenantService->updateTenantRecordById($record->dormitory_tenant_id, $userId, RequestStatus::ACTIVE->value);
 
             $this->loggingDetails(
                 $record->dormitory_tenant_id,

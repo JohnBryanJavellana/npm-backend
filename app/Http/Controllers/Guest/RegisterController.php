@@ -108,8 +108,11 @@ class RegisterController extends Controller
             $user->isSocial = 'NO';
             $user->birthdate = $request->birthdate;
             $user->role = $request->role ?? 'TRAINEE';
-            $user->qr = $this->generateAndSendQR($user, "{$user->id}.png");
+            $filename = "{$user->id}.png";
+            $user->qr = $filename;
             $user->save();
+
+            $this->generateAndSendQR($user, $filename);
 
             if($request->adminSettings) {
                 AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a user account. ID#" . $user->id);

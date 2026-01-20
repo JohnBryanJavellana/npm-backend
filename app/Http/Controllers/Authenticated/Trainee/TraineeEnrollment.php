@@ -16,11 +16,13 @@ use App\Http\Resources\Trainee\Enrollment\ViewTraineeRecResource;
 use Illuminate\Http\Request;
 use App\Utils\{AuditHelper, GenerateUniqueFilename, SaveFile, Notifications};
 use App\Http\Resources\{TrainingListResource,AvailableTrainingsResource, SelectedTrainingResource};
+use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\{
     AdditionalTraineeInfo,
+    CourseModule,
     Training,
     Requirement,
     EnrolledCourse,
@@ -54,9 +56,7 @@ class TraineeEnrollment extends Controller
     public function view_module_requirements_v2(Request $request, $moduleId,  $enrolled_id = null)
     {
         try {
-            \Log::info("userId", [$request->userId]);
             $userId = $request->has("userId") && !is_null($request->userId) ? $request->userId : $request->user()->id ?? auth()->id();
-            \Log::info('MODULE ID', [$moduleId, $enrolled_id, $userId]);
             $requirements = Requirement::query()
                 ->with([
                     'trainee_file' => function ($q) use ($userId) {
@@ -103,7 +103,7 @@ class TraineeEnrollment extends Controller
                 "training",
                 "training.module.moduleType",
                 "training.module.charge",
-                "training.module.facilitator.facilitator",
+                "training.module.facilitator.facilitator:id,fname,lname,mname,email",
                 "invoice",
             ])
             ->where([
@@ -141,14 +141,31 @@ class TraineeEnrollment extends Controller
                 $q->where('user_id', $userId)
                 ->whereIn('enrolled_course_status', $this->restrictedStatuses);
             })
-            ->where('status', Training::STATUS_ACTIVE)
-            ->get();
+            ->where('status', Training::STATUS_ACTIVE);
 
-            return AvailableTrainingsResource::collection($trainings);
+            if($request->has("course_module_id")) {
+                $trainings->where("course_module_id", $request->course_module_id);
+            }
+
+            $tr = $trainings->get();
+
+            return AvailableTrainingsResource::collection($tr);
         } catch (\Exception $e) {
             \Log::error("error get_available_trainings", [$e->getMessage()]);
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
+    }
+
+    public function getCourseModule(Request $request)
+    {
+        $courses = CourseModule::with([
+            "charge",
+            "moduleType"
+        ])
+        ->whereHas("schedules")
+        ->get();
+
+        return CourseModuleResource::collection($courses);
     }
 
     public function send_enrollment_request(EnrollmentRequest $request) {
@@ -156,7 +173,6 @@ class TraineeEnrollment extends Controller
 
             DB::beginTransaction();
             $validated = $request->validated();
-            // $user_id = $request->has("userId") && !is_null($request->userId) ? $request->userId : $request->user()->id ?? auth()->id();
             $user_id = $validated["userId"];
 
             $addtional_info_id = AdditionalTraineeInfo::where('user_id', $user_id)->value('id');

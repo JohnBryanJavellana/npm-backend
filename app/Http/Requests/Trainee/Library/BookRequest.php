@@ -40,7 +40,6 @@ class BookRequest extends FormRequest
                 "after:from",
                 new BorrowDateRangeRule($this->from)
             ],
-            'purpose' => 'required',
         ];
     }
 
@@ -54,9 +53,6 @@ class BookRequest extends FormRequest
             'to.required' => 'End date is required.',
             'to.date' => 'End date must be a valid date.',
             'to.after' => 'End date must be after the starting date.',
-            'purpose.required' => 'Purpose is required.',
-            'purpose.string' => 'Purpose must be text.',
-            'purpose.max' => 'Purpose must not exceed 500 characters.',
         ];
     }
 

@@ -40,7 +40,6 @@ class LibraryService {
 
             $res = $this->createBookRes(
                 $user->id,
-                $validated["purpose"]
             );
 
             $BookData = $this->prepareData($validated["book_id"]);
@@ -134,11 +133,10 @@ class LibraryService {
         });
     }
 
-    private function createBookRes($userId, $purpose) {
+    private function createBookRes($userId) {
         return  $this->bookResModel::create([
             "user_id" => $userId,
             "trace_number" => GenerateTrace::createTraceNumber(BookRes::class),
-            "purpose" => $purpose,
             "type" => $this->bookResModel::TYPE_ONLINE,
         ]);
     }

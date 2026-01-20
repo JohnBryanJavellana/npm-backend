@@ -17,7 +17,7 @@ class UserLibraryRule implements ValidationRule
 
 
     protected $user;
-    protected $max = 5;
+    protected $max = 3;
 
     protected $restrictedstatuses = [
             'APPROVED',
@@ -52,7 +52,7 @@ class UserLibraryRule implements ValidationRule
                 ->count();
 
             if($this->max - $max_books < count($value)) {
-                $fail("It looks like you will exceed with your borrowing limit (5 books max). You already have {$max_books}.");
+                $fail("It looks like you will exceed with your borrowing limit (3 books max). You already have {$max_books}.");
             }
 
             $duplicatedReservations = BookReservation::with('books.catalog:id,title,isbn')
@@ -63,7 +63,7 @@ class UserLibraryRule implements ValidationRule
 
             if ($duplicatedReservations->isNotEmpty()) {
                 $bookTitles = $duplicatedReservations->pluck('books.catalog.title')->filter()->implode(', ');
-                $bookIds = $duplicatedReservations->pluck('book_id')->toArray();
+                // $bookIds = $duplicatedReservations->pluck('book_id')->toArray();
 
                 $fail("Duplicate request detected. You already have pending requests for: {$bookTitles}");
             }

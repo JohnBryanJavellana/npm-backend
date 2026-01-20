@@ -19,7 +19,7 @@ class ExtendingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-
+        \Log::info("extending...", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -34,7 +34,6 @@ class ExtendingRequest extends FormRequest
     {
         return [
             "reference_id" => "required|exists:book_res,id",
-            "purpose" => "required|string",
             "data" => "required|array",
             "data.*.book_res_id" => [
                 "required",

@@ -41,4 +41,5 @@ enum RequestStatus: string {
     case INACTIVE = 'INACTIVE';
     case FOR_CSM = 'FOR CSM';
     case VERIFICATION = 'VERIFICATION';
+    case RENEWING = 'RENEWING';
 }

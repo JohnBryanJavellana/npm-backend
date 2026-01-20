@@ -81,7 +81,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_all_courses_and_schools', [MyAccount::class, 'get_all_courses_and_schools']);
             Route::get('get_all_requirements', [MyAccount::class, '']);
             Route::get("dropdown_values", [TraineeEnrollment::class, "viewRanksLicenses"]);
-
         });
 
         Route::prefix('/enrollment/')->group(function () {
@@ -97,6 +96,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('get_applications', [TraineeEnrollment::class, 'get_applications']);
             Route::get('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
+            Route::get("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
         });
 
         Route::prefix('/trainings/')->group(function() {
@@ -106,7 +106,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix('/dormitories/')->group(function() {
             //DORM REQUEST
-            Route::get('get_all_dormitories', [TraineeDormitory::class, 'get_all_dormitories']);
+            // Route::get('get_all_dormitories', [TraineeDormitory::class, 'get_all_dormitories']);
             // Route::get('get_items', [TraineeDormitory::class, 'get_items']);
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
@@ -164,6 +164,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('requests/available_extension', [TraineeLibrary::class, 'view_available_extension']);
             Route::post('requests/submit_extension', [TraineeLibrary::class, 'extend']);
             Route::post('requests/extension/cancel', [TraineeLibrary::class, 'cancel_extend']);
+            Route::post('requests/renew', [TraineeLibrary::class, 'renew']);
         });
 
         Route::prefix('/client_satisfaction/')->group(function() {
