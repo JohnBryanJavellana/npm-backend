@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Authenticated\Trainee;
 
+use App\Enums\RequestStatus;
 use App\Events\BEDormitory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainee\Dormitory\{CancelServiceRequest, CreateExtendRequest, CreateInclusionRequest, CreateServiceRequest, CreateTransferRequest, DormRoomRequest};
@@ -57,11 +58,6 @@ class TraineeDormitory extends Controller
         protected DormitoryInclusionService $dormitoryInclusionService,
     ){}
 
-    public function get_all_dormitories(Request $request) {
-        $dormitories = DormitoryRoom::where("room_status", "ACTIVE")->get();
-        return response()->json(['dormitories' => $dormitories], 200);
-    }
-
     public function get_filtered_dorms (Request $request) {
         try {
             $cost = $request->cost;
@@ -87,6 +83,7 @@ class TraineeDormitory extends Controller
                 "dormitory_room.dormitory"
             ]);
 
+            if(empty($request->type)) $applications->whereNot("status", RequestStatus::CANCELLED->value);
             if($request->type) $applications->whereIn("tenant_status", $request->type);
 
             $apps = $applications->latest("created_at")->get();
@@ -232,6 +229,8 @@ class TraineeDormitory extends Controller
         $user_id = $request->user()->id;
         try {
             $this->dormitoryExtendService->cancelExtendRequest($id, $user_id);
+
+            AuditHelper::log($user_id, "User {$user_id} cancelled a book request.");
 
             return response()->json(["message" => "Your transfer request has been successfully cancelled."], 200);
         }
@@ -415,7 +414,7 @@ class TraineeDormitory extends Controller
     {
         $user_id = $request->user()->id;
         $validated = $request->validated();
-
+        \Log::info("request_service", [$validated]);
         try {
             
             $this->dormitoryExtraService->createService($validated, $user_id);
@@ -448,4 +447,6 @@ class TraineeDormitory extends Controller
             return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
         }
     }
+
+
 }

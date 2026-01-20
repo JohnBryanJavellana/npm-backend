@@ -15,33 +15,37 @@ class BookRequestResource extends JsonResource
     public function toArray(Request $request): array
     {
         // return parent::toArray($request);
-        // return ['book_status' => $this->borrowedBooks->map(function($book) {return $book;})];
         return [
-            'request_id' => $this->id,
-            'request_trace_number' => $this->trace_number,
-            'request_purpose' => $this->purpose,
-            'request_status' => $this->status,
-            'request_type' => $this->type,
+            'id' => $this->id,
+            'trace_number' => $this->trace_number,
+            'status' => $this->status,
+            'type' => $this->type,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
             'requested_books' => $this->borrowedBooks?->map(function($book) {
                 return [
-                    'book_res_id' => $book->id,
-                    'book_id' => $book->books?->id,
-                    'book_name' => $book->books?->catalog?->title,
-                    'book_genre' => $book->books?->catalog?->genre?->name,
-                    'book_author' => $book->books?->catalog?->author,
-                    'book_language' => $book->books?->catalog?->language,
-                    'book_isbn' => $book->books?->catalog?->isbn,
-                    'book_edition' => $book->books?->catalog?->edition,
-                    'book_bibliography' => $book->books?->catalog?->bibliography,
-                    'book_description' => $book->books?->catalog?->description,
-                    'book_publication_year' => $book->books?->catalog?->publication_year,
-                    'book_status' => $book->status,
-                    'book_photo' => $book->books?->photo,
-                    'book_pdf' => $book->books?->pdf_copy,
-                    'book_from' => $book->from_date,
-                    'book_to' => $book->to_date,
-                    'book_ui' => $book->book?->unique_identifier,
-                    'book_recommended' => $book->books?->related->map(function($course) {
+                    'res_id' => $book->id,
+                    'id' => $book->books?->id,
+                    'name' => $book->books?->catalog?->title,
+                    'entry' => $book->books?->catalog?->genre?->name,
+                    'author' => $book->books?->catalog?->author,
+                    'language' => $book->books?->catalog?->language,
+                    'isbn' => $book->books?->catalog?->isbn,
+                    'editor' => $book->books?->catalog?->editor,
+                    'publisher' => $book->books?->catalog?->publisher,
+                    'file_location' => $book->books?->catalog?->file_location,
+                    'type' => $book->books?->catalog?->type,
+                    'publication_year' => $book->books?->catalog?->publication_year,
+                    'status' => $book->status,
+                    'call_number' => $book->books?->catalog?->call_number,
+                    'price' => $book->books?->catalog?->price,
+                    'pages' => $book->books?->catalog?->pages,
+                    'photo' => $book->books?->photo,
+                    'pdf' => $book->books?->pdf_copy,
+                    'from' => $book->from_date,
+                    'to' => $book->to_date,
+                    'ui' => $book->book?->unique_identifier,
+                    'recommended' => $book->books?->related->map(function($course) {
                         return $course->training?->module?->name;
                     }),
                 ];

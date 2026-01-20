@@ -152,7 +152,7 @@ class DormitoryRequestService {
 
         $this->dormitoryTenantHistory->create([
             "dormitory_tenant_id" => $record->id,
-            "history_reason" => $action,
+            "history_reason" => $reason,
         ]);
     }
 }

@@ -18,7 +18,6 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(BookRes::class)->constrained()->cascadeOnDelete();
-            $table->string('purpose');
             $table->timestamps();
         });
     }

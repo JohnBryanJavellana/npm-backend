@@ -27,6 +27,6 @@ class CourseModule extends Model
 
     public function facilitator()
     {
-        return $this->hasMany(TrainingFacilitator::class, "id", "course_module_id");
+        return $this->hasMany(TrainingFacilitator::class, "course_module_id", "id");
     }
 }

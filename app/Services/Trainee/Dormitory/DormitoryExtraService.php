@@ -9,6 +9,7 @@ use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Request;
+use Termwind\Components\Raw;
 
 class DormitoryExtraService {
 
@@ -49,7 +50,7 @@ class DormitoryExtraService {
     }
 
     private function prepareData($validated, int $userId) {
-        $existing = $this->tenantModel->query()
+        $record = $this->tenantModel->query()
         ->with([
             "services" => function($query) use($validated) {
             $query->where("dormitory_service_id", $validated["service_id"])
@@ -63,12 +64,12 @@ class DormitoryExtraService {
         ->forUser($userId)
         ->first();
 
-        if(!$existing) {
+        if(!$record) {
             throw new DomainException("Not active tenant record found");
         }
 
-        if($existing->services->isNotEmpty()) {
-            $services = $existing->services->pluck("services")->flatten()->pluck("name")->filter()->implode(', ');
+        if($record->services->isNotEmpty()) {
+            $services = $record->services->pluck("services")->flatten()->pluck("name")->filter()->implode(', ');
             throw new DomainException("You already have an active request for this service. Please wait for the current request to be completed before submitting a new one. Service: $services");
         } 
 
@@ -113,6 +114,7 @@ class DormitoryExtraService {
         DB::transaction(function () use ($documentId, $userId) {
 
             $record = $this->dormitoryReqService->query()
+            ->with(["invoice"])
             ->whereKey($documentId)
             ->whereRelation("tenant", "user_id", "=", $userId)
             ->lockForUpdate()
@@ -135,8 +137,14 @@ class DormitoryExtraService {
             }
 
             $record->update([
-                "status" => RequestStatus::CANCELLED
+                "status" => RequestStatus::CANCELLED,
             ]);
+
+            // $record->invoice->update([
+            //     "invoice_status" => RequestStatus::CANCELLED,
+            // ]);
+
+            $record->invoice?->delete();
         });
     }
 }

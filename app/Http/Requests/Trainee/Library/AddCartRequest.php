@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Trainee\Dormitory;
+namespace App\Http\Requests\Trainee\Library;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CreateExtendRequest extends FormRequest
+class AddCartRequest extends FormRequest
 {
 
     protected $stopOnFirstFailure = true;
@@ -15,7 +15,8 @@ class CreateExtendRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        
+
+        \Log::info( "add book to cart", [$this->all(), $this->user()->id]);
         return $this->user() !== null;
     }
 
@@ -27,9 +28,7 @@ class CreateExtendRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "document_id" => "required|exists:dormitory_tenants,id",
-            "to_date" => "required|date",
-            "extension_date" => "required|date|after:to_date",
+            "book_id" => "required|exists:books,id"
         ];
     }
 

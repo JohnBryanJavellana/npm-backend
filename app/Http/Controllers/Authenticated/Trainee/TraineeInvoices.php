@@ -34,8 +34,8 @@ class TraineeInvoices extends Controller
                 ])
             ->get();
 
-        $invoices = $all_user_invoices->select('trainee_enrolled_invoices', 'trainee_dormitory_invoices');     
-       
+        $invoices = $all_user_invoices->select('trainee_enrolled_invoices', 'trainee_dormitory_invoices');
+
         return response()->json(['message' => 'Invoices Fetched Successfully!', 'data' => $invoices], 200);
     }
 
@@ -46,7 +46,7 @@ class TraineeInvoices extends Controller
         {
             $validated = $request->validated();
             $this->enrollmentInvoiceService->updateEnrollmentInvoice($validated);
-            
+
         }
         catch (DomainException $e) {
             throw $e;
@@ -59,7 +59,7 @@ class TraineeInvoices extends Controller
 
     public function library_penalties(Request $request)
     {
-        
+
         $records = LibraryInvoice::with([
             "payee",
             "BookRes",

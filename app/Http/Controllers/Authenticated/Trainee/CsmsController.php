@@ -47,7 +47,6 @@ class CsmsController extends Controller
     public function create(Request $request)
     {
         try {
-            \Log::info("csm", $request->all());
             $userId = $request->user()->id;
 
             $CSM = CSM::forUser($userId)

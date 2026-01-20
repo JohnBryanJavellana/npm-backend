@@ -17,7 +17,11 @@ return new class extends Migration
             $table->foreignIdFor(BookGenre::class)->constrained()->cascadeOnDelete();
             $table->longText('title');
             $table->longText('author');
+            $table->string('author', 255);
+            $table->string('publisher', 255);
             $table->string('language');
+            $table->integer('pages')->nullable();
+            $table->string('call_number');
             $table->string('isbn')->nullable();
             $table->longText('edition');
             $table->longText('bibliography')->nullable();

@@ -3,6 +3,7 @@
 namespace App\Services\Trainee\Enrollment;
 
 use App\Enums\RequestStatus;
+use App\Models\EnrolledCourse;
 use App\Models\EnrollmentInvoice;
 use App\Services\Trainee\Credit\CreditService;
 use App\Utils\GenerateTrace;
@@ -15,7 +16,8 @@ class EnrollmentInvoiceService {
     private const prefix = "-EAINV-";
     public function __construct(
         protected EnrollmentInvoice $enrollmentInvoiceModel,
-        protected CreditService $creditService
+        protected CreditService $creditService,
+        protected EnrolledCourse $enrolledCourseModel
     ){}
 
     protected $notAllowedStatuses = [
@@ -54,7 +56,7 @@ class EnrollmentInvoiceService {
 
         return $record;
     }
-    
+
     public function updateEnrollmentInvoice($validated)
     {
         return DB::transaction(function() use ($validated){
@@ -69,19 +71,18 @@ class EnrollmentInvoiceService {
                         "credit_deduction" => $validated["credit_amount"],
                         "datePaid" => Carbon::now()
                     ]);
+
+                    $this->enrolledCourseModel->whereKey($validated["enrolled_course_id"])->update([
+                        "enrolled_course_status" => RequestStatus::PROCESSING_PAYMENT->value
+                    ]);
+
                 }
                 $this->creditService->storeUserAudit($validated, $validated["user_id"]);
             }
-            
+
             return (float) (
-              $validated["total_amount"] - $validated["credit_amount"]
+              round($validated["total_amount"], 2) - round($validated["credit_amount"], 2)
             );
         });
     }
 }
-
-//credit deduction
-//received amount
-//invoice reference
-//payment type
-//date paid
