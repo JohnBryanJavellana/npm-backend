@@ -13,6 +13,7 @@ class CancelBookRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        \Log::info("cancel_book", [$this->all()]);
         return $this->user() !== null;
     }
 

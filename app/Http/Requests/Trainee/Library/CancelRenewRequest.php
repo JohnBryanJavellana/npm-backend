@@ -13,7 +13,6 @@ class CancelRenewRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("cancelRenew", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -33,7 +32,7 @@ class CancelRenewRequest extends FormRequest
     {
         return [
             "book_res_id" => "required|exists:book_reservations,id",
-            "request_id" => "required|exists:book_res,id",
+            "request_id" => "required|exists:book_res,id"
         ];
     }
 

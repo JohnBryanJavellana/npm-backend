@@ -32,11 +32,10 @@ class BookReservation extends Model
         return $this->hasMany(LISelectedBook::class, 'book_reservation_id', 'id');
     }
 
-    public function service()
+    public function services()
     {
         return $this->hasMany(BookService::class, "book_reservation_id", "id");
     }
-
 
     /**
      * SCOPES

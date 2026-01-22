@@ -59,47 +59,46 @@ class LibraryService {
 
     public function prepareMockData($validated)
     {
-        
+
         foreach($validated["books"] as $book) {
 
         }
     }
-    
-    // public function validate($validated)
-    // {
-        
-    //     $book_ids = collect($validated["books"])->pluck("book_id");
-    //     \Log::info("laravel_porject", [$book_ids, gettype($book_ids)]);
 
-    //     $records = $this->bookReservationModel->query()
-    //     ->with([
-    //         "book"
-    //     ])
-    //     // ->select("id", "book_id")
-    //     ->whereIn("id", $validated)
-    //     ->forUser($validated["user_id"])
-    //     ->get();
-
-
-    //     if($records){
-    //         $titles = $records;
-    //     }
-
-
-
-    // }
-
-    public function storeRequest($validated, $user)
+    public function preparedData($validated)
     {
-        DB::transaction(function () use ($validated, $user) {
-            // $this->validate($validated);
+        $book_ids = collect($validated["books"])->pluck("book_id");
+        \Log::info("laravel_porject", [$book_ids, gettype($book_ids)]);
 
-            $record = $this->createBookRes($user->id);
+        $records = $this->bookReservationModel->query()
+        ->with([
+            "book"
+        ])
+        // ->select("id", "book_id")
+        ->whereIn("id", $validated)
+        ->forUser($validated["user_id"])
+        ->get();
 
-            foreach($validated["books"] as $book) {
+
+        if($records){
+            $titles = $records;
+        }
+    }
+
+    //validate and supply
+    public function storeRequest($validated, $userId)
+    {
+        DB::transaction(function () use ($validated, $userId) {
+            // $this->preparedData($validated);
+
+
+
+            $record = $this->createBookRes($userId);
+
+            foreach($validated["data"] as $book) {
                 $this->bookReservationModel->create([
                     "book_res_id" => $record->id,
-                    "book_copy_id" => $book["book_id"],
+                    "book_copy_id" => $book["book_copy_id"] ?? null,
                     "book_id" => $book["book_id"],
                     "from_date" => Carbon::parse($validated["from"])->format("Y-m-d"),
                     "to_date" => Carbon::parse($validated["to"])->format("Y-m-d"),
@@ -177,7 +176,7 @@ class LibraryService {
         }
 
         return $books->map(function($book) use($copies) {
-            return [    
+            return [
                 "book" => $book,
                 "copy" => $book->pdf_copy ? null : $copies[$book->id]->first()
             ];

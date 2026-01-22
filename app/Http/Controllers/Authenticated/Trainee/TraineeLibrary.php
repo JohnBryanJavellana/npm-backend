@@ -27,9 +27,11 @@ use App\Http\Requests\Trainee\Library\AddCartRequest;
 use App\Http\Requests\Trainee\Library\CancelRenewRequest;
 use App\Http\Requests\Trainee\Library\RemoveCartRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
+use App\Http\Resources\Trainee\Library\BookCartResource;
 use App\Services\Trainee\Library\LibraryExtendService;
 use App\Services\Trainee\Library\LibraryRenewService;
 use DomainException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TraineeLibrary extends Controller
 {
@@ -46,25 +48,15 @@ class TraineeLibrary extends Controller
 
     public function test(Request $request)
     {
-        $data = [
-            'books' => [
-                [
-                    'book_id'   => 4,
-                    'copy_type' => 'soft-copy',
-                ],
-                [
-                    'book_id'   => 7,
-                    'copy_type' => 'hard-copy',
-                ],
-            ],
-            'from' => 'Thu, 22 Jan 2026 05:23:27 GMT',
-            'to'   => 'Wed, 28 Jan 2026 05:23:27 GMT',
-        ];
-
-        $test = collect($data["books"])->pluck("book_id", "copy_type");
-
-        return $test;
-
+        $record = BookCart::query()
+            ->with([
+                'books.catalog.genre',
+                'books' => function($q) {
+                    $q->withCount(["copies" => fn($query) => $query->where("status", RequestStatus::AVAILABLE->value)]);
+                },
+            ])
+            ->get();
+        return BookCartResource::collection($record);
     }
 
     /** GET ALL AVAILABLE BOOKS */
@@ -270,25 +262,25 @@ class TraineeLibrary extends Controller
 
     /** POST BOOK REQUEST */
     public function send_request_book(BookRequest $request){
-        // return response()->json(["sesh"], 200);
         try {
-            $user = $request->user();
             $validated = $request->validated();
+            $userId = $validated["user"]["id"];
 
 
-            $this->library_service->storeRequest($validated, $user);
+            // return response()->json(["sheesshh"], 200);
+            $this->library_service->storeRequest($validated, $userId);
 
             if(env("USE_EVENT")) {
                 event(new BELibrary(''));
             }
 
-            $this->forgetCache($user->id);
+            $this->forgetCache($userId);
 
             //EMAIL ABOUT SENDING A BORROWING A BOOK
             //CHANGE THE imbedded IMAGE TO BASE-64 FOR EMAIL??
-            SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
-            AuditHelper::log($user->id, "User {$user->id} sent a book request.");
-            Notifications::notify($user->id, null, 'LIBRARY', 'has sent a book request.');
+            SendingEmail::dispatch($validated["user"], new BookReservationStatus(['status' => "PENDING"], $validated["user"]));
+            AuditHelper::log($userId, "User {$userId} sent a book request.");
+            Notifications::notify($userId, null, 'LIBRARY', 'has sent a book request.');
 
             return response()->json(['message' => 'Your book request was sent successfully!'], 200);
         }
@@ -323,7 +315,7 @@ class TraineeLibrary extends Controller
             //pluck name of already cancelled.
             //flatten after plucking.
             //concert the collection into array.
-            //and return using implode ', ' 
+            //and return using implode ', '
 
             // $cancellables = $books->filter(fn($book) => !$book->status === RequestStatus::CANCELLED)
             // ->pluck('id')
@@ -375,14 +367,14 @@ class TraineeLibrary extends Controller
 
     /** CREATE EXTEND REQUESTS */
     public function extend(ExtendingRequest $request)
-    {        
+    {
         return response()->json(["sheeshs"], 200);
         try {
             DB::beginTransaction();
             $validated = $request->validated();
             $user_id = $request->user()->id;
             $bookId = [];
-        
+
             //separate
             $extension_req = ExtensionRequest::create([
                 "user_id" => $user_id,
@@ -399,12 +391,12 @@ class TraineeLibrary extends Controller
                 ]);
                 $bookId[] = $data['book_res_id'];
             }
-                
+
             BookReservation::query()
             ->whereIn("id",$bookId)
             ->lockForUpdate()
             ->update(["status" => RequestStatus::EXTENDING->value]);
-                
+
             //separate
             // $bookRes = BookRes::find($validated["reference_id"]);
             // $bookRes->status = "EXTENDING";
@@ -474,7 +466,7 @@ class TraineeLibrary extends Controller
             return response()->json(["message" => "Something went wrong, Please try again"], 500);
         }
     }
-    
+
     /** CREATE RENEW REQUESTS */
     public function renew(RenewBookRequest $request)
     {
@@ -489,6 +481,9 @@ class TraineeLibrary extends Controller
 
             return response()->json(["message" => "You've successfully sent a book renew request."], 200);
         }
+        catch (DomainException $e) {
+            throw $e;
+        }
         catch (\Exception $e) {
             \Log::error("renew", [$e]);
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
@@ -499,15 +494,18 @@ class TraineeLibrary extends Controller
     {
         try
         {
-        $validated = $request->validated();
+            $validated = $request->validated();
+            $this->libraryRenewService->cancelRenewRequest($validated);
 
-        $this->libraryRenewService->cancelRenewRequest($validated);
+            return response()->json(["You've successfully cancelled a book renew request."], 200);
 
-        return response()->json(["You've successfully cancel your renewal request"], 200);
+        }
+        catch (ModelNotFoundException) {
+            return response()->json(["wow not found"], 404);
         }
         catch (\Exception $e) {
             \Log::error("cancelRenew", [$e]);
-            return response()->json(["Something went wrong, Please try again."], 500);
+            return response()->json([], 500);
         }
     }
     /** CART MODULES */
@@ -515,8 +513,8 @@ class TraineeLibrary extends Controller
     {
         try {
             $books = $this->libraryCartService->getCart($request);
-            
-            return BookResource::collection($books);
+
+            return BookCartResource::collection($books);
         }
         catch (DomainException $e) {
             throw $e;
@@ -537,7 +535,7 @@ class TraineeLibrary extends Controller
             AuditHelper::log($userId, "User {$userId} added a book to cart.");
 
             return response()->json(["message" => "Item added to the cart"], 201);
-        } 
+        }
         catch (DomainException $e) {
             throw $e;
         }
@@ -549,6 +547,7 @@ class TraineeLibrary extends Controller
 
     public function remove_book_items(RemoveCartRequest $request)
     {
+        return response()->json([$request->all()], 200);
         try {
             $userId = $request->user()->id;
             $validated = $request->validated();
@@ -556,9 +555,9 @@ class TraineeLibrary extends Controller
             $this->libraryCartService->removeFromCart($validated, $userId);
 
             AuditHelper::log($userId, "User {$userId} removed a book from the cart.");
-            
+
             return response()->json(["message" => "Item removed from the cart"], 201);
-        } 
+        }
         catch (DomainException $e) {
             throw $e;
         }
