@@ -24,13 +24,18 @@ class CreateOrUpdateBookRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string'],
-            'description' => ['required', 'string'],
             'genre' => ['required', 'numeric'],
             'isbn' => ['required'],
             'author' => ['required', 'string'],
-            'language' => ['required', 'string'],
-            'edition' => ['required', 'string'],
-            'publicationYear' => ['required', 'numeric'],
+            'editor' => ['required', 'string'],
+            'publisher' => ['required', 'string'],
+            'type' => ['required', 'string'],
+            'pages' => ['required', 'string'],
+            'call_number' => ['required', 'string'],
+            'file_location' => ['required', 'string'],
+            'publication_year' => ['required', 'string'],
+            'price' => ['required', 'numeric'],
+
             'httpMethod' => ['required'],
             'catalogId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ],
             'photo' => [ Rule::when($this->httpMethod === 'POST', ['required'], ['nullable']) ],

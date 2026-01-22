@@ -71,12 +71,15 @@ class LibraryController extends Controller
             $book_catalog->book_genre_id = $request->genre;
             $book_catalog->title = $request->title;
             $book_catalog->author = $request->author;
-            $book_catalog->language = $request->language;
+            $book_catalog->editor = $request->editor;
             $book_catalog->isbn = $request->isbn;
-            $book_catalog->edition = $request->edition;
-            $book_catalog->bibliography = $request->bibliography;
-            $book_catalog->description = $request->description;
-            $book_catalog->publication_year = $request->publicationYear;
+            $book_catalog->publisher = $request->publisher;
+            $book_catalog->type = $request->type;
+            $book_catalog->call_number = $request->call_number;
+            $book_catalog->file_location = $request->file_location;
+            $book_catalog->pages = $request->pages;
+            $book_catalog->price = $request->price;
+            $book_catalog->publication_year = $request->publication_year;
             $book_catalog->save();
 
             $book = $request->httpMethod === "POST" ? new Book : Book::find($request->documentId);
