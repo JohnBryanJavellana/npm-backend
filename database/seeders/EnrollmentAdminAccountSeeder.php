@@ -33,7 +33,31 @@ class EnrollmentAdminAccountSeeder extends Seeder
                 'qr' => "1.png",
                 'dark_mode' => "light",
                 'password' => bcrypt("123456")
-            ]
+            ],
+              [
+                'fname' => "Isaac",
+                'mname' => "Rita",
+                'lname' => "BayotGud",
+                'email' => "isaacrita02@gmail.com",
+                'email_verified_at' => Carbon::now(),
+                'birthdate' => Carbon::parse('07-11-2002'),
+                'role' => "TRAINER",
+                'qr' => "2.png",
+                'dark_mode' => "light",
+                'password' => bcrypt("123456")
+            ],
+              [
+                'fname' => "Bayot Isaac",
+                'mname' => "Rita",
+                'lname' => "Ritayow",
+                'email' => "isaacrita47@gmail.com",
+                'email_verified_at' => Carbon::now(),
+                'birthdate' => Carbon::parse('07-11-2002'),
+                'role' => "TRAINEE",
+                'qr' => "3.png",
+                'dark_mode' => "light",
+                'password' => bcrypt("123456")
+            ],
         ];
 
         foreach($users as $user) {
@@ -50,7 +74,7 @@ class EnrollmentAdminAccountSeeder extends Seeder
             $enrollment_admin_account->password = $user['password'];
             $enrollment_admin_account->save();
 
-            $this->registerCtrlInstance->generateAndSendQR($user, $user['qr']);
+            // $this->registerCtrlInstance->generateAndSendQR($enrollment_admin_account, $user['qr']);
         }
     }
 }

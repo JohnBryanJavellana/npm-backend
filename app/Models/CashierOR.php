@@ -9,6 +9,8 @@ class CashierOR extends Model
 {
     use HasFactory;
 
+    protected $table = "cashier_o_r_s";
+
     public function connectionInLibrary() {
         return $this->hasMany(LibraryInvoice::class);
     }

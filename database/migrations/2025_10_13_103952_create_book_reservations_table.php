@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignIdFor(BookRes::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(BookCopy::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Book::class)->constrained()->cascadeOnDelete();
+            $table->enum("type", ["soft-copy", "hard-copy"])->default('hard-copy');
             $table->enum('status', [
                 'PENDING',
                 'APPROVED',

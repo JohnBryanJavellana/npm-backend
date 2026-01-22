@@ -20,6 +20,7 @@ class UserLibraryRule implements ValidationRule
     protected $max = 3;
 
     protected $restrictedstatuses = [
+            'PENDING',
             'APPROVED',
             'RECEIVED'
     ];

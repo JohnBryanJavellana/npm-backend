@@ -24,11 +24,14 @@ use Carbon\Carbon;
 use App\Services\Trainee\Library\LibraryService;
 use App\Enums\RequestStatus;
 use App\Http\Requests\Trainee\Library\AddCartRequest;
+use App\Http\Requests\Trainee\Library\CancelRenewRequest;
 use App\Http\Requests\Trainee\Library\RemoveCartRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
+use App\Http\Resources\Trainee\Library\BookCartResource;
 use App\Services\Trainee\Library\LibraryExtendService;
 use App\Services\Trainee\Library\LibraryRenewService;
 use DomainException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TraineeLibrary extends Controller
 {
@@ -41,6 +44,20 @@ class TraineeLibrary extends Controller
         protected LibraryRenewService $libraryRenewService,
         protected LibraryCartService $libraryCartService
         ) {}
+
+
+    public function test(Request $request)
+    {
+        $record = BookCart::query()
+            ->with([
+                'books.catalog.genre',
+                'books' => function($q) {
+                    $q->withCount(["copies" => fn($query) => $query->where("status", RequestStatus::AVAILABLE->value)]);
+                },
+            ])
+            ->get();
+        return BookCartResource::collection($record);
+    }
 
     /** GET ALL AVAILABLE BOOKS */
     public function view_books(Request $request)
@@ -245,25 +262,25 @@ class TraineeLibrary extends Controller
 
     /** POST BOOK REQUEST */
     public function send_request_book(BookRequest $request){
-        $validated = $request->validated();
-
-        \Log::info("send_book_req", $request->validated());
-
         try {
-            $user = $request->user();
+            $validated = $request->validated();
+            $userId = $validated["user"]["id"];
 
-            $this->library_service->createReservation($validated, $user);
+
+            // return response()->json(["sheesshh"], 200);
+            $this->library_service->storeRequest($validated, $userId);
 
             if(env("USE_EVENT")) {
                 event(new BELibrary(''));
             }
 
-            $this->forgetCache($user->id);
+            $this->forgetCache($userId);
 
             //EMAIL ABOUT SENDING A BORROWING A BOOK
-            SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
-            AuditHelper::log($user->id, "User {$user->id} sent a book request.");
-            Notifications::notify($user->id, null, 'LIBRARY', 'has sent a book request.');
+            //CHANGE THE imbedded IMAGE TO BASE-64 FOR EMAIL??
+            SendingEmail::dispatch($validated["user"], new BookReservationStatus(['status' => "PENDING"], $validated["user"]));
+            AuditHelper::log($userId, "User {$userId} sent a book request.");
+            Notifications::notify($userId, null, 'LIBRARY', 'has sent a book request.');
 
             return response()->json(['message' => 'Your book request was sent successfully!'], 200);
         }
@@ -453,7 +470,7 @@ class TraineeLibrary extends Controller
     /** CREATE RENEW REQUESTS */
     public function renew(RenewBookRequest $request)
     {
-        return response()->json(["ngek"], 200);
+        // return response()->json(["ngek"], 200);
         try
         {
             $validated = $request->validated();
@@ -464,8 +481,31 @@ class TraineeLibrary extends Controller
 
             return response()->json(["message" => "You've successfully sent a book renew request."], 200);
         }
+        catch (DomainException $e) {
+            throw $e;
+        }
         catch (\Exception $e) {
+            \Log::error("renew", [$e]);
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
+        }
+    }
+
+    public function cancelRenew(CancelRenewRequest $request)
+    {
+        try
+        {
+            $validated = $request->validated();
+            $this->libraryRenewService->cancelRenewRequest($validated);
+
+            return response()->json(["You've successfully cancelled a book renew request."], 200);
+            
+        }
+        catch (ModelNotFoundException) {
+            return response()->json(["wow not found"], 404);
+        }
+        catch (\Exception $e) {
+            \Log::error("cancelRenew", [$e]);
+            return response()->json([], 500);
         }
     }
     /** CART MODULES */
@@ -474,7 +514,7 @@ class TraineeLibrary extends Controller
         try {
             $books = $this->libraryCartService->getCart($request);
             
-            return BookResource::collection($books);
+            return BookCartResource::collection($books);
         }
         catch (DomainException $e) {
             throw $e;
@@ -507,6 +547,7 @@ class TraineeLibrary extends Controller
 
     public function remove_book_items(RemoveCartRequest $request)
     {
+        return response()->json([$request->all()], 200);
         try {
             $userId = $request->user()->id;
             $validated = $request->validated();

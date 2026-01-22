@@ -42,4 +42,5 @@ enum RequestStatus: string {
     case FOR_CSM = 'FOR CSM';
     case VERIFICATION = 'VERIFICATION';
     case RENEWING = 'RENEWING';
+    case EXPIRED = "EXPIRED";
 }
