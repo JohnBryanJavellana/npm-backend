@@ -36,8 +36,8 @@ return new class extends Migration
                 'EXTENDING',
                 'RENEWING'
             ])->default('PENDING');
-            $table->date('from_date');
-            $table->date('to_date');
+            $table->timestamp('from_date');
+            $table->timestamp('to_date');
             $table->timestamps();
         });
     }
