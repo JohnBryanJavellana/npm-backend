@@ -68,7 +68,7 @@ class RegisterController extends Controller
                         $user->profile_picture = $this->processAvatar($socialUser->getAvatar());
 
                         $user->save();
-                        $this->generateAndSendQR($user, $filename);
+                        // $this->generateAndSendQR($user, $filename);
                     }
 
                     AuditHelper::log($user->id, "Logged in via Social Login");
