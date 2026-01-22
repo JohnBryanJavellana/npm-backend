@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('book_catalogs', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(BookGenre::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(BookGenre::class)->constrained()->cascadeOnDelete(); #
             $table->longText('title');
             $table->string('author', 255);
             $table->longText('editor');

@@ -55,7 +55,7 @@ class LibraryRenewService {
             //kon diri throw error "Only received books are allowed to be renewed."
 
             //get all book_resvation based on the passed ids,
-            //filter() statuses !== "Received", pluck name, 
+            //filter() statuses !== "Received", pluck name,
 
             // $this->prepareData($records, $book_reservation_ids);
 
@@ -103,4 +103,4 @@ class LibraryRenewService {
 
         });
     }
-}   
+}

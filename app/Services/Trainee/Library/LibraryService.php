@@ -59,12 +59,12 @@ class LibraryService {
 
     public function prepareMockData($validated)
     {
-        
+
         foreach($validated["books"] as $book) {
 
         }
     }
-    
+
     public function preparedData($validated)
     {
         $book_ids = collect($validated["books"])->pluck("book_id");
@@ -176,7 +176,7 @@ class LibraryService {
         }
 
         return $books->map(function($book) use($copies) {
-            return [    
+            return [
                 "book" => $book,
                 "copy" => $book->pdf_copy ? null : $copies[$book->id]->first()
             ];
