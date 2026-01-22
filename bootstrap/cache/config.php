@@ -201,8 +201,8 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'A:\\nmp-files\\nmp-be\\storage\\framework/cache/data',
-        'lock_path' => 'A:\\nmp-files\\nmp-be\\storage\\framework/cache/data',
+        'path' => 'C:\\laragon\\www\\npm-backend\\storage\\framework/cache/data',
+        'lock_path' => 'C:\\laragon\\www\\npm-backend\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -401,13 +401,13 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'A:\\nmp-files\\nmp-be\\storage\\app',
+        'root' => 'C:\\laragon\\www\\npm-backend\\storage\\app',
         'throw' => false,
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'A:\\nmp-files\\nmp-be\\storage\\app/public',
+        'root' => 'C:\\laragon\\www\\npm-backend\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
@@ -427,7 +427,7 @@
     ),
     'links' => 
     array (
-      'A:\\nmp-files\\nmp-be\\public\\storage' => 'A:\\nmp-files\\nmp-be\\storage\\app/public',
+      'C:\\laragon\\www\\npm-backend\\public\\storage' => 'C:\\laragon\\www\\npm-backend\\storage\\app/public',
     ),
   ),
   'hashing' => 
@@ -468,14 +468,14 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'A:\\nmp-files\\nmp-be\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\npm-backend\\storage\\logs/laravel.log',
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'A:\\nmp-files\\nmp-be\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\npm-backend\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
         'replace_placeholders' => true,
@@ -540,12 +540,12 @@
       ),
       'emergency' => 
       array (
-        'path' => 'A:\\nmp-files\\nmp-be\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\npm-backend\\storage\\logs/laravel.log',
       ),
       'errormonitor' => 
       array (
         'driver' => 'single',
-        'path' => 'A:\\nmp-files\\nmp-be\\storage\\logs/forerror.log',
+        'path' => 'C:\\laragon\\www\\npm-backend\\storage\\logs/forerror.log',
         'level' => 'info',
       ),
     ),
@@ -622,7 +622,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'A:\\nmp-files\\nmp-be\\resources\\views/vendor/mail',
+        0 => 'C:\\laragon\\www\\npm-backend\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -774,7 +774,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'A:\\nmp-files\\nmp-be\\storage\\framework/sessions',
+    'files' => 'C:\\laragon\\www\\npm-backend\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -795,9 +795,9 @@
   array (
     'paths' => 
     array (
-      0 => 'A:\\nmp-files\\nmp-be\\resources\\views',
+      0 => 'C:\\laragon\\www\\npm-backend\\resources\\views',
     ),
-    'compiled' => 'A:\\nmp-files\\nmp-be\\storage\\framework\\views',
+    'compiled' => 'C:\\laragon\\www\\npm-backend\\storage\\framework\\views',
   ),
   'dompdf' => 
   array (
@@ -806,10 +806,10 @@
     'convert_entities' => true,
     'options' => 
     array (
-      'font_dir' => 'A:\\nmp-files\\nmp-be\\storage\\fonts',
-      'font_cache' => 'A:\\nmp-files\\nmp-be\\storage\\fonts',
-      'temp_dir' => 'C:\\Users\\Freqit\\AppData\\Local\\Temp',
-      'chroot' => 'A:\\nmp-files\\nmp-be',
+      'font_dir' => 'C:\\laragon\\www\\npm-backend\\storage\\fonts',
+      'font_cache' => 'C:\\laragon\\www\\npm-backend\\storage\\fonts',
+      'temp_dir' => 'C:\\Users\\admin\\AppData\\Local\\Temp',
+      'chroot' => 'C:\\laragon\\www\\npm-backend',
       'allowed_protocols' => 
       array (
         'data://' => 
@@ -938,7 +938,7 @@
     array (
     ),
     'enable_runnable_solutions' => NULL,
-    'remote_sites_path' => 'A:\\nmp-files\\nmp-be',
+    'remote_sites_path' => 'C:\\laragon\\www\\npm-backend',
     'local_sites_path' => '',
     'housekeeping_endpoint_prefix' => '_ignition',
     'settings_file_path' => '',
