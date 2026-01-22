@@ -189,21 +189,22 @@ class LibraryController extends Controller
         });
     }
 
-    public function get_genres (Request $request) {
+    public function get_book_entries (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $genres = BookGenre::withCount('hasData')->get();
             return response()->json(['genres' => $genres], 200);
         });
     }
 
-    public function create_or_update_genre (CreateOrUpdateGenre $request) {
+    public function create_or_update_book_entry (CreateOrUpdateGenre $request) {
         return TransactionUtil::transact($request, ['genres_cache'], function() use ($request) {
             $this_genre = $request->httpMethod === "POST" ? new BookGenre : BookGenre::find($request->documentId);
+            $this_genre->category = $request->category;
             $this_genre->name = $request->name;
             if($request->status) $this_genre->status = $request->status;
             $this_genre->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a book genre. ID#" . $this_genre->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a book entry. ID#" . $this_genre->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -212,19 +213,19 @@ class LibraryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a book genre. ID#" . $this_genre->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a book entry. ID#" . $this_genre->id], 201);
         });
     }
 
-    public function remove_genre (Request $request, int $genre_id) {
-        return TransactionUtil::transact(null, ['genres_cache'], function() use ($request, $genre_id) {
-            $this_book_genre = BookGenre::withCount(['hasData'])->where('id', $genre_id)->first();
+    public function remove_entry (Request $request, int $entry_id) {
+        return TransactionUtil::transact(null, ['genres_cache'], function() use ($request, $entry_id) {
+            $this_book_genre = BookGenre::withCount(['hasData'])->where('id', $entry_id)->first();
 
             if($this_book_genre->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove book genre. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove book entry. It already has connected data."], 200);
             } else {
                 $this_book_genre->delete();
-                AuditHelper::log($request->user()->id, "Removed book genre. ID#$genre_id");
+                AuditHelper::log($request->user()->id, "Removed book entry. ID#$entry_id");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -233,7 +234,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a book genre. ID#$genre_id"], 200);
+                return response()->json(['message' => "You've removed a book entry. ID#$entry_id"], 200);
             }
         });
     }

@@ -269,11 +269,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book']);
         });
 
-        Route::prefix('/genre/')->group(function() {
-            Route::get('get_genres', [LibraryController::class, 'get_genres']);
-            Route::get('get_active_genres', [LibraryController::class, 'get_active_genres']);
-            Route::post('create_or_update_genre', [LibraryController::class, 'create_or_update_genre']);
-            Route::delete('remove_genre/{genre_id}', [LibraryController::class, 'remove_genre']);
+        Route::prefix('/book_entry/')->group(function() {
+            Route::get('get_book_entries', [LibraryController::class, 'get_book_entries']);
+            Route::get('get_active_entries', [LibraryController::class, 'get_active_entries']);
+            Route::post('create_or_update_book_entry', [LibraryController::class, 'create_or_update_book_entry']);
+            Route::delete('remove_entry/{entry_id}', [LibraryController::class, 'remove_entry']);
         });
 
         Route::prefix('/dormitory/')->group(function() {
