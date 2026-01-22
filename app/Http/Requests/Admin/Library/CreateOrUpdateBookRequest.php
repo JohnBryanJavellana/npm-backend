@@ -24,23 +24,23 @@ class CreateOrUpdateBookRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string'],
-            'genre' => ['required', 'numeric'],
-            'isbn' => ['required'],
-            'author' => ['required', 'string'],
-            'editor' => ['required', 'string'],
-            'publisher' => ['required', 'string'],
-            'type' => ['required', 'string'],
-            'pages' => ['required', 'string'],
-            'call_number' => ['required', 'string'],
-            'file_location' => ['required', 'string'],
-            'publication_year' => ['required', 'string'],
-            'price' => ['required', 'numeric'],
+            'entry' => ['required', 'numeric'],
+            'isbn' => ['nullable', 'required'],
+            'author' => ['nullable', 'string'],
+            'editor' => ['nullable', 'string'],
+            'publisher' => ['nullable', 'string'],
+            'type' => ['nullable', 'string'],
+            'pages' => ['nullable', 'string'],
+            'call_number' => ['nullable', 'string'],
+            'file_location' => ['nullable', 'string'],
+            'publication_year' => ['nullable', 'string'],
+            'price' => ['nullable', 'numeric'],
+            'pdf_file' => ['nullable', 'string'],
+            'copies' => ['nullable', 'string'],
 
             'httpMethod' => ['required'],
             'catalogId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ],
-            'photo' => [ Rule::when($this->httpMethod === 'POST', ['required'], ['nullable']) ],
-            'copies' => [ Rule::when($this->copies, ['required', 'numeric', 'min:1'], ['nullable']) ],
-            'pdfCopy' => [ Rule::when($this->httpMethod === 'POST' && $this->copies <= 0, ['required'], ['nullable']) ],
+            'photo' => [ Rule::when($this->httpMethod === "POST", ['required'], ['nullable']) ],
         ];
     }
 }

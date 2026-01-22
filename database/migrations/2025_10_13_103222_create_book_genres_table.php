@@ -15,7 +15,7 @@ return new class extends Migration
             $table->engine = "InnoDB";
             $table->id();
             $table->string('name');
-            $table->enum('category', ['BOOK', 'N0N-BOOK']);
+            $table->enum('category', ['BOOK', 'NON-BOOK']);
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default("ACTIVE");
             $table->timestamps();
         });
