@@ -23,13 +23,14 @@ class BookRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        \Log::info("send_book_req", $this->all());
         return $this->user() !== null;
-    }   
-    
+    }
+
     protected function prepareForValidation()
     {
         $this->merge([
-            "user" => User::find(in_array($this->user()->role, $this->allowedRoles) 
+            "user" => User::find(in_array($this->user()->role, $this->allowedRoles)
             ? $this->user_id
             : $this->user()->id)
         ]);
@@ -94,5 +95,5 @@ class BookRequest extends FormRequest
             ], 422)
         );
     }
-    
+
 }
