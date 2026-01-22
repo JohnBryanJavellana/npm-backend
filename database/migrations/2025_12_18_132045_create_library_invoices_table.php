@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignIdFor(Charge::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(BookRes::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(CashierOR::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(CashierOR::class)->nullable();
             $table->longText("trace_number");
             $table->longText("invoice_reference")->nullable();
             $table->decimal("amount", 65, 2)->default(0.0);

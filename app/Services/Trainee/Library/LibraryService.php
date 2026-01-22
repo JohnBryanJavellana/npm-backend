@@ -57,6 +57,56 @@ class LibraryService {
         });
     }
 
+    public function prepareMockData($validated)
+    {
+        
+        foreach($validated["books"] as $book) {
+
+        }
+    }
+    
+    // public function validate($validated)
+    // {
+        
+    //     $book_ids = collect($validated["books"])->pluck("book_id");
+    //     \Log::info("laravel_porject", [$book_ids, gettype($book_ids)]);
+
+    //     $records = $this->bookReservationModel->query()
+    //     ->with([
+    //         "book"
+    //     ])
+    //     // ->select("id", "book_id")
+    //     ->whereIn("id", $validated)
+    //     ->forUser($validated["user_id"])
+    //     ->get();
+
+
+    //     if($records){
+    //         $titles = $records;
+    //     }
+
+
+
+    // }
+
+    public function storeRequest($validated, $user)
+    {
+        DB::transaction(function () use ($validated, $user) {
+            // $this->validate($validated);
+
+            $record = $this->createBookRes($user->id);
+
+            foreach($validated["books"] as $book) {
+                $this->bookReservationModel->create([
+                    "book_res_id" => $record->id,
+                    "book_copy_id" => $book["book_id"],
+                    "book_id" => $book["book_id"],
+                    "from_date" => Carbon::parse($validated["from"])->format("Y-m-d"),
+                    "to_date" => Carbon::parse($validated["to"])->format("Y-m-d"),
+                ]);
+            }
+        });
+    }
     public function getOverDue()
     {
         $books = $this->getBooks(["*"],[
@@ -78,7 +128,7 @@ class LibraryService {
 
         return $query;
     }
-
+    //remove
     private function validateBook(array $book_id) {
         $books = $this->getBooks(["id", "pdf_copy"], ['catalog:id,title'])
         ->whereIn("id", $book_id)
@@ -106,6 +156,7 @@ class LibraryService {
         }
     }
 
+    //remove
     private function prepareData(array $book_id) {
         $books = $this->bookModel::whereIn("id" , $book_id)
         ->select("id", "pdf_copy")
@@ -133,6 +184,7 @@ class LibraryService {
         });
     }
 
+    //stay
     private function createBookRes($userId) {
         return  $this->bookResModel::create([
             "user_id" => $userId,

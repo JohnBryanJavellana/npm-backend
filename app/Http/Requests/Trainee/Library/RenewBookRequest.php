@@ -17,6 +17,8 @@ class RenewBookRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,7 +27,8 @@ class RenewBookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            
+            "data.*.book_res_id" => "required|exists:book_reservations,id",
+            "data.*.to" => "required|date"
         ];
     }
 

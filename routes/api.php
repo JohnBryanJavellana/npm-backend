@@ -46,6 +46,9 @@ Route::get('/email/verify', [EmailVerificationController::class, 'verify'])->mid
 Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
+//remove
+Route::get("test", [TraineeLibrary::class, "test"]);
+
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::post('/broadcasting/auth', function (Request $request) {
@@ -165,6 +168,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('requests/submit_extension', [TraineeLibrary::class, 'extend']);
             Route::post('requests/extension/cancel', [TraineeLibrary::class, 'cancel_extend']);
             Route::post('requests/renew', [TraineeLibrary::class, 'renew']);
+            Route::post('renew/cancel', [TraineeLibrary::class, 'cancelRenew']);
         });
 
         Route::prefix('/client_satisfaction/')->group(function() {

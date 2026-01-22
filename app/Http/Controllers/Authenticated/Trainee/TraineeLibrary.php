@@ -24,6 +24,7 @@ use Carbon\Carbon;
 use App\Services\Trainee\Library\LibraryService;
 use App\Enums\RequestStatus;
 use App\Http\Requests\Trainee\Library\AddCartRequest;
+use App\Http\Requests\Trainee\Library\CancelRenewRequest;
 use App\Http\Requests\Trainee\Library\RemoveCartRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
 use App\Services\Trainee\Library\LibraryExtendService;
@@ -41,6 +42,30 @@ class TraineeLibrary extends Controller
         protected LibraryRenewService $libraryRenewService,
         protected LibraryCartService $libraryCartService
         ) {}
+
+
+    public function test(Request $request)
+    {
+        $data = [
+            'books' => [
+                [
+                    'book_id'   => 4,
+                    'copy_type' => 'soft-copy',
+                ],
+                [
+                    'book_id'   => 7,
+                    'copy_type' => 'hard-copy',
+                ],
+            ],
+            'from' => 'Thu, 22 Jan 2026 05:23:27 GMT',
+            'to'   => 'Wed, 28 Jan 2026 05:23:27 GMT',
+        ];
+
+        $test = collect($data["books"])->pluck("book_id", "copy_type");
+
+        return $test;
+
+    }
 
     /** GET ALL AVAILABLE BOOKS */
     public function view_books(Request $request)
@@ -245,14 +270,13 @@ class TraineeLibrary extends Controller
 
     /** POST BOOK REQUEST */
     public function send_request_book(BookRequest $request){
-        $validated = $request->validated();
-
-        \Log::info("send_book_req", $request->validated());
-
+        // return response()->json(["sesh"], 200);
         try {
             $user = $request->user();
+            $validated = $request->validated();
 
-            $this->library_service->createReservation($validated, $user);
+
+            $this->library_service->storeRequest($validated, $user);
 
             if(env("USE_EVENT")) {
                 event(new BELibrary(''));
@@ -261,6 +285,7 @@ class TraineeLibrary extends Controller
             $this->forgetCache($user->id);
 
             //EMAIL ABOUT SENDING A BORROWING A BOOK
+            //CHANGE THE imbedded IMAGE TO BASE-64 FOR EMAIL??
             SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
             AuditHelper::log($user->id, "User {$user->id} sent a book request.");
             Notifications::notify($user->id, null, 'LIBRARY', 'has sent a book request.');
@@ -453,7 +478,7 @@ class TraineeLibrary extends Controller
     /** CREATE RENEW REQUESTS */
     public function renew(RenewBookRequest $request)
     {
-        return response()->json(["ngek"], 200);
+        // return response()->json(["ngek"], 200);
         try
         {
             $validated = $request->validated();
@@ -465,7 +490,24 @@ class TraineeLibrary extends Controller
             return response()->json(["message" => "You've successfully sent a book renew request."], 200);
         }
         catch (\Exception $e) {
+            \Log::error("renew", [$e]);
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
+        }
+    }
+
+    public function cancelRenew(CancelRenewRequest $request)
+    {
+        try
+        {
+        $validated = $request->validated();
+
+        $this->libraryRenewService->cancelRenewRequest($validated);
+
+        return response()->json(["You've successfully cancel your renewal request"], 200);
+        }
+        catch (\Exception $e) {
+            \Log::error("cancelRenew", [$e]);
+            return response()->json(["Something went wrong, Please try again."], 500);
         }
     }
     /** CART MODULES */

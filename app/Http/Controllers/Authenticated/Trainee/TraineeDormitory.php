@@ -83,7 +83,7 @@ class TraineeDormitory extends Controller
                 "dormitory_room.dormitory"
             ]);
 
-            if(empty($request->type)) $applications->whereNot("status", RequestStatus::CANCELLED->value);
+            if(empty($request->type)) $applications->whereNot("tenant_status", RequestStatus::CANCELLED->value);
             if($request->type) $applications->whereIn("tenant_status", $request->type);
 
             $apps = $applications->latest("created_at")->get();
