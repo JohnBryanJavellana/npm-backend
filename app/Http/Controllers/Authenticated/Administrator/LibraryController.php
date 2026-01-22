@@ -307,6 +307,8 @@ class LibraryController extends Controller
     }
 
     public function remove_copy (Request $request, int $copy_id) {
+
+
         return TransactionUtil::transact(null, ['book_copies_cache'], function() use ($request, $copy_id) {
             $this_book = BookCopy::withCount(['hasData'])->where('id', $copy_id)->first();
 
