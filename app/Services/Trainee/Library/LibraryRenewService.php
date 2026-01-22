@@ -42,32 +42,57 @@ class LibraryRenewService {
         DB::transaction(function() use($validated)  {
 
             $userId = auth()->id();
+            $book_reservation_ids = collect(value: $validated["data"])->pluck("book_res_id");
 
-            $record = $this->bookReservationModel->query()
+            $records = $this->bookReservationModel->query()
             ->with([
                 "bookRes:id,user_id,status"
             ])
             ->whereRelation("bookRes", "user_id", "=", $userId)
-            ->whereKey($validated["book_reservation_id"])
+            ->whereIn("id",$book_reservation_ids)
             ->lockForUpdate()
-            ->first();
+            ->get();
 
-            $this->prepareData($record);
+            // $this->prepareData($record);
 
-            $this->bookServiceModel->create([
-                "book_reservation_id" => $validated["book_reservation_id"],
-                "action" => "RENEW",
-                "current_to_date" => $validated["current_to_date"],
-                ]);
+            foreach ($validated["data"] as $data){
+                $this->bookServiceModel->create([
+                    "book_reservation_id" => $data["book_res_id"],
+                    "user_id" => $userId,
+                    "action" => "RENEW",
+                    "old_to_date" => $data["to"],
+                    ]);
 
-            $record->update([
-                "status" => RequestStatus::RENEWING->value
-            ]);
+            }
+
+            foreach($records as $record) {
+                $record->status = RequestStatus::RENEWING->value;
+                $record->save();
+            }
+            // $records->update([
+            //     "status" => RequestStatus::RENEWING->value
+            // ]);
         });
     }
 
-    public function cancelRenewRequest()
+    public function cancelRenewRequest($validated)
     {
-        return;
+        DB::transaction(function () use ($validated) {
+            $record = $this->bookReservationModel->query()
+            ->with([
+                "service"
+            ])
+            ->whereKey($validated["book_res_id"])
+            ->lockForUpdate()
+            ->first();
+
+            $record->update([
+                "status" => RequestStatus::RECEIVED->value
+            ]);
+
+            // $record->service?->update([
+            //     "status" => RequestStatus::CANCELLED->value
+            // ]);
+        });
     }
 }   

@@ -17,7 +17,15 @@ class BookRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        \Log::info("send_book_req", $this->all());
         return $this->user() !== null;
+    }   
+    
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            "user_id" => $this->user()->id
+        ]);
     }
 
     /**
@@ -28,11 +36,13 @@ class BookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'book_id'=> [
+            "books" => "required|array",
+            'books.*.book_id'=> [
                 'required',
-                'array',
+                'integer',
                 new UserLibraryRule($this->user()),
             ],
+            "books.*.copy_type" => "required|string|in:soft-copy,hard-copy",
             'from'=> 'required|date',
             'to'=> [
                 "required",
@@ -58,7 +68,7 @@ class BookRequest extends FormRequest
 
     public function attributes() {
         return [
-            'book_id' => 'book',
+            'books.*.book_id' => 'book',
             'from' => 'starting date',
             'to'=> 'end date',
         ];

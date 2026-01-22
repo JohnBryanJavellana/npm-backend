@@ -15,8 +15,6 @@ class AddCartRequest extends FormRequest
      */
     public function authorize(): bool
     {
-
-        \Log::info( "add book to cart", [$this->all(), $this->user()->id]);
         return $this->user() !== null;
     }
 

@@ -20,6 +20,8 @@ class UploadAvatarRequest extends FormRequest
 
     protected function prepareForValidation()
     {
+
+        //in_array()
         $this->merge([
             "user_id" => $this->user()->role === UserRoleEnum::SUPERADMIN ? $this->user_id : $this->user()->id
         ]);
