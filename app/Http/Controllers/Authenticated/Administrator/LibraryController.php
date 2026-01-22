@@ -68,7 +68,7 @@ class LibraryController extends Controller
                 ? new BookCatalog
                 : BookCatalog::find($request->catalogId);
 
-            $book_catalog->book_genre_id = $request->genre;
+            $book_catalog->book_genre_id = $request->entry;
             $book_catalog->title = $request->title;
             $book_catalog->author = $request->author;
             $book_catalog->editor = $request->editor;
@@ -91,12 +91,13 @@ class LibraryController extends Controller
                 $book->photo = $image_name;
             }
 
-            if($request->pdfCopy) {
+            if($request->pdf_file) {
                 $pdf_name = Str::uuid() . '.pdf';
-                ConvertToBase64::generate($request->pdfCopy, 'application', "book-uploaded-files/pdf/$pdf_name");
+                ConvertToBase64::generate($request->pdf_file, 'application', "book-uploaded-files/pdf/$pdf_name");
                 $book->pdf_copy = $pdf_name;
             }
 
+            $book->status = $request->status;
             $book->save();
 
             BookTrainingRelated::where("book_id", $book->id)->delete();
@@ -198,7 +199,10 @@ class LibraryController extends Controller
 
     public function create_or_update_book_entry (CreateOrUpdateGenre $request) {
         return TransactionUtil::transact($request, ['genres_cache'], function() use ($request) {
-            $this_genre = $request->httpMethod === "POST" ? new BookGenre : BookGenre::find($request->documentId);
+            $this_genre = $request->httpMethod === "POST"
+                ? new BookGenre
+                : BookGenre::find($request->documentId);
+
             $this_genre->category = $request->category;
             $this_genre->name = $request->name;
             if($request->status) $this_genre->status = $request->status;
