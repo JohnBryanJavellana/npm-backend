@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Trainee\Library;
 
+use App\Enums\UserRoleEnum;
+use App\Models\User;
 use App\Rules\Trainee\Library\{UserLibraryRule, BorrowDateRangeRule};
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -11,6 +13,10 @@ class BookRequest extends FormRequest
 {
     //stop on first failed of the validation
     protected $stopOnFirstFailure = true;
+    protected $allowedRoles = [
+        UserRoleEnum::SUPERADMIN,
+        UserRoleEnum::ADMIN_LIBRARY
+    ];
 
     /**
      * Determine if the user is authorized to make this request.
@@ -19,12 +25,14 @@ class BookRequest extends FormRequest
     {
         \Log::info("send_book_req", $this->all());
         return $this->user() !== null;
-    }   
-    
+    }
+
     protected function prepareForValidation()
     {
         $this->merge([
-            "user_id" => $this->user()->id
+            "user" => User::find(in_array($this->user()->role, $this->allowedRoles)
+            ? $this->user_id
+            : $this->user()->id)
         ]);
     }
 
@@ -36,18 +44,19 @@ class BookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "books" => "required|array",
-            'books.*.book_id'=> [
+            "user" => "required",
+            "data" => "required|array",
+            'data.*.book_id'=> [
                 'required',
                 'integer',
                 new UserLibraryRule($this->user()),
             ],
-            "books.*.copy_type" => "required|string|in:soft-copy,hard-copy",
+            "data.*.copy_type" => "required|string|in:SOFT-COPY,HARD-COPY",
+            "data.*.book_copy_id" => "nullable|exists:book_copies,id",
             'from'=> 'required|date',
             'to'=> [
                 "required",
                 "date",
-                "after:from",
                 new BorrowDateRangeRule($this->from)
             ],
         ];
@@ -86,5 +95,5 @@ class BookRequest extends FormRequest
             ], 422)
         );
     }
-    
+
 }

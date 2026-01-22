@@ -5,8 +5,10 @@ namespace App\Services\Trainee\Library;
 use App\Enums\RequestStatus;
 use App\Models\BookReservation;
 use App\Models\BookService;
+use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Request;
 
 class LibraryRenewService {
     public function __construct(
@@ -15,19 +17,13 @@ class LibraryRenewService {
     )
     {}
 
-    public function prepareData($record)
+    public function prepareData($records, $book_reservation_ids)
     {
-        if(!$record) {
-            throw new DomainException("No data found!");
+
+        if($records->count() !== count($book_reservation_ids)) {
+            throw new DomainException("Only RECEIVED books are allowed to be renewed.");
         }
 
-        if($record !== RequestStatus::RECEIVED->value) {
-            throw new DomainException("Only received books are allowed to be renewed.");
-        }
-
-        if($record->bookRes?->status !== RequestStatus::ACTIVE->value) {
-            throw new DomainException("Only active requests are allowed to be renewed.");
-        }
     }
 
     // public function getRenewRequests()
@@ -48,51 +44,63 @@ class LibraryRenewService {
             ->with([
                 "bookRes:id,user_id,status"
             ])
+            ->forStatus([RequestStatus::RECEIVED->value])
             ->whereRelation("bookRes", "user_id", "=", $userId)
             ->whereIn("id",$book_reservation_ids)
             ->lockForUpdate()
             ->get();
 
-            // $this->prepareData($record);
+            //validate if all book reservations are active or "Received"
+            //check length if an iya ginpasa na mga id is equal han kahilaba han return han model
+            //kon diri throw error "Only received books are allowed to be renewed."
 
-            foreach ($validated["data"] as $data){
-                $this->bookServiceModel->create([
-                    "book_reservation_id" => $data["book_res_id"],
-                    "user_id" => $userId,
-                    "action" => "RENEW",
-                    "old_to_date" => $data["to"],
-                    ]);
+            //get all book_resvation based on the passed ids,
+            //filter() statuses !== "Received", pluck name,
 
-            }
+            // $this->prepareData($records, $book_reservation_ids);
+
+            $Bulkdata = collect($validated["data"])->map(function ($data) use ($userId) {
+                    return [
+                        "book_reservation_id" => $data["book_res_id"],
+                        "user_id" => $userId,
+                        "action" => "RENEW",
+                        "old_to_date" => $data["to"],
+                        "created_at" => Carbon::now(),
+                        "updated_at" => Carbon::now()
+                    ];
+            })->toArray();
+
+            $this->bookServiceModel->insert($Bulkdata);
 
             foreach($records as $record) {
                 $record->status = RequestStatus::RENEWING->value;
                 $record->save();
             }
-            // $records->update([
-            //     "status" => RequestStatus::RENEWING->value
-            // ]);
         });
     }
 
     public function cancelRenewRequest($validated)
     {
-        DB::transaction(function () use ($validated) {
+        DB::transaction(function() use ($validated) {
             $record = $this->bookReservationModel->query()
-            ->with([
-                "service"
-            ])
             ->whereKey($validated["book_res_id"])
-            ->lockForUpdate()
-            ->first();
+            ->where("book_res_id", $validated["request_id"])
+            ->firstOrFail();
+
+            //validate record
+            $date = Carbon::parse($record->to_date);
 
             $record->update([
-                "status" => RequestStatus::RECEIVED->value
+                "status" => $date?->isPast() ? RequestStatus::EXPIRED->value : RequestStatus::RECEIVED->value
             ]);
 
-            // $record->service?->update([
-            //     "status" => RequestStatus::CANCELLED->value
-            // ]);
+            $record->services()
+            ->status(RequestStatus::PENDING->value)
+            ->service("RENEW")
+            ->update([
+                "status" => RequestStatus::CANCELLED->value
+            ]);
+
         });
     }
-}   
+}

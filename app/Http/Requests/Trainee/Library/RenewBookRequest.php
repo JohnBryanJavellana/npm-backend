@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Trainee\Library;
 
+use App\Enums\UserRoleEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -17,7 +18,17 @@ class RenewBookRequest extends FormRequest
         return $this->user() !== null;
     }
 
-    
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            "user_id" => in_array($this->user()->role, [
+                UserRoleEnum::SUPERADMIN->value,
+                UserRoleEnum::ADMIN_LIBRARY->value
+            ])
+        ]);
+    }
+
 
     /**
      * Get the validation rules that apply to the request.
