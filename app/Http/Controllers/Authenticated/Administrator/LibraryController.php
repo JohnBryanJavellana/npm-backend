@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Authenticated\Administrator;
 
+use App\Http\Controllers\Authenticated\Trainee\TraineeLibrary;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\{
 use App\Utils\{
     TransactionUtil,
 };
+use App\Http\Requests\Trainee\Library\BookRequest;
+
 use App\Http\Requests\Admin\Library\{
     CreateOrUpdateBookRequest,
     CreateOrUpdateGenre,
@@ -51,6 +54,12 @@ use App\Models\{
 
 class LibraryController extends Controller
 {
+    protected $traineeCtrlInstance;
+
+    public function __construct(TraineeLibrary $traineeLibrary){
+        $this->traineeCtrlInstance = $traineeLibrary;
+    }
+
     public function get_books (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $books = Book::withCount('copies', 'hasData')->with([
@@ -620,68 +629,9 @@ class LibraryController extends Controller
         });
     }
 
-    public function create_walkin_request (CreateWalkInRequest $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
-            $bookReservations = BookReservation::forUser($request->borrower)
-                ->whereNotIn('status', ['CANCELLED', 'RETURNED', 'REJECTED'])
-                ->whereIn('book_id', collect($request->data)->pluck('bookId')->toArray())
-                ->exists();
-
-            if ($bookReservations) {
-                return response()->json(['message' => "Duplicate request detected. Borrower can only request each book once, check request list."],  412);
-            } else {
-                $book_res = new BookRes();
-                $book_res->user_id = $request->borrower;
-                $book_res->trace_number = GenerateTrace::createTraceNumber(BookRes::class, '-LR-');
-                $book_res->purpose = $request->purpose;
-                $book_res->type = $request->type;
-                $book_res->save();
-
-                foreach($request->data as $book) {
-                    $book_record = new BookReservation();
-                    $is_e_copy = Book::where('id', $book['bookId'])->whereNotNull('pdf_copy')->first();
-
-                    $record = BookCopy::where(['book_id' => $book['bookId'], 'status' => "AVAILABLE"]);
-
-                    if($book['preferredBookCopy'] && $book['preferredBookCopy'] !== 'undefined') {
-                        $record->where('unique_identifier', $book['preferredBookCopy']);
-                    }
-
-                    $rec = $record->first();
-
-                    if (!$is_e_copy) {
-                        if($rec === null) {
-                            return response()->json(['message' => 'One of the book(s) you requested has no available copies at the moment.'], 422);
-                        }
-
-                        $rec->status = "RESERVED";
-                        $rec->save();
-                    }
-
-                    $book_record->from_date = $request->fromDate;
-                    $book_record->to_date = $request->toDate;
-                    $book_record->book_copy_id = $rec?->id;
-                    $book_record->book_res_id = $book_res->id;
-                    $book_record->book_id = $book['bookId'];
-                    $book_record->save();
-                }
-
-                if(env("USE_EVENT")) {
-                    event(
-                        new BELibrary(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                Notifications::notify($request->user()->id, $request->borrower, "LIBRARY", "created a library request for you.");
-                $action = $request->type === "WALK-IN"
-                        ? strtolower($request->type) . " library request for User ID#" . ($request->user()->role === "TRAINER" ? $request->user()->id : $request->borrower)
-                        : strtolower($request->type) . " library request";
-
-
-                AuditHelper::log($request->user()->id, "Created " . $action);
-                return response()->json(['message' => "You've created " . $action], 200);
-            }
+    public function create_walkin_request (BookRequest $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this->traineeCtrlInstance->send_request_book($request);
         });
     }
 

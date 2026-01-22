@@ -23,14 +23,12 @@ class CreateWalkInRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'borrower' => [ Rule::when($this->user()->role !== "TRAINER", ['required'], ['nullable']) ],
+            'borrower' => ['required'],
             'fromDate' => ['required', 'date'],
             'toDate' => ['required', 'date'],
-            'purpose' => ['required', 'string'],
-            'type' => ['required', 'string'],
             'data' => ['required', 'array'],
             'data.*.bookId' => ['required', 'numeric'],
-            'otherPurpose' => [ Rule::when($this->purpose === 'reason13', ['required'], ['nullable']) ]
+            'data.*.copy_type' => ['required', 'string']
         ];
     }
 }
