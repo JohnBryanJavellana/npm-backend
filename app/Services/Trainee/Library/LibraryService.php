@@ -59,16 +59,19 @@ class LibraryService {
         });
     }
 
-    public function prepareMockData($validated)
-    {
-        
-        foreach($validated["books"] as $book) {
-
-        }
-    }
     
     public function preparedData($validated, $userId)
         {
+
+            $exists = $this->bookResModel->query()
+            ->forUser($userId)
+            ->where("status", RequestStatus::FOR_CSM->value)
+            ->exists();
+
+            if($exists) {
+                throw new DomainException("You still have a request with a “FOR CSM” status. Please fill it out before submitting a new request.");
+            }
+
             $book_ids = collect($validated["data"])->pluck("book_id");
             $statuses = [
                 RequestStatus::PENDING->value,
@@ -77,29 +80,35 @@ class LibraryService {
                 RequestStatus::EXTENDED->value, 
                 RequestStatus::RENEWING->value,
                 RequestStatus::RENEWED->value,
+                RequestStatus::RECEIVED->value
             ];
 
-            $records = BookReservation::query()
+            $records = $this->bookReservationModel::query()
                 ->with([
                     "books.catalog:id,title"
                 ])
-                ->select("id", "book_id")
+                ->select("id", "book_id", "to_date", "type")
                 ->whereIn("status",$statuses)
                 ->forUser($userId)
-                ->get();
+                ->get();    
 
             $book_counts = $records->count();
-            \Log::info("book_counts", [$book_counts]);
-            if($book_counts >= 3) {
-                throw new DomainException("You will exceed with your borrowing limit (3 books max). You already have {$book_counts}.");
+            if(($book_counts + $book_ids->count()) > 3) {
+                throw new DomainException("You will exceed with your borrowing limit (3 books max). You already have {$book_counts} active book requests.");
             }
-
+            
+            \Log::info("date", [$records->where('to_date', '<', now())]);
+            $overDues = $records->where('to_date', '<', now())->where("type", "HARD-COPY")->count();
+            if($overDues > 0) {
+                throw new DomainException("You have an overdue book" . (($overDues > 1) ? 's' : '') . ", please return or check your borrowed list.");
+            }
 
             $dublicates = $records->whereIn("book_id", $book_ids);
             if($dublicates->isNotEmpty()){
-                $titles = $records->pluck("books.catalog.title")->toArray();
+                $titles = implode(", ", $records->pluck("books.catalog.title")->toArray());
                 throw new DomainException("Duplicate request detected. You already have pending requests for: {$titles}");
             }
+
     }
 
     //validate and supply

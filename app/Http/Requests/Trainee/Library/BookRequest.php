@@ -49,7 +49,7 @@ class BookRequest extends FormRequest
             'data.*.book_id'=> [
                 'required',
                 'integer',
-                new UserLibraryRule($this->user()),
+                // new UserLibraryRule($this->user()),
             ],
             "data.*.copy_type" => "required|string|in:SOFT-COPY,HARD-COPY",
             "data.*.book_copy_id" => "nullable|exists:book_copies,id",
