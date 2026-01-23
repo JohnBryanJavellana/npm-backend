@@ -51,12 +51,12 @@ class TraineeLibrary extends Controller
         $ids = [2,3,1];
         $statuses = [
             RequestStatus::PENDING->value,
-             RequestStatus::APPROVED->value,
-             RequestStatus::EXTENDING->value,
-             RequestStatus::RENEWING->value,
-             RequestStatus::EXTENDED->value,
-             RequestStatus::RENEWED->value,
-             ];
+            RequestStatus::APPROVED->value,
+            RequestStatus::EXTENDING->value,
+            RequestStatus::EXTENDED->value,
+            RequestStatus::RENEWING->value,
+            RequestStatus::RENEWED->value,
+            ];
 
         $record = BookReservation::query()
         ->with([
@@ -67,8 +67,8 @@ class TraineeLibrary extends Controller
         ->forUser(1)
         ->whereNotIn("status",$statuses)
         ->get();
-
-        return $record->pluck("books.catalog.title");
+        $title = $record->pluck("books.catalog.title")->toArray();
+        return implode(", ", $title);
     }
 
     /** GET ALL AVAILABLE BOOKS */

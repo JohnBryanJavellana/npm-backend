@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Authenticated\Trainee;
 
+use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainee\Enrollment\EnrollmentInvoiceRequest;
 use App\Http\Requests\Trainee\Invoice\DormitoryInvoiceRequest;
 use App\Http\Resources\Trainee\Invoices\DormitoryInvoiceResource;
 use App\Http\Requests\Trainee\Library\LibInvoiceRequest;
+use App\Http\Resources\BookRequestResource;
 use App\Http\Resources\LibInvoiceResource;
 use Illuminate\Http\Request;
-use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice};
+use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice, BookRes};
 use App\Services\Trainee\Dormitory\DormitoryInvoiceService;
 use App\Services\Trainee\Enrollment\EnrollmentInvoiceService;
 use App\Services\Trainee\Library\LibraryInvoiceService;
@@ -59,18 +61,33 @@ class TraineeInvoices extends Controller
 
     public function library_penalties(Request $request)
     {
+        try
+        {
+        $penaltiedStatuses = [RequestStatus::DAMAGED->value, RequestStatus::LOST->value];
 
-        $records = LibraryInvoice::with([
-            "payee",
-            "BookRes",
-            "selectedBooks.bookReservation.books.catalog.genre",
-            "selectedBooks.bookReservation.book",
+        $records = BookRes::with([
+            "borrowedBooks" => fn($q) => $q->whereIn("status", $penaltiedStatuses),
+            "borrowedBooks.books.catalog.genre",
+            "borrowedBooks.book",
             ])
         ->where("user_id", $request->user()->id)
+        ->whereHas("borrowedBooks", function($query) use ($penaltiedStatuses) {
+            $query->whereIn("status", $penaltiedStatuses);
+        })
+        ->latest("created_at")
         ->get();
 
+        return BookRequestResource::collection($records);
+
+        }
+        catch (\Exception $e) {
+            \Log::error("error_library_penalties", [$e]);
+            return response()->json(["Something went wrong, Please try again."], 500);
+        }
+        
+
         // return response()->json(["invoices" => $records], 200);
-        return LibInvoiceResource::collection($records);
+        // return LibInvoiceResource::collection($records);
     }
 
     public function updateLibInvoice(LibInvoiceRequest $request)
