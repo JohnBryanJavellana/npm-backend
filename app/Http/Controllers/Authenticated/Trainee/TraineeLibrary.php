@@ -77,6 +77,15 @@ class TraineeLibrary extends Controller
         try {
             $user = User::find($request->user()->id);
             $userId = $user?->id;
+            $statuses = [
+                RequestStatus::PENDING->value,
+                RequestStatus::APPROVED->value,
+                RequestStatus::EXTENDING->value,
+                RequestStatus::EXTENDED->value, 
+                RequestStatus::RENEWING->value,
+                RequestStatus::RENEWED->value,
+                RequestStatus::RECEIVED->value
+            ];
 
             if(!$user) {
                 throw new HttpResponseException(
@@ -108,8 +117,8 @@ class TraineeLibrary extends Controller
                 'carts' => function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 },
-                'hasData' => function ($q) use ($user) {
-                    $q->whereIn('status', [RequestStatus::RECEIVED, RequestStatus::PENDING, RequestStatus::APPROVED])->whereRelation('bookRes', 'user_id', '=', $user->id);
+                'hasData' => function ($q) use ($user, $statuses) {
+                    $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $user->id);
                 },
                 'related as enrolled_trainings_count' => function ($query) use ($record) {
                     $query->whereIn('training_id', $record);
@@ -519,64 +528,6 @@ class TraineeLibrary extends Controller
             return response()->json([], 500);
         }
     }
-    /** CART MODULES */
-    public function view_book_cart(Request $request)
-    {
-        try {
-            $books = $this->libraryCartService->getCart($request);
-            
-            return BookCartResource::collection($books);
-        }
-        catch (DomainException $e) {
-            throw $e;
-        }
-        catch (\Exception $e) {
-            return response()->json(["message" => "Something went wrong, Please try again."], 500);
-        }
-    }
-
-    public function add_book_items(AddCartRequest $request)
-    {
-        try {
-            $userId = $request->user()->id;
-            $validated = $request->validated();
-
-            $this->libraryCartService->storeToCart($validated, $userId);
-
-            AuditHelper::log($userId, "User {$userId} added a book to cart.");
-
-            return response()->json(["message" => "Item added to the cart"], 201);
-        } 
-        catch (DomainException $e) {
-            throw $e;
-        }
-        catch(\Exception $e) {
-            \Log::error('error add_book_items', [$e]);
-            return response()->json(['message' => "Something went wrong, Please try again!"], 500);
-        }
-    }
-
-    public function remove_book_items(RemoveCartRequest $request)
-    {
-        try {
-            $userId = $request->user()->id;
-            $validated = $request->validated();
-
-            $this->libraryCartService->removeFromCart($validated, $userId);
-
-            AuditHelper::log($userId, "User {$userId} removed a book from the cart.");
-            
-            return response()->json(["message" => "Item removed from the cart"], 201);
-        } 
-        catch (DomainException $e) {
-            throw $e;
-        }
-        catch(\Exception $e) {
-            \Log::error('error remove_book_items', [$e]);
-            return response()->json(['message' => "Something went wrong, Please try again!"], 400);
-        }
-    }
-
     public function count_book_reservation (Request $request){
         return TransactionUtil::transact(null, [], function() use ($request) {
             $userId = $request->user()->id;

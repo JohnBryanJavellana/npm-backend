@@ -22,7 +22,7 @@ class LibraryRenewService {
     {
 
         if($records->count() !== count($book_reservation_ids)) {
-            throw new DomainException("Only RECEIVED books are allowed to be renewed.");
+            throw new DomainException("Only 'RECEIVED' books are allowed to be renewed.");
         }
 
     }
