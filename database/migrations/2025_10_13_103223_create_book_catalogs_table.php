@@ -16,21 +16,19 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(BookGenre::class)->constrained()->cascadeOnDelete();
             $table->longText('title');
-            $table->longText('author');
             $table->string('author', 255);
+            $table->longText('editor');
             $table->string('publisher', 255);
-            $table->string('language');
+            $table->string('type', 255);
             $table->integer('pages')->nullable();
             $table->string('call_number');
+            $table->double('price', 65, 2)->default(0.00);
             $table->string('isbn')->nullable();
-            $table->longText('edition');
-            $table->longText('bibliography')->nullable();
-            $table->longText('description');
+            $table->string('file_location', 255)->nullable();
             $table->year('publication_year');
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */

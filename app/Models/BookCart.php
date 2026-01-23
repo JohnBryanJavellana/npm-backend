@@ -18,4 +18,14 @@ class BookCart extends Model
     {
         return $this->belongsTo(Book::class, 'book_id', 'id');
     }
+
+    public function copiess()
+    {
+        return $this->hasManyThrough(Book::class, BookCopy::class, "book_id", "id");
+    }
+
+    public function number()
+    {
+        return $this->books?->copies()?->count();
+    }
 }

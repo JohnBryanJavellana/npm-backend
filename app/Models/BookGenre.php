@@ -9,6 +9,8 @@ class BookGenre extends Model
 {
     use HasFactory;
 
+    protected $guarded = ["id"];
+
     public function hasData() {
         return $this->hasMany(BookCatalog::class);
     }
