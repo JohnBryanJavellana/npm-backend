@@ -2,9 +2,11 @@
 
 namespace App\Services\Trainee\Library;
 
+use App\Enums\RequestStatus;
 use App\Models\{BookRes, Book, BookCopy, BookReservation, BookCart};
 use App\Utils\GenerateTrace;
 use Carbon\Carbon;
+use DomainException;
 use Illuminate\Support\Facades\DB;
 
 
@@ -65,30 +67,46 @@ class LibraryService {
         }
     }
     
-    public function preparedData($validated)
-    {
-        $book_ids = collect($validated["books"])->pluck("book_id");
+    public function preparedData($validated, $userId)
+        {
+            $book_ids = collect($validated["data"])->pluck("book_id");
+            $statuses = [
+                RequestStatus::PENDING->value,
+                RequestStatus::APPROVED->value,
+                RequestStatus::EXTENDING->value,
+                RequestStatus::EXTENDED->value, 
+                RequestStatus::RENEWING->value,
+                RequestStatus::RENEWED->value,
+            ];
 
-        $records = $this->bookReservationModel->query()
-        ->with([
-            "book"
-        ])
-        // ->select("id", "book_id")
-        ->whereIn("id", $validated)
-        ->forUser($validated["user_id"])
-        ->get();
+            $records = BookReservation::query()
+                ->with([
+                    "books.catalog:id,title"
+                ])
+                ->select("id", "book_id")
+                ->whereIn("status",$statuses)
+                ->forUser($userId)
+                ->get();
+
+            $book_counts = $records->count();
+            \Log::info("book_counts", [$book_counts]);
+            if($book_counts >= 3) {
+                throw new DomainException("You will exceed with your borrowing limit (3 books max). You already have {$book_counts}.");
+            }
 
 
-        if($records){
-            $titles = $records;
-        }
+            $dublicates = $records->whereIn("book_id", $book_ids);
+            if($dublicates->isNotEmpty()){
+                $titles = $records->pluck("books.catalog.title")->toArray();
+                throw new DomainException("Duplicate request detected. You already have pending requests for: {$titles}");
+            }
     }
 
     //validate and supply
     public function storeRequest($validated, $userId)
     {
         DB::transaction(function () use ($validated, $userId) {
-            // $this->preparedData($validated);
+            $this->preparedData($validated, $userId);
 
             $record = $this->createBookRes($userId);
 
@@ -103,6 +121,7 @@ class LibraryService {
             }
         });
     }
+    
     public function getOverDue()
     {
         $books = $this->getBooks(["*"],[

@@ -45,4 +45,6 @@ enum RequestStatus: string {
     case EXTENDED = 'EXTENDED';
     case EXPIRED = "EXPIRED";
     case RENEWED = 'RENEWED';
+    case LOST = "LOST";
+    case DAMAGED = "DAMAGED";
 }
