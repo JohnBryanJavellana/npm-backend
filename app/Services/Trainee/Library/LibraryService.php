@@ -68,7 +68,6 @@ class LibraryService {
     public function preparedData($validated)
     {
         $book_ids = collect($validated["books"])->pluck("book_id");
-        \Log::info("laravel_porject", [$book_ids, gettype($book_ids)]);
 
         $records = $this->bookReservationModel->query()
         ->with([
@@ -91,8 +90,6 @@ class LibraryService {
         DB::transaction(function () use ($validated, $userId) {
             // $this->preparedData($validated);
 
-
-
             $record = $this->createBookRes($userId);
 
             foreach($validated["data"] as $book) {
@@ -100,8 +97,8 @@ class LibraryService {
                     "book_res_id" => $record->id,
                     "book_copy_id" => $book["book_copy_id"] ?? null,
                     "book_id" => $book["book_id"],
-                    "from_date" => Carbon::parse($validated["from"])->format("Y-m-d"),
-                    "to_date" => Carbon::parse($validated["to"])->format("Y-m-d"),
+                    "from_date" => Carbon::parse($validated["from"]),
+                    "to_date" => Carbon::parse($validated["to"])->setTime(12, 0, 0),
                 ]);
             }
         });
