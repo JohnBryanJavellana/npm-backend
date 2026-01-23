@@ -23,6 +23,7 @@ class BookRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        \Log::info("send_request", [$this->all()]);
         return $this->user() !== null;
     }   
     

@@ -48,15 +48,27 @@ class TraineeLibrary extends Controller
 
     public function test(Request $request)
     {
-        $record = BookCart::query()
-            ->with([
-                'books.catalog.genre',
-                'books' => function($q) {
-                    $q->withCount(["copies" => fn($query) => $query->where("status", RequestStatus::AVAILABLE->value)]);
-                },
-            ])
-            ->get();
-        return BookCartResource::collection($record);
+        $ids = [2,3,1];
+        $statuses = [
+            RequestStatus::PENDING->value,
+             RequestStatus::APPROVED->value,
+             RequestStatus::EXTENDING->value,
+             RequestStatus::RENEWING->value,
+             RequestStatus::EXTENDED->value,
+             RequestStatus::RENEWED->value,
+             ];
+
+        $record = BookReservation::query()
+        ->with([
+            "books.catalog:id,title"
+        ])
+        ->select("id", "book_id")
+        ->whereIn("book_id", $ids)
+        ->forUser(1)
+        ->whereNotIn("status",$statuses)
+        ->get();
+
+        return $record->pluck("books.catalog.title");
     }
 
     /** GET ALL AVAILABLE BOOKS */
@@ -179,6 +191,7 @@ class TraineeLibrary extends Controller
 
             $books = BookRes::forUser($user_id)
                 ->with([
+                    "borrowedBooks.book",
                     "borrowedBooks.books.catalog.genre",
                     "borrowedBooks.books.related" => function($q) use ($record) {
                     $q->whereIn('training_id', $record);
@@ -266,8 +279,6 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $userId = $validated["user"]["id"];
 
-
-            // return response()->json(["sheesshh"], 200);
             $this->library_service->storeRequest($validated, $userId);
 
             if(env("USE_EVENT")) {
@@ -599,7 +610,7 @@ class TraineeLibrary extends Controller
             return TransactionUtil::transact(null,[], function() use($request, $book_id) {
             // $ttl = now()->addMinutes(env('CACHE_DURATION'));
             // return Cache::remember("book_info_cache_$book_id:{$request->user()->id}", $ttl, function () use($request, $book_id) {
-                \Log::info($request->all());
+                \Log::info("get_book_info",[$request->all(), $book_id]);
 
                 $book = Book::where('id', $book_id)
                     ->withCount('copies', 'hasData')
@@ -622,11 +633,10 @@ class TraineeLibrary extends Controller
                     ->whereHas('borrowedBooks', function ($self) use($book_id) {
                         return $self->where([
                             'book_id' => $book_id,
-                            'status' => 'RECEIVED'
-                        ])->where('to_date', '>=', Carbon::now());
+                        ])->whereIn("status",[RequestStatus::RECEIVED->value, RequestStatus::EXTENDED->value, RequestStatus::RENEWED->value])
+                        ->where('to_date', '>=', Carbon::now());
                      })->exists();
 
-                    \Log::info($isMine);
 
                     if ($filename && $isMine) {
                         $filePath = public_path("book-uploaded-files/pdf/{$filename}");

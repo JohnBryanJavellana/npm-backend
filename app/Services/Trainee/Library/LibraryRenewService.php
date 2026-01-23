@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class LibraryRenewService {
     public function __construct(
+        protected LibraryExtraService $libraryExtraService,
         protected BookService $bookServiceModel,
         protected BookReservation $bookReservationModel,
     )
@@ -59,18 +60,7 @@ class LibraryRenewService {
 
             // $this->prepareData($records, $book_reservation_ids);
 
-            $Bulkdata = collect($validated["data"])->map(function ($data) use ($userId) {
-                    return [
-                        "book_reservation_id" => $data["book_res_id"],
-                        "user_id" => $userId,
-                        "action" => "RENEW",
-                        "old_to_date" => $data["to"],
-                        "created_at" => Carbon::now(),
-                        "updated_at" => Carbon::now()
-                    ];
-            })->toArray();
-
-            $this->bookServiceModel->insert($Bulkdata);
+            $this->libraryExtraService->storeExtraService($validated, $userId, "RENEW");
 
             foreach($records as $record) {
                 $record->status = RequestStatus::RENEWING->value;
