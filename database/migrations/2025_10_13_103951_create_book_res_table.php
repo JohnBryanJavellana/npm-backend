@@ -20,7 +20,6 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->longText('trace_number')->nullable();
-            $table->longText('purpose');
             $table->enum('status', ["COMPLETED", "ACTIVE", "FOR CSM", "EXTENDING"])->default("ACTIVE");
             $table->enum('type', ["WALK-IN", "ONLINE"]);
             $table->timestamps();
