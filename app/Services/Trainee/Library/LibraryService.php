@@ -34,84 +34,62 @@ class LibraryService {
         });
     }
 
-    public function createReservation($validated, $user)
-    {
-        return DB::transaction(function() use ($validated, $user) {
+    // public function createReservation($validated, $user)
+    // {
+    //     return DB::transaction(function() use ($validated, $user) {
 
-            $this->validateBook($validated["book_id"]);
+    //         $this->validateBook($validated["book_id"]);
 
-            $res = $this->createBookRes(
-                $user->id,
-            );
+    //         $res = $this->createBookRes(
+    //             $user->id,
+    //         );
 
-            $BookData = $this->prepareData($validated["book_id"]);
+    //         $BookData = $this->prepareData($validated["book_id"]);
 
-            foreach($validated["book_id"] as $book) {
-                $this->reserveBook(
-            $res,
-            $BookData[$book],
-            $validated["from"],
-            $validated["to"],
-            $book,
-            $user
-                );
-            }
-        });
-    }
+    //         foreach($validated["book_id"] as $book) {
+    //             $this->reserveBook(
+    //         $res,
+    //         $BookData[$book],
+    //         $validated["from"],
+    //         $validated["to"],
+    //         $book,
+    //         $user
+    //             );
+    //         }
+    //     });
+    // }
 
     
     public function preparedData($validated)
-        {
-            $start = microtime(true);
-            // $exists = $this->bookResModel->query()
-            // ->forUser($validated["userId"])
-            // ->where("status", RequestStatus::FOR_CSM->value)
-            // ->exists();
+    {
 
-            // if($exists) {
-            //     throw new DomainException("You still have a request with a “FOR CSM” status. Please fill it out before submitting a new request.");
-            // }
+        $book_ids = collect($validated["data"])->pluck("book_id");
+        $statuses = [
+            RequestStatus::PENDING->value,
+            RequestStatus::APPROVED->value,
+            RequestStatus::EXTENDING->value,
+            RequestStatus::EXTENDED->value, 
+            RequestStatus::RENEWING->value,
+            RequestStatus::RENEWED->value,
+            RequestStatus::RECEIVED->value
+        ];
 
-            $book_ids = collect($validated["data"])->pluck("book_id");
-            $statuses = [
-                RequestStatus::PENDING->value,
-                RequestStatus::APPROVED->value,
-                RequestStatus::EXTENDING->value,
-                RequestStatus::EXTENDED->value, 
-                RequestStatus::RENEWING->value,
-                RequestStatus::RENEWED->value,
-                RequestStatus::RECEIVED->value
-            ];
+        $records = $this->bookReservationModel::query()
+            ->with([
+                "books.catalog:id,title"
+            ])
+            ->select("id", "book_id", "to_date", "type")
+            ->whereIn("status",$statuses)
+            ->forUser($validated["userId"])
+            ->get();    
 
-            $records = $this->bookReservationModel::query()
-                ->with([
-                    "books.catalog:id,title"
-                ])
-                ->select("id", "book_id", "to_date", "type")
-                ->whereIn("status",$statuses)
-                ->forUser($validated["userId"])
-                ->get();    
-
-            //remove
-            // $book_counts = $records->count();
-            // if(($book_counts + $book_ids->count()) > 3) {
-            //     throw new DomainException("You will exceed with your borrowing limit (3 books max). You already have {$book_counts} active book requests.");
-            // }
-
-            // remove
-            // \Log::info("date", [$records->where('to_date', '<', now())]);
-            // $overDues = $records->where('to_date', '<', now())->where("type", "HARD-COPY")->count();
-            // if($overDues > 0) {
-            //     throw new DomainException("You have an overdue book" . (($overDues > 1) ? 's' : '') . ", please return or check your borrowed list.");
-            // }
-
-            $duplicates = $records->whereIn("book_id", $book_ids);
-            if($duplicates->isNotEmpty()){
-                $titles = implode(", ", $records->pluck("books.catalog.title")->toArray());
-                throw new DomainException("Duplicate request detected. You already have pending requests for: {$titles}");
-            }
-
+        $duplicates = $records->whereIn("book_id", $book_ids);
+        if($duplicates->isNotEmpty()){
+            $titles = implode(", ", $records->pluck("books.catalog.title")->toArray());
+            throw new DomainException("Duplicate request detected. You already have pending requests for: {$titles}");
+        }
     }
+
 
     public function storeRequest($validated)
     {
@@ -183,32 +161,32 @@ class LibraryService {
     }
 
     //remove
-    private function prepareData(array $book_id) {
-        $books = $this->bookModel::whereIn("id" , $book_id)
-        ->select("id", "pdf_copy")
-        ->get()
-        ->keyBy("id");
+    // private function prepareData(array $book_id) {
+    //     $books = $this->bookModel::whereIn("id" , $book_id)
+    //     ->select("id", "pdf_copy")
+    //     ->get()
+    //     ->keyBy("id");
 
-        $physical_books = $books->filter(fn($book) => !$book->pdf_copy)
-        ->pluck('id')
-        ->toArray();
+    //     $physical_books = $books->filter(fn($book) => !$book->pdf_copy)
+    //     ->pluck('id')
+    //     ->toArray();
 
-        $copies = [];
-        if(!empty($physical_books)) {
-            $copies = BookCopy::whereIn('book_id', $physical_books)
-            ->where("status", "AVAILABLE")
-            ->lockForUpdate()
-            ->get()
-            ->groupBy('book_id');
-        }
+    //     $copies = [];
+    //     if(!empty($physical_books)) {
+    //         $copies = BookCopy::whereIn('book_id', $physical_books)
+    //         ->where("status", "AVAILABLE")
+    //         ->lockForUpdate()
+    //         ->get()
+    //         ->groupBy('book_id');
+    //     }
 
-        return $books->map(function($book) use($copies) {
-            return [    
-                "book" => $book,
-                "copy" => $book->pdf_copy ? null : $copies[$book->id]->first()
-            ];
-        });
-    }
+    //     return $books->map(function($book) use($copies) {
+    //         return [    
+    //             "book" => $book,
+    //             "copy" => $book->pdf_copy ? null : $copies[$book->id]->first()
+    //         ];
+    //     });
+    // }
 
     //stay
     private function createBookRes($validated) {
@@ -219,6 +197,7 @@ class LibraryService {
         ]);
     }
 
+    //remove
     private function reserveBook($res, $book_data, $from, $to, $book_id, $user) {
         $copy = $book_data["copy"];
 

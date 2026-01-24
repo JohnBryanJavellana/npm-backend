@@ -31,8 +31,6 @@ class Book extends Model
         return $this->hasMany(BookCart::class);
     }
 
-
-
     /**
      * SCOPES
      */
