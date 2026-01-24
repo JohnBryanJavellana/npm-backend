@@ -103,6 +103,9 @@ class TraineeLibrary extends Controller
             //SEPARATE
             $books = Book::with([
                 'catalog.genre',
+                'hasData' => function($q) use ($user, $statuses) {
+                    $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $user->id);
+                },
                 'hasData.bookRes' => function ($query) use ($userId) {
                     $query->where(['user_id' => $userId, 'status' => 'FOR CSM']);
                 },
@@ -130,7 +133,9 @@ class TraineeLibrary extends Controller
 
             $bookList = $books->get();
 
-        return BookResource::collection($bookList);
+            $sum = $bookList->pluck("hasData")->flatten()->pluck("status")->count();
+
+        return BookResource::collection($bookList->each(fn ($book) => $book->bb_count = $sum));
         } catch (\Exception $e) {
             \Log::info("view_books_error", [$e]);
             return response()->json(["Something went wrong, Please try again!"], 500);
