@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Trainee\Library;
 
+use App\Enums\UserRoleEnum;
 use App\Rules\Trainee\Library\BookLibraryRule;
 use App\Rules\ExtensionDateRangeRule;
 use App\Rules\Trainee\Library\UserLibraryRule;
@@ -23,6 +24,17 @@ class ExtendingRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            "user_id" => in_array($this->user()->role, [
+                UserRoleEnum::SUPERADMIN->value,
+                UserRoleEnum::ADMIN_LIBRARY->value       
+            ])
+                ? $this->user_id
+                : $this->user()->id
+        ]);
+    }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -33,16 +45,10 @@ class ExtendingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "reference_id" => "required|exists:book_res,id",
             "data" => "required|array",
-            "data.*.book_res_id" => [
-                "required",
-                "integer", 
-                "exists:book_reservations,id", 
-                new BookLibraryRule($this->user())
-            ],
-            "data.*.to_date" => "required|date",
-            "data.*.extension_date" => "required|date"
+            "data.*.book_res_id" => "required|exists:book_reservations,id",
+            "data.*.to" => "required|date",
+            "reference_id" => "required|exists:book_res,id",
         ];
     }
 

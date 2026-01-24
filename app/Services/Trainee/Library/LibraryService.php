@@ -62,7 +62,7 @@ class LibraryService {
     
     public function preparedData($validated, $userId)
         {
-
+            $start = microtime(true);
             $exists = $this->bookResModel->query()
             ->forUser($userId)
             ->where("status", RequestStatus::FOR_CSM->value)
@@ -103,12 +103,13 @@ class LibraryService {
                 throw new DomainException("You have an overdue book" . (($overDues > 1) ? 's' : '') . ", please return or check your borrowed list.");
             }
 
-            $dublicates = $records->whereIn("book_id", $book_ids);
-            if($dublicates->isNotEmpty()){
+            $duplicates = $records->whereIn("book_id", $book_ids);
+            if($duplicates->isNotEmpty()){
                 $titles = implode(", ", $records->pluck("books.catalog.title")->toArray());
                 throw new DomainException("Duplicate request detected. You already have pending requests for: {$titles}");
             }
 
+            \Log::info("dataTimequery", [round((microtime(true) - $start) * 1000, 2)]);
     }
 
     //validate and supply
