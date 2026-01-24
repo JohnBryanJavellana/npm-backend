@@ -1,0 +1,593 @@
+[33mcommit 5b93f9be38d14d2565f6fed29ae72413588805b2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mlibrary[m[33m)[m
+Author: Allen Alfred Beato <allenalfred.beato4@gmail.com>
+Date:   Sat Jan 24 11:17:08 2026 +0800
+
+    library_extenstion_email
+
+[33mcommit ca47654333322f4b4e254bfeffe2b9d90712c7a1[m[33m ([m[1;31morigin/library[m[33m)[m
+Author: Allen Alfred Beato <allenalfred.beato4@gmail.com>
+Date:   Fri Jan 23 17:03:24 2026 +0800
+
+    library send_request validations
+
+[33mcommit 626424914a2a106db9c7aacbb6b0a38f195ae8df[m
+Author: Allen Alfred Beato <allenalfred.beato4@gmail.com>
+Date:   Fri Jan 23 14:15:28 2026 +0800
+
+    library send_request
+
+[33mcommit d1c30c700ca03985c759f292fbae37552456b0e8[m
+Author: Allen Alfred Beato <allenalfred.beato4@gmail.com>
+Date:   Fri Jan 23 10:38:57 2026 +0800
+
+    library Renew
+
+[33mcommit d82158c85bef1c501e2a67d7600cd38e0b121e33[m[33m ([m[1;32mmaster[m[33m)[m
+Author: Isaac Rita <isaacrita47@email.com>
+Date:   Fri Jan 23 08:03:01 2026 +0800
+
+    initial ni allen
+
+[33mcommit 9f8eb8858ca040527afffc7bbd610a4846fa3460[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Jan 20 17:15:48 2026 +0800
+
+    123
+
+[33mcommit 517852bda271081ce64ab13be94ae3d8d00d6ef3[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 16 11:02:55 2026 +0800
+
+    123
+
+[33mcommit 75eaead4f0121ce19b1deb552a5fa8055e10172b[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Jan 15 19:01:27 2026 +0800
+
+    123
+
+[33mcommit 705a166ab873fe05caa9d8f457f1b8678cdec6f8[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Jan 15 15:26:28 2026 +0800
+
+    123
+
+[33mcommit cd0eda290ea75d280de4d92f5f4e9bcc2402cce2[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Jan 15 13:25:17 2026 +0800
+
+    123
+
+[33mcommit ec861d229207bc2000de6db5bfa6c3733ba441fd[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 14 17:06:36 2026 +0800
+
+    123
+
+[33mcommit a345d1ef89733aa5ecf4b33c140ce221be98172e[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 14 16:58:52 2026 +0800
+
+    123
+
+[33mcommit 8dec57b080ea01d6e96fdfbc15b07782473b8689[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 14 16:06:03 2026 +0800
+
+    123
+
+[33mcommit b550555173558b28babadfe4b81432c039df3748[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 14 13:54:08 2026 +0800
+
+    123
+
+[33mcommit 8a542d9fff8f99975b4347c0b965446bc41d27f8[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 14 13:27:24 2026 +0800
+
+    123
+
+[33mcommit 9a1fa67fd10f3ef92bf47474e75568af63dcc93a[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 14 11:05:46 2026 +0800
+
+    123
+
+[33mcommit 5ff4720ab23263b40a1211b3712d2fec98cddaf8[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 14 10:23:16 2026 +0800
+
+    123
+
+[33mcommit f0526fd07b1cffdca9d77554c92d96fa85cdd404[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 14 10:12:28 2026 +0800
+
+    123
+
+[33mcommit d334a89a97609701b3e95b3278fe24d2d3d71b6f[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 14 10:00:56 2026 +0800
+
+    123
+
+[33mcommit d7dfbbd3f5524a5c6ce0bed58f73ddf5a11721c7[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Jan 13 17:58:35 2026 +0800
+
+    123
+
+[33mcommit 69cc25545c5c6d1b956f43ee8faeeca6415cb558[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Jan 13 17:27:17 2026 +0800
+
+    123
+
+[33mcommit 5976273f5a3c217085f6e39b2827c5767d4839e9[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Jan 13 14:20:26 2026 +0800
+
+    123
+
+[33mcommit 4e8d7ca79c42f242c0a76ed61a9736ead29c989c[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Jan 13 08:40:47 2026 +0800
+
+    123
+
+[33mcommit 03624e6a31ad485b9f2a8041a805cf0ff1968d72[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Jan 12 18:04:24 2026 +0800
+
+    123
+
+[33mcommit 8c507e8a14f800a5c1690ca3e0e9de7a5829d395[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Jan 12 14:51:45 2026 +0800
+
+    123
+
+[33mcommit 0d1656c2bfb2e0568cec700d4500f159b3eeadf3[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Jan 12 09:14:46 2026 +0800
+
+    123
+
+[33mcommit 18799bf075a80cb005e1158f6020918d360ca7ee[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Jan 12 08:59:57 2026 +0800
+
+    123
+
+[33mcommit f0b60cb3ad92a956cd33eada506681e7e5a91e45[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Jan 10 18:22:55 2026 +0800
+
+    123
+
+[33mcommit ce8c6a74853e6bd9456dc78d95ddd646bce210aa[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Jan 10 18:19:32 2026 +0800
+
+    123
+
+[33mcommit 9c11a519a4c950b2e2cc3ff4c849a945ccf1bcb9[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Jan 10 16:25:35 2026 +0800
+
+    123
+
+[33mcommit 7e65626356c3a04b3f09a98d1df93ebe7d9bf997[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Jan 10 11:34:44 2026 +0800
+
+    123
+
+[33mcommit 2a3930710a2b67211faf62f2468447274c5c65b7[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 9 19:11:50 2026 +0800
+
+    123
+
+[33mcommit bbaaca88d1e7eb98b195a15001d9c4e7f21ee13f[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 9 18:21:36 2026 +0800
+
+    123
+
+[33mcommit 502114dec9f6480d323dc3cb5ad6a47dc70e6e54[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 9 17:38:17 2026 +0800
+
+    123
+
+[33mcommit a098f62e8081a9770eafce4a730ee274cd04f5ec[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 9 17:30:15 2026 +0800
+
+    123
+
+[33mcommit 5e8abcbce58bd216c6cbf5dad1eacc05a42e8fa1[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 9 17:27:22 2026 +0800
+
+    123
+
+[33mcommit d7bea88619d5a5ac1fb909a8a88c7b1087627cff[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 9 17:07:05 2026 +0800
+
+    123
+
+[33mcommit 44854b8e6d127a880e809666f6f29a44be88aaeb[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 9 16:59:57 2026 +0800
+
+    123
+
+[33mcommit 7d15028d78397fdabe569fe29ce159220865d18b[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 9 10:46:05 2026 +0800
+
+    123
+
+[33mcommit f908c748c9289d9b58352f8871f58a69bddcd450[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 9 08:09:40 2026 +0800
+
+    123
+
+[33mcommit c744040d61eb8cee2030588f6cd13d8759e214fe[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Jan 8 18:06:56 2026 +0800
+
+    123
+
+[33mcommit 115c337f829552685d102e9383c131ff61687b37[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Jan 8 14:43:01 2026 +0800
+
+    123
+
+[33mcommit c9fd122318b3d5cbf511e1d5eb7654475ff90ac6[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 7 18:10:08 2026 +0800
+
+    123
+
+[33mcommit 2528ee201147cbf06ffd0e81d942df4c99c5bd12[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 7 16:36:14 2026 +0800
+
+    123
+
+[33mcommit 866a08d0e0afc6106004151397c0ecad10469ebe[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 7 13:25:51 2026 +0800
+
+    123
+
+[33mcommit 1e6abda87dd8374d596cef5dbee207fddfe95012[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 7 12:51:51 2026 +0800
+
+    123
+
+[33mcommit 9ae1cfbd32930a1a8d95e7e65dbe355aea4512b3[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 7 08:54:17 2026 +0800
+
+    123
+
+[33mcommit 023d185435097598eda0329acc3a8967df3b1fad[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Wed Jan 7 08:09:45 2026 +0800
+
+    123
+
+[33mcommit f8705ee96ffc60f769a08866de95c504d5a5ddc2[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Jan 6 18:19:54 2026 +0800
+
+    123
+
+[33mcommit aacb4f2bde974315f93fec1232bd53487c48812b[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Jan 6 13:47:30 2026 +0800
+
+    123
+
+[33mcommit 17a031299ebefa038d41a9358dc47215219d7ef4[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Jan 6 10:50:59 2026 +0800
+
+    123
+
+[33mcommit c3842b390f207e28ef54d6c4b1fda8e39cfe9383[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Jan 6 08:20:50 2026 +0800
+
+    123
+
+[33mcommit fcaf08a8e0a23cd8d265402fb1782e993a626c5a[m[33m ([m[1;31morigin/AdminDormitory[m[33m, [m[1;32mAdminDormitory[m[33m)[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Jan 3 17:29:53 2026 +0800
+
+    123
+
+[33mcommit af4b9269295459821f8c5a0b901d67e3071d4119[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Jan 3 16:29:37 2026 +0800
+
+    123
+
+[33mcommit 8d390b1f7cac2573249e273c02d8cbe51ac0e8d7[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Jan 3 11:21:48 2026 +0800
+
+    123
+
+[33mcommit 9371fa2ed3ee95c44882381ee41610128807d094[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Jan 3 10:30:01 2026 +0800
+
+    123
+
+[33mcommit 0f789b5dae518cbc71996ebaf13ed427d26c953e[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Jan 3 10:15:20 2026 +0800
+
+    123
+
+[33mcommit 4197990f833a4ed87d9e2aa84a51c00c26e040df[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 2 18:53:07 2026 +0800
+
+    123
+
+[33mcommit 82ecf60e5e9eebb2ae9b92ea8414462bed1ae960[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Jan 2 11:39:50 2026 +0800
+
+    123
+
+[33mcommit f484dc850f6d632bc67cc5184a8cebbd85093366[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 29 18:08:29 2025 +0800
+
+    123
+
+[33mcommit 834ec5d78066c63a5c3e4089ffd1df0cabfabd91[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 29 13:50:09 2025 +0800
+
+    123
+
+[33mcommit 8d04fd849967a606329807de2222affffc8649ab[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 29 08:17:44 2025 +0800
+
+    Added Service & Req Service Model with migrations
+
+[33mcommit 083dce0637d22512625c202e607fa6d37da73f12[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 29 08:09:51 2025 +0800
+
+    123
+
+[33mcommit a068972a40230b7a04208cd3b146d35861312ffb[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 27 18:15:56 2025 +0800
+
+    123
+
+[33mcommit aee27cbea457198c7265e0ea88479d970fd89297[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 27 14:30:17 2025 +0800
+
+    123
+
+[33mcommit 2da99ea51099236b7f416d7f53295344bc8cd4ef[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 27 09:36:51 2025 +0800
+
+    123
+
+[33mcommit 22f2003e2906ca1120c54753fc4bf485603a9504[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Dec 26 19:03:45 2025 +0800
+
+    Fixed BIS Table
+
+[33mcommit 006b7013036a83b905ca803ecf841c9d62abe051[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Dec 26 08:16:10 2025 +0800
+
+    Fixed BIS Table
+
+[33mcommit 6baa1f5fb12c17353f7fd1d4faae9c9af5dd2c81[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Dec 26 08:13:40 2025 +0800
+
+    Added BIS Table
+
+[33mcommit cab9251fa6bdef298cc8208ed21cd3a874ee7dc5[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Dec 23 18:26:29 2025 +0800
+
+    Added Consumable Type
+
+[33mcommit eae267e8e833af14012c7242cc92043725a6286c[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Dec 23 17:28:29 2025 +0800
+
+    Added Consumable Type
+
+[33mcommit 024a2020003d9728814b138cd07ce042f0216d09[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Dec 23 13:57:32 2025 +0800
+
+    Added Refresh Cache Key
+
+[33mcommit bb642d954bf3b2cb6c42203add6484ffc735dc84[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Dec 23 11:34:52 2025 +0800
+
+    123
+
+[33mcommit 9d22f506bcd156261274ff3b17bab9e57459b8f9[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Dec 23 11:33:34 2025 +0800
+
+    123
+
+[33mcommit a8ebb27509da49251f510980e5cc5f1a74afe191[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Dec 23 10:35:44 2025 +0800
+
+    123
+
+[33mcommit a08dfd0c51d68f8dfe7de61920934052139c1c65[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Tue Dec 23 08:24:35 2025 +0800
+
+    123
+
+[33mcommit ae00de3b100b450607120eeda73f0cbdc1b6221a[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 22 18:10:17 2025 +0800
+
+    enrollment ctrl 6:10PM
+
+[33mcommit dcaf34ab9762654ccdf82ef7bc03ae94cbe6eaff[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 22 18:07:42 2025 +0800
+
+    enrollment ctrl 6:07PM
+
+[33mcommit 3484787de8143b139d0e68a1534d452d533aa3c5[m[33m ([m[1;31morigin/CopyBE[m[33m, [m[1;31morigin/AdminLibrary[m[33m, [m[1;32mAdminLibrary[m[33m)[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 22 17:26:11 2025 +0800
+
+    haha
+
+[33mcommit 1a1d1e9d0607a456a519f3a22239c8bd80134222[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 22 17:08:40 2025 +0800
+
+    haha
+
+[33mcommit 8aef5860c60cd66c0a2c78bac3465d4d3381c9fb[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 22 12:01:46 2025 +0800
+
+    Fixed trace number
+
+[33mcommit f3790b1f3aca0f8d635fda0dd590fb13595996bb[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 22 10:52:30 2025 +0800
+
+    Added Deletable File in SaveAvatar Job
+
+[33mcommit a86b5f086bb940b1d1929d27e40756beafa63f51[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Mon Dec 22 10:48:58 2025 +0800
+
+    Fixing Walk-in Dormitory Request
+
+[33mcommit bb55a582c2e66ea0772cc0e9565755f04b4edddc[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 20 16:13:13 2025 +0800
+
+    haha
+
+[33mcommit 6763cd84162d796e7d33088a676bbcecf6c37cc1[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 20 16:10:25 2025 +0800
+
+    haha
+
+[33mcommit 98669bce802159e7e4bbbb13e09883916d913659[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 20 16:05:34 2025 +0800
+
+    haha
+
+[33mcommit c714936ec1d747ac1884924e7eb20cbf3b9bf531[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 20 15:52:07 2025 +0800
+
+    haha
+
+[33mcommit e0d703a8e7a72df4dc76b23089f926ea13e307fe[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 20 15:45:57 2025 +0800
+
+    haha
+
+[33mcommit d75391f227fe7728f9775b21499dc49b8d3967f1[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 20 14:50:08 2025 +0800
+
+    Fixing Jobs
+
+[33mcommit 9604fc05e73da46056c10303f73e9854113d94f1[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 20 14:08:08 2025 +0800
+
+    Fixing Register Controller.php
+
+[33mcommit 859660e3f17498cca0ffbe191b3367da4a6435da[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 20 12:10:26 2025 +0800
+
+    haha
+
+[33mcommit eb32de0cf9ca95aa5fcb558d4c69ad83615ff548[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Sat Dec 20 09:50:36 2025 +0800
+
+    haha
+
+[33mcommit 031ada35a6c3b2cf3591d492075614153ea55bad[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Fri Dec 19 15:05:18 2025 +0800
+
+    12-16-2025
+
+[33mcommit 8a53eaf28b8d4c2df9e55947ee6b18a9c55e7a1f[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Dec 18 19:02:53 2025 +0800
+
+    12-16-2025
+
+[33mcommit 3ae4b4b5aaedb6d11eab21261c4744f09e9d4efb[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Dec 18 15:56:40 2025 +0800
+
+    12-16-2025
+
+[33mcommit 2f9dd304f4c6bc72a4fb78c0211d93e66fab1dd0[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Dec 18 15:55:01 2025 +0800
+
+    12-16-2025
+
+[33mcommit bbcd3e74c6101b20d266f545846dbb3beb5e7991[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Dec 18 15:54:41 2025 +0800
+
+    12-16-2025
+
+[33mcommit 1b975fe3e97e3361ccca5131c7548cf6861757ff[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Dec 18 13:35:06 2025 +0800
+
+    12-16-2025
+
+[33mcommit 9cd8b1df021c4f9bc8ce6d86a56e0090ec4f4656[m
+Author: John The Bryan <johnbryanjavellana@gmail.com>
+Date:   Thu Dec 18 13:26:06 2025 +0800
+
+    12-16-2025

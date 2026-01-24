@@ -30,9 +30,9 @@ class BookRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            "user" => User::find(in_array($this->user()->role, $this->allowedRoles) 
-            ? $this->user_id
-            : $this->user()->id)
+            "userId" =>in_array($this->user()->role, $this->allowedRoles) 
+                ? $this->userId
+                : $this->user()->id
         ]);
     }
 
@@ -44,12 +44,15 @@ class BookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "user" => "required",
+            "userId" => [
+                "required", 
+                "exists:users,id",
+                new UserLibraryRule(),
+            ],
             "data" => "required|array",
             'data.*.book_id'=> [
                 'required',
                 'integer',
-                // new UserLibraryRule($this->user()),
             ],
             "data.*.copy_type" => "required|string|in:SOFT-COPY,HARD-COPY",
             "data.*.book_copy_id" => "nullable|exists:book_copies,id",

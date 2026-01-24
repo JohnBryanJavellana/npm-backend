@@ -285,10 +285,13 @@ class TraineeLibrary extends Controller
     /** POST BOOK REQUEST */
     public function send_request_book(BookRequest $request){
         try {
-            $validated = $request->validated();
-            $userId = $validated["user"]["id"];
+            $start = microtime(true);
 
-            $this->library_service->storeRequest($validated, $userId);
+            $validated = $request->validated();
+            $user = User::find($validated["userId"]);
+            $userId = $user->id;
+
+            $this->library_service->storeRequest($validated);
 
             if(env("USE_EVENT")) {
                 event(new BELibrary(''));
@@ -297,8 +300,10 @@ class TraineeLibrary extends Controller
             $this->forgetCache($userId);
 
             //EMAIL ABOUT SENDING A BORROWING A BOOK
-            //CHANGE THE imbedded IMAGE TO BASE-64 FOR EMAIL??
-            SendingEmail::dispatch($validated["user"], new BookReservationStatus(['status' => "PENDING"], $validated["user"]));
+            //CHANGE THE imbid images    TO BASE-64 FOR EMAIL??
+            \Log::info("dataTimequery", [round((microtime(true) - $start) * 1000, 2)]);
+
+            SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
             AuditHelper::log($userId, "User {$userId} sent a book request.");
             Notifications::notify($userId, null, 'LIBRARY', 'has sent a book request.');
 

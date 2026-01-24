@@ -60,17 +60,17 @@ class LibraryService {
     }
 
     
-    public function preparedData($validated, $userId)
+    public function preparedData($validated)
         {
             $start = microtime(true);
-            $exists = $this->bookResModel->query()
-            ->forUser($userId)
-            ->where("status", RequestStatus::FOR_CSM->value)
-            ->exists();
+            // $exists = $this->bookResModel->query()
+            // ->forUser($validated["userId"])
+            // ->where("status", RequestStatus::FOR_CSM->value)
+            // ->exists();
 
-            if($exists) {
-                throw new DomainException("You still have a request with a “FOR CSM” status. Please fill it out before submitting a new request.");
-            }
+            // if($exists) {
+            //     throw new DomainException("You still have a request with a “FOR CSM” status. Please fill it out before submitting a new request.");
+            // }
 
             $book_ids = collect($validated["data"])->pluck("book_id");
             $statuses = [
@@ -89,19 +89,21 @@ class LibraryService {
                 ])
                 ->select("id", "book_id", "to_date", "type")
                 ->whereIn("status",$statuses)
-                ->forUser($userId)
+                ->forUser($validated["userId"])
                 ->get();    
 
-            $book_counts = $records->count();
-            if(($book_counts + $book_ids->count()) > 3) {
-                throw new DomainException("You will exceed with your borrowing limit (3 books max). You already have {$book_counts} active book requests.");
-            }
-            
-            \Log::info("date", [$records->where('to_date', '<', now())]);
-            $overDues = $records->where('to_date', '<', now())->where("type", "HARD-COPY")->count();
-            if($overDues > 0) {
-                throw new DomainException("You have an overdue book" . (($overDues > 1) ? 's' : '') . ", please return or check your borrowed list.");
-            }
+            //remove
+            // $book_counts = $records->count();
+            // if(($book_counts + $book_ids->count()) > 3) {
+            //     throw new DomainException("You will exceed with your borrowing limit (3 books max). You already have {$book_counts} active book requests.");
+            // }
+
+            // remove
+            // \Log::info("date", [$records->where('to_date', '<', now())]);
+            // $overDues = $records->where('to_date', '<', now())->where("type", "HARD-COPY")->count();
+            // if($overDues > 0) {
+            //     throw new DomainException("You have an overdue book" . (($overDues > 1) ? 's' : '') . ", please return or check your borrowed list.");
+            // }
 
             $duplicates = $records->whereIn("book_id", $book_ids);
             if($duplicates->isNotEmpty()){
@@ -109,22 +111,21 @@ class LibraryService {
                 throw new DomainException("Duplicate request detected. You already have pending requests for: {$titles}");
             }
 
-            \Log::info("dataTimequery", [round((microtime(true) - $start) * 1000, 2)]);
     }
 
-    //validate and supply
-    public function storeRequest($validated, $userId)
+    public function storeRequest($validated)
     {
-        DB::transaction(function () use ($validated, $userId) {
-            $this->preparedData($validated, $userId);
+        DB::transaction(function () use ($validated) {
+            $this->preparedData($validated);
 
-            $record = $this->createBookRes($userId);
+            $record = $this->createBookRes($validated);
 
             foreach($validated["data"] as $book) {
                 $this->bookReservationModel->create([
                     "book_res_id" => $record->id,
                     "book_copy_id" => $book["book_copy_id"] ?? null,
                     "book_id" => $book["book_id"],
+                    "type" => $book["copy_type"],
                     "from_date" => Carbon::parse($validated["from"]),
                     "to_date" => Carbon::parse($validated["to"])->setTime(12, 0, 0),
                 ]);
@@ -210,9 +211,9 @@ class LibraryService {
     }
 
     //stay
-    private function createBookRes($userId) {
+    private function createBookRes($validated) {
         return  $this->bookResModel::create([
-            "user_id" => $userId,
+            "user_id" => $validated["userId"],
             "trace_number" => GenerateTrace::createTraceNumber(BookRes::class),
             "type" => $this->bookResModel::TYPE_ONLINE,
         ]);
