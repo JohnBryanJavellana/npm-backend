@@ -26,18 +26,10 @@ class LibraryRenewService {
 
     }
 
-    // public function getRenewRequests()
-    // {
-    //     $records = $this->bookServiceModel->query()
-    //     ->where()
-    //     ;
-    // }
-
     public function storeRenewRequest($validated)
     {
         DB::transaction(function() use($validated)  {
-
-            $userId = auth()->id();
+            $userId = $validated["userId"];
             $book_ids = collect(value: $validated["data"])->pluck("book_res_id");
 
             $records = $this->bookReservationModel->query()

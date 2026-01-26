@@ -20,14 +20,13 @@ class ExtendingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("extending...", [$this->all()]);
         return $this->user() !== null;
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
-            "user_id" => in_array($this->user()->role, [
+            "userId" => in_array($this->user()->role, [
                 UserRoleEnum::SUPERADMIN->value,
                 UserRoleEnum::ADMIN_LIBRARY->value       
             ])
@@ -45,6 +44,7 @@ class ExtendingRequest extends FormRequest
     public function rules(): array
     {
         return [
+            "userId" => "required|exists:users,id",
             "data" => "required|array",
             "data.*.book_res_id" => "required|exists:book_reservations,id",
             "data.*.to" => "required|date",

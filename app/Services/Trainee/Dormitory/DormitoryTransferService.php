@@ -30,7 +30,6 @@ class DormitoryTransferService extends DormitoryHistoryService {
     ) {}
 
     private function prepareData($userId, $documentId) {
-
         $record = $this->tenantModel
         ->with([
             "transferRequest" => function($query) {
