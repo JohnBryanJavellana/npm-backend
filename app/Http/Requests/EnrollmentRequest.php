@@ -16,17 +16,18 @@ class EnrollmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        \Log::info("dataEnrolll", [$this->all()]);
         return $this->user() !== null;
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
-            "userId" => in_array($this->user()->role, [
+            "user_id" => in_array($this->user()->role, [
                 UserRoleEnum::ADMIN_ENROLLMENT->value,
                 UserRoleEnum::SUPERADMIN->value
             ]) 
-                ? $this->userId 
+                ? $this->input("userId") 
                 : $this->user()->id
         ]);
     }
@@ -39,9 +40,10 @@ class EnrollmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "userId" => "required|exists:users,id",
+            "user_id" => "required|exists:users,id",
             'training_id' => [
                 'required',
+                "exists:trainings,id",
                 new UserEnrollmentRule($this->user())
             ],
             'file_upload' => 'required|array',

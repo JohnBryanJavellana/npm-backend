@@ -3,7 +3,7 @@
 namespace App\Services\Trainee\Enrollment;
 
 use App\Enums\RequestStatus;
-use App\Models\{EnrolledCourse, Rank, License};
+use App\Models\{EnrolledCourse, Rank, License, Training};
 use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +21,7 @@ class EnrollmentService {
 
     public function __construct(
         protected EnrolledCourse $enrolledCourseModel,
+        protected Training $trainingModel,
         protected Rank $rankModel,
         protected License $licenseModel
     ) {}
@@ -55,9 +56,26 @@ class EnrollmentService {
         ->get();
     }
 
-    public function store($validated)
+    public function validateTraining($training)
     {
-        return;   
+
+        if($training->schedule_slot <= 0) {
+            throw new DomainException("There is no remaining slot for this training schedule.");
+        }
+
+        $specificReqCount = $training->module()->hasData()->count();
+    }
+
+    public function storeEnrollmentRequest($validated)
+    {
+        $training = $this->trainingModel->query()
+        ->whereKey($validated["training_id"])
+        ->active()
+        ->lockForUpdate()
+        ->findOrFail(["id", "schedule_slot"]);
+
+        $this->validateTraining($training);
+
     }
 
     public function getRankLicense()
@@ -65,8 +83,8 @@ class EnrollmentService {
         $cacheKey = "rank:license:all";
         return Cache::remember($cacheKey, 3600, function() {
             return [
-            "ranks" => $this->rankModel->all("id", "name", "short_name", "type"),
-            "licenses" => $this->licenseModel->all("id", "license", "short_name"),
+                "ranks" => $this->rankModel->all("id", "name", "short_name", "type"),
+                "licenses" => $this->licenseModel->all("id", "license", "short_name"),
             ];
         });
     }
