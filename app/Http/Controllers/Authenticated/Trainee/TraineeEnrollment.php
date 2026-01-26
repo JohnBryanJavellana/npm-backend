@@ -33,6 +33,7 @@ use App\Models\{
 use App\Services\Trainee\Enrollment\EnrollmentService;
 use App\Services\Trainee\Invoice\TraineeInvoiceService;
 use DomainException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TraineeEnrollment extends Controller
 {
@@ -170,20 +171,16 @@ class TraineeEnrollment extends Controller
 
     public function send_enrollment_request(EnrollmentRequest $request) {
         try {
-
+            // return response()->json(["data" => $request->all()], 200);
             DB::beginTransaction();
             $validated = $request->validated();
-            $user_id = $validated["userId"];
+            $user_id = $validated["user_id"];
 
             $addtional_info_id = AdditionalTraineeInfo::where('user_id', $user_id)->value('id');
             $training = Training::query()
             ->where('id',$validated["training_id"])
             ->lockForUpdate()
             ->first();
-
-            if(!$training) {
-                return response()->json(['message' => 'Training not found.'], 404);
-            }
 
             if ( !$addtional_info_id ) {
                 return response()->json(['message' => 'To get started, open My Account and enter some of your information.'], 422);
@@ -216,17 +213,8 @@ class TraineeEnrollment extends Controller
                 }
             }
 
-            // $data = [
-            //     "userId" => $user_id,
-            //     "enrolled_course_id" => $selected_training->id,
-            //     "charge_id" => $training->module?->charge?->id
-            // ];
-
-            // $this->traineeInvoiceService->createEnrollmentInvoice($data);
-
             $training->decrement('schedule_slot', 1);
             AuditHelper::log($user_id, "User " . $user_id . " sent an enrollment request.");
-
             Notifications::notify(
                 $request->has("userId") && !is_null($request->userId) ? $request->user()->id : $user_id,
                  $request->has("userId") && !is_null($request->userId) ? $user_id : null,
@@ -245,7 +233,14 @@ class TraineeEnrollment extends Controller
 
             DB::commit();
             return response()->json(['message' => 'Enrollment request sent successfully'], 201);
-        } catch (\Exception $e) {
+        } 
+        catch (ModelNotFoundException $e) {
+            return response()->json(["message" => "Training record not available."], 404);
+        }
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (\Exception $e) {
             DB::rollBack();
             \Log::error("error send_enrollment_request", [$e]);
             return response()->json(['message' => "Something went wrong, Please try again!"], 400);
@@ -254,28 +249,18 @@ class TraineeEnrollment extends Controller
 
     /** CANCELLING ENROLLMENT REQUESTS */
     public function remove_training_request (CancelEnrollmentRequest $request) {
-        \Log::info("inputs", [$request->validated()]);
         try {
             $validated = $request->validated();
-
             $this->enrollmentService->cancelEnrollmentRequest($validated);
-
-            // DB::beginTransaction();
-
-            // $training_request = EnrolledCourse::find($training_request_id);
-            // $training_request->enrolled_course_status = 'CANCELLED';
-            // $training_request->save();
 
             // //TRAINING ID PASS
             Training::where("id", $validated["training_id"])->increment('schedule_slot',1);
-
             AuditHelper::log($validated["user_id"], "User " . $validated["user_id"] . " has cancelled training request. {$validated["training_id"]}");
 
             if(env("USE_EVENT")) {
                 event(new BETraineeApplication(''));
             }
 
-            // DB::commit();
             return response()->json(['message' => "You've removed training request. ID# {$validated["enrolled_course_id"]}"], 200);
         }
         catch (DomainException $e) {
@@ -308,7 +293,7 @@ class TraineeEnrollment extends Controller
             try {
                 DB::beginTransaction();
 
-                foreach($request->file_upload as $file){
+                foreach($request->file_upload as $file) {
                     $record = $file['is_basic'] === "YES" ? TrainingRegFile::find($file['trainee_file_id']) : TraineeRequirement::find($file['trainee_file_id']);
                     $record->filename = SaveFile::save($file['file'], $file['is_basic'] === 'YES' ? 'trainee-files' : 'training_requirement_files' );
                     $record->locked = "N";
