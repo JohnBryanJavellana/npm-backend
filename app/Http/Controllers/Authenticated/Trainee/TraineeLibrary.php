@@ -24,6 +24,7 @@ use Carbon\Carbon;
 use App\Services\Trainee\Library\LibraryService;
 use App\Enums\RequestStatus;
 use App\Http\Requests\Trainee\Library\AddCartRequest;
+use App\Http\Requests\Trainee\Library\CancelBookExtendRequest;
 use App\Http\Requests\Trainee\Library\CancelRenewRequest;
 use App\Http\Requests\Trainee\Library\RemoveCartRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
@@ -290,10 +291,9 @@ class TraineeLibrary extends Controller
     /** POST BOOK REQUEST */
     public function send_request_book(BookRequest $request){
         try {
-            $start = microtime(true);
 
             $validated = $request->validated();
-            $user = User::find($validated["userId"]);
+            $user = User::findOrFail($validated["userId"]);
             $userId = $user->id;
 
             $this->library_service->storeRequest($validated);
@@ -305,14 +305,15 @@ class TraineeLibrary extends Controller
             $this->forgetCache($userId);
 
             //EMAIL ABOUT SENDING A BORROWING A BOOK
-            //CHANGE THE imbid images    TO BASE-64 FOR EMAIL??
-            \Log::info("dataTimequery", [round((microtime(true) - $start) * 1000, 2)]);
-
+            //CHANGE THE imbed images TO BASE-64 FOR EMAIL??
             SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
             AuditHelper::log($userId, "User {$userId} sent a book request.");
             Notifications::notify($userId, null, 'LIBRARY', 'has sent a book request.');
 
             return response()->json(['message' => 'Your book request was sent successfully!'], 200);
+        }
+        catch (ModelNotFoundException) {
+            return response()->json(["message" => "User record not found."], 404);
         }
         catch (DomainException $e) {
             throw $e;
@@ -342,7 +343,7 @@ class TraineeLibrary extends Controller
             ->get();
 
             //get all cancelled use to filter flatten and pluck the names of the books and implode?
-            //pluck name of already cancelled.
+            //pluck name of already                 cancelled.
             //flatten after plucking.
             //concert the collection into array.
             //and return using implode ', ' 
@@ -358,9 +359,6 @@ class TraineeLibrary extends Controller
                 if (!in_array($book->status, ["CANCELLED", "RECEIVED", "LOST", "RETURNED", "REJECTED"])) {
 
                     $book->update(["status" => RequestStatus::CANCELLED]);
-                    // $book->status = RequestStatus::CANCELLED;
-                    // $book->save();
-
                     if($book->book_copy_id) {
                         BookCopy::find($book->book_copy_id)->update(['status' => RequestStatus::AVAILABLE]);
                     }
@@ -389,8 +387,7 @@ class TraineeLibrary extends Controller
             DB::commit();
             return response()->json(['message' => "You're request has been cancelled successfully."], 200);
         } catch (\Exception $e){
-            \Log::error('error cancel_book', [$e]);
-            // \Log::channel("errormonitor")->error("error cancel_book", [$e->getMessage()]);
+            \Log::error('error_cancel_book', [$e]);
             return response()->json(["message" => "Something went wrong, Please try again"], 500);
         }
     }
@@ -398,100 +395,41 @@ class TraineeLibrary extends Controller
     /** CREATE EXTEND REQUESTS */
     public function extend(ExtendingRequest $request)
     {        
-        return response()->json(["sheeshs"], 200);
         try {
-            DB::beginTransaction();
             $validated = $request->validated();
-            $user_id = $request->user()->id;
-            $bookId = [];
-        
-            //separate
-            $extension_req = ExtensionRequest::create([
-                "user_id" => $user_id,
-                "book_res_id" => $validated["reference_id"],
-            ]);
+            $user_id = $validated["userId"];
 
-            //separate
-            foreach($validated['data'] as $data) {
-                BookExtensionRequest::create([
-                    "book_reservation_id" => $data['book_res_id'],
-                    "extension_request_id" => $extension_req->id,
-                    "current_to_date" => Carbon::parse($data['to_date'])->format('Y-m-d'),
-                    "date_of_extension" => Carbon::parse($data['extension_date'])->format('Y-m-d'),
-                ]);
-                $bookId[] = $data['book_res_id'];
-            }
-                
-            BookReservation::query()
-            ->whereIn("id",$bookId)
-            ->lockForUpdate()
-            ->update(["status" => RequestStatus::EXTENDING->value]);
-                
-            //separate
-            // $bookRes = BookRes::find($validated["reference_id"]);
-            // $bookRes->status = "EXTENDING";
-            // $bookRes->save();
+            $this->libraryExtendService->createExtendRequest($validated);
+            AuditHelper::log($user_id, "User {$user_id} sent a book extension request.");
+            Notifications::notify($user_id, null, 'LIBRARY', 'has sent a book extension request.');
 
             $this->forgetCache($user_id);
-
-            DB::commit();
+            
             return response()->json(["message" => "Extension request has sent successfully!"], 201);
         }
         catch (DomainException$e) {
             throw $e;
         }
         catch (\Exception $e) {
-        DB::rollBack();
-            \Log::error('error extend', [$e]);
-            // \Log::channel("errormonitor")->error("error extend", [$e->getMessage()]);
+            \Log::error('error_extend', [$e]);
             return response()->json(["message" => "Something went wrong, Please try again"], 500);
         }
     }
 
     /** CANCELLING EXTEND REQUESTS */
-    public function cancel_extend(Request $request)
+    public function cancel_extend(CancelBookExtendRequest $request)
     {
         try {
-            DB::beginTransaction();
-            $book_ext_id = $request->ext_book_id;
-            $res_id = $request->book_res_id;
+            $validated = $request->validated();
 
-            \Log::info("try cancel", $request->all());
-
-            $record = BookExtensionRequest::whereKey($book_ext_id)->first();
-            $record->update(['status' => "CANCELLED"]);
-
-            BookReservation::whereKey($record->book_reservation_id)->update([
-                'status' => "RECEIVED"
-            ]);
-
-            $book_res = BookReservation::whereHas('bookRes', function($q) use ($res_id){
-                $q->where('id', $res_id);
-            })
-            ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
-            ->exists();
-
-            if($book_res) {
-                $record = BookRes::find($res_id);
-                if (!$record) {
-                    return;
-                }
-                // $date = Carbon::parse($record->to_date);
-                // $status = $date->isPast()
-                //     ? 'EXPIRED'
-                //     : 'ACTIVE';
-
-                $record->update(['status' => "ACTIVE"]);
-            }
-
-            // Cache::forget("user_id:{$request->user()->id}:status:EXTENDING");
+            $this->libraryExtendService->cancelExtendRequest($validated);
             $this->forgetCache($request->user()->id);
-
-            DB::commit();
-            return response()->json(["message" => "Cancelled Successfully!"], 200);
+            
+            AuditHelper::log($validated["userId"], "User {$validated["userId"]} sent a book extension request.");
+            
+            return response()->json(["message" => "Cancelled extension request successfully!"], 200);
         }
         catch (\Exception $e) {
-            DB::rollBack();
             \Log::error('error cancel_extend', [$e]);
             return response()->json(["message" => "Something went wrong, Please try again"], 500);
         }
@@ -500,16 +438,14 @@ class TraineeLibrary extends Controller
     /** CREATE RENEW REQUESTS */
     public function renew(RenewBookRequest $request)
     {
-        // return response()->json(["ngek"], 200);
         try
         {
             $validated = $request->validated();
-
             $this->libraryRenewService->storeRenewRequest($validated);
 
-            // AuditHelper::log()
+            AuditHelper::log($validated["userId"], "User {$validated["userId"]} sent a book renewal request.");
 
-            return response()->json(["message" => "You've successfully sent a book renew request."], 200);
+            return response()->json(["message" => "You've successfully sent a book renewal request."], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -527,8 +463,7 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $this->libraryRenewService->cancelRenewRequest($validated);
 
-            return response()->json(["You've successfully cancelled a book renew request."], 200);
-            
+            return response()->json(["You've successfully cancelled a book renewal request."], 200);
         }
         catch (ModelNotFoundException) {
             return response()->json(["wow not found"], 404);
@@ -597,7 +532,6 @@ class TraineeLibrary extends Controller
                         ])->whereIn("status",[RequestStatus::RECEIVED->value, RequestStatus::EXTENDED->value, RequestStatus::RENEWED->value])
                         ->where('to_date', '>=', Carbon::now());
                      })->exists();
-
 
                     if ($filename && $isMine) {
                         $filePath = public_path("book-uploaded-files/pdf/{$filename}");
