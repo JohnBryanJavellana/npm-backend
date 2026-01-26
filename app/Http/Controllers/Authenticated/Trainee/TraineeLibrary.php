@@ -28,6 +28,7 @@ use App\Http\Requests\Trainee\Library\CancelBookExtendRequest;
 use App\Http\Requests\Trainee\Library\CancelRenewRequest;
 use App\Http\Requests\Trainee\Library\RemoveCartRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
+use App\Http\Requests\Trainee\Library\ViewAllByUserRequest;
 use App\Http\Resources\Trainee\Library\BookCartResource;
 use App\Services\Trainee\Library\LibraryExtendService;
 use App\Services\Trainee\Library\LibraryRenewService;
@@ -59,24 +60,18 @@ class TraineeLibrary extends Controller
             RequestStatus::RENEWED->value,
             ];
 
-        $record = BookReservation::query()
-        ->with([
-            "books.catalog:id,title"
-        ])
-        ->select("id", "book_id")
-        ->whereIn("book_id", $ids)
-        ->forUser(1)
-        ->whereNotIn("status",$statuses)
-        ->get();
-        $title = $record->pluck("books.catalog.title")->toArray();
-        return implode(", ", $title);
+        // $record = Training::whereKey()
+
+
+        // return implode(", ", $title);
     }
 
     /** GET ALL AVAILABLE BOOKS */
-    public function view_books(Request $request)
+    public function view_books(ViewAllByUserRequest $request)
     {
         try {
-            $user = User::find($request->user()->id);
+            $validated = $request->validated();
+            $user = User::findOrFail($validated["user_id"]);
             $userId = $user?->id;
             $statuses = [
                 RequestStatus::PENDING->value,
@@ -87,12 +82,6 @@ class TraineeLibrary extends Controller
                 RequestStatus::RENEWED->value,
                 RequestStatus::RECEIVED->value
             ];
-
-            if(!$user) {
-                throw new HttpResponseException(
-                    response()->json(["message" => "Unauthorized Access!"], 500)
-                );
-            }
 
             //SEPARATE
             $record = EnrolledCourse::query()

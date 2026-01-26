@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,5 +24,12 @@ class Training extends Model
 
     public function training_requirement() {
         return $this->hasMany(TrainingRequirement::class, 'training_id', 'id');
+    }
+
+    /** Scopes */
+
+    public function scopeActive($query)
+    {
+        return $query->where("status", RequestStatus::ACTIVE->value);
     }
 }

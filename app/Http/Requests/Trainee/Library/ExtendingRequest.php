@@ -30,7 +30,7 @@ class ExtendingRequest extends FormRequest
                 UserRoleEnum::SUPERADMIN->value,
                 UserRoleEnum::ADMIN_LIBRARY->value       
             ])
-                ? $this->user_id
+                ? $this->input("user_id")
                 : $this->user()->id
         ]);
     }
@@ -43,13 +43,21 @@ class ExtendingRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            "userId" => "required|exists:users,id",
+        $rules = [
             "data" => "required|array",
             "data.*.book_res_id" => "required|exists:book_reservations,id",
             "data.*.to" => "required|date",
             "reference_id" => "required|exists:book_res,id",
         ];
+
+        if(in_array($this->user()->role, [
+                UserRoleEnum::ADMIN_ENROLLMENT->value,
+                UserRoleEnum::SUPERADMIN->value
+            ])) {
+            $rules["userId"] = "required|exists:users,id";
+        }
+        
+        return $rules;
     }
 
     public function withValidation($validator) {
