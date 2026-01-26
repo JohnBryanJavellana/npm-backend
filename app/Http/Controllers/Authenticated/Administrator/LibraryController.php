@@ -632,9 +632,7 @@ class LibraryController extends Controller
     }
 
     public function create_walkin_request (BookRequest $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $this->traineeCtrlInstance->send_request_book($request);
-        });
+        $this->traineeCtrlInstance->send_request_book($request);
     }
 
     public function get_pre_data (Request $request) {
