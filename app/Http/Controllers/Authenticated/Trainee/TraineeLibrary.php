@@ -367,7 +367,7 @@ class TraineeLibrary extends Controller
                 event(new BELibrary(''));
             }
 
-            // $this->forgetCache($user_id);
+            $this->forgetCache($user_id);
 
             SendingEmail::dispatch($request->user(), new BookReservationStatus(['status' => "CANCELLED"], $request->user()));
             AuditHelper::log($user_id, "User {$user_id} cancelled a book request.");
