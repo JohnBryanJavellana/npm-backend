@@ -24,7 +24,7 @@ class CancelRenewRequest extends FormRequest
                 UserRoleEnum::ADMIN_LIBRARY->value,
                 UserRoleEnum::SUPERADMIN->value
             ])
-                ? $this->userId
+                ? $this->input("userId")
                 : $this->user()->id
         ]);
     }

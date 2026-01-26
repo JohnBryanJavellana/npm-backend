@@ -23,7 +23,7 @@ class CancelBookExtendRequest extends FormRequest
                 UserRoleEnum::SUPERADMIN->value,
                 UserRoleEnum::ADMIN_LIBRARY->value
             ])
-                ? $this->userId
+                ? $this->input("userId")
                 : $this->user()->id 
         ]);
     }
