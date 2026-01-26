@@ -43,6 +43,7 @@ class BookRequestResource extends JsonResource
                     'photo' => $book->books?->photo,
                     'pdf' => $book->books?->pdf_copy,
                     'from' => $book->from_date,
+                    'b_type' => $book->type,
                     'to' => $book->to_date,
                     'ui' => $book->book?->unique_identifier,
                     'recommended' => $book->books?->related->map(function($course) {

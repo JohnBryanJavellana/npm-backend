@@ -2,12 +2,13 @@
 
 namespace App\Rules\Trainee\Library;
 
+use App\Enums\RequestStatus;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use App\Models\{User, BookRes, BookReservation};
+use App\Models\{BookRes, BookReservation, User};
+use Illuminate\Contracts\Validation\DataAwareRule;
 
-
-class UserLibraryRule implements ValidationRule
+class UserLibraryRule implements ValidationRule , DataAwareRule
 {
     /**
      * Run the validation rule.
@@ -16,7 +17,7 @@ class UserLibraryRule implements ValidationRule
      */
 
 
-    protected $user;
+    protected $data;
     protected $max = 3;
 
     protected $restrictedstatuses = [
@@ -25,49 +26,52 @@ class UserLibraryRule implements ValidationRule
             'RECEIVED'
     ];
 
-    public function __construct(?User $user)
+    public function setData(array $data)
     {
-        $this->user = $user;
+            $this->data = $data;
+            return $data;
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if($attribute === "book_id") {
-            $overDue = BookReservation::isOverDue($this->user->id)
-                ->where('status', 'RECEIVED')
-                ->exists();
+        $exists = BookRes::query()
+        ->forUser($value)
+        ->where("status", RequestStatus::FOR_CSM->value)
+        ->exists();
 
-            if ($overDue) {
-                $fail("Trainee has a overdue book, please return or check your borrowed list.");
-            }
-
-            $withCSM = BookRes::where(["user_id" => $this->user->id, "status" => "FOR CSM"])
-                ->exists();
-
-            if ($withCSM) {
-                $fail("It looks like you still have a request with 'FOR CSM' status, so you're unable to submit a new request at this time.");
-            }
-
-            $max_books = BookReservation::forUser($this->user->id)
-                ->forStatus($this->restrictedstatuses)
-                ->count();
-
-            if($this->max - $max_books < count($value)) {
-                $fail("It looks like you will exceed with your borrowing limit (3 books max). You already have {$max_books}.");
-            }
-
-            $duplicatedReservations = BookReservation::with('books.catalog:id,title,isbn')
-                ->forUser($this->user->id)
-                ->forNotInUse()
-                ->whereIn('book_id', $value)
-                ->get();
-
-            if ($duplicatedReservations->isNotEmpty()) {
-                $bookTitles = $duplicatedReservations->pluck('books.catalog.title')->filter()->implode(', ');
-                // $bookIds = $duplicatedReservations->pluck('book_id')->toArray();
-
-                $fail("Duplicate request detected. You already have pending requests for: {$bookTitles}");
-            }
+        if($exists) {
+            $fail("You still have a request with a “FOR CSM” status. Please fill it out before submitting a new request.");
         }
+
+        $statuses = [
+            RequestStatus::PENDING->value,
+            RequestStatus::APPROVED->value,
+            RequestStatus::EXTENDING->value,
+            RequestStatus::EXTENDED->value, 
+            RequestStatus::RENEWING->value,
+            RequestStatus::RENEWED->value,
+            RequestStatus::RECEIVED->value
+        ];
+
+        $bookCounts = BookReservation::query()
+        ->forUser($value)
+        ->whereIn("status", $statuses)
+        ->count();
+
+        $bookCountRequested = collect($this->data["data"])->pluck("book_id");
+
+        if(($bookCounts + $bookCountRequested->count()) > 3) {
+            $fail("You will exceed with your borrowing limit (3 books max). You already have {$bookCounts} active book requests.");
+        }
+
+        $overDues = BookReservation::query()
+        ->where('to_date', '<', now())
+        ->where("type", "HARD-COPY")
+        ->count();
+
+        if($overDues) {
+            $fail("You have an overdue book" . (($overDues > 1) ? 's' : '') . ", please return or check your borrowed list.");
+        }
+
     }
 }

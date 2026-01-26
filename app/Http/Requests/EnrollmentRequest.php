@@ -22,7 +22,12 @@ class EnrollmentRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            "userId" => $this->user()->role === UserRoleEnum::SUPERADMIN ? $this->userId : $this->user()->id
+            "userId" => in_array($this->user()->role, [
+                UserRoleEnum::ADMIN_ENROLLMENT->value,
+                UserRoleEnum::SUPERADMIN->value
+            ]) 
+                ? $this->userId 
+                : $this->user()->id
         ]);
     }
 

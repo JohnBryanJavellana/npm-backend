@@ -14,7 +14,6 @@ class RenewBookRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("renew", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -22,10 +21,12 @@ class RenewBookRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            "user_id" => in_array($this->user()->role, [
+            "userId" => in_array($this->user()->role, [
                 UserRoleEnum::SUPERADMIN->value,
                 UserRoleEnum::ADMIN_LIBRARY->value
             ])
+                ? $this->input("user_id")
+                : $this->user()->id
         ]);
     }
 
@@ -37,10 +38,20 @@ class RenewBookRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
+            "data" => "required|array",
             "data.*.book_res_id" => "required|exists:book_reservations,id",
             "data.*.to" => "required|date"
         ];
+
+        if(in_array($this->user()->role, [
+                UserRoleEnum::SUPERADMIN->value,
+                UserRoleEnum::ADMIN_LIBRARY->value
+            ])) {
+            $rules['userId'] = "required|exists:users,id";
+        }
+
+        return $rules;
     }
 
     protected function failedValidation(Validator $validator)

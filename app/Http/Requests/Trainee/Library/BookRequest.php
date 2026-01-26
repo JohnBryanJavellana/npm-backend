@@ -23,7 +23,7 @@ class BookRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("send_book_req", $this->all());
+        \Log::info("send_request", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -39,17 +39,20 @@ class BookRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, \Illu              minate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            "user" => "required",
+            "userId" => [
+                "required",
+                "exists:users,id",
+                new UserLibraryRule(),
+            ],
             "data" => "required|array",
             'data.*.book_id'=> [
                 'required',
                 'integer',
-                new UserLibraryRule($this->user()),
             ],
             "data.*.copy_type" => "required|string|in:SOFT-COPY,HARD-COPY",
             "data.*.book_copy_id" => "nullable|exists:book_copies,id",

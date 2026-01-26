@@ -8,7 +8,7 @@
     <div style="background: #fff; border-radius: 8px; padding: 30px; max-width: 600px; margin: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center;">
 
         <!-- Embedded image -->
-        <img src="{{ $message->embed(public_path('system-images/62334fcadd0d9e6d0a152aca.png')) }}"
+        <!-- <img src="{{ $message->embed(public_path('system-images/62334fcadd0d9e6d0a152aca.png')) }}" -->
              alt={{ config('app.name') }}
              style="height: 40px; width: auto; margin-bottom: 20px;">
 

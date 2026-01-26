@@ -67,21 +67,13 @@ class LibraryCartService {
     }
 
 
-    public function prepareCancellingData($validated, $userId)
+    public function prepareCancellingData($validated, $userId, $record)
     {
         if(auth()->id() !== $userId) {
             throw new DomainException("You are not authorized to perform this action.");
         }
 
-        $record = $this->bookCartModel->query()
-        ->whereIn("book_id", $validated["book_id"])
-        ->where("user_id", $userId)
-        ->count();
-        \Log::info('Delete prepareCancellingData:', [$validated, $validated["book_id"]]);
-        \Log::info('Delete userId:', [$userId]);
-
-        \Log::info("prepareCancellingData", [$record, count($validated["book_id"])]);
-        if($record !== count($validated["book_id"])) {
+        if($record->count() !== count($validated["book_id"])) {
             throw new DomainException("Some of the selected books are invalid, unavailable, or not allowed for this request.");
         }
     }
@@ -89,15 +81,14 @@ class LibraryCartService {
     public function removeFromCart($validated, $userId)
     {
         DB::transaction(function() use ($validated, $userId) {
-        
-            $this->prepareCancellingData($validated, $userId);
 
             $books = $this->bookCartModel->query()
-            ->whereIn('book_id', $validated["book_id"])
-            ->where('user_id', $userId)
-            ->get();
+            ->whereIn('id', $validated["book_id"])
+            ->where('user_id', $userId);
+
+            $this->prepareCancellingData($validated, $userId, $books);
 
             $books->delete();
         });
-    }   
+    }
 }
