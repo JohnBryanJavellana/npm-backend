@@ -71,8 +71,7 @@ class TraineeLibrary extends Controller
     {
         try {
             $validated = $request->validated();
-            $user = User::findOrFail($validated["user_id"]);
-            $userId = $user?->id;
+            $userId = $validated["user_id"];
             $statuses = [
                 RequestStatus::PENDING->value,
                 RequestStatus::APPROVED->value,
@@ -93,8 +92,8 @@ class TraineeLibrary extends Controller
             //SEPARATE
             $books = Book::with([
                 'catalog.genre',
-                'hasData' => function($q) use ($user, $statuses) {
-                    $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $user->id);
+                'hasData' => function($q) use ($userId, $statuses) {
+                    $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $userId);
                 },
                 'hasData.bookRes' => function ($query) use ($userId) {
                     $query->where(['user_id' => $userId, 'status' => 'FOR CSM']);
@@ -107,11 +106,11 @@ class TraineeLibrary extends Controller
             ])
             ->withCount([
                 'copies' => fn ($q) => $q->where('status', RequestStatus::AVAILABLE),
-                'carts' => function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
+                'carts' => function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
                 },
-                'hasData' => function ($q) use ($user, $statuses) {
-                    $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $user->id);
+                'hasData' => function ($q) use ($userId, $statuses) {
+                    $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $userId);
                 },
                 'related as enrolled_trainings_count' => function ($query) use ($record) {
                     $query->whereIn('training_id', $record);
