@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class LibraryRenewService {
     public function __construct(
+        protected LibraryExtraService $libraryExtraService,
         protected BookService $bookServiceModel,
         protected BookReservation $bookReservationModel,
     )
@@ -19,34 +20,22 @@ class LibraryRenewService {
 
     public function prepareData($records, $book_reservation_ids)
     {
-
         if($records->count() !== count($book_reservation_ids)) {
-            throw new DomainException("Only RECEIVED books are allowed to be renewed.");
+            throw new DomainException("Only 'RECEIVED' books are allowed to be renewed.");
         }
 
     }
 
-    // public function getRenewRequests()
-    // {
-    //     $records = $this->bookServiceModel->query()
-    //     ->where()
-    //     ;
-    // }
-
     public function storeRenewRequest($validated)
     {
         DB::transaction(function() use($validated)  {
-
-            $userId = auth()->id();
-            $book_reservation_ids = collect(value: $validated["data"])->pluck("book_res_id");
+            $userId = $validated["userId"];
+            $book_ids = collect(value: $validated["data"])->pluck("book_res_id");
 
             $records = $this->bookReservationModel->query()
-            ->with([
-                "bookRes:id,user_id,status"
-            ])
             ->forStatus([RequestStatus::RECEIVED->value])
             ->whereRelation("bookRes", "user_id", "=", $userId)
-            ->whereIn("id",$book_reservation_ids)
+            ->whereIn("id",$book_ids)
             ->lockForUpdate()
             ->get();
 
@@ -57,20 +46,9 @@ class LibraryRenewService {
             //get all book_resvation based on the passed ids,
             //filter() statuses !== "Received", pluck name,
 
-            // $this->prepareData($records, $book_reservation_ids);
+            // $this->prepareData($records, $book_ids);
 
-            $Bulkdata = collect($validated["data"])->map(function ($data) use ($userId) {
-                    return [
-                        "book_reservation_id" => $data["book_res_id"],
-                        "user_id" => $userId,
-                        "action" => "RENEW",
-                        "old_to_date" => $data["to"],
-                        "created_at" => Carbon::now(),
-                        "updated_at" => Carbon::now()
-                    ];
-            })->toArray();
-
-            $this->bookServiceModel->insert($Bulkdata);
+            $this->libraryExtraService->storeExtraService($validated, $userId, "RENEW");
 
             foreach($records as $record) {
                 $record->status = RequestStatus::RENEWING->value;

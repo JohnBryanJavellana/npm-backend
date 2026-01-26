@@ -55,6 +55,11 @@ class EnrollmentService {
         ->get();
     }
 
+    public function store($validated)
+    {
+        return;   
+    }
+
     public function getRankLicense()
     {
         $cacheKey = "rank:license:all";

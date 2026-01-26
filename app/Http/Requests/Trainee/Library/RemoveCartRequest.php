@@ -18,6 +18,14 @@ class RemoveCartRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    protected function prepareForValidation()
+    {
+
+        $this->merge([
+            "book_id" => $this->get($this->keys()[0])
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -29,6 +37,7 @@ class RemoveCartRequest extends FormRequest
             'book_id' => "required|array",
         ];
     }
+    
 
     protected function failedValidation(Validator $validator)
     {
@@ -38,7 +47,7 @@ class RemoveCartRequest extends FormRequest
             response()->json([
                 "message" => $fisrtError,
                 "errors" => $errors
-            ])
+            ], 422)
         );
     }
 }

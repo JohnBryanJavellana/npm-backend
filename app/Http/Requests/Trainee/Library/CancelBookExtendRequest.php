@@ -3,32 +3,30 @@
 namespace App\Http\Requests\Trainee\Library;
 
 use App\Enums\UserRoleEnum;
-use Illuminate\Contracts\Validation\Validator;
+use App\Http\Middleware\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CancelRenewRequest extends FormRequest
+class CancelBookExtendRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return false;
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
             "userId" => in_array($this->user()->role, [
-                UserRoleEnum::ADMIN_LIBRARY->value,
-                UserRoleEnum::SUPERADMIN->value
+                UserRoleEnum::SUPERADMIN->value,
+                UserRoleEnum::ADMIN_LIBRARY->value
             ])
                 ? $this->userId
-                : $this->user()->id
+                : $this->user()->id 
         ]);
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -39,19 +37,7 @@ class CancelRenewRequest extends FormRequest
         return [
             "userId" => "required|exists:users,id",
             "book_res_id" => "required|exists:book_reservations,id",
-            "request_id" => "required|exists:book_res,id"
+            "request_id" => "required|exists:book_res,id"        
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        $errors = $validator->errors();
-        $firstError = $errors->first();
-        throw new HttpResponseException(
-            response()->json([
-                "message" => $firstError,
-                "errors" => $errors
-            ], 422)
-        );
     }
 }

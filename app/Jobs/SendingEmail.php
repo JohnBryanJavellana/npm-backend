@@ -24,6 +24,8 @@ class SendingEmail implements ShouldQueue
 
     public function handle() {
         try {
+            \Log::info("mail job handle", [$this->user]);
+
             \Mail::to($this->user->email)->send($this->mailable);
         } catch (\Throwable $th) {
             \Log::error("error mail job handle", [$th]);
