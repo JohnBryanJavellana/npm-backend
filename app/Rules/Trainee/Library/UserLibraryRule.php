@@ -72,6 +72,5 @@ class UserLibraryRule implements ValidationRule , DataAwareRule
         if($overDues) {
             $fail("You have an overdue book" . (($overDues > 1) ? 's' : '') . ", please return or check your borrowed list.");
         }
-
     }
 }
