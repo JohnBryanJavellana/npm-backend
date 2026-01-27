@@ -80,7 +80,7 @@ class LibraryService {
             ])
             ->select("id", "book_id", "to_date", "type")
             ->whereIn("status",$statuses)
-            ->forUser($validated["userId"])
+            ->forUser($validated["user_id"])
             ->get();
 
         $duplicates = $records->whereIn("book_id", $book_ids);
@@ -105,7 +105,6 @@ class LibraryService {
                     "book_id" => $book["book_id"],
                     "type" => $book["copy_type"],
                     "from_date" => Carbon::parse($validated["from"]),
-                    "to_date" => Carbon::parse($validated["to"])->setTime(12, 0, 0),
                 ]);
             }
         });
@@ -191,7 +190,7 @@ class LibraryService {
     //stay
     private function createBookRes($validated) {
         return  $this->bookResModel::create([
-            "user_id" => $validated["userId"],
+            "user_id" => $validated["user_id"],
             "trace_number" => GenerateTrace::createTraceNumber(BookRes::class),
             "type" => $this->bookResModel::TYPE_ONLINE,
         ]);
@@ -205,7 +204,6 @@ class LibraryService {
             "book_res_id" => $res->id,
             "book_copy_id" => $copy?->id,
             "from_date" => Carbon::parse($from)->format('Y-m-d'),
-            "to_date" => Carbon::parse($to)->format('Y-m-d'),
             "book_id" => $book_id,
         ]);
 
