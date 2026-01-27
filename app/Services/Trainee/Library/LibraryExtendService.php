@@ -27,7 +27,10 @@ class LibraryExtendService {
             
             $records = $this->bookReservationModel->query()
             ->select("id", "status")
-            ->forStatus([RequestStatus::RECEIVED->value])
+            ->forStatus([
+                RequestStatus::RECEIVED->value,
+                RequestStatus::RENEWED->value,
+            ])
             ->whereRelation("bookRes", "user_id", "=", $validated["user_id"])
             ->whereIn("id",$book_ids)
             ->lockForUpdate()
