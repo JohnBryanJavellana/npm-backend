@@ -13,13 +13,13 @@ class CancelBookExtendRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return $this->user() !== null;
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
-            "userId" => in_array($this->user()->role, [
+            "c" => in_array($this->user()->role, [
                 UserRoleEnum::SUPERADMIN->value,
                 UserRoleEnum::ADMIN_LIBRARY->value
             ])
@@ -34,10 +34,15 @@ class CancelBookExtendRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            "userId" => "required|exists:users,id",
+        $rules = [
             "book_res_id" => "required|exists:book_reservations,id",
             "request_id" => "required|exists:book_res,id"        
         ];
+
+        if(in_array($this->user()->role, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_LIBRARY->value])) {
+            $rules["user_id"] = "required|exists:users,id";
+        }
+
+        return $rules;
     }
 }
