@@ -15,8 +15,6 @@ class UserLibraryRule implements ValidationRule , DataAwareRule
      *
      * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
-
-
     protected $data;
     protected $max = 3;
 
