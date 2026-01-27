@@ -20,11 +20,11 @@ class LibraryExtendService {
     
     public function createExtendRequest($validated)
     {
-        DB::transaction(function($validated) {
+        DB::transaction(function()use ($validated) {
             // $this->prepareData();
 
             $book_ids = collect($validated["data"])->pluck("book_res_id");
-
+            
             $records = $this->bookReservationModel->query()
             ->select("id", "status")
             ->forStatus([RequestStatus::RECEIVED->value])
