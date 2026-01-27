@@ -23,28 +23,27 @@ class BookRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("send_request", [$this->all()]);
         return $this->user() !== null;
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
-            "user" => User::find(in_array($this->user()->role, $this->allowedRoles)
-            ? $this->user_id
-            : $this->user()->id)
+            "user_id" => in_array($this->user()->role, $this->allowedRoles)
+            ? $this->input("userId")
+            : $this->user()->id
         ]);
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illu              minate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            "userId" => [
+            "user_id" => [
                 "required",
                 "exists:users,id",
                 new UserLibraryRule(),
@@ -56,12 +55,7 @@ class BookRequest extends FormRequest
             ],
             "data.*.copy_type" => "required|string|in:SOFT-COPY,HARD-COPY",
             "data.*.book_copy_id" => "nullable|exists:book_copies,id",
-            'from'=> 'required|date',
-            'to'=> [
-                "required",
-                "date",
-                new BorrowDateRangeRule($this->from)
-            ],
+            'from'=> 'required|date'
         ];
     }
 
@@ -72,9 +66,6 @@ class BookRequest extends FormRequest
             'book_id.array' => 'Book selection must be an array.',
             'from.required' => 'Starting date is required.',
             'from.date' => 'Starting date must be a valid date.',
-            'to.required' => 'End date is required.',
-            'to.date' => 'End date must be a valid date.',
-            'to.after' => 'End date must be after the starting date.',
         ];
     }
 
@@ -82,7 +73,6 @@ class BookRequest extends FormRequest
         return [
             'books.*.book_id' => 'book',
             'from' => 'starting date',
-            'to'=> 'end date',
         ];
     }
 

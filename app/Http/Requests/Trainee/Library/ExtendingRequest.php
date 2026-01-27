@@ -26,11 +26,11 @@ class ExtendingRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            "userId" => in_array($this->user()->role, [
+            "user_id" => in_array($this->user()->role, [
                 UserRoleEnum::SUPERADMIN->value,
                 UserRoleEnum::ADMIN_LIBRARY->value       
             ])
-                ? $this->input("user_id")
+                ? $this->input("userId")
                 : $this->user()->id
         ]);
     }
@@ -54,12 +54,11 @@ class ExtendingRequest extends FormRequest
                 UserRoleEnum::ADMIN_ENROLLMENT->value,
                 UserRoleEnum::SUPERADMIN->value
             ])) {
-            $rules["userId"] = "required|exists:users,id";
+            $rules["user_id"] = "required|exists:users,id";
         }
         
         return $rules;
     }
-
     public function withValidation($validator) {
         $validator->after(function($validator) {
             $user = $this->user();
