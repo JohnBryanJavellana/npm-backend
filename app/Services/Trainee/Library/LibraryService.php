@@ -105,6 +105,8 @@ class LibraryService {
                     "book_id" => $book["book_id"],
                     "type" => $book["copy_type"],
                     "from_date" => Carbon::parse($validated["from"]),
+                    //new
+                    "to_date" => Carbon::parse($validated["from"])->addDays(6),
                 ]);
             }
         });

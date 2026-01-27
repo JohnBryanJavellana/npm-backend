@@ -258,7 +258,7 @@ class TraineeLibrary extends Controller
                         ]);
                     });
                 })
-            ->get();;
+            ->get();
 
             return AvailableBooksResource::collection($books);
         }
