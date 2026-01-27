@@ -274,8 +274,9 @@ class TraineeLibrary extends Controller
 
             $validated = $request->validated();
             $user = User::findOrFail($validated["user_id"]);
+            $validated["role"] = $user->role;
             $userId = $user->id;
-
+            // return response()->json(["wow"], 200);
             $this->library_service->storeRequest($validated);
 
             if(env("USE_EVENT")) {

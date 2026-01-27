@@ -106,10 +106,17 @@ class LibraryService {
                     "type" => $book["copy_type"],
                     "from_date" => Carbon::parse($validated["from"]),
                     //new
-                    "to_date" => Carbon::parse($validated["from"])->addDays(6),
+                    "to_date" => Carbon::parse($validated["from"])->addDays(6)->setTime(12, 0, 0),
                 ]);
             }
         });
+    }
+
+    public function setEndDate($startingDate, $roles)
+    {
+        // return switch() {
+            
+        // }
     }
 
     public function getOverDue()
