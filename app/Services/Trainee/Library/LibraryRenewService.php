@@ -29,9 +29,8 @@ class LibraryRenewService {
     public function storeRenewRequest($validated)
     {
         DB::transaction(function() use($validated)  {
-            //new
             $userId = $validated["user_id"];
-            $book_ids = collect(value: $validated["data"])->pluck("book_res_id");
+            $book_ids = collect($validated["data"])->pluck("book_res_id");
 
             $records = $this->bookReservationModel->query()
             ->forStatus([RequestStatus::RECEIVED->value])
@@ -49,7 +48,7 @@ class LibraryRenewService {
             //get all book_resvation based on the passed ids,
             //filter() statuses !== "Received", pluck name,
 
-            
+        
             $this->libraryExtraService->storeExtraService($validated, $userId, "RENEW");
 
             foreach($records as $record) {
