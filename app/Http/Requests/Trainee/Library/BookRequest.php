@@ -13,10 +13,9 @@ class BookRequest extends FormRequest
 {
     //stop on first failed of the validation
     protected $stopOnFirstFailure = true;
-    protected $allowedRoles = [
-        UserRoleEnum::SUPERADMIN,
-        UserRoleEnum::ADMIN_LIBRARY
-    ];
+    // protected $allowedRoles = [
+
+    // ];
 
     /**
      * Determine if the user is authorized to make this request.
@@ -29,7 +28,7 @@ class BookRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            "user_id" => in_array($this->user()->role, $this->allowedRoles)
+            "user_id" => in_array($this->user()->role, [UserRoleEnum::SUPERADMIN->value,UserRoleEnum::ADMIN_LIBRARY->value])
             ? $this->input("userId")
             : $this->user()->id
         ]);
