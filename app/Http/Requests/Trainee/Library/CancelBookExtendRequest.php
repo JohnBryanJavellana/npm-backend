@@ -3,16 +3,19 @@
 namespace App\Http\Requests\Trainee\Library;
 
 use App\Enums\UserRoleEnum;
-use App\Http\Middleware\UserRole;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CancelBookExtendRequest extends FormRequest
 {
+    protected $stopOnFirstFailure = true;
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
+        \Log::info("userExnd", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -39,5 +42,17 @@ class CancelBookExtendRequest extends FormRequest
             "book_res_id" => "required|exists:book_reservations,id",
             "request_id" => "required|exists:book_res,id"        
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors();
+        $firstError = $errors->first();
+        throw new HttpResponseException(
+            response()->json([
+                "message" => $firstError,
+                "errors" => $errors
+            ], 422)
+        );
     }
 }
