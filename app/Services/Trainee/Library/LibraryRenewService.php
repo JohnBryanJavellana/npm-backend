@@ -41,6 +41,8 @@ class LibraryRenewService {
             ->lockForUpdate()
             ->get();
 
+            $this->prepareData($records, $book_ids); 
+
             //validate if all book reservations are active or "Received"
             //check length if an iya ginpasa na mga id is equal han kahilaba han return han model
             //kon diri throw error "Only received books are allowed to be renewed."
@@ -48,8 +50,7 @@ class LibraryRenewService {
             //get all book_resvation based on the passed ids,
             //filter() statuses !== "Received", pluck name,
 
-            // $this->prepareData($records, $book_ids);
-
+            
             $this->libraryExtraService->storeExtraService($validated, $userId, "RENEW");
 
             foreach($records as $record) {
