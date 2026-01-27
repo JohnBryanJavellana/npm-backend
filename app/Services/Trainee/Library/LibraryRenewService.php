@@ -30,9 +30,7 @@ class LibraryRenewService {
     public function storeRenewRequest($validated)
     {
         DB::transaction(function() use($validated)  {
-            \Log::info("validated", [$validated]);
-            \Log::info("userIdV", [$validated["user_id"]]);
-            return;
+            //new
             $userId = $validated["user_id"];
             $book_ids = collect(value: $validated["data"])->pluck("book_res_id");
 
