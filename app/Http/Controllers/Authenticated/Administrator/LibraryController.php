@@ -435,7 +435,7 @@ class LibraryController extends Controller
             ])->where([
                 'book_res_id' => $request->libraryId,
                 'status' => "RECEIVED"
-            ])->whereRaw("DATEDIFF(to_date, from_date) < 12")->get();
+            ])->get();
 
             return response()->json(['booksThatCanExtend' => $booksThatCanExtend], 200);
         });
