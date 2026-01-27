@@ -410,16 +410,14 @@ class LibraryController extends Controller
 
     public function get_extension_request (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $extensionMain = ExtensionRequest::with([
-                'extendingBooks',
-                'extendingBooks.bookReservation',
-                'extendingBooks.bookReservation.books',
-                'extendingBooks.bookReservation.books.catalog',
-                'extendingBooks.bookReservation.books.catalog.genre'
+            $extensionMain = BookReservation::with([
+                'bookRes',
+                'books',
+                'books.catalog',
+                'books.catalog.genre'
             ])->where([
-                'book_res_id' => $request->libraryId,
-                'user_id' => $request->userId
-            ])->orderBy('created_at', 'DESC')->get();
+                'book_res_id' => $request->libraryId
+            ])->whereIn('status', ["EXTENDING"])->get();
 
             return response()->json(['extensionRequests' => $extensionMain], 200);
         });
@@ -433,48 +431,52 @@ class LibraryController extends Controller
                 'books.catalog',
                 'books.catalog.genre'
             ])->where([
-                'book_res_id' => $request->libraryId,
-                'status' => "RECEIVED"
-            ])->get();
+                'book_res_id' => $request->libraryId
+            ])->whereIn('status', ["RECEIVED"])->get();
 
             return response()->json(['booksThatCanExtend' => $booksThatCanExtend], 200);
         });
     }
 
     public function submit_extension_request (ExtendingRequest $request) {
-        $this->traineeCtrlInstance->extend($request);
+        return $this->traineeCtrlInstance->extend($request);
     }
 
-    public function update_extension_request (Request $request) {
+    public function update_extension_request(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $this_request = BookExtensionRequest::find($request->documentId);
-            $this_request->status = $request->status;
-            $this_request->save();
+            $bR = BookReservation::find($request->documentId);
 
-            $bR = BookReservation::find($this_request->book_reservation_id);
-            $bR->status = "RECEIVED";
-            if($request->status === "APPROVED") $bR->to_date = $this_request->date_of_extension;
-            $bR->save();
-
-            $checkIfNeedMainTableToUpdate = BookExtensionRequest::where('extension_request_id', $request->extensionReqId)
-                ->whereIn("status", ['CANCELLED', 'APPROVED', 'REJECTED']);
-            $isExist = $checkIfNeedMainTableToUpdate->clone()->exists();
-
-            if($isExist) {
-                $d = $checkIfNeedMainTableToUpdate->clone()->first();
-                $bookRes = BookRes::find($d->extensionRequest->book_res_id);
-                $bookRes->status = "ACTIVE";
-                $bookRes->save();
+            if (!$bR) {
+                return response()->json(['message' => 'Reservation not found.'], 404);
             }
 
-            Notifications::notify($request->user()->id, $this_request->bookReservation->bookRes->trainee->id, "LIBRARY", "updated your book reservation extension request.");
+            $isPastDue = now()->gt(Carbon::parse($bR->to_date));
+
+            $tempStatus = match(true) {
+                $isPastDue => 'EXPIRED',
+                $request->status === "APPROVED" => "EXTENDED",
+                in_array($request->status, ["REJECTED", "CANCELLED"]) => 'RECEIVED',
+                default => 'HAHAHAH'
+            };
+
+            if ($tempStatus === "EXTENDED") {
+                $bR->to_date = Carbon::parse($request->to_date);
+            }
+
+            $bR->status = $tempStatus;
+            $bR->save();
+
+            Notifications::notify(
+                $request->user()->id,
+                $bR->bookRes->trainee->id,
+                "LIBRARY",
+                "updated your book reservation extension request to {$tempStatus}."
+            );
+
             AuditHelper::log($request->user()->id, "Updated a book reservation extension request.");
 
-            if(env('USE_EVENT')) {
-                event(
-                    new BELibrary(''),
-                    new BEAuditTrail(''),
-                );
+            if (env('USE_EVENT')) {
+                event(new BELibrary(''), new BEAuditTrail(''));
             }
 
             return response()->json(['message' => "You've successfully updated a book reservation extension request."], 201);
@@ -587,7 +589,7 @@ class LibraryController extends Controller
     }
 
     public function create_walkin_request (BookRequest $request) {
-        $this->traineeCtrlInstance->send_request_book($request);
+        return $this->traineeCtrlInstance->send_request_book($request);
     }
 
     public function get_pre_data (Request $request) {
