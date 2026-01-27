@@ -16,7 +16,7 @@ class EnrollmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("dataEnrolll", [$this->all()]);
+        \Log::info("dataEnrolll", [$this->user()]);
         return $this->user() !== null;
     }
 
