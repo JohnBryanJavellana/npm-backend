@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Authenticated\Trainee\TraineeLibrary;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -440,43 +441,8 @@ class LibraryController extends Controller
         });
     }
 
-    public function submit_extension_request (ExtensionFormRequest $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
-            $this_request = new ExtensionRequest;
-            $this_request->user_id = $request->userId;
-            $this_request->book_res_id = $request->bookResId;
-            $this_request->purpose = $request->purpose;
-            $this_request->save();
-
-            foreach ($request->bookData as $value) {
-                $this_book_extension_request = new BookExtensionRequest;
-                $this_book_extension_request->book_reservation_id = $value['bookReservationId'];
-                $this_book_extension_request->extension_request_id = $this_request->id;
-                $this_book_extension_request->date_of_extension = $value['dateOfExtension'];
-                $this_book_extension_request->current_to_date = $value['currentToDate'];
-                $this_book_extension_request->save();
-
-                $bookRes = BookReservation::find($value['bookReservationId']);
-                $bookRes->status = 'EXTENDING';
-                $bookRes->save();
-            }
-
-            $bookRes = BookRes::find($request->bookResId);
-            $bookRes->status = 'EXTENDING';
-            $bookRes->save();
-
-            Notifications::notify($request->user()->id, $request->userId, "LIBRARY", "created a book reservation extension request for you.");
-            AuditHelper::log($request->user()->id, "Submitted a book reservation extension request. ID#" . $this_request->id);
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BELibrary(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            return response()->json(['message' => "You've successfully submitted a book reservation extension request. ID#" . $this_request->id], 201);
-        });
+    public function submit_extension_request (ExtendingRequest $request) {
+        $this->traineeCtrlInstance->extend($request);
     }
 
     public function update_extension_request (Request $request) {
