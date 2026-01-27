@@ -106,9 +106,6 @@ class TraineeLibrary extends Controller
             ])
             ->withCount([
                 'copies' => fn ($q) => $q->where('status', RequestStatus::AVAILABLE),
-                'carts' => function ($q) use ($userId) {
-                    $q->where('user_id', $userId);
-                },
                 'hasData' => function ($q) use ($userId, $statuses) {
                     $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $userId);
                 },
