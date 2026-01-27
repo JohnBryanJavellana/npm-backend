@@ -21,11 +21,11 @@ class RenewBookRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            "userId" => in_array($this->user()->role, [
+            "user_id" => in_array($this->user()->role, [
                 UserRoleEnum::SUPERADMIN->value,
                 UserRoleEnum::ADMIN_LIBRARY->value
             ])
-                ? $this->input("user_id")
+                ? $this->input("userId")
                 : $this->user()->id
         ]);
     }
@@ -48,7 +48,7 @@ class RenewBookRequest extends FormRequest
                 UserRoleEnum::SUPERADMIN->value,
                 UserRoleEnum::ADMIN_LIBRARY->value
             ])) {
-            $rules['userId'] = "required|exists:users,id";
+            $rules['user_id'] = "required|exists:users,id";
         }
 
         return $rules;

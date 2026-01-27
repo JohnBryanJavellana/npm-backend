@@ -27,12 +27,12 @@ class LibraryExtendService {
             $records = $this->bookReservationModel->query()
             ->select("id", "status")
             ->forStatus([RequestStatus::RECEIVED->value])
-            ->whereRelation("bookRes", "user_id", "=", $validated["userId"])
+            ->whereRelation("bookRes", "user_id", "=", $validated["user_id"])
             ->whereIn("id",$book_ids)
             ->lockForUpdate()
             ->get();
 
-            $this->libraryExtraService->storeExtraService($validated, $validated["userId"], "EXTEND");
+            $this->libraryExtraService->storeExtraService($validated, $validated["user_id"], "EXTEND");
             
             foreach($records as $record) {
                 $record->status = RequestStatus::EXTENDING->value;
