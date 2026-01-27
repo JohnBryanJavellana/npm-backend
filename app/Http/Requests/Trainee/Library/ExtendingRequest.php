@@ -43,21 +43,14 @@ class ExtendingRequest extends FormRequest
 
     public function rules(): array
     {
-        $rules = [
+        return [
+            "user_id" => "required|exists:users,id",
             "data" => "required|array",
             "data.*.book_res_id" => "required|exists:book_reservations,id",
             "data.*.to" => "required|date",
             "reference_id" => "required|exists:book_res,id",
         ];
 
-        if(in_array($this->user()->role, [
-                UserRoleEnum::ADMIN_ENROLLMENT->value,
-                UserRoleEnum::SUPERADMIN->value
-            ])) {
-            $rules["user_id"] = "required|exists:users,id";
-        }
-        
-        return $rules;
     }
     public function withValidation($validator) {
         $validator->after(function($validator) {

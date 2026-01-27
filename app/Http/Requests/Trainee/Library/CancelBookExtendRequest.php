@@ -19,7 +19,7 @@ class CancelBookExtendRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            "c" => in_array($this->user()->role, [
+            "user_id" => in_array($this->user()->role, [
                 UserRoleEnum::SUPERADMIN->value,
                 UserRoleEnum::ADMIN_LIBRARY->value
             ])
@@ -34,15 +34,10 @@ class CancelBookExtendRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return [
+            "user_id" => "required|exists:users,id",
             "book_res_id" => "required|exists:book_reservations,id",
             "request_id" => "required|exists:book_res,id"        
         ];
-
-        if(in_array($this->user()->role, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_LIBRARY->value])) {
-            $rules["user_id"] = "required|exists:users,id";
-        }
-
-        return $rules;
     }
 }
