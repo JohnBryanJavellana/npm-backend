@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BELibrary;
 use App\Http\Controllers\Controller;
-use App\Services\Trainee\Library\LibraryCartService;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
@@ -17,19 +16,16 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use App\Http\Resources\{BookResource, BookRequestResource, PdfCopyResource, BookExtensionResource, AvailableBooksResource, BookOverDueResource};
 use App\Jobs\SendingEmail;
-use App\Models\{User, Book, BookCopy, BookCart, BookReservation, BookRes, EnrolledCourse, BookTrainingRelated, ExtensionRequest, BookExtensionRequest};
+use App\Models\{User, Book, BookCopy, BookReservation, BookRes, EnrolledCourse, BookTrainingRelated, ExtensionRequest, BookExtensionRequest};
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Services\Trainee\Library\LibraryService;
 use App\Enums\RequestStatus;
-use App\Http\Requests\Trainee\Library\AddCartRequest;
 use App\Http\Requests\Trainee\Library\CancelBookExtendRequest;
 use App\Http\Requests\Trainee\Library\CancelRenewRequest;
-use App\Http\Requests\Trainee\Library\RemoveCartRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
 use App\Http\Requests\Trainee\Library\ViewAllByUserRequest;
-use App\Http\Resources\Trainee\Library\BookCartResource;
 use App\Services\Trainee\Library\LibraryExtendService;
 use App\Services\Trainee\Library\LibraryRenewService;
 use DomainException;
@@ -44,27 +40,26 @@ class TraineeLibrary extends Controller
         protected LibraryService $library_service,
         protected LibraryExtendService $libraryExtendService,
         protected LibraryRenewService $libraryRenewService,
-        protected LibraryCartService $libraryCartService
         ) {}
 
 
-    public function test(Request $request)
-    {
-        $ids = [2,3,1];
-        $statuses = [
-            RequestStatus::PENDING->value,
-            RequestStatus::APPROVED->value,
-            RequestStatus::EXTENDING->value,
-            RequestStatus::EXTENDED->value,
-            RequestStatus::RENEWING->value,
-            RequestStatus::RENEWED->value,
-            ];
+    // public function test(Request $request)
+    // {
+    //     $ids = [2,3,1];
+    //     $statuses = [
+    //         RequestStatus::PENDING->value,
+    //         RequestStatus::APPROVED->value,
+    //         RequestStatus::EXTENDING->value,
+    //         RequestStatus::EXTENDED->value,
+    //         RequestStatus::RENEWING->value,
+    //         RequestStatus::RENEWED->value,
+    //         ];
 
-        // $record = Training::whereKey()
+    //     // $record = Training::whereKey()
 
 
-        // return implode(", ", $title);
-    }
+    //     // return implode(", ", $title);`
+    // }
 
     /** GET ALL AVAILABLE BOOKS */
     public function view_books(ViewAllByUserRequest $request)
@@ -72,6 +67,7 @@ class TraineeLibrary extends Controller
         try {
             $validated = $request->validated();
             $userId = $validated["user_id"];
+
             $statuses = [
                 RequestStatus::PENDING->value,
                 RequestStatus::APPROVED->value,
@@ -106,9 +102,6 @@ class TraineeLibrary extends Controller
             ])
             ->withCount([
                 'copies' => fn ($q) => $q->where('status', RequestStatus::AVAILABLE),
-                'carts' => function ($q) use ($userId) {
-                    $q->where('user_id', $userId);
-                },
                 'hasData' => function ($q) use ($userId, $statuses) {
                     $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $userId);
                 },
@@ -116,7 +109,7 @@ class TraineeLibrary extends Controller
                     $query->whereIn('training_id', $record);
                 }
             ])
-            ->where('status', RequestStatus::ACTIVE)
+            ->where('status', RequestStatus::ACTIVE->value)
             ->orderByDesc('enrolled_trainings_count')
             ->orderBy('id');
 
@@ -178,7 +171,6 @@ class TraineeLibrary extends Controller
     /** GET TRAINEE RECORD BY ID */
     public function view_request_details(Request $request){
         try {
-            \Log::info("view_request_details", [$request->all()]);
             $user_id = $request->user()->id;
             $trac = $request->trace_number;
 
@@ -281,7 +273,7 @@ class TraineeLibrary extends Controller
         try {
 
             $validated = $request->validated();
-            $user = User::findOrFail($validated["userId"]);
+            $user = User::findOrFail($validated["user_id"]);
             $userId = $user->id;
 
             $this->library_service->storeRequest($validated);
@@ -367,7 +359,7 @@ class TraineeLibrary extends Controller
                 event(new BELibrary(''));
             }
 
-            // $this->forgetCache($user_id);
+            $this->forgetCache($user_id);
 
             SendingEmail::dispatch($request->user(), new BookReservationStatus(['status' => "CANCELLED"], $request->user()));
             AuditHelper::log($user_id, "User {$user_id} cancelled a book request.");
@@ -385,7 +377,7 @@ class TraineeLibrary extends Controller
     {
         try {
             $validated = $request->validated();
-            $user_id = $validated["userId"];
+            $user_id = $validated["user_id"];
 
             $this->libraryExtendService->createExtendRequest($validated);
             AuditHelper::log($user_id, "User {$user_id} sent a book extension request.");
@@ -411,9 +403,9 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
 
             $this->libraryExtendService->cancelExtendRequest($validated);
-            $this->forgetCache($request->user()->id);
+            $this->forgetCache($validated["user_id"]);
 
-            AuditHelper::log($validated["userId"], "User {$validated["userId"]} sent a book extension request.");
+            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} sent a book extension request.");
 
             return response()->json(["message" => "Cancelled extension request successfully!"], 200);
         }
@@ -431,7 +423,7 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $this->libraryRenewService->storeRenewRequest($validated);
 
-            AuditHelper::log($validated["userId"], "User {$validated["userId"]} sent a book renewal request.");
+            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} sent a book renewal request.");
 
             return response()->json(["message" => "You've successfully sent a book renewal request."], 200);
         }
