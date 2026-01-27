@@ -65,10 +65,13 @@ class RegisterController extends Controller
                         $filename = "{$user->id}.png";
                         $user->qr = $filename;
 
-                        $user->profile_picture = $this->processAvatar($socialUser->getAvatar());
+                        $profile_filename = Str::uuid() . '.png';
+                        $user->profile_picture = $profile_filename;
 
                         $user->save();
-                        // $this->generateAndSendQR($user, $filename);
+
+                        $this->processAvatar($socialUser->getAvatar(), $profile_filename);
+                        $this->generateAndSendQR($user, $filename);
                     }
 
                     AuditHelper::log($user->id, "Logged in via Social Login");
@@ -145,7 +148,7 @@ class RegisterController extends Controller
         return $filename;
     }
 
-    protected function processAvatar($avatarUrl, $isBase64 = false) {
+    protected function processAvatar($avatarUrl, $filename, $isBase64 = false) {
         $filename = Str::uuid() . '.png';
         SaveAvatar::dispatch($avatarUrl, $filename, "user_images/", true, $isBase64);
         return $filename;
