@@ -307,8 +307,6 @@ class LibraryController extends Controller
     }
 
     public function remove_copy (Request $request, int $copy_id) {
-
-
         return TransactionUtil::transact(null, ['book_copies_cache'], function() use ($request, $copy_id) {
             $this_book = BookCopy::withCount(['hasData'])->where('id', $copy_id)->first();
 
@@ -517,56 +515,47 @@ class LibraryController extends Controller
         });
     }
 
-    public function update_reservation (UpdateBookRequest $request) {
+    public function update_reservation(UpdateBookRequest $request){
         return TransactionUtil::transact($request, ["book_reservations_cache"], function() use ($request) {
-            $this_book = BookReservation::find($request->documentId);
-            $this_book->status = $request->status;
-            $this_book->save();
+            $reservation = BookReservation::findOrFail($request->documentId);
+            $reservation->status = $request->status;
 
-            if(!is_null($this_book->book_copy_id)){
-                $book_copy = BookCopy::find($this_book->book_copy_id);
-
-                switch ($request->status) {
-                    case in_array($request->status, ["RETURNED", "REJECTED", "CANCELLED"]):
-                        $book_copy->status = "AVAILABLE";
-                        break;
-
-                    case in_array($request->status, ["DAMAGED", "LOST"]):
-                        $book_copy->status = $request->status;
-                        break;
-
-                    case in_array($request->status, ["RECEIVED"]):
-                        $book_copy->status = "BORROWED";
-                        break;
-
-                    default: break;
-                }
-                $book_copy->save();
+            if ($reservation->type === "HARD-COPY" && is_null($reservation->book_copy_id)) {
+                $copy = BookCopy::where('status', 'AVAILABLE')->first();
+                if (!$copy) return response()->json(['message' => "No available copies for this book."], 422);
+                $reservation->book_copy_id = $copy->id;
             }
 
-            $book_res = $this_book->whereHas('bookRes', function($q) use ($this_book){
-                $q->where('id', $this_book->book_res_id);
-            })
-            ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
-            ->exists();
+            $reservation->save();
 
-            if(!$book_res) {
-                $record = BookRes::find($this_book->book_res_id);
-                $record->status = "FOR CSM";
-                $record->save();
+            if ($reservation->book_copy_id) {
+                $copy = BookCopy::find($reservation->book_copy_id);
+
+                $copy->status = match(true) {
+                    in_array($request->status, ["RETURNED", "REJECTED", "CANCELLED"]) => "AVAILABLE",
+                    in_array($request->status, ["DAMAGED", "LOST"]) => $request->status,
+                    in_array($request->status, ["RECEIVED"]) => "BORROWED",
+                    default => $copy->status
+                };
+                $copy->save();
             }
 
-            Notifications::notify($request->user()->id, $this_book->bookRes->trainee->id, "LIBRARY", "updated your book reservation status.");
-            AuditHelper::log($request->user()->id, "Updated book reservation status. ID#" . $request->documentId);
+            $hasActiveItems = BookReservation::where('book_res_id', $reservation->book_res_id)
+                ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
+                ->exists();
 
-            if(env('USE_EVENT')) {
-                event(
-                    new BELibrary(''),
-                    new BEAuditTrail(''),
-                );
+            if (!$hasActiveItems) {
+                BookRes::where('id', $reservation->book_res_id)->update(['status' => 'FOR CSM']);
             }
 
-            return response()->json(['message' => "You've updated a book request. ID#" . $request->documentId], 200);
+            Notifications::notify($request->user()->id, $reservation->bookRes->trainee->id, "LIBRARY", "updated your book reservation status.");
+            AuditHelper::log($request->user()->id, "Updated book reservation status. ID#{$request->documentId}");
+
+            if (env('USE_EVENT')) {
+                event(new BELibrary(''), new BEAuditTrail(''));
+            }
+
+            return response()->json(['message' => "Updated book request ID#{$request->documentId}"], 200);
         });
     }
 
