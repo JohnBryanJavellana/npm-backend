@@ -3,6 +3,7 @@
 namespace App\Services\Trainee\Library;
 
 use App\Enums\RequestStatus;
+use App\Enums\UserRoleEnum;
 use App\Models\{BookRes, Book, BookCopy, BookReservation, BookCart};
 use App\Utils\GenerateTrace;
 use Carbon\Carbon;
@@ -106,17 +107,13 @@ class LibraryService {
                     "type" => $book["copy_type"],
                     "from_date" => Carbon::parse($validated["from"]),
                     //new
-                    "to_date" => Carbon::parse($validated["from"])->addDays(6)->setTime(12, 0, 0),
+                    "to_date" => match ($validated["role"]) {
+                        UserRoleEnum::TRAINEE->value => Carbon::parse($validated["from"])->addDays(6)->setTime(12, 0, 0),
+                        UserRoleEnum::TRAINER->value => Carbon::parse($validated["from"])->addDays(14)->setTime(12, 0, 0),
+                    },
                 ]);
             }
         });
-    }
-
-    public function setEndDate($startingDate, $roles)
-    {
-        // return switch() {
-            
-        // }
     }
 
     public function getOverDue()
