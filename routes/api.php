@@ -203,36 +203,47 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_enrolled', [EnrollmentCtrl::class, 'get_enrolled']);
             Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished']);
             Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
+
             Route::get('get_schedules', [EnrollmentCtrl::class, 'get_schedules']);
             Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
             Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
+
             Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
             Route::post('create_or_update_module', [EnrollmentCtrl::class, 'create_or_update_module']);
             Route::delete('remove_module/{module_id}', [EnrollmentCtrl::class, 'remove_module']);
+
             Route::get('get_module_types', [EnrollmentCtrl::class, 'get_module_types']);
             Route::post('create_or_update_module_type', [EnrollmentCtrl::class, 'create_or_update_module_type']);
             Route::delete('remove_module_type/{module_type_id}', [EnrollmentCtrl::class, 'remove_module_type']);
+
             Route::get('get_certificates', [EnrollmentCtrl::class, 'get_certificates']);
             Route::post('create_or_update_certificate', [EnrollmentCtrl::class, 'create_or_update_certificate']);
             Route::delete('remove_certificate/{certificate_id}', [EnrollmentCtrl::class, 'remove_certificate']);
+
             Route::get('get_requirements', [EnrollmentCtrl::class, 'get_requirements']);
             Route::post('create_or_update_requirement', [EnrollmentCtrl::class, 'create_or_update_requirement']);
             Route::delete('training-requirements/remove_trequirement/{requirement_id}', [EnrollmentCtrl::class, 'remove_requirement']);
+
             Route::get('get_schools', [EnrollmentCtrl::class, 'get_schools']);
             Route::post('create_or_update_school', [EnrollmentCtrl::class, 'create_or_update_school']);
             Route::delete('remove_school/{school_id}', [EnrollmentCtrl::class, 'remove_school']);
+
             Route::get('get_courses', [EnrollmentCtrl::class, 'get_courses']);
             Route::post('create_or_update_course', [EnrollmentCtrl::class, 'create_or_update_course']);
             Route::delete('remove_course/{course_id}', [EnrollmentCtrl::class, 'remove_course']);
+
             Route::get('get_vouchers', [EnrollmentCtrl::class, 'get_vouchers']);
             Route::post('create_or_update_voucher', [EnrollmentCtrl::class, 'create_or_update_voucher']);
             Route::delete('remove_voucher/{voucher_id}', [EnrollmentCtrl::class, 'remove_voucher']);
+
             Route::get('get_sponsors', [EnrollmentCtrl::class, 'get_sponsors']);
             Route::post('create_or_update_sponsor', [EnrollmentCtrl::class, 'create_or_update_sponsor']);
             Route::delete('remove_sponsor/{sponsor_id}', [EnrollmentCtrl::class, 'remove_sponsor']);
+
             Route::get('get_licenses', [EnrollmentCtrl::class, 'get_licenses']);
             Route::post('create_or_update_license', [EnrollmentCtrl::class, 'create_or_update_license']);
             Route::delete('remove_license/{license_id}', [EnrollmentCtrl::class, 'remove_license']);
+
             Route::get('get_ranks', [EnrollmentCtrl::class, 'get_ranks']);
             Route::post('create_or_update_rank', [EnrollmentCtrl::class, 'create_or_update_rank']);
             Route::delete('remove_rank/{rank_id}', [EnrollmentCtrl::class, 'remove_rank']);
@@ -240,6 +251,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_facilitators', [EnrollmentCtrl::class, 'get_facilitators']);
             Route::post('create_or_update_facilitator', [EnrollmentCtrl::class, 'create_or_update_facilitator']);
             Route::delete('remove_facilitator/{facilitator_id}', [EnrollmentCtrl::class, 'remove_facilitator']);
+
+            Route::get('get_training_fees_predata', [EnrollmentCtrl::class, 'get_training_fees_predata']);
+            Route::get('get_course_module_fees', [EnrollmentCtrl::class, 'get_course_module_fees']);
+            Route::post('create_or_update_course_fee', [EnrollmentCtrl::class, 'create_or_update_course_fee']);
+            Route::delete('remove_course_fee/{course_fee_id}', [EnrollmentCtrl::class, 'remove_course_fee']);
         });
 
         Route::prefix('/books/')->group(function() {
