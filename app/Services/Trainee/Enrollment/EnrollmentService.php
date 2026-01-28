@@ -77,9 +77,6 @@ class EnrollmentService {
         ->firstOrFail(["id", "schedule_slot"]);
 
         $this->validateTraining($training);
-
-        
-
     }
 
     public function storeBasic()

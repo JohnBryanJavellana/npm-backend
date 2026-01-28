@@ -56,4 +56,15 @@ enum RequestStatus: string {
             self::RENEWED->value
         ];
     }
+
+    public static function notAllowedStatuses(): array
+    {
+        return [
+            RequestStatus::COMPLETED->value,
+            RequestStatus::CANCELLED->value,
+            RequestStatus::DECLINED->value,
+            RequestStatus::IR->value,
+            RequestStatus::CSFB->value,
+        ];
+    }
 }

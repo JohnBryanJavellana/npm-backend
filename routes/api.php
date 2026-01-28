@@ -101,6 +101,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
         });
 
+        Route::prefix('/trainer/enrollment/')->middleware('user_role:TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () { 
+
+        });
+
         Route::prefix('/trainings/')->group(function() {
             Route::get('get_all_courses', [TraineeCourses::class, 'get_all_courses']);
             Route::get('get_trainee_trainings', [TraineeCourses::class, 'get_trainee_courses']);

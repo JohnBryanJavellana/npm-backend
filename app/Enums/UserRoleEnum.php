@@ -11,4 +11,13 @@ enum UserRoleEnum: string
     case ADMIN_DORMITORY = "ADMIN-DORMITORY";
     case TRAINER = "TRAINER";
     case CASHIER = "ADMIN-CASHIER";
+
+
+    public static function enrollmentRoles(): array
+    {
+        return [
+            self::ADMIN_ENROLLMENT->value,
+            self::SUPERADMIN->value,
+        ];
+    }
 }
