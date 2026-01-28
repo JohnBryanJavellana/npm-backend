@@ -169,6 +169,20 @@ class TraineeEnrollment extends Controller
         return CourseModuleResource::collection($courses);
     }
 
+    public function test(Request $request)
+    {
+        $training = Training::query()
+        ->whereKey(20260001)
+        ->active()
+        ->lockForUpdate()
+        ->firstOrFail();
+
+        $speReq =  $training->module->hasData->count();
+        $basicReq = Requirement::where("isBasic", "YES")->count();
+
+        return response()->json(["data" => $speReq + $basicReq], 200);
+    }
+
     public function send_enrollment_request(EnrollmentRequest $request) {
         try {
             // return response()->json(["data" => $request->all()], 200);
@@ -185,13 +199,14 @@ class TraineeEnrollment extends Controller
             if ( !$addtional_info_id ) {
                 return response()->json(['message' => 'To get started, open My Account and enter some of your information.'], 422);
             }
-
+            //SEPARATE CONCERN
             $selected_training = new EnrolledCourse();
             $selected_training->user_id = $user_id;
             $selected_training->training_id = $validated["training_id"];
             $selected_training->enrolled_course_status = RequestStatus::RESERVED;
             $selected_training->save();
 
+            //SEPARATE CONCERN
             foreach($validated["file_upload"] as $up_file) {
                 if ($up_file['is_basic'] == 'YES') {
                     $trainee_upload = TrainingRegFile::where([

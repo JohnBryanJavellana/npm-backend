@@ -23,6 +23,7 @@ class TrainingListResource extends JsonResource
             'requirement_description' => $this->description,
             'requirement_is_required' => $this->isRequired,
             'requirement_is_basic' => $this->isBasic,
+            'reference' => $this->upload_reference,
             'trainee_file_id' => $this->isBasic === 'YES' 
                 //hasMany
                 ? $this->trainee_file->first()?->id
