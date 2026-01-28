@@ -258,10 +258,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('get_book_reservation/create_fine', [LibraryController::class, 'create_fine']);
             Route::delete('get_book_reservation/remove_fine/{id}', [LibraryController::class, 'remove_fine']);
             Route::post('get_book_reservation/get_book_reservation_that_needs_fine', [LibraryController::class, 'get_book_reservation_that_needs_fine']);
-            Route::post('get_book_reservation/get_extension_request', [LibraryController::class, 'get_extension_request']);
-            Route::post('get_book_reservation/get_books_that_can_extend', [LibraryController::class, 'get_books_that_can_extend']);
+            Route::post('get_book_reservation/get_prolongation_request', [LibraryController::class, 'get_prolongation_request']);
+            Route::post('get_book_reservation/get_books_that_protractible', [LibraryController::class, 'get_books_that_protractible']);
+            Route::post('get_book_reservation/submit_renewal_request', [LibraryController::class, 'submit_renewal_request']);
             Route::post('get_book_reservation/submit_extension_request', [LibraryController::class, 'submit_extension_request']);
-            Route::post('get_book_reservation/update_extension_request', [LibraryController::class, 'update_extension_request']);
+            Route::post('get_book_reservation/update_prolongation_request', [LibraryController::class, 'update_prolongation_request']);
             Route::post('get_book_reservation/count_book_reservation', [LibraryController::class, 'count_book_reservation']);
             Route::post('get_book_reservation/check_for_book_reservation', [LibraryController::class, 'check_for_book_reservation']);
             Route::delete('get_book_info/remove_copy/{copy_id}', [LibraryController::class, 'remove_copy']);

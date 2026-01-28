@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 use App\Http\Controllers\Authenticated\Trainee\TraineeLibrary;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
+use App\Http\Requests\Trainee\Library\RenewBookRequest;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -408,33 +409,34 @@ class LibraryController extends Controller
         });
     }
 
-    public function get_extension_request (Request $request) {
+    public function get_prolongation_request (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $extensionMain = BookReservation::with([
+            $prolongationMain = BookReservation::with([
                 'bookRes',
                 'books',
+                'bookRes.trainee',
                 'books.catalog',
                 'books.catalog.genre'
             ])->where([
                 'book_res_id' => $request->libraryId
-            ])->whereIn('status', ["EXTENDING"])->get();
+            ])->whereIn('status', $request->status)->get();
 
-            return response()->json(['extensionRequests' => $extensionMain], 200);
+            return response()->json(['prolongationRequests' => $prolongationMain], 200);
         });
     }
 
-    public function get_books_that_can_extend (Request $request) {
+    public function get_books_that_protractible (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $booksThatCanExtend = BookReservation::with([
+            $booksThatAreProtactible = BookReservation::with([
                 'bookRes',
                 'books',
                 'books.catalog',
                 'books.catalog.genre'
             ])->where([
                 'book_res_id' => $request->libraryId
-            ])->whereIn('status', ["RECEIVED"])->get();
+            ])->whereIn('status', $request->status)->get();
 
-            return response()->json(['booksThatCanExtend' => $booksThatCanExtend], 200);
+            return response()->json(['booksThatAreProtactible' => $booksThatAreProtactible], 200);
         });
     }
 
@@ -442,7 +444,11 @@ class LibraryController extends Controller
         return $this->traineeCtrlInstance->extend($request);
     }
 
-    public function update_extension_request(Request $request) {
+    public function submit_renewal_request (RenewBookRequest $request) {
+        return $this->traineeCtrlInstance->renew($request);
+    }
+
+    public function update_prolongation_request(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $bR = BookReservation::find($request->documentId);
 
@@ -454,12 +460,12 @@ class LibraryController extends Controller
 
             $tempStatus = match(true) {
                 $isPastDue => 'EXPIRED',
-                $request->status === "APPROVED" => "EXTENDED",
+                $request->status === "APPROVED" => $request->acceptedStatus,
                 in_array($request->status, ["REJECTED", "CANCELLED"]) => 'RECEIVED',
                 default => 'HAHAHAH'
             };
 
-            if ($tempStatus === "EXTENDED") {
+            if (in_array($tempStatus, ["EXTENDED", "RENEWED"])) {
                 $bR->to_date = Carbon::parse($request->to_date);
             }
 
@@ -470,16 +476,16 @@ class LibraryController extends Controller
                 $request->user()->id,
                 $bR->bookRes->trainee->id,
                 "LIBRARY",
-                "updated your book reservation extension request to {$tempStatus}."
+                "updated your book reservation request to {$tempStatus}."
             );
 
-            AuditHelper::log($request->user()->id, "Updated a book reservation extension request.");
+            AuditHelper::log($request->user()->id, "Updated a book reservation {$tempStatus} request.");
 
             if (env('USE_EVENT')) {
                 event(new BELibrary(''), new BEAuditTrail(''));
             }
 
-            return response()->json(['message' => "You've successfully updated a book reservation extension request."], 201);
+            return response()->json(['message' => "You've successfully updated a book reservation {$tempStatus} request."], 201);
         });
     }
 
