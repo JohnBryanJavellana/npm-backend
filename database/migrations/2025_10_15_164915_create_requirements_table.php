@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->longText('description');
+            $table->longText('upload_reference')->nullable();
             $table->enum('isRequired', ['YES', 'NO'])->default('YES');
             $table->enum('isBasic', ['YES', 'NO'])->default('YES');
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');

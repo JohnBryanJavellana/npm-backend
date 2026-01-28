@@ -210,7 +210,6 @@ class LibraryService {
             "book_res_id" => $res->id,
             "book_copy_id" => $copy?->id,
             "from_date" => Carbon::parse($from)->format('Y-m-d'),
-            "to_date" => Carbon::parse($to)->format('Y-m-d'),
             "book_id" => $book_id,
         ]);
 

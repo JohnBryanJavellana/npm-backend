@@ -28,6 +28,8 @@ class RenewBookRequest extends FormRequest
                 ? $this->input("userId")
                 : $this->user()->id
         ]);
+
+        \Log::info("user", [$this->all()]);
     }
 
 

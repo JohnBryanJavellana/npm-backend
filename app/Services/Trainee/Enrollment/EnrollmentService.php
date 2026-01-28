@@ -74,10 +74,22 @@ class EnrollmentService {
         ->whereKey($validated["training_id"])
         ->active()
         ->lockForUpdate()
-        ->findOrFail(["id", "schedule_slot"]);
+        ->firstOrFail(["id", "schedule_slot"]);
 
         $this->validateTraining($training);
 
+        
+
+    }
+
+    public function storeBasic()
+    {
+        
+    }
+
+    public function storeSpecific()
+    {
+        
     }
 
     public function getRankLicense()

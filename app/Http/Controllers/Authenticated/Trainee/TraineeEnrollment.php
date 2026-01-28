@@ -131,6 +131,7 @@ class TraineeEnrollment extends Controller
     /** VIEW/GET AVAILABLE TRAINING SCHEDULES */
     public function get_available_trainings (Request $request)   {
         try {
+            \Log::info("getschedule", [$request->all()]);
             $userId = $request->has("userId") && !is_null($request->userId) ? $request->userId : $request->user()->id ?? auth()->id();
 
             $trainings = Training::with([
@@ -185,7 +186,11 @@ class TraineeEnrollment extends Controller
 
     public function send_enrollment_request(EnrollmentRequest $request) {
         try {
-            // return response()->json(["data" => $request->all()], 200);
+
+            $validated = $request->validated();
+            \Log::info("vakudated", [$validated]);
+
+            return response()->json(["data" => $request->all()], 200);
             DB::beginTransaction();
             $validated = $request->validated();
             $user_id = $validated["user_id"];

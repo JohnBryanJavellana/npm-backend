@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Authenticated\Trainee\TraineeLibrary;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Trainee\Library\ExtendingRequest;
+use App\Http\Requests\Trainee\Library\RenewBookRequest;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -307,8 +309,6 @@ class LibraryController extends Controller
     }
 
     public function remove_copy (Request $request, int $copy_id) {
-
-
         return TransactionUtil::transact(null, ['book_copies_cache'], function() use ($request, $copy_id) {
             $this_book = BookCopy::withCount(['hasData'])->where('id', $copy_id)->first();
 
@@ -409,164 +409,127 @@ class LibraryController extends Controller
         });
     }
 
-    public function get_extension_request (Request $request) {
+    public function get_prolongation_request (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $extensionMain = ExtensionRequest::with([
-                'extendingBooks',
-                'extendingBooks.bookReservation',
-                'extendingBooks.bookReservation.books',
-                'extendingBooks.bookReservation.books.catalog',
-                'extendingBooks.bookReservation.books.catalog.genre'
+            $prolongationMain = BookReservation::with([
+                'bookRes',
+                'books',
+                'bookRes.trainee',
+                'books.catalog',
+                'books.catalog.genre'
             ])->where([
-                'book_res_id' => $request->libraryId,
-                'user_id' => $request->userId
-            ])->orderBy('created_at', 'DESC')->get();
+                'book_res_id' => $request->libraryId
+            ])->whereIn('status', $request->status)->get();
 
-            return response()->json(['extensionRequests' => $extensionMain], 200);
+            return response()->json(['prolongationRequests' => $prolongationMain], 200);
         });
     }
 
-    public function get_books_that_can_extend (Request $request) {
+    public function get_books_that_protractible (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $booksThatCanExtend = BookReservation::with([
+            $booksThatAreProtactible = BookReservation::with([
                 'bookRes',
                 'books',
                 'books.catalog',
                 'books.catalog.genre'
             ])->where([
-                'book_res_id' => $request->libraryId,
-                'status' => "RECEIVED"
-            ])->whereRaw("DATEDIFF(to_date, from_date) < 12")->get();
+                'book_res_id' => $request->libraryId
+            ])->whereIn('status', $request->status)->get();
 
-            return response()->json(['booksThatCanExtend' => $booksThatCanExtend], 200);
+            return response()->json(['booksThatAreProtactible' => $booksThatAreProtactible], 200);
         });
     }
 
-    public function submit_extension_request (ExtensionFormRequest $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
-            $this_request = new ExtensionRequest;
-            $this_request->user_id = $request->userId;
-            $this_request->book_res_id = $request->bookResId;
-            $this_request->purpose = $request->purpose;
-            $this_request->save();
-
-            foreach ($request->bookData as $value) {
-                $this_book_extension_request = new BookExtensionRequest;
-                $this_book_extension_request->book_reservation_id = $value['bookReservationId'];
-                $this_book_extension_request->extension_request_id = $this_request->id;
-                $this_book_extension_request->date_of_extension = $value['dateOfExtension'];
-                $this_book_extension_request->current_to_date = $value['currentToDate'];
-                $this_book_extension_request->save();
-
-                $bookRes = BookReservation::find($value['bookReservationId']);
-                $bookRes->status = 'EXTENDING';
-                $bookRes->save();
-            }
-
-            $bookRes = BookRes::find($request->bookResId);
-            $bookRes->status = 'EXTENDING';
-            $bookRes->save();
-
-            Notifications::notify($request->user()->id, $request->userId, "LIBRARY", "created a book reservation extension request for you.");
-            AuditHelper::log($request->user()->id, "Submitted a book reservation extension request. ID#" . $this_request->id);
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BELibrary(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            return response()->json(['message' => "You've successfully submitted a book reservation extension request. ID#" . $this_request->id], 201);
-        });
+    public function submit_extension_request (ExtendingRequest $request) {
+        return $this->traineeCtrlInstance->extend($request);
     }
 
-    public function update_extension_request (Request $request) {
+    public function submit_renewal_request (RenewBookRequest $request) {
+        return $this->traineeCtrlInstance->renew($request);
+    }
+
+    public function update_prolongation_request(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $this_request = BookExtensionRequest::find($request->documentId);
-            $this_request->status = $request->status;
-            $this_request->save();
+            $bR = BookReservation::find($request->documentId);
 
-            $bR = BookReservation::find($this_request->book_reservation_id);
-            $bR->status = "RECEIVED";
-            if($request->status === "APPROVED") $bR->to_date = $this_request->date_of_extension;
+            if (!$bR) {
+                return response()->json(['message' => 'Reservation not found.'], 404);
+            }
+
+            $isPastDue = now()->gt(Carbon::parse($bR->to_date));
+
+            $tempStatus = match(true) {
+                $isPastDue => 'EXPIRED',
+                $request->status === "APPROVED" => $request->acceptedStatus,
+                in_array($request->status, ["REJECTED", "CANCELLED"]) => 'RECEIVED',
+                default => 'HAHAHAH'
+            };
+
+            if (in_array($tempStatus, ["EXTENDED", "RENEWED"])) {
+                $bR->to_date = Carbon::parse($request->to_date);
+            }
+
+            $bR->status = $tempStatus;
             $bR->save();
 
-            $checkIfNeedMainTableToUpdate = BookExtensionRequest::where('extension_request_id', $request->extensionReqId)
-                ->whereIn("status", ['CANCELLED', 'APPROVED', 'REJECTED']);
-            $isExist = $checkIfNeedMainTableToUpdate->clone()->exists();
+            Notifications::notify(
+                $request->user()->id,
+                $bR->bookRes->trainee->id,
+                "LIBRARY",
+                "updated your book reservation request to {$tempStatus}."
+            );
 
-            if($isExist) {
-                $d = $checkIfNeedMainTableToUpdate->clone()->first();
-                $bookRes = BookRes::find($d->extensionRequest->book_res_id);
-                $bookRes->status = "ACTIVE";
-                $bookRes->save();
+            AuditHelper::log($request->user()->id, "Updated a book reservation {$tempStatus} request.");
+
+            if (env('USE_EVENT')) {
+                event(new BELibrary(''), new BEAuditTrail(''));
             }
 
-            Notifications::notify($request->user()->id, $this_request->bookReservation->bookRes->trainee->id, "LIBRARY", "updated your book reservation extension request.");
-            AuditHelper::log($request->user()->id, "Updated a book reservation extension request.");
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BELibrary(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            return response()->json(['message' => "You've successfully updated a book reservation extension request."], 201);
+            return response()->json(['message' => "You've successfully updated a book reservation {$tempStatus} request."], 201);
         });
     }
 
-    public function update_reservation (UpdateBookRequest $request) {
+    public function update_reservation(UpdateBookRequest $request){
         return TransactionUtil::transact($request, ["book_reservations_cache"], function() use ($request) {
-            $this_book = BookReservation::find($request->documentId);
-            $this_book->status = $request->status;
-            $this_book->save();
+            $reservation = BookReservation::findOrFail($request->documentId);
+            $reservation->status = $request->status;
 
-            if(!is_null($this_book->book_copy_id)){
-                $book_copy = BookCopy::find($this_book->book_copy_id);
-
-                switch ($request->status) {
-                    case in_array($request->status, ["RETURNED", "REJECTED", "CANCELLED"]):
-                        $book_copy->status = "AVAILABLE";
-                        break;
-
-                    case in_array($request->status, ["DAMAGED", "LOST"]):
-                        $book_copy->status = $request->status;
-                        break;
-
-                    case in_array($request->status, ["RECEIVED"]):
-                        $book_copy->status = "BORROWED";
-                        break;
-
-                    default: break;
-                }
-                $book_copy->save();
+            if ($reservation->type === "HARD-COPY" && is_null($reservation->book_copy_id)) {
+                $copy = BookCopy::where('status', 'AVAILABLE')->first();
+                if (!$copy) return response()->json(['message' => "No available copies for this book."], 422);
+                $reservation->book_copy_id = $copy->id;
             }
 
-            $book_res = $this_book->whereHas('bookRes', function($q) use ($this_book){
-                $q->where('id', $this_book->book_res_id);
-            })
-            ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
-            ->exists();
+            $reservation->save();
 
-            if(!$book_res) {
-                $record = BookRes::find($this_book->book_res_id);
-                $record->status = "FOR CSM";
-                $record->save();
+            if ($reservation->book_copy_id) {
+                $copy = BookCopy::find($reservation->book_copy_id);
+
+                $copy->status = match(true) {
+                    in_array($request->status, ["RETURNED", "REJECTED", "CANCELLED"]) => "AVAILABLE",
+                    in_array($request->status, ["DAMAGED", "LOST"]) => $request->status,
+                    in_array($request->status, ["RECEIVED"]) => "BORROWED",
+                    default => $copy->status
+                };
+                $copy->save();
             }
 
-            Notifications::notify($request->user()->id, $this_book->bookRes->trainee->id, "LIBRARY", "updated your book reservation status.");
-            AuditHelper::log($request->user()->id, "Updated book reservation status. ID#" . $request->documentId);
+            $hasActiveItems = BookReservation::where('book_res_id', $reservation->book_res_id)
+                ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
+                ->exists();
 
-            if(env('USE_EVENT')) {
-                event(
-                    new BELibrary(''),
-                    new BEAuditTrail(''),
-                );
+            if (!$hasActiveItems) {
+                BookRes::where('id', $reservation->book_res_id)->update(['status' => 'FOR CSM']);
             }
 
-            return response()->json(['message' => "You've updated a book request. ID#" . $request->documentId], 200);
+            Notifications::notify($request->user()->id, $reservation->bookRes->trainee->id, "LIBRARY", "updated your book reservation status.");
+            AuditHelper::log($request->user()->id, "Updated book reservation status. ID#{$request->documentId}");
+
+            if (env('USE_EVENT')) {
+                event(new BELibrary(''), new BEAuditTrail(''));
+            }
+
+            return response()->json(['message' => "Updated book request ID#{$request->documentId}"], 200);
         });
     }
 
@@ -632,7 +595,7 @@ class LibraryController extends Controller
     }
 
     public function create_walkin_request (BookRequest $request) {
-        $this->traineeCtrlInstance->send_request_book($request);
+        return $this->traineeCtrlInstance->send_request_book($request);
     }
 
     public function get_pre_data (Request $request) {

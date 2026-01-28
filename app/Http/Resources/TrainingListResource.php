@@ -15,8 +15,6 @@ class TrainingListResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        // return parent::toArray($request);
-
           return [
             'requirement_id' => $this->id,
             'requirement_name' => $this->name,

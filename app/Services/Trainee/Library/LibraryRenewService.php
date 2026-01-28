@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Request;
+use function Safe\rrd_restore;
 
 class LibraryRenewService {
     public function __construct(
