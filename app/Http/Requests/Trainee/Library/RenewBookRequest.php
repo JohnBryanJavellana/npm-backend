@@ -14,7 +14,6 @@ class RenewBookRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("dataRewn", [$this->all()]);
         return $this->user() !== null;
     }
 

@@ -20,7 +20,6 @@ class ExtendingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("extendUser", [$this->all()]);
         return $this->user() !== null;
     }
 
