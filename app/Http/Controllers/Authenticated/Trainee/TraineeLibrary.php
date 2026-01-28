@@ -42,25 +42,6 @@ class TraineeLibrary extends Controller
         protected LibraryRenewService $libraryRenewService,
         ) {}
 
-
-    // public function test(Request $request)
-    // {
-    //     $ids = [2,3,1];
-    //     $statuses = [
-    //         RequestStatus::PENDING->value,
-    //         RequestStatus::APPROVED->value,
-    //         RequestStatus::EXTENDING->value,
-    //         RequestStatus::EXTENDED->value,
-    //         RequestStatus::RENEWING->value,
-    //         RequestStatus::RENEWED->value,
-    //         ];
-
-    //     // $record = Training::whereKey()
-
-
-    //     // return implode(", ", $title);`
-    // }
-
     /** GET ALL AVAILABLE BOOKS */
     public function view_books(ViewAllByUserRequest $request)
     {
@@ -380,7 +361,7 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $user_id = $validated["user_id"];
 
-            $this->libraryExtendService->createExtendRequest($validated);
+            $this->libraryExtendService->storeExtendRequest($validated);
             AuditHelper::log($user_id, "User {$user_id} sent a book extension request.");
             Notifications::notify($user_id, null, 'LIBRARY', 'has sent a book extension request.');
 

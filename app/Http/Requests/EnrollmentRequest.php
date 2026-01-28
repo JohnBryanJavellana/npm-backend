@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use App\Enums\UserRoleEnum;
 use App\Rules\Trainee\Enrollment\UserEnrollmentRule;
-use GuzzleHttp\Exception\BadResponseException;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -14,9 +13,9 @@ class EnrollmentRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
+
     public function authorize(): bool
     {
-        \Log::info("dataEnrolll", [$this->user()]);
         return $this->user() !== null;
     }
 

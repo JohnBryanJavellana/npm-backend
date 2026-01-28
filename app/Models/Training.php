@@ -10,7 +10,6 @@ class Training extends Model
 {
     use HasFactory;
 
-    // reason? please specify (.)
     public const STATUS_ACTIVE = 'ACTIVE';
     public const STATUS_INACTIVE = 'INACTIVE';
 
