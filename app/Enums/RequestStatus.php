@@ -47,4 +47,13 @@ enum RequestStatus: string {
     case RENEWED = 'RENEWED';
     case LOST = "LOST";
     case DAMAGED = "DAMAGED";
+
+
+    public static function renewableStatuses(): array {
+        return [
+            self::RECEIVED->value,
+            self::EXTENDED->value,
+            self::RENEWED->value
+        ];
+    }
 }
