@@ -1033,6 +1033,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_facilitators
+     * @param Request $request
+     */
     public function get_facilitators (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $facilitators = TrainingFacilitator::withCount(['hasData'])->with([
@@ -1043,6 +1047,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_facilitator
+     * @param CreateOrUpdateFacilitator $request
+     */
     public function create_or_update_facilitator (CreateOrUpdateFacilitator $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_facilitator = $request->httpMethod === "POST"
@@ -1067,6 +1075,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_facilitator
+     * @param Request $request
+     * @param int $facilitator_id
+     */
     public function remove_facilitator (Request $request, int $facilitator_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $facilitator_id) {
             $this_facilitator = TrainingFacilitator::withCount(['hasData'])->where('id', $facilitator_id)->first();
@@ -1106,6 +1119,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_training_fees_predata
+     * @param Request $request
+     */
     public function get_training_fees_predata (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $modules = CourseModule::all();

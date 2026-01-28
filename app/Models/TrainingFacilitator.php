@@ -10,9 +10,10 @@ class TrainingFacilitator extends Model
     use HasFactory;
 
     public function hasData(){
-        return $this->hasMany(CourseModule::class, 'id', 'course_module_id')->whereHas('schedules', function($query) {
-            $query->where('status', 'ACTIVE');
-        });
+        return $this->hasMany(CourseModule::class, 'id', 'course_module_id')
+            ->whereHas('schedules', function($query) {
+                $query->where('status', 'ACTIVE');
+            });
     }
 
     public function facilitator() {
