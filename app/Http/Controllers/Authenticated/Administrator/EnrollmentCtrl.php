@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Models\ChargeCategory;
+use App\Models\CourseModuleFee;
 use App\Utils\ConvertToBase64;
 use App\Utils\GenerateTrace;
 use App\Utils\Notifications;
@@ -972,6 +974,92 @@ class EnrollmentCtrl extends Controller
 
                 DB::commit();
                 return response()->json(['message' => "You've removed facilitator. ID#$facilitator_id"], 200);
+            }
+        });
+    }
+
+    /**
+     * Summary of get_course_module_fees
+     * @param Request $request
+     */
+    public function get_course_module_fees (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $course_module_fees = CourseModuleFee::with([
+                'category',
+                'module'
+            ])->get();
+
+            return response()->json(['courseModuleFees' => $course_module_fees], 200);
+        });
+    }
+
+    public function get_training_fees_predata (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $modules = CourseModule::all();
+            $categories = ChargeCategory::all();
+
+            return response()->json([
+                'modules' => $modules,
+                'categories' => $categories
+            ], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_course_fee
+     * @param Request $request
+     */
+    public function create_or_update_course_fee (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this_course_fee = $request->httpMethod === "POST"
+                ? new CourseModuleFee()
+                : CourseModuleFee::find($request->documentId);
+
+            $this_course_fee->course_module_id = $request->module;
+            $this_course_fee->charge_category_id = $request->category;
+            $this_course_fee->name = $request->name;
+            $this_course_fee->amount = $request->amount;
+            if($request->status) $this_course_fee->status = $request->status;
+            $this_course_fee->save();
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a training fee. ID#" . $this_course_fee->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEEnrollment(''),
+                    new BEAuditTrail(''),
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a training fee. ID# " . $this_course_fee->id], 201);
+        });
+    }
+
+    /**
+     * Summary of remove_course_fee
+     * @param Request $request
+     * @param int $course_fee_id
+     */
+    public function remove_course_fee (Request $request, int $course_fee_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $course_fee_id) {
+            $this_course_fee = CourseModuleFee::where('id', $course_fee_id)->first();
+
+            if($this_course_fee->has_data_count > 0) {
+                return response()->json(['message' => "Can't remove training fee. It already has connected data."], 409);
+            } else {
+                $this_course_fee->delete();
+
+                AuditHelper::log($request->user()->id, "Removed a training fee. ID#$course_fee_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEEnrollment(''),
+                        new BEAuditTrail('')
+                    );
+                }
+
+                DB::commit();
+                return response()->json(['message' => "You've removed training fee. ID#$course_fee_id"], 200);
             }
         });
     }
