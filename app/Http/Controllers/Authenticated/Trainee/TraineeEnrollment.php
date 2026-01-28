@@ -10,6 +10,7 @@ use App\Events\BETraineeApplication;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EnrollmentRequest;
 use App\Http\Requests\Trainee\Enrollment\CancelEnrollmentRequest;
+use App\Http\Requests\Trainee\Enrollment\getModuleRequest;
 use App\Http\Requests\Trainee\Enrollment\ViewApplicationRequest;
 use App\Http\Requests\Trainee\Enrollment\ViewTraineeRecRequest;
 use App\Http\Resources\Trainee\Enrollment\ViewTraineeRecResource;
@@ -158,15 +159,22 @@ class TraineeEnrollment extends Controller
         }
     }
 
-    public function getCourseModule(Request $request)
+    public function getCourseModule(getModuleRequest $request)
     {
+        \Log::info("getCourseModule", [$request->validated()]);
+        $validated = $request->validated();
+        $userId = $validated["user_id"];
         $courses = CourseModule::with([
             "charge",
             "moduleType"
-        ])
+            ])
         ->whereHas("schedules")
+        ->whereDoesntHave("schedules.hasData", function($query) use ($userId){
+            $query->forUser($userId)->whereNotIn("enrolled_course_status", RequestStatus::notAllowedStatuses());
+        })
         ->get();
 
+        \Log::info("getCourseModuleResponse", [$courses]);
         return CourseModuleResource::collection($courses);
     }
 
