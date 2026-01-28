@@ -21,7 +21,7 @@ class LibraryRenewService {
     public function prepareData($records, $book_reservation_ids)
     {
         if($records->count() !== count($book_reservation_ids)) {
-            throw new DomainException("Only 'RECEIVED' books are allowed to be renewed.");
+            throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be renewed.");
         }
 
     }
@@ -33,7 +33,7 @@ class LibraryRenewService {
             $book_ids = collect($validated["data"])->pluck("book_res_id");
 
             $records = $this->bookReservationModel->query()
-            ->forStatus([RequestStatus::RECEIVED->value])
+            ->forStatus(RequestStatus::renewableStatuses())
             ->whereRelation("bookRes", "user_id", "=", $userId)
             ->whereIn("id",$book_ids)
             ->lockForUpdate()

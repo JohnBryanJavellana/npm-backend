@@ -14,7 +14,6 @@ class RemoveCartRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info('Delete cart:', [$this->all()]);
         return $this->user() !== null;
     }
 

@@ -6,6 +6,7 @@ use App\Enums\RequestStatus;
 use App\Models\BookExtensionRequest;
 use App\Models\BookReservation;
 use Carbon\Carbon;
+use DomainException;
 use Illuminate\Support\Facades\DB;
 
 class LibraryExtendService {
@@ -14,27 +15,27 @@ class LibraryExtendService {
         protected LibraryExtraService $libraryExtraService,
     ) {}
 
-    private function prepareData(){
-        return;
+    private function prepareData($records, $book_reservation_ids){
+                if($records->count() !== count($book_reservation_ids)) {
+            throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be renewed.");
+        }
     }
     
     public function createExtendRequest($validated)
     {
         DB::transaction(function()use ($validated) {
-            // $this->prepareData();
 
             $book_ids = collect($validated["data"])->pluck("book_res_id");
             
             $records = $this->bookReservationModel->query()
             ->select("id", "status")
-            ->forStatus([
-                RequestStatus::RECEIVED->value,
-                RequestStatus::RENEWED->value,
-            ])
+            ->forStatus(RequestStatus::renewableStatuses())
             ->whereRelation("bookRes", "user_id", "=", $validated["user_id"])
             ->whereIn("id",$book_ids)
             ->lockForUpdate()
             ->get();
+
+            $this->prepareData($records, $book_ids);
 
             $this->libraryExtraService->storeExtraService($validated, $validated["user_id"], "EXTEND");
             
