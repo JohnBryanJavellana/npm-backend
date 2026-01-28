@@ -17,8 +17,17 @@ class CourseModule extends Model
         return $this->hasMany(Training::class, 'course_module_id', 'id');
     }
 
+    /**
+     * TO BE REMOVED 🍆💦
+     * Summary of charge
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function charge(){
         return $this->hasOne(Charge::class, 'id', 'charge_id');
+    }
+
+    public function trainingFees() {
+        return $this->hasMany(CourseModuleFee::class, 'course_module_id', 'id');
     }
 
     public function moduleType() {
