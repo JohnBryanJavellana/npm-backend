@@ -47,7 +47,7 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPasswor
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 //remove
-Route::get("test", [TraineeLibrary::class, "test"]);
+Route::get("test", [TraineeEnrollment::class, "test"]);
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {

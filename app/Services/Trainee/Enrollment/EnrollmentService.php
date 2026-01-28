@@ -17,6 +17,8 @@ class EnrollmentService {
         RequestStatus::DECLINED,
         RequestStatus::IR,
         RequestStatus::CSFB,
+        RequestStatus::PAID,
+        RequestStatus::PROCESSING_PAYMENT
     ];
 
     public function __construct(
