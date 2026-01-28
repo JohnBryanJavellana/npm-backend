@@ -236,6 +236,12 @@ class EnrollmentCtrl extends Controller
         }
     }
 
+    /**
+     * Summary of remove_training_request
+     * @param Request $request
+     * @param int $training_request_id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function remove_training_request (Request $request, int $training_request_id) {
         try {
             DB::beginTransaction();
@@ -267,6 +273,10 @@ class EnrollmentCtrl extends Controller
         }
     }
 
+    /**
+     * Summary of get_schedules
+     * @param Request $request
+     */
     public function get_schedules (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $schedules = Training::withCount(['hasData'])->get()->map(function($self) {
@@ -283,8 +293,12 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_schedule
+     * @param CreateOrUpdateSchedule $request
+     */
     public function create_or_update_schedule (CreateOrUpdateSchedule $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+        return TransactionUtil::transact($request, ['schedules_cache'], function() use ($request) {
             $this_schedule = $request->httpMethod === "POST"
                 ? new Training
                 : Training::find($request->documentId);
@@ -314,13 +328,17 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            // Cache::forget('schedules_cache');
             return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a schedule. ID# " . $this_schedule->id], 200);
         });
     }
 
+    /**
+     * Summary of remove_schedule
+     * @param Request $request
+     * @param int $schedule_id
+     */
     public function remove_schedule (Request $request, int $schedule_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $schedule_id) {
+        return TransactionUtil::transact(null, ['schedules_cache'], function() use ($request, $schedule_id) {
             $this_schedule = Training::withCount(['hasData'])->where('id', $schedule_id)->first();
 
             if($this_schedule->has_data_count > 0) {
@@ -336,7 +354,6 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                // Cache::forget('schedules_cache');
                 return response()->json(['message' => "You've removed schedule. ID#$schedule_id"], 200);
             }
         });
@@ -383,6 +400,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_module
+     * @param Request $request
+     * @param int $module_id
+     */
     public function remove_module (Request $request, int $module_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $module_id) {
             $this_module = CourseModule::withCount(['hasData'])->where('id', $module_id)->first();
@@ -405,6 +427,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_module_types
+     * @param Request $request
+     */
     public function get_module_types (Request $request) {
         return TransactionUtil::transact(null, [], function()  {
             $moduleTypes = ModuleType::withCount(['hasData'])->get();
@@ -412,6 +438,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_module_type
+     * @param CreateOrUpdateModuleType $request
+     */
     public function create_or_update_module_type (CreateOrUpdateModuleType $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_module_type = $request->httpMethod === "POST"
