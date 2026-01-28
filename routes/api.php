@@ -331,7 +331,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::prefix('/user/')->group(function() {
                 Route::match(['GET', 'POST'], 'get_users', [Masterlist::class, 'get_users']);
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
-                Route::get('get_user_credits/{user_id}', [Masterlist::class, 'get_user_credits']);
                 Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities']);
                 Route::post('create_or_update_user', [Masterlist::class, 'create_or_update_user']);
                 Route::delete('remove_user/{user_id}', [Masterlist::class, 'remove_user']);
