@@ -47,7 +47,7 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPasswor
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 //remove
-Route::get("test", [TraineeLibrary::class, "test"]);
+Route::get("test", [TraineeEnrollment::class, "test"]);
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
@@ -99,6 +99,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
             Route::get("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
+        });
+
+        Route::prefix('/trainer/enrollment/')->middleware('user_role:TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () { 
+
         });
 
         Route::prefix('/trainings/')->group(function() {

@@ -9,7 +9,6 @@ use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Request;
-use function Safe\rrd_restore;
 
 class LibraryRenewService {
     public function __construct(
@@ -25,6 +24,8 @@ class LibraryRenewService {
             throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be renewed.");
         }
 
+        //validate DATE
+
     }
 
     public function storeRenewRequest($validated)
@@ -34,6 +35,7 @@ class LibraryRenewService {
             $book_ids = collect($validated["data"])->pluck("book_res_id");
 
             $records = $this->bookReservationModel->query()
+            ->select("id", "status")
             ->forStatus(RequestStatus::renewableStatuses())
             ->whereRelation("bookRes", "user_id", "=", $userId)
             ->whereIn("id",$book_ids)
@@ -41,14 +43,6 @@ class LibraryRenewService {
             ->get();
 
             $this->prepareData($records, $book_ids); 
-
-            //validate if all book reservations are active or "Received"
-            //check length if an iya ginpasa na mga id is equal han kahilaba han return han model
-            //kon diri throw error "Only received books are allowed to be renewed."
-
-            //get all book_resvation based on the passed ids,
-            //filter() statuses !== "Received", pluck name,
-
         
             $this->libraryExtraService->storeExtraService($validated, $userId, "RENEW");
 
