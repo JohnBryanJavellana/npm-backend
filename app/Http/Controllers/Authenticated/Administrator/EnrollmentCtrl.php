@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Utils\ConvertToBase64;
 use App\Utils\GenerateTrace;
 use App\Utils\Notifications;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -531,6 +533,18 @@ class EnrollmentCtrl extends Controller
             $this_requirement->isRequired = $request->requiredStatus;
             $this_requirement->isBasic = $request->type;
             if($request->status) $this_requirement->status = $request->status;
+
+            if($request->upload_reference) {
+                if(!is_null($this_requirement->upload_reference) && file_exists(public_path('upload-reference/' . $this_requirement->upload_reference))) {
+                    unlink(public_path('upload-reference/' . $this_requirement->upload_reference));
+                }
+
+                $image_name = Str::uuid() . '-upload-reference-.png';
+                $image = $request->upload_reference;
+                ConvertToBase64::generate($image, 'image', "upload-reference/$image_name");
+                $this_requirement->upload_reference = $image_name;
+            }
+
             $this_requirement->save();
 
             if($request->module) {
