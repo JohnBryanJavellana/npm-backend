@@ -600,7 +600,10 @@ class LibraryController extends Controller
 
     public function get_pre_data (Request $request) {
         return TransactionUtil::transact(null, [], function() {
-            $genres = BookGenre::withCount(['hasData'])->where('status', 'ACTIVE')->orderBy('category', 'ASC')->get();
+            $genres = BookGenre::withCount(['hasData'])
+                ->where('status', 'ACTIVE')
+                ->orderBy('category', 'ASC')
+                ->get();
             $trainings = Training::with([
                 'module',
                 'module.moduleType'
