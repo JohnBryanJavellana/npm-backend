@@ -58,6 +58,10 @@ use App\Models\{
 
 class EnrollmentCtrl extends Controller
 {
+    /**
+     * Summary of get_applications
+     * @param Request $request
+     */
     public function get_applications (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $applications = EnrolledCourse::query();
@@ -131,6 +135,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of requirement_remark
+     * @param Request $request
+     */
     public function requirement_remark (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_remark = $request->isBasic === "YES"
@@ -154,6 +162,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of lock_requirement
+     * @param Request $request
+     */
     public function lock_requirement (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_requirement = $request->isBasic === 'YES'
@@ -169,6 +181,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of set_training_status
+     * @param Request $request
+     */
     public function set_training_status (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_training_status = EnrolledCourse::find($request->documentId);
@@ -199,6 +215,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of set_expired_status
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function set_expired_status (Request $request) {
         $validations = [
             'isExpired' => 'required|string'
@@ -552,13 +573,26 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_requirements
+     * @param Request $request
+     */
     public function get_requirements (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $requirements = Requirement::withCount(['hasData', 'trainee_file'])->with('forModules')->get();
+            $requirements = Requirement::withCount([
+                'hasData',
+                'trainee_file',
+                'forModules'
+            ])->with('forModules')->get();
+
             return response()->json(['requirements' => $requirements], 200);
         });
     }
 
+    /**
+     * Summary of create_or_update_requirement
+     * @param CreateOrUpdateRequirement $request
+     */
     public function create_or_update_requirement (CreateOrUpdateRequirement $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_requirement = $request->httpMethod === "POST"
@@ -613,11 +647,16 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_requirement
+     * @param Request $request
+     * @param int $requirement_id
+     */
     public function remove_requirement (Request $request, int $requirement_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $requirement_id) {
             $this_requirement = Requirement::withCount(['hasData', 'trainee_file'])->where('id', $requirement_id)->first();
 
-            if($this_requirement->has_data_count > 0 || $this_requirement->trainee_file_count > 0) {
+            if($this_requirement->has_data_count > 0 || $this_requirement->trainee_file_count > 0 || $this_requirement->for_modules_count > 0) {
                 return response()->json(['message' => "Can't remove requirement. It already has connected data."], 200);
             } else {
                 $this_requirement->delete();
@@ -635,6 +674,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_schools
+     * @param Request $request
+     */
     public function get_schools (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $schools = MainSchool::withCount(['hasData'])->get();
@@ -642,6 +685,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_school
+     * @param CreateOrUpdateSchool $request
+     */
     public function create_or_update_school (CreateOrUpdateSchool $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_school = $request->httpMethod === "POST"
@@ -666,6 +713,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_school
+     * @param Request $request
+     * @param int $school_id
+     */
     public function remove_school (Request $request, int $school_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $school_id) {
             $this_school = MainSchool::withCount(['hasData'])->where('id', $school_id)->first();
@@ -689,6 +741,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_courses
+     * @param Request $request
+     */
     public function get_courses (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $courses = MainCourse::withCount(['hasData'])->get();
@@ -696,6 +752,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_course
+     * @param CreateOrUpdateCourse $request
+     */
     public function create_or_update_course (CreateOrUpdateCourse $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_course = $request->httpMethod === "POST"
@@ -719,6 +779,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_course
+     * @param Request $request
+     * @param int $course_id
+     */
     public function remove_course (Request $request, int $course_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $course_id) {
             $this_course = MainCourse::withCount(['hasData'])->where('id', $course_id)->first();
@@ -741,6 +806,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_vouchers
+     * @param Request $request
+     */
     public function get_vouchers (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $vouchers = Voucher::all();
@@ -748,6 +817,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_voucher
+     * @param CreateOrUpdateVoucher $request
+     */
     public function create_or_update_voucher (CreateOrUpdateVoucher $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_voucher = $request->httpMethod === "POST"
@@ -772,6 +845,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_voucher
+     * @param Request $request
+     * @param int $voucher_id
+     */
     public function remove_voucher (Request $request, int $voucher_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $voucher_id) {
             $this_voucher = Voucher::where('id', $voucher_id)->first();
