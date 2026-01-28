@@ -170,8 +170,6 @@ class EnrollmentCtrl extends Controller
     }
 
     public function set_training_status (Request $request) {
-        \Log::info($request->all());
-
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_training_status = EnrolledCourse::find($request->documentId);
             $this_training_status->enrolled_course_status = $request->status;
@@ -344,6 +342,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_modules
+     * @param Request $request
+     */
     public function get_modules (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $modules = CourseModule::withCount(['hasData'])->with('moduleType')->get();
@@ -351,13 +353,16 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_module
+     * @param CreateOrUpdateModule $request
+     */
     public function create_or_update_module (CreateOrUpdateModule $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_module = $request->httpMethod === "POST"
                 ? new CourseModule
                 : CourseModule::find($request->documentId);
 
-            $this_module->charge_id = $request->charge;
             $this_module->module_type_id = $request->module;
             $this_module->name = $request->name;
             $this_module->acronym = $request->short_name;
