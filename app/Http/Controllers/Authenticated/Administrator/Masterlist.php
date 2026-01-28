@@ -30,6 +30,10 @@ class Masterlist extends Controller
         $this->registerCtrlInstance = $registerController;
     }
 
+    /**
+     * Summary of get_users
+     * @param Request $request
+     */
     public function get_users (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $users = User::withCount([
@@ -47,6 +51,11 @@ class Masterlist extends Controller
         });
     }
 
+    /**
+     * Summary of get_user_basic_info
+     * @param Request $request
+     * @param int $user_id
+     */
     public function get_user_basic_info (Request $request, int $user_id) {
         return TransactionUtil::transact(null, [], function() use ($user_id) {
             $user_info = User::find($user_id);
@@ -54,20 +63,11 @@ class Masterlist extends Controller
         });
     }
 
-    public function get_user_credits (Request $request, int $user_id) {
-        return TransactionUtil::transact(null, [], function() use ($user_id) {
-            $owner = User::find($user_id);
-            $credits = [
-                'credits' => $owner->creditAmount()->orderBy('created_at', 'DESC')->get()->map(function($credit) {
-                    return $credit;
-                })->values(),
-                'credit_amount' => $owner->credit_amount
-            ];
-
-            return response()->json(['credits' => $credits], 200);
-        });
-    }
-
+    /**
+     * Summary of get_user_activities
+     * @param Request $request
+     * @param int $user_id
+     */
     public function get_user_activities (Request $request, int $user_id) {
         return TransactionUtil::transact(null, [], function() use ($user_id) {
             $activities = AuditTrail::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
@@ -75,10 +75,20 @@ class Masterlist extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_user
+     * @param Request $request
+     * @return void
+     */
     public function create_or_update_user (Request $request) {
         $this->registerCtrlInstance->register_user($request);
     }
 
+    /**
+     * Summary of remove_user
+     * @param Request $request
+     * @param int $user_id
+     */
     public function remove_user (Request $request, int $user_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $user_id) {
             $this_user = User::withCount(['hasData'])->where('id', $user_id)->first();
@@ -102,6 +112,10 @@ class Masterlist extends Controller
         });
     }
 
+    /**
+     * Summary of get_employers
+     * @param Request $request
+     */
     public function get_employers (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $employers = Employer::all();
@@ -109,6 +123,10 @@ class Masterlist extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_employer
+     * @param CreateOrUpdateEmployer $request
+     */
     public function create_or_update_employer (CreateOrUpdateEmployer $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_employer = $request->httpMethod === "POST"
