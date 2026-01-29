@@ -98,6 +98,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('get_applications/', [TraineeEnrollment::class, 'get_applications']);
             Route::get('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
+            //new
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
         });
 
