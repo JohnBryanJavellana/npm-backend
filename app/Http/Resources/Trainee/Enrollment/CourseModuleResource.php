@@ -14,13 +14,15 @@ class CourseModuleResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // return parent::toArray($request);
+
         return [
             "id" => $this->id,
             "name" => $this->name,
             "acronym" => $this->acronym,
             "type" => $this->moduleType?->name,
             "compendium" => $this->compendium,
-            "price" => $this->charge?->amount,
+            "price" => 900,
         ];
     }
 }
