@@ -3,7 +3,7 @@
 namespace App\Services\Trainee\Enrollment;
 
 use App\Enums\RequestStatus;
-use App\Models\{EnrolledCourse, Rank, License, Training};
+use App\Models\{EnrolledCourse, Rank, License, Requirement, Training};
 use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +25,8 @@ class EnrollmentService {
         protected EnrolledCourse $enrolledCourseModel,
         protected Training $trainingModel,
         protected Rank $rankModel,
-        protected License $licenseModel
+        protected License $licenseModel,
+        protected Requirement $requirementModel,
     ) {}
 
     public function getUserTrainings($validated)
@@ -60,14 +61,20 @@ class EnrollmentService {
         ->get();
     }
 
-    public function validateTraining($training)
+    public function validateTraining($training, $validated)
     {
 
         if($training->schedule_slot <= 0) {
             throw new DomainException("There is no remaining slot for this training schedule.");
         }
 
-        $specificReqCount = $training->module()->hasData()->count();
+        $basicReq = $this->requirementModel->query()->active()->basic()->count();
+        $specificReqCount = $training->module->hasData->count();
+        $totalReq = $basicReq + $specificReqCount;
+
+        if(count(array_filter($validated["file_upload"], fn ($s) => !$s->file === "null")) !== $totalReq) {
+            new DomainException("Incomplete Requirements, Try again bitch!");
+        }
     }
 
     public function storeEnrollmentRequest($validated)
@@ -78,17 +85,19 @@ class EnrollmentService {
         ->lockForUpdate()
         ->firstOrFail(["id", "schedule_slot"]);
 
-        $this->validateTraining($training);
+        $this->validateTraining($training, $validated);
+
+
     }
 
     public function storeBasic()
     {
-        
+        return;
     }
 
     public function storeSpecific()
     {
-        
+        return;
     }
 
     public function getRankLicense()
