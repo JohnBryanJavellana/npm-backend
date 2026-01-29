@@ -59,6 +59,7 @@ class TraineeEnrollment extends Controller
     {
         try {
             $userId = $request->has("userId") && !is_null($request->userId) ? $request->userId : $request->user()->id ?? auth()->id();
+            \Log::info("mdoule", [$moduleId, $enrolled_id]);
             $requirements = Requirement::query()
                 ->with([
                     'trainee_file' => function ($q) use ($userId) {
@@ -71,13 +72,13 @@ class TraineeEnrollment extends Controller
                 });
 
                 if($enrolled_id !== null) {
+                    \Log::info("inside", [$enrolled_id]);
                     $requirements->with([
                         'uploaded_specific_requirement' => function ($q) use ($enrolled_id, $userId) {
                         $q->where('enrolled_course_id', $enrolled_id, )->whereRelation('enrolled_course', 'user_id', '=', $userId)->latest();
                         }
                     ]);
                 }
-
                 $data = $requirements->active()->get();
 
             return TrainingListResource::collection($data);
@@ -85,8 +86,8 @@ class TraineeEnrollment extends Controller
             \Log::error("error view_module_requirements_v2", [$e->getMessage()]);
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
-
     }
+
     /** GET/VIEW TRAINEE REQUESTS */
     public function trainee_selected_training (Request $request, $status) {
         try {
@@ -330,7 +331,8 @@ class TraineeEnrollment extends Controller
                 foreach($request->file_upload as $file) {
                     $record = $file['is_basic'] === "YES" ? TrainingRegFile::find($file['trainee_file_id']) : TraineeRequirement::find($file['trainee_file_id']);
                     $record->filename = SaveFile::save($file['file'], $file['is_basic'] === 'YES' ? 'trainee-files' : 'training_requirement_files' );
-                    $record->locked = "N";
+                    $record->remarks = null;
+                    $record->locked = "";
                     $record->save();
                 }
 
