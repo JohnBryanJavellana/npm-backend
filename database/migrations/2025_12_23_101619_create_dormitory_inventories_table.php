@@ -20,7 +20,8 @@ return new class extends Migration
             $table->enum("is_consumable", ['YES', 'NO']);
             $table->longText("description");
             $table->longText("filename")->nullable();
-            $table->foreignIdFor(Charge::class);
+            $table->double("charge", 65, 2);
+            // $table->foreignIdFor(Charge::class);
             $table->timestamps();
         });
     }

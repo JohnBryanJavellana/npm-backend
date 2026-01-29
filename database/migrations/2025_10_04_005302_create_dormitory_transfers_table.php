@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class,'processed_by')->nullable();
             $table->longText('trace_number')->nullable();
             // $table->enum('transfer_type', ['ROOM', 'CLASS']);
-            $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);
+            // $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);
             $table->enum('room_type', ["AIR-CONDITIONED", "NON-AIRCON"]);
             $table->enum("status", ['PENDING', 'CANCELLED', 'APPROVED'])->default('PENDING');
             $table->longText("reason")->nullable();
