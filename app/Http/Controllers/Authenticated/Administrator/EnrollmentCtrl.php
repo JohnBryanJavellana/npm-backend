@@ -62,78 +62,88 @@ class EnrollmentCtrl extends Controller
      * Summary of get_applications
      * @param Request $request
      */
-    public function get_applications (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $applications = EnrolledCourse::query();
+    public function get_applications(Request $request) {
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $allRequirements = Requirement::where('status', 'ACTIVE')->get();
+        $basicRequirements = $allRequirements->where('isBasic', 'YES');
 
-            if($request->applicationStatus) $applications->whereIn('enrolled_course_status', $request->applicationStatus);
-            if($request->isExpired) $applications->where('isExpired', $request->isExpired);
+        $query = EnrolledCourse::with([
+            'training.module.charge',
+            'training.module.moduleType',
+            'trainee.additional_trainee_info.user',
+            'trainee.additional_trainee_info.general_info',
+            'trainee.additional_trainee_info.contact',
+            'trainee.additional_trainee_info.educational_attainment.main_school',
+            'trainee.additional_trainee_info.educational_attainment.main_course',
+            'trainee.additional_trainee_info.latest_shipboard_attainment',
+            'trainee.additional_trainee_info.basic_requirement',
+            'trainee_requirement'
+        ]);
 
-            $applications = $applications->get()
-                ->map(function($self) {
+        if($request->applicationStatus) $query->whereIn('enrolled_course_status', $request->applicationStatus);
+        if($request->isExpired) $query->where('isExpired', $request->isExpired);
+
+        if ($request->onlyWithRemarks) {
+            $query->where(function($q) {
+                $q->whereHas('trainee.additional_trainee_info.basic_requirement', fn($sub) => $sub->whereNotNull('remarks'))
+                  ->orWhereHas('trainee_requirement', fn($sub) => $sub->whereNotNull('remarks'));
+            });
+        }
+
+        $applications = $query->get()->map(function($self) use ($allRequirements, $basicRequirements) {
+            $addInfo = $self->trainee->additional_trainee_info;
+            $traineeBasicReqs = $addInfo->basic_requirement->keyBy('requirement_id');
+            $traineeCourseReqs = $self->trainee_requirement->keyBy('requirement_id');
+
+            return [
+                'training' => [
+                    'main' => [
+                        'info' => $self->toArray(),
+                        'charge' => $self->training->module->charge->toArray(),
+                        'name' => [
+                            'module' => $self->training->module,
+                            'moduleType' => $self->training->module->moduleType
+                        ]
+                    ],
+                    'schedule' => $self->training
+                ],
+                'trainee_info' => [
+                    'account' => $addInfo->user,
+                    'general_info' => $addInfo->general_info,
+                    'contact' => $addInfo->contact,
+                    'educational_attainment' => [
+                        'main' => $addInfo->educational_attainment->first(),
+                        'school' => $addInfo->educational_attainment->first()?->main_school,
+                        'course' => $addInfo->educational_attainment->first()?->main_course,
+                    ],
+                    'shipboard' => $addInfo->latest_shipboard_attainment,
+                    'basic_requirements' => $basicRequirements->map(function($req) use ($traineeBasicReqs) {
+                        $tr = $traineeBasicReqs->get($req->id);
+                        return [
+                            'id' => $tr->id ?? null,
+                            'locked' => $tr->locked ?? null,
+                            'requirement_info' => $req,
+                            'remarks' => $tr->remarks ?? null,
+                            'uploaded_file' => $tr->filename ?? null
+                        ];
+                    })->values()
+                ],
+                'requirements' => $allRequirements->map(function($req) use ($traineeBasicReqs, $traineeCourseReqs) {
+                    $tr = ($req->isBasic === "YES") ? $traineeBasicReqs->get($req->id) : $traineeCourseReqs->get($req->id);
                     return [
-                        'training' => [
-                            'main' => [
-                                'info' => $self->toArray(),
-                                'charge' => $self->training->module->charge->toArray(),
-                                'name' => [
-                                    'module' => $self->training->module,
-                                    'moduleType' => $self->training->module->moduleType
-                                ]
-                            ],
-                            'schedule' => $self->training
-                        ],
-                        'trainee_info' => [
-                            'account' => $self->trainee->additional_trainee_info->user,
-                            'general_info' => $self->trainee->additional_trainee_info->general_info,
-                            'contact' => $self->trainee->additional_trainee_info->contact,
-                            'educational_attainment' => [
-                                'main' => $self->trainee->additional_trainee_info->educational_attainment->first(),
-                                'school' => $self->trainee->additional_trainee_info->educational_attainment->main_school,
-                                'course' => $self->trainee->additional_trainee_info->educational_attainment->main_course,
-                            ],
-                            'shipboard' => $self->trainee->additional_trainee_info->latest_shipboard_attainment,
-                            'basic_requirements' => (function() use ($self) {
-                                $allRequirements = Requirement::where('isBasic', 'YES')->get();
-                                $traineeBasicReqs = $self->trainee->additional_trainee_info->basic_requirement->keyBy('requirement_id');
-
-                                return $allRequirements->map(function($req) use ($traineeBasicReqs) {
-                                    $tr = $traineeBasicReqs->get($req->id);
-
-                                    return [
-                                        'id' => $tr->id ?? null,
-                                        'locked' => $tr->locked ?? null,
-                                        'requirement_info' => $req,
-                                        'remarks' => $tr->remarks ?? null,
-                                        'uploaded_file' => $tr->filename ?? null
-                                    ];
-                                })->toArray();
-                            })()
-                        ],
-                        'requirements' => (function() use ($self) {
-                            $allRequirements = Requirement::get();
-                            $traineeBasicReqs = $self->trainee->additional_trainee_info->basic_requirement->keyBy('requirement_id');
-                            $traineeCourseReqs = $self->trainee_requirement->keyBy('requirement_id');
-
-                            return $allRequirements->map(function($req) use ($traineeBasicReqs, $traineeCourseReqs) {
-                                $isBasic = $req->isBasic === "YES";
-                                $tr = $isBasic ? $traineeBasicReqs->get($req->id) : $traineeCourseReqs->get($req->id);
-
-                                return [
-                                    'id' => $tr->id ?? null,
-                                    'locked' => $tr->locked ?? null,
-                                    'requirement_info' => $req,
-                                    'remarks' => $tr->remarks ?? null,
-                                    'uploaded_file' => $tr->filename ?? null
-                                ];
-                            })->toArray();
-                        })()
+                        'id' => $tr->id ?? null,
+                        'locked' => $tr->locked ?? null,
+                        'requirement_info' => $req,
+                        'remarks' => $tr->remarks ?? null,
+                        'uploaded_file' => $tr->filename ?? null
                     ];
-                });
-
-            return response()->json(['applications' => $applications], 200);
+                })->values()
+            ];
         });
-    }
+
+        return response()->json(['applications' => $applications], 200);
+    });
+}
 
     /**
      * Summary of requirement_remark
