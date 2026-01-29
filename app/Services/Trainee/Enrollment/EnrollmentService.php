@@ -36,7 +36,7 @@ class EnrollmentService {
             "training.module:id,module_type_id,charge_id,name,acronym,compendium",
             "training.module.moduleType:id,name",
             "training.module.charge:id,charge_category_id,name,amount,description,service_type",
-            "training.module.charge.chargeCategory:id,name"
+            "training.module.charge.chargeCategory:id,name",
         ])
         ->status($validated["status"])
         ->forUser($validated["userId"])
@@ -51,7 +51,9 @@ class EnrollmentService {
             "training.module:id,module_type_id,charge_id,name,acronym,compendium",
             "training.module.moduleType:id,name",
             "training.module.charge:id,charge_category_id,name,amount,description,service_type",
-            "training.module.charge.chargeCategory:id,name"
+            "training.module.charge.chargeCategory:id,name",
+            "training.module.facilitator:id,course_module_id,user_id,role",
+            "training.module.facilitator.facilitator:id,fname,mname,lname,email"
         ])
         ->whereKey($validated["courseId"])
         ->where("user_id", $validated["userId"])
