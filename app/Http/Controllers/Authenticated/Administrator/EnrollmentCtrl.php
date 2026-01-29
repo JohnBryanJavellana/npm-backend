@@ -62,78 +62,88 @@ class EnrollmentCtrl extends Controller
      * Summary of get_applications
      * @param Request $request
      */
-    public function get_applications (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $applications = EnrolledCourse::query();
+    public function get_applications(Request $request) {
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $allRequirements = Requirement::where('status', 'ACTIVE')->get();
+        $basicRequirements = $allRequirements->where('isBasic', 'YES');
 
-            if($request->applicationStatus) $applications->whereIn('enrolled_course_status', $request->applicationStatus);
-            if($request->isExpired) $applications->where('isExpired', $request->isExpired);
+        $query = EnrolledCourse::with([
+            'training.module.charge',
+            'training.module.moduleType',
+            'trainee.additional_trainee_info.user',
+            'trainee.additional_trainee_info.general_info',
+            'trainee.additional_trainee_info.contact',
+            'trainee.additional_trainee_info.educational_attainment.main_school',
+            'trainee.additional_trainee_info.educational_attainment.main_course',
+            'trainee.additional_trainee_info.latest_shipboard_attainment',
+            'trainee.additional_trainee_info.basic_requirement',
+            'trainee_requirement'
+        ]);
 
-            $applications = $applications->get()
-                ->map(function($self) {
+        if($request->applicationStatus) $query->whereIn('enrolled_course_status', $request->applicationStatus);
+        if($request->isExpired) $query->where('isExpired', $request->isExpired);
+
+        if ($request->onlyWithRemarks) {
+            $query->where(function($q) {
+                $q->whereHas('trainee.additional_trainee_info.basic_requirement', fn($sub) => $sub->whereNotNull('remarks'))
+                  ->orWhereHas('trainee_requirement', fn($sub) => $sub->whereNotNull('remarks'));
+            });
+        }
+
+        $applications = $query->get()->map(function($self) use ($allRequirements, $basicRequirements) {
+            $addInfo = $self->trainee->additional_trainee_info;
+            $traineeBasicReqs = $addInfo->basic_requirement->keyBy('requirement_id');
+            $traineeCourseReqs = $self->trainee_requirement->keyBy('requirement_id');
+
+            return [
+                'training' => [
+                    'main' => [
+                        'info' => $self->toArray(),
+                        'charge' => $self->training->module->charge->toArray(),
+                        'name' => [
+                            'module' => $self->training->module,
+                            'moduleType' => $self->training->module->moduleType
+                        ]
+                    ],
+                    'schedule' => $self->training
+                ],
+                'trainee_info' => [
+                    'account' => $addInfo->user,
+                    'general_info' => $addInfo->general_info,
+                    'contact' => $addInfo->contact,
+                    'educational_attainment' => [
+                        'main' => $addInfo->educational_attainment->first(),
+                        'school' => $addInfo->educational_attainment->first()?->main_school,
+                        'course' => $addInfo->educational_attainment->first()?->main_course,
+                    ],
+                    'shipboard' => $addInfo->latest_shipboard_attainment,
+                    'basic_requirements' => $basicRequirements->map(function($req) use ($traineeBasicReqs) {
+                        $tr = $traineeBasicReqs->get($req->id);
+                        return [
+                            'id' => $tr->id ?? null,
+                            'locked' => $tr->locked ?? null,
+                            'requirement_info' => $req,
+                            'remarks' => $tr->remarks ?? null,
+                            'uploaded_file' => $tr->filename ?? null
+                        ];
+                    })->values()
+                ],
+                'requirements' => $allRequirements->map(function($req) use ($traineeBasicReqs, $traineeCourseReqs) {
+                    $tr = ($req->isBasic === "YES") ? $traineeBasicReqs->get($req->id) : $traineeCourseReqs->get($req->id);
                     return [
-                        'training' => [
-                            'main' => [
-                                'info' => $self->toArray(),
-                                'charge' => $self->training->module->charge->toArray(),
-                                'name' => [
-                                    'module' => $self->training->module,
-                                    'moduleType' => $self->training->module->moduleType
-                                ]
-                            ],
-                            'schedule' => $self->training
-                        ],
-                        'trainee_info' => [
-                            'account' => $self->trainee->additional_trainee_info->user,
-                            'general_info' => $self->trainee->additional_trainee_info->general_info,
-                            'contact' => $self->trainee->additional_trainee_info->contact,
-                            'educational_attainment' => [
-                                'main' => $self->trainee->additional_trainee_info->educational_attainment->first(),
-                                'school' => $self->trainee->additional_trainee_info->educational_attainment->main_school,
-                                'course' => $self->trainee->additional_trainee_info->educational_attainment->main_course,
-                            ],
-                            'shipboard' => $self->trainee->additional_trainee_info->latest_shipboard_attainment,
-                            'basic_requirements' => (function() use ($self) {
-                                $allRequirements = Requirement::where('isBasic', 'YES')->get();
-                                $traineeBasicReqs = $self->trainee->additional_trainee_info->basic_requirement->keyBy('requirement_id');
-
-                                return $allRequirements->map(function($req) use ($traineeBasicReqs) {
-                                    $tr = $traineeBasicReqs->get($req->id);
-
-                                    return [
-                                        'id' => $tr->id ?? null,
-                                        'locked' => $tr->locked ?? null,
-                                        'requirement_info' => $req,
-                                        'remarks' => $tr->remarks ?? null,
-                                        'uploaded_file' => $tr->filename ?? null
-                                    ];
-                                })->toArray();
-                            })()
-                        ],
-                        'requirements' => (function() use ($self) {
-                            $allRequirements = Requirement::get();
-                            $traineeBasicReqs = $self->trainee->additional_trainee_info->basic_requirement->keyBy('requirement_id');
-                            $traineeCourseReqs = $self->trainee_requirement->keyBy('requirement_id');
-
-                            return $allRequirements->map(function($req) use ($traineeBasicReqs, $traineeCourseReqs) {
-                                $isBasic = $req->isBasic === "YES";
-                                $tr = $isBasic ? $traineeBasicReqs->get($req->id) : $traineeCourseReqs->get($req->id);
-
-                                return [
-                                    'id' => $tr->id ?? null,
-                                    'locked' => $tr->locked ?? null,
-                                    'requirement_info' => $req,
-                                    'remarks' => $tr->remarks ?? null,
-                                    'uploaded_file' => $tr->filename ?? null
-                                ];
-                            })->toArray();
-                        })()
+                        'id' => $tr->id ?? null,
+                        'locked' => $tr->locked ?? null,
+                        'requirement_info' => $req,
+                        'remarks' => $tr->remarks ?? null,
+                        'uploaded_file' => $tr->filename ?? null
                     ];
-                });
-
-            return response()->json(['applications' => $applications], 200);
+                })->values()
+            ];
         });
-    }
+
+        return response()->json(['applications' => $applications], 200);
+    });
+}
 
     /**
      * Summary of requirement_remark
@@ -486,6 +496,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_module_type
+     * @param Request $request
+     * @param int $module_type_id
+     */
     public function remove_module_type (Request $request, int $module_type_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $module_type_id) {
             $this_module_type = ModuleType::withCount(['hasData'])->where('id', $module_type_id)->first();
@@ -508,6 +523,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_certificates
+     * @param Request $request
+     */
     public function get_certificates (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $certificates = MainCertificate::withCount(['module' => function($query) {
@@ -520,6 +539,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_certificate
+     * @param CreateOrUpdateCertificate $request
+     */
     public function create_or_update_certificate (CreateOrUpdateCertificate $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_certificate = $request->httpMethod === "POST"
@@ -547,6 +570,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_certificate
+     * @param Request $request
+     * @param int $certificate_id
+     */
     public function remove_certificate (Request $request, int $certificate_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $certificate_id) {
             $this_certificate = MainCertificate::withCount(['module' => function($query) {
@@ -873,6 +901,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_sponsors
+     * @param Request $request
+     */
     public function get_sponsors (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $sponsors = Sponsor::all();
@@ -880,6 +912,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_sponsor
+     * @param CreateOrUpdateSponsor $request
+     */
     public function create_or_update_sponsor (CreateOrUpdateSponsor $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_sponsor = $request->httpMethod === "POST"
@@ -904,6 +940,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_sponsor
+     * @param Request $request
+     * @param int $sponsor_id
+     */
     public function remove_sponsor (Request $request, int $sponsor_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $sponsor_id) {
             $this_sponsor = Sponsor::where('id', $sponsor_id)->first();
@@ -926,13 +967,21 @@ class EnrollmentCtrl extends Controller
         });
     }
 
-     public function get_licenses (Request $request) {
+    /**
+     * *
+     * @param Request $request
+     */
+    public function get_licenses (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $licenses = License::withCount(['hasData'])->get();
             return response()->json(['licenses' => $licenses], 200);
         });
     }
 
+    /**
+     * Summary of create_or_update_license
+     * @param CreateOrUpdateLicense $request
+     */
     public function create_or_update_license (CreateOrUpdateLicense $request) {
         return TransactionUtil::transact($request, ["rank:license:all"], function() use ($request) {
             $this_license = $request->httpMethod === "POST"
@@ -956,6 +1005,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_license
+     * @param Request $request
+     * @param int $license_id
+     */
     public function remove_license (Request $request, int $license_id) {
         return TransactionUtil::transact(null, ["rank:license:all"], function() use ($request, $license_id) {
             $this_license = License::withCount(['hasData'])->where('id', $license_id)->first();
@@ -978,6 +1032,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_ranks
+     * @param Request $request
+     */
     public function get_ranks (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $ranks = Rank::withCount(['hasData'])->get();
@@ -985,6 +1043,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_rank
+     * @param CreateOrUpdateRank $request
+     */
     public function create_or_update_rank (CreateOrUpdateRank $request) {
         return TransactionUtil::transact($request, ["rank:license:all"], function() use ($request) {
             $this_rank = $request->httpMethod === "POST"
@@ -1009,6 +1071,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_rank
+     * @param Request $request
+     * @param int $rank_id
+     */
     public function remove_rank (Request $request, int $rank_id) {
         return TransactionUtil::transact(null, ["rank:license:all"], function() use ($request, $rank_id) {
             $this_rank = Rank::withCount(['hasData'])->where('id', $rank_id)->first();
