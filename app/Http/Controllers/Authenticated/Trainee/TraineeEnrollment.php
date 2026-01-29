@@ -203,7 +203,7 @@ class TraineeEnrollment extends Controller
             $user_id = $validated["user_id"];
 
             $addtional_info_id = AdditionalTraineeInfo::where('user_id', $user_id)->value('id');
-            
+
             $training = Training::query()
             ->whereKey($validated["training_id"])
             ->active()
@@ -267,7 +267,7 @@ class TraineeEnrollment extends Controller
 
             DB::commit();
             return response()->json(['message' => 'Enrollment request sent successfully'], 201);
-        } 
+        }
         catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Training record not available."], 404);
         }
