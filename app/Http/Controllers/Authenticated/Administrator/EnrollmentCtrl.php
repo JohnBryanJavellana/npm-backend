@@ -63,62 +63,73 @@ class EnrollmentCtrl extends Controller
      * @param Request $request
      */
     public function get_applications(Request $request) {
-    return TransactionUtil::transact(null, [], function() use ($request) {
-        $allRequirements = Requirement::where('status', 'ACTIVE')->get();
-        $basicRequirements = $allRequirements->where('isBasic', 'YES');
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $allRequirements = Requirement::where('status', 'ACTIVE')->get();
+            $basicRequirements = $allRequirements->where('isBasic', 'YES');
 
-        $query = EnrolledCourse::with([
-            'training.module.charge',
-            'training.module.moduleType',
-            'trainee.additional_trainee_info.user',
-            'trainee.additional_trainee_info.general_info',
-            'trainee.additional_trainee_info.contact',
-            'trainee.additional_trainee_info.educational_attainment.main_school',
-            'trainee.additional_trainee_info.educational_attainment.main_course',
-            'trainee.additional_trainee_info.latest_shipboard_attainment',
-            'trainee.additional_trainee_info.basic_requirement',
-            'trainee_requirement'
-        ]);
+            $query = EnrolledCourse::with([
+                'training.module.charge',
+                'training.module.moduleType',
+                'trainee.additional_trainee_info.user',
+                'trainee.additional_trainee_info.general_info',
+                'trainee.additional_trainee_info.contact',
+                'trainee.additional_trainee_info.educational_attainment.main_school',
+                'trainee.additional_trainee_info.educational_attainment.main_course',
+                'trainee.additional_trainee_info.latest_shipboard_attainment',
+                'trainee.additional_trainee_info.basic_requirement',
+                'trainee_requirement'
+            ]);
 
-        if($request->applicationStatus) $query->whereIn('enrolled_course_status', $request->applicationStatus);
-        if($request->isExpired) $query->where('isExpired', $request->isExpired);
+            if($request->applicationStatus) $query->whereIn('enrolled_course_status', $request->applicationStatus);
+            if($request->isExpired) $query->where('isExpired', $request->isExpired);
 
-        if ($request->onlyWithRemarks) {
-            $query->where(function($q) {
-                $q->whereHas('trainee.additional_trainee_info.basic_requirement', fn($sub) => $sub->whereNotNull('remarks'))
-                  ->orWhereHas('trainee_requirement', fn($sub) => $sub->whereNotNull('remarks'));
-            });
-        }
+            if ($request->onlyWithRemarks) {
+                $query->where(function($q) {
+                    $q->whereHas('trainee.additional_trainee_info.basic_requirement', fn($sub) => $sub->whereNotNull('remarks'))
+                    ->orWhereHas('trainee_requirement', fn($sub) => $sub->whereNotNull('remarks'));
+                });
+            }
 
-        $applications = $query->get()->map(function($self) use ($allRequirements, $basicRequirements) {
-            $addInfo = $self->trainee->additional_trainee_info;
-            $traineeBasicReqs = $addInfo->basic_requirement->keyBy('requirement_id');
-            $traineeCourseReqs = $self->trainee_requirement->keyBy('requirement_id');
+            $applications = $query->get()->map(function($self) use ($allRequirements, $basicRequirements) {
+                $addInfo = $self->trainee->additional_trainee_info;
+                $traineeBasicReqs = $addInfo->basic_requirement->keyBy('requirement_id');
+                $traineeCourseReqs = $self->trainee_requirement->keyBy('requirement_id');
 
-            return [
-                'training' => [
-                    'main' => [
-                        'info' => $self->toArray(),
-                        'charge' => $self->training->module->charge->toArray(),
-                        'name' => [
-                            'module' => $self->training->module,
-                            'moduleType' => $self->training->module->moduleType
-                        ]
+                return [
+                    'training' => [
+                        'main' => [
+                            'info' => $self->toArray(),
+                            'charge' => $self->training->module->trainingFees()->latest()->first()->toArray(),
+                            'name' => [
+                                'module' => $self->training->module,
+                                'moduleType' => $self->training->module->moduleType
+                            ]
+                        ],
+                        'schedule' => $self->training
                     ],
-                    'schedule' => $self->training
-                ],
-                'trainee_info' => [
-                    'account' => $addInfo->user,
-                    'general_info' => $addInfo->general_info,
-                    'contact' => $addInfo->contact,
-                    'educational_attainment' => [
-                        'main' => $addInfo->educational_attainment->first(),
-                        'school' => $addInfo->educational_attainment->first()?->main_school,
-                        'course' => $addInfo->educational_attainment->first()?->main_course,
+                    'trainee_info' => [
+                        'account' => $addInfo->user,
+                        'general_info' => $addInfo->general_info,
+                        'contact' => $addInfo->contact,
+                        'educational_attainment' => [
+                            'main' => $addInfo->educational_attainment->first(),
+                            'school' => $addInfo->educational_attainment->first()?->main_school,
+                            'course' => $addInfo->educational_attainment->first()?->main_course,
+                        ],
+                        'shipboard' => $addInfo->latest_shipboard_attainment,
+                        'basic_requirements' => $basicRequirements->map(function($req) use ($traineeBasicReqs) {
+                            $tr = $traineeBasicReqs->get($req->id);
+                            return [
+                                'id' => $tr->id ?? null,
+                                'locked' => $tr->locked ?? null,
+                                'requirement_info' => $req,
+                                'remarks' => $tr->remarks ?? null,
+                                'uploaded_file' => $tr->filename ?? null
+                            ];
+                        })->values()
                     ],
-                    'shipboard' => $addInfo->latest_shipboard_attainment,
-                    'basic_requirements' => $basicRequirements->map(function($req) use ($traineeBasicReqs) {
-                        $tr = $traineeBasicReqs->get($req->id);
+                    'requirements' => $allRequirements->map(function($req) use ($traineeBasicReqs, $traineeCourseReqs) {
+                        $tr = ($req->isBasic === "YES") ? $traineeBasicReqs->get($req->id) : $traineeCourseReqs->get($req->id);
                         return [
                             'id' => $tr->id ?? null,
                             'locked' => $tr->locked ?? null,
@@ -127,23 +138,12 @@ class EnrollmentCtrl extends Controller
                             'uploaded_file' => $tr->filename ?? null
                         ];
                     })->values()
-                ],
-                'requirements' => $allRequirements->map(function($req) use ($traineeBasicReqs, $traineeCourseReqs) {
-                    $tr = ($req->isBasic === "YES") ? $traineeBasicReqs->get($req->id) : $traineeCourseReqs->get($req->id);
-                    return [
-                        'id' => $tr->id ?? null,
-                        'locked' => $tr->locked ?? null,
-                        'requirement_info' => $req,
-                        'remarks' => $tr->remarks ?? null,
-                        'uploaded_file' => $tr->filename ?? null
-                    ];
-                })->values()
-            ];
-        });
+                ];
+            });
 
-        return response()->json(['applications' => $applications], 200);
-    });
-}
+            return response()->json(['applications' => $applications], 200);
+        });
+    }
 
     /**
      * Summary of requirement_remark
