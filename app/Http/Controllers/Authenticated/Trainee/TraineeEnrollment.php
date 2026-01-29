@@ -166,7 +166,7 @@ class TraineeEnrollment extends Controller
         $validated = $request->validated();
         $userId = $validated["user_id"];
         $courses = CourseModule::with([
-            "charge",
+            "trainingFees",
             "moduleType"
             ])
         ->whereHas("schedules")
