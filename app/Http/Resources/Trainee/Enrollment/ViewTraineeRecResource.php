@@ -43,13 +43,10 @@ class ViewTraineeRecResource extends JsonResource
             "acronym" => $this->training?->module?->acronym,
             "compendium" => $this->training?->module?->compendium,
             "module_type" => $this->training?->module->moduleType->name,
-            "charge_id" => $this->training?->module?->charge_id,
 
-            "charge_name" => $this->training?->module?->charge?->name,
-            "charge_amount" => $this->training?->module?->charge?->amount,
-            "charge_description" => $this->training?->module?->charge?->description,
-            "charge_service_type" => $this->training?->module?->charge?->service_type,
-            "charge_category_name" => $this->training?->module?->charge?->chargeCategory?->name,
+            "charge_name" => $this->training?->module?->trainingFees?->first()?->name,
+            "charge_amount" => $this->training?->module?->trainingFees?->first()?->amount,
+            "charge_category_name" => $this->training?->module?->trainingFees?->first()?->category?->name,
         ];
 
     }
