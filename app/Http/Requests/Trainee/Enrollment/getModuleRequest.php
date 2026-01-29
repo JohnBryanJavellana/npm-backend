@@ -21,7 +21,7 @@ class getModuleRequest extends FormRequest
     {
         $this->merge([
             "user_id" => in_array($this->user()->role, UserRoleEnum::enrollmentRoles()) 
-            ? $this->input("userId")
+            ? $this->input(" ")
             : $this->user()->id
         ]);
     }
