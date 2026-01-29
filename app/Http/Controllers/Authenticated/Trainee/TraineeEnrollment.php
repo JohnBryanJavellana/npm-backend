@@ -105,7 +105,6 @@ class TraineeEnrollment extends Controller
             $selected_courses = EnrolledCourse::with([
                 "training",
                 "training.module.moduleType",
-                "training.module.charge",
                 "training.module.facilitator.facilitator:id,fname,lname,mname,email",
                 "invoice",
             ])
@@ -163,10 +162,13 @@ class TraineeEnrollment extends Controller
     public function getCourseModule(getModuleRequest $request)
     {
         \Log::info("getCourseModule", [$request->validated()]);
+
         $validated = $request->validated();
         $userId = $validated["user_id"];
         $courses = CourseModule::with([
-            "trainingFees",
+            "trainingFees" => function ($query) {
+                $query->latest();
+                },
             "moduleType"
             ])
         ->whereHas("schedules")
@@ -332,7 +334,7 @@ class TraineeEnrollment extends Controller
                     $record = $file['is_basic'] === "YES" ? TrainingRegFile::find($file['trainee_file_id']) : TraineeRequirement::find($file['trainee_file_id']);
                     $record->filename = SaveFile::save($file['file'], $file['is_basic'] === 'YES' ? 'trainee-files' : 'training_requirement_files' );
                     $record->remarks = null;
-                    $record->locked = "";
+                    $record->locked = "N";
                     $record->save();
                 }
 
