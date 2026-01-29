@@ -78,7 +78,7 @@ class TraineeEnrollment extends Controller
                     ]);
                 }
 
-                $data = $requirements->get();
+                $data = $requirements->active()->get();
 
             return TrainingListResource::collection($data);
         } catch (\Exception $e) {
@@ -184,30 +184,36 @@ class TraineeEnrollment extends Controller
         ->whereKey(20260001)
         ->active()
         ->lockForUpdate()
-        ->firstOrFail();
+        ->firstOrFail(["id", "schedule_slot", "course_module_id"]);
 
         $speReq =  $training->module->hasData->count();
-        $basicReq = Requirement::where("isBasic", "YES")->count();
+        $basicReq = Requirement::active()->basic()->count();
 
-        return response()->json(["data" => $speReq + $basicReq], 200);
+        return response()->json(["data" => $speReq], 200);
     }
 
     public function send_enrollment_request(EnrollmentRequest $request) {
         try {
 
-            $validated = $request->validated();
-            \Log::info("vakudated", [$validated]);
+            // $validated = $request->validated();
+            // $files = count($validated["file_upload"]);
 
-            return response()->json(["data" => $request->all()], 200);
             DB::beginTransaction();
             $validated = $request->validated();
             $user_id = $validated["user_id"];
 
             $addtional_info_id = AdditionalTraineeInfo::where('user_id', $user_id)->value('id');
+            
             $training = Training::query()
-            ->where('id',$validated["training_id"])
+            ->whereKey($validated["training_id"])
+            ->active()
             ->lockForUpdate()
-            ->first();
+            ->firstOrFail(["id", "schedule_slot", "course_module_id"]);
+
+            // $this->enrollmentService->validateTraining($training, $validated);
+
+            // \Log::info("vakudated", [$files]);
+            // return response()->json(["data" => $request->all()], 422);
 
             if ( !$addtional_info_id ) {
                 return response()->json(['message' => 'To get started, open My Account and enter some of your information.'], 422);
