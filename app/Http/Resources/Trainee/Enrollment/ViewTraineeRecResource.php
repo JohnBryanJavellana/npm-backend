@@ -22,23 +22,13 @@ class ViewTraineeRecResource extends JsonResource
             "enrolled_course_status" => $this->enrolled_course_status,
             "request_at" => $this->created_at,
             "training_id" => $this->training_id,
-            "training_instructor" => [
-                    [
-                        "name" => "Allen Alfred Beato",
-                        "email" => "allenExample@gmail.com",
-                        "type" => "instructor"
-                    ],
-                    [
-                        "name" => "Bryan Aguncilio",
-                        "email" => "bryanExample@gmail.com",
-                        "type" => "instructor-III"
-                    ],
-                    [
-                        "name" => "Saac",
-                        "email" => "saacExample@gmail.com",
-                        "type" => "instructor-IV"
-                    ],
-                 ],
+            "training_instructor" => $this->training?->module?->facilitator?->map(function ($user) {
+                return [
+                    "name" => $user?->facilitator?->fname . " " . $user?->facilitator?->mname . " " .  $user?->facilitator?->lname,
+                    "role" => $user->role,
+                    "email" => $user?->facilitator?->email,
+                ];
+            }),
             "training_status" => $this->training?->status,
             "daily_hours" => $this->training?->daily_hours,
             "schedule_from" => $this->training?->schedule_from,

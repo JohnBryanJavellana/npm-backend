@@ -406,7 +406,6 @@ class TraineeEnrollment extends Controller
             $validated = $request->validated();
             $record = $this->enrollmentService->getUserTrainingById($validated);
 
-            // return response()->json([], 200);
             return ViewTraineeRecResource::collection($record);
         }
         catch (\Exception $e) {
