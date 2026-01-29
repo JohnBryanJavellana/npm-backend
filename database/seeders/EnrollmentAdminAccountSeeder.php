@@ -61,7 +61,7 @@ class EnrollmentAdminAccountSeeder extends Seeder
         ];
 
         foreach($users as $user) {
-            $enrollment_admin_account = new User;
+            $enrollment_admin_account = new User();
             $enrollment_admin_account->fname = $user['fname'];
             $enrollment_admin_account->mname = $user['mname'];
             $enrollment_admin_account->lname = $user['lname'];
@@ -74,7 +74,7 @@ class EnrollmentAdminAccountSeeder extends Seeder
             $enrollment_admin_account->password = $user['password'];
             $enrollment_admin_account->save();
 
-            // $this->registerCtrlInstance->generateAndSendQR($enrollment_admin_account, $user['qr']);
+            $this->registerCtrlInstance->generateAndSendQR($enrollment_admin_account, $user['qr']);
         }
     }
 }

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignIdFor(DormitoryInvoice::class)->constrained()->cascadeOnDelete();
             $table->string('trace_number', 255)->nullable();
             $table->enum('status_of_occupancy', ['TRAINEE', 'NON-PAYING GUEST/VISITOR', 'NMP PERSONNEL (REGULAR/JOW)', 'PAYING GUEST/VISITOR'])->default('TRAINEE');
-            $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);
+            // $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);
             $table->enum('transfer_type', ['ROOM', 'CLASS'])->nullable();
             $table->enum('single_accommodation', ['YES', 'NO'])->default('NO');
             $table->enum('is_air_conditioned', ["YES", "NO"]);
