@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('dormitory_room_images', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Dormitory::class)->constrained()->cascadeOnDelete();
-            $table->string('filename');
+            $table->longText('filename');
             $table->timestamps();
         });
     }

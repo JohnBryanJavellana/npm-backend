@@ -15,11 +15,13 @@ return new class extends Migration
         Schema::create('dormitory_services', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(Charge::class)->constrained()->cascadeOnDelete();
             $table->string('name');
+            $table->double('charge', 65, 2);
             $table->longText('description');
             $table->enum("status", ["AVAILABLE", "UNAVAILABLE"])->default('AVAILABLE');
             $table->timestamps();
+
+            // $table->foreignIdFor(Charge::class)->constrained()->cascadeOnDelete();
         });
     }
 

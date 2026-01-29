@@ -21,12 +21,9 @@ return new class extends Migration
         Schema::create('dormitory_invoices', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryTenant::class);
-            $table->foreignIdFor(Charge::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(CashierOR::class)->nullable();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
-            $table->enum('isInitial', ['Y', 'N']);
             $table->longText('invoice_reference')->nullable();
             $table->longText('trace_number');
             $table->decimal('total_amount')->default(0.0);
@@ -34,10 +31,14 @@ return new class extends Migration
             $table->longText('remarks')->nullable();
             $table->enum('invoice_status', ['PENDING', 'PAID','FOR-VERIFICATION', 'CANCELLED'])->default('PENDING');
             $table->enum('type', ['INCLUSION', 'SERVICE','DORMITORY']);
-            $table->decimal("received_amount", 65, 2)->nullable();
-            $table->decimal("credit_deduction", 65, 2)->nullable();
             $table->timestamp('datePaid')->nullable();
             $table->timestamps();
+
+            // $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            // $table->enum('isInitial', ['Y', 'N']);
+            // $table->foreignIdFor(Charge::class)->nullable()->constrained()->cascadeOnDelete();
+            // $table->decimal("received_amount", 65, 2)->nullable();
+            // $table->decimal("credit_deduction", 65, 2)->nullable();
         });
     }
 
