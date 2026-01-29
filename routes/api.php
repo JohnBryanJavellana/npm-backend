@@ -98,7 +98,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('get_applications/', [TraineeEnrollment::class, 'get_applications']);
             Route::get('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
-            Route::get("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
+            Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
         });
 
         // Route::prefix('/trainer/enrollment/')->middleware('user_role:TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () { 
