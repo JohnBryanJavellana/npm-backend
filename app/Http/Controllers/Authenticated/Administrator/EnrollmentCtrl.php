@@ -486,6 +486,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_module_type
+     * @param Request $request
+     * @param int $module_type_id
+     */
     public function remove_module_type (Request $request, int $module_type_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $module_type_id) {
             $this_module_type = ModuleType::withCount(['hasData'])->where('id', $module_type_id)->first();
@@ -508,6 +513,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_certificates
+     * @param Request $request
+     */
     public function get_certificates (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $certificates = MainCertificate::withCount(['module' => function($query) {
@@ -520,6 +529,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_certificate
+     * @param CreateOrUpdateCertificate $request
+     */
     public function create_or_update_certificate (CreateOrUpdateCertificate $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_certificate = $request->httpMethod === "POST"
@@ -547,6 +560,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_certificate
+     * @param Request $request
+     * @param int $certificate_id
+     */
     public function remove_certificate (Request $request, int $certificate_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $certificate_id) {
             $this_certificate = MainCertificate::withCount(['module' => function($query) {
@@ -873,6 +891,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_sponsors
+     * @param Request $request
+     */
     public function get_sponsors (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $sponsors = Sponsor::all();
@@ -880,6 +902,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_sponsor
+     * @param CreateOrUpdateSponsor $request
+     */
     public function create_or_update_sponsor (CreateOrUpdateSponsor $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_sponsor = $request->httpMethod === "POST"
@@ -904,6 +930,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_sponsor
+     * @param Request $request
+     * @param int $sponsor_id
+     */
     public function remove_sponsor (Request $request, int $sponsor_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $sponsor_id) {
             $this_sponsor = Sponsor::where('id', $sponsor_id)->first();
@@ -926,13 +957,21 @@ class EnrollmentCtrl extends Controller
         });
     }
 
-     public function get_licenses (Request $request) {
+    /**
+     * *
+     * @param Request $request
+     */
+    public function get_licenses (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $licenses = License::withCount(['hasData'])->get();
             return response()->json(['licenses' => $licenses], 200);
         });
     }
 
+    /**
+     * Summary of create_or_update_license
+     * @param CreateOrUpdateLicense $request
+     */
     public function create_or_update_license (CreateOrUpdateLicense $request) {
         return TransactionUtil::transact($request, ["rank:license:all"], function() use ($request) {
             $this_license = $request->httpMethod === "POST"
@@ -956,6 +995,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_license
+     * @param Request $request
+     * @param int $license_id
+     */
     public function remove_license (Request $request, int $license_id) {
         return TransactionUtil::transact(null, ["rank:license:all"], function() use ($request, $license_id) {
             $this_license = License::withCount(['hasData'])->where('id', $license_id)->first();
@@ -978,6 +1022,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_ranks
+     * @param Request $request
+     */
     public function get_ranks (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $ranks = Rank::withCount(['hasData'])->get();
@@ -985,6 +1033,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_rank
+     * @param CreateOrUpdateRank $request
+     */
     public function create_or_update_rank (CreateOrUpdateRank $request) {
         return TransactionUtil::transact($request, ["rank:license:all"], function() use ($request) {
             $this_rank = $request->httpMethod === "POST"
@@ -1009,6 +1061,11 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of remove_rank
+     * @param Request $request
+     * @param int $rank_id
+     */
     public function remove_rank (Request $request, int $rank_id) {
         return TransactionUtil::transact(null, ["rank:license:all"], function() use ($request, $rank_id) {
             $this_rank = Rank::withCount(['hasData'])->where('id', $rank_id)->first();
