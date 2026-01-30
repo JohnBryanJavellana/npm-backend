@@ -17,4 +17,11 @@ class TrainingRegFile extends Model
     {
         return $this->belongsTo(AdditionalTraineeInfo::class, 'additional_trainee_info_id', 'id');
     }
+
+    /** Scopes */
+
+    public function scopeForAddition($query, $add_id)
+    {
+        $query->where("additional_trainee_info_id", $add_id);
+    }
 }

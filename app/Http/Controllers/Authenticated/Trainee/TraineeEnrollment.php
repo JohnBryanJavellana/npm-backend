@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use App\Utils\{AuditHelper, GenerateUniqueFilename, SaveFile, Notifications};
 use App\Http\Resources\{TrainingListResource,AvailableTrainingsResource, SelectedTrainingResource};
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
+use App\Http\Resources\Trainee\Enrollment\RequirementListResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -70,67 +71,16 @@ class TraineeEnrollment extends Controller
                 ->where(function($query) use ($moduleId) {
                     $query->whereRelation('forModules', 'course_module_id', '=', $moduleId)
                         ->orWhere("isBasic", "YES");
-                });
+                })
+                ->active()
+                ->get();
 
-                if($enrolled_id !== null) {
-                    $requirements->with([
-                        'uploaded_specific_requirement' => function ($q) use ($enrolled_id, $userId) {
-                        $q->where('enrolled_course_id', $enrolled_id, )
-                        ->whereRelation('enrolled_course', 'user_id', '=', $userId)
-                        ->latest();
-                        }
-                    ]);
-                }
-                $data = $requirements->active()->get();
-
-            // return response()->json(["data" => $data], 200);
-            return TrainingListResource::collection($data);
+            return RequirementListResource::collection($requirements);
         } catch (\Exception $e) {
             \Log::error("error view_module_requirements_v2", [$e->getMessage()]);
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
     }
-
-    /** GET/VIEW TRAINEE REQUESTS */
-    // public function trainee_selected_training (Request $request, $status) {
-    //     try {
-    //         $lst = [
-    //             'FOR-PAYMENT' => 'FOR-PAYMENT',
-    //             'PROCESSING_PAYMENT' => 'PROCESSING PAYMENT',
-    //             'RESERVED' => 'RESERVED'
-    //         ];
-    //         $stat = [];
-    //         foreach(explode(',',$status) as $s) [
-    //             $stat[] = $lst[$s]
-    //         ];
-
-    //         $userId = $request->user()->id ?? auth()->id();
-    //         $selected_courses = EnrolledCourse::with([
-    //             "training",
-    //             "training.module.moduleType",
-    //             "training.module.facilitator.facilitator:id,fname,lname,mname,email",
-    //             "invoice",
-    //         ])
-    //         ->where([
-    //             'user_id' => $userId,
-    //             'isExpired' => 'NO',
-    //         ])
-    //         ->whereIn('enrolled_course_status', $stat)
-    //         ->get();
-
-    //         $data = $selected_courses->map( function ($course) use ($request)  {
-    //             $course_module_id = $course->training->course_module_id ?? null;
-    //             $req = $this->view_module_requirements_v2($request, $course_module_id, enrolled_id: $course->id);
-    //             $course->requirement = $req;
-    //             return $course;
-    //         });
-
-    //         return SelectedTrainingResource::collection($data);
-    //     } catch (\Exception $e) {
-    //         \Log::error("error trainee_selected_training", [$e->getMessage()]);
-    //         return response()->json(["message" => "Something went wrong, Please try again."], 500);
-    //     }
-    // }
 
     /** VIEW/GET AVAILABLE TRAINING SCHEDULES */
     public function get_available_trainings (Request $request)   {
@@ -201,6 +151,8 @@ class TraineeEnrollment extends Controller
         try {
 
             // $validated = $request->validated();
+            // \Log::info("validated", [$validated]);
+            // \Log::info("file_upload", [$validated["file_upload"]]);
             // $files = count($validated["file_upload"]);
 
             DB::beginTransaction();
@@ -215,7 +167,7 @@ class TraineeEnrollment extends Controller
             ->lockForUpdate()
             ->firstOrFail(["id", "schedule_slot", "course_module_id"]);
 
-            // $this->enrollmentService->validateTraining($training, $validated);
+            $this->enrollmentService->validateTraining($training, $validated, $addtional_info_id);
 
             // \Log::info("vakudated", [$files]);
             // return response()->json(["data" => $request->all()], 422);
@@ -320,7 +272,7 @@ class TraineeEnrollment extends Controller
            'file_upload' => 'required|array',
            'file_upload.*.trainee_file_id' => 'required',
            'file_upload.*.is_basic' => 'required',
-           'file_upload.*.file' => 'required'
+           'file_upload.*.file' => 'required|max:5120'
         ];
 
         $validator = \Validator::make($request->all(), $validations);
@@ -400,7 +352,8 @@ class TraineeEnrollment extends Controller
 
     public function get_applications(ViewTraineeRecRequest $request)
     {
-        try {
+        try 
+        {
             $validated = $request->validated();
             $record = $this->enrollmentService->getUserTrainings($validated);
 
@@ -418,7 +371,7 @@ class TraineeEnrollment extends Controller
             $validated = $request->validated();
             $record = $this->enrollmentService->getUserTrainingById($validated);
 
-            return response()->json(["data" => $record],200);
+            // return response()->json(["data" => $record],200);
             return new ViewTraineeRecResource($record);
         }
         catch (ModelNotFoundException $e) {
