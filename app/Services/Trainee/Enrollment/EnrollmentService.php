@@ -97,19 +97,21 @@ class EnrollmentService {
         return TrainingListResource::collection($requirement);
     }
 
-    public function validateTraining($training, $validated)
+    public function validateTraining($training, $validated, $addtional_info_id)
     {
-
         if($training->schedule_slot <= 0) {
             throw new DomainException("There is no remaining slot for this training schedule.");
         }
 
-        $basicReq = $this->requirementModel->query()->active()->basic()->count();
+        $basicReq = $this->requirementModel->query()->userCountReq($addtional_info_id)->active()->basic()->count();
+        //count orwhere basic. so both basic and specific(based on the course module) will be counted
         $specificReqCount = $training->module->hasData->count();
         $totalReq = $basicReq + $specificReqCount;
+        \Log::info("8520", [count($validated["file_upload"])]);
+        \Log::info("asdas", [$validated["file_upload"]]);
 
-        if(count(array_filter($validated["file_upload"], fn ($s) => !$s->file === "null")) !== $totalReq) {
-            new DomainException("Incomplete Requirements, Try again bitch!");
+        if(count($validated["file_upload"]) < $totalReq) {
+            throw new DomainException("Incomplete Requirements, Try again bitch!");
         }
     }
 
@@ -121,8 +123,7 @@ class EnrollmentService {
         ->lockForUpdate()
         ->firstOrFail(["id", "schedule_slot"]);
 
-        $this->validateTraining($training, $validated);
-
+        // $this->validateTraining($training, $validated);
 
     }
 

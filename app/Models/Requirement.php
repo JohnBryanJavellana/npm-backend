@@ -36,6 +36,11 @@ class Requirement extends Model
         return $query->where("status", RequestStatus::ACTIVE->value);
     }
 
+    public function scopeUserCountReq(Builder $query, $addtional_info_id)
+    {
+        return $query->whereHas("trainee_file", fn($q) => $q->forAddition($addtional_info_id));
+    }
+
     public function scopeBasic(Builder $query)
     {
         return $query->where("isBasic", "YES");

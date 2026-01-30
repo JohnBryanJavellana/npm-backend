@@ -47,7 +47,7 @@ class ViewTraineeRecResource extends JsonResource
             "charge_name" => $this->training?->module?->trainingFees?->first()?->name,
             "charge_amount" => $this->training?->module?->trainingFees?->first()?->amount,
             "charge_category_name" => $this->training?->module?->trainingFees?->first()?->category?->name,
-            // "requirements" => $this-
+            "requirements" => $this->requirements,
         ];
 
     }
