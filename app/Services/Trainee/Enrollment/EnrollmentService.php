@@ -3,6 +3,7 @@
 namespace App\Services\Trainee\Enrollment;
 
 use App\Enums\RequestStatus;
+use App\Http\Resources\TrainingListResource;
 use App\Models\{EnrolledCourse, Rank, License, Requirement, Training};
 use DomainException;
 use Illuminate\Support\Facades\Cache;
@@ -29,6 +30,10 @@ class EnrollmentService {
         protected Requirement $requirementModel,
     ) {}
 
+    /**
+     * Summary of getUserTrainings
+     * @param mixed $validated
+     */
     public function getUserTrainings($validated)
     {
         return $this->enrolledCourseModel->query()->select("id", "training_id", "bgColor", "enrolled_course_status", "created_at")
@@ -44,7 +49,7 @@ class EnrollmentService {
 
     public function getUserTrainingById($validated)
     {
-        return $this->enrolledCourseModel->query()
+        $enrolled = $this->enrolledCourseModel->query()
         ->with([
             "training:id,course_module_id,status,daily_hours,schedule_from,schedule_to,venue,room,schedule_preference,batch_number",
             "training.module:id,module_type_id,name,acronym,compendium",
@@ -59,7 +64,37 @@ class EnrollmentService {
         ])
         ->whereKey($validated["courseId"])
         ->where("user_id", $validated["userId"])
+        ->firstOrFail();
+        
+        $data = $this->getModuleRequirements($validated, $enrolled?->training?->course_module_id);
+        \Log::info("pwede nba", [$enrolled?->training?->course_module_id]);
+        $enrolled->requirements = $data;
+        return $enrolled;
+    }
+
+    protected function getModuleRequirements($validated, $module_id)
+    {
+        $userId = $validated["userId"];
+        $en_course_id = $validated["courseId"];
+
+        $requirement = $this->requirementModel->query()
+        ->with([
+            "trainee_file" => function ($query) use ($userId) {
+                $query->whereRelation("additional_info", "user_id", $userId);
+            },
+            "uploaded_specific_requirement" => function ($query) use ($en_course_id, $userId) {
+                $query->where('enrolled_course_id', $en_course_id, )
+                    ->whereRelation('enrolled_course', 'user_id', '=', $userId)
+                    ->latest();
+                }
+        ])
+         ->where(function($query) use ($module_id) {
+                $query->whereRelation('forModules', 'course_module_id', '=', $module_id)
+                    ->orWhere("isBasic", "YES");
+        })
         ->get();
+
+        return TrainingListResource::collection($requirement);
     }
 
     public function validateTraining($training, $validated)
