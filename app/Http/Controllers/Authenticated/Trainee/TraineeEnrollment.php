@@ -63,7 +63,8 @@ class TraineeEnrollment extends Controller
             $requirements = Requirement::query()
                 ->with([
                     'trainee_file' => function ($q) use ($userId) {
-                        $q->whereRelation('additional_info', 'user_id', '=', $userId)->latest();
+                        $q->whereRelation('additional_info', 'user_id', '=', $userId)
+                        ->latest();
                     },
                 ])
                 ->where(function($query) use ($moduleId) {
@@ -72,15 +73,17 @@ class TraineeEnrollment extends Controller
                 });
 
                 if($enrolled_id !== null) {
-                    \Log::info("inside", [$enrolled_id]);
                     $requirements->with([
                         'uploaded_specific_requirement' => function ($q) use ($enrolled_id, $userId) {
-                        $q->where('enrolled_course_id', $enrolled_id, )->whereRelation('enrolled_course', 'user_id', '=', $userId)->latest();
+                        $q->where('enrolled_course_id', $enrolled_id, )
+                        ->whereRelation('enrolled_course', 'user_id', '=', $userId)
+                        ->latest();
                         }
                     ]);
                 }
                 $data = $requirements->active()->get();
 
+            // return response()->json(["data" => $data], 200);
             return TrainingListResource::collection($data);
         } catch (\Exception $e) {
             \Log::error("error view_module_requirements_v2", [$e->getMessage()]);
@@ -89,50 +92,49 @@ class TraineeEnrollment extends Controller
     }
 
     /** GET/VIEW TRAINEE REQUESTS */
-    public function trainee_selected_training (Request $request, $status) {
-        try {
-            $lst = [
-                'FOR-PAYMENT' => 'FOR-PAYMENT',
-                'PROCESSING_PAYMENT' => 'PROCESSING PAYMENT',
-                'RESERVED' => 'RESERVED'
-            ];
-            $stat = [];
-            foreach(explode(',',$status) as $s) [
-                $stat[] = $lst[$s]
-            ];
+    // public function trainee_selected_training (Request $request, $status) {
+    //     try {
+    //         $lst = [
+    //             'FOR-PAYMENT' => 'FOR-PAYMENT',
+    //             'PROCESSING_PAYMENT' => 'PROCESSING PAYMENT',
+    //             'RESERVED' => 'RESERVED'
+    //         ];
+    //         $stat = [];
+    //         foreach(explode(',',$status) as $s) [
+    //             $stat[] = $lst[$s]
+    //         ];
 
-            $userId = $request->user()->id ?? auth()->id();
-            $selected_courses = EnrolledCourse::with([
-                "training",
-                "training.module.moduleType",
-                "training.module.facilitator.facilitator:id,fname,lname,mname,email",
-                "invoice",
-            ])
-            ->where([
-                'user_id' => $userId,
-                'isExpired' => 'NO',
-            ])
-            ->whereIn('enrolled_course_status', $stat)
-            ->get();
+    //         $userId = $request->user()->id ?? auth()->id();
+    //         $selected_courses = EnrolledCourse::with([
+    //             "training",
+    //             "training.module.moduleType",
+    //             "training.module.facilitator.facilitator:id,fname,lname,mname,email",
+    //             "invoice",
+    //         ])
+    //         ->where([
+    //             'user_id' => $userId,
+    //             'isExpired' => 'NO',
+    //         ])
+    //         ->whereIn('enrolled_course_status', $stat)
+    //         ->get();
 
-            $data = $selected_courses->map( function ($course) use ($request)  {
-                $course_module_id = $course->training->course_module_id ?? null;
-                $req = $this->view_module_requirements_v2($request, $course_module_id, enrolled_id: $course->id);
-                $course->requirement = $req;
-                return $course;
-            });
+    //         $data = $selected_courses->map( function ($course) use ($request)  {
+    //             $course_module_id = $course->training->course_module_id ?? null;
+    //             $req = $this->view_module_requirements_v2($request, $course_module_id, enrolled_id: $course->id);
+    //             $course->requirement = $req;
+    //             return $course;
+    //         });
 
-            return SelectedTrainingResource::collection($data);
-        } catch (\Exception $e) {
-            \Log::error("error trainee_selected_training", [$e->getMessage()]);
-            return response()->json(["message" => "Something went wrong, Please try again."], 500);
-        }
-    }
+    //         return SelectedTrainingResource::collection($data);
+    //     } catch (\Exception $e) {
+    //         \Log::error("error trainee_selected_training", [$e->getMessage()]);
+    //         return response()->json(["message" => "Something went wrong, Please try again."], 500);
+    //     }
+    // }
 
     /** VIEW/GET AVAILABLE TRAINING SCHEDULES */
     public function get_available_trainings (Request $request)   {
         try {
-            \Log::info("getschedule", [$request->all()]);
             $userId = $request->has("userId") && !is_null($request->userId) ? $request->userId : $request->user()->id ?? auth()->id();
 
             $trainings = Training::with([
@@ -416,7 +418,11 @@ class TraineeEnrollment extends Controller
             $validated = $request->validated();
             $record = $this->enrollmentService->getUserTrainingById($validated);
 
-            return ViewTraineeRecResource::collection($record);
+            return response()->json(["data" => $record],200);
+            return new ViewTraineeRecResource($record);
+        }
+        catch (ModelNotFoundException $e) {
+            return response()->json(["message" => "Training record not available."], 404);
         }
         catch (\Exception $e) {
             \Log::error("get_application", [$e]);
