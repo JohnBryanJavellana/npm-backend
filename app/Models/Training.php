@@ -20,10 +20,15 @@ class Training extends Model
     public function module() {
         return $this->hasOne(CourseModule::class, 'id', 'course_module_id');
     }
+    // public function requirements()
+    // {
+    //     return $this->hasMany(Requirement::class);
+    // }
 
-    public function training_requirement() {
-        return $this->hasMany(TrainingRequirement::class, 'training_id', 'id');
-    }
+
+    // public function training_requirement() {
+    //     return $this->hasMany(TrainingRequirement::class, 'training_id', 'id');
+    // }
 
     /** Scopes */
 

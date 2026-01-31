@@ -17,7 +17,6 @@ class CancelEnrollmentRequest extends FormRequest
     public function authorize(): bool
     {
         \Log::info("CancelEnrollmentRequest", [$this->all()]);
-
         return $this->user() !== null;
     }
 
@@ -25,7 +24,7 @@ class CancelEnrollmentRequest extends FormRequest
     {
         $this->merge([
             "user_id" => $this->user()->role === UserRoleEnum::SUPERADMIN ? $this->userId : $this->user()->id,
-            "enrolled_course_id" => $this->route("training_request_id")
+            "enrolled_course_id" => $this->route("course")
         ]);
     }
 

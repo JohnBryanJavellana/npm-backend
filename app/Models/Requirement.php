@@ -30,14 +30,26 @@ class Requirement extends Model
     }
 
     /** Scopes */
-
     public function scopeActive(Builder $query)
     {
         return $query->where("status", RequestStatus::ACTIVE->value);
     }
 
+    public function scopeUserCountReq(Builder $query, $addtional_info_id)
+    {
+        return $query->whereHas("trainee_file", fn($q) => $q->forAddition($addtional_info_id));
+    }
+
     public function scopeBasic(Builder $query)
     {
         return $query->where("isBasic", "YES");
+    }
+
+    public function scopeEachModuleRequirements(Builder $query, $course_module_id)
+    {
+        return $query->where(function($q) use ($course_module_id) {
+            $q->whereRelation('forModules', 'course_module_id', '=', $course_module_id)
+            ->orWhere("isBasic", "YES");
+        });
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Trainee\Enrollment;
 
+use App\Enums\UserRoleEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -22,7 +23,9 @@ class ViewApplicationRequest extends FormRequest
     {
         $this->merge([
             "courseId" => $this->route("course"),
-            "userId" => $this->user()->id
+            "user_id" => in_array($this->user()->role, UserRoleEnum::enrollmentRoles()) 
+            ? $this->input("userId")
+            : $this->user()->id
         ]);
     }
 
@@ -35,7 +38,7 @@ class ViewApplicationRequest extends FormRequest
     {
         return [
             "courseId" => "required|exists:enrolled_courses,id",
-            "userId" => "required|exists:users,id"
+            "user_id" => "required|exists:users,id"
         ];
     }
 
