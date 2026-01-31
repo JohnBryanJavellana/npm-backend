@@ -43,4 +43,11 @@ class CourseModule extends Model
     {
         return $this->hasMany(MainCertificate::class, "course_module_id", "id");
     }
+
+    /** Scopes */
+
+    public function scopeForFacilitator()
+    {
+        return;
+    }
 }

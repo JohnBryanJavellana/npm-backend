@@ -3,23 +3,36 @@
 namespace App\Http\Controllers\Authenticated\Trainer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
+use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
 use Illuminate\Http\Request;
 
 class TrainerEnrollmentController extends Controller
 {
     public function __construct(
-        
+        protected TrainerEnrollmentService $trainerEnrollmentService,
     )
     {}
 
-    public function viewAsFacilitator(Request $request)
+    public function view(Request $request)
     {
         try
         {
-            
+            return CourseModuleResource::collection($this->trainerEnrollmentService->getDataFacilitator());
         }
         catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+    }
 
+    public function viewTrainingSchedules(Request $request, $course)
+    {
+        try
+        {
+            return response()->json(["data" => $this->trainerEnrollmentService->getTrainingSchedules($course)], 200);
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 }

@@ -35,6 +35,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
 };
 /** other controllers */
 use App\Http\Controllers\Authenticated\Logout;
+use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
 
 /** imported models */
 use App\Models\User;
@@ -102,8 +103,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
         });
 
-        // Route::prefix('/trainer/enrollment/')->middleware('user_role:TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () { 
-        // });
+        Route::prefix('/trainer/enrollment/')->middleware('user_role:TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () { 
+        });
 
         Route::prefix('/trainings/')->group(function() {
             Route::get('get_all_courses', [TraineeCourses::class, 'get_all_courses']);
@@ -158,10 +159,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('get_all_books', [TraineeLibrary::class, 'view_books']);
             Route::get('book_overdues', [TraineeLibrary::class, 'view_over_due']);
             Route::post('cancel_book', [TraineeLibrary::class, 'cancel_book']);
-            Route::get('get_cart', [TraineeLibrary::class, 'view_book_cart']);
             Route::get('pdfs', [TraineeLibrary::class, 'pdf_copies']);
-            Route::post('add_book', [TraineeLibrary::class, 'add_book_items']);
-            Route::post('remove_book', [TraineeLibrary::class, 'remove_book_items']);
             Route::match(['GET', 'POST'], 'book_info/{book_id}', [TraineeLibrary::class, 'get_book_info']);
             Route::post('requests/', [TraineeLibrary::class, 'get_book_records']);
             Route::post('request/details', [TraineeLibrary::class, 'view_request_details']);
@@ -195,6 +193,14 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         });
     });
+
+    Route::middleware('user_role:TRAINER')->prefix('/trainer/')->group(function () { 
+        Route::prefix('enrollment/')->group(function() {
+            Route::get('courses', [TrainerEnrollmentController::class, 'view']);
+            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
+        });
+    });
+
 
     /** administrator routes */
     Route::prefix('/admin/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
