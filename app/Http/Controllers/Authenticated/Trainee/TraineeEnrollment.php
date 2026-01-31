@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EnrollmentRequest;
 use App\Http\Requests\Trainee\Enrollment\CancelEnrollmentRequest;
 use App\Http\Requests\Trainee\Enrollment\getModuleRequest;
+use App\Http\Requests\Trainee\Enrollment\UpdateRequirementRequest;
 use App\Http\Requests\Trainee\Enrollment\ViewApplicationRequest;
 use App\Http\Requests\Trainee\Enrollment\ViewTraineeRecRequest;
 use App\Http\Resources\Trainee\Enrollment\ViewTraineeRecResource;
@@ -258,51 +259,38 @@ class TraineeEnrollment extends Controller
     }
 
     /** UPDATING ENROLLMENT REQUESTS **/
-    public function update_requirements_request(Request $request) {
+    public function update_requirements_request(UpdateRequirementRequest $request) {
+        return response()->json(["wow"], 200);
         /**
          * Use Form Request Class
          * Use the EnrollmentService Class
          * Try to use updateOrCreate
          **/
+        try {
+            DB::beginTransaction();
 
-        $validations = [
-           'file_upload' => 'required|array',
-           'file_upload.*.trainee_file_id' => 'required',
-           'file_upload.*.is_basic' => 'required',
-           'file_upload.*.file' => 'required|max:5120'
-        ];
-
-        $validator = \Validator::make($request->all(), $validations);
-
-        if ($validator->fails()) {
-            $errors = $validator->messages()->all();
-            return response()->json(['message' => implode(',', $errors)], 422);
-        } else {
-            try {
-                DB::beginTransaction();
-
-                foreach($request->file_upload as $file) {
-                    $record = $file['is_basic'] === "YES" ? TrainingRegFile::find($file['trainee_file_id']) : TraineeRequirement::find($file['trainee_file_id']);
-                    $record->filename = SaveFile::save($file['file'], $file['is_basic'] === 'YES' ? 'trainee-files' : 'training_requirement_files' );
-                    $record->remarks = null;
-                    $record->locked = "N";
-                    $record->save();
-                }
-
-                AuditHelper::log($request->user()->id, "User " . $request->user()->id . " updated an enrollment request.");
-                Notifications::notify($request->user()->id, null, "ENROLLMENT", "has updated their enrollement request");
-
-                if(env("USE_EVENT")) {
-                    event(new BETraineeApplication(''), new BENotification(''));
-                }
-
-                DB::commit();
-                return response()->json(['message' => 'Enrollment request updated successfully!'], 200);
-            } catch (\Exception $e) {
-                DB::rollBack();
-                \Log::error('Error_updating_enrollment_request: ' . $e->getMessage());
-                return response()->json(['message' => $e->getMessage()], 500);
+            foreach($request->file_upload as $file) {
+                //change to CreateOrUpdate
+                $record = $file['is_basic'] === "YES" ? TrainingRegFile::find($file['trainee_file_id']) : TraineeRequirement::find($file['trainee_file_id']);
+                $record->filename = SaveFile::save($file['file'], $file['is_basic'] === 'YES' ? 'trainee-files' : 'training_requirement_files' );
+                $record->remarks = null;
+                $record->locked = "N";
+                $record->save();
             }
+
+            AuditHelper::log($request->user()->id, "User " . $request->user()->id . " updated an enrollment request.");
+            Notifications::notify($request->user()->id, null, "ENROLLMENT", "has updated their enrollement request");
+
+            if(env("USE_EVENT")) {
+                event(new BETraineeApplication(''), new BENotification(''));
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Enrollment request updated successfully!'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error_updating_enrollment_request: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 

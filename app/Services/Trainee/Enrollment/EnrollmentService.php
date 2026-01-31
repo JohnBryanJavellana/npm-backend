@@ -96,20 +96,20 @@ class EnrollmentService {
         return TrainingListResource::collection($requirement);
     }
 
+    //wait
     public function validateTraining($training, $validated, $addtional_info_id)
     {
         if($training->schedule_slot <= 0) {
             throw new DomainException("There is no remaining slot for this training schedule.");
         }
 
-        $userBasicReq = $this->requirementModel->query()->userCountReq($addtional_info_id)->active()->basic()->count();
-        $TotalRequirements = $this->requirementModel->query()->eachModuleRequirements($training->course_module_id)->count();
+        // $userBasicReq = $this->requirementModel->query()->userCountReq($addtional_info_id)->active()->basic()->count();
+        // $TotalRequirements = $this->requirementModel->query()->eachModuleRequirements($training->course_module_id)->count();
 
         // if(count($validated["file_upload"]) < $totalReq) {
         //     throw new DomainException("Incomplete Requirements, Try again bitch!");
         // }
     }
-
     public function storeEnrollmentRequest($validated)
     {
         $training = $this->trainingModel->query()
@@ -131,7 +131,16 @@ class EnrollmentService {
     {
         return;
     }
+    //wait
 
+    public function updateRequirements()
+    {
+        
+    }
+
+    /**
+     * Summary of getRankLicense
+     */
     public function getRankLicense()
     {
         $cacheKey = "rank:license:all";
@@ -143,6 +152,12 @@ class EnrollmentService {
         });
     }
 
+    /**
+     * Summary of prepareDataForCancellation
+     * @param mixed $record
+     * @throws DomainException
+     * @return void
+     */
     public function prepareDataForCancellation($record)
     {
         if(!$record) {
@@ -169,10 +184,5 @@ class EnrollmentService {
                 "enrolled_course_status" => RequestStatus::CANCELLED
             ]);
         });
-    }
-
-    public function forgetCache($userId)
-    {
-        return;
     }
 }
