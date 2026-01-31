@@ -86,24 +86,23 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::prefix('/enrollment/')->group(function () {
-            Route::match(["GET", "POST"],'get_requirements/{moduleId}', [TraineeEnrollment::class, 'view_module_requirements_v2']);
-            Route::post('remove_training_request/{training_request_id}', [TraineeEnrollment::class, 'remove_training_request']);
+            Route::match(["GET", "POST"],'get_requirements/{module}', [TraineeEnrollment::class, 'view_module_requirements_v2']);
+            Route::post('remove_training_request/{course}', [TraineeEnrollment::class, 'remove_training_request']);
             Route::match(['POST', 'GET'],'get_available_trainings', [TraineeEnrollment::class,'get_available_trainings']);
-            Route::get('trainee_selected_training/{status}', [TraineeEnrollment::class,'trainee_selected_training']);
             Route::post('send_enrollment_request', [TraineeEnrollment::class,'send_enrollment_request']);
             Route::post('send_training_requirements', [TraineeEnrollment::class,'send_training_requirements']);
-            Route::post('update_enrollment_request', [TraineeEnrollment::class,'update_enrollment_request']);
+            Route::post('update_enrollment_request', [TraineeEnrollment::class,'update_requirements_request']);
             Route::post('update_invoice_trainings', [TraineeEnrollment::class,'update_invoice_trainings']);
             Route::post('get_all_trainee_invoices_two', [TraineeEnrollment::class,'get_all_trainee_invoices_two']);
+            //status
             Route::post('get_applications/', [TraineeEnrollment::class, 'get_applications']);
-            Route::get('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
+            //byId
+            Route::post('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
-            //new
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
         });
 
         // Route::prefix('/trainer/enrollment/')->middleware('user_role:TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () { 
-
         // });
 
         Route::prefix('/trainings/')->group(function() {

@@ -42,6 +42,6 @@ class EnrolledCourse extends Model
 
     public function scopeStatus($query, $status)
     {
-        return $query->where("enrolled_course_status", $status);
+        return $query->whereIn("enrolled_course_status", $status);
     }
 }
