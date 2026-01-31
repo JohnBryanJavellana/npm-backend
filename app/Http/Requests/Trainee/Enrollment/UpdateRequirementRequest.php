@@ -33,7 +33,7 @@ class UpdateRequirementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "user_id" => "required|exist:users,id",
+            "user_id" => "required|exists:users,id",
             "enrolled_course_id" => "required|exists:enrolled_courses,id",
             'file_upload' => 'required|array',
             'file_upload.*.requirement_id' => 'required',

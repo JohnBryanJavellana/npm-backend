@@ -4,7 +4,7 @@ namespace App\Services\Trainee\Enrollment;
 
 use App\Enums\RequestStatus;
 use App\Http\Resources\TrainingListResource;
-use App\Models\{EnrolledCourse, Rank, License, Requirement, Training};
+use App\Models\{EnrolledCourse, Rank, License, Requirement, TraineeRequirement, Training, TrainingRegFile};
 use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +28,8 @@ class EnrollmentService {
         protected Rank $rankModel,
         protected License $licenseModel,
         protected Requirement $requirementModel,
+        protected TrainingRegFile $trainingRegFileModel,
+        protected TraineeRequirement $traineeRequirementModel
     ) {}
 
     /**
@@ -124,7 +126,10 @@ class EnrollmentService {
 
     public function storeBasic()
     {
-        return;
+        $this->trainingRegFileModel->query()
+        ->updateOrCreate([
+
+        ]);
     }
 
     public function storeSpecific()
