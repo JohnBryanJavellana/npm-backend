@@ -19,8 +19,8 @@ use App\Utils\{AuditHelper, GenerateUniqueFilename, SaveFile, Notifications};
 use App\Http\Resources\{TrainingListResource,AvailableTrainingsResource, SelectedTrainingResource};
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
 use App\Http\Resources\Trainee\Enrollment\RequirementListResource;
+use App\Http\Resources\Trainee\Enrollment\TraineeSingleRecResource;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\{
     AdditionalTraineeInfo,
@@ -56,11 +56,10 @@ class TraineeEnrollment extends Controller
     {}
 
     /** GET/VIEW REQUIREMENTS */
-    public function view_module_requirements_v2(Request $request, $moduleId,  $enrolled_id = null)
+    public function view_module_requirements_v2(Request $request, $module,  $enrolled_id = null)
     {
         try {
             $userId = $request->has("userId") && !is_null($request->userId) ? $request->userId : $request->user()->id ?? auth()->id();
-            \Log::info("mdoule", [$moduleId, $enrolled_id]);
             $requirements = Requirement::query()
                 ->with([
                     'trainee_file' => function ($q) use ($userId) {
@@ -68,8 +67,8 @@ class TraineeEnrollment extends Controller
                         ->latest();
                     },
                 ])
-                ->where(function($query) use ($moduleId) {
-                    $query->whereRelation('forModules', 'course_module_id', '=', $moduleId)
+                ->where(function($query) use ($module) {
+                    $query->whereRelation('forModules', 'course_module_id', '=', $module)
                         ->orWhere("isBasic", "YES");
                 })
                 ->active()
@@ -149,15 +148,10 @@ class TraineeEnrollment extends Controller
 
     public function send_enrollment_request(EnrollmentRequest $request) {
         try {
-
-            // $validated = $request->validated();
-            // \Log::info("validated", [$validated]);
-            // \Log::info("file_upload", [$validated["file_upload"]]);
-            // $files = count($validated["file_upload"]);
-
             DB::beginTransaction();
             $validated = $request->validated();
             $user_id = $validated["user_id"];
+            // $files = count($validated["file_upload"]);
 
             $addtional_info_id = AdditionalTraineeInfo::where('user_id', $user_id)->value('id');
             
@@ -167,8 +161,7 @@ class TraineeEnrollment extends Controller
             ->lockForUpdate()
             ->firstOrFail(["id", "schedule_slot", "course_module_id"]);
 
-            $this->enrollmentService->validateTraining($training, $validated, $addtional_info_id);
-
+            // $this->enrollmentService->validateTraining($training, $validated, $addtional_info_id);
             // \Log::info("vakudated", [$files]);
             // return response()->json(["data" => $request->all()], 422);
 
@@ -264,9 +257,13 @@ class TraineeEnrollment extends Controller
         }
     }
 
-    /** UPDATING ENROLLMENT REQUESTS */
-    public function update_enrollment_request(Request $request) {
-        \Log::info("UpdateEnrollReq", $request->all());
+    /** UPDATING ENROLLMENT REQUESTS **/
+    public function update_requirements_request(Request $request) {
+        /**
+         * Use Form Request Class
+         * Use the EnrollmentService Class
+         * Try to use updateOrCreate
+         **/
 
         $validations = [
            'file_upload' => 'required|array',
@@ -361,18 +358,17 @@ class TraineeEnrollment extends Controller
         }
         catch (\Exception $e) {
             \Log::error("view_trainee_records", [$e]);
-            return response()->json([], 500);
+            return response()->json(["message" => "Something went wrong, Please try again"], 500);
         }
     }
-
+//new
     public function get_application(ViewApplicationRequest $request)
     {
         try {
             $validated = $request->validated();
             $record = $this->enrollmentService->getUserTrainingById($validated);
 
-            // return response()->json(["data" => $record],200);
-            return new ViewTraineeRecResource($record);
+            return new TraineeSingleRecResource($record);
         }
         catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Training record not available."], 404);

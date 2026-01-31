@@ -22,6 +22,6 @@ class TrainingRegFile extends Model
 
     public function scopeForAddition($query, $add_id)
     {
-        $query->where("additional_trainee_info_id", $add_id);
+        return $query->where("additional_trainee_info_id", $add_id);
     }
 }
