@@ -75,15 +75,16 @@ class EnrollmentCtrl extends Controller
             if ($request->applicationStatus) {
                 $query->whereIn('enrolled_course_status', $request->applicationStatus);
             }
-            if ($request->isExpired) {
-                $query->where('isExpired', $request->isExpired);
-            }
 
             if ($request->onlyWithRemarks) {
                 $query->where(function ($q) {
                     $q->whereHas('trainee.additional_trainee_info.basic_requirement', fn ($sub) => $sub->whereNotNull('remarks'))
-                        ->orWhereHas('trainee_requirement', fn ($sub) => $sub->whereNotNull('remarks'));
+                      ->orWhereHas('trainee_requirement', fn ($sub) => $sub->whereNotNull('remarks'));
                 });
+            }
+
+            if ($request->isExpired) {
+                $query->where('isExpired', $request->isExpired);
             }
 
             $applications = $query->get()->map(function ($self) use ($allRequirements, $basicRequirements) {
