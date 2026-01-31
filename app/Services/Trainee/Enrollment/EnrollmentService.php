@@ -73,7 +73,7 @@ class EnrollmentService {
 
     protected function getModuleRequirements($validated, $module_id)
     {
-        $userId = $validated["userId"];
+        $userId = $validated["user_id"];
         $en_course_id = $validated["courseId"];
 
         $requirement = $this->requirementModel->query()
