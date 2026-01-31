@@ -260,22 +260,25 @@ class TraineeEnrollment extends Controller
 
     /** UPDATING ENROLLMENT REQUESTS **/
     public function update_requirements_request(UpdateRequirementRequest $request) {
+
+        $validated = $request->validated();
+        $files = $validated["file_upload"];
+        foreach($request->file_upload as $file) { 
+            \Log::info($file["requirement_id"]);
+        }
         return response()->json(["wow"], 200);
         /**
          * Use Form Request Class
          * Use the EnrollmentService Class
          * Try to use updateOrCreate
-         **/
+         **/ 
         try {
             DB::beginTransaction();
 
             foreach($request->file_upload as $file) {
-                //change to CreateOrUpdate
-                $record = $file['is_basic'] === "YES" ? TrainingRegFile::find($file['trainee_file_id']) : TraineeRequirement::find($file['trainee_file_id']);
-                $record->filename = SaveFile::save($file['file'], $file['is_basic'] === 'YES' ? 'trainee-files' : 'training_requirement_files' );
-                $record->remarks = null;
-                $record->locked = "N";
-                $record->save();
+                $file['is_basic'] === "YES" 
+                    ? $this->enrollmentService->storeBasic($file)
+                    : $this->enrollmentService->storeSpecific($file);
             }
 
             AuditHelper::log($request->user()->id, "User " . $request->user()->id . " updated an enrollment request.");
@@ -289,7 +292,7 @@ class TraineeEnrollment extends Controller
             return response()->json(['message' => 'Enrollment request updated successfully!'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Error_updating_enrollment_request: ' . $e->getMessage());
+            \Log::error('Error_updating_enrollment_request: ', [$e->getMessage()]);
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
