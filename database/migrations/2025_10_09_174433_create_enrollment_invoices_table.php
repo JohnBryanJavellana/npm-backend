@@ -20,7 +20,6 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(EnrolledCourse::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Charge::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(CashierOR::class)->nullable();
             $table->longText('trace_number')->nullable();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
@@ -30,7 +29,6 @@ return new class extends Migration
             $table->dateTime('verification_date')->nullable();
             $table->enum('isExpired', ['YES', 'NO'])->default('NO');
             $table->decimal("received_amount", 65, 2)->nullable();
-            $table->decimal("credit_deduction", 65, 2)->nullable();
             $table->timestamp('datePaid')->nullable();
             $table->timestamps();
         });

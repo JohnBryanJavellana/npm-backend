@@ -62,6 +62,7 @@ class EnrollmentCtrl extends Controller
             $query = EnrolledCourse::with([
                 'training.module.charge',
                 'training.module.moduleType',
+                'training.module.specific_requirements',
                 'trainee.additional_trainee_info.user',
                 'trainee.additional_trainee_info.general_info',
                 'trainee.additional_trainee_info.contact',
@@ -89,6 +90,8 @@ class EnrollmentCtrl extends Controller
 
             $applications = $query->get()->map(function ($self) use ($allRequirements, $basicRequirements) {
                 $addInfo = $self->trainee->additional_trainee_info;
+                $courseSpecificReqs = $self->training->module->specific_requirements;
+                $allRelevantReqs = $basicRequirements->concat($courseSpecificReqs)->unique('id');
                 $traineeBasicReqs = $addInfo->basic_requirement->keyBy('requirement_id');
                 $traineeCourseReqs = $self->trainee_requirement->keyBy('requirement_id');
 
@@ -126,8 +129,10 @@ class EnrollmentCtrl extends Controller
                             ];
                         })->values(),
                     ],
-                    'requirements' => $allRequirements->map(function ($req, $index) use ($traineeBasicReqs, $traineeCourseReqs) {
-                        $tr = ($req->isBasic === 'YES') ? $traineeBasicReqs->get($req->id) : $traineeCourseReqs->get($req->id);
+                    'requirements' => $allRelevantReqs->map(function ($req, $index) use ($traineeBasicReqs, $traineeCourseReqs) {
+                        $tr = ($req->isBasic === 'YES')
+                            ? $traineeBasicReqs->get($req->id)
+                            : $traineeCourseReqs->get($req->id);
 
                         return [
                             'index' => $index,
@@ -205,7 +210,6 @@ class EnrollmentCtrl extends Controller
                 $premade_record = new EnrollmentInvoice;
                 $premade_record->enrolled_course_id = $request->documentId;
                 $premade_record->user_id = $this_training_status->user_id;
-                // $premade_record->charge_id = $this_training_status->training->module->charge->id;
                 $premade_record->trace_number = GenerateTrace::createTraceNumber(EnrollmentInvoice::class, '-EAINV-');
                 $premade_record->invoice_amount = $request->invoiceAmount;
                 $premade_record->save();

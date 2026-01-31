@@ -136,35 +136,12 @@ class Cashier extends Controller
                 $this_main_table->save();
             }
 
-            $checkForCreditsUsed = User::where('id', $request->userId)
-                ->where('credit_amount', '>=', $request->usedCredits)
-                ->lockForUpdate()
-                ->first();
-
-            if(!$checkForCreditsUsed) {
-                return response()->json(['message' => "Insufficient credits to complete this transaction."], 400);
-            }
-
             $this_payment->invoice_status = "PAID";
-            $this_payment->credit_deduction = $request->usedCredits;
             $this_payment->received_amount = $request->receivedAmount;
             $this_payment->cashier_o_r_id = $request->orNumber;
             $this_payment->payment_type = 'WALK-IN';
             $this_payment->datePaid = Carbon::now();
             $this_payment->save();
-
-            if($request->usedCredits > 0) {
-                $checkForCreditsUsed->credit_amount -= $request->usedCredits;
-                $checkForCreditsUsed->save();
-
-                $new_credit_deduction = new Credit();
-                $new_credit_deduction->user_id = $request->userId;
-                $new_credit_deduction->reference_number = $this_payment->trace_number;
-                $new_credit_deduction->reason = config('creditReason.deduct.0');
-                $new_credit_deduction->type = "DEDUCT";
-                $new_credit_deduction->amount = $request->usedCredits;
-                $new_credit_deduction->save();
-            }
 
             if($request->orNumber) {
                 $this_or_parent = CashierOR::find($request->orNumber);
