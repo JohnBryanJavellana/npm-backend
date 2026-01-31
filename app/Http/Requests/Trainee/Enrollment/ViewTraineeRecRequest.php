@@ -35,7 +35,7 @@ class ViewTraineeRecRequest extends FormRequest
         return [
             "userId" => "required|exists:users,id",
             "status" => "required|array",
-            "status.*" => "required|in:COMPLETED,ENROLLED,RESERVED,FOR-PAYMENT,PROCESSING_PAYMENT",
+            "status.*" => "required|in:COMPLETED,ENROLLED,RESERVED,FOR-PAYMENT,PROCESSING_PAYMENT,PAID",
         ];
     }
 

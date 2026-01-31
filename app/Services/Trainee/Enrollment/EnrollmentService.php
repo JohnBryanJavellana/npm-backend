@@ -59,15 +59,14 @@ class EnrollmentService {
             "training.module.trainingFees.category:id,name",
 
             "training.module.facilitator:id,course_module_id,user_id,role",
-            "training.module.facilitator.facilitator:id,fname,mname,lname,email"
-
+            "training.module.facilitator.facilitator:id,fname,mname,lname,email",
+            "invoice"
         ])
         ->whereKey($validated["courseId"])
-        ->where("user_id", $validated["userId"])
+        ->where("user_id", $validated["user_id"])
         ->firstOrFail();
         
         $data = $this->getModuleRequirements($validated, $enrolled?->training?->course_module_id);
-        \Log::info("pwede nba", [$enrolled?->training?->course_module_id]);
         $enrolled->requirements = $data;
         return $enrolled;
     }
@@ -103,16 +102,12 @@ class EnrollmentService {
             throw new DomainException("There is no remaining slot for this training schedule.");
         }
 
-        $basicReq = $this->requirementModel->query()->userCountReq($addtional_info_id)->active()->basic()->count();
-        //count orwhere basic. so both basic and specific(based on the course module) will be counted
-        $specificReqCount = $training->module->hasData->count();
-        $totalReq = $basicReq + $specificReqCount;
-        \Log::info("8520", [count($validated["file_upload"])]);
-        \Log::info("asdas", [$validated["file_upload"]]);
+        $userBasicReq = $this->requirementModel->query()->userCountReq($addtional_info_id)->active()->basic()->count();
+        $TotalRequirements = $this->requirementModel->query()->eachModuleRequirements($training->course_module_id)->count();
 
-        if(count($validated["file_upload"]) < $totalReq) {
-            throw new DomainException("Incomplete Requirements, Try again bitch!");
-        }
+        // if(count($validated["file_upload"]) < $totalReq) {
+        //     throw new DomainException("Incomplete Requirements, Try again bitch!");
+        // }
     }
 
     public function storeEnrollmentRequest($validated)
