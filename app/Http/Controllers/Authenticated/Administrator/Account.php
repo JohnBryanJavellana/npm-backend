@@ -8,6 +8,10 @@ use Illuminate\Support\Str;
 use App\Utils\TransactionUtil;
 use Illuminate\Support\Facades\Cache;
 use App\Mail\UpdatePasswordMail;
+use App\Enums\Administrator\{
+    UserDetailsEnum,
+    EnrollmentEnum
+};
 use App\Http\Requests\Admin\Account\{
     UpdatePassword,
     SubmitCSM
@@ -44,10 +48,16 @@ class Account extends Controller
                 'additional_trainee_info.educational_attainment.main_school',
                 'additional_trainee_info.educational_attainment',
                 'additional_trainee_info.latest_shipboard_attainment',
-                'additional_trainee_info.latest_shipboard_attainment.licensesssssss',
-                'additional_trainee_info.latest_shipboard_attainment.rankkkkkkkkkkkkkkkkk',
+                'additional_trainee_info.latest_shipboard_attainment.license',
+                'additional_trainee_info.latest_shipboard_attainment.rank',
                 'trainee_enrolled_courses' => function($query) {
-                    $query->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'IR', 'CSFB', 'PENDING']);
+                    $query->whereNotIn('enrolled_course_status', [
+                        EnrollmentEnum::CANCELLED->value,
+                        EnrollmentEnum::DECLINED->value,
+                        EnrollmentEnum::CANCELLED->value,
+                        EnrollmentEnum::COURSE_STATUS_FULLY_BOOKED->value,
+                        EnrollmentEnum::PENDING->value
+                    ]);
                 },
                 'trainee_enrolled_courses.training.module'
             ])->where('id', $traineeId)->first();
@@ -62,31 +72,6 @@ class Account extends Controller
             if ($request->user()->role !== "SUPERADMIN") $activities->where('user_id', $request->user()->id);
 
             return response()->json(['activities' => $activities->get()], 200);
-        });
-    }
-
-    public function submit_csm (SubmitCSM $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
-            $new_csm = new CSM;
-            $new_csm->user_id = $request->user()->id;
-            $new_csm->reference_id = $request->refNumber;
-            $new_csm->service = $request->service;
-            $new_csm->suggestion = $request->suggestion;
-
-            $csm_data = [];
-            foreach ($request->ccAnswer as $key => $cc) $csm_data['cc' . $key + 1] = $cc;
-            foreach ($request->sqdAnswer as $key => $sqd) $csm_data['sqd' . $key] = $sqd;
-
-            $new_csm->fill($csm_data);
-            $new_csm->save();
-
-            if($request->service === 'LIBRARY') {
-                $updateRef = BookRes::find($request->refNumber);
-                $updateRef->status = "COMPLETED";
-                $updateRef->save();
-            }
-
-            return response()->json(['message' => "Client Satisfaction Submitted"], 200);
         });
     }
 
@@ -176,7 +161,7 @@ class Account extends Controller
             }
 
             $user->password = bcrypt($request->password);
-            $user->isSocial = "NO";
+            $user->isSocial = UserDetailsEnum::HARD_ACCOUNT;
             $user->save();
 
             AuditHelper::log($request->user()->id, "Updated account password.");
@@ -198,7 +183,9 @@ class Account extends Controller
     public function change_theme(Request $request) {
         return TransactionUtil::transact(null, ['user_profile_' . $request->user()->id], function() use ($request) {
             $user = User::find($request->user()->id);
-            $user->dark_mode = $user->dark_mode === 'dark' ? 'light' : 'dark';
+            $user->dark_mode = $user->dark_mode === UserDetailsEnum::DARK_MODE->value
+                ? UserDetailsEnum::LIGHT_MODE
+                : UserDetailsEnum::DARK_MODE;
             $user->save();
         });
     }

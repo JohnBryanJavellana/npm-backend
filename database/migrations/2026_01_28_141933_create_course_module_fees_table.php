@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(CourseModule::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(ChargeCategory::class)->constrained()->cascadeOnDelete();
-            $table->string("name")->nullable();
+            $table->longText("name")->nullable();
             $table->double("amount", 65,2 )->default(0.0);
             $table->enum("status", ["ACTIVE", "INACTIVE"])->default("ACTIVE");
             $table->timestamps();

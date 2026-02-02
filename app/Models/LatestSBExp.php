@@ -9,11 +9,11 @@ class LatestSBExp extends Model
 {
     use HasFactory;
 
-    public function licensesssssss() {
+    public function license() {
         return $this->belongsTo(License::class, 'license_id', 'id');
     }
 
-    public function rankkkkkkkkkkkkkkkkk()
+    public function rank()
     {
         return $this->belongsTo(Rank::class, 'rank_id', 'id');
     }

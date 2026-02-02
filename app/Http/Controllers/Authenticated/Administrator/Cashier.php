@@ -7,7 +7,6 @@ use App\Jobs\SendingEmail;
 use App\Mail\CashierEmail;
 use App\Models\BookRes;
 use App\Models\CashierOR;
-use App\Models\Credit;
 use App\Models\DormitoryInvoice;
 use App\Models\DormitoryTenant;
 use App\Models\EnrolledCourse;
@@ -17,13 +16,11 @@ use App\Models\User;
 use App\Utils\Notifications;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use App\Utils\{
     TransactionUtil,
     AuditHelper
 };
 use App\Events\{
-    BeDormitory,
     BEInvoice,
     BEAuditTrail
 };
@@ -36,6 +33,7 @@ use App\Models\{
     Charge,
     ChargeCategory
 };
+use App\Helpers\Administrator\General\CheckForDocumentExistence;
 
 class Cashier extends Controller
 {
@@ -136,35 +134,12 @@ class Cashier extends Controller
                 $this_main_table->save();
             }
 
-            $checkForCreditsUsed = User::where('id', $request->userId)
-                ->where('credit_amount', '>=', $request->usedCredits)
-                ->lockForUpdate()
-                ->first();
-
-            if(!$checkForCreditsUsed) {
-                return response()->json(['message' => "Insufficient credits to complete this transaction."], 400);
-            }
-
             $this_payment->invoice_status = "PAID";
-            $this_payment->credit_deduction = $request->usedCredits;
             $this_payment->received_amount = $request->receivedAmount;
             $this_payment->cashier_o_r_id = $request->orNumber;
             $this_payment->payment_type = 'WALK-IN';
             $this_payment->datePaid = Carbon::now();
             $this_payment->save();
-
-            if($request->usedCredits > 0) {
-                $checkForCreditsUsed->credit_amount -= $request->usedCredits;
-                $checkForCreditsUsed->save();
-
-                $new_credit_deduction = new Credit();
-                $new_credit_deduction->user_id = $request->userId;
-                $new_credit_deduction->reference_number = $this_payment->trace_number;
-                $new_credit_deduction->reason = config('creditReason.deduct.0');
-                $new_credit_deduction->type = "DEDUCT";
-                $new_credit_deduction->amount = $request->usedCredits;
-                $new_credit_deduction->save();
-            }
 
             if($request->orNumber) {
                 $this_or_parent = CashierOR::find($request->orNumber);
@@ -192,58 +167,6 @@ class Cashier extends Controller
         });
     }
 
-    public function create_or_update_charge (CreateOrUpdateCharge $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
-            $this_training_fee = $request->httpMethod === "POST"
-                ? new Charge
-                : Charge::find($request->documentId);
-
-            $this_training_fee->charge_category_id = $request->category;
-            $this_training_fee->name = $request->name;
-            $this_training_fee->amount = $request->amount;
-            $this_training_fee->description = $request->description;
-            $this_training_fee->service_type = $request->serviceType;
-            if($request->status) $this_training_fee->status = $request->status;
-            $this_training_fee->save();
-
-            AuditHelper::log($request->user()->id,($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a training fee. ID#" . $this_training_fee->id);
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BEInvoice(''),
-                    new BEAuditTrail('')
-                );
-            }
-
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a training fee. ID#" . $this_training_fee->id], 201);
-        });
-    }
-
-    public function remove_charge (Request $request, int $chargeId) {
-        return TransactionUtil::transact(null, [], function() use ($request, $chargeId) {
-            $this_fee = Charge::withCount(['module' => function($query) {
-                return $query->whereHas('schedules', function ($schedulesQuery) {
-                    return $schedulesQuery->whereHas('hasData');
-                });
-            }])->where('id', $chargeId)->first();
-
-            if($this_fee->module_count > 0) {
-                return response()->json(['message' => "Can't remove training fee. It already has connected data."], 200);
-            } else {
-                $this_fee->delete();
-                AuditHelper::log($request->user()->id, "Removed a training fee. ID#$chargeId");
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEInvoice(''),
-                        new BEAuditTrail('')
-                    );
-                }
-                return response()->json(['message' => "You've removed a training fee. ID#$chargeId"], 200);
-            }
-        });
-    }
-
     public function get_charges_category (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request)  {
             $categories = ChargeCategory::withCount(['hasData'])->get();
@@ -253,10 +176,21 @@ class Cashier extends Controller
 
     public function create_or_update_charge_category (CreateOrUpdateFeeCategory $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $fee_category = $request->httpMethod === "POST"
-                ? new ChargeCategory()
-                : ChargeCategory::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                ChargeCategory::class,
+                ['name' => $request->name],
+                !$isPost,
+                $documentId,
+                'id',
+                "Charge Category already exist."
+            );
+
+            if($check) return $check;
+
+            $fee_category = $isPost ? new ChargeCategory() : ChargeCategory::find($request->documentId);
             $fee_category->name = $request->name;
             $fee_category->save();
 
@@ -361,24 +295,35 @@ class Cashier extends Controller
 
     public function create_or_update_or_number (CreateOrUpdateOR $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $this_or = $request->httpMethod === "POST"
-                ? new CashierOR()
-                : CashierOR::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                CashierOR::class,
+                ['name' => $request->name, 'service_type' => $request->service],
+                !$isPost,
+                $documentId,
+                'id',
+                "The OR Number '{$request->name}' is already assigned to this service type."
+            );
+
+            if($check) return $check;
+
+            $this_or = $isPost ? new CashierOR() : CashierOR::findOrFail($documentId);
             $this_or->name = $request->name;
             $this_or->service_type = $request->service;
             $this_or->save();
 
-            AuditHelper::log($request->user()->id,($request->httpMethod === "POST" ? 'Created' : 'Updated') . " an OR Number. ID#" . $this_or->id);
+            AuditHelper::log(
+                $request->user()->id,
+                ($isPost ? 'Created' : 'Updated') . " OR Number ID# " . $this_or->id
+            );
 
-            if(env('USE_EVENT')) {
-                event(
-                    new BEInvoice(''),
-                    new BEAuditTrail('')
-                );
+            if (env('USE_EVENT')) {
+                event(new BEInvoice(''), new BEAuditTrail(''));
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " an OR Number. ID#" . $this_or->id], 201);
+            return response()->json(['success' => true, 'message' => "OR Number successfully saved."], 200);
         });
     }
 
