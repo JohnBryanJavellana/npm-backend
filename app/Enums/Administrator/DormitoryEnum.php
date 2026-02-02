@@ -4,14 +4,19 @@ namespace App\Enums\Administrator;
 
 enum DormitoryEnum : string
 {
-    case DECLINED = "DECLINED";
-    case ENROLLED = "ENROLLED";
-    case FOR_PAYMENT = "FOR-PAYMENT";
-    case INCOMPLETE_REQUIREMENTS = "IR";
-    case COURSE_STATUS_FULLY_BOOKED = "CSFB";
-
-    case VERIFIED_REQUIREMENT = "Y";
-    case UNVERIFIED_REQUIREMENT = "N";
-
-    case BASIC_REQUIREMENT = 'YES';
+    case PENDING = "PENDING";
+    case PAID = "PAID";
+    case PROCESSING_PAYMENT = "PROCESSING PAYMENT";
+    case APPROVED = "APPROVED";
+    case RESERVED = "RESERVED";
+    case ACTIVE = "ACTIVE";
+    case FOR_PAYMENT = "FOR PAYMENT";
+    case REJECTED = 'REJECTED';
+    case TERMINATED = 'TERMINATED';
+    case EXTENDING = 'EXTENDING';
+    case CANCELLED = 'CANCELLED';
+    case AVAILABLE = 'AVAILABLE';
+    case RECEIVED = 'RECEIVED';
+    case BORROWED = 'BORROWED';
+    case COUPLE = 'COUPLE';
 }
