@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Enums\Administrator\EnrollmentEnum;
 use App\Events\{
     BEAuditTrail,
     BEEnrollment,
@@ -138,7 +139,7 @@ class EnrollmentCtrl extends Controller
                         })->values(),
                     ],
                     'requirements' => $allRelevantReqs->map(function ($req, $index) use ($traineeBasicReqs, $traineeCourseReqs) {
-                        $tr = ($req->isBasic === 'YES')
+                        $tr = ($req->isBasic === EnrollmentEnum::BASIC_REQUIREMENT->value)
                             ? $traineeBasicReqs->get($req->id)
                             : $traineeCourseReqs->get($req->id);
 
@@ -164,12 +165,12 @@ class EnrollmentCtrl extends Controller
     public function requirement_remark(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-            $this_remark = $request->isBasic === 'YES'
+            $this_remark = $request->isBasic === EnrollmentEnum::BASIC_REQUIREMENT->value
                 ? TrainingRegFile::findOrFail($request->documentId)
                 : TraineeRequirement::findOrFail($request->documentId);
 
             $this_remark->remarks = $request->remark ?? null;
-            $this_remark->locked = 'N';
+            $this_remark->locked = EnrollmentEnum::UNVERIFIED_REQUIREMENT;
             $this_remark->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod == 'POST' ? 'Created' : 'Updated').' a remark. ID# '.$this_remark->id);
@@ -195,7 +196,10 @@ class EnrollmentCtrl extends Controller
                 ? TrainingRegFile::findOrFail($request->documentId)
                 : TraineeRequirement::findOrFail($request->documentId);
 
-            $this_requirement->locked = $request->locked === 'Y' ? 'N' : 'Y';
+            $this_requirement->locked = $request->locked === EnrollmentEnum::VERIFIED_REQUIREMENT->value
+                ? EnrollmentEnum::UNVERIFIED_REQUIREMENT->value
+                : EnrollmentEnum::VERIFIED_REQUIREMENT->value;
+
             $this_requirement->save();
 
             if (env('USE_EVENT')) {
@@ -214,8 +218,8 @@ class EnrollmentCtrl extends Controller
             $this_training_status->enrolled_course_status = $request->status;
             $this_training_status->save();
 
-            if ($request->status === 'FOR-PAYMENT') {
-                $premade_record = new EnrollmentInvoice;
+            if ($request->status === EnrollmentEnum::FOR_PAYMENT) {
+                $premade_record = new EnrollmentInvoice();
                 $premade_record->enrolled_course_id = $request->documentId;
                 $premade_record->user_id = $this_training_status->user_id;
                 $premade_record->trace_number = GenerateTrace::createTraceNumber(EnrollmentInvoice::class, '-EAINV-');
@@ -681,7 +685,6 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () {
             $schools = MainSchool::withCount(['hasData'])->get();
-
             return response()->json(['schools' => $schools], 200);
         });
     }
@@ -762,7 +765,6 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () {
             $courses = MainCourse::withCount(['hasData'])->get();
-
             return response()->json(['courses' => $courses], 200);
         });
     }
@@ -838,7 +840,6 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () {
             $vouchers = Voucher::all();
-
             return response()->json(['vouchers' => $vouchers], 200);
         });
     }
@@ -897,7 +898,6 @@ class EnrollmentCtrl extends Controller
                 return response()->json(['message' => "Can't remove voucher. It already has connected data."], 409);
             } else {
                 $this_voucher->delete();
-
                 AuditHelper::log($request->user()->id, "Removed a voucher. ID#$voucher_id");
 
                 if (env('USE_EVENT')) {
@@ -995,7 +995,6 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () {
             $licenses = License::withCount(['hasData'])->get();
-
             return response()->json(['licenses' => $licenses], 200);
         });
     }
@@ -1074,7 +1073,6 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () {
             $ranks = Rank::withCount(['hasData'])->get();
-
             return response()->json(['ranks' => $ranks], 200);
         });
     }
@@ -1143,8 +1141,6 @@ class EnrollmentCtrl extends Controller
                         new BEAuditTrail('')
                     );
                 }
-
-                DB::commit();
 
                 return response()->json(['message' => "You've removed rank. ID#$rank_id"], 200);
             }
@@ -1221,7 +1217,6 @@ class EnrollmentCtrl extends Controller
                 return response()->json(['message' => "Can't remove facilitator. It already has connected data."], 409);
             } else {
                 $this_facilitator->delete();
-
                 AuditHelper::log($request->user()->id, "Removed a facilitator. ID#$facilitator_id");
 
                 if (env('USE_EVENT')) {
@@ -1230,8 +1225,6 @@ class EnrollmentCtrl extends Controller
                         new BEAuditTrail('')
                     );
                 }
-
-                DB::commit();
 
                 return response()->json(['message' => "You've removed facilitator. ID#$facilitator_id"], 200);
             }
