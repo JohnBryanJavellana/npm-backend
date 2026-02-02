@@ -7,4 +7,5 @@ enum UserDetailsEnum : string
     case DARK_MODE = "dark";
     case LIGHT_MODE = "light";
     case HARD_ACCOUNT = "NO";
+    case SOFT_ACCOUNT = "YES";
 }
