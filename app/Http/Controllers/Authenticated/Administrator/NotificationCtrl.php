@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Utils\TransactionUtil;
 use App\Models\{
     Notification
@@ -41,7 +40,7 @@ class NotificationCtrl extends Controller
 
     public function update_notification (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $this_notification = $this->notificationInstance->find($request->notificationId);
+            $this_notification = $this->notificationInstance->findOrFail($request->notificationId);
             $this_notification->is_read = "YES";
             $this_notification->save();
             return response()->json(['message' => "OK"], 200);

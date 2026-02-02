@@ -23,8 +23,6 @@ use App\Http\Requests\Admin\Library\{
     CreateOrUpdateBookRequest,
     CreateOrUpdateGenre,
     UpdateBookRequest,
-    CreateWalkInRequest,
-    ExtensionFormRequest,
     RequestFine
 };
 use App\Events\{
@@ -50,18 +48,26 @@ use App\Models\{
     User,
     ExtensionRequest,
     LibraryInvoice,
-    BookExtensionRequest,
     LISelectedBook
 };
+use App\Helpers\Administrator\General\CheckForDocumentExistence;
 
 class LibraryController extends Controller
 {
     protected $traineeCtrlInstance;
 
+    /**
+     * Summary of __construct
+     * @param TraineeLibrary $traineeLibrary
+     */
     public function __construct(TraineeLibrary $traineeLibrary){
         $this->traineeCtrlInstance = $traineeLibrary;
     }
 
+    /**
+     * Summary of get_books
+     * @param Request $request
+     */
     public function get_books (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $books = Book::withCount('copies', 'hasData')->with([
@@ -73,6 +79,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_book
+     * @param CreateOrUpdateBookRequest $request
+     */
     public function create_or_update_book (CreateOrUpdateBookRequest $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $book_catalog = $request->httpMethod === "POST"
@@ -148,6 +158,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of create_book_copies
+     * @param Request $request
+     */
     public function create_book_copies (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $copiesData = [];
@@ -172,6 +186,11 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of remove_book
+     * @param Request $request
+     * @param int $book_id
+     */
     public function remove_book (Request $request, int $book_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $book_id) {
             $this_book = Book::withCount(['hasData', 'copies'])->where('id', $book_id)->first();
@@ -201,6 +220,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_book_entries
+     * @param Request $request
+     */
     public function get_book_entries (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $genres = BookGenre::withCount('hasData')->get();
@@ -208,15 +231,30 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_book_entry
+     * @param CreateOrUpdateGenre $request
+     */
     public function create_or_update_book_entry (CreateOrUpdateGenre $request) {
         return TransactionUtil::transact($request, ['genres_cache'], function() use ($request) {
-            $this_genre = $request->httpMethod === "POST"
-                ? new BookGenre
-                : BookGenre::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                BookGenre::class,
+                ['name' => $request->name, 'category' => $request->category],
+                !$isPost,
+                $documentId,
+                'id',
+                "Book Entry already exist."
+            );
+
+            if($check) return $check;
+
+            $this_genre = $isPost ? new BookGenre : BookGenre::find($request->documentId);
             $this_genre->category = $request->category;
             $this_genre->name = $request->name;
-            if($request->status) $this_genre->status = $request->status;
+            if(!$isPost) $this_genre->status = $request->status;
             $this_genre->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a book entry. ID#" . $this_genre->id);
@@ -232,6 +270,11 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of remove_entry
+     * @param Request $request
+     * @param int $entry_id
+     */
     public function remove_entry (Request $request, int $entry_id) {
         return TransactionUtil::transact(null, ['genres_cache'], function() use ($request, $entry_id) {
             $this_book_genre = BookGenre::withCount(['hasData'])->where('id', $entry_id)->first();
@@ -254,6 +297,11 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_book_info
+     * @param Request $request
+     * @param int $book_id
+     */
     public function get_book_info (Request $request, int $book_id){
         return TransactionUtil::transact(null, [], function() use($request, $book_id) {
             $book = Book::where('id', $book_id)
@@ -301,6 +349,11 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_copies
+     * @param Request $request
+     * @param int $book_id
+     */
     public function get_copies (Request $request, int $book_id) {
         return TransactionUtil::transact(null, [], function() use ($book_id) {
             $bookCopies = BookCopy::withCount('hasData')->where('book_id', operator: $book_id)->get();
@@ -308,6 +361,11 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of remove_copy
+     * @param Request $request
+     * @param int $copy_id
+     */
     public function remove_copy (Request $request, int $copy_id) {
         return TransactionUtil::transact(null, ['book_copies_cache'], function() use ($request, $copy_id) {
             $this_book = BookCopy::withCount(['hasData'])->where('id', $copy_id)->first();
@@ -330,6 +388,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of count_book_reservation
+     * @param Request $request
+     */
     public function count_book_reservation (Request $request){
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = BookRes::query();
@@ -355,6 +417,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of check_for_book_reservation
+     * @param Request $request
+     */
     public function check_for_book_reservation (Request $request){
         return TransactionUtil::transact(null, [], function() use ($request) {
             $bookReservationCheck = ExtensionRequest::where([
@@ -385,6 +451,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_book_reservation
+     * @param Request $request
+     */
     public function get_book_reservation (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = BookRes::with([
@@ -409,6 +479,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_prolongation_request
+     * @param Request $request
+     */
     public function get_prolongation_request (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $prolongationMain = BookReservation::with([
@@ -425,6 +499,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_books_that_protractible
+     * @param Request $request
+     */
     public function get_books_that_protractible (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $booksThatAreProtactible = BookReservation::with([
@@ -440,14 +518,28 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of submit_extension_request
+     * @param ExtendingRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function submit_extension_request (ExtendingRequest $request) {
         return $this->traineeCtrlInstance->extend($request);
     }
 
+    /**
+     * Summary of submit_renewal_request
+     * @param RenewBookRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function submit_renewal_request (RenewBookRequest $request) {
         return $this->traineeCtrlInstance->renew($request);
     }
 
+    /**
+     * Summary of update_prolongation_request
+     * @param Request $request
+     */
     public function update_prolongation_request(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $bR = BookReservation::find($request->documentId);
@@ -489,6 +581,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of update_reservation
+     * @param UpdateBookRequest $request
+     */
     public function update_reservation(UpdateBookRequest $request){
         return TransactionUtil::transact($request, ["book_reservations_cache"], function() use ($request) {
             $reservation = BookReservation::findOrFail($request->documentId);
@@ -533,6 +629,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_available_books
+     * @param Request $request
+     */
     public function get_available_books (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $user = User::findOrFail($request->userId);
@@ -594,10 +694,19 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of create_walkin_request
+     * @param BookRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function create_walkin_request (BookRequest $request) {
         return $this->traineeCtrlInstance->send_request_book($request);
     }
 
+    /**
+     * Summary of get_pre_data
+     * @param Request $request
+     */
     public function get_pre_data (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $genres = BookGenre::withCount(['hasData'])
@@ -616,6 +725,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_fines
+     * @param Request $request
+     */
     public function get_fines(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $fines = LibraryInvoice::with([
@@ -635,6 +748,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_book_reservation_that_needs_fine
+     * @param Request $request
+     */
     public function get_book_reservation_that_needs_fine (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $booksThatNeedsFine = BookRes::where([
@@ -654,6 +771,11 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of remove_fine
+     * @param Request $request
+     * @param int $id
+     */
     public function remove_fine (Request $request, int $id) {
         return TransactionUtil::transact(null, [], function() use ($request, $id) {
             $libraryInvoice = LibraryInvoice::find($id);
@@ -669,6 +791,10 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of create_fine
+     * @param RequestFine $request
+     */
     public function create_fine(RequestFine $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $new_fine = $request->httpMethod === "POST"
