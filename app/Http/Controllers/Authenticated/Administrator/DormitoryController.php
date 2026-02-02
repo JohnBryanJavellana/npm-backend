@@ -67,7 +67,7 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $dormitories = Dormitory::withCount([
                 'rooms' => function ($query) {
-                    $query->where("room_status", "AVAILABLE");
+                    $query->where("room_status", DormitoryEnum::AVAILABLE->value);
                 }
             ])->withCount([
                 'rooms'
