@@ -878,6 +878,8 @@ class DormitoryController extends Controller
             $count = [
                 'total'     => $get_count($reservations),
                 'pending'   => $get_count($reservations->clone()->where('tenant_status', 'PENDING')),
+                'paid'   => $get_count($reservations->clone()->where('tenant_status', 'PAID')),
+                'processing_payment'   => $get_count($reservations->clone()->where('tenant_status', 'PROCESSING PAYMENT')),
                 'approved'  => $get_count($reservations->clone()->whereIn('tenant_status', ['APPROVED', 'RESERVED'])),
                 'active'    => $get_count($reservations->clone()->whereIn('tenant_status', ['ACTIVE', 'FOR PAYMENT', 'PAID', 'PROCESSING PAYMENT'])),
                 'extending' => $get_count($reservations->clone()->where('tenant_status', 'EXTENDING')),
