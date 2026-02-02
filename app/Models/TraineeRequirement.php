@@ -9,7 +9,7 @@ class TraineeRequirement extends Model
 {
     use HasFactory;
 
-    // protected $guarded = ["id"];
+    protected $guarded = ["id"];
 
     public function requirement () {
         return $this->hasOne(Requirement::class, 'id', 'requirement_id');

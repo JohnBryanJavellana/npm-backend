@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Enums\RequestStatus;
+use App\Enums\UserRoleEnum;
 use App\Events\BEAccount;
 use App\Events\BEAuditTrail;
 use App\Events\BENotification;
@@ -133,20 +134,6 @@ class TraineeEnrollment extends Controller
         return CourseModuleResource::collection($courses);
     }
 
-    public function test(Request $request)
-    {
-        $training = Training::query()
-        ->whereKey(20260001)
-        ->active()
-        ->lockForUpdate()
-        ->firstOrFail(["id", "schedule_slot", "course_module_id"]);
-
-        $speReq =  $training->module->hasData->count();
-        $basicReq = Requirement::active()->basic()->count();
-
-        return response()->json(["data" => $speReq], 200);
-    }
-
     public function send_enrollment_request(EnrollmentRequest $request) {
         try {
             DB::beginTransaction();
@@ -169,6 +156,7 @@ class TraineeEnrollment extends Controller
             if ( !$addtional_info_id ) {
                 return response()->json(['message' => 'To get started, open My Account and enter some of your information.'], 422);
             }
+            
             //SEPARATE CONCERN
             $selected_training = new EnrolledCourse();
             $selected_training->user_id = $user_id;
@@ -246,7 +234,7 @@ class TraineeEnrollment extends Controller
                 event(new BETraineeApplication(''));
             }
 
-            return response()->json(['message' => "You've removed training request. ID# {$validated["enrolled_course_id"]}"], 200);
+            return response()->json(['message' => "You've successully cancelled a training request."], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -260,23 +248,6 @@ class TraineeEnrollment extends Controller
 
     /** UPDATING ENROLLMENT REQUESTS **/
     public function update_requirements_request(UpdateRequirementRequest $request) {
-
-        // $validated = $request->validated();
-        // $files = $validated["file_upload"];
-        // \Log::info($validated);
-
-        // foreach($files as $file) { 
-        //     \Log::info($file["requirement_id"]);
-        // }
-        // return response()->json(["wow"], 200);
-        /**
-         * Use Form Request Class
-         * Use the EnrollmentService Class+
-         * Try to use updateOrCreate
-         * Check if error other files will be saved.
-         * train_reg_file = 1769997421_6980046d082d9.png
-         * specific = 1769997421_6980046d1ada7.png
-         **/ 
         $validated = $request->validated();
         $storedFiles = [];
 
@@ -296,7 +267,6 @@ class TraineeEnrollment extends Controller
                             ],
                             ["filename" => $filename]
                         );
-
                     } else {
                         $filename = SaveFile::save($file['file'],'training_requirement_files');
                         $storedFiles[] = ["training_requirement_files" => $filename];
@@ -311,9 +281,17 @@ class TraineeEnrollment extends Controller
                 }
             });
 
-            //based on userId not the $request->user()
-            // AuditHelper::log($request->user()->id, "User " . $request->user()->id . " updated an enrollment request.");
-            // Notifications::notify($request->user()->id, null, "ENROLLMENT", "has updated their enrollement request");
+            AuditHelper::log(
+                $validated["user_id"],
+                 in_array($request->user()->role, UserRoleEnum::enrollmentRoles()) 
+                    ? "Admin " . $request->user()->id . " updated the enrollment request of trainee " . $validated["user_id"] . "." 
+                    : "User " . $request->user()->id . " updated an enrollment request.");
+            
+            Notifications::notify(
+                $request->user()->id,
+                 in_array($request->user()->role, UserRoleEnum::enrollmentRoles()) ? $validated["user_id"] : null,
+                  "ENROLLMENT",
+                in_array($request->user()->role, UserRoleEnum::enrollmentRoles()) ? : "has updated their enrollement request");
 
             if(env("USE_EVENT")) {
                 event(new BETraineeApplication(''), new BENotification(''));
@@ -321,14 +299,15 @@ class TraineeEnrollment extends Controller
 
             return response()->json(['message' => 'Enrollment request updated successfully!'], 200);
         } catch (\Exception $e) {
-            foreach ($storedFiles as $key => $file) {
-                unlink(public_path($key . "/" . $file));
-            }
+            //Temporary Method
+            $this->enrollmentService->removeFailedUploads($storedFiles);
+
             \Log::error('Error_updating_enrollment_request: ', [$e->getMessage()]);
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
+    //for testing only
     public function update_invoice_trainings (Request $request) {
         \Log::info('update_invoice_trainings: ', $request->all());
         return response()->json([$request->all()], 200);
@@ -369,7 +348,6 @@ class TraineeEnrollment extends Controller
         }
 
     }
-
     public function get_applications(ViewTraineeRecRequest $request)
     {
         try 
@@ -384,7 +362,6 @@ class TraineeEnrollment extends Controller
             return response()->json(["message" => "Something went wrong, Please try again"], 500);
         }
     }
-//new
     public function get_application(ViewApplicationRequest $request)
     {
         try {
