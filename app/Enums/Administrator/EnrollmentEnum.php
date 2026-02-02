@@ -4,7 +4,9 @@ namespace App\Enums\Administrator;
 
 enum EnrollmentEnum : string
 {
+    case PENDING = "PENDING";
     case DECLINED = "DECLINED";
+    case CANCELLED = "CANCELLED";
     case ENROLLED = "ENROLLED";
     case FOR_PAYMENT = "FOR-PAYMENT";
     case INCOMPLETE_REQUIREMENTS = "IR";
