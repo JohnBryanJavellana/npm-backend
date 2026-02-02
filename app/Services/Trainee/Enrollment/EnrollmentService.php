@@ -4,7 +4,8 @@ namespace App\Services\Trainee\Enrollment;
 
 use App\Enums\RequestStatus;
 use App\Http\Resources\TrainingListResource;
-use App\Models\{EnrolledCourse, Rank, License, Requirement, TraineeRequirement, Training, TrainingRegFile};
+use App\Models\{AdditionalTraineeInfo, EnrolledCourse, Rank, License, Requirement, TraineeRequirement, Training, TrainingRegFile};
+use App\Utils\SaveFile;
 use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,8 @@ class EnrollmentService {
         protected License $licenseModel,
         protected Requirement $requirementModel,
         protected TrainingRegFile $trainingRegFileModel,
-        protected TraineeRequirement $traineeRequirementModel
+        protected TraineeRequirement $traineeRequirementModel,
+        protected AdditionalTraineeInfo $additionalTraineeInfoModel
     ) {}
 
     /**
@@ -124,23 +126,35 @@ class EnrollmentService {
 
     }
 
-    public function storeBasic()
+    public function storeBasic($file, $additional_id)
     {
+        $filename = SaveFile::save($file['file'],'trainee-files');
         $this->trainingRegFileModel->query()
-        ->updateOrCreate([
-
-        ]);
+        ->updateOrCreate(
+            [
+                "requirement_id" => $file["requirement_id"],
+                "additional_trainee_info_id" => $additional_id,
+            ],
+            [
+                "filename" => $filename,
+            ]
+        );
+        return $filename;
     }
 
-    public function storeSpecific()
+    public function storeSpecific($file, $enrolled_id)
     {
-        return;
-    }
-    //wait
-
-    public function updateRequirements()
-    {
-        
+        $filename = SaveFile::save($file['file'],'training_requirement_files');
+        $this->traineeRequirementModel->query()
+            ->updateOrCreate([
+                "requirement_id" => $file["requirement_id"],
+                "enrolled_course_id" => $enrolled_id,
+            ],
+            [
+                "filename" => $filename,
+            ]
+        );
+        return $filename;
     }
 
     /**

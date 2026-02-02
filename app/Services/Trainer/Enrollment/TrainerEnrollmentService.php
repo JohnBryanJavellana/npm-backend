@@ -24,6 +24,7 @@ class TrainerEnrollmentService {
     {
         $userId = Auth::id();
         return $this->trainingModel->query()
+        ->where("course_module_id", $course_module_id)
         ->whereHas("module", function($query) use ($userId) {
             $query->whereRelation("facilitator", "user_id", $userId);
         })
