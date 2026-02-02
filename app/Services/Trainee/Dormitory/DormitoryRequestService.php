@@ -3,6 +3,7 @@
 namespace App\Services\Trainee\Dormitory;
 
 use App\Models\{
+    Dormitory,
     DormitoryInventory,
     DormitoryRoom,
     DormitoryTenant,
@@ -13,7 +14,6 @@ use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use App\Utils\SaveFile;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use DomainException;
 
@@ -25,6 +25,7 @@ class DormitoryRequestService {
     private const PREFIX = "-DR-";
 
     public function __construct(
+        protected Dormitory $dormitoryModel,
         protected DormitoryRoom $roomModel,
         protected DormitoryTenant $tenantModel,
         protected DormitoryTenantHistory $dormitoryTenantHistory,
@@ -32,17 +33,26 @@ class DormitoryRequestService {
         protected DormitoryItemBorrowing $dormitoryItemBorrowing,
     ) {}
 
-    public function viewUserRequest($userId, $traceNumber)
-    {
-        $cacheKey = "a$userId";
-        return Cache::remember($cacheKey, self::LONG_TTL, function() {
+    // public function viewUserRequest($userId, $traceNumber)
+    // {
+    //     $cacheKey = "a$userId";
+    //     return Cache::remember($cacheKey, self::LONG_TTL, function() {
 
-        });
-    }
+    //     });
+    // }
 
-    public function viewApplication()
+    public function getRecommendedRoom($validated)
     {
-        return;
+        return $this->dormitoryModel->query()
+        ->with([
+            "room_images:id,dormitory_id,filename"
+        ])
+        ->where([
+            "room_fee_type" => $validated["forType"],
+            "is_air_conditioned" => $validated["roomType"],
+        ])
+        //for single accomodation and date range
+        ->get(["id", "room_name","room_cost","guest_cost"]);        
     }
 
     public function createRequest($validated, $userId)

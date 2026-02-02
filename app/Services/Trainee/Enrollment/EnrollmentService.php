@@ -9,6 +9,8 @@ use App\Utils\SaveFile;
 use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+
 
 class EnrollmentService {
 
@@ -203,5 +205,26 @@ class EnrollmentService {
                 "enrolled_course_status" => RequestStatus::CANCELLED
             ]);
         });
+    }
+
+    //temporary
+    public function removeFailedUploads($storedFiles)
+    {
+        foreach ($storedFiles as $file) {
+            foreach ($file as $path => $filename) {
+
+                $fullPath = public_path($path . '/' . $filename);
+
+                // Normalize path to prevent traversal attacks
+                $realBase = realpath(public_path($path));
+                $realFile = realpath($fullPath);
+
+                if ($realFile && str_starts_with($realFile, $realBase)) {
+                    if (File::exists($realFile)) {
+                        File::delete($realFile);
+                    }
+                }
+            }
+        }
     }
 }

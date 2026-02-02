@@ -65,6 +65,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 ->with([
                     'additional_trainee_info.general_info',
                     'additional_trainee_info.contact',
+                    'additional_trainee_info.latest_shipboard_attainment',
                     'additional_trainee_info.trainee_registration_file',
                     'additional_trainee_info.trainee_registration_file.requirement',
             ]);
@@ -113,8 +114,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix('/dormitories/')->group(function() {
             //DORM REQUEST
-            // Route::get('get_all_dormitories', [TraineeDormitory::class, 'get_all_dormitories']);
-            // Route::get('get_items', [TraineeDormitory::class, 'get_items']);
+            Route::post('rooms', [TraineeDormitory::class, 'viewRecommendedRooms']);
+
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
 

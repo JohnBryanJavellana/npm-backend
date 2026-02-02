@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 use App\Enums\RequestStatus;
 use App\Events\BEDormitory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Trainee\Dormitory\{CancelServiceRequest, CreateExtendRequest, CreateInclusionRequest, CreateServiceRequest, CreateTransferRequest, DormRoomRequest};
-use App\Http\Resources\Trainee\Dormitory\{AvailableItemsResource, AvailableServicesResource, DApplicationResource, DAppliedRequest, InclusionRequestsResource};
+use App\Http\Requests\Trainee\Dormitory\{CancelServiceRequest, CreateExtendRequest, CreateInclusionRequest, CreateServiceRequest, CreateTransferRequest, DormRoomRequest, RoomPreferRequest};
+use App\Http\Resources\Trainee\Dormitory\{AvailableItemsResource, AvailableServicesResource, DApplicationResource, DAppliedRequest, DormRoomsResource, InclusionRequestsResource};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Utils\{AuditHelper, GenerateUniqueFilename, GenerateTrace, TransactionUtil};
@@ -58,6 +58,19 @@ class TraineeDormitory extends Controller
         protected DormitoryInclusionService $dormitoryInclusionService,
     ){}
 
+    public function viewRecommendedRooms(RoomPreferRequest $request)
+    {
+        try
+        {
+            $validated = $request->validated();
+            $rooms = $this->dormitory_service->getRecommendedRoom($validated);
+            return DormRoomsResource::collection($rooms);
+        }
+        catch (\Exception $e) {
+        }
+    }
+
+    //for removal
     public function get_filtered_dorms (Request $request) {
         try {
             $cost = $request->cost;
