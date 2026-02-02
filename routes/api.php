@@ -3,7 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\Facades\Cache;
 
 /** guest controllers */
 use App\Http\Controllers\Guest\{
@@ -66,7 +65,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                     'additional_trainee_info.contact',
                     'additional_trainee_info.trainee_registration_file',
                     'additional_trainee_info.trainee_registration_file.requirement',
-            ]);
+                ]);
         }
         return response()->json(['user' => $user->first()]);
     });
@@ -102,7 +101,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
         });
 
-        // Route::prefix('/trainer/enrollment/')->middleware('user_role:TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () { 
+        // Route::prefix('/trainer/enrollment/')->middleware('user_role:TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () {
         // });
 
         Route::prefix('/trainings/')->group(function() {
@@ -207,62 +206,49 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_enrolled', [EnrollmentCtrl::class, 'get_enrolled']);
             Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished']);
             Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
-
             Route::get('get_schedules', [EnrollmentCtrl::class, 'get_schedules']);
             Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
             Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
-
             Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
             Route::post('create_or_update_module', [EnrollmentCtrl::class, 'create_or_update_module']);
             Route::delete('remove_module/{module_id}', [EnrollmentCtrl::class, 'remove_module']);
-
             Route::get('get_module_types', [EnrollmentCtrl::class, 'get_module_types']);
             Route::post('create_or_update_module_type', [EnrollmentCtrl::class, 'create_or_update_module_type']);
             Route::delete('remove_module_type/{module_type_id}', [EnrollmentCtrl::class, 'remove_module_type']);
-
             Route::get('get_certificates', [EnrollmentCtrl::class, 'get_certificates']);
             Route::post('create_or_update_certificate', [EnrollmentCtrl::class, 'create_or_update_certificate']);
             Route::delete('remove_certificate/{certificate_id}', [EnrollmentCtrl::class, 'remove_certificate']);
-
             Route::get('get_requirements', [EnrollmentCtrl::class, 'get_requirements']);
             Route::post('create_or_update_requirement', [EnrollmentCtrl::class, 'create_or_update_requirement']);
             Route::delete('training-requirements/remove_trequirement/{requirement_id}', [EnrollmentCtrl::class, 'remove_requirement']);
-
             Route::get('get_schools', [EnrollmentCtrl::class, 'get_schools']);
             Route::post('create_or_update_school', [EnrollmentCtrl::class, 'create_or_update_school']);
             Route::delete('remove_school/{school_id}', [EnrollmentCtrl::class, 'remove_school']);
-
             Route::get('get_courses', [EnrollmentCtrl::class, 'get_courses']);
             Route::post('create_or_update_course', [EnrollmentCtrl::class, 'create_or_update_course']);
             Route::delete('remove_course/{course_id}', [EnrollmentCtrl::class, 'remove_course']);
-
             Route::get('get_vouchers', [EnrollmentCtrl::class, 'get_vouchers']);
             Route::post('create_or_update_voucher', [EnrollmentCtrl::class, 'create_or_update_voucher']);
             Route::delete('remove_voucher/{voucher_id}', [EnrollmentCtrl::class, 'remove_voucher']);
-
             Route::get('get_sponsors', [EnrollmentCtrl::class, 'get_sponsors']);
             Route::post('create_or_update_sponsor', [EnrollmentCtrl::class, 'create_or_update_sponsor']);
             Route::delete('remove_sponsor/{sponsor_id}', [EnrollmentCtrl::class, 'remove_sponsor']);
-
             Route::get('get_licenses', [EnrollmentCtrl::class, 'get_licenses']);
             Route::post('create_or_update_license', [EnrollmentCtrl::class, 'create_or_update_license']);
             Route::delete('remove_license/{license_id}', [EnrollmentCtrl::class, 'remove_license']);
-
             Route::get('get_ranks', [EnrollmentCtrl::class, 'get_ranks']);
             Route::post('create_or_update_rank', [EnrollmentCtrl::class, 'create_or_update_rank']);
             Route::delete('remove_rank/{rank_id}', [EnrollmentCtrl::class, 'remove_rank']);
-
             Route::get('get_facilitators', [EnrollmentCtrl::class, 'get_facilitators']);
             Route::post('create_or_update_facilitator', [EnrollmentCtrl::class, 'create_or_update_facilitator']);
             Route::delete('remove_facilitator/{facilitator_id}', [EnrollmentCtrl::class, 'remove_facilitator']);
-
             Route::get('get_training_fees_predata', [EnrollmentCtrl::class, 'get_training_fees_predata']);
             Route::get('get_course_module_fees', [EnrollmentCtrl::class, 'get_course_module_fees']);
             Route::post('create_or_update_course_fee', [EnrollmentCtrl::class, 'create_or_update_course_fee']);
             Route::delete('remove_course_fee/{course_fee_id}', [EnrollmentCtrl::class, 'remove_course_fee']);
         });
 
-        Route::prefix('/books/')->group(function() {
+        Route::prefix('/books/')->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function() {
             Route::get('get_books', [LibraryController::class, 'get_books']);
             Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
             Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
@@ -289,14 +275,14 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book']);
         });
 
-        Route::prefix('/book_entry/')->group(function() {
+        Route::prefix('/book_entry/')->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function() {
             Route::get('get_book_entries', [LibraryController::class, 'get_book_entries']);
             Route::get('get_active_entries', [LibraryController::class, 'get_active_entries']);
             Route::post('create_or_update_book_entry', [LibraryController::class, 'create_or_update_book_entry']);
             Route::delete('remove_entry/{entry_id}', [LibraryController::class, 'remove_entry']);
         });
 
-        Route::prefix('/dormitory/')->group(function() {
+        Route::prefix('/dormitory/')->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY')->group(function() {
             Route::get('get', [DormitoryController::class, 'dormitories']);
             Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
@@ -331,7 +317,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
         });
 
-        Route::prefix('/masterlist/')->group(function() {
+        Route::prefix('/masterlist/')->middleware('user_role:SUPERADMIN')->group(function() {
             Route::prefix('/user/')->group(function() {
                 Route::match(['GET', 'POST'], 'get_users', [Masterlist::class, 'get_users']);
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
@@ -353,12 +339,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             });
         });
 
-        Route::prefix('/invoice/')->group(function() {
+        Route::prefix('/invoice/')->middleware('user_role:SUPERADMIN,CASHIER')->group(function() {
             Route::post('get_invoices', [Cashier::class, 'get_invoices']);
             Route::post('update_payment_status', [Cashier::class, 'update_payment_status']);
         });
 
-        Route::prefix('/cashier/')->group(function() {
+        Route::prefix('/cashier/')->middleware('user_role:SUPERADMIN,CASHIER')->group(function() {
             Route::post('get_payments', [Cashier::class, 'get_payments']);
             Route::post('pay-walk-in', [Cashier::class, 'pay_walkin']);
             Route::post('verify_payment', [Cashier::class, 'verify_payment']);

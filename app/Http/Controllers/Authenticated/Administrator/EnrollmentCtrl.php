@@ -2,51 +2,59 @@
 
 namespace App\Http\Controllers\Authenticated\Administrator;
 
-use App\Events\BEAuditTrail;
-use App\Events\BEEnrollment;
-use App\Events\BETraineeApplication;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateCertificate;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateCourse;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateFacilitator;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateLicense;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateModule;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateModuleType;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateRank;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateRequirement;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateSchedule;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateSchool;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateSponsor;
-use App\Http\Requests\Admin\Enrollment\CreateOrUpdateVoucher;
-use App\Models\AuditTrail;
-use App\Models\ChargeCategory;
-use App\Models\CourseModule;
-use App\Models\CourseModuleFee;
-use App\Models\EnrolledCourse;
-use App\Models\EnrollmentInvoice;
-use App\Models\License;
-use App\Models\MainCertificate;
-use App\Models\MainCourse;
-use App\Models\MainSchool;
-use App\Models\ModuleType;
-use App\Models\Rank;
-use App\Models\Requirement;
-use App\Models\RequirementSpecificModule;
-use App\Models\Sponsor;
-use App\Models\TraineeRequirement;
-use App\Models\Training;
-use App\Models\TrainingFacilitator;
-use App\Models\TrainingRegFile;
-use App\Models\Voucher;
-use App\Utils\AuditHelper;
-use App\Utils\ConvertToBase64;
-use App\Utils\GenerateTrace;
-use App\Utils\Notifications;
-use App\Utils\TransactionUtil;
+use App\Events\{
+    BEAuditTrail,
+    BEEnrollment,
+    BETraineeApplication
+};
+use App\Http\Requests\Admin\Enrollment\{
+    CreateOrUpdateCertificate,
+    CreateOrUpdateCourse,
+    CreateOrUpdateFacilitator,
+    CreateOrUpdateLicense,
+    CreateOrUpdateModule,
+    CreateOrUpdateModuleType,
+    CreateOrUpdateRank,
+    CreateOrUpdateRequirement,
+    CreateOrUpdateSchedule,
+    CreateOrUpdateSchool,
+    CreateOrUpdateSponsor,
+    CreateOrUpdateVoucher
+};
+use App\Models\{
+    ChargeCategory,
+    CourseModule,
+    CourseModuleFee,
+    EnrolledCourse,
+    EnrollmentInvoice,
+    License,
+    MainCertificate,
+    MainCourse,
+    MainSchool,
+    ModuleType,
+    Rank,
+    Requirement,
+    RequirementSpecificModule,
+    Sponsor,
+    TraineeRequirement,
+    Training,
+    TrainingFacilitator,
+    TrainingRegFile,
+    Voucher
+};
+use App\Utils\{
+    AuditHelper,
+    ConvertToBase64,
+    GenerateTrace,
+    Notifications,
+    TransactionUtil
+};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Helpers\Administrator\General\CheckForDocumentExistence;
 
 class EnrollmentCtrl extends Controller
 {
@@ -157,8 +165,8 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $this_remark = $request->isBasic === 'YES'
-                ? TrainingRegFile::find($request->documentId)
-                : TraineeRequirement::find($request->documentId);
+                ? TrainingRegFile::findOrFail($request->documentId)
+                : TraineeRequirement::findOrFail($request->documentId);
 
             $this_remark->remarks = $request->remark ?? null;
             $this_remark->locked = 'N';
@@ -184,8 +192,8 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $this_requirement = $request->isBasic === 'YES'
-                ? TrainingRegFile::find($request->documentId)
-                : TraineeRequirement::find($request->documentId);
+                ? TrainingRegFile::findOrFail($request->documentId)
+                : TraineeRequirement::findOrFail($request->documentId);
 
             $this_requirement->locked = $request->locked === 'Y' ? 'N' : 'Y';
             $this_requirement->save();
@@ -202,7 +210,7 @@ class EnrollmentCtrl extends Controller
     public function set_training_status(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-            $this_training_status = EnrolledCourse::find($request->documentId);
+            $this_training_status = EnrolledCourse::findOrFail($request->documentId);
             $this_training_status->enrolled_course_status = $request->status;
             $this_training_status->save();
 
@@ -236,82 +244,20 @@ class EnrollmentCtrl extends Controller
      */
     public function set_expired_status(Request $request)
     {
-        $validations = [
-            'isExpired' => 'required|string',
-        ];
+        return TransactionUtil::transact(null, [], function () use($request) {
+            $this_training = EnrolledCourse::findOrFail($request->documentId);
+            $this_training->enrolled_course_status = 'DECLINED';
+            $this_training->isExpired = $request->isExpired;
+            $this_training->save();
 
-        $validator = \Validator::make($request->all(), $validations);
-
-        if ($validator->fails()) {
-            $errors = $validator->messages()->all();
-
-            return response()->json(['message' => implode(', ', $errors)], 422);
-        } else {
-            try {
-                DB::beginTransaction();
-
-                $this_training = EnrolledCourse::find($request->documentId);
-                $this_training->enrolled_course_status = 'DECLINED';
-                $this_training->isExpired = $request->isExpired;
-                $this_training->save();
-
-                $new_log = new AuditTrail;
-                $new_log->user_id = $request->user()->id;
-                $new_log->actions = 'User has updated an enrolled course expiry status. ID# '.$this_training->id;
-                $new_log->save();
-
-                if (env('USE_EVENT')) {
-                    event(new BETraineeApplication(''));
-                }
-
-                DB::commit();
-
-                return response()->json(['message' => "You've updated an enrolled course expiry status. ID# ".$this_training->id], 201);
-            } catch (\Exception $e) {
-                DB::rollback();
-
-                return response()->json(['message' => $e->getMessage()], 500);
-            }
-        }
-    }
-
-    /**
-     * Summary of remove_training_request
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function remove_training_request(Request $request, int $training_request_id)
-    {
-        try {
-            DB::beginTransaction();
-
-            $training_request = EnrolledCourse::find($training_request_id);
-            $training_request_files = TraineeRequirement::where('enrolled_course_id', $training_request_id)->get();
-            foreach ($training_request_files as $trf) {
-                if (file_exists(public_path('training_requirement_files/'.$trf->filename))) {
-                    unlink(public_path('training_requirement_files/'.$trf->filename));
-                }
-            }
-
-            $training_request->delete();
-
-            $new_log = new AuditTrail;
-            $new_log->user_id = $request->user()->id;
-            $new_log->actions = "User has removed training request. ID# $training_request_id";
-            $new_log->save();
+            AuditHelper::log($request->user()->id, 'User has updated an enrolled course expiry status. ID# '.$this_training->id);
 
             if (env('USE_EVENT')) {
                 event(new BETraineeApplication(''));
             }
 
-            DB::commit();
-
-            return response()->json(['message' => "You've removed training request. ID# $training_request_id"], 200);
-        } catch (\Exception $e) {
-            DB::rollback();
-
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+            return response()->json(['message' => "You've updated an enrolled course expiry status. ID# ".$this_training->id], 201);
+        });
     }
 
     /**
@@ -341,8 +287,8 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact($request, ['schedules_cache'], function () use ($request) {
             $this_schedule = $request->httpMethod === 'POST'
-                ? new Training
-                : Training::find($request->documentId);
+                ? new Training()
+                : Training::findOrFail($request->documentId);
 
             $this_schedule->id = $request->httpMethod === 'POST'
                 ? Carbon::now()->year.str_pad((int) substr(Training::max('id'), 4) + 1, 4, 0, STR_PAD_LEFT)
@@ -420,8 +366,8 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $this_module = $request->httpMethod === 'POST'
-                ? new CourseModule
-                : CourseModule::find($request->documentId);
+                ? new CourseModule()
+                : CourseModule::findOrFail($request->documentId);
 
             $this_module->module_type_id = $request->module;
             $this_module->name = $request->name;
@@ -478,7 +424,6 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () {
             $moduleTypes = ModuleType::withCount(['hasData'])->get();
-
             return response()->json(['moduleTypes' => $moduleTypes], 200);
         });
     }
@@ -489,14 +434,26 @@ class EnrollmentCtrl extends Controller
     public function create_or_update_module_type(CreateOrUpdateModuleType $request)
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
-            $this_module_type = $request->httpMethod === 'POST'
-                ? new ModuleType
-                : ModuleType::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                ModuleType::class,
+                [
+                    'name' => $request->name,
+                    'category' => $request->category
+                ],
+                !$isPost,
+                $documentId,
+                'id',
+                "Module Type already exist."
+            );
+
+            if($check) return $check;
+
+            $this_module_type = $isPost ? new ModuleType() : ModuleType::findOrFail($request->documentId);
             $this_module_type->name = $request->name;
-            if ($request->status) {
-                $this_module_type->status = $request->status;
-            }
+            if (!$isPost) $this_module_type->status = $request->status;
             $this_module_type->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a module type. ID#'.$this_module_type->id);
@@ -561,8 +518,8 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $this_certificate = $request->httpMethod === 'POST'
-                ? new MainCertificate
-                : MainCertificate::find($request->documentId);
+                ? new MainCertificate()
+                : MainCertificate::findOrFail($request->documentId);
 
             $this_certificate->course_module_id = $request->module;
             $this_certificate->name = $request->name;
@@ -638,8 +595,8 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $this_requirement = $request->httpMethod === 'POST'
-                ? new Requirement
-                : Requirement::find($request->documentId);
+                ? new Requirement()
+                : Requirement::findOrFail($request->documentId);
 
             $this_requirement->name = $request->name;
             $this_requirement->description = $request->description;
@@ -735,16 +692,27 @@ class EnrollmentCtrl extends Controller
     public function create_or_update_school(CreateOrUpdateSchool $request)
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
-            $this_school = $request->httpMethod === 'POST'
-                ? new MainSchool
-                : MainSchool::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                MainSchool::class,
+                [
+                    'name' => $request->name,
+                    'school_address' => $request->address
+                ],
+                !$isPost,
+                $documentId,
+                'id',
+                "School details already exist."
+            );
+
+            if($check) return $check;
+
+            $this_school = $isPost ? new MainSchool() : MainSchool::findOrFail($request->documentId);
             $this_school->school_name = $request->name;
             $this_school->school_address = $request->address;
-            if ($request->status) {
-                $this_school->school_status = $request->status;
-            }
-
+            if (!$isPost) $this_school->school_status = $request->status;
             $this_school->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a school. ID#'.$this_school->id);
@@ -805,14 +773,23 @@ class EnrollmentCtrl extends Controller
     public function create_or_update_course(CreateOrUpdateCourse $request)
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
-            $this_course = $request->httpMethod === 'POST'
-                ? new MainCourse
-                : MainCourse::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                MainCourse::class,
+                ['course_name' => $request->name],
+                !$isPost,
+                $documentId,
+                'id',
+                "Course details already exist."
+            );
+
+            if($check) return $check;
+
+            $this_course = $isPost ? new MainCourse() : MainCourse::findOrFail($request->documentId);
             $this_course->course_name = $request->name;
-            if ($request->status) {
-                $this_course->course_status = $request->status;
-            }
+            if (!$isPost) $this_course->course_status = $request->status;
             $this_course->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a course. ID#'.$this_course->id);
@@ -872,15 +849,27 @@ class EnrollmentCtrl extends Controller
     public function create_or_update_voucher(CreateOrUpdateVoucher $request)
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
-            $this_voucher = $request->httpMethod === 'POST'
-                ? new Voucher
-                : Voucher::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                Voucher::class,
+                [
+                    'name' => $request->name,
+                    'code' => $request->code
+                ],
+                !$isPost,
+                $documentId,
+                'id',
+                "Voucher already exist."
+            );
+
+            if($check) return $check;
+
+            $this_voucher = $isPost ? new Voucher() : Voucher::findOrFail($request->documentId);
             $this_voucher->name = $request->name;
             $this_voucher->code = $request->code;
-            if ($request->status) {
-                $this_voucher->status = $request->status;
-            }
+            if (!$isPost) $this_voucher->status = $request->status;
             $this_voucher->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a voucher. ID#'.$this_voucher->id);
@@ -930,7 +919,6 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () {
             $sponsors = Sponsor::all();
-
             return response()->json(['sponsors' => $sponsors], 200);
         });
     }
@@ -941,15 +929,27 @@ class EnrollmentCtrl extends Controller
     public function create_or_update_sponsor(CreateOrUpdateSponsor $request)
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
-            $this_sponsor = $request->httpMethod === 'POST'
-                ? new Sponsor
-                : Sponsor::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                Sponsor::class,
+                [
+                    'name' => $request->name,
+                    'short_name' => $request->short_name
+                ],
+                !$isPost,
+                $documentId,
+                'id',
+                "Sponsor already exist."
+            );
+
+            if($check) return $check;
+
+            $this_sponsor = $isPost ? new Sponsor() : Sponsor::findOrFail($request->documentId);
             $this_sponsor->name = $request->name;
             $this_sponsor->short_name = $request->short_name;
-            if ($request->status) {
-                $this_sponsor->status = $request->status;
-            }
+            if (!$isPost) $this_sponsor->status = $request->status;
             $this_sponsor->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a sponsor. ID#'.$this_sponsor->id);
@@ -1006,10 +1006,24 @@ class EnrollmentCtrl extends Controller
     public function create_or_update_license(CreateOrUpdateLicense $request)
     {
         return TransactionUtil::transact($request, ['rank:license:all'], function () use ($request) {
-            $this_license = $request->httpMethod === 'POST'
-                ? new License
-                : License::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                Sponsor::class,
+                [
+                    'license' => $request->license,
+                    'short_name' => $request->short_name
+                ],
+                !$isPost,
+                $documentId,
+                'id',
+                "License already exist."
+            );
+
+            if($check) return $check;
+
+            $this_license = $isPost ? new License() : License::findOrFail($request->documentId);
             $this_license->short_name = $request->name;
             $this_license->license = $request->license;
             $this_license->save();
@@ -1071,10 +1085,25 @@ class EnrollmentCtrl extends Controller
     public function create_or_update_rank(CreateOrUpdateRank $request)
     {
         return TransactionUtil::transact($request, ['rank:license:all'], function () use ($request) {
-            $this_rank = $request->httpMethod === 'POST'
-                ? new Rank
-                : Rank::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                Rank::class,
+                [
+                    'name' => $request->name,
+                    'short_name' => $request->short_name,
+                    'type' => $request->type
+                ],
+                !$isPost,
+                $documentId,
+                'id',
+                "Rank already exist."
+            );
+
+            if($check) return $check;
+
+            $this_rank = $isPost ? new Rank() : Rank::findOrFail($request->documentId);
             $this_rank->short_name = $request->short_name;
             $this_rank->name = $request->name;
             $this_rank->type = $request->type;
@@ -1143,10 +1172,25 @@ class EnrollmentCtrl extends Controller
     public function create_or_update_facilitator(CreateOrUpdateFacilitator $request)
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
-            $this_facilitator = $request->httpMethod === 'POST'
-                ? new TrainingFacilitator
-                : TrainingFacilitator::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                TrainingFacilitator::class,
+                [
+                    'course_module_id' => $request->module,
+                    'user_id' => $request->facilitator,
+                    'role' => $request->role
+                ],
+                !$isPost,
+                $documentId,
+                'id',
+                "Training Facilitator already exist."
+            );
+
+            if($check) return $check;
+
+            $this_facilitator = $isPost ? new TrainingFacilitator() : TrainingFacilitator::findOrFail($request->documentId);
             $this_facilitator->course_module_id = $request->module;
             $this_facilitator->user_id = $request->facilitator;
             $this_facilitator->role = $request->role;
@@ -1231,17 +1275,31 @@ class EnrollmentCtrl extends Controller
     public function create_or_update_course_fee(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-            $this_course_fee = $request->httpMethod === 'POST'
-                ? new CourseModuleFee
-                : CourseModuleFee::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                CourseModuleFee::class,
+                [
+                    'course_module_id' => $request->module,
+                    'charge_category_id' => $request->category,
+                    'name' => $request->name,
+                    'amount' => $request->amount
+                ],
+                !$isPost,
+                $documentId,
+                'id',
+                "Course Module Fee already exist."
+            );
+
+            if($check) return $check;
+
+            $this_course_fee = $isPost ? new CourseModuleFee() : CourseModuleFee::findOrFail($request->documentId);
             $this_course_fee->course_module_id = $request->module;
             $this_course_fee->charge_category_id = $request->category;
             $this_course_fee->name = $request->name;
             $this_course_fee->amount = $request->amount;
-            if ($request->status) {
-                $this_course_fee->status = $request->status;
-            }
+            if (!$isPost) $this_course_fee->status = $request->status;
             $this_course_fee->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a training fee. ID#'.$this_course_fee->id);
@@ -1278,8 +1336,6 @@ class EnrollmentCtrl extends Controller
                         new BEAuditTrail('')
                     );
                 }
-
-                DB::commit();
 
                 return response()->json(['message' => "You've removed training fee. ID#$course_fee_id"], 200);
             }
