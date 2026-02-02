@@ -10,7 +10,12 @@ use Illuminate\Auth\Events\Registered;
 use App\Mail\WelcomeAboard;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
-
+use App\Enums\Administrator\{
+    UserDetailsEnum
+};
+use App\Enums\{
+    UserRoleEnum
+};
 use App\Utils\{
     AuditHelper,
     GenerateQR,
@@ -58,8 +63,8 @@ class RegisterController extends Controller
                         $user->lname = $lname;
                         $user->email = $email;
                         $user->password = Hash::make(Str::random(24));
-                        $user->isSocial = 'YES';
-                        $user->role = 'TRAINEE';
+                        $user->isSocial = UserDetailsEnum::SOFT_ACCOUNT;
+                        $user->role = UserRoleEnum::TRAINEE;
                         $user->email_verified_at = now();
 
                         $filename = "{$user->id}.png";
@@ -101,16 +106,16 @@ class RegisterController extends Controller
                 return response()->json(['message' => 'Account already exists.'], 422);
             }
 
-            $user = new User;
+            $user = new User();
             $user->id = $this->generateCustomId();
             $user->fname = $fname;
             $user->mname = $mname;
             $user->lname = $lname;
             $user->email = $request->email;
             $user->password = bcrypt($request->password);
-            $user->isSocial = 'NO';
+            $user->isSocial = UserDetailsEnum::HARD_ACCOUNT;
             $user->birthdate = $request->birthdate;
-            $user->role = $request->role ?? 'TRAINEE';
+            $user->role = $request->role ?? UserRoleEnum::TRAINEE;
             $filename = "{$user->id}.png";
             $user->qr = $filename;
             $user->save();

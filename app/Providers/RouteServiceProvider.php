@@ -24,22 +24,14 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        RateLimiter::for('admin', function (Request $request) {
-            return Limit::perMinute(30)
-                ->by($request->user()?->id ?: $request->ip())
-                ->response(function (Request $request, array $headers) {
-                    return response()->json([
-                        'status' => 'error',
-                        'code' => 429,
-                        'message' => 'You have made too many requests. Please wait ' . ($headers['Retry-After'] ?? 'a moment') . ' seconds before trying again.',
-                    ], 429, $headers);
-                });
-        });
-
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
+
+            Route::middleware('admin-api')
+                ->prefix('api')
+                ->group(base_path('routes/admin-api.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));

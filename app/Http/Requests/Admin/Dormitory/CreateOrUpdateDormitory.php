@@ -25,7 +25,6 @@ class CreateOrUpdateDormitory extends FormRequest
         return [
             'room_name' => ['required', 'string'],
             'room_type' => ['required', 'string'],
-            'room_for_type' => ['required', 'string'],
             'room_description' => ['required', 'string'],
             'room_cost' => ['required', 'numeric'],
             'room_guest_cost' => ['required', 'numeric'],

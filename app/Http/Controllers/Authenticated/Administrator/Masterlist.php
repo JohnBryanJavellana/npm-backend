@@ -21,6 +21,7 @@ use App\Models\{
     Position,
     User
 };
+use App\Helpers\Administrator\General\CheckForDocumentExistence;
 
 class Masterlist extends Controller
 {
@@ -58,7 +59,7 @@ class Masterlist extends Controller
      */
     public function get_user_basic_info (Request $request, int $user_id) {
         return TransactionUtil::transact(null, [], function() use ($user_id) {
-            $user_info = User::find($user_id);
+            $user_info = User::findOrFail($user_id);
             return response()->json(['user_info' => $user_info], 200);
         });
     }
@@ -129,13 +130,24 @@ class Masterlist extends Controller
      */
     public function create_or_update_employer (CreateOrUpdateEmployer $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $this_employer = $request->httpMethod === "POST"
-                ? new Employer
-                : Employer::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                Employer::class,
+                ['name' => $request->name, 'address' => $request->address],
+                !$isPost,
+                $documentId,
+                'id',
+                "Employer already exist."
+            );
+
+            if($check) return $check;
+
+            $this_employer = $isPost ? new Employer : Employer::findOrFail($request->documentId);
             $this_employer->name = $request->name;
             $this_employer->address = $request->address;
-            if($request->status) $this_employer->status = $request->status;
+            if(!$isPost) $this_employer->status = $request->status;
             $this_employer->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " an employer. ID#" . $this_employer->id);
@@ -151,6 +163,11 @@ class Masterlist extends Controller
         });
     }
 
+    /**
+     * Summary of remove_employer
+     * @param Request $request
+     * @param int $employer_id
+     */
     public function remove_employer (Request $request, int $employer_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $employer_id) {
             $this_employer = Employer::where('id', $employer_id)->first();
@@ -173,6 +190,10 @@ class Masterlist extends Controller
         });
     }
 
+    /**
+     * Summary of get_positions
+     * @param Request $request
+     */
     public function get_positions (Request $request) {
         return TransactionUtil::transact(null, [], function() {
             $positions = Position::all();
@@ -180,15 +201,30 @@ class Masterlist extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_position
+     * @param CreateOrUpdatePosition $request
+     */
     public function create_or_update_position (CreateOrUpdatePosition $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $this_position = $request->httpMethod === "POST"
-                ? new Position
-                : Position::find($request->documentId);
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
+            $check = CheckForDocumentExistence::exists(
+                Position::class,
+                ['name' => $request->name, 'short_name' => $request->shortName],
+                !$isPost,
+                $documentId,
+                'id',
+                "Position already exist."
+            );
+
+            if($check) return $check;
+
+            $this_position = $isPost ? new Position : Position::findOrFail($request->documentId);
             $this_position->name = $request->name;
             $this_position->short_name = $request->shortName;
-            if($request->status) $this_position->status = $request->status;
+            if(!$isPost) $this_position->status = $request->status;
             $this_position->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a position. ID#" . $this_position->id);
@@ -204,6 +240,11 @@ class Masterlist extends Controller
         });
     }
 
+    /**
+     * Summary of remove_position
+     * @param Request $request
+     * @param int $position_id
+     */
     public function remove_position (Request $request, int $position_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $position_id) {
             $this_position = Position::where('id', $position_id)->first();

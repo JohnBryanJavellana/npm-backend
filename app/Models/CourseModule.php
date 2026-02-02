@@ -13,6 +13,16 @@ class CourseModule extends Model
         return $this->hasMany(RequirementSpecificModule::class);
     }
 
+    public function specific_requirements()
+    {
+        return $this->belongsToMany(
+            Requirement::class,
+            'requirement_specific_modules',
+            'course_module_id',
+            'requirement_id'
+        );
+    }
+
     public function schedules() {
         return $this->hasMany(Training::class, 'course_module_id', 'id');
     }
