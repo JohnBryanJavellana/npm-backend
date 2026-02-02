@@ -15,7 +15,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::prefix('/admin/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER')->group(function() {
-        Route::prefix('/enrollment/')->group(function() {
+        Route::prefix('/enrollment/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT')->group(function() {
             Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications']);
             Route::post('get_applications/requirement_remark', [EnrollmentCtrl::class, 'requirement_remark']);
             Route::post('get_applications/set_training_status', [EnrollmentCtrl::class, 'set_training_status']);
@@ -155,11 +155,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::post('create_or_update_position', [Masterlist::class, 'create_or_update_position']);
                 Route::delete('remove_position/{position_id}', [Masterlist::class, 'remove_position']);
             });
-        });
-
-        Route::prefix('/invoice/')->middleware('user_role:SUPERADMIN,CASHIER')->group(function() {
-            Route::post('get_invoices', [Cashier::class, 'get_invoices']);
-            Route::post('update_payment_status', [Cashier::class, 'update_payment_status']);
         });
 
         Route::prefix('/cashier/')->middleware('user_role:SUPERADMIN,CASHIER')->group(function() {

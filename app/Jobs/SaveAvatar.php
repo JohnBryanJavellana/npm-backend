@@ -36,10 +36,10 @@ class SaveAvatar implements ShouldQueue
                 if ($response->successful()) {
                     file_put_contents(public_path($this->path . $this->filename), $response->body());
                 }
-            } else {
-                if($this->isBase64) {
-                    ConvertToBase64::generate($this->avatar, 'image', "$this->path/$this->filename");
-                }
+            }
+
+            if($this->isBase64) {
+                return ConvertToBase64::generate($this->avatar, 'image', "$this->path/$this->filename");
             }
         }
     }
