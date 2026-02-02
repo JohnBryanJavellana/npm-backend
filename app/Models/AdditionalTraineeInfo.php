@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -35,5 +36,12 @@ class AdditionalTraineeInfo extends Model
 
     public function basic_requirement() {
         return $this->hasMany(TrainingRegFile::class);
+    }
+
+    /** Scopes */
+
+    public function scopeForUser(Builder $query, $userId)
+    {
+        return $query->where("user_id", $userId);
     }
 }

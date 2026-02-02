@@ -261,37 +261,69 @@ class TraineeEnrollment extends Controller
     /** UPDATING ENROLLMENT REQUESTS **/
     public function update_requirements_request(UpdateRequirementRequest $request) {
 
-        $validated = $request->validated();
-        $files = $validated["file_upload"];
-        foreach($request->file_upload as $file) { 
-            \Log::info($file["requirement_id"]);
-        }
-        return response()->json(["wow"], 200);
+        // $validated = $request->validated();
+        // $files = $validated["file_upload"];
+        // \Log::info($validated);
+
+        // foreach($files as $file) { 
+        //     \Log::info($file["requirement_id"]);
+        // }
+        // return response()->json(["wow"], 200);
         /**
          * Use Form Request Class
-         * Use the EnrollmentService Class
+         * Use the EnrollmentService Class+
          * Try to use updateOrCreate
+         * Check if error other files will be saved.
+         * train_reg_file = 1769997421_6980046d082d9.png
+         * specific = 1769997421_6980046d1ada7.png
          **/ 
+        $validated = $request->validated();
+        $storedFiles = [];
+
         try {
-            DB::beginTransaction();
+            DB::transaction(function() use ($validated, &$storedFiles) {
+                $additional_id = AdditionalTraineeInfo::forUser($validated["user_id"])->value("id");
+                $files = $validated["file_upload"];
+                foreach($files as $file) {
+                    if (strtoupper($file['is_basic']) === 'YES') {
+                        $filename = SaveFile::save($file['file'],'trainee-files');
+                        $storedFiles[] = ["trainee-files" => $filename];
 
-            foreach($request->file_upload as $file) {
-                $file['is_basic'] === "YES" 
-                    ? $this->enrollmentService->storeBasic($file)
-                    : $this->enrollmentService->storeSpecific($file);
-            }
+                            TrainingRegFile::updateOrCreate(
+                            [
+                                "requirement_id" => $file["requirement_id"],
+                                "additional_trainee_info_id" => $additional_id,
+                            ],
+                            ["filename" => $filename]
+                        );
 
-            AuditHelper::log($request->user()->id, "User " . $request->user()->id . " updated an enrollment request.");
-            Notifications::notify($request->user()->id, null, "ENROLLMENT", "has updated their enrollement request");
+                    } else {
+                        $filename = SaveFile::save($file['file'],'training_requirement_files');
+                        $storedFiles[] = ["training_requirement_files" => $filename];
+                        TraineeRequirement::updateOrCreate(
+                            [
+                                "requirement_id" => $file["requirement_id"],
+                                "enrolled_course_id" => $validated["enrolled_course_id"],
+                            ],
+                            ["filename" => $filename]
+                        );
+                    }
+                }
+            });
+
+            //based on userId not the $request->user()
+            // AuditHelper::log($request->user()->id, "User " . $request->user()->id . " updated an enrollment request.");
+            // Notifications::notify($request->user()->id, null, "ENROLLMENT", "has updated their enrollement request");
 
             if(env("USE_EVENT")) {
                 event(new BETraineeApplication(''), new BENotification(''));
             }
 
-            DB::commit();
             return response()->json(['message' => 'Enrollment request updated successfully!'], 200);
         } catch (\Exception $e) {
-            DB::rollBack();
+            foreach ($storedFiles as $key => $file) {
+                unlink(public_path($key . "/" . $file));
+            }
             \Log::error('Error_updating_enrollment_request: ', [$e->getMessage()]);
             return response()->json(['message' => $e->getMessage()], 500);
         }

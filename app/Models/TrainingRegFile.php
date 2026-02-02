@@ -9,6 +9,8 @@ class TrainingRegFile extends Model
 {
     use HasFactory;
 
+    protected $guarded = ["id"];
+
     public function requirement() {
         return $this->belongsTo(Requirement::class, 'requirement_id', 'id');
     }
