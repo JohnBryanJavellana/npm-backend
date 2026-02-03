@@ -24,8 +24,13 @@ use App\Events\{
     BEInvoice,
     BEAuditTrail
 };
+use App\Enums\Administrator\{
+    CashierEnum,
+};
+use App\Enums\{
+    NotificationEnum
+};
 use App\Http\Requests\Admin\Cashier\{
-    CreateOrUpdateCharge,
     CreateOrUpdateFeeCategory,
     CreateOrUpdateOR
 };
@@ -39,9 +44,9 @@ class Cashier extends Controller
 {
     protected function getTable(string $service, ?int $referenceId, ?array $whereIns, bool $isMainTable = false, bool $isInitialTable = false) {
         $modelMap = [
-            'DORMITORY'  => $isMainTable || $isInitialTable ? DormitoryTenant::class : DormitoryInvoice::class,
-            'ENROLLMENT' => $isMainTable || $isInitialTable ? EnrolledCourse::class : EnrollmentInvoice::class,
-            'LIBRARY'    => $isMainTable || $isInitialTable ? BookRes::class : LibraryInvoice::class,
+            NotificationEnum::DORMITORY->value  => $isMainTable || $isInitialTable ? DormitoryTenant::class : DormitoryInvoice::class,
+            NotificationEnum::ENROLLMENT->value => $isMainTable || $isInitialTable ? EnrolledCourse::class : EnrollmentInvoice::class,
+            NotificationEnum::LIBRARY->value    => $isMainTable || $isInitialTable ? BookRes::class : LibraryInvoice::class,
         ];
 
         if (!array_key_exists($service, $modelMap)) {
@@ -85,7 +90,7 @@ class Cashier extends Controller
             $payments = self::getTable($request->service, null, ['invoice_status' => $request->statuses]);
             $relations = ['payee', 'orNumber'];
 
-            if($request->service === "LIBRARY") {
+            if($request->service === NotificationEnum::LIBRARY->value) {
                 $relations = array_merge($relations, [
                     'bookRes',
                     'selectedBooks',
@@ -96,13 +101,13 @@ class Cashier extends Controller
                 ]);
             }
 
-            if($request->service === "ENROLLMENT") {
+            if($request->service === NotificationEnum::ENROLLMENT->value) {
                 $relations = array_merge($relations, [
                     'training'
                 ]);
             }
 
-            if($request->service === "DORMITORY") {
+            if($request->service === NotificationEnum::DORMITORY->value) {
                 $relations = array_merge($relations, [
                     'tenant'
                 ]);
@@ -120,12 +125,12 @@ class Cashier extends Controller
                 $this_main_table = self::getTable($request->service, $request->mainTable, null, true, true)->first();
 
                 switch($request->service) {
-                    case "DORMITORY":
-                        $this_main_table->tenant_status = "PAID";
+                    case NotificationEnum::DORMITORY->value:
+                        $this_main_table->tenant_status = CashierEnum::PAID;
                         break;
 
-                    case "ENROLLMENT":
-                        $this_main_table->enrolled_course_status = "PAID";
+                    case NotificationEnum::ENROLLMENT->value:
+                        $this_main_table->enrolled_course_status = CashierEnum::PAID;
                         break;
 
                     default: break;
@@ -134,7 +139,7 @@ class Cashier extends Controller
                 $this_main_table->save();
             }
 
-            $this_payment->invoice_status = "PAID";
+            $this_payment->invoice_status = CashierEnum::PAID;
             $this_payment->received_amount = $request->receivedAmount;
             $this_payment->cashier_o_r_id = $request->orNumber;
             $this_payment->payment_type = 'WALK-IN';
@@ -143,7 +148,7 @@ class Cashier extends Controller
 
             if($request->orNumber) {
                 $this_or_parent = CashierOR::find($request->orNumber);
-                $this_or_parent->status = "UNAVAILABLE";
+                $this_or_parent->status = CashierEnum::UNAVAILABLE;
                 $this_or_parent->save();
             }
 
@@ -212,7 +217,7 @@ class Cashier extends Controller
             $this_fee = ChargeCategory::withCount(['hasData'])->where('id', $fee_category_id)->first();
 
             if($this_fee->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove fee category. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove fee category. It already has connected data."], 409);
             } else {
                 $this_fee->delete();
                 AuditHelper::log($request->user()->id, "Removed a fee category. ID#$fee_category_id");
@@ -233,7 +238,7 @@ class Cashier extends Controller
             $this_payment = self::getTable($request->service, $request->documentId, null);
             $this_fee = $this_payment->lockForUpdate()->first();
 
-            if(in_array($this_fee->invoice_status, ["CANCELLED", "PAID"])) {
+            if(in_array($this_fee->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
                 return response()->json(['message' => "Can't update payment."], 200);
             } else {
                 $this_fee->invoice_status = $request->verificationStatus;
@@ -243,12 +248,12 @@ class Cashier extends Controller
                     $this_main_table = self::getTable($request->service, $request->mainTable, null, true, true)->first();
 
                     switch($request->service) {
-                        case "DORMITORY":
-                            $this_main_table->tenant_status = "PAID";
+                        case NotificationEnum::DORMITORY->value:
+                            $this_main_table->tenant_status = CashierEnum::PAID;
                             break;
 
-                        case "ENROLLMENT":
-                            $this_main_table->enrolled_course_status = "PAID";
+                        case NotificationEnum::ENROLLMENT->value:
+                            $this_main_table->enrolled_course_status = CashierEnum::PAID;
                             break;
 
                         default: break;
@@ -284,7 +289,7 @@ class Cashier extends Controller
             if($request->service) {
                 $orNumbersTemp->where([
                     "service_type" => $request->service,
-                    'status' => "AVAILABLE"
+                    'status' => CashierEnum::AVAILABLE->value
                 ]);
             }
 
@@ -332,7 +337,7 @@ class Cashier extends Controller
             $this_or = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment'])->where('id', $orNumber)->first();
 
             if($this_or->connection_in_library_count > 0 || $this_or->connection_in_dormitory_count > 0 || $this_or->connection_in_enrollment_count > 0 || $this_or->status === "UNAVAILABLE") {
-                return response()->json(['message' => "Can't remove OR Number. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove OR Number. It already has connected data."], 409);
             } else {
                 $this_or->delete();
                 AuditHelper::log($request->user()->id, "Removed an OR Number. ID#$orNumber");
