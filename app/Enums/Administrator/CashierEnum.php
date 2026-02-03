@@ -11,6 +11,5 @@ enum CashierEnum : string
     case UNAVAILABLE = "UNAVAILABLE";
     case FOR_PAYMENT = "FOR-PAYMENT";
     case AVAILABLE = "AVAILABLE";
-    case UNVERIFIED_REQUIREMENT = "N";
-    case BASIC_REQUIREMENT = 'YES';
+    case WALK_IN = "WALK-IN";
 }
