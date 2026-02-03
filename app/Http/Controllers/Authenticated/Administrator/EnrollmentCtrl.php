@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use App\Enums\Administrator\EnrollmentEnum;
+use App\Enums\NotificationEnum;
 use App\Events\{
     BEAuditTrail,
     BEEnrollment,
@@ -218,7 +219,7 @@ class EnrollmentCtrl extends Controller
             $this_training_status->enrolled_course_status = $request->status;
             $this_training_status->save();
 
-            if ($request->status === EnrollmentEnum::FOR_PAYMENT) {
+            if ($request->status === EnrollmentEnum::FOR_PAYMENT->value) {
                 $premade_record = new EnrollmentInvoice();
                 $premade_record->enrolled_course_id = $request->documentId;
                 $premade_record->user_id = $this_training_status->user_id;
@@ -227,7 +228,7 @@ class EnrollmentCtrl extends Controller
                 $premade_record->save();
             }
 
-            Notifications::notify($request->user()->id, $this_training_status->user_id, 'DORMITORY', 'updated your enrollment application status.');
+            Notifications::notify($request->user()->id, $this_training_status->user_id, NotificationEnum::DORMITORY, 'updated your enrollment application status.');
             AuditHelper::log($request->user()->id, 'Updated enrollment application status. ID#'.$this_training_status->id);
 
             if (env('USE_EVENT')) {
