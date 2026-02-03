@@ -250,7 +250,7 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () use($request) {
             $this_training = EnrolledCourse::findOrFail($request->documentId);
-            $this_training->enrolled_course_status = 'DECLINED';
+            $this_training->enrolled_course_status = EnrollmentEnum::DECLINED;
             $this_training->isExpired = $request->isExpired;
             $this_training->save();
 

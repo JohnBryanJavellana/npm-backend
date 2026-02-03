@@ -12,9 +12,11 @@ use App\Enums\Administrator\{
     UserDetailsEnum,
     EnrollmentEnum
 };
+use App\Enums\{
+    UserRoleEnum
+};
 use App\Http\Requests\Admin\Account\{
-    UpdatePassword,
-    SubmitCSM
+    UpdatePassword
 };
 use App\Events\{
     BEAccount,
@@ -69,7 +71,7 @@ class Account extends Controller
     public function get_activities (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $activities = AuditTrail::orderBy('created_at', 'DESC');
-            if ($request->user()->role !== "SUPERADMIN") $activities->where('user_id', $request->user()->id);
+            if ($request->user()->role !== UserRoleEnum::SUPERADMIN->value) $activities->where('user_id', $request->user()->id);
 
             return response()->json(['activities' => $activities->get()], 200);
         });
