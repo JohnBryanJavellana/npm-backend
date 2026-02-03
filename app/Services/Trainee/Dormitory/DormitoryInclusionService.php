@@ -28,30 +28,25 @@ class DormitoryInclusionService {
     )
     {}
 
-    public function getUserInclusionRequest($documentId)
-    {
-        return $this->dormitoryInclusionRequest->query()
-        ->with([
-
-            "itemInfo"
-        ])
-        ->where("dormitory_tenant_id", $documentId)
-        ->latest("created_at")
-        ->get();
-    }
-
     public function getAllItems()
     {
         $cacheKey = "dormitory:inclusions:all";
         return  Cache::remember($cacheKey, self::LONG_TTL, function () {
             return $this->dormitoryInventory
-            ->with([
-                "charge:id,charge_category_id,name,amount,description,service_type",
-                "charge.chargeCategory:id,name"
-                ])
             ->whereHas("stock", fn($q) => $q->available())
             ->get();    
         });    
+    }
+
+    public function getUserInclusionRequest($documentId)
+    {
+        return $this->dormitoryInclusionRequest->query()
+        ->with([
+            "itemInfo"
+        ])
+        ->where("dormitory_tenant_id", $documentId)
+        ->latest("created_at")
+        ->get();
     }
 
     public function getUserInclusions(string $documentId)
@@ -72,19 +67,15 @@ class DormitoryInclusionService {
 
             //prepareData
             $invoice =$this->dormitoryInvoiceModel->create([
-                "user_id" => $userId,
                 "dormitory_tenant_id" => $validated["request_id"],
-                "charge_id" => $validated["charge_id"],
-                "isInitial" => "N",
                 "type" => RequestStatus::INCLUSION,
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
-
             ]);
 
             $this->dormitoryInclusionRequest->create([
                 "dormitory_inventory_id" => $validated["inclusion_id"],
                 "dormitory_tenant_id" => $validated["request_id"],
-                "dormitory_invoices_id" => $invoice->id,
+                "dormitory_invoice_id" => $invoice->id,
                 "quantity" => $validated["quantity"]
             ]);
         });

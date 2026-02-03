@@ -63,22 +63,19 @@ class DormitoryRequestService {
 
             $data = [
                 "user_id" => $userId,
-                "room_for_type" => $validated["forType"],
+                // "room_for_type" => $validated["forType"],
+                "dormitory_room_id" => $validated["room_id"] ?? null,
                 "trace_number" => GenerateTrace::createTraceNumber($this->tenantModel, self::PREFIX),
                 "is_air_conditioned" => $validated["is_air_conditioned"],
                 "single_accomodation" => $validated["single_accomodation"],
-                "tenant_from_date" => $validated["startDate"],
-                "tenant_to_date" => $validated["endDate"],
+                "tenant_from_date" => $validated["fromDate"],
+                "tenant_to_date" => $validated["toDate"],
                 "purpose" => $validated["purpose"],
             ];
 
-            if($validated["forType"] === $this->tenantModel::COUPLE) {
-
-                // $file_requested = $validated["file"];
-                // $filename = GenerateUniqueFilename::generate($file_requested);
-                // $file_requested->move(public_path('dormitory/supporting-document'), $filename);
-                $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document');
-            }
+            // if($validated["forType"] === $this->tenantModel::COUPLE) {
+            //     $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document');
+            // }
 
             $record = $this->tenantModel->create($data);
 

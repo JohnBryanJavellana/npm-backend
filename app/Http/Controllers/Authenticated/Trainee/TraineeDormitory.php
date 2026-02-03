@@ -294,7 +294,7 @@ class TraineeDormitory extends Controller
      * Methods for Dorm Occupancy
      */
     public function request_tenant_room(DormRoomRequest $request) {
-        \Log::info("controller dorm", [$request->all()]);
+        // \Log::info("controller dorm", [$request->all()]);
         $user = $request->user();
         $validated = $request->validated();
         try {

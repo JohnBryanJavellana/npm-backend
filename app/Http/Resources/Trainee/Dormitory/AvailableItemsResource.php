@@ -22,12 +22,7 @@ class AvailableItemsResource extends JsonResource
             "is_consumable" => $this->is_consumable,
             "description" => $this->description,
             "filename" => $this->filename,
-            "charge_id" => $this->charge?->id,
-            "charge_name" => $this->charge?->name,
-            "amount" => $this->charge?->amount,
-            "charge_description" => $this->charge?->description,
-            "service_type" => $this->charge?->service_type,
-            "category" => $this->charge?->chargeCategory?->name,
+            "amount" => $this->charge,
         ];
     }
 }
