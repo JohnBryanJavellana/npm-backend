@@ -19,7 +19,6 @@ class TransactionUtil {
                 return $body();
             });
         } catch (\Exception $e) {
-            \Log::info("error_book_info",[$e]);
             return response()->json(['message' => 'Transaction failed: ' . $e->getMessage()], 500);
         }
     }
