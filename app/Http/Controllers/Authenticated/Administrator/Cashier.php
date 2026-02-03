@@ -142,7 +142,7 @@ class Cashier extends Controller
             $this_payment->invoice_status = CashierEnum::PAID;
             $this_payment->received_amount = $request->receivedAmount;
             $this_payment->cashier_o_r_id = $request->orNumber;
-            $this_payment->payment_type = 'WALK-IN';
+            $this_payment->payment_type = CashierEnum::WALK_IN;
             $this_payment->datePaid = Carbon::now();
             $this_payment->save();
 
