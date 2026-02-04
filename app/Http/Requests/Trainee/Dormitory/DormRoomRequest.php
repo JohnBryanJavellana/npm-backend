@@ -28,7 +28,6 @@ class DormRoomRequest extends FormRequest
     {
         return [
             "room_id" => "nullable|exists:dormitories,id",
-            // "forType" => "required|in:RATINGS,OFFICERS",
             "is_air_conditioned" => "required|in:YES,NO",
             "single_accomodation" => "required|in:YES,NO",
             "purpose" => "required|string|max:255",
