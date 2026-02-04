@@ -88,7 +88,6 @@ class TraineeDormitory extends Controller
     }
 
     public function view_room_application (Request $request) {
-        \Log::info("status_view", [$request->all()]);
         try {
             $applications = DormitoryTenant::forUser($request->user()->id)
             ->with([
