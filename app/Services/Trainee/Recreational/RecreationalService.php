@@ -2,24 +2,19 @@
 
 namespace App\Services\Trainee\Recreational;
 
-use App\Models\Equipment;
-use App\Models\Facility;
+use App\Models\RAEquipments;
 
 class RecreationalService {
     public function __construct(
-        protected Equipment $equipmentModel,
-        protected Facility $facilityModel
-    ) {}
+        protected RAEquipments $raequipmentsModel
+    ){}
 
     public function getEquipments()
     {
-        return $this->equipmentModel->query()
+        return $this->raequipmentsModel->query()
         ->withCount([
-            "inventories" => function($query) {
-                $query->where([
-                    "condition_status" => "GOOD",
-                    "availability_status" => "AVAILABLE"
-                ]);
+            "stocks" => function($query) {
+                $query->available()->okayCondition();
             },
         ])
         ->with([
