@@ -136,6 +136,11 @@ class RecreationalActivityCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of ra_remove_equipment_stock
+     * @param Request $request
+     * @param int $equipment_stock_id
+     */
     public function ra_remove_equipment_stock(Request $request, int $equipment_stock_id) {
         TransactionUtil::transact(null, [], function() use ($request, $equipment_stock_id) {
             $this_equipment_stock = RAEquipmentStock::where('id', $equipment_stock_id)->withCount([
