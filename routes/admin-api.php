@@ -181,8 +181,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('ra_requests', [RecreationalActivityCtrl::class, 'ra_requests']);
 
             Route::post('ra_equipments', [RecreationalActivityCtrl::class, 'ra_equipments']);
+            Route::post('ra_equipment_stock', [RecreationalActivityCtrl::class, 'ra_equipment_stock']);
             Route::post('ra_create_or_update_equipment', [RecreationalActivityCtrl::class, 'ra_create_or_update_equipment']);
             Route::delete('ra_remove_equipment/{equipment_id}', [RecreationalActivityCtrl::class, 'ra_remove_equipment']);
+            Route::delete('ra_remove_equipment_stock/{equipment_stock_id}', [RecreationalActivityCtrl::class, 'ra_remove_equipment_stock']);
 
             Route::post('ra_facilities', [RecreationalActivityCtrl::class, 'ra_facilities']);
             Route::post('ra_create_or_update_facility', [RecreationalActivityCtrl::class, 'ra_create_or_update_facility']);
