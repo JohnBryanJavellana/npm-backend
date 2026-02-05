@@ -23,4 +23,15 @@ class TraineeRecreational extends Controller
     {
         
     }
+
+    /**
+     * 
+     * FACILITIES
+     * create a get API for facilities together with its related equipment.
+     * 
+     * 
+     * 
+     * EQUIPMENTS
+     * 
+     **/
 }
