@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class RAEquipmentStock extends Model
 {
     use HasFactory;
+
+    public function hasData() {
+        return $this->hasMany(RAEquipmentRequest::class);
+    }
 }

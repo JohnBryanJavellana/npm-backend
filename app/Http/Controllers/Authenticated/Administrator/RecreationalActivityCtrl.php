@@ -31,7 +31,7 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      */
     public function ra_requests(Request $request) {
-        TransactionUtil::transact(null, [], function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $ra_requests_temp = RARequestInfo::with(['requestor']);
             $ra_requests = $request->status
                 ? $ra_requests_temp->whereIn('status', $request->status)
@@ -47,7 +47,7 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      */
     public function ra_facilities(Request $request) {
-        TransactionUtil::transact(null, [], function() use ($request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $ra_facilities_temp = RAFacility::withCount(['hasData']);
             $ra_facilities = $request->documentId
                 ? $ra_facilities_temp->with(['images'])->first()
@@ -62,7 +62,7 @@ class RecreationalActivityCtrl extends Controller
      * @param CreateOrUpdateFacility $request
      */
     public function ra_create_or_update_facility(CreateOrUpdateFacility $request) {
-        TransactionUtil::transact($request, [], function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
             $documentId = $request->documentId;
 
@@ -100,7 +100,7 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      */
     public function ra_remove_facility(Request $request, int $facility_id) {
-        TransactionUtil::transact(null, [], function() use ($request, $facility_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $facility_id) {
             $this_facility = RAFacility::where('id', $facility_id)->withCount([
                 'hasData'
             ])->first();
@@ -120,7 +120,7 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      */
     public function ra_equipments(Request $request) {
-        TransactionUtil::transact(null, [], function() use($request) {
+        return TransactionUtil::transact(null, [], function() use($request) {
             $ra_equipments_temp = RAEquipments::withCount(['hasData']);
             $ra_equipments = $request->documentId
                 ? $ra_equipments_temp->with(['images', 'stocks'])->first()
@@ -135,7 +135,7 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      */
     public function ra_equipment_stock(Request $request) {
-        TransactionUtil::transact(null, [], function() use($request) {
+        return TransactionUtil::transact(null, [], function() use($request) {
             $ra_equipment_stock = RAEquipmentStock::withCount(['hasData'])->get();
             return response()->json(['ra_equipment_stock' => $ra_equipment_stock], 200);
         });
@@ -147,7 +147,7 @@ class RecreationalActivityCtrl extends Controller
      * @param int $equipment_stock_id
      */
     public function ra_remove_equipment_stock(Request $request, int $equipment_stock_id) {
-        TransactionUtil::transact(null, [], function() use ($request, $equipment_stock_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $equipment_stock_id) {
             $this_equipment_stock = RAEquipmentStock::where('id', $equipment_stock_id)->withCount([
                 'hasData'
             ])->first();
@@ -167,7 +167,7 @@ class RecreationalActivityCtrl extends Controller
      * @param CreateOrUpdateEquipment $request
      */
     public function ra_create_or_update_equipment(CreateOrUpdateEquipment $request) {
-        TransactionUtil::transact($request, [], function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
             $documentId = $request->documentId;
 
@@ -238,7 +238,7 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      */
     public function ra_remove_equipment(Request $request, int $equipment_id) {
-        TransactionUtil::transact(null, [], function() use ($request, $equipment_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $equipment_id) {
             $this_equipment = RAEquipments::where('id', $equipment_id)->withCount([
                 'hasData'
             ])->first();
