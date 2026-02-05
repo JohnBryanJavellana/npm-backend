@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class RARequestInfo extends Model
 {
     use HasFactory;
+
+    public function requestor() {
+        return $this->hasOne(User::class);
+    }
 }
