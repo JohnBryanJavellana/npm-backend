@@ -128,9 +128,9 @@ class RecreationalActivityCtrl extends Controller
      */
     public function ra_equipments(Request $request) {
         return TransactionUtil::transact(null, [], function() use($request) {
-            $ra_equipments_temp = RAEquipments::withCount('hasData');
+            $ra_equipments_temp = RAEquipments::withCount('hasData', 'stocks');
             $ra_equipments = $request->documentId
-                ? $ra_equipments_temp->with(['images', 'stocks'])->first()
+                ? $ra_equipments_temp->with(['images'])->first()
                 : $ra_equipments_temp->get();
 
             return response()->json(['ra_equipments' => $ra_equipments], 200);
@@ -181,7 +181,7 @@ class RecreationalActivityCtrl extends Controller
             $this_equipment = $isPost ? new RAEquipments() : RAEquipments::findOrFail($documentId);
             $this_equipment->name = $request->name;
             $this_equipment->additional_details = $request->additionalDetails;
-            if($request->status) $this_equipment->status = $request->status;
+            if($request->status) $this_equipment->availability_status = $request->status;
             $this_equipment->save();
 
             $dataToReturn = [];
@@ -192,20 +192,6 @@ class RecreationalActivityCtrl extends Controller
                 ]);
 
                 $dataToReturn = $this->ra_equipment_create_stock($request);
-            }
-
-            if($request->photos) {
-                if($documentId) RAEquipmentImage::where('r_a_equipments_id', $documentId)->delete();
-
-                foreach($request->photos as $photos){
-                    $image_name = Str::uuid() . '.png';
-                    ConvertToBase64::generate($photos, 'image', "recreational-activity/equipment/image/$image_name");
-
-                    $photo = new RAEquipmentImage();
-                    $photo->r_a_equipments_id = $this_equipment->id;
-                    $photo->filename = $image_name;
-                    $photo->save();
-                }
             }
 
             if($request->data_photos) {
@@ -219,6 +205,18 @@ class RecreationalActivityCtrl extends Controller
                     }
 
                     $item->delete();
+                }
+            }
+
+            if($request->photos) {
+                foreach($request->photos as $photos){
+                    $image_name = Str::uuid() . '.png';
+                    ConvertToBase64::generate($photos, 'image', "recreational-activity/equipment/image/$image_name");
+
+                    $photo = new RAEquipmentImage();
+                    $photo->r_a_equipments_id = $this_equipment->id;
+                    $photo->filename = $image_name;
+                    $photo->save();
                 }
             }
 
