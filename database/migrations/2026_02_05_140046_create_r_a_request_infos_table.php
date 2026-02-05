@@ -21,6 +21,12 @@ return new class extends Migration
                 'FACILITY',
                 'HYBRID'
             ])->default('EQUIPMENT');
+            $table->enum('status', [
+                'PENDING',
+                'ACTIVE',
+                'FOR CSM',
+                'COMPLETED'
+            ])->default('PENDING');
             $table->longText('reason');
             $table->timestamps();
         });
