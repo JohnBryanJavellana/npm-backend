@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class RAInvoices extends Model
 {
     use HasFactory;
+
+    public function cashier_or() {
+        return $this->hasOne(CashierOR::class);
+    }
 }

@@ -12,4 +12,16 @@ class RARequestInfo extends Model
     public function requestor() {
         return $this->hasOne(User::class);
     }
+
+    public function equipment_request() {
+        return $this->hasMany(RAEquipmentRequest::class);
+    }
+
+    public function facility_request() {
+        return $this->hasMany(RAFacilityRequest::class);
+    }
+
+    public function invoices() {
+        return $this->hasMany(RAInvoices::class);
+    }
 }
