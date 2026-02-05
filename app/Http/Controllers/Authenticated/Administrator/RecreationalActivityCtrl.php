@@ -32,7 +32,7 @@ class RecreationalActivityCtrl extends Controller
      */
     public function ra_requests(Request $request) {
         TransactionUtil::transact(null, [], function() use ($request) {
-            $ra_requests_temp = RARequestInfo::all();
+            $ra_requests_temp = RARequestInfo::with(['requestor']);
             $ra_requests = $request->status
                 ? $ra_requests_temp->whereIn('status', $request->status)
                 : $ra_requests_temp;
