@@ -173,13 +173,8 @@ class DormitoryController extends Controller
             }
 
             $dorms = Dormitory::withCount('rooms')
-                ->with([
-                    'roomCharge',
-                    'guestCharge'
-                ])
                 ->has('rooms')
                 ->where([
-                    'room_for_type' => $request->room_for_type,
                     'is_air_conditioned' => $request->room_type
                 ])->get();
 
@@ -211,7 +206,6 @@ class DormitoryController extends Controller
                         return 'OUT OF STOCK';
                     }
                 })();
-
                 $self->availabilityStatus = $availabilityStatus;
                 return $self;
             })->sortBy(function ($item) {
@@ -676,9 +670,7 @@ class DormitoryController extends Controller
                 'borrowedItems.inventory',
                 'borrowedItems.items',
                 'borrowedItems.items.item',
-                'tenant_invoices' => function($query) {
-                    $query->where("isInitial", "Y");
-                }
+                'tenant_invoices'
             ]);
 
             if($request->userId) $room_requests->where('user_id', $request->userId);
