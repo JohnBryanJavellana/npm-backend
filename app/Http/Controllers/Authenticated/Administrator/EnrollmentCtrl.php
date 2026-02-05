@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use App\Enums\Administrator\EnrollmentEnum;
+use App\Enums\NotificationEnum;
 use App\Events\{
     BEAuditTrail,
     BEEnrollment,
@@ -53,7 +54,6 @@ use App\Utils\{
 };
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
 
@@ -218,7 +218,7 @@ class EnrollmentCtrl extends Controller
             $this_training_status->enrolled_course_status = $request->status;
             $this_training_status->save();
 
-            if ($request->status === EnrollmentEnum::FOR_PAYMENT) {
+            if ($request->status === EnrollmentEnum::FOR_PAYMENT->value) {
                 $premade_record = new EnrollmentInvoice();
                 $premade_record->enrolled_course_id = $request->documentId;
                 $premade_record->user_id = $this_training_status->user_id;
@@ -227,7 +227,7 @@ class EnrollmentCtrl extends Controller
                 $premade_record->save();
             }
 
-            Notifications::notify($request->user()->id, $this_training_status->user_id, 'DORMITORY', 'updated your enrollment application status.');
+            Notifications::notify($request->user()->id, $this_training_status->user_id, NotificationEnum::DORMITORY, 'updated your enrollment application status.');
             AuditHelper::log($request->user()->id, 'Updated enrollment application status. ID#'.$this_training_status->id);
 
             if (env('USE_EVENT')) {
@@ -250,7 +250,7 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () use($request) {
             $this_training = EnrolledCourse::findOrFail($request->documentId);
-            $this_training->enrolled_course_status = 'DECLINED';
+            $this_training->enrolled_course_status = EnrollmentEnum::DECLINED;
             $this_training->isExpired = $request->isExpired;
             $this_training->save();
 
@@ -334,7 +334,7 @@ class EnrollmentCtrl extends Controller
             $this_schedule = Training::withCount(['hasData'])->where('id', $schedule_id)->first();
 
             if ($this_schedule->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove module. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove module. It already has connected data."], 409);
             } else {
                 $this_schedule->delete();
                 AuditHelper::log($request->user()->id, "Removed a schedule. ID#$schedule_id");
@@ -404,7 +404,7 @@ class EnrollmentCtrl extends Controller
             $this_module = CourseModule::withCount(['hasData'])->where('id', $module_id)->first();
 
             if ($this_module->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove module. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove module. It already has connected data."], 409);
             } else {
                 $this_module->delete();
                 AuditHelper::log($request->user()->id, "Removed a module. ID#$module_id");
@@ -482,7 +482,7 @@ class EnrollmentCtrl extends Controller
             $this_module_type = ModuleType::withCount(['hasData'])->where('id', $module_type_id)->first();
 
             if ($this_module_type->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove module type. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove module type. It already has connected data."], 409);
             } else {
                 $this_module_type->delete();
                 AuditHelper::log($request->user()->id, "Removed a module type. ID#$module_type_id");
@@ -559,7 +559,7 @@ class EnrollmentCtrl extends Controller
             }])->where('id', $certificate_id)->first();
 
             if ($this_certificate->module_count > 0) {
-                return response()->json(['message' => "Can't remove certificate. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove certificate. It already has connected data."], 409);
             } else {
                 $this_certificate->delete();
                 AuditHelper::log($request->user()->id, "Removed a certificate. ID#$certificate_id");
@@ -661,7 +661,7 @@ class EnrollmentCtrl extends Controller
             $this_requirement = Requirement::withCount(['hasData', 'trainee_file'])->where('id', $requirement_id)->first();
 
             if ($this_requirement->has_data_count > 0 || $this_requirement->trainee_file_count > 0 || $this_requirement->for_modules_count > 0) {
-                return response()->json(['message' => "Can't remove requirement. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove requirement. It already has connected data."], 409);
             } else {
                 $this_requirement->delete();
                 AuditHelper::log($request->user()->id, "Removed a requirement. ID#$requirement_id");
