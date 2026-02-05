@@ -12,11 +12,16 @@ class RAEquipmentStock extends Model
 
     protected $guarded = ["id"];
 
+    /**
+     * Related
+     */
+    public function hasData() {
+        return $this->hasMany(RAEquipmentRequest::class);
+    }
 
     /**
      * Scopes
      **/
-
     public function scopeAvailable(Builder $query)
     {
         return $query->where("availability_status", "AVAILABLE");
