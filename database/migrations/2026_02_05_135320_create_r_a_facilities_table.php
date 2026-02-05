@@ -15,7 +15,7 @@ return new class extends Migration
             $table->engine = "innoDB";
             $table->id();
             $table->string('name', 255);
-            $table->longText('lcoation');
+            $table->longText('location');
             $table->longText('additional_details')->nullable();
             $table->dateTime('open_time');
             $table->dateTime('close_time');
