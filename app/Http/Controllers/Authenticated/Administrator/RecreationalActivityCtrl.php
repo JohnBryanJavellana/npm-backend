@@ -31,8 +31,13 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      */
     public function ra_requests(Request $request) {
-        TransactionUtil::transact(null, [], function() {
-            $ra_requests = RARequestInfo::orderBy('created_at', 'DESC')->get();
+        TransactionUtil::transact(null, [], function() use ($request) {
+            $ra_requests_temp = RARequestInfo::all();
+            $ra_requests = $request->status
+                ? $ra_requests_temp->whereIn('status', $request->status)
+                : $ra_requests_temp;
+
+            $ra_requests = $ra_requests->orderBy('created_at', 'DESC')->get();
             return response()->json(['ra_requests' => $ra_requests], 200);
         });
     }
