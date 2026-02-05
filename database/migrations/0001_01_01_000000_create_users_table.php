@@ -29,7 +29,8 @@ return new class extends Migration
                 'ADMIN-ENROLLMENT',
                 'ADMIN-LIBRARY',
                 'TRAINER',
-                'ADMIN-CASHIER'
+                'ADMIN-CASHIER',
+                'ADMIN-RA'
             ])->default('SUPERADMIN');
             $table->string('password');
             $table->decimal('credit_amount', 65, 2)->default(0);
