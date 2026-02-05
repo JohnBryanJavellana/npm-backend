@@ -101,13 +101,20 @@ class RecreationalActivityCtrl extends Controller
      */
     public function ra_remove_facility(Request $request, int $facility_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $facility_id) {
-            $this_facility = RAFacility::where('id', $facility_id)->withCount([
-                'hasData'
-            ])->first();
+            $this_facility = RAFacility::where('id', $facility_id)
+                ->with(['images'])
+                ->withCount(['hasData'])
+                ->first();
 
             if($this_facility->has_data_count > 0) {
                 return response()->json(['message' => "Can't remove facility. It already has connected data."], 409);
             } else {
+                foreach($this_facility->images as $images){
+                    if(file_exists(public_path('recreational-activity/facility/image/' . $images->filename))) {
+                        unlink(public_path('recreational-activity/facility/image/' . $images->filename));
+                    }
+                }
+
                 $this_facility->delete();
                 AuditHelper::log($request->user()->id, "Removed an facility. ID#$facility_id");
                 return response()->json(['message' => "Success!"], 200);
@@ -121,7 +128,7 @@ class RecreationalActivityCtrl extends Controller
      */
     public function ra_equipments(Request $request) {
         return TransactionUtil::transact(null, [], function() use($request) {
-            $ra_equipments_temp = RAEquipments::withCount(['hasData']);
+            $ra_equipments_temp = RAEquipments::withCount('hasData');
             $ra_equipments = $request->documentId
                 ? $ra_equipments_temp->with(['images', 'stocks'])->first()
                 : $ra_equipments_temp->get();
@@ -148,9 +155,9 @@ class RecreationalActivityCtrl extends Controller
      */
     public function ra_remove_equipment_stock(Request $request, int $equipment_stock_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $equipment_stock_id) {
-            $this_equipment_stock = RAEquipmentStock::where('id', $equipment_stock_id)->withCount([
-                'hasData'
-            ])->first();
+            $this_equipment_stock = RAEquipmentStock::where('id', $equipment_stock_id)
+                ->withCount(['hasData'])
+                ->first();
 
             if($this_equipment_stock->has_data_count > 0) {
                 return response()->json(['message' => "Can't remove equipment stock. It already has connected data."], 409);
@@ -177,13 +184,14 @@ class RecreationalActivityCtrl extends Controller
             if($request->status) $this_equipment->status = $request->status;
             $this_equipment->save();
 
+            $dataToReturn = [];
             if($request->stock) {
                 $request->merge([
                     'insideJob' => true,
                     'r_a_equipments_id' => $this_equipment->id
                 ]);
 
-                $this->ra_equipment_create_stock($request);
+                $dataToReturn = $this->ra_equipment_create_stock($request);
             }
 
             if($request->photos) {
@@ -200,8 +208,25 @@ class RecreationalActivityCtrl extends Controller
                 }
             }
 
+            if($request->data_photos) {
+                $room_images = RAEquipmentImage::whereNotIn('id', $request->data_photos)
+                    ->where('r_a_equipments_id', $request->documentId)
+                    ->get();
+
+                foreach($room_images as $item) {
+                    if(file_exists(public_path('recreational-activity/inventory/image/' . $item->filename))) {
+                        unlink(public_path('recreational-activity/inventory/image/' . $item->filename));
+                    }
+
+                    $item->delete();
+                }
+            }
+
             AuditHelper::log($request->user()->id, ($isPost ? 'Created' : 'Updated') . " an equipment. ID#" . $this_equipment->id);
-            return response()->json(['message' => "Success!"], 200);
+            return response()->json([
+                'message' => "Success!",
+                'returnedData' => $dataToReturn
+            ], 200);
         });
     }
 
@@ -239,13 +264,20 @@ class RecreationalActivityCtrl extends Controller
      */
     public function ra_remove_equipment(Request $request, int $equipment_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $equipment_id) {
-            $this_equipment = RAEquipments::where('id', $equipment_id)->withCount([
-                'hasData'
-            ])->first();
+            $this_equipment = RAEquipments::where('id', $equipment_id)
+                ->with(['images'])
+                ->withCount(['hasData'])
+                ->first();
 
             if($this_equipment->has_data_count > 0) {
                 return response()->json(['message' => "Can't remove equipment. It already has connected data."], 409);
             } else {
+                foreach($this_equipment->images as $images){
+                    if(file_exists(public_path('recreational-activity/equipment/image/' . $images->filename))) {
+                        unlink(public_path('recreational-activity/equipment/image/' . $images->filename));
+                    }
+                }
+
                 $this_equipment->delete();
                 AuditHelper::log($request->user()->id, "Removed an equipment. ID#$equipment_id");
                 return response()->json(['message' => "Success!"], 200);
