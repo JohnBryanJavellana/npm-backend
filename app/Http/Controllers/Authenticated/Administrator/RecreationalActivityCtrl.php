@@ -126,6 +126,33 @@ class RecreationalActivityCtrl extends Controller
     }
 
     /**
+     * Summary of ra_equipment_stock
+     * @param Request $request
+     */
+    public function ra_equipment_stock(Request $request) {
+        TransactionUtil::transact(null, [], function() use($request) {
+            $ra_equipment_stock = RAEquipmentStock::withCount(['hasData'])->get();
+            return response()->json(['ra_equipment_stock' => $ra_equipment_stock], 200);
+        });
+    }
+
+    public function ra_remove_equipment_stock(Request $request, int $equipment_stock_id) {
+        TransactionUtil::transact(null, [], function() use ($request, $equipment_stock_id) {
+            $this_equipment_stock = RAEquipmentStock::where('id', $equipment_stock_id)->withCount([
+                'hasData'
+            ])->first();
+
+            if($this_equipment_stock->has_data_count > 0) {
+                return response()->json(['message' => "Can't remove equipment stock. It already has connected data."], 409);
+            } else {
+                $this_equipment_stock->delete();
+                AuditHelper::log($request->user()->id, "Removed an equipment stock. ID#$equipment_stock_id");
+                return response()->json(['message' => "Success!"], 200);
+            }
+        });
+    }
+
+    /**
      * Summary of ra_create_or_update_equipment
      * @param CreateOrUpdateEquipment $request
      */
