@@ -28,4 +28,9 @@ class RecreationalService {
         ->available()
         ->get();
     }
+
+    public function getFacilities()
+    {
+        return;
+    }
 }
