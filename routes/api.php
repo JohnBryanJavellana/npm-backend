@@ -42,6 +42,9 @@ Route::get('/email/verify', [EmailVerificationController::class, 'verify'])->mid
 Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
+/** testing routes */
+Route::get('test', [TraineeRecreational::class, 'viewEquipments']);
+
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
@@ -192,9 +195,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
       Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN')->group(function () {
           Route::prefix('recreationals/')->group(function() {
-            Route::get('equipments', [TraineeRecreational::class, 'viewEquipments']);
-            Route::post('request/', [TraineeRecreational::class, 'viewEquipments']);
-
+            Route::get('equipment', [TraineeRecreational::class, 'viewEquipment']);
+            // Route::post('request/', [TraineeRecreational::class, 'viewEquipments']);
         });
     });
 
