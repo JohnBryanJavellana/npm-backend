@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Models\RARelationship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Utils\{
@@ -75,6 +76,22 @@ class RecreationalActivityCtrl extends Controller
             $this_facility->condition_status = $request->conditionStatus;
             if($request->availabilityStatus) $this_facility->availability_status = $request->availabilityStatus;
             $this_facility->save();
+
+            if ($request->related_equipment) {
+                foreach ($request->related_equipment as $equipment) {
+                    $checkExistence = RARelationship::where([
+                        'r_a_facility_id' => $this_facility->id,
+                        'r_a_equipments_id' => $equipment
+                    ])->count();
+
+                    if ($checkExistence <= 0) {
+                        $relationship = new RARelationship();
+                        $relationship->r_a_facility_id = $this_facility->id;
+                        $relationship->r_a_equipments_id = $equipment;
+                        $relationship->save();
+                    }
+                }
+            }
 
             if($request->photos) {
                 if($documentId) RAFacilityImage::where('r_a_facility_id', $documentId)->delete();
