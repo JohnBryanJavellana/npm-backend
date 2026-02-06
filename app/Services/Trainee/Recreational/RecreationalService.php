@@ -2,11 +2,12 @@
 
 namespace App\Services\Trainee\Recreational;
 
+use App\Models\RAEquipmentRequest;
 use App\Models\RAEquipments;
 
 class RecreationalService {
     public function __construct(
-        protected RAEquipments $raequipmentsModel
+        protected RAEquipments $raequipmentsModel,
     ){}
 
     public function getEquipments()
@@ -18,14 +19,21 @@ class RecreationalService {
             },
         ])
         ->with([
-            "relatedFacility"
+            "images:id,r_a_equipments_id,filename",
+            "relatedFacility.facility",
         ])
         ->available()
-        ->get();
+        ->get(["id", "name", "additional_details", "availability_status"]);
     }
 
     public function getFacilities()
     {
         return;
+    }
+
+
+    public function storeRecreationalRequests()
+    {
+        
     }
 }
