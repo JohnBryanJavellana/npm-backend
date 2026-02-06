@@ -25,7 +25,7 @@ class CreateOrUpdateEquipment extends FormRequest
         return [
             'name' => ['required', 'string'],
             'httpMethod' => ['required'],
-            'stock' => [Rule::when($this->httpMethod === 'POST', ['required', 'numeric'], ['nullable'])],
+            'copies' => [Rule::when($this->httpMethod === 'POST', ['required', 'numeric'], ['nullable'])],
             'photos' => [Rule::when($this->httpMethod === 'POST', ['required'], ['nullable'])],
             'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
             'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
