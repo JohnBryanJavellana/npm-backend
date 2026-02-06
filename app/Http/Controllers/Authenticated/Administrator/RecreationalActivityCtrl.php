@@ -130,7 +130,7 @@ class RecreationalActivityCtrl extends Controller
         return TransactionUtil::transact(null, [], function() use($request) {
             $ra_equipments_temp = RAEquipments::withCount('hasData', 'stocks');
             $ra_equipments = $request->documentId
-                ? $ra_equipments_temp->with(['images'])->first()
+                ? $ra_equipments_temp->where('id', $request->documentId)->with(['images'])->first()
                 : $ra_equipments_temp->get();
 
             return response()->json(['ra_equipments' => $ra_equipments], 200);
@@ -143,7 +143,10 @@ class RecreationalActivityCtrl extends Controller
      */
     public function ra_equipment_stock(Request $request) {
         return TransactionUtil::transact(null, [], function() use($request) {
-            $ra_equipment_stock = RAEquipmentStock::withCount(['hasData'])->get();
+            $ra_equipment_stock = RAEquipmentStock::where('r_a_equipments_id', $request->documentId)
+                ->withCount(['hasData'])
+                ->get();
+
             return response()->json(['ra_equipment_stock' => $ra_equipment_stock], 200);
         });
     }
@@ -185,7 +188,7 @@ class RecreationalActivityCtrl extends Controller
             $this_equipment->save();
 
             $dataToReturn = [];
-            if($request->stock) {
+            if($request->copies) {
                 $request->merge([
                     'insideJob' => true,
                     'r_a_equipments_id' => $this_equipment->id
@@ -214,7 +217,7 @@ class RecreationalActivityCtrl extends Controller
                     ConvertToBase64::generate($photos, 'image', "recreational-activity/equipment/image/$image_name");
 
                     $photo = new RAEquipmentImage();
-                    $photo->r_a_equipments_id = $this_equipment->id;
+                    $photo->documentId = $this_equipment->id;
                     $photo->filename = $image_name;
                     $photo->save();
                 }
@@ -232,17 +235,17 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_equipment_create_stock
      * @param Request $request
      */
-    private function ra_equipment_create_stock(Request $request) {
+    public function ra_equipment_create_stock(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $stockData = [];
 
-            if($request->stock) {
-                for ($i = 0; $i < $request->stock; $i++) {
+            if($request->copies) {
+                for ($i = 0; $i < $request->copies; $i++) {
                     $new_equipment_stock_ui = GenerateTrace::createTraceNumber(RAEquipmentStock::class, '-RAE-', 'unique_identifier', 10, 99);
 
                     $book_copy = new RAEquipmentStock;
                     $book_copy->unique_identifier = $new_equipment_stock_ui;
-                    $book_copy->r_a_equipments_id = $request->r_a_equipments_id;
+                    $book_copy->r_a_equipments_id = $request->documentId;
                     $book_copy->save();
 
                     array_push($stockData, $new_equipment_stock_ui);
