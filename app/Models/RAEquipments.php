@@ -11,7 +11,12 @@ class RAEquipments extends Model
     use HasFactory;
 
     public function hasData() {
-        return $this->hasMany(RAEquipmentRequest::class);
+        return $this->hasManyThrough(
+            RAEquipmentStock::class,
+            RAEquipmentRequest::class,
+            'r_a_equipment_stock_id',
+            'r_a_equipments_id'
+        );
     }
 
     public function images() {

@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('name', 255);
             $table->longText('location');
             $table->longText('additional_details')->nullable();
-            $table->dateTime('open_time');
-            $table->dateTime('close_time');
+            $table->dateTime('open_time')->nullable();
+            $table->dateTime('close_time')->nullable();
             $table->enum('condition_status', [
                 'GOOD CONDITION',
                 'DAMAGED'
