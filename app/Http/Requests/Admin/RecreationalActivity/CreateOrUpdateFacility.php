@@ -24,8 +24,6 @@ class CreateOrUpdateFacility extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'openTime' => ['required', 'datetime'],
-            'closeTime' => ['required', 'datetime'],
             'photos' => [Rule::when($this->httpMethod === 'POST', ['required'], ['nullable'])],
             'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
             'availability_status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]

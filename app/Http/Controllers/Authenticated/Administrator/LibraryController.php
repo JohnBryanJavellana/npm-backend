@@ -145,7 +145,7 @@ class LibraryController extends Controller
             if($request->copies) {
                 $fixedRequest = $request->merge([
                     'insideJob' => true,
-                    'bookId' => $book->id
+                    'documentId' => $book->id
                 ]);
 
                 $dataToReturn = $this->create_book_copies($fixedRequest);
@@ -172,7 +172,7 @@ class LibraryController extends Controller
 
                     $book_copy = new BookCopy;
                     $book_copy->unique_identifier = $new_book_ui;
-                    $book_copy->book_id = $request->bookId;
+                    $book_copy->book_id = $request->documentId;
                     $book_copy->save();
 
                     array_push($copiesData, $new_book_ui);
