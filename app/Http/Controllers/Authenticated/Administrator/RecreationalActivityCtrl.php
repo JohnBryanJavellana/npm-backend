@@ -72,8 +72,8 @@ class RecreationalActivityCtrl extends Controller
             $this_facility->location = $request->location;
             $this_facility->open_time = $request->openTime;
             $this_facility->close_time = $request->closeTime;
-            if($request->condition_status) $this_facility->condition_status = $request->condition_status;
-            if($request->availability_status) $this_facility->availability_status = $request->availability_status;
+            $this_facility->condition_status = $request->conditionStatus;
+            if($request->availabilityStatus) $this_facility->availability_status = $request->availabilityStatus;
             $this_facility->save();
 
             if($request->photos) {
