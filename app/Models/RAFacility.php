@@ -16,4 +16,8 @@ class RAFacility extends Model
     public function images() {
         return $this->hasMany(RAFacilityImage::class);
     }
+
+    public function relationships() {
+        return $this->hasMany(RARelationship::class);
+    }
 }
