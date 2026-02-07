@@ -88,7 +88,6 @@ class TraineeDormitory extends Controller
     }
 
     public function view_room_application (Request $request) {
-        \Log::info("status_view", [$request->all()]);
         try {
             $applications = DormitoryTenant::forUser($request->user()->id)
             ->with([
@@ -294,7 +293,7 @@ class TraineeDormitory extends Controller
      * Methods for Dorm Occupancy
      */
     public function request_tenant_room(DormRoomRequest $request) {
-        \Log::info("controller dorm", [$request->all()]);
+        // \Log::info("controller dorm", [$request->all()]);
         $user = $request->user();
         $validated = $request->validated();
         try {

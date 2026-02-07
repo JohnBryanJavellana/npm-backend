@@ -10,11 +10,8 @@ class DormitoryTenantService {
 
     public function __construct(
         protected DormitoryTenant $dormitoryTenantModel
-        
     )
     {}
-
-
 
     public function getTenantRecordById($tenantId, $userId, $columns = ["*"], $with = [])
     {

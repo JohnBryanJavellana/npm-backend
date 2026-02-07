@@ -14,8 +14,8 @@ class RoomPreferRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("dormRec", [$this->all()]);
-        return $this->user() !== null;
+        return true;
+        // return $this->user() !== null;
     }
 
     /**
