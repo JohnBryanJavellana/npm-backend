@@ -16,6 +16,7 @@ return new class extends Migration
             $table->engine = "innoDB";
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->longText('trace_number');
             $table->enum('request_type', [
                 'EQUIPMENT',
                 'FACILITY',
