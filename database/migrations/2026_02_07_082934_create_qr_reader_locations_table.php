@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('qr_reader_locations', function (Blueprint $table) {
             $table->engine = "innoDB";
             $table->id();
+            $table->string('unit_name', 255);
             $table->longText('location');
             $table->enum('type', ['DORMITORY', 'LIBRARY', 'ENROLLMENT', 'GUARD_ENTRANCE', 'GUARD_EXIT']);
             $table->timestamps();
