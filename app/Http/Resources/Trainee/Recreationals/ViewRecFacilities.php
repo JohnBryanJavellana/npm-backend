@@ -26,7 +26,18 @@ class ViewRecFacilities extends JsonResource
             "condition_status" => $this->condition_status,
             "availability_status" => $this->availability_status,
             "image" => $this->images,
-            "equipment" => $this->relatedEquipment->map(fn($query) => $query->equipment),
+            "equipment" => $this->relatedEquipment?->map(function($query) {
+                return [
+                    "disabled_dates" => $query?->equipment?->hasData->map(fn($data) => [
+                        "from_datetime" => $data->start_date,
+                        "to_datetime" => $data->end_date
+                    ]),
+                ];
+            }),
+            "disabled_dates" => $this->hasData->map(fn($q) => [
+                "from_datetime" => $q->start_date,
+                "to_datetime" => $q->end_date
+            ])
         ];
     }
 }
