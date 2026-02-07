@@ -12,10 +12,10 @@ class RAEquipments extends Model
 
     public function hasData() {
         return $this->hasManyThrough(
-            RAEquipmentStock::class,
             RAEquipmentRequest::class,
-            'r_a_equipment_stock_id',
-            'r_a_equipments_id'
+            RAEquipmentStock::class,
+            'r_a_equipments_id', //balikada la
+            'r_a_equipment_stock_id' // ini hira na duha
         );
     }
 
