@@ -136,25 +136,32 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
         });
 
-        Route::prefix('/masterlist/')->middleware('user_role:SUPERADMIN')->group(function() {
-            Route::prefix('/user/')->group(function() {
+        Route::prefix('/masterlist/')->middleware('user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD')->group(function() {
+            Route::prefix('/user/')->middleware('user_role:SUPERADMIN')->group(function() {
                 Route::match(['GET', 'POST'], 'get_users', [Masterlist::class, 'get_users']);
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
                 Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities']);
+                Route::get('get_user_qr_reader_assignments/{user_id}', [Masterlist::class, 'get_user_qr_reader_assignments']);
                 Route::post('create_or_update_user', [Masterlist::class, 'create_or_update_user']);
                 Route::delete('remove_user/{user_id}', [Masterlist::class, 'remove_user']);
             });
 
-            Route::prefix('/employer/')->group(function() {
+            Route::prefix('/employer/')->middleware('user_role:SUPERADMIN')->group(function() {
                 Route::get('get_employers', [Masterlist::class, 'get_employers']);
                 Route::post('create_or_update_employer', [Masterlist::class, 'create_or_update_employer']);
                 Route::delete('remove_employer/{employer_id}', [Masterlist::class, 'remove_employer']);
             });
 
-            Route::prefix('/position/')->group(function() {
+            Route::prefix('/position/')->middleware('user_role:SUPERADMIN')->group(function() {
                 Route::get('get_positions', [Masterlist::class, 'get_positions']);
                 Route::post('create_or_update_position', [Masterlist::class, 'create_or_update_position']);
                 Route::delete('remove_position/{position_id}', [Masterlist::class, 'remove_position']);
+            });
+
+            Route::prefix('/qr-reader/')->group(function() {
+                Route::get('get_qr_readers', [Masterlist::class, 'get_qr_readers']);
+                Route::post('create_or_update_qr_reader', [Masterlist::class, 'create_or_update_qr_reader']);
+                Route::delete('remove_qr_reader/{qr_reader_id}', [Masterlist::class, 'remove_qr_reader']);
             });
         });
 

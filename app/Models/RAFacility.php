@@ -37,4 +37,7 @@ class RAFacility extends Model
     {
         return $query->whereIn("condition_status", ["GOOD CONDITION", "DAMAGED"]);
     }
+    public function relationships() {
+        return $this->hasMany(RARelationship::class);
+    }
 }

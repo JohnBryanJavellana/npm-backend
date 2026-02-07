@@ -54,8 +54,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     });
 
     /** current user */
-    Route::get('/user', function(Request $request) {
-        $user = User::where('id', $request->user()->id);
+    Route::post('/user', function(Request $request) {
+        $user = User::where('id', $request->incomingId ?? $request->user()->id);
 
         if ($user && $request->user()->role === "TRAINEE") {
             $user->withCount('trainee_enrolled_courses')
@@ -187,7 +187,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
-    Route::middleware('user_role:TRAINER')->prefix('/trainer/')->group(function () { 
+    Route::middleware('user_role:TRAINER')->prefix('/trainer/')->group(function () {
         Route::prefix('enrollment/')->group(function() {
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
             Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
