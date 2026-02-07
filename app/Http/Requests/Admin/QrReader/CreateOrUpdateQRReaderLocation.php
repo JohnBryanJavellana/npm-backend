@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Admin\RecreationalActivity;
+namespace App\Http\Requests\Admin\QrReader;
 
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateFacility extends FormRequest
+class CreateOrUpdateQRReaderLocation extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +24,10 @@ class CreateOrUpdateFacility extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'photos' => [Rule::when($this->httpMethod === 'POST', ['required'], ['nullable'])],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'availabilityStatus' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'location' => ['required', 'string'],
+            'type' => ['required', 'string'],
+            'httpMethod' => ['required'],
+            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
         ];
     }
 }

@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Guest\RegisterController;
 use Illuminate\Http\Request;
 use App\Utils\TransactionUtil;
+use App\Http\Requests\Admin\QrReader\{
+    CreateOrUpdateQRReaderLocation
+};
 use App\Http\Requests\Admin\Masterlist\{
     CreateOrUpdateEmployer,
     CreateOrUpdatePosition
@@ -19,7 +22,9 @@ use App\Models\{
     AuditTrail,
     Employer,
     Position,
-    User
+    User,
+    QrReaderLocation,
+    UserAssignedQrLocation
 };
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
 
@@ -73,6 +78,21 @@ class Masterlist extends Controller
         return TransactionUtil::transact(null, [], function() use ($user_id) {
             $activities = AuditTrail::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
             return response()->json(['activities' => $activities], 200);
+        });
+    }
+
+    /**
+     * Summary of get_user_activities
+     * @param Request $request
+     * @param int $user_id
+     */
+    public function get_user_qr_reader_assignments (Request $request, int $user_id) {
+        return TransactionUtil::transact(null, [], function() use ($user_id) {
+            $qr_readers = UserAssignedQrLocation::where('user_id', $user_id)
+                ->with('qrLocation')
+                ->get();
+
+            return response()->json(['qr_readers' => $qr_readers], 200);
         });
     }
 
@@ -264,6 +284,92 @@ class Masterlist extends Controller
                 }
 
                 return response()->json(['message' => "You've removed a position. ID#$position_id"], 200);
+            }
+        });
+    }
+
+    /**
+     * Summary of get_qr_readers
+     * @param Request $request
+     */
+    public function get_qr_readers (Request $request) {
+        return TransactionUtil::transact(null, [], function() {
+            $qr_readers = QrReaderLocation::withCount(['hasData'])->get();
+            return response()->json(['qr_readers' => $qr_readers], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_qr_reader
+     * @param Request $request
+     */
+    public function create_or_update_qr_reader (CreateOrUpdateQRReaderLocation $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
+
+            $check = CheckForDocumentExistence::exists(
+                QrReaderLocation::class,
+                [
+                    'unit_name' => $request->name,
+                    'location' => $request->location,
+                    'type' => $request->type
+                ],
+                !$isPost,
+                $documentId,
+                'id',
+                "QR Reader already exist."
+            );
+
+            if($check) return $check;
+
+            $this_qr_reader = $isPost ? new QrReaderLocation : QrReaderLocation::findOrFail($request->documentId);
+            $this_qr_reader->unit_name = $request->name;
+            $this_qr_reader->location = $request->location;
+            $this_qr_reader->type = $request->type;
+            $this_qr_reader->save();
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a QR reader. ID#" . $this_qr_reader->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEMasterlist(''),
+                    new BEAuditTrail(''),
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a QR reader. ID#" . $this_qr_reader->id], 201);
+        });
+    }
+
+    /**
+     * Summary of remove_qr_reader
+     * @param Request $request
+     * @param int $qr_reader_id
+     */
+    public function remove_qr_reader (Request $request, int $qr_reader_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $qr_reader_id) {
+            $this_qr_reader = QrReaderLocation::where('id', $qr_reader_id)
+                ->withCount([
+                    'hasData'
+                ])
+                ->first();
+
+            if($this_qr_reader->has_data_count > 0) {
+                return response()->json(['message' => "Can't remove qr reader. It already has connected data."], status: 409);
+            } else {
+                $this_qr_reader->delete();
+
+                AuditHelper::log($request->user()->id, "Removed a qr reader. ID#$qr_reader_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEMasterlist(''),
+                        new BEAuditTrail(''),
+                    );
+                }
+
+                return response()->json(['message' => "You've removed a qr reader. ID#$qr_reader_id"], 200);
             }
         });
     }
