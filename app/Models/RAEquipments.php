@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,8 +14,8 @@ class RAEquipments extends Model
         return $this->hasManyThrough(
             RAEquipmentRequest::class,
             RAEquipmentStock::class,
-            'r_a_equipments_id',
-            'r_a_equipment_stock_id'
+            'r_a_equipments_id', //balikada la
+            'r_a_equipment_stock_id' // ini hira na duha
         );
     }
 
@@ -25,4 +26,18 @@ class RAEquipments extends Model
     public function stocks() {
         return $this->hasMany(RAEquipmentStock::class);
     }
+
+    public function relatedFacility()
+    {
+        return $this->hasMany(RARelationship::class);
+    }
+    /**
+     * Scopes
+     */
+
+    public function scopeAvailable(Builder $query)
+    {
+        return $query->where("availability_status", "AVAILABLE");
+    }
+
 }

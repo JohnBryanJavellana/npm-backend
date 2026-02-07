@@ -93,10 +93,7 @@ class DormitoryExtraService {
         return DB::transaction(function() use ($userId, $validated) {
             $this->prepareData($validated, $userId);
             $invoice =$this->dormitoryInvoiceModel->create([
-                "user_id" => $userId,
                 "dormitory_tenant_id" => $validated["dormitory_id"],
-                "isInitial" => "N",
-                "charge_id" => $validated["charge_id"],
                 "type" => RequestStatus::SERVICE,
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
             ]);
@@ -104,7 +101,7 @@ class DormitoryExtraService {
             $this->dormitoryReqService->create([
                 "dormitory_tenant_id" => $validated["dormitory_id"],
                 "dormitory_service_id" => $validated["service_id"],
-                "dormitory_invoices_id" => $invoice->id
+                "dormitory_invoice_id" => $invoice->id
             ]);
         });
     }

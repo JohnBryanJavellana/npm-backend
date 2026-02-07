@@ -20,7 +20,8 @@ use App\Http\Controllers\Authenticated\Trainee\{
     TraineeLibrary,
     TraineeInvoices,
     CsmsController,
-    CreditController
+    CreditController,
+    TraineeRecreational
 };
 /** administrator controllers */
 use App\Http\Controllers\Authenticated\Administrator\{
@@ -41,8 +42,10 @@ Route::get('/email/verify', [EmailVerificationController::class, 'verify'])->mid
 Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
-//remove
-Route::get("test", [TraineeEnrollment::class, "test"]);
+/** testing routes */
+Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
+Route::post('items', [TraineeRecreational::class, 'requestEquipment']);
+
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
@@ -67,8 +70,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         return response()->json(['user' => $user->first()]);
     });
 
-    // SUPERADMIN: needs access for updating user details
-    // reuse trainee user profile update functionalities
     Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () {
         Route::prefix('/my-account/')->group(function() {
             Route::post('create_or_update_additional_info', [MyAccount::class,'create_or_update_additional_info']);
@@ -97,12 +98,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
         });
-
-        Route::prefix('/trainer/enrollment/')->middleware('user_role:TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () {
-        });
-
+        
         Route::prefix('/trainings/')->group(function() {
-            Route::get('get_all_courses', [TraineeCourses::class, 'get_all_courses']);
+            Route::get('get_all_courses', [TraineeCourses::class, 'get_all_courses']);            
             Route::get('get_trainee_trainings', [TraineeCourses::class, 'get_trainee_courses']);
         });
 
@@ -196,6 +194,15 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
+      Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN')->group(function () {
+          Route::prefix('recreationals/')->group(function() {
+            Route::get('equipment', [TraineeRecreational::class, 'viewEquipment']);
+            Route::get('facilities', [TraineeRecreational::class, 'viewFacilities']);
+            Route::post('requests', [TraineeRecreational::class, 'requestEquipment']);
+        });
+    });
+
+    //FOR RECREATIONALS
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
     Route::post('update_notification', [NotificationCtrl::class, 'update_notification']);
     Route::post('get_notifications', [NotificationCtrl::class, 'get_notifications']);

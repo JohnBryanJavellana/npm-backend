@@ -33,7 +33,7 @@ class CreateServiceRequest extends FormRequest
     {
         return [
             "dormitory_id" => "required|exists:dormitory_tenants,id",
-            "charge_id" => "required|exists:charges,id",
+            "charge_amount" => "required|decimal:2",
             "service_id" => "required|exists:dormitory_services,id",
         ];
     }
@@ -56,7 +56,7 @@ class CreateServiceRequest extends FormRequest
             response()->json([
                 "message" => $firstError,
                 "erorrs" => $errors
-            ])
+            ], 422)
         );
     }
 }

@@ -41,19 +41,42 @@ class DormitoryRequestService {
     //     });
     // }
 
-    public function getRecommendedRoom($validated)
-    {
-        return $this->dormitoryModel->query()
+public function getRecommendedRoom($validated)
+{
+    $start = $validated['fromDate'];
+    $end   = $validated['toDate'];
+
+    $requiredSlots = $validated['single_accomodation'] === 'YES' ? 2 : 1;
+    $capacity = 2;
+
+    return $this->dormitoryModel->query()
         ->with([
             "room_images:id,dormitory_id,filename"
         ])
-        ->where([
-            "room_fee_type" => $validated["forType"],
-            "is_air_conditioned" => $validated["roomType"],
+
+        ->where('room_fee_type', $validated["forType"])
+        ->where('is_air_conditioned', $validated["roomType"])
+
+        ->withCount([
+            'tenants as overlapping_tenants_count' => function ($q) use ($start, $end) {
+                $q->where('tenant_from_date', '<', $end)
+                  ->where('tenant_to_date', '>', $start)
+                  ->whereIn('tenant_status', ['APPROVED', 'ACTIVE']);
+            }
         ])
-        //for single accomodation and date range
-        ->get(["id", "room_name","room_cost","guest_cost"]);        
-    }
+
+        ->havingRaw("overlapping_tenants_count + ? <= ?", [$requiredSlots, $capacity])
+        ->orderBy('overlapping_tenants_count', 'asc')
+        ->orderBy('room_cost', 'asc')
+
+        ->get([
+            "id",
+            "room_name",
+            "room_cost",
+            "guest_cost"
+        ]);
+}
+
 
     public function createRequest($validated, $userId)
     {
@@ -63,22 +86,19 @@ class DormitoryRequestService {
 
             $data = [
                 "user_id" => $userId,
-                "room_for_type" => $validated["forType"],
+                // "room_for_type" => $validated["forType"],
+                "dormitory_room_id" => $validated["room_id"] ?? null,
                 "trace_number" => GenerateTrace::createTraceNumber($this->tenantModel, self::PREFIX),
                 "is_air_conditioned" => $validated["is_air_conditioned"],
                 "single_accomodation" => $validated["single_accomodation"],
-                "tenant_from_date" => $validated["startDate"],
-                "tenant_to_date" => $validated["endDate"],
+                "tenant_from_date" => $validated["fromDate"],
+                "tenant_to_date" => $validated["toDate"],
                 "purpose" => $validated["purpose"],
             ];
 
-            if($validated["forType"] === $this->tenantModel::COUPLE) {
-
-                // $file_requested = $validated["file"];
-                // $filename = GenerateUniqueFilename::generate($file_requested);
-                // $file_requested->move(public_path('dormitory/supporting-document'), $filename);
-                $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document');
-            }
+            // if($validated["forType"] === $this->tenantModel::COUPLE) {
+            //     $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document');
+            // }
 
             $record = $this->tenantModel->create($data);
 
@@ -106,7 +126,6 @@ class DormitoryRequestService {
                 );
             }
 
-            \Log::info("enri", [$record->tenant_status]);
             if(!in_array($record->tenant_status, [
                 RequestStatus::PENDING->value,
                 RequestStatus::FOR_PAYMENT->value,

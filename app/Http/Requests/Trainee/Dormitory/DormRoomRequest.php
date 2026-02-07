@@ -15,6 +15,7 @@ class DormRoomRequest extends FormRequest
      */
     public function authorize(): bool
     {        
+        \Log::info("dormitoryRequest", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -26,12 +27,12 @@ class DormRoomRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "forType" => "required|in:MALE,FEMALE,COUPLE",
+            "room_id" => "nullable|exists:dormitories,id",
             "is_air_conditioned" => "required|in:YES,NO",
             "single_accomodation" => "required|in:YES,NO",
             "purpose" => "required|string|max:255",
-            "startDate" => "required|date",
-            "endDate" => "required|date|after:startDate",
+            "fromDate" => "required|date",
+            "toDate" => "required|date|after:fromDate",
             "file" => "mimes:jpg,jpeg,png,pdf,doc,docx|max:5120",
         ];
     }

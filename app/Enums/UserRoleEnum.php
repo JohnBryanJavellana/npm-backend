@@ -10,6 +10,7 @@ enum UserRoleEnum: string
     case ADMIN_LIBRARY = "ADMIN-LIBRARY";
     case ADMIN_DORMITORY = "ADMIN-DORMITORY";
     case TRAINER = "TRAINER";
+    case ADMIN_RA = "ADMIN-RA";
     case CASHIER = "ADMIN-CASHIER";
 
 
@@ -17,6 +18,14 @@ enum UserRoleEnum: string
     {
         return [
             self::ADMIN_ENROLLMENT->value,
+            self::SUPERADMIN->value,
+        ];
+    }
+
+    public static function recreationalRoles(): array
+    {
+        return [
+            self::ADMIN_RA->value,
             self::SUPERADMIN->value,
         ];
     }
