@@ -38,7 +38,12 @@ class RecreationalActivityCtrl extends Controller
                 ? $ra_requests_temp->whereIn('status', $request->status)
                 : $ra_requests_temp;
 
-            $ra_requests = $ra_requests->orderBy('created_at', 'DESC')->get();
+            $ra_requests = $request->trace_number
+                ? $ra_requests->where('trace_number', $request->trace_number)
+                              ->with(['equipment_request', 'facility_request'])
+                              ->first()
+                : $ra_requests->orderBy('created_at', 'DESC')->get();
+
             return response()->json(['ra_requests' => $ra_requests], 200);
         });
     }
