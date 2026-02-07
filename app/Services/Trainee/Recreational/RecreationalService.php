@@ -9,6 +9,7 @@ use App\Models\RAEquipmentStock;
 use App\Models\RAFacility;
 use App\Models\RAFacilityRequest;
 use App\Models\RARequestInfo;
+use App\Utils\GenerateTrace;
 use Illuminate\Support\Facades\DB;
 
 class RecreationalService {
@@ -38,28 +39,38 @@ class RecreationalService {
             "relatedFacility:id,r_a_facility_id,r_a_equipments_id",
             "relatedFacility.facility.images:id,r_a_facility_id,filename",
             "relatedFacility.facility:id,name,location,additional_details,open_time,close_time,condition_status,availability_status",
+            "relatedFacility.facility.hasData" => function($query){
+                $query->where("status", RequestStatus::APPROVED->value);
+            }
         ])
         ->available()
         ->get();
     }
 
+    // public function getUserRecRecord($validated)
+    // {
+    //     return $this->
+    // }
+
     public function getFacilities()
     {
         return $this->rafacilityModel->query()
         ->with([
+            "hasData" => function($query) {
+                $query->where("status", RequestStatus::APPROVED->value);
+            },
             "images:id,r_a_facility_id,filename",
             "relatedEquipment:id,r_a_facility_id,r_a_equipments_id",
             "relatedEquipment.equipment.images:id,r_a_equipments_id,filename",
             "relatedEquipment.equipment:id,name,additional_details",
+            "relatedEquipment.equipment.hasData" => function($query){
+                $query->where("status", RequestStatus::APPROVED->value);
+            },
         ])
         ->available()
         ->okayCondition()
         ->get(["id","name","location","additional_details","open_time","close_time","condition_status","availability_status"]);
     }
-
-    /**
-     * 
-     */
 
     public function prepareEquipment($validated)
     {
@@ -85,19 +96,23 @@ class RecreationalService {
 
             $record = $this->rarequestInfoModel->create([
                 "user_id" => $validated["user_id"],
+                "trace_number" => GenerateTrace::createTraceNumber($this->rarequestInfoModel,"-RAR-"),
                 "request_type" => $selectedType,
                 "reason" => $validated["purpose"],
             ]);
 
             foreach($validated["data"] as $info) {
                 if ($info["type"] === "EQUIPMENT") {
-                    $stock = $this->raequipmentStockModel->query()->where("r_a_equipments_id", $info["id"])->available()->okayCondition()->firstOrFail();
+                    $stock = $this->raequipmentStockModel->query()->where("r_a_equipments_id", $info["id"])->lockForUpdate()->available()->okayCondition()->firstOrFail();
                     $this->raequipmentRequestModel->create([
                         "r_a_request_info_id" => $record->id,
                         "r_a_equipment_stock_id" => $stock->id,
                         "start_date" => $info["from_datetime"],
                         "end_date" => $info["to_datetime"],
                         "issued_condition" => $stock->condition_status, 
+                    ]);
+                    $stock->update([
+                        "condition_status" => "BORROWED"
                     ]);
                 } else {
                     $this->rafacilityRequestModel->create([

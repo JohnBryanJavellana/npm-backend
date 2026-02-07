@@ -41,6 +41,17 @@ class TraineeRecreational extends Controller
         }
     }
 
+    // public function getUserRecRequest(Request $request)
+    // {
+    //     try
+    //     {
+    //         ret
+            
+    //     }
+    //     catch (\Exception $e) {
+    //     }
+    // }
+
 
     public function requestEquipment(RecreationalRequest $request)
     {
@@ -49,7 +60,8 @@ class TraineeRecreational extends Controller
         $validated = $request->validated();
         try
         {
-            return $this->recreationalService->storeRecreationalRequests($validated);
+            $this->recreationalService->storeRecreationalRequests($validated);
+            return response()->json(["message" => "Successfully requested!"], 200);;
         }
         catch (\Exception $e) {
             \Log::info("requestEquipmentError", [$e]);

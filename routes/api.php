@@ -43,7 +43,7 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPasswor
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 /** testing routes */
-Route::get('test', [TraineeRecreational::class, 'viewEquipment']);
+Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
 Route::post('items', [TraineeRecreational::class, 'requestEquipment']);
 
 

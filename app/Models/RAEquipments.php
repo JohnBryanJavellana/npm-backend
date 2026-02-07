@@ -14,13 +14,8 @@ class RAEquipments extends Model
         return $this->hasManyThrough(
             RAEquipmentRequest::class,
             RAEquipmentStock::class,
-<<<<<<< HEAD
             'r_a_equipments_id', //balikada la
             'r_a_equipment_stock_id' // ini hira na duha
-=======
-            'r_a_equipments_id',
-            'r_a_equipment_stock_id'
->>>>>>> a92aa035b3e1ecfe75af708a7eddc443e05f7c31
         );
     }
 
