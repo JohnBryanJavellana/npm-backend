@@ -12,4 +12,8 @@ class QrReaderLocation extends Model
     public function hasData() {
         return $this->hasMany(CheckInOutLog::class);
     }
+
+    public function assignedUsers() {
+        return $this->hasMany(UserAssignedQrLocation::class);
+    }
 }

@@ -7,7 +7,8 @@ use App\Http\Controllers\Guest\RegisterController;
 use Illuminate\Http\Request;
 use App\Utils\TransactionUtil;
 use App\Http\Requests\Admin\QrReader\{
-    CreateOrUpdateQRReaderLocation
+    CreateOrUpdateQRReaderLocation,
+    CreateOrUpdateQRAssignment
 };
 use App\Http\Requests\Admin\Masterlist\{
     CreateOrUpdateEmployer,
@@ -24,6 +25,7 @@ use App\Models\{
     Position,
     User,
     QrReaderLocation,
+    CheckInOutLog,
     UserAssignedQrLocation
 };
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
@@ -93,6 +95,44 @@ class Masterlist extends Controller
                 ->get();
 
             return response()->json(['qr_readers' => $qr_readers], 200);
+        });
+    }
+
+    /**
+     * Summary of qr_assignments
+     * @param CreateOrUpdateQRAssignment $request
+     */
+    public function qr_assignments (CreateOrUpdateQRAssignment $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
+
+            $check = CheckForDocumentExistence::exists(
+                UserAssignedQrLocation::class,
+                ['user_id' => $request->userId, 'qr_reader_location_id' => $request->qrReader],
+                !$isPost,
+                $documentId,
+                'id',
+                "User Assigned Qr Location already exist."
+            );
+
+            if($check) return $check;
+
+            $this_qr_assignments = $isPost ? new UserAssignedQrLocation() : UserAssignedQrLocation::findOrFail($documentId);
+            $this_qr_assignments->user_id = $request->userId;
+            $this_qr_assignments->qr_reader_location_id = $request->qrReader;
+            $this_qr_assignments->save();
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a QR Reader assignment. ID#" . $this_qr_assignments->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEMasterlist(''),
+                    new BEAuditTrail(''),
+                );
+            }
+
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a QR Reader assignment. ID#" . $this_qr_assignments->id], 201);
         });
     }
 
@@ -293,15 +333,32 @@ class Masterlist extends Controller
      * @param Request $request
      */
     public function get_qr_readers (Request $request) {
-        return TransactionUtil::transact(null, [], function() {
-            $qr_readers = QrReaderLocation::withCount(['hasData'])->get();
+        return TransactionUtil::transact(null, [], function() use($request) {
+            $qr_readers_temp = QrReaderLocation::withCount(['hasData']);
+
+            $qr_readers = $request->documentId
+                ? $qr_readers_temp->where('id', $request->documentId)
+                                  ->with('assignedUsers.user')
+                                  ->first()
+                : $qr_readers_temp->get();
+
             return response()->json(['qr_readers' => $qr_readers], 200);
+        });
+    }
+
+    public function get_qr_reader_records (Request $request) {
+        return TransactionUtil::transact(null, [], function() use($request) {
+            $qr_reader_records = CheckInOutLog::where('qr_reader_location_id', $request->documentId)
+                ->with(['initiator'])
+                ->get();
+
+            return response()->json(['qr_reader_records' => $qr_reader_records], 200);
         });
     }
 
     /**
      * Summary of create_or_update_qr_reader
-     * @param Request $request
+     * @param CreateOrUpdateQRReaderLocation $request
      */
     public function create_or_update_qr_reader (CreateOrUpdateQRReaderLocation $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
@@ -318,18 +375,18 @@ class Masterlist extends Controller
                 !$isPost,
                 $documentId,
                 'id',
-                "QR Reader already exist."
+                "Qr Location already exist."
             );
 
             if($check) return $check;
 
-            $this_qr_reader = $isPost ? new QrReaderLocation : QrReaderLocation::findOrFail($request->documentId);
-            $this_qr_reader->unit_name = $request->name;
-            $this_qr_reader->location = $request->location;
-            $this_qr_reader->type = $request->type;
-            $this_qr_reader->save();
+            $this_qr_reader_location = $isPost ? new QrReaderLocation() : QrReaderLocation::findOrFail($documentId);
+            $this_qr_reader_location->unit_name = $request->name;
+            $this_qr_reader_location->location = $request->location;
+            $this_qr_reader_location->type = $request->type;
+            $this_qr_reader_location->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a QR reader. ID#" . $this_qr_reader->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a QR Reader location. ID#" . $this_qr_reader_location->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -338,7 +395,30 @@ class Masterlist extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a QR reader. ID#" . $this_qr_reader->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a QR Reader location. ID#" . $this_qr_reader_location->id], 201);
+        });
+    }
+
+    /**
+     * Summary of remove_qr_reader_assignment
+     * @param Request $request
+     * @param int $qr_reader_id
+     */
+    public function remove_qr_reader_assignment (Request $request, int $qr_reader_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $qr_reader_id) {
+            $this_qr_assignment = UserAssignedQrLocation::where('id', $qr_reader_id)->first();
+            $this_qr_assignment->delete();
+
+            AuditHelper::log($request->user()->id, "Removed a position. ID#$qr_reader_id");
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEMasterlist(''),
+                    new BEAuditTrail(''),
+                );
+            }
+
+            return response()->json(['message' => "You've removed a position. ID#$qr_reader_id"], 200);
         });
     }
 
