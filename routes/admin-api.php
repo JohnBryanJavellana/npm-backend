@@ -142,7 +142,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
                 Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities']);
                 Route::get('get_user_qr_reader_assignments/{user_id}', [Masterlist::class, 'get_user_qr_reader_assignments']);
+                Route::post('qr_assignments', [Masterlist::class, 'qr_assignments']);
                 Route::post('create_or_update_user', [Masterlist::class, 'create_or_update_user']);
+                Route::delete('remove_qr_reader_assignment/{qr_reader_id}', [Masterlist::class, 'remove_qr_reader_assignment']);
                 Route::delete('remove_user/{user_id}', [Masterlist::class, 'remove_user']);
             });
 
@@ -159,7 +161,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             });
 
             Route::prefix('/qr-reader/')->group(function() {
-                Route::get('get_qr_readers', [Masterlist::class, 'get_qr_readers']);
+                Route::post('get_qr_readers', [Masterlist::class, 'get_qr_readers']);
+                Route::post('get_qr_reader_records', [Masterlist::class, 'get_qr_reader_records']);
                 Route::post('create_or_update_qr_reader', [Masterlist::class, 'create_or_update_qr_reader']);
                 Route::delete('remove_qr_reader/{qr_reader_id}', [Masterlist::class, 'remove_qr_reader']);
             });

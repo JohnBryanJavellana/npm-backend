@@ -10,6 +10,10 @@ class UserAssignedQrLocation extends Model
     use HasFactory;
 
     public function qrLocation() {
-        return $this->hasOne(QrReaderLocation::class);
+        return $this->hasOne(QrReaderLocation::class, 'id', 'qr_reader_location_id');
+    }
+
+    public function user() {
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
 }
