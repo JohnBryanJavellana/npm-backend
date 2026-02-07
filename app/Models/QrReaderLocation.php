@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class QrReaderLocation extends Model
 {
     use HasFactory;
+
+    public function hasData() {
+        return $this->hasMany(CheckInOutLog::class);
+    }
 }
