@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,5 +17,24 @@ class RAFacility extends Model
 
     public function images() {
         return $this->hasMany(RAFacilityImage::class);
+    }
+
+    public function relatedEquipment()
+    {
+        return $this->hasMany(RARelationship::class);
+    }
+
+    /**
+     * Scopes
+     **/
+
+    public function scopeAvailable(Builder $query)
+    {
+        return $query->where("availability_status", RequestStatus::AVAILABLE->value);
+    }
+
+    public function scopeOkayCondition(Builder $query)
+    {
+        return $query->whereIn("condition_status", ["GOOD CONDITION", "DAMAGED"]);
     }
 }

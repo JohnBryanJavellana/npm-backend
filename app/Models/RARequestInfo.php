@@ -9,6 +9,8 @@ class RARequestInfo extends Model
 {
     use HasFactory;
 
+    protected $guarded = ["id"];
+
     public function requestor() {
         return $this->hasOne(User::class);
     }

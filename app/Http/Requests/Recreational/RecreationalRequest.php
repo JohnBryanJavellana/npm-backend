@@ -14,16 +14,36 @@ class RecreationalRequest extends FormRequest
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
-    {
+    {   
+        \Log::info("recRequest", [$this->all()]);
         return true;
     }
 
     protected function prepareForValidation()
     {
+        // $this->merge([
+        //     "user_id" => in_array($this->user()->role, UserRoleEnum::recreationalRoles()) 
+        //         ?  $this->input("userId")
+        //         :  $this->user()->id,
+        //     "data.*.type" => strtoupper($this->input("type"))
+        // ]);     
+
+        $data = $this->input("data", []);
+
+        $data = array_map(function($item) {
+            if(isset($item["type"])) {
+                $item["type"] = strtoupper( $item["type"]);
+            }
+
+            return $item;
+        }
+        , $data);
+
         $this->merge([
-            "user_id" => in_array($this->user()->role, UserRoleEnum::recreationalRoles()) 
+            "user_id" => $this->has("userId")
                 ?  $this->input("userId")
-                :  $this->user()->id
+                :  $this->user()->id,
+            "data" => $data
         ]);     
     }
 
@@ -36,6 +56,13 @@ class RecreationalRequest extends FormRequest
     {
         return [
             "user_id" => "required|exists:users,id",
+            "data" => "required|array",
+            "data.*.id" => "required|integer",
+            "data.*.from_datetime" => "required|date_format:Y-m-d H:i",
+            "data.*.to_datetime" => "required|date_format:Y-m-d H:i|after:data.*.from_datetime",
+            "data.*.quantity" => "integer",
+            "data.*.type" => "required|in:EQUIPMENT,FACILITY,HYBRID",
+            "purpose" => "required|string|max:255"
         ];
     }
 
