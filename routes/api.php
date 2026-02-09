@@ -98,9 +98,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
         });
-        
+
         Route::prefix('/trainings/')->group(function() {
-            Route::get('get_all_courses', [TraineeCourses::class, 'get_all_courses']);            
+            Route::get('get_all_courses', [TraineeCourses::class, 'get_all_courses']);
             Route::get('get_trainee_trainings', [TraineeCourses::class, 'get_trainee_courses']);
         });
 
@@ -194,11 +194,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
-      Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN')->group(function () {
-          Route::prefix('recreationals/')->group(function() {
+    Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN')->group(function () {
+        Route::prefix('recreationals/')->group(function() {
             Route::get('equipment', [TraineeRecreational::class, 'viewEquipment']);
             Route::get('facilities', [TraineeRecreational::class, 'viewFacilities']);
             Route::post('requests', [TraineeRecreational::class, 'requestEquipment']);
+            Route::post('get_recreational_request', [TraineeRecreational::class, 'get_recreational_request']);
         });
     });
 

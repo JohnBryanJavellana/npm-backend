@@ -46,7 +46,7 @@ class RecreationalActivityCtrl extends Controller
                                     return [
                                         'request_info' => $self->first(),
                                         'facility_request' => $self->facility_request,
-                                        'equipment_request' => $self->equipment_request
+                                        'equipment_request' => $self->equipment_request,
                                     ];
                               })
                               ->values()
