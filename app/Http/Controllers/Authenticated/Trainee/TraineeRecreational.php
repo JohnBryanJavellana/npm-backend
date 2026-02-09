@@ -8,6 +8,7 @@ use App\Http\Resources\Recreational\ViewRecFacilities;
 use App\Http\Resources\Trainee\Recreationals\ViewRecEquipment;
 use App\Http\Resources\Trainee\Recreationals\ViewRecFacilities as RecreationalsViewRecFacilities;
 use App\Models\Equipment;
+use App\Models\RAEquipmentRequest;
 use App\Services\Trainee\Recreational\RecreationalService;
 use Illuminate\Http\Request;
 
@@ -55,14 +56,18 @@ class TraineeRecreational extends Controller
     //     }
     // }
 
+    /**
+     * Summary of get_recreational_request
+     * @param Request $request
+     */
     public function get_recreational_request(Request $request) {
         return TransactionUtil::transact(null, [], function() use($request) {
             $userId = $request->user()->id;
             $recRequests_temp = RARequestInfo::where('user_id', $userId)->orderBy('created_at', 'DESC');
 
             $recRequests = $request->status
-                ? $recRequests_temp->whereIn('status', $request->status)->get()
-                : $recRequests_temp->get();
+                ? $recRequests_temp->whereIn('status', $request->status)
+                : $recRequests_temp;
 
             $recRequests = $request->traceNumber
                 ?  $recRequests->where('trace_number', $request->traceNumber)
@@ -72,10 +77,40 @@ class TraineeRecreational extends Controller
                         'facility_request',
                         'facility_request.facility',
                     ])
+                    ->get()
+                    ->map(function($request) {
+                        $grouped = $request->equipment_request->groupBy('r_a_equipments_id');
+
+                        $request->grouped_equipment = $grouped->map(function($items) {
+                            $first = $items->first();
+                            $first->requested_qty = $items->count();
+                            $first->requested_issued_qty = $items->whereNotNull('r_a_equipment_stock_id')->count();
+                            return $first;
+                        })->values();
+
+                        return $request;
+                    })
                     ->first()
-                : $recRequests;
+                : $recRequests->get();
 
             return response()->json(['recRequests' => $recRequests], 200);
+        });
+    }
+
+    /**
+     * Summary of get_requested_equipments
+     * @param Request $request
+     */
+    public function get_requested_equipments(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $raEquipmentRequests = RAEquipmentRequest::where([
+                'r_a_request_info_id' => $request->rARequestInfoId,
+                'r_a_equipments_id' => $request->rAEquipmentsId
+            ])->with([
+                'equipment_stock'
+            ])->get();
+
+            return response()->json(['raEquipmentRequests' => $raEquipmentRequests], 200);
         });
     }
 
