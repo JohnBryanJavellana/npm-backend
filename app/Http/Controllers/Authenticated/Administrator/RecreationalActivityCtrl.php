@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Models\RAEquipmentRequest;
 use App\Models\RARelationship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -24,6 +25,7 @@ use App\Http\Requests\Admin\RecreationalActivity\{
     CreateOrUpdateEquipment,
     CreateOrUpdateFacility
 };
+use Carbon\Carbon;
 
 class RecreationalActivityCtrl extends Controller
 {
@@ -33,27 +35,95 @@ class RecreationalActivityCtrl extends Controller
      */
     public function ra_requests(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $ra_requests_temp = RARequestInfo::with(['requestor']);
-            $ra_requests = $request->status
-                ? $ra_requests_temp->whereIn('status', $request->status)
-                : $ra_requests_temp;
+            $query = RARequestInfo::with(['requestor']);
 
-            $ra_requests = $request->trace_number
-                ? $ra_requests->where('trace_number', $request->trace_number)
-                              ->with(['equipment_request', 'facility_request'])
-                              ->get()
-                              ->map(function($self) {
-                                    return [
-                                        'request_info' => $self->first(),
-                                        'facility_request' => $self->facility_request,
-                                        'equipment_request' => $self->equipment_request,
-                                    ];
-                              })
-                              ->values()
-                              ->first()
-                : $ra_requests->orderBy('created_at', 'DESC')->get();
+            if ($request->status) {
+                $query->whereIn('status', $request->status);
+            }
+
+            if ($request->trace_number) {
+                $ra_requests = $query->where('trace_number', $request->trace_number)
+                    ->with(['equipment_request.equipment', 'facility_request.facility'])
+                    ->get()
+                    ->map(function($request) {
+                        $grouped = $request->equipment_request->groupBy('r_a_equipments_id');
+
+                        $request->grouped_equipment = $grouped->map(function($items) {
+                            $first = $items->first();
+                            $first->requested_qty = $items->count();
+                            $first->requested_issued_qty = $items->whereNotNull('r_a_equipment_stock_id')->count();
+                            return $first;
+                        })->values();
+
+                        return $request;
+                    })
+                    ->first();
+            } else {
+                $ra_requests = $query->orderBy('created_at', 'DESC')->get();
+            }
 
             return response()->json(['ra_requests' => $ra_requests], 200);
+        });
+    }
+
+    /**
+     * Summary of get_requested_equipments
+     * @param Request $request
+     */
+    public function get_requested_equipments(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $raEquipmentRequests = RAEquipmentRequest::where([
+                'r_a_request_info_id' => $request->rARequestInfoId,
+                'r_a_equipments_id' => $request->rAEquipmentsId
+            ])->get();
+
+            return response()->json(['raEquipmentRequests' => $raEquipmentRequests], 200);
+        });
+    }
+
+    /**
+     * Summary of get_requested_match_equipments
+     * @param Request $request
+     */
+    public function get_requested_match_equipments(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $raEquipmentMainFromRequests = RAEquipmentStock::where([
+                'r_a_equipments_id' => $request->rAEquipmentsId
+            ])->get();
+
+            return response()->json(['raEquipmentMainFromRequests' => $raEquipmentMainFromRequests], 200);
+        });
+    }
+
+    /**
+     * Summary of issue_requested_equipments
+     * @param Request $request
+     */
+    public function issue_requested_equipments(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $rARequestInfoId = $request->rARequestInfoId;
+            $selectedRows = $request->row;
+
+            $rARequestInfo = RARequestInfo::findOrFail($rARequestInfoId);
+            $rARequestInfo->status = "ACTIVE";
+            $rARequestInfo->save();
+
+            foreach($selectedRows as $rows) {
+                $mainEquipmentStock = RAEquipmentStock::findOrFail($rows['rowId']);
+                $mainEquipmentStock->availability_status = "UNAVAILABLE";
+                $mainEquipmentStock->save();
+
+                $rAEquipments = RAEquipmentRequest::findOrFail($rows['rowEquipmentRequestId']);
+                $rAEquipments->r_a_equipment_stock_id = $rows['rowId'];
+                $rAEquipments->remarks = $rows['remarks'];
+                $rAEquipments->issued_condition = $mainEquipmentStock->condition_status;
+                $rAEquipments->issued_at = Carbon::now();
+                $rAEquipments->status = "APPROVED";
+                $rAEquipments->updated_by_whom = $request->user()->id;
+                $rAEquipments->save();
+            };
+
+            return response()->json(['message' => "Issued Successfully!"], 200);
         });
     }
 

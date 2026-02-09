@@ -189,6 +189,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix('/recreational-activity/')->middleware('user_role:SUPERADMIN,ADMIN-RA')->group(function() {
             Route::post('ra_requests', [RecreationalActivityCtrl::class, 'ra_requests']);
+            Route::post('ra_requests/get_requested_equipments', [RecreationalActivityCtrl::class, 'get_requested_equipments']);
+            Route::post('ra_requests/get_requested_match_equipments', [RecreationalActivityCtrl::class, 'get_requested_match_equipments']);
+            Route::post('ra_requests/issue_requested_equipments', [RecreationalActivityCtrl::class, 'issue_requested_equipments']);
 
             Route::post('ra_equipments', [RecreationalActivityCtrl::class, 'ra_equipments']);
             Route::post('ra_equipment_stock', [RecreationalActivityCtrl::class, 'ra_equipment_stock']);

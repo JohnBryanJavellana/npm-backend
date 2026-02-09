@@ -11,7 +11,11 @@ class RAEquipmentRequest extends Model
 
     protected $guarded = ["id"];
 
-    public function facility() {
-        return $this->hasOne(RAFacility::class, 'id', 'r_a_facility_id');
+    public function equipment() {
+        return $this->hasOne(RAEquipments::class, 'id', 'r_a_equipments_id');
+    }
+
+    public function equipment_stock() {
+        return $this->hasOne(RAEquipmentStock::class, 'id', 'r_a_equipment_stock_id');
     }
 }
