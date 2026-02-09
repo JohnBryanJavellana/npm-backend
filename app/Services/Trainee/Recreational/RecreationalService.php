@@ -109,7 +109,7 @@ class RecreationalService {
                         "r_a_equipment_stock_id" => $stock->id,
                         "start_date" => $info["from_datetime"],
                         "end_date" => $info["to_datetime"],
-                        "issued_condition" => $stock->condition_status, 
+                        "issued_condition" => $stock->condition_status,
                     ]);
                     $stock->update([
                         "condition_status" => "BORROWED"
@@ -120,7 +120,7 @@ class RecreationalService {
                         "r_a_facility_id" => $info["id"],
                         "start_date" => $info["from_datetime"],
                         "end_date" => $info["to_datetime"],
-                        "issued_condition" => $stock->condition_status, 
+                        "issued_condition" => $stock->condition_status,
                     ]);
                 }
             }
