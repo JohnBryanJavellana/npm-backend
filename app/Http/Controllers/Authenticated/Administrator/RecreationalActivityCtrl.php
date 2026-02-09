@@ -103,25 +103,70 @@ class RecreationalActivityCtrl extends Controller
     public function issue_requested_equipments(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $rARequestInfoId = $request->rARequestInfoId;
+            $rAEquipmentsId = $request->rAEquipmentsId;
             $selectedRows = $request->row;
 
             $rARequestInfo = RARequestInfo::findOrFail($rARequestInfoId);
             $rARequestInfo->status = RAEnum::ACTIVE;
             $rARequestInfo->save();
 
+            $ids = collect($selectedRows)
+                ->pluck('rowEquipmentRequestId')
+                ->unique()
+                ->toArray();
+
             foreach($selectedRows as $rows) {
-                $mainEquipmentStock = RAEquipmentStock::findOrFail($rows['rowId']);
-                $mainEquipmentStock->availability_status = RAEnum::UNAVAILABLE;
-                $mainEquipmentStock->save();
+                $getNotInCurrent = RAEquipmentRequest::whereNotIn('id', $ids)
+                    ->where([
+                        'r_a_request_info_id' => $rARequestInfoId,
+                        'r_a_equipments_id' => $rAEquipmentsId
+                    ])->get();
+
+                if($getNotInCurrent) {
+                    foreach($getNotInCurrent as $notInCurrents) {
+                        $thisNotInCurrent = RAEquipmentRequest::findOrFail($notInCurrents->id);
+
+                        if(!\in_array($thisNotInCurrent->status, [
+                            RAEnum::CANCELLED->value,
+                            RAEnum::RECEIVED->value,
+                            RAEnum::PENDING->value,
+                            RAEnum::RETURNED->value
+                        ])) {
+                            $thisNotInCurrent->status = RAEnum::PENDING;
+                            $thisNotInCurrent->remarks = NULL;
+                            $thisNotInCurrent->issued_condition = NULL;
+                            $thisNotInCurrent->issued_at = NULL;
+                            $thisNotInCurrent->updated_by_whom = NULL;
+
+                            $mainEquipmentStock = RAEquipmentStock::findOrFail($thisNotInCurrent->r_a_equipment_stock_id);
+                            $mainEquipmentStock->availability_status = RAEnum::AVAILABLE;
+                            $mainEquipmentStock->save();
+
+                            $thisNotInCurrent->r_a_equipment_stock_id = NULL;
+                            $thisNotInCurrent->save();
+                        }
+                    }
+                }
 
                 $rAEquipments = RAEquipmentRequest::findOrFail($rows['rowEquipmentRequestId']);
-                $rAEquipments->r_a_equipment_stock_id = $rows['rowId'];
-                $rAEquipments->remarks = $rows['remarks'] ?? NULL;
-                $rAEquipments->issued_condition = $mainEquipmentStock->condition_status;
-                $rAEquipments->issued_at = Carbon::now();
-                $rAEquipments->status = RAEnum::APPROVED;
-                $rAEquipments->updated_by_whom = $request->user()->id;
-                $rAEquipments->save();
+
+                if(!\in_array($rAEquipments->status, [
+                    RAEnum::CANCELLED->value,
+                    RAEnum::RECEIVED->value,
+                    RAEnum::RETURNED->value
+                ])) {
+                    $mainEquipmentStock = RAEquipmentStock::findOrFail($rows['rowId']);
+                    $mainEquipmentStock->availability_status = RAEnum::UNAVAILABLE;
+                    $mainEquipmentStock->save();
+
+                    $rAEquipments->r_a_equipment_stock_id = $rows['rowId'];
+                    $rAEquipments->remarks = $rows['remarks'] ?? NULL;
+                    $rAEquipments->issued_condition = $mainEquipmentStock->condition_status;
+                    $rAEquipments->issued_at = Carbon::now();
+                    $rAEquipments->status = RAEnum::APPROVED;
+                    $rAEquipments->updated_by_whom = $request->user()->id;
+                    $rAEquipments->save();
+                }
             };
 
             return response()->json(['message' => "Issued Successfully!"], 200);
@@ -399,79 +444,6 @@ class RecreationalActivityCtrl extends Controller
                 AuditHelper::log($request->user()->id, "Removed an equipment. ID#$equipment_id");
                 return response()->json(['message' => "Success!"], 200);
             }
-        });
-    }
-
-    public function issue_requested_equipments_correct_version(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $rARequestInfoId = $request->rARequestInfoId;
-            $rAEquipmentsId = $request->rAEquipmentsId;
-            $selectedRows = $request->row;
-
-            $rARequestInfo = RARequestInfo::findOrFail($rARequestInfoId);
-            $rARequestInfo->status = RAEnum::ACTIVE;
-            $rARequestInfo->save();
-
-            $ids = collect($selectedRows)
-                ->pluck('rowEquipmentRequestId')
-                ->unique()
-                ->toArray();
-
-            foreach($selectedRows as $rows) {
-                $getNotInCurrent = RAEquipmentRequest::whereNotIn('id', $ids)
-                    ->where([
-                        'r_a_request_info_id' => $rARequestInfoId,
-                        'r_a_equipments_id' => $rAEquipmentsId
-                    ])->get();
-
-                if($getNotInCurrent) {
-                    foreach($getNotInCurrent as $notInCurrents) {
-                        $thisNotInCurrent = RAEquipmentRequest::findOrFail($notInCurrents->id);
-
-                        if(!\in_array($thisNotInCurrent->status, [
-                            RAEnum::CANCELLED->value,
-                            RAEnum::RECEIVED->value,
-                            RAEnum::PENDING->value,
-                            RAEnum::RETURNED->value
-                        ])) {
-                            $thisNotInCurrent->status = RAEnum::PENDING;
-                            $thisNotInCurrent->remarks = NULL;
-                            $thisNotInCurrent->issued_condition = NULL;
-                            $thisNotInCurrent->issued_at = NULL;
-                            $thisNotInCurrent->updated_by_whom = NULL;
-
-                            $mainEquipmentStock = RAEquipmentStock::findOrFail($thisNotInCurrent->r_a_equipment_stock_id);
-                            $mainEquipmentStock->availability_status = RAEnum::AVAILABLE;
-                            $mainEquipmentStock->save();
-
-                            $thisNotInCurrent->r_a_equipment_stock_id = NULL;
-                            $thisNotInCurrent->save();
-                        }
-                    }
-                }
-
-                $rAEquipments = RAEquipmentRequest::findOrFail($rows['rowEquipmentRequestId']);
-
-                if(!\in_array($rAEquipments->status, [
-                    RAEnum::CANCELLED->value,
-                    RAEnum::RECEIVED->value,
-                    RAEnum::RETURNED->value
-                ])) {
-                    $mainEquipmentStock = RAEquipmentStock::findOrFail($rows['rowId']);
-                    $mainEquipmentStock->availability_status = RAEnum::UNAVAILABLE;
-                    $mainEquipmentStock->save();
-
-                    $rAEquipments->r_a_equipment_stock_id = $rows['rowId'];
-                    $rAEquipments->remarks = $rows['remarks'] ?? NULL;
-                    $rAEquipments->issued_condition = $mainEquipmentStock->condition_status;
-                    $rAEquipments->issued_at = Carbon::now();
-                    $rAEquipments->status = RAEnum::APPROVED;
-                    $rAEquipments->updated_by_whom = $request->user()->id;
-                    $rAEquipments->save();
-                }
-            };
-
-            return response()->json(['message' => "Issued Successfully!"], 200);
         });
     }
 }
