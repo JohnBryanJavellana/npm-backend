@@ -201,6 +201,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('requests', [TraineeRecreational::class, 'requestEquipment']);
             Route::post('get_recreational_request', [TraineeRecreational::class, 'get_recreational_request']);
             Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'get_requested_equipments']);
+            Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancel_requested_units']);
         });
     });
 

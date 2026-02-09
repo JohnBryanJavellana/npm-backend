@@ -9,6 +9,9 @@ use App\Http\Resources\Trainee\Recreationals\ViewRecEquipment;
 use App\Http\Resources\Trainee\Recreationals\ViewRecFacilities as RecreationalsViewRecFacilities;
 use App\Models\Equipment;
 use App\Models\RAEquipmentRequest;
+use App\Models\RAEquipmentStock;
+use App\Models\RAFacility;
+use App\Models\RAFacilityRequest;
 use App\Services\Trainee\Recreational\RecreationalService;
 use Illuminate\Http\Request;
 
@@ -111,6 +114,37 @@ class TraineeRecreational extends Controller
             ])->get();
 
             return response()->json(['raEquipmentRequests' => $raEquipmentRequests], 200);
+        });
+    }
+
+    public function cancel_requested_units(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $model = match ($request->documentType) {
+                'EQUIPMENT'  => RAEquipmentRequest::class,
+                'FACILITY' => RAFacilityRequest::class,
+                default    => throw new \Exception("Invalid document type")
+            };
+
+            $thisRequest = $model::findOrFail($request->documentId);
+
+            if(\in_array($thisRequest->status, ["CANCELLED", "RECEIVED"])) {
+                return response()->json(['message' => "Cant cancel unit. It is already " . $thisRequest->status], 409);   
+            } else {
+                $thisRequest->status = "CANCELLED";
+                $thisRequest->save();
+
+                if($model instanceof RAEquipmentRequest) {
+                    $mainStock = RAEquipmentStock::findOrFail($thisRequest->r_a_equipment_stock_id);
+                    $mainStock = "AVAILABLE";
+                    $mainStock->save();   
+                } else { 
+                    $mainFacility = RAFacility::findOrFail($thisRequest->r_a_facility_id);
+                    $mainFacility = "AVAILABLE";
+                    $mainFacility->save(); 
+                }
+
+                return response()->json(['message' => "Success! Unit has been cancelled."], 200); 
+            }
         });
     }
 

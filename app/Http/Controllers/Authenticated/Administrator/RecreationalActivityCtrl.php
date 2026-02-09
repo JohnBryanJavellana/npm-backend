@@ -108,7 +108,30 @@ class RecreationalActivityCtrl extends Controller
             $rARequestInfo->status = "ACTIVE";
             $rARequestInfo->save();
 
+            $ids = $selectedRows->pluck('rowId');
+
             foreach($selectedRows as $rows) {
+                $getNotInCurrent = RAEquipmentRequest::whereNotIn('id', $ids)->get();
+
+                if($getNotInCurrent) {
+                    foreach($getNotInCurrent as $notInCurrents) {
+                        $thisNotInCurrent = RAEquipmentRequest::findOrFail($notInCurrents->id);
+
+                        if(!\in_array($thisNotInCurrent->status, ["CANCELLED", "RECEIVED"])) {
+                            $thisNotInCurrent->status = "PENDING";
+                            $thisNotInCurrent->remarks = NULL;
+                            $thisNotInCurrent->issued_condition = NULL;
+                            $thisNotInCurrent->issued_at = NULL;
+                            $thisNotInCurrent->issued_by_whom = NULL;
+                            $thisNotInCurrent->save();
+
+                            $mainEquipmentStock = RAEquipmentStock::findOrFail($thisNotInCurrent->r_a_equipment_stock_id);
+                            $mainEquipmentStock->availability_status = "AVAILABLE";
+                            $mainEquipmentStock->save();
+                        }
+                    }
+                }
+
                 $mainEquipmentStock = RAEquipmentStock::findOrFail($rows['rowId']);
                 $mainEquipmentStock->availability_status = "UNAVAILABLE";
                 $mainEquipmentStock->save();
