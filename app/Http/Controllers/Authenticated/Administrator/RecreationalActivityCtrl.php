@@ -115,7 +115,7 @@ class RecreationalActivityCtrl extends Controller
 
                 $rAEquipments = RAEquipmentRequest::findOrFail($rows['rowEquipmentRequestId']);
                 $rAEquipments->r_a_equipment_stock_id = $rows['rowId'];
-                $rAEquipments->remarks = $rows['remarks'];
+                $rAEquipments->remarks = $rows['remarks'] ?? '';
                 $rAEquipments->issued_condition = $mainEquipmentStock->condition_status;
                 $rAEquipments->issued_at = Carbon::now();
                 $rAEquipments->status = "APPROVED";
