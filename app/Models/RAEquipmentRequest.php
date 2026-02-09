@@ -11,4 +11,7 @@ class RAEquipmentRequest extends Model
 
     protected $guarded = ["id"];
 
+    public function facility() {
+        return $this->hasOne(RAFacility::class, 'id', 'r_a_facility_id');
+    }
 }

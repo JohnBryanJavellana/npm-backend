@@ -11,6 +11,9 @@ use App\Models\Equipment;
 use App\Services\Trainee\Recreational\RecreationalService;
 use Illuminate\Http\Request;
 
+use App\Utils\TransactionUtil;
+use App\Models\RARequestInfo;
+
 class TraineeRecreational extends Controller
 {
 
@@ -46,12 +49,35 @@ class TraineeRecreational extends Controller
     //     try
     //     {
     //         ret
-            
+
     //     }
     //     catch (\Exception $e) {
     //     }
     // }
 
+    public function get_recreational_request(Request $request) {
+        return TransactionUtil::transact(null, [], function() use($request) {
+            $userId = $request->user()->id;
+            $recRequests_temp = RARequestInfo::where('user_id', $userId)->orderBy('created_at', 'DESC');
+
+            $recRequests = $request->status
+                ? $recRequests_temp->whereIn('status', $request->status)->get()
+                : $recRequests_temp->get();
+
+            $recRequests = $request->traceNumber
+                ?  $recRequests->where('trace_number', $request->traceNumber)
+                    ->with([
+                        'equipment_request',
+                        'equipment_request.equipment',
+                        'facility_request',
+                        'facility_request.facility',
+                    ])
+                    ->first()
+                : $recRequests;
+
+            return response()->json(['recRequests' => $recRequests], 200);
+        });
+    }
 
     public function requestEquipment(RecreationalRequest $request)
     {
@@ -76,13 +102,13 @@ class TraineeRecreational extends Controller
     }
 
     /**
-     * 
+     *
      * FACILITIES
      * create a get API for facilities together with its related equipment.
-     * 
-     * 
-     * 
+     *
+     *
+     *
      * EQUIPMENTS
-     * 
+     *
      **/
 }
