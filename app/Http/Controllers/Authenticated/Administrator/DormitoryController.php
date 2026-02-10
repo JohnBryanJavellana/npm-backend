@@ -234,7 +234,7 @@ class DormitoryController extends Controller
                 ->get()
                 ->map(function($room) {
                     $disabled = $room->hasData->filter(function($tenant) {
-                        return !in_array($tenant->tenant_status, ["PENDING", "TERMINATED", "CANCELLED", "DECLINED", "RESERVED"]);
+                        return !\in_array($tenant->tenant_status, ["PENDING", "TERMINATED", "CANCELLED", "DECLINED", "RESERVED"]);
                     })->map(function($d) {
                         return [
                             'from' => $d->tenant_from_date,
@@ -688,7 +688,7 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request, $dormReqId) {
             $this_dorm_request = DormitoryTenant::where('id', $dormReqId)->lockForUpdate()->first();
 
-            if(!in_array($this_dorm_request->tenant_status, [DormitoryEnum::PENDING->value, DormitoryEnum::CANCELLED->value, DormitoryEnum::FOR_PAYMENT->value])) {
+            if(!\in_array($this_dorm_request->tenant_status, [DormitoryEnum::PENDING->value, DormitoryEnum::CANCELLED->value, DormitoryEnum::FOR_PAYMENT->value])) {
                 return response()->json(['message' => "Can't cancel request."], 422);
             } else {
                 $this_dorm_request->tenant_status = DormitoryEnum::CANCELLED->value;
@@ -932,7 +932,7 @@ class DormitoryController extends Controller
             }
 
             $invoiceId->description = $descriptionHtml;
-            if($request->charge <= 0 && !in_array($request->status, ["CANCELLED", "DECLINED"])) $invoiceId->invoice_status = "PAID";
+            if($request->charge <= 0 && !\in_array($request->status, ["CANCELLED", "DECLINED"])) $invoiceId->invoice_status = "PAID";
             if($request->status === "CANCELLED") {;
                 $invoiceId->invoice_status = "CANCELLED";
             }
@@ -1117,7 +1117,7 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request, $chargeId) {
             $this_charge = DormitoryInvoice::where('id', $chargeId)->lockForUpdate()->first();
 
-            if(!in_array($this_charge->invoice_status, [DormitoryEnum::PENDING->value])) {
+            if(!\in_array($this_charge->invoice_status, [DormitoryEnum::PENDING->value])) {
                 return response()->json(['message' => "Can't cancel charge."], 200);
             } else {
                 $this_charge->invoice_status = DormitoryEnum::CANCELLED->value;

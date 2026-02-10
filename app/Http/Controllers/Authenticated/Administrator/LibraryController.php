@@ -322,7 +322,7 @@ class LibraryController extends Controller
                     'trace_number' => $request->traceNumber
                 ])->with(['borrowedBooks' => function ($self) use($book_id) {
                     $self->where(['book_id' => $book_id, 'status' => 'RECEIVED'])
-                            ->where('to_date', '>=', Carbon::now());
+                         ->where('to_date', '>=', Carbon::now());
                 }])->first();
 
                 if ($filename && !is_null($isMine->borrowedBooks)) {
