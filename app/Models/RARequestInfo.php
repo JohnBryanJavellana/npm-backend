@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,5 +26,12 @@ class RARequestInfo extends Model
 
     public function invoices() {
         return $this->hasMany(RAInvoices::class);
+    }
+
+    /** Scopes */
+
+    public function scopeStatus(Builder $query, array $statuses)
+    {
+        return $query->whereIn("status", $statuses);
     }
 }
