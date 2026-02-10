@@ -19,7 +19,8 @@ use App\Models\{
     RAEquipments,
     RAEquipmentStock,
     RAEquipmentImage,
-    RAFacilityImage
+    RAFacilityImage,
+    RAFacilityRequest
 };
 use App\Http\Requests\Admin\RecreationalActivity\{
     CreateOrUpdateEquipment,
@@ -172,7 +173,14 @@ class RecreationalActivityCtrl extends Controller
             return response()->json(['message' => "Issued Successfully!"], 200);
         });
     }
+    public function facility (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+                $documentId = $request->documentId;
+                $documentstatus = $request->documentstatus;
 
+        $this_facility = RAFacilityRequest::findOrFail($documentId);
+        return response()->json(['message' => "Facility Approved!"], 200);
+    }
     /**
      * Summary of ra_facilities
      * @param Request $request
