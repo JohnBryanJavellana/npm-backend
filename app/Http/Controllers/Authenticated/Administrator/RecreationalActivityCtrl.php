@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use App\Models\RAEquipmentRequest;
-use App\Models\RAFacilityRequest;
 use App\Models\RARelationship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -20,7 +19,8 @@ use App\Models\{
     RAEquipments,
     RAEquipmentStock,
     RAEquipmentImage,
-    RAFacilityImage
+    RAFacilityImage,
+    RAFacilityRequest
 };
 use App\Http\Requests\Admin\RecreationalActivity\{
     CreateOrUpdateEquipment,
@@ -89,6 +89,38 @@ class RecreationalActivityCtrl extends Controller
             ])->get();
 
             return response()->json(['raEquipmentRequests' => $raEquipmentRequests], 200);
+        });
+    }
+
+    public function Facility(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $documentId = $request->documentId;
+            $documentStatus = $request->documentStatus;
+            $documentRemarks = $request->documentRemarks;
+
+            $this_facility = RAFacilityRequest::findOrFail($documentId);
+
+            if(\in_array($this_facility->status, ["CANCELLED", "OCCUPIED", "DECLINED"])) {
+                return response()->json(['message' => "Sorry your Status must be Cancelled, Occupied or Declined! "], 409);
+            }
+
+            $conflicts = RAFacilityRequest::where(function($query) use ($request) {
+                $query->where('start_date','<=', $request->end_date)
+                        ->where('end_date','>=', $request->start_date);
+                        });
+
+            if($conflicts) {
+                return response()->json(['message' => "Sorry this facility is already booked for the selected dates! "], 409);
+            }
+
+            $this_facility->status = $documentStatus;
+            if($documentRemarks) $this_facility->remarks = $documentRemarks;
+            $this_facility->save();
+
+             return response()->json([
+            'message' => 'Facility updated successfully!',
+            'data' => $this_facility
+             ]);
         });
     }
 
@@ -189,29 +221,6 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_facilities
      * @param Request $request
      */
-
-    //*
-
-    public function aarequest(Request $request)
-    {
-        // $validated = $request->validate([
-        //     "user_id" => "required|integer",
-        //     "purpose" => "required|string",
-        //     "data" => "required|array",
-        //     "data.*.id" => "required|integer",
-        //     "data.*.type" => "required|string|in:EQUIPMENT,FACILITY",
-        //     "data.*.from_datetime" => "required|date_format:Y-m-d H:i:s",
-        //     "data.*.to_datetime" => "required|date_format:Y-m-d H:i:s|after:data.*.from_datetime",
-        // ]);
-        try {
-            \Log::info("message");
-            // $this->recreationalService->storeRecreationalRequests($validated);
-            return response()->json(["message" => "Successfully requested!"], 200);;
-        } catch (\Exception $e) {
-            return response()->json(["message" => $e->getMessage()], 500);
-        }
-    }
-
     public function ra_facilities(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
