@@ -393,7 +393,7 @@ class RecreationalActivityCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $ra_equipments_temp = RAEquipments::withCount('hasData', 'stocks');
-            $ra_equipments = $request->rARequestInfoId
+            $ra_equipments = $request->documentId
                 ? $ra_equipments_temp->where('id', $request->documentId)->with(['images'])->first()
                 : $ra_equipments_temp->get();
 
