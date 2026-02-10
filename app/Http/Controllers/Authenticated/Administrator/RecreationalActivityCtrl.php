@@ -63,6 +63,7 @@ class RecreationalActivityCtrl extends Controller
                             return $first;
                         })->values();
 
+                        unset($request->equipment_request);
                         return $request;
                     })
                     ->first();
