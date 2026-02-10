@@ -78,49 +78,51 @@ class RecreationalActivityCtrl extends Controller
      * Summary of get_requested_equipments
      * @param Request $request
      */
-    public function get_requested_equipments(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+    public function get_requested_equipments(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $raEquipmentRequests = RAEquipmentRequest::with([
                 'equipment_stock'
             ])
-            ->where([
-                'r_a_request_info_id' => $request->rARequestInfoId,
-                'r_a_equipments_id' => $request->rAEquipmentsId
-            ])->get();
+                ->where([
+                    'r_a_request_info_id' => $request->rARequestInfoId,
+                    'r_a_equipments_id' => $request->rAEquipmentsId
+                ])->get();
 
             return response()->json(['raEquipmentRequests' => $raEquipmentRequests], 200);
         });
     }
 
-    public function Facility(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+    public function Facility(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $documentId = $request->documentId;
             $documentStatus = $request->documentStatus;
             $documentRemarks = $request->documentRemarks;
 
             $this_facility = RAFacilityRequest::findOrFail($documentId);
 
-            if(\in_array($this_facility->status, ["CANCELLED", "OCCUPIED", "DECLINED"])) {
+            if (\in_array($this_facility->status, ["CANCELLED", "OCCUPIED", "DECLINED"])) {
                 return response()->json(['message' => "Sorry your Status must be Cancelled, Occupied or Declined! "], 409);
             }
 
-            $conflicts = RAFacilityRequest::where(function($query) use ($request) {
-                $query->where('start_date','<=', $request->end_date)
-                        ->where('end_date','>=', $request->start_date);
-                        });
+            $conflicts = RAFacilityRequest::where(function ($query) use ($request) {
+                $query->where('start_date', '<=', $request->end_date)
+                    ->where('end_date', '>=', $request->start_date);
+            });
 
-            if($conflicts) {
+            if ($conflicts) {
                 return response()->json(['message' => "Sorry this facility is already booked for the selected dates! "], 409);
             }
 
             $this_facility->status = $documentStatus;
-            if($documentRemarks) $this_facility->remarks = $documentRemarks;
+            if ($documentRemarks) $this_facility->remarks = $documentRemarks;
             $this_facility->save();
 
-             return response()->json([
-            'message' => 'Facility updated successfully!',
-            'data' => $this_facility
-             ]);
+            return response()->json([
+                'message' => 'Facility updated successfully!',
+                'data' => $this_facility
+            ]);
         });
     }
 
@@ -331,54 +333,31 @@ class RecreationalActivityCtrl extends Controller
 
     public function et_recreational_requests(Request $request)
     {
-        // lacking!
-        /**
-         * update of request
-         * considerations [DATETIME, STATUS]
-         * add return TransactionUtil::transact(null, [], function () use ($request) { });
-         * $rARequestInfoId = $request->rARequestInfoId;
-         * $rAEquipmentsId = $request->rAEquipmentsId;
-         * $rows = $request->row; ARRAY e.g., [{
-         *    rowId: 1,
-         *    rowStatus: 'RECEIVED'
-         *    rowRemarks: null
-         * },{
-         *    rowId: 2,
-         *    rowStatus: 'RECEIVED'
-         *    rowRemarks: "Sample Remarks"
-         * }]
-         */
 
-        $request->validate([
-            'id'     => 'required|exists:ra_equipment_requests,id',
-            'status' => 'required|in:APPROVED,REJECTED,PENDING'
+        $validated = $request->validate([
+            'id'        => 'required|exists:ra_equipment_requests,id',
+            'status'    => 'required|in:APPROVED,REJECTED,PENDING',
+            'date_time' => 'required|date',
         ]);
 
 
-        /**
-         * apply filters or considerations
-         * apply date time validations
-         * must use foreach loop
-         */
-        RAEquipmentRequest::where('id', $request->id)->update([
-            'status'     => $request->status,
-            'updated_at' => now()
+
+
+        RAEquipmentRequest::where('id', $validated['id'])->update([
+            'status'     => $validated['status'],
+            'updated_at' => now(),
         ]);
 
-        /**
-         * @var mixed
-         * useless ??
-         *
-         */
+
         $raRequests = RAEquipmentRequest::whereIn('status', [
             'APPROVED',
             'REJECTED',
-            'PENDING'
+            'PENDING',
         ])->get();
 
         return response()->json([
             'message'    => 'Request updated successfully',
-            'raRequests' => $raRequests
+            'raRequests' => $raRequests,
         ], 200);
     }
 
