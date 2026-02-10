@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 /** administrator controllers */
+
 use App\Http\Controllers\Authenticated\Administrator\{
     Account,
     DormitoryController,
@@ -13,10 +14,14 @@ use App\Http\Controllers\Authenticated\Administrator\{
     RecreationalActivityCtrl
 };
 
+
+// Route::post('request', [RecreationalActivityCtrl::class, 'aarequest']);
+
+
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
-    Route::prefix('/admin/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA')->group(function() {
-        Route::prefix('/enrollment/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT')->group(function() {
+    Route::prefix('/admin/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA')->group(function () {
+        Route::prefix('/enrollment/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT')->group(function () {
             Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications']);
             Route::post('get_applications/requirement_remark', [EnrollmentCtrl::class, 'requirement_remark']);
             Route::post('get_applications/set_training_status', [EnrollmentCtrl::class, 'set_training_status']);
@@ -67,7 +72,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('remove_course_fee/{course_fee_id}', [EnrollmentCtrl::class, 'remove_course_fee']);
         });
 
-        Route::prefix('/books/')->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function() {
+        Route::prefix('/books/')->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function () {
             Route::get('get_books', [LibraryController::class, 'get_books']);
             Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
             Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
@@ -94,14 +99,14 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book']);
         });
 
-        Route::prefix('/book_entry/')->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function() {
+        Route::prefix('/book_entry/')->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function () {
             Route::get('get_book_entries', [LibraryController::class, 'get_book_entries']);
             Route::get('get_active_entries', [LibraryController::class, 'get_active_entries']);
             Route::post('create_or_update_book_entry', [LibraryController::class, 'create_or_update_book_entry']);
             Route::delete('remove_entry/{entry_id}', [LibraryController::class, 'remove_entry']);
         });
 
-        Route::prefix('/dormitory/')->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY')->group(function() {
+        Route::prefix('/dormitory/')->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY')->group(function () {
             Route::get('get', [DormitoryController::class, 'dormitories']);
             Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
@@ -136,8 +141,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
         });
 
-        Route::prefix('/masterlist/')->middleware('user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD')->group(function() {
-            Route::prefix('/user/')->middleware('user_role:SUPERADMIN')->group(function() {
+        Route::prefix('/masterlist/')->middleware('user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD')->group(function () {
+            Route::prefix('/user/')->middleware('user_role:SUPERADMIN')->group(function () {
                 Route::match(['GET', 'POST'], 'get_users', [Masterlist::class, 'get_users']);
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
                 Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities']);
@@ -148,19 +153,19 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
                 Route::delete('remove_user/{user_id}', [Masterlist::class, 'remove_user']);
             });
 
-            Route::prefix('/employer/')->middleware('user_role:SUPERADMIN')->group(function() {
+            Route::prefix('/employer/')->middleware('user_role:SUPERADMIN')->group(function () {
                 Route::get('get_employers', [Masterlist::class, 'get_employers']);
                 Route::post('create_or_update_employer', [Masterlist::class, 'create_or_update_employer']);
                 Route::delete('remove_employer/{employer_id}', [Masterlist::class, 'remove_employer']);
             });
 
-            Route::prefix('/position/')->middleware('user_role:SUPERADMIN')->group(function() {
+            Route::prefix('/position/')->middleware('user_role:SUPERADMIN')->group(function () {
                 Route::get('get_positions', [Masterlist::class, 'get_positions']);
                 Route::post('create_or_update_position', [Masterlist::class, 'create_or_update_position']);
                 Route::delete('remove_position/{position_id}', [Masterlist::class, 'remove_position']);
             });
 
-            Route::prefix('/qr-reader/')->group(function() {
+            Route::prefix('/qr-reader/')->group(function () {
                 Route::post('get_qr_readers', [Masterlist::class, 'get_qr_readers']);
                 Route::post('get_qr_reader_records', [Masterlist::class, 'get_qr_reader_records']);
                 Route::post('create_or_update_qr_reader', [Masterlist::class, 'create_or_update_qr_reader']);
@@ -168,7 +173,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             });
         });
 
-        Route::prefix('/cashier/')->middleware('user_role:SUPERADMIN,CASHIER')->group(function() {
+        Route::prefix('/cashier/')->middleware('user_role:SUPERADMIN,CASHIER')->group(function () {
             Route::post('get_payments', [Cashier::class, 'get_payments']);
             Route::post('pay-walk-in', [Cashier::class, 'pay_walkin']);
             Route::post('verify_payment', [Cashier::class, 'verify_payment']);
@@ -187,7 +192,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete('remove_or_number/{fee_category_id}', [Cashier::class, 'remove_or_number']);
         });
 
-        Route::prefix('/recreational-activity/')->middleware('user_role:SUPERADMIN,ADMIN-RA')->group(function() {
+        Route::prefix('/recreational-activity/')->middleware('user_role:SUPERADMIN,ADMIN-RA')->group(function () {
+            #
+            Route::post('get_recreational_requests', [RecreationalActivityCtrl::class, 'get_recreational_requests']);
+            
             Route::post('ra_requests', [RecreationalActivityCtrl::class, 'ra_requests']);
             Route::post('ra_requests/get_requested_equipments', [RecreationalActivityCtrl::class, 'get_requested_equipments']);
             Route::post('ra_requests/get_requested_match_equipments', [RecreationalActivityCtrl::class, 'get_requested_match_equipments']);
@@ -209,11 +217,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         Route::post('get_trainee_enrolled_trainings', [DormitoryController::class, 'get_trainee_enrolled_trainings']);
         Route::post('submit-csm', [Account::class, 'submit_csm']);
 
-        Route::prefix('/my-account/')->group(function() {
+        Route::prefix('/my-account/')->group(function () {
             Route::post('update_personal', [Account::class, 'update_personal']);
             Route::post('update_password', [Account::class, 'update_password']);
             Route::get('get_activities', [Account::class, 'get_activities']);
         });
     });
 });
-
