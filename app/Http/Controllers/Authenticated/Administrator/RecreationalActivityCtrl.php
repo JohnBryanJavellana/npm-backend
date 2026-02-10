@@ -107,7 +107,7 @@ class RecreationalActivityCtrl extends Controller
             $conflicts = RAFacilityRequest::where(function($query) use ($request) {
                 $query->where('start_date','<=', $request->end_date)
                         ->where('end_date','>=', $request->start_date);
-                        });
+                        })->get();
 
             if($conflicts) {
                 return response()->json(['message' => "Sorry this facility is already booked for the selected dates! "], 409);
@@ -331,16 +331,59 @@ class RecreationalActivityCtrl extends Controller
 
     public function et_recreational_requests(Request $request)
     {
-        $request = RAEquipmentRequest::where('status', 'APPROVED', 'REJECTED', 'PENDING')->get();
-        $raRequests = RAEquipmentRequest::whereIn('status', (array) $request)->get();
-
         // lacking!
         /**
          * update of request
          * considerations [DATETIME, STATUS]
+         * add return TransactionUtil::transact(null, [], function () use ($request) { });
+         * $rARequestInfoId = $request->rARequestInfoId;
+         * $rAEquipmentsId = $request->rAEquipmentsId;
+         * $rows = $request->row; ARRAY e.g., [{
+         *    rowId: 1,
+         *    rowStatus: 'RECEIVED'
+         *    rowRemarks: null
+         * },{
+         *    rowId: 2,
+         *    rowStatus: 'RECEIVED'
+         *    rowRemarks: "Sample Remarks"
+         * }]
          */
-        return response()->json(['raRequests' => $raRequests], 100);
+
+        $request->validate([
+            'id'     => 'required|exists:ra_equipment_requests,id',
+            'status' => 'required|in:APPROVED,REJECTED,PENDING'
+        ]);
+
+
+        /**
+         * apply filters or considerations
+         * apply date time validations
+         * must use foreach loop
+         */
+        RAEquipmentRequest::where('id', $request->id)->update([
+            'status'     => $request->status,
+            'updated_at' => now()
+        ]);
+
+        /**
+         * @var mixed
+         * useless ??
+         *
+         */
+        $raRequests = RAEquipmentRequest::whereIn('status', [
+            'APPROVED',
+            'REJECTED',
+            'PENDING'
+        ])->get();
+
+        return response()->json([
+            'message'    => 'Request updated successfully',
+            'raRequests' => $raRequests
+        ], 200);
     }
+
+
+
 
     /**
      * Summary of ra_equipments
