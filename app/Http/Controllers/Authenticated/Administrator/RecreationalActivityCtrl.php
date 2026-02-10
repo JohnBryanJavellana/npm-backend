@@ -107,7 +107,7 @@ class RecreationalActivityCtrl extends Controller
             $conflicts = RAFacilityRequest::where(function($query) use ($request) {
                 $query->where('start_date','<=', $request->end_date)
                         ->where('end_date','>=', $request->start_date);
-                        });
+                        })->get();
 
             if($conflicts) {
                 return response()->json(['message' => "Sorry this facility is already booked for the selected dates! "], 409);
