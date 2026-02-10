@@ -18,4 +18,8 @@ class RAEquipmentRequest extends Model
     public function equipment_stock() {
         return $this->hasOne(RAEquipmentStock::class, 'id', 'r_a_equipment_stock_id');
     }
+
+    public function updatedByWhom() {
+        return $this->hasOne(User::class, 'id', 'updated_by_whom');
+    }
 }

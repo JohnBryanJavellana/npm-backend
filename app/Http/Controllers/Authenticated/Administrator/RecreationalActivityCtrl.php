@@ -45,7 +45,12 @@ class RecreationalActivityCtrl extends Controller
 
             if ($request->trace_number) {
                 $ra_requests = $query->where('trace_number', $request->trace_number)
-                    ->with(['equipment_request.equipment', 'facility_request.facility'])
+                    ->with([
+                        'equipment_request.equipment',
+                        'equipment_request.updatedByWhom',
+                        'facility_request.facility',
+                        'facility_request.updatedByWhom'
+                    ])
                     ->get()
                     ->map(function($request) {
                         $grouped = $request->equipment_request->groupBy('r_a_equipments_id');
