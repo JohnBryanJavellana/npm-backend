@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use App\Models\RAEquipmentRequest;
+use App\Models\RAFacilityRequest;
 use App\Models\RARelationship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -73,12 +74,37 @@ class RecreationalActivityCtrl extends Controller
      */
     public function get_requested_equipments(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $raEquipmentRequests = RAEquipmentRequest::where([
+            $raEquipmentRequests = RAEquipmentRequest::with([
+                'equipment_stock'
+            ])
+            ->where([
                 'r_a_request_info_id' => $request->rARequestInfoId,
                 'r_a_equipments_id' => $request->rAEquipmentsId
             ])->get();
 
             return response()->json(['raEquipmentRequests' => $raEquipmentRequests], 200);
+        });
+    }
+
+    public function sample(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $documentId = $request->documentId;
+            $documentStatus = $request->documentStatus; // APPROVED
+            $documentRemarks = $request->documentRemarks;
+
+            $this_facility = RAFacilityRequest::findOrFail($documentId);
+
+            if(\in_array($this_facility->status, ["CANCELLED", "OCCUPIED", "DECLINED"])) {
+                return response()->json(['message' => "We're sorry. "], 409);
+            }
+
+            // if() {
+            //     // check for date & time conflicts.
+            // }
+
+            $this_facility->status = $documentStatus;
+            if($documentRemarks) $this_facility->remarks = $documentRemarks;
+            $this_facility->save();
         });
     }
 
