@@ -44,7 +44,8 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'
 
 /** testing routes */
 Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
-Route::post('items', [TraineeRecreational::class, 'requestEquipment']);
+Route::post('items', [TraineeRecreational::class, 'getUserRecRequest']);
+Route::post('item', [TraineeRecreational::class, 'get_recreational_request']);
 
 
 /** authenticated routes */

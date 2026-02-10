@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recreational\RecreationalRequest;
+use App\Http\Requests\Recreational\ViewUserRecRecord;
 use App\Http\Resources\Recreational\ViewRecFacilities;
 use App\Http\Resources\Trainee\Recreationals\ViewRecEquipment;
 use App\Http\Resources\Trainee\Recreationals\ViewRecFacilities as RecreationalsViewRecFacilities;
@@ -48,24 +49,36 @@ class TraineeRecreational extends Controller
         }
     }
 
-    // public function getUserRecRequest(Request $request)
-    // {
-    //     try
-    //     {
-    //         ret
+    public function getUserRecRequest(ViewUserRecRecord $request)
+    {
+        $validated = $request->validated();
+        $validated["userId"] = $request->user()->id ?? 202600001;
+        \Log::info("validated", $validated);
+        try
+        {
+            \Log::info("data", [$validated]);
 
-    //     }
-    //     catch (\Exception $e) {
-    //     }
-    // }
+            $data = $this->recreationalService->getUserRecRecord($validated);
+
+            return response()->json(["data" => $data], 200);
+        }
+        catch (\Exception $e) {
+            \Log::error("error_data", [$validated]);
+
+            return response()->json(["message" => $e], 500);
+        }
+    }
 
     /**
      * Summary of get_recreational_request
+     * fetching trainee records
      * @param Request $request
      */
     public function get_recreational_request(Request $request) {
         return TransactionUtil::transact(null, [], function() use($request) {
             $userId = $request->user()->id;
+            // $userId = 202600001;
+            // $status = ["PENDING"];
             $recRequests_temp = RARequestInfo::where('user_id', $userId)->orderBy('created_at', 'DESC');
 
             $recRequests = $request->status
@@ -79,7 +92,7 @@ class TraineeRecreational extends Controller
                         'equipment_request.equipment',
                         'facility_request',
                         'facility_request.facility',
-                    ])
+                        ])
                     ->get()
                     ->map(function($request) {
                         $grouped = $request->equipment_request->groupBy('r_a_equipments_id');
@@ -135,11 +148,11 @@ class TraineeRecreational extends Controller
 
                 if($model instanceof RAEquipmentRequest) {
                     $mainStock = RAEquipmentStock::findOrFail($thisRequest->r_a_equipment_stock_id);
-                    $mainStock = "AVAILABLE";
+                    $mainStock->availability_status = "AVAILABLE";
                     $mainStock->save();   
                 } else { 
                     $mainFacility = RAFacility::findOrFail($thisRequest->r_a_facility_id);
-                    $mainFacility = "AVAILABLE";
+                    $mainFacility->availability_status = "AVAILABLE";
                     $mainFacility->save(); 
                 }
 
@@ -150,7 +163,6 @@ class TraineeRecreational extends Controller
 
     public function requestEquipment(RecreationalRequest $request)
     {
-        // return response()->json(["wow"], 200);
 
         $validated = $request->validated();
         try
@@ -164,20 +176,4 @@ class TraineeRecreational extends Controller
             return response()->json(["Something went wrong."], 500);
         }
     }
-
-    public function cancelRequests(Request $request)
-    {
-        return;
-    }
-
-    /**
-     *
-     * FACILITIES
-     * create a get API for facilities together with its related equipment.
-     *
-     *
-     *
-     * EQUIPMENTS
-     *
-     **/
 }
