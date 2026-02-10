@@ -334,32 +334,49 @@ class RecreationalActivityCtrl extends Controller
     public function et_recreational_requests(Request $request)
     {
 
-        $validated = $request->validate([
-            'id'        => 'required|exists:ra_equipment_requests,id',
-            'status'    => 'required|in:APPROVED,REJECTED,PENDING',
-            'date_time' => 'required|date',
+
+        $request->validate([
+            'rARequestInfoId' => 'required|integer',
+            'rAEquipmentsId'  => 'required|integer',
+            'rows'            => 'required|array',
+            'rows.*.rowId'     => 'required|exists:ra_equipment_requests,id',
+            'rows.*.rowStatus' => 'required|in:APPROVED,REJECTED,PENDING,RECEIVED',
+            'rows.*.rowRemarks' => 'nullable|string',
         ]);
 
+        return TransactionUtil::transact(null, [], function () use ($request) {
+
+            $rARequestInfoId = $request->rARequestInfoId;
+            $rAEquipmentsId  = $request->rAEquipmentsId;
+            $rows            = $request->rows;
+
+
+            foreach ($rows as $row) {
 
 
 
-        RAEquipmentRequest::where('id', $validated['id'])->update([
-            'status'     => $validated['status'],
-            'updated_at' => now(),
-        ]);
+                RAEquipmentRequest::where('id', $row['rowId'])->update([
+                    'status'      => $row['rowStatus'],
+                    'remarks'     => $row['rowRemarks'] ?? null,
+                    'updated_at'  => now(),
+                ]);
+            }
 
 
-        $raRequests = RAEquipmentRequest::whereIn('status', [
-            'APPROVED',
-            'REJECTED',
-            'PENDING',
-        ])->get();
+            $raRequests = RAEquipmentRequest::whereIn('status', [
+                'APPROVED',
+                'REJECTED',
+                'PENDING',
+                'RECEIVED',
+            ])->get();
 
-        return response()->json([
-            'message'    => 'Request updated successfully',
-            'raRequests' => $raRequests,
-        ], 200);
+            return response()->json([
+                'message'    => 'Updated successfully',
+                'raRequests' => $raRequests
+            ], 200);
+        });
     }
+
 
 
 
