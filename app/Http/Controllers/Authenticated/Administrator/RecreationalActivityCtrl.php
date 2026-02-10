@@ -98,6 +98,7 @@ class RecreationalActivityCtrl extends Controller
                 return response()->json(['message' => "We're sorry. "], 409);
             }
 
+            // 1
             // if() {
             //     // check for date & time conflicts.
             // }
