@@ -331,10 +331,22 @@ class RecreationalActivityCtrl extends Controller
 
     public function et_recreational_requests(Request $request)
     {
-           // lacking!
+        // lacking!
         /**
          * update of request
          * considerations [DATETIME, STATUS]
+         * add return TransactionUtil::transact(null, [], function () use ($request) { });
+         * $rARequestInfoId = $request->rARequestInfoId;
+         * $rAEquipmentsId = $request->rAEquipmentsId;
+         * $rows = $request->row; ARRAY e.g., [{
+         *    rowId: 1,
+         *    rowStatus: 'RECEIVED'
+         *    rowRemarks: null
+         * },{
+         *    rowId: 2,
+         *    rowStatus: 'RECEIVED'
+         *    rowRemarks: "Sample Remarks"
+         * }]
          */
 
         $request->validate([
@@ -342,13 +354,22 @@ class RecreationalActivityCtrl extends Controller
             'status' => 'required|in:APPROVED,REJECTED,PENDING'
         ]);
 
-        
+
+        /**
+         * apply filters or considerations
+         * apply date time validations
+         * must use foreach loop
+         */
         RAEquipmentRequest::where('id', $request->id)->update([
             'status'     => $request->status,
             'updated_at' => now()
         ]);
 
-      
+        /**
+         * @var mixed
+         * useless ??
+         *
+         */
         $raRequests = RAEquipmentRequest::whereIn('status', [
             'APPROVED',
             'REJECTED',
@@ -361,8 +382,8 @@ class RecreationalActivityCtrl extends Controller
         ], 200);
     }
 
-        
-     
+
+
 
     /**
      * Summary of ra_equipments
@@ -372,7 +393,7 @@ class RecreationalActivityCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $ra_equipments_temp = RAEquipments::withCount('hasData', 'stocks');
-            $ra_equipments = $request->documentId
+            $ra_equipments = $request->rARequestInfoId
                 ? $ra_equipments_temp->where('id', $request->documentId)->with(['images'])->first()
                 : $ra_equipments_temp->get();
 
