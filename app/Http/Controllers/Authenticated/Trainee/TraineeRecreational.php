@@ -77,8 +77,6 @@ class TraineeRecreational extends Controller
     public function get_recreational_request(Request $request) {
         return TransactionUtil::transact(null, [], function() use($request) {
             $userId = $request->user()->id;
-            // $userId = 202600001;
-            // $status = ["PENDING"];
             $recRequests_temp = RARequestInfo::where('user_id', $userId)->orderBy('created_at', 'DESC');
 
             $recRequests = $request->status
