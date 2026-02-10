@@ -86,29 +86,6 @@ class RecreationalActivityCtrl extends Controller
         });
     }
 
-    public function sample(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $documentId = $request->documentId;
-            $documentStatus = $request->documentStatus; // APPROVED
-            $documentRemarks = $request->documentRemarks;
-
-            $this_facility = RAFacilityRequest::findOrFail($documentId);
-
-            if(\in_array($this_facility->status, ["CANCELLED", "OCCUPIED", "DECLINED"])) {
-                return response()->json(['message' => "We're sorry. "], 409);
-            }
-
-            // 1
-            // if() {
-            //     // check for date & time conflicts.
-            // }
-
-            $this_facility->status = $documentStatus;
-            if($documentRemarks) $this_facility->remarks = $documentRemarks;
-            $this_facility->save();
-        });
-    }
-
     /**
      * Summary of get_requested_match_equipments
      * @param Request $request
