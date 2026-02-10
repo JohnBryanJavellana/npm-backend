@@ -322,16 +322,38 @@ class RecreationalActivityCtrl extends Controller
 
     public function et_recreational_requests(Request $request)
     {
-        $request = RAEquipmentRequest::where('status', 'APPROVED', 'REJECTED', 'PENDING')->get();
-        $raRequests = RAEquipmentRequest::whereIn('status', (array) $request)->get();
-
-        // lacking!
+           // lacking!
         /**
          * update of request
          * considerations [DATETIME, STATUS]
          */
-        return response()->json(['raRequests' => $raRequests], 100);
+
+        $request->validate([
+            'id'     => 'required|exists:ra_equipment_requests,id',
+            'status' => 'required|in:APPROVED,REJECTED,PENDING'
+        ]);
+
+        
+        RAEquipmentRequest::where('id', $request->id)->update([
+            'status'     => $request->status,
+            'updated_at' => now()
+        ]);
+
+      
+        $raRequests = RAEquipmentRequest::whereIn('status', [
+            'APPROVED',
+            'REJECTED',
+            'PENDING'
+        ])->get();
+
+        return response()->json([
+            'message'    => 'Request updated successfully',
+            'raRequests' => $raRequests
+        ], 200);
     }
+
+        
+     
 
     /**
      * Summary of ra_equipments
