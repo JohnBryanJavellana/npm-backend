@@ -35,8 +35,9 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_requests
      * @param Request $request
      */
-    public function ra_requests(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+    public function ra_requests(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $query = RARequestInfo::with(['requestor']);
 
             if ($request->status) {
@@ -52,10 +53,10 @@ class RecreationalActivityCtrl extends Controller
                         'facility_request.updatedByWhom'
                     ])
                     ->get()
-                    ->map(function($request) {
+                    ->map(function ($request) {
                         $grouped = $request->equipment_request->groupBy('r_a_equipments_id');
 
-                        $request->grouped_equipment = $grouped->map(function($items) {
+                        $request->grouped_equipment = $grouped->map(function ($items) {
                             $first = $items->first();
                             $first->requested_qty = $items->count();
                             $first->requested_issued_qty = $items->whereNotNull('r_a_equipment_stock_id')->count();
@@ -95,8 +96,9 @@ class RecreationalActivityCtrl extends Controller
      * Summary of get_requested_match_equipments
      * @param Request $request
      */
-    public function get_requested_match_equipments(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+    public function get_requested_match_equipments(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $raEquipmentMainFromRequests = RAEquipmentStock::where([
                 'r_a_equipments_id' => $request->rAEquipmentsId
             ])->get();
@@ -109,8 +111,9 @@ class RecreationalActivityCtrl extends Controller
      * Summary of issue_requested_equipments
      * @param Request $request
      */
-    public function issue_requested_equipments(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+    public function issue_requested_equipments(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $rARequestInfoId = $request->rARequestInfoId;
             $rAEquipmentsId = $request->rAEquipmentsId;
             $selectedRows = $request->row;
@@ -124,18 +127,18 @@ class RecreationalActivityCtrl extends Controller
                 ->unique()
                 ->toArray();
 
-            foreach($selectedRows as $rows) {
+            foreach ($selectedRows as $rows) {
                 $getNotInCurrent = RAEquipmentRequest::whereNotIn('id', $ids)
                     ->where([
                         'r_a_request_info_id' => $rARequestInfoId,
                         'r_a_equipments_id' => $rAEquipmentsId
                     ])->get();
 
-                if($getNotInCurrent) {
-                    foreach($getNotInCurrent as $notInCurrents) {
+                if ($getNotInCurrent) {
+                    foreach ($getNotInCurrent as $notInCurrents) {
                         $thisNotInCurrent = RAEquipmentRequest::findOrFail($notInCurrents->id);
 
-                        if(!\in_array($thisNotInCurrent->status, [
+                        if (!\in_array($thisNotInCurrent->status, [
                             RAEnum::CANCELLED->value,
                             RAEnum::RECEIVED->value,
                             RAEnum::PENDING->value,
@@ -159,7 +162,7 @@ class RecreationalActivityCtrl extends Controller
 
                 $rAEquipments = RAEquipmentRequest::findOrFail($rows['rowEquipmentRequestId']);
 
-                if(!\in_array($rAEquipments->status, [
+                if (!\in_array($rAEquipments->status, [
                     RAEnum::CANCELLED->value,
                     RAEnum::RECEIVED->value,
                     RAEnum::RETURNED->value
@@ -186,8 +189,32 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_facilities
      * @param Request $request
      */
-    public function ra_facilities(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+
+    //*
+
+    public function aarequest(Request $request)
+    {
+        // $validated = $request->validate([
+        //     "user_id" => "required|integer",
+        //     "purpose" => "required|string",
+        //     "data" => "required|array",
+        //     "data.*.id" => "required|integer",
+        //     "data.*.type" => "required|string|in:EQUIPMENT,FACILITY",
+        //     "data.*.from_datetime" => "required|date_format:Y-m-d H:i:s",
+        //     "data.*.to_datetime" => "required|date_format:Y-m-d H:i:s|after:data.*.from_datetime",
+        // ]);
+        try {
+            \Log::info("message");
+            // $this->recreationalService->storeRecreationalRequests($validated);
+            return response()->json(["message" => "Successfully requested!"], 200);;
+        } catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+    }
+
+    public function ra_facilities(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $ra_facilities_temp = RAFacility::withCount(['hasData']);
             $ra_facilities = $request->documentId
                 ? $ra_facilities_temp->where('id', $request->documentId)->with(['images', 'relationships'])->first()
@@ -201,8 +228,9 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_create_or_update_facility
      * @param CreateOrUpdateFacility $request
      */
-    public function ra_create_or_update_facility(CreateOrUpdateFacility $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+    public function ra_create_or_update_facility(CreateOrUpdateFacility $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
             $documentId = $request->documentId;
 
@@ -213,7 +241,7 @@ class RecreationalActivityCtrl extends Controller
             $this_facility->open_time = $request->openTime;
             $this_facility->close_time = $request->closeTime;
             $this_facility->condition_status = $request->conditionStatus;
-            if($request->availabilityStatus) $this_facility->availability_status = $request->availabilityStatus;
+            if ($request->availabilityStatus) $this_facility->availability_status = $request->availabilityStatus;
             $this_facility->save();
 
             if ($request->related_equipment) {
@@ -232,13 +260,13 @@ class RecreationalActivityCtrl extends Controller
                 }
             }
 
-            if($request->data_photos) {
+            if ($request->data_photos) {
                 $room_images = RAFacilityImage::whereNotIn('id', $request->data_photos)
                     ->where('r_a_facility_id', $request->documentId)
                     ->get();
 
-                foreach($room_images as $item) {
-                    if(file_exists(public_path('recreational-activity/facility/image/' . $item->filename))) {
+                foreach ($room_images as $item) {
+                    if (file_exists(public_path('recreational-activity/facility/image/' . $item->filename))) {
                         unlink(public_path('recreational-activity/facility/image/' . $item->filename));
                     }
 
@@ -246,8 +274,8 @@ class RecreationalActivityCtrl extends Controller
                 }
             }
 
-            if($request->photos) {
-                foreach($request->photos as $photos){
+            if ($request->photos) {
+                foreach ($request->photos as $photos) {
                     $image_name = Str::uuid() . '.png';
 
                     $photo = new RAFacilityImage();
@@ -268,18 +296,19 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_remove_facility
      * @param Request $request
      */
-    public function ra_remove_facility(Request $request, int $facility_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $facility_id) {
+    public function ra_remove_facility(Request $request, int $facility_id)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request, $facility_id) {
             $this_facility = RAFacility::where('id', $facility_id)
                 ->with(['images'])
                 ->withCount(['hasData'])
                 ->first();
 
-            if($this_facility->has_data_count > 0) {
+            if ($this_facility->has_data_count > 0) {
                 return response()->json(['message' => "Can't remove facility. It already has connected data."], 409);
             } else {
-                foreach($this_facility->images as $images){
-                    if(file_exists(public_path('recreational-activity/facility/image/' . $images->filename))) {
+                foreach ($this_facility->images as $images) {
+                    if (file_exists(public_path('recreational-activity/facility/image/' . $images->filename))) {
                         unlink(public_path('recreational-activity/facility/image/' . $images->filename));
                     }
                 }
@@ -291,12 +320,26 @@ class RecreationalActivityCtrl extends Controller
         });
     }
 
+    public function et_recreational_requests(Request $request)
+    {
+        $request = RAEquipmentRequest::where('status', 'APPROVED', 'REJECTED', 'PENDING')->get();
+        $raRequests = RAEquipmentRequest::whereIn('status', (array) $request)->get();
+
+        // lacking!
+        /**
+         * update of request
+         * considerations [DATETIME, STATUS]
+         */
+        return response()->json(['raRequests' => $raRequests], 100);
+    }
+
     /**
      * Summary of ra_equipments
      * @param Request $request
      */
-    public function ra_equipments(Request $request) {
-        return TransactionUtil::transact(null, [], function() use($request) {
+    public function ra_equipments(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $ra_equipments_temp = RAEquipments::withCount('hasData', 'stocks');
             $ra_equipments = $request->documentId
                 ? $ra_equipments_temp->where('id', $request->documentId)->with(['images'])->first()
@@ -310,8 +353,9 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_equipment_stock
      * @param Request $request
      */
-    public function ra_equipment_stock(Request $request) {
-        return TransactionUtil::transact(null, [], function() use($request) {
+    public function ra_equipment_stock(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $ra_equipment_stock = RAEquipmentStock::where('r_a_equipments_id', $request->documentId)
                 ->withCount(['hasData'])
                 ->get();
@@ -325,13 +369,14 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      * @param int $equipment_stock_id
      */
-    public function ra_remove_equipment_stock(Request $request, int $equipment_stock_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $equipment_stock_id) {
+    public function ra_remove_equipment_stock(Request $request, int $equipment_stock_id)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request, $equipment_stock_id) {
             $this_equipment_stock = RAEquipmentStock::where('id', $equipment_stock_id)
                 ->withCount(['hasData'])
                 ->first();
 
-            if($this_equipment_stock->has_data_count > 0) {
+            if ($this_equipment_stock->has_data_count > 0) {
                 return response()->json(['message' => "Can't remove equipment stock. It already has connected data."], 409);
             } else {
                 $this_equipment_stock->delete();
@@ -345,19 +390,20 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_create_or_update_equipment
      * @param CreateOrUpdateEquipment $request
      */
-    public function ra_create_or_update_equipment(CreateOrUpdateEquipment $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+    public function ra_create_or_update_equipment(CreateOrUpdateEquipment $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
             $documentId = $request->documentId;
 
             $this_equipment = $isPost ? new RAEquipments() : RAEquipments::findOrFail($documentId);
             $this_equipment->name = $request->name;
             $this_equipment->additional_details = $request->additionalDetails;
-            if($request->status) $this_equipment->availability_status = $request->status;
+            if ($request->status) $this_equipment->availability_status = $request->status;
             $this_equipment->save();
 
             $dataToReturn = [];
-            if($request->copies) {
+            if ($request->copies) {
                 $request->merge([
                     'insideJob' => true,
                     'r_a_equipments_id' => $this_equipment->id
@@ -366,13 +412,13 @@ class RecreationalActivityCtrl extends Controller
                 $dataToReturn = $this->ra_equipment_create_stock($request);
             }
 
-            if($request->data_photos) {
+            if ($request->data_photos) {
                 $room_images = RAEquipmentImage::whereNotIn('id', $request->data_photos)
                     ->where('r_a_equipments_id', $request->documentId)
                     ->get();
 
-                foreach($room_images as $item) {
-                    if(file_exists(public_path('recreational-activity/inventory/image/' . $item->filename))) {
+                foreach ($room_images as $item) {
+                    if (file_exists(public_path('recreational-activity/inventory/image/' . $item->filename))) {
                         unlink(public_path('recreational-activity/inventory/image/' . $item->filename));
                     }
 
@@ -380,8 +426,8 @@ class RecreationalActivityCtrl extends Controller
                 }
             }
 
-            if($request->photos) {
-                foreach($request->photos as $photos){
+            if ($request->photos) {
+                foreach ($request->photos as $photos) {
                     $image_name = Str::uuid() . '.png';
 
                     $photo = new RAEquipmentImage();
@@ -405,11 +451,12 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_equipment_create_stock
      * @param Request $request
      */
-    public function ra_equipment_create_stock(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+    public function ra_equipment_create_stock(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $stockData = [];
 
-            if($request->copies) {
+            if ($request->copies) {
                 for ($i = 0; $i < $request->copies; $i++) {
                     $new_equipment_stock_ui = GenerateTrace::createTraceNumber(RAEquipmentStock::class, '-RAE-', 'unique_identifier', 10, 99);
 
@@ -433,18 +480,19 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_remove_equipment
      * @param Request $request
      */
-    public function ra_remove_equipment(Request $request, int $equipment_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $equipment_id) {
+    public function ra_remove_equipment(Request $request, int $equipment_id)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request, $equipment_id) {
             $this_equipment = RAEquipments::where('id', $equipment_id)
                 ->with(['images'])
                 ->withCount(['hasData'])
                 ->first();
 
-            if($this_equipment->has_data_count > 0) {
+            if ($this_equipment->has_data_count > 0) {
                 return response()->json(['message' => "Can't remove equipment. It already has connected data."], 409);
             } else {
-                foreach($this_equipment->images as $images){
-                    if(file_exists(public_path('recreational-activity/equipment/image/' . $images->filename))) {
+                foreach ($this_equipment->images as $images) {
+                    if (file_exists(public_path('recreational-activity/equipment/image/' . $images->filename))) {
                         unlink(public_path('recreational-activity/equipment/image/' . $images->filename));
                     }
                 }
