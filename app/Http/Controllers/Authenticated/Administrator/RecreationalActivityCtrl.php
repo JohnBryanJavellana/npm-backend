@@ -98,38 +98,73 @@ class RecreationalActivityCtrl extends Controller
     }
 
     /**
-     * Summary of Facility ============= TASK ==============
+     * Summary of update_requested_facility
      * @param Request $request
      */
-    public function Facility(Request $request) {
+    public function update_requested_facility(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $documentId = $request->documentId;
             $documentStatus = $request->documentStatus;
-            $documentRemarks = $request->documentRemarks;
+            $requestInfoId = $request->requestInfoId;
+            $documentRemarks = $request->documentRemarks ?? NULL;
 
             $this_facility = RAFacilityRequest::findOrFail($documentId);
+            $this_main_facility = RAFacility::findOrFail($this_facility->r_a_facility_id);
 
-            if(\in_array($this_facility->status, ["CANCELLED", "OCCUPIED", "DECLINED"])) {
-                return response()->json(['message' => "Sorry your status is already " . $this_facility->status], 409);
+            if(\in_array($this_facility->status, [
+                RAEnum::CANCELLED->value,
+                RAEnum::DECLINED->value
+            ])) {
+                return response()->json(['message' => "Sorry your status is already " . ucfirst(strtolower($this_facility->status))], 409);
             }
 
-            $conflicts = RAFacilityRequest::where(function($query) use ($request) {
-                $query->where('start_date','<=', $request->end_date)
-                        ->where('end_date','>=', $request->start_date);
-                        })->get();
+            $hasDateTimeConflicts = RAFacilityRequest::where('r_a_request_info_id', '!=', $documentId)
+                ->where('r_a_facility_id', $this_facility->r_a_facility_id)
+                ->whereIn('status', [
+                    RAEnum::APPROVED,
+                    RAEnum::OCCUPIED
+                ])
+                ->where(function($query) use ($this_facility) {
+                    $query->where('start_date', '<', $this_facility->end_date)
+                          ->where('end_date', '>', $this_facility->start_date);
+                })
+                ->exists();
 
-            if($conflicts) {
-                return response()->json(['message' => "Sorry this facility is already booked for the selected dates! "], 409);
+            if ($hasDateTimeConflicts) {
+                return response()->json(['message' => "Scheduling conflict detected. This facility is already booked for the selected time range."], 409);
             }
 
             $this_facility->status = $documentStatus;
-            if($documentRemarks) $this_facility->remarks = $documentRemarks;
+            $this_facility->remarks = $documentRemarks;
+            $this_facility->issued_condition = $this_main_facility->condition_status;
+            $this_facility->updated_by_whom = $request->user()->id;
+            $this_facility->issued_at = $this_facility->issued_at ?? Carbon::now();
+            $this_facility->returned_at = \in_array($documentStatus, [RAEnum::DONE->value, RAEnum::DAMAGED->value])
+                ? Carbon::now()
+                : $this_facility->returned_at;
+            $this_facility->returned_condition = \in_array($documentStatus, [RAEnum::DONE->value, RAEnum::DAMAGED->value])
+                ? ($documentStatus === RAEnum::DONE->value ? RAEnum::GOOD_CONDITION->value : $documentStatus)
+                : $this_facility->returned_condition;
             $this_facility->save();
 
-             return response()->json([
-            'message' => 'Facility updated successfully!',
-            'data' => $this_facility
-             ]);
+            if(\in_array($documentStatus, [RAEnum::DONE->value, RAEnum::DAMAGED->value])) {
+                $this_main_facility->condition_status = $documentStatus === RAEnum::DONE->value ? RAEnum::GOOD_CONDITION->value : $documentStatus;
+                $this_main_facility->save();
+            }
+
+            $this_request_info = RARequestInfo::findOrFail($this_facility->r_a_request_info_id);
+            $this_request_info->status = RAFacilityRequest::where('r_a_request_info_id', $requestInfoId)->whereNotIn('status', [
+                RAEnum::APPROVED,
+                RAEnum::OCCUPIED,
+                RAEnum::PENDING
+            ])->exists() || RAEquipmentRequest::where('r_a_request_info_id', $requestInfoId)->whereNotIn('status', [
+                RAEnum::ACTIVE,
+                RAEnum::RECEIVED,
+                RAEnum::PENDING
+            ])->exists() ? RAEnum::FOR_CSM : RAEnum::ACTIVE;
+            $this_request_info->save();
+
+            return response()->json(['message' => 'Issued successfully!']);
         });
     }
 
