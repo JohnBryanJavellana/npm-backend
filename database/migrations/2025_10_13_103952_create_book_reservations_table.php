@@ -34,6 +34,7 @@ return new class extends Migration
                 'DAMAGED',
                 'EXPIRED',
                 'EXTENDING',
+                'EXTENDED',
                 'RENEWING'
             ])->default('PENDING');
             $table->timestamp('from_date');

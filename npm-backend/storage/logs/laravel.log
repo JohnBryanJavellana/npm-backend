@@ -1,0 +1,222 @@
+[2026-02-10 14:46:28] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:46:40] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:47:12] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:47:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:47:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:48:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:48:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:48:19] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:49:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:49:22] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:50:14] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:50:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:50:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:50:19] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:51:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:51:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:52:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:52:15] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 Command line code(1): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
+[2026-02-10 14:52:16] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(186): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(170): Illuminate/Foundation/Http/Kernel->bootstrap()
+#6 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate/Foundation/Http/Kernel->sendRequestThroughRouter(Object(Illuminate/Http/Request))
+#7 C:/laragon/www/npm-backend/public/index.php(52): Illuminate/Foundation/Http/Kernel->handle(Object(Illuminate/Http/Request))
+#8 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(16): require_once('C://laragon//www//...')
+#9 {main}
+"} 
+[2026-02-10 14:52:41] local.ERROR: syntax error, unexpected token "<<", expecting ")" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"<<\", expecting \")\" at C:/laragon/www/npm-backend/bootstrap/cache/routes-v7.php:105)
+[stacktrace]
+#0 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1102): Illuminate/Foundation/Support/Providers/RouteServiceProvider->Illuminate/Foundation/Support/Providers/{closure}(Object(Illuminate/Foundation/Application))
+#1 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1045): Illuminate/Foundation/Application->fireAppCallbacks(Array)
+#2 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php(17): Illuminate/Foundation/Application->boot()
+#3 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(286): Illuminate/Foundation/Bootstrap/BootProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#4 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(447): Illuminate/Foundation/Application->bootstrapWith(Array)
+#5 C:/laragon/www/npm-backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(199): Illuminate/Foundation/Console/Kernel->bootstrap()
+#6 C:/laragon/www/npm-backend/artisan(37): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#7 {main}
+"} 
