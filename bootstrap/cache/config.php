@@ -201,8 +201,13 @@
       'file' => 
       array (
         'driver' => 'file',
+<<<<<<< HEAD
         'path' => 'C:\\laragon\\www\\npm-backend\\storage\\framework/cache/data',
         'lock_path' => 'C:\\laragon\\www\\npm-backend\\storage\\framework/cache/data',
+=======
+        'path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\framework/cache/data',
+        'lock_path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\framework/cache/data',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
       ),
       'memcached' => 
       array (
@@ -401,13 +406,21 @@
       'local' => 
       array (
         'driver' => 'local',
+<<<<<<< HEAD
         'root' => 'C:\\laragon\\www\\npm-backend\\storage\\app',
+=======
+        'root' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\app',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
         'throw' => false,
       ),
       'public' => 
       array (
         'driver' => 'local',
+<<<<<<< HEAD
         'root' => 'C:\\laragon\\www\\npm-backend\\storage\\app/public',
+=======
+        'root' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\app/public',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
@@ -427,7 +440,11 @@
     ),
     'links' => 
     array (
+<<<<<<< HEAD
       'C:\\laragon\\www\\npm-backend\\public\\storage' => 'C:\\laragon\\www\\npm-backend\\storage\\app/public',
+=======
+      'C:\\laragon\\www\\FreqIT\\npm-backend\\public\\storage' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\app/public',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
     ),
   ),
   'hashing' => 
@@ -468,14 +485,22 @@
       'single' => 
       array (
         'driver' => 'single',
+<<<<<<< HEAD
         'path' => 'C:\\laragon\\www\\npm-backend\\storage\\logs/laravel.log',
+=======
+        'path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\logs/laravel.log',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
       'daily' => 
       array (
         'driver' => 'daily',
+<<<<<<< HEAD
         'path' => 'C:\\laragon\\www\\npm-backend\\storage\\logs/laravel.log',
+=======
+        'path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\logs/laravel.log',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
         'level' => 'debug',
         'days' => 14,
         'replace_placeholders' => true,
@@ -540,12 +565,20 @@
       ),
       'emergency' => 
       array (
+<<<<<<< HEAD
         'path' => 'C:\\laragon\\www\\npm-backend\\storage\\logs/laravel.log',
+=======
+        'path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\logs/laravel.log',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
       ),
       'errormonitor' => 
       array (
         'driver' => 'single',
+<<<<<<< HEAD
         'path' => 'C:\\laragon\\www\\npm-backend\\storage\\logs/forerror.log',
+=======
+        'path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\logs/forerror.log',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
         'level' => 'info',
       ),
     ),
@@ -622,7 +655,11 @@
       'theme' => 'default',
       'paths' => 
       array (
+<<<<<<< HEAD
         0 => 'C:\\laragon\\www\\npm-backend\\resources\\views/vendor/mail',
+=======
+        0 => 'C:\\laragon\\www\\FreqIT\\npm-backend\\resources\\views/vendor/mail',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
       ),
     ),
   ),
@@ -774,7 +811,11 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
+<<<<<<< HEAD
     'files' => 'C:\\laragon\\www\\npm-backend\\storage\\framework/sessions',
+=======
+    'files' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\framework/sessions',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -795,9 +836,15 @@
   array (
     'paths' => 
     array (
+<<<<<<< HEAD
       0 => 'C:\\laragon\\www\\npm-backend\\resources\\views',
     ),
     'compiled' => 'C:\\laragon\\www\\npm-backend\\storage\\framework\\views',
+=======
+      0 => 'C:\\laragon\\www\\FreqIT\\npm-backend\\resources\\views',
+    ),
+    'compiled' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\framework\\views',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
   ),
   'dompdf' => 
   array (
@@ -806,10 +853,17 @@
     'convert_entities' => true,
     'options' => 
     array (
+<<<<<<< HEAD
       'font_dir' => 'C:\\laragon\\www\\npm-backend\\storage\\fonts',
       'font_cache' => 'C:\\laragon\\www\\npm-backend\\storage\\fonts',
       'temp_dir' => 'C:\\Users\\admin\\AppData\\Local\\Temp',
       'chroot' => 'C:\\laragon\\www\\npm-backend',
+=======
+      'font_dir' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\fonts',
+      'font_cache' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\fonts',
+      'temp_dir' => 'C:\\Users\\MARKNA~1\\AppData\\Local\\Temp',
+      'chroot' => 'C:\\laragon\\www\\FreqIT\\npm-backend',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
       'allowed_protocols' => 
       array (
         'data://' => 
@@ -938,7 +992,11 @@
     array (
     ),
     'enable_runnable_solutions' => NULL,
+<<<<<<< HEAD
     'remote_sites_path' => 'C:\\laragon\\www\\npm-backend',
+=======
+    'remote_sites_path' => 'C:\\laragon\\www\\FreqIT\\npm-backend',
+>>>>>>> 89c5ffe30ddad8c904ebb68cadb991b87d1c10f5
     'local_sites_path' => '',
     'housekeeping_endpoint_prefix' => '_ignition',
     'settings_file_path' => '',
