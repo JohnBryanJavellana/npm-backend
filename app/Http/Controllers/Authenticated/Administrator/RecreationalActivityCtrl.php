@@ -369,6 +369,24 @@ class RecreationalActivityCtrl extends Controller
                 return response()->json(['message' => "Success!"], 200);
             }
         });
+        /*************  ✨ Windsurf Command ⭐  *************/
+        /**
+         * Update of request
+         * considerations [DATETIME, STATUS]
+         * add return TransactionUtil::transact(null, [], function () use ($request) { });
+         * $rARequestInfoId = $request->rARequestInfoId;
+         * $rAEquipmentsId = $request->rAEquipmentsId;
+         * $rows = $request->row; ARRAY e.g., [{
+         *    rowId: 1,
+         *    rowStatus: 'RECEIVED'
+         *    rowRemarks: null
+         * },{
+         *    rowId: 2,
+         *    rowStatus: 'RECEIVED'
+         *    rowRemarks: "Sample Remarks"
+         * }]
+         */
+        /*******  f64d3662-9b6f-4078-a72b-74c6124cfd73  *******/
     }
 
     /**
@@ -397,8 +415,10 @@ class RecreationalActivityCtrl extends Controller
          */
 
         $request->validate([
-            'id'     => 'required|exists:ra_equipment_requests,id',
-            'status' => 'required|in:APPROVED,REJECTED,PENDING'
+            'rows'               => 'required|array',
+            'rows.*.rowId'       => 'required|exists:ra_equipment_requests,id',
+            'rows.*.rowStatus'   => 'required|in:APPROVED,REJECTED,PENDING,RECEIVED',
+            'rows.*.rowRemarks'  => 'nullable|string|max:500',
         ]);
 
 
@@ -407,32 +427,108 @@ class RecreationalActivityCtrl extends Controller
          * apply date time validations
          * must use foreach loop
          */
-        RAEquipmentRequest::where('id', $request->id)->update([
-            'status'     => $request->status,
-            'updated_at' => now()
+        return TransactionUtil::transact(
+            null,
+            [],
+            function () use ($request) {
+
+                foreach ($request->rows as $row) {
+
+
+                    $requestRecord = RAEquipmentRequest::find($row['rowId']);
+
+
+                    if (in_array($requestRecord->status, ['PENDING', 'APPROVED'])) {
+                        $requestRecord->update([
+                            'status'     => $row['rowStatus'],
+                            'remarks'    => $row['rowRemarks'] ?? null,
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+
+                /**
+                 * @var mixed
+                 * useless ??
+                 *
+                 */
+                $raRequests = RAEquipmentRequest::whereIn('status', [
+                    'APPROVED',
+                    'REJECTED',
+                    'PENDING',
+                    'RECEIVED',
+                ])->latest()->get();
+
+                return response()->json([
+                    'message'    => 'uUpdated Successfully).',
+                    'raRequests' => $raRequests,
+                ], 200);
+            }
+        );
+    }
+    //!
+
+    /* public function get_recreational_requests(Request $request)
+    {
+
+        $request->validate([
+            'rows'             => 'required|array',
+            'rows.*.rowId'     => 'required|exists:ra_equipment_requests,id',
+            'rows.*.rowStatus' => 'required|in:APPROVED,REJECTED,PENDING,RECEIVED',
         ]);
 
-        /**
-         * @var mixed
-         * useless ??
-         *
-         */
-        $raRequests = RAEquipmentRequest::whereIn('status', [
-            'APPROVED',
-            'REJECTED',
-            'PENDING'
-        ])->get();
+        return TransactionUtil::transact(null, [], function () use ($request) {
 
-        return response()->json([
-            'message'    => 'Request updated successfully',
-            'raRequests' => $raRequests
-        ], 200);
+            foreach ($request->rows as $row) {
+
+
+                $requestRecord = RAEquipmentRequest::find($row['rowId']);
+
+
+                if ($requestRecord->status === 'PENDING') {
+                    $requestRecord->update([
+                        'status'     => $row['rowStatus'],
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'message' => 'Updated Successfully).',
+            ], 200);
+        });
     }
 
     /**
      * Summary of ra_equipments
      * @param Request $request
      */
+
+    public function RACount(Request $request)
+    {
+
+
+        $status = ['PENDING', 'ACTIVE', 'FOR CSM', 'COMPLETED'];
+
+        $counts = RARequestInfo::whereIn('status', $status)
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $total_count = RARequestInfo::count();
+
+        return response()->json([
+            'count_pending'  => min($counts['PENDING'] ?? 0, 99),
+            'count_active' => min($counts['ACTIVE'] ?? 0, 99),
+            'count_forCSM' => min($counts['FOR CSM'] ?? 0, 99),
+            'count_complete' => min($counts['COMPLETED'] ?? 0, 99),
+            'count_total' => min($total_count ?? 0, 99),
+        ], 200);
+    }
+
+
+
+
     public function ra_equipments(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
