@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recreational\RecreationalRequest;
+use App\Http\Requests\Recreational\ViewUserRecRecord;
 use App\Http\Resources\Recreational\ViewRecFacilities;
 use App\Http\Resources\Trainee\Recreationals\ViewRecEquipment;
 use App\Http\Resources\Trainee\Recreationals\ViewRecFacilities as RecreationalsViewRecFacilities;
 use App\Models\Equipment;
 use App\Models\RAEquipmentRequest;
+use App\Models\RAEquipmentStock;
+use App\Models\RAFacility;
+use App\Models\RAFacilityRequest;
 use App\Services\Trainee\Recreational\RecreationalService;
 use Illuminate\Http\Request;
 
@@ -45,19 +49,29 @@ class TraineeRecreational extends Controller
         }
     }
 
-    // public function getUserRecRequest(Request $request)
-    // {
-    //     try
-    //     {
-    //         ret
+    public function getUserRecRequest(ViewUserRecRecord $request)
+    {
+        $validated = $request->validated();
+        $validated["userId"] = $request->user()->id ?? 202600001;
+        \Log::info("validated", $validated);
+        try
+        {
+            \Log::info("data", [$validated]);
 
-    //     }
-    //     catch (\Exception $e) {
-    //     }
-    // }
+            $data = $this->recreationalService->getUserRecRecord($validated);
+
+            return response()->json(["data" => $data], 200);
+        }
+        catch (\Exception $e) {
+            \Log::error("error_data", [$validated]);
+
+            return response()->json(["message" => $e], 500);
+        }
+    }
 
     /**
      * Summary of get_recreational_request
+     * fetching trainee records
      * @param Request $request
      */
     public function get_recreational_request(Request $request) {
@@ -76,7 +90,7 @@ class TraineeRecreational extends Controller
                         'equipment_request.equipment',
                         'facility_request',
                         'facility_request.facility',
-                    ])
+                        ])
                     ->get()
                     ->map(function($request) {
                         $grouped = $request->equipment_request->groupBy('r_a_equipments_id');
@@ -114,9 +128,39 @@ class TraineeRecreational extends Controller
         });
     }
 
+    public function cancel_requested_units(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $model = match ($request->documentType) {
+                'EQUIPMENT'  => RAEquipmentRequest::class,
+                'FACILITY' => RAFacilityRequest::class,
+                default    => throw new \Exception("Invalid document type")
+            };
+
+            $thisRequest = $model::findOrFail($request->documentId);
+
+            if(\in_array($thisRequest->status, ["CANCELLED", "RECEIVED"])) {
+                return response()->json(['message' => "Cant cancel unit. It is already " . $thisRequest->status], 409);   
+            } else {
+                $thisRequest->status = "CANCELLED";
+                $thisRequest->save();
+
+                if($model instanceof RAEquipmentRequest) {
+                    $mainStock = RAEquipmentStock::findOrFail($thisRequest->r_a_equipment_stock_id);
+                    $mainStock->availability_status = "AVAILABLE";
+                    $mainStock->save();   
+                } else { 
+                    $mainFacility = RAFacility::findOrFail($thisRequest->r_a_facility_id);
+                    $mainFacility->availability_status = "AVAILABLE";
+                    $mainFacility->save(); 
+                }
+
+                return response()->json(['message' => "Success! Unit has been cancelled."], 200); 
+            }
+        });
+    }
+
     public function requestEquipment(RecreationalRequest $request)
     {
-        // return response()->json(["wow"], 200);
 
         $validated = $request->validated();
         try
@@ -130,20 +174,4 @@ class TraineeRecreational extends Controller
             return response()->json(["Something went wrong."], 500);
         }
     }
-
-    public function cancelRequests(Request $request)
-    {
-        return;
-    }
-
-    /**
-     *
-     * FACILITIES
-     * create a get API for facilities together with its related equipment.
-     *
-     *
-     *
-     * EQUIPMENTS
-     *
-     **/
 }
