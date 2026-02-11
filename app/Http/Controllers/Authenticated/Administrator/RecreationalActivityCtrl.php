@@ -93,6 +93,10 @@ class RecreationalActivityCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of Facility ============= TASK ==============
+     * @param Request $request
+     */
     public function Facility(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $documentId = $request->documentId;
@@ -102,7 +106,7 @@ class RecreationalActivityCtrl extends Controller
             $this_facility = RAFacilityRequest::findOrFail($documentId);
 
             if(\in_array($this_facility->status, ["CANCELLED", "OCCUPIED", "DECLINED"])) {
-                return response()->json(['message' => "Sorry your Status must be Cancelled, Occupied or Declined! "], 409);
+                return response()->json(['message' => "Sorry your status is already " . $this_facility->status], 409);
             }
 
             $conflicts = RAFacilityRequest::where(function($query) use ($request) {
@@ -330,6 +334,11 @@ class RecreationalActivityCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of et_recreational_requests ============= TASK ==============
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function et_recreational_requests(Request $request)
     {
         // lacking!
@@ -382,9 +391,6 @@ class RecreationalActivityCtrl extends Controller
             'raRequests' => $raRequests
         ], 200);
     }
-
-
-
 
     /**
      * Summary of ra_equipments
