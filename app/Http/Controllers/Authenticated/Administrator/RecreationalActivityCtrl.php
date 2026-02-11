@@ -423,7 +423,7 @@ class RecreationalActivityCtrl extends Controller
         );
     }
     //! 
-    
+
     /* public function get_recreational_requests(Request $request)
     {
         
@@ -461,6 +461,24 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_equipments
      * @param Request $request
      */
+
+    public function RACount(Request $request)
+    {
+        $status = ['PENDING', 'ACTIVE', 'FOR_CSM_APPROVAL', 'COMPLETE'];
+
+        $counts = RAEquipmentRequest::whereIn('status', $status)
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return response()->json([
+            'count_pending'  => min($counts['PENDING'] ?? 0, 99),
+            'count_active'   => min($counts['ACTIVE'] ?? 0, 99),
+            'count_forCSM'   => min($counts['FOR_CSM_APPROVAL'] ?? 0, 99),
+            'count_complete' => min($counts['COMPLETE'] ?? 0, 99),
+        ], 200);
+    }
+
     public function ra_equipments(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
