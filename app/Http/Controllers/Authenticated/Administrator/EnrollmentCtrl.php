@@ -88,8 +88,8 @@ class EnrollmentCtrl extends Controller
 
             if ($request->onlyWithRemarks) {
                 $query->where(function ($q) {
-                    $q->whereHas('trainee.additional_trainee_info.basic_requirement', fn ($sub) => $sub->whereNotNull('remarks'))
-                      ->orWhereHas('trainee_requirement', fn ($sub) => $sub->whereNotNull('remarks'));
+                    $q->whereHas('trainee.additional_trainee_info.basic_requirement', fn($sub) => $sub->whereNotNull('remarks'))
+                        ->orWhereHas('trainee_requirement', fn($sub) => $sub->whereNotNull('remarks'));
                 });
             }
 
@@ -173,7 +173,7 @@ class EnrollmentCtrl extends Controller
             $this_remark->locked = EnrollmentEnum::UNVERIFIED_REQUIREMENT;
             $this_remark->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod == 'POST' ? 'Created' : 'Updated').' a remark. ID# '.$this_remark->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod == 'POST' ? 'Created' : 'Updated') . ' a remark. ID# ' . $this_remark->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -182,9 +182,59 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod == 'POST' ? 'created' : 'updated').' a remark. ID# '.$this_remark->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod == 'POST' ? 'created' : 'updated') . ' a remark. ID# ' . $this_remark->id], 201);
         });
     }
+
+    public function get_enrollment_count(Request $request)
+    {
+
+        $couse_status = [
+            'PENDING',
+            'RESERVED',
+            'ENROLLED',
+            'COMPLETED',
+            'CANCELLED',
+            'PAID',
+            'DECLINED',
+            'FOR-PAYMENT',
+            'IR',
+            'CSFB',
+            'PROCESSING PAYMENT'
+        ];
+
+        $counts = EnrolledCourse::whereIn('enrolled_course_status', $couse_status)
+            ->selectRaw('enrolled_course_status, COUNT(*) as total')
+            ->groupBy('enrolled_course_status')
+            ->pluck('total', 'enrolled_course_status');
+
+
+
+        return response()->json([
+            'count_forVerification'  => min($counts['PENDING'] ?? 0, 99),
+            'count_forReserved'  => min($counts['RESERVED'] ?? 0, 99),
+            'count_forEnrolled'  => min($counts['ENROLLED'] ?? 0, 99),
+            'count_forFinished'  => min($counts['COMPLETED'] ?? 0, 99),
+            'count_forPaid'  => min($counts['PAID'] ?? 0, 99),
+            'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0, 99),
+            'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0, 99),
+            'count_denied' => min($counts['DECLINED'] ?? 0, 99) + min($counts['IR'] ?? 0, 99) + min($counts['CSFB'] ?? 0, 99) + min($counts['CANCELLED'] ?? 0, 99),
+
+        ], 200);
+    }
+
+    public function get_remarks_count(Request $request)
+    {
+
+        $traineeRemarks = TraineeRequirement::whereNotNull('remarks', $request->id)->count() +
+            TrainingRegFile::whereNotNull('remarks', $request->id)->count();
+
+
+        return response()->json([
+            'total_remarks' => $traineeRemarks,
+        ], 200);
+    }
+
 
     /**
      * Summary of lock_requirement
@@ -228,7 +278,7 @@ class EnrollmentCtrl extends Controller
             }
 
             Notifications::notify($request->user()->id, $this_training_status->user_id, NotificationEnum::DORMITORY, 'updated your enrollment application status.');
-            AuditHelper::log($request->user()->id, 'Updated enrollment application status. ID#'.$this_training_status->id);
+            AuditHelper::log($request->user()->id, 'Updated enrollment application status. ID#' . $this_training_status->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -237,7 +287,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've Updated enrollment application status. ID#".$this_training_status->id], 201);
+            return response()->json(['message' => "You've Updated enrollment application status. ID#" . $this_training_status->id], 201);
         });
     }
 
@@ -248,19 +298,19 @@ class EnrollmentCtrl extends Controller
      */
     public function set_expired_status(Request $request)
     {
-        return TransactionUtil::transact(null, [], function () use($request) {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $this_training = EnrolledCourse::findOrFail($request->documentId);
             $this_training->enrolled_course_status = EnrollmentEnum::DECLINED;
             $this_training->isExpired = $request->isExpired;
             $this_training->save();
 
-            AuditHelper::log($request->user()->id, 'User has updated an enrolled course expiry status. ID# '.$this_training->id);
+            AuditHelper::log($request->user()->id, 'User has updated an enrolled course expiry status. ID# ' . $this_training->id);
 
             if (env('USE_EVENT')) {
                 event(new BETraineeApplication(''));
             }
 
-            return response()->json(['message' => "You've updated an enrolled course expiry status. ID# ".$this_training->id], 201);
+            return response()->json(['message' => "You've updated an enrolled course expiry status. ID# " . $this_training->id], 201);
         });
     }
 
@@ -295,7 +345,7 @@ class EnrollmentCtrl extends Controller
                 : Training::findOrFail($request->documentId);
 
             $this_schedule->id = $request->httpMethod === 'POST'
-                ? Carbon::now()->year.str_pad((int) substr(Training::max('id'), 4) + 1, 4, 0, STR_PAD_LEFT)
+                ? Carbon::now()->year . str_pad((int) substr(Training::max('id'), 4) + 1, 4, 0, STR_PAD_LEFT)
                 : $request->documentId;
 
             $this_schedule->course_module_id = $request->module;
@@ -312,7 +362,7 @@ class EnrollmentCtrl extends Controller
             }
             $this_schedule->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a schedule. ID#'.$this_schedule->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a schedule. ID#' . $this_schedule->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -321,7 +371,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a schedule. ID# '.$this_schedule->id], 200);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a schedule. ID# ' . $this_schedule->id], 200);
         });
     }
 
@@ -382,7 +432,7 @@ class EnrollmentCtrl extends Controller
             }
             $this_module->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a module. ID#'.$this_module->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a module. ID#' . $this_module->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -391,7 +441,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a module. ID#'.$this_module->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a module. ID#' . $this_module->id], 201);
         });
     }
 
@@ -453,14 +503,14 @@ class EnrollmentCtrl extends Controller
                 "Module Type already exist."
             );
 
-            if($check) return $check;
+            if ($check) return $check;
 
             $this_module_type = $isPost ? new ModuleType() : ModuleType::findOrFail($request->documentId);
             $this_module_type->name = $request->name;
             if (!$isPost) $this_module_type->status = $request->status;
             $this_module_type->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a module type. ID#'.$this_module_type->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a module type. ID#' . $this_module_type->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -469,7 +519,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a module type. ID#'.$this_module_type->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a module type. ID#' . $this_module_type->id], 201);
         });
     }
 
@@ -533,7 +583,7 @@ class EnrollmentCtrl extends Controller
             $this_certificate->body = $request->body;
             $this_certificate->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a certificate. ID#'.$this_certificate->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a certificate. ID#' . $this_certificate->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -542,7 +592,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a certificate. ID#'.$this_certificate->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a certificate. ID#' . $this_certificate->id], 201);
         });
     }
 
@@ -611,11 +661,11 @@ class EnrollmentCtrl extends Controller
             }
 
             if ($request->upload_reference) {
-                if (!is_null($this_requirement->upload_reference) && file_exists(public_path('upload-reference/'.$this_requirement->upload_reference))) {
-                    unlink(public_path('upload-reference/'.$this_requirement->upload_reference));
+                if (!is_null($this_requirement->upload_reference) && file_exists(public_path('upload-reference/' . $this_requirement->upload_reference))) {
+                    unlink(public_path('upload-reference/' . $this_requirement->upload_reference));
                 }
 
-                $image_name = Str::uuid().'-upload-reference-.png';
+                $image_name = Str::uuid() . '-upload-reference-.png';
                 $image = $request->upload_reference;
                 ConvertToBase64::generate($image, 'image', "upload-reference/$image_name");
                 $this_requirement->upload_reference = $image_name;
@@ -639,7 +689,7 @@ class EnrollmentCtrl extends Controller
                 }
             }
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a requirement. ID#'.$this_requirement->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a requirement. ID#' . $this_requirement->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -648,7 +698,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a requirement. ID#'.$this_requirement->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a requirement. ID#' . $this_requirement->id], 201);
         });
     }
 
@@ -710,7 +760,7 @@ class EnrollmentCtrl extends Controller
                 "School details already exist."
             );
 
-            if($check) return $check;
+            if ($check) return $check;
 
             $this_school = $isPost ? new MainSchool() : MainSchool::findOrFail($request->documentId);
             $this_school->school_name = $request->name;
@@ -718,7 +768,7 @@ class EnrollmentCtrl extends Controller
             if (!$isPost) $this_school->school_status = $request->status;
             $this_school->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a school. ID#'.$this_school->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a school. ID#' . $this_school->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -727,7 +777,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a school. ID#'.$this_school->id], 200);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a school. ID#' . $this_school->id], 200);
         });
     }
 
@@ -787,14 +837,14 @@ class EnrollmentCtrl extends Controller
                 "Course details already exist."
             );
 
-            if($check) return $check;
+            if ($check) return $check;
 
             $this_course = $isPost ? new MainCourse() : MainCourse::findOrFail($request->documentId);
             $this_course->course_name = $request->name;
             if (!$isPost) $this_course->course_status = $request->status;
             $this_course->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a course. ID#'.$this_course->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a course. ID#' . $this_course->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -803,7 +853,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a course. ID#'.$this_course->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a course. ID#' . $this_course->id], 201);
         });
     }
 
@@ -865,7 +915,7 @@ class EnrollmentCtrl extends Controller
                 "Voucher already exist."
             );
 
-            if($check) return $check;
+            if ($check) return $check;
 
             $this_voucher = $isPost ? new Voucher() : Voucher::findOrFail($request->documentId);
             $this_voucher->name = $request->name;
@@ -873,7 +923,7 @@ class EnrollmentCtrl extends Controller
             if (!$isPost) $this_voucher->status = $request->status;
             $this_voucher->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a voucher. ID#'.$this_voucher->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a voucher. ID#' . $this_voucher->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -882,7 +932,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a voucher. ID#'.$this_voucher->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a voucher. ID#' . $this_voucher->id], 201);
         });
     }
 
@@ -944,7 +994,7 @@ class EnrollmentCtrl extends Controller
                 "Sponsor already exist."
             );
 
-            if($check) return $check;
+            if ($check) return $check;
 
             $this_sponsor = $isPost ? new Sponsor() : Sponsor::findOrFail($request->documentId);
             $this_sponsor->name = $request->name;
@@ -952,7 +1002,7 @@ class EnrollmentCtrl extends Controller
             if (!$isPost) $this_sponsor->status = $request->status;
             $this_sponsor->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a sponsor. ID#'.$this_sponsor->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a sponsor. ID#' . $this_sponsor->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -961,7 +1011,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a sponsor. ID#'.$this_sponsor->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a sponsor. ID#' . $this_sponsor->id], 201);
         });
     }
 
@@ -1020,14 +1070,14 @@ class EnrollmentCtrl extends Controller
                 "License already exist."
             );
 
-            if($check) return $check;
+            if ($check) return $check;
 
             $this_license = $isPost ? new License() : License::findOrFail($request->documentId);
             $this_license->short_name = $request->name;
             $this_license->license = $request->license;
             $this_license->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a license. ID#'.$this_license->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a license. ID#' . $this_license->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -1036,7 +1086,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a license. ID#'.$this_license->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a license. ID#' . $this_license->id], 201);
         });
     }
 
@@ -1099,7 +1149,7 @@ class EnrollmentCtrl extends Controller
                 "Rank already exist."
             );
 
-            if($check) return $check;
+            if ($check) return $check;
 
             $this_rank = $isPost ? new Rank() : Rank::findOrFail($request->documentId);
             $this_rank->short_name = $request->short_name;
@@ -1107,7 +1157,7 @@ class EnrollmentCtrl extends Controller
             $this_rank->type = $request->type;
             $this_rank->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a rank. ID#'.$this_rank->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a rank. ID#' . $this_rank->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -1116,7 +1166,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a rank. ID# '.$this_rank->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a rank. ID# ' . $this_rank->id], 201);
         });
     }
 
@@ -1184,7 +1234,7 @@ class EnrollmentCtrl extends Controller
                 "Training Facilitator already exist."
             );
 
-            if($check) return $check;
+            if ($check) return $check;
 
             $this_facilitator = $isPost ? new TrainingFacilitator() : TrainingFacilitator::findOrFail($request->documentId);
             $this_facilitator->course_module_id = $request->module;
@@ -1192,7 +1242,7 @@ class EnrollmentCtrl extends Controller
             $this_facilitator->role = $request->role;
             $this_facilitator->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a facilitator. ID#'.$this_facilitator->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a facilitator. ID#' . $this_facilitator->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -1201,7 +1251,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a facilitator. ID# '.$this_facilitator->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a facilitator. ID# ' . $this_facilitator->id], 201);
         });
     }
 
@@ -1285,7 +1335,7 @@ class EnrollmentCtrl extends Controller
                 "Course Module Fee already exist."
             );
 
-            if($check) return $check;
+            if ($check) return $check;
 
             $this_course_fee = $isPost ? new CourseModuleFee() : CourseModuleFee::findOrFail($request->documentId);
             $this_course_fee->course_module_id = $request->module;
@@ -1295,7 +1345,7 @@ class EnrollmentCtrl extends Controller
             if (!$isPost) $this_course_fee->status = $request->status;
             $this_course_fee->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated').' a training fee. ID#'.$this_course_fee->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a training fee. ID#' . $this_course_fee->id);
 
             if (env('USE_EVENT')) {
                 event(
@@ -1304,7 +1354,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've ".($request->httpMethod === 'POST' ? 'created' : 'updated').' a training fee. ID# '.$this_course_fee->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a training fee. ID# ' . $this_course_fee->id], 201);
         });
     }
 
