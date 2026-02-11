@@ -66,7 +66,7 @@ class RecreationalService {
                 "equipment_request.equipment",
                 "facility_request",
                 "facility_request.facility",
-            ])
+            ]) 
             ->get();
         }
         return $recordsQuery->get();
