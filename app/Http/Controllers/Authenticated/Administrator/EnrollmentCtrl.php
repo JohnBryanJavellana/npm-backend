@@ -611,7 +611,7 @@ class EnrollmentCtrl extends Controller
             }
 
             if ($request->upload_reference) {
-                if (! is_null($this_requirement->upload_reference) && file_exists(public_path('upload-reference/'.$this_requirement->upload_reference))) {
+                if (!is_null($this_requirement->upload_reference) && file_exists(public_path('upload-reference/'.$this_requirement->upload_reference))) {
                     unlink(public_path('upload-reference/'.$this_requirement->upload_reference));
                 }
 

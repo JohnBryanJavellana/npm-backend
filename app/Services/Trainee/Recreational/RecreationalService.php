@@ -47,10 +47,30 @@ class RecreationalService {
         ->get();
     }
 
-    // public function getUserRecRecord($validated)
-    // {
-    //     return $this->
-    // }
+    public function getUserRecRecord($validated)
+    {
+        $recordsQuery = $this->rarequestInfoModel->query()
+        ->where([
+            "user_id" => $validated["userId"],
+        ])
+        ->latest();
+
+        if(!empty($validated["status"])) {
+            $recordsQuery->status($validated["status"]);
+        }
+
+        if(!empty($validated["traceNumber"])) {
+            return $recordsQuery->where("trace_number", $validated["traceNumber"])
+            ->with([
+                "equipment_request",
+                "equipment_request.equipment",
+                "facility_request",
+                "facility_request.facility",
+            ]) 
+            ->get();
+        }
+        return $recordsQuery->get();
+    }
 
     public function getFacilities()
     {
@@ -89,11 +109,12 @@ class RecreationalService {
         DB::transaction(function() use ($validated) {
 
             $types = collect($validated["data"])->unique("type")->pluck("type");
+
             $selectedType = match ($types->count()) {
                 1 => $types->first(),
                 default => 'HYBRID',
             };
-
+            //create a separate method
             $record = $this->rarequestInfoModel->create([
                 "user_id" => $validated["user_id"],
                 "trace_number" => GenerateTrace::createTraceNumber($this->rarequestInfoModel,"-RAR-"),
@@ -101,31 +122,43 @@ class RecreationalService {
                 "reason" => $validated["purpose"],
             ]);
 
+            //separate and group and validate
             foreach($validated["data"] as $info) {
                 if ($info["type"] === "EQUIPMENT") {
-                    $stock = $this->raequipmentStockModel->query()->where("r_a_equipments_id", $info["id"])->lockForUpdate()->available()->okayCondition()->firstOrFail();
+                    $stock = $this->raequipmentStockModel->query()->where("unique_identifier", $validated["unique_identifier"])->lockForUpdate()->available()->okayCondition()->firstOrFail();
                     $this->raequipmentRequestModel->create([
                         "r_a_request_info_id" => $record->id,
-                        "r_a_equipment_stock_id" => $stock->id,
+                        // "r_a_equipment_stock_id" => $stock->id, if has unique identifier passed get the equipment_id
                         "start_date" => $info["from_datetime"],
                         "end_date" => $info["to_datetime"],
-                        "issued_condition" => $stock->condition_status, 
+                        "issued_condition" => $stock->condition_status,
                     ]);
                     $stock->update([
                         "condition_status" => "BORROWED"
                     ]);
                 } else {
+
                     $this->rafacilityRequestModel->create([
                         "r_a_request_info_id" => $record->id,
                         "r_a_facility_id" => $info["id"],
                         "start_date" => $info["from_datetime"],
                         "end_date" => $info["to_datetime"],
-                        "issued_condition" => $stock->condition_status, 
+                        // "issued_condition" =>$stock->condition_status, MUST THROW AN ERROR
                     ]);
                 }
             }
         });
     }
+
+    public function storeEquipmentRequest()
+    {
+        return; 
+    }
+
+    public function storeFacilitiesRequest()
+    {
+        return;
+    }   
 
     public function cancelRequests()
     {

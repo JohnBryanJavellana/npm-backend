@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\RAEquipments;
 use App\Models\RAEquipmentStock;
 use App\Models\RARequestInfo;
 use App\Models\User;
@@ -18,7 +19,8 @@ return new class extends Migration
             $table->engine = "innoDB";
             $table->id();
             $table->foreignIdFor(RARequestInfo::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(RAEquipmentStock::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(RAEquipmentStock::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(RAEquipments::class)->constrained()->cascadeOnDelete();
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->enum('status', [
