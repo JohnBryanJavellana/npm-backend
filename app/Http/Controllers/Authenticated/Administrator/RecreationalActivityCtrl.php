@@ -260,6 +260,83 @@ class RecreationalActivityCtrl extends Controller
     }
 
     /**
+     * Summary of update_requested_equipment
+     * @param Request $request
+     */
+    public function update_requested_equipment(Request $request){
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $selectedRows = $request->row;
+            $summary = [
+                'success_ids' => [],
+                'failed_items' => []
+            ];
+
+            foreach ($selectedRows as $row) {
+                $requestId = $row['rowEquipmentRequestId'];
+                $equipment = RAEquipmentRequest::find($requestId);
+
+                if (!$equipment) {
+                    $summary['failed_items'][] = ['id' => $requestId, 'reason' => 'Not found'];
+                    continue;
+                }
+
+                $hasDateTimeConflicts = RAEquipmentRequest::where('id', '!=', $requestId)
+                    ->where('r_a_equipments_id', $row['rowId'])
+                    ->whereIn('status', [RAEnum::APPROVED, RAEnum::RECEIVED])
+                    ->where(function($query) use ($equipment) {
+                        $query->where('start_date', '<', $equipment->end_date)
+                              ->where('end_date', '>', $equipment->start_date);
+                    })
+                    ->exists();
+
+                if ($hasDateTimeConflicts) {
+                    $summary['failed_items'][] = ['id' => $requestId, 'reason' => 'Schedule conflict'];
+                    continue;
+                }
+
+                $terminalStatuses = [
+                    RAEnum::CANCELLED->value,
+                    RAEnum::RECEIVED->value,
+                    RAEnum::RETURNED->value
+                ];
+
+                if (in_array($equipment->status, $terminalStatuses)) {
+                    $summary['failed_items'][] = ['id' => $requestId, 'reason' => 'Already in terminal state'];
+                    continue;
+                }
+
+                try {
+                    $mainStock = RAEquipmentStock::findOrFail($row['rowId']);
+                    $mainStock->availability_status = RAEnum::UNAVAILABLE;
+                    $mainStock->save();
+
+                    $equipment->status = $row['rowStatus'];
+                    $equipment->remarks = $row['rowRemarks'] ?? null;
+                    $equipment->updated_by_whom = $request->user()->id;
+                    $equipment->save();
+
+                    $summary['success_ids'][] = $requestId;
+                } catch (\Exception $e) {
+                    $summary['failed_items'][] = ['id' => $requestId, 'reason' => 'System error during save'];
+                }
+            }
+
+            $failCount = count($summary['failed_items']);
+            $successCount = count($summary['success_ids']);
+
+            if ($failCount > 0) {
+                $errorDetails = array_map(function($item) {
+                    return "ID {$item['id']} ({$item['reason']})";
+                }, $summary['failed_items']);
+
+                return response()->json(['message' => "Update partially completed. $successCount successful, $failCount failed. Summary: " . implode(', ', $errorDetails)], 207);
+            }
+
+            return response()->json(['message' => "All items updated successfully!"], 200);
+        });
+    }
+
+    /**
      * Summary of ra_facilities
      * @param Request $request
      */
@@ -390,121 +467,11 @@ class RecreationalActivityCtrl extends Controller
     }
 
     /**
-     * Summary of et_recreational_requests ============= TASK ==============
+     * Summary of get_ra_count
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function et_recreational_requests(Request $request)
-    {
-        // lacking!
-        /**
-         * update of request
-         * considerations [DATETIME, STATUS]
-         * add return TransactionUtil::transact(null, [], function () use ($request) { });
-         * $rARequestInfoId = $request->rARequestInfoId;
-         * $rAEquipmentsId = $request->rAEquipmentsId;
-         * $rows = $request->row; ARRAY e.g., [{
-         *    rowId: 1,
-         *    rowStatus: 'RECEIVED'
-         *    rowRemarks: null
-         * },{
-         *    rowId: 2,
-         *    rowStatus: 'RECEIVED'
-         *    rowRemarks: "Sample Remarks"
-         * }]
-         */
-
-        $request->validate([
-            'rows'               => 'required|array',
-            'rows.*.rowId'       => 'required|exists:ra_equipment_requests,id',
-            'rows.*.rowStatus'   => 'required|in:APPROVED,REJECTED,PENDING,RECEIVED',
-            'rows.*.rowRemarks'  => 'nullable|string|max:500',
-        ]);
-
-
-        /**
-         * apply filters or considerations
-         * apply date time validations
-         * must use foreach loop
-         */
-        return TransactionUtil::transact(
-            null,
-            [],
-            function () use ($request) {
-
-                foreach ($request->rows as $row) {
-
-
-                    $requestRecord = RAEquipmentRequest::find($row['rowId']);
-
-
-                    if (in_array($requestRecord->status, ['PENDING', 'APPROVED'])) {
-                        $requestRecord->update([
-                            'status'     => $row['rowStatus'],
-                            'remarks'    => $row['rowRemarks'] ?? null,
-                            'updated_at' => now(),
-                        ]);
-                    }
-                }
-
-                /**
-                 * @var mixed
-                 * useless ??
-                 *
-                 */
-                $raRequests = RAEquipmentRequest::whereIn('status', [
-                    'APPROVED',
-                    'REJECTED',
-                    'PENDING',
-                    'RECEIVED',
-                ])->latest()->get();
-
-                return response()->json([
-                    'message'    => 'uUpdated Successfully).',
-                    'raRequests' => $raRequests,
-                ], 200);
-            }
-        );
-    }
-    //!
-
-    /* public function get_recreational_requests(Request $request)
-    {
-
-        $request->validate([
-            'rows'             => 'required|array',
-            'rows.*.rowId'     => 'required|exists:ra_equipment_requests,id',
-            'rows.*.rowStatus' => 'required|in:APPROVED,REJECTED,PENDING,RECEIVED',
-        ]);
-
-        return TransactionUtil::transact(null, [], function () use ($request) {
-
-            foreach ($request->rows as $row) {
-
-
-                $requestRecord = RAEquipmentRequest::find($row['rowId']);
-
-
-                if ($requestRecord->status === 'PENDING') {
-                    $requestRecord->update([
-                        'status'     => $row['rowStatus'],
-                        'updated_at' => now(),
-                    ]);
-                }
-            }
-
-            return response()->json([
-                'message' => 'Updated Successfully).',
-            ], 200);
-        });
-    }
-
-    /**
-     * Summary of ra_equipments
-     * @param Request $request
-     */
-
-    public function RACount(Request $request)
+    public function get_ra_count(Request $request)
     {
 
 
@@ -525,9 +492,6 @@ class RecreationalActivityCtrl extends Controller
             'count_total' => min($total_count ?? 0, 99),
         ], 200);
     }
-
-
-
 
     public function ra_equipments(Request $request)
     {

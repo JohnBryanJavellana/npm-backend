@@ -193,15 +193,13 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::prefix('/recreational-activity/')->middleware('user_role:SUPERADMIN,ADMIN-RA')->group(function () {
-            #
-            #Route::post('get_recreational_requests', [RecreationalActivityCtrl::class, 'get_recreational_requests']);
-            Route::get('ra_count/get_ra_count', [RecreationalActivityCtrl::class, 'RACount']);
-
+            Route::get('ra_count/get_ra_count', [RecreationalActivityCtrl::class, 'get_ra_count']);
             Route::post('ra_requests', [RecreationalActivityCtrl::class, 'ra_requests']);
             Route::post('ra_requests/get_requested_equipments', [RecreationalActivityCtrl::class, 'get_requested_equipments']);
             Route::post('ra_requests/get_requested_match_equipments', [RecreationalActivityCtrl::class, 'get_requested_match_equipments']);
             Route::post('ra_requests/issue_requested_equipments', [RecreationalActivityCtrl::class, 'issue_requested_equipments']);
             Route::post('ra_requests/update_requested_facility', [RecreationalActivityCtrl::class, 'update_requested_facility']);
+            Route::post('ra_requests/update_requested_equipment', [RecreationalActivityCtrl::class, 'update_requested_equipment']);
 
             Route::post('ra_equipments', [RecreationalActivityCtrl::class, 'ra_equipments']);
             Route::post('ra_equipment_stock', [RecreationalActivityCtrl::class, 'ra_equipment_stock']);
