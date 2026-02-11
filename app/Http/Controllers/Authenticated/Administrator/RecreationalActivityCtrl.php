@@ -464,20 +464,28 @@ class RecreationalActivityCtrl extends Controller
 
     public function RACount(Request $request)
     {
-        $status = ['PENDING', 'ACTIVE', 'FOR_CSM_APPROVAL', 'COMPLETE'];
 
-        $counts = RAEquipmentRequest::whereIn('status', $status)
+
+        $status = ['PENDING', 'ACTIVE', 'FOR CSM', 'COMPLETED'];
+
+        $counts = RARequestInfo::whereIn('status', $status)
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
 
+        $total_count = RARequestInfo::count();
+
         return response()->json([
             'count_pending'  => min($counts['PENDING'] ?? 0, 99),
-            'count_active'   => min($counts['ACTIVE'] ?? 0, 99),
-            'count_forCSM'   => min($counts['FOR_CSM_APPROVAL'] ?? 0, 99),
-            'count_complete' => min($counts['COMPLETE'] ?? 0, 99),
+            'count_active' => min($counts['ACTIVE'] ?? 0, 99),
+            'count_forCSM' => min($counts['FOR CSM'] ?? 0, 99),
+            'count_complete' => min($counts['COMPLETED'] ?? 0, 99),
+            'count_total' => min($total_count ?? 0, 99),
         ], 200);
     }
+
+
+    
 
     public function ra_equipments(Request $request)
     {
