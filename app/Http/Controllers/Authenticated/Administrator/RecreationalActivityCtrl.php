@@ -130,24 +130,22 @@ class RecreationalActivityCtrl extends Controller
                 })
                 ->exists();
 
-            if ($hasDateTimeConflicts) {
+            if ($hasDateTimeConflicts && \in_array($documentStatus, [RAEnum::APPROVED->value, RAEnum::OCCUPIED->value])) {
                 return response()->json(['message' => "Scheduling conflict detected. This facility is already booked for the selected time range."], 409);
             }
+
+            $isClosing = \in_array($documentStatus, [RAEnum::DONE->value, RAEnum::DAMAGED->value]);
 
             $this_facility->status = $documentStatus;
             $this_facility->remarks = $documentRemarks;
             $this_facility->issued_condition = $this_main_facility->condition_status;
             $this_facility->updated_by_whom = $request->user()->id;
             $this_facility->issued_at = $this_facility->issued_at ?? Carbon::now();
-            $this_facility->returned_at = \in_array($documentStatus, [RAEnum::DONE->value, RAEnum::DAMAGED->value])
-                ? Carbon::now()
-                : $this_facility->returned_at;
-            $this_facility->returned_condition = \in_array($documentStatus, [RAEnum::DONE->value, RAEnum::DAMAGED->value])
-                ? ($documentStatus === RAEnum::DONE->value ? RAEnum::GOOD_CONDITION->value : $documentStatus)
-                : $this_facility->returned_condition;
+            $this_facility->returned_at = $isClosing ? Carbon::now() : $this_facility->returned_at;
+            $this_facility->returned_condition = $isClosing ? ($documentStatus === RAEnum::DONE->value ? RAEnum::GOOD_CONDITION->value : $documentStatus) : $this_facility->returned_condition;
             $this_facility->save();
 
-            if(\in_array($documentStatus, [RAEnum::DONE->value, RAEnum::DAMAGED->value])) {
+            if($isClosing) {
                 $this_main_facility->condition_status = $documentStatus === RAEnum::DONE->value ? RAEnum::GOOD_CONDITION->value : $documentStatus;
                 $this_main_facility->save();
             }
