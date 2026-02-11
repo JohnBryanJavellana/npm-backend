@@ -446,24 +446,6 @@ class RecreationalActivityCtrl extends Controller
                 return response()->json(['message' => "Success!"], 200);
             }
         });
-        /*************  ✨ Windsurf Command ⭐  *************/
-        /**
-         * Update of request
-         * considerations [DATETIME, STATUS]
-         * add return TransactionUtil::transact(null, [], function () use ($request) { });
-         * $rARequestInfoId = $request->rARequestInfoId;
-         * $rAEquipmentsId = $request->rAEquipmentsId;
-         * $rows = $request->row; ARRAY e.g., [{
-         *    rowId: 1,
-         *    rowStatus: 'RECEIVED'
-         *    rowRemarks: null
-         * },{
-         *    rowId: 2,
-         *    rowStatus: 'RECEIVED'
-         *    rowRemarks: "Sample Remarks"
-         * }]
-         */
-        /*******  f64d3662-9b6f-4078-a72b-74c6124cfd73  *******/
     }
 
     /**
