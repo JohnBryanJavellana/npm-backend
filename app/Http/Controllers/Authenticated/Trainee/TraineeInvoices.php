@@ -43,7 +43,6 @@ class TraineeInvoices extends Controller
 
     public function updateEnrollmentInvoice(EnrollmentInvoiceRequest $request)
     {
-        // return response()->json([$request->all()], 200);
         try
         {
             $validated = $request->validated();
