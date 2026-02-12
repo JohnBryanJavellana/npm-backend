@@ -25,7 +25,7 @@ class NotificationCtrl extends Controller
             $notificationsTemp = $this->notificationInstance->with(['sender']);
             $userDesignation = in_array($currentUserInstance->role, ["ADMIN-DORMITORY", "ADMIN-LIBRARY", "ADMIN-ENROLLMENT"])
                 ? [str_replace("ADMIN-", '', $currentUserInstance->role)]
-                : ["DORMITORY", "LIBRARY", "ENROLLMENT"];
+                : ["DORMITORY", "LIBRARY", "ENROLLMENT", "RECREATIONAL"];
 
             $notifications = $isNotAdmin
                 ? $notificationsTemp->where('to_user', $currentUserInstance->id)
