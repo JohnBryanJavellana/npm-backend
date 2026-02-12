@@ -211,6 +211,10 @@ class EnrollmentCtrl extends Controller
                 ->groupBy('enrolled_course_status')
                 ->pluck('total', 'enrolled_course_status');
 
+            $requestForRemarks = $request->merge([
+                'onlyWithRemarks' => true
+            ]);
+
             return response()->json([
                 'count_forVerification'  => min($counts['PENDING'] ?? 0, 99),
                 'count_forReserved'  => min($counts['RESERVED'] ?? 0, 99),
@@ -220,7 +224,7 @@ class EnrollmentCtrl extends Controller
                 'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0, 99),
                 'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0, 99),
                 'count_denied' => min($counts['DECLINED'] ?? 0, 99) + min($counts['IR'] ?? 0, 99) + min($counts['CSFB'] ?? 0, 99) + min($counts['CANCELLED'] ?? 0, 99),
-
+                'count_withRemarks' => iterator_count($this->get_applications($requestForRemarks))
             ], 200);
         });
     }
@@ -1043,6 +1047,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of get_licenses
+     * @param Request $request
+     */
     public function get_licenses(Request $request)
     {
         return TransactionUtil::transact(null, [], function () {
