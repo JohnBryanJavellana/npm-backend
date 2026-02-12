@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Authenticated\Trainee;
 
+use App\Events\BENotification;
+use App\Events\BERecreational;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recreational\RecreationalRequest;
 use App\Http\Requests\Recreational\ViewRecreationalRequest;
@@ -19,6 +21,8 @@ use Illuminate\Http\Request;
 
 use App\Utils\TransactionUtil;
 use App\Models\RARequestInfo;
+use App\Utils\AuditHelper;
+use App\Utils\Notifications;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -189,7 +193,20 @@ class TraineeRecreational extends Controller
         {
             $this->recreationalService->storeRecreationalRequests($validated);
 
-            
+            AuditHelper::log();
+            Notifications::notify();
+
+            if(env("USE_EVENT")) {
+                try
+                {
+                    event (
+                        new BERecreational(''),
+                    );
+                }
+                catch (\Exception $e) {
+                }                
+            }
+
             return response()->json(["message" => "Successfully sent a recreational request."], 200);
         }
         catch (DomainException $e) {
