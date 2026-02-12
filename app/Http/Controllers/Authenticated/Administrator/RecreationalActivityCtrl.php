@@ -81,47 +81,88 @@ class RecreationalActivityCtrl extends Controller
      */
     public function get_requested_equipments(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $raEquipmentRequests = RAEquipmentRequest::with([
+            $raEquipmentRequests_temp = RAEquipmentRequest::with([
                 'equipment_stock'
             ])
             ->where([
                 'r_a_request_info_id' => $request->rARequestInfoId,
                 'r_a_equipments_id' => $request->rAEquipmentsId
-            ])->get();
+            ]);
+
+            $raEquipmentRequests = $request->status
+                ? $raEquipmentRequests_temp->whereIn('status', $request->status)->get()
+                : $raEquipmentRequests_temp->get();
 
             return response()->json(['raEquipmentRequests' => $raEquipmentRequests], 200);
         });
     }
 
-    public function Facility(Request $request) {
+    /**
+     * Summary of update_requested_facility
+     * @param Request $request
+     */
+    public function update_requested_facility(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $documentId = $request->documentId;
             $documentStatus = $request->documentStatus;
-            $documentRemarks = $request->documentRemarks;
+            $requestInfoId = $request->requestInfoId;
+            $documentRemarks = $request->documentRemarks ?? NULL;
 
             $this_facility = RAFacilityRequest::findOrFail($documentId);
+            $this_main_facility = RAFacility::findOrFail($this_facility->r_a_facility_id);
 
-            if(\in_array($this_facility->status, ["CANCELLED", "OCCUPIED", "DECLINED"])) {
-                return response()->json(['message' => "Sorry your Status must be Cancelled, Occupied or Declined! "], 409);
+            if(\in_array($this_facility->status, [
+                RAEnum::CANCELLED->value,
+                RAEnum::DECLINED->value
+            ])) {
+                return response()->json(['message' => "Sorry your status is already " . ucfirst(strtolower($this_facility->status))], 409);
             }
 
-            $conflicts = RAFacilityRequest::where(function($query) use ($request) {
-                $query->where('start_date','<=', $request->end_date)
-                        ->where('end_date','>=', $request->start_date);
-                        })->get();
+            $hasDateTimeConflicts = RAFacilityRequest::where('r_a_request_info_id', '!=', $documentId)
+                ->where('r_a_facility_id', $this_facility->r_a_facility_id)
+                ->whereIn('status', [
+                    RAEnum::APPROVED,
+                    RAEnum::OCCUPIED
+                ])
+                ->where(function($query) use ($this_facility) {
+                    $query->where('start_date', '<', $this_facility->end_date)
+                          ->where('end_date', '>', $this_facility->start_date);
+                })
+                ->exists();
 
-            if($conflicts) {
-                return response()->json(['message' => "Sorry this facility is already booked for the selected dates! "], 409);
+            if ($hasDateTimeConflicts && \in_array($documentStatus, [RAEnum::APPROVED->value, RAEnum::OCCUPIED->value])) {
+                return response()->json(['message' => "Scheduling conflict detected. This facility is already booked for the selected time range."], 409);
             }
+
+            $isClosing = \in_array($documentStatus, [RAEnum::DONE->value, RAEnum::DAMAGED->value]);
 
             $this_facility->status = $documentStatus;
-            if($documentRemarks) $this_facility->remarks = $documentRemarks;
+            $this_facility->remarks = $documentRemarks;
+            $this_facility->issued_condition = $this_main_facility->condition_status;
+            $this_facility->updated_by_whom = $request->user()->id;
+            $this_facility->issued_at = $this_facility->issued_at ?? Carbon::now();
+            $this_facility->returned_at = $isClosing ? Carbon::now() : $this_facility->returned_at;
+            $this_facility->returned_condition = $isClosing ? ($documentStatus === RAEnum::DONE->value ? RAEnum::GOOD_CONDITION->value : $documentStatus) : $this_facility->returned_condition;
             $this_facility->save();
 
-             return response()->json([
-            'message' => 'Facility updated successfully!',
-            'data' => $this_facility
-             ]);
+            if($isClosing) {
+                $this_main_facility->condition_status = $documentStatus === RAEnum::DONE->value ? RAEnum::GOOD_CONDITION->value : $documentStatus;
+                $this_main_facility->save();
+            }
+
+            $this_request_info = RARequestInfo::findOrFail($this_facility->r_a_request_info_id);
+            $this_request_info->status = RAFacilityRequest::where('r_a_request_info_id', $requestInfoId)->whereNotIn('status', [
+                RAEnum::APPROVED,
+                RAEnum::OCCUPIED,
+                RAEnum::PENDING
+            ])->exists() || RAEquipmentRequest::where('r_a_request_info_id', $requestInfoId)->whereNotIn('status', [
+                RAEnum::ACTIVE,
+                RAEnum::RECEIVED,
+                RAEnum::PENDING
+            ])->exists() ? RAEnum::FOR_CSM : RAEnum::ACTIVE;
+            $this_request_info->save();
+
+            return response()->json(['message' => 'Issued successfully!']);
         });
     }
 
@@ -215,6 +256,83 @@ class RecreationalActivityCtrl extends Controller
             };
 
             return response()->json(['message' => "Issued Successfully!"], 200);
+        });
+    }
+
+    /**
+     * Summary of update_requested_equipment
+     * @param Request $request
+     */
+    public function update_requested_equipment(Request $request){
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $selectedRows = $request->row;
+            $summary = [
+                'success_ids' => [],
+                'failed_items' => []
+            ];
+
+            foreach ($selectedRows as $row) {
+                $requestId = $row['rowEquipmentRequestId'];
+                $equipment = RAEquipmentRequest::find($requestId);
+
+                if (!$equipment) {
+                    $summary['failed_items'][] = ['id' => $requestId, 'reason' => 'Not found'];
+                    continue;
+                }
+
+                $hasDateTimeConflicts = RAEquipmentRequest::where('id', '!=', $requestId)
+                    ->where('r_a_equipments_id', $row['rowId'])
+                    ->whereIn('status', [RAEnum::APPROVED, RAEnum::RECEIVED])
+                    ->where(function($query) use ($equipment) {
+                        $query->where('start_date', '<', $equipment->end_date)
+                              ->where('end_date', '>', $equipment->start_date);
+                    })
+                    ->exists();
+
+                if ($hasDateTimeConflicts) {
+                    $summary['failed_items'][] = ['id' => $requestId, 'reason' => 'Schedule conflict'];
+                    continue;
+                }
+
+                $terminalStatuses = [
+                    RAEnum::CANCELLED->value,
+                    RAEnum::RECEIVED->value,
+                    RAEnum::RETURNED->value
+                ];
+
+                if (in_array($equipment->status, $terminalStatuses)) {
+                    $summary['failed_items'][] = ['id' => $requestId, 'reason' => 'Already in terminal state'];
+                    continue;
+                }
+
+                try {
+                    $mainStock = RAEquipmentStock::findOrFail($row['rowId']);
+                    $mainStock->availability_status = RAEnum::UNAVAILABLE;
+                    $mainStock->save();
+
+                    $equipment->status = $row['rowStatus'];
+                    $equipment->remarks = $row['rowRemarks'] ?? null;
+                    $equipment->updated_by_whom = $request->user()->id;
+                    $equipment->save();
+
+                    $summary['success_ids'][] = $requestId;
+                } catch (\Exception $e) {
+                    $summary['failed_items'][] = ['id' => $requestId, 'reason' => 'System error during save'];
+                }
+            }
+
+            $failCount = count($summary['failed_items']);
+            $successCount = count($summary['success_ids']);
+
+            if ($failCount > 0) {
+                $errorDetails = array_map(function($item) {
+                    return "ID {$item['id']} ({$item['reason']})";
+                }, $summary['failed_items']);
+
+                return response()->json(['message' => "Update partially completed. $successCount successful, $failCount failed. Summary: " . implode(', ', $errorDetails)], 207);
+            }
+
+            return response()->json(['message' => "All items updated successfully!"], 200);
         });
     }
 
@@ -330,66 +448,33 @@ class RecreationalActivityCtrl extends Controller
         });
     }
 
-    public function et_recreational_requests(Request $request)
+    /**
+     * Summary of get_ra_count
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_ra_count(Request $request)
     {
-        // lacking!
-        /**
-         * update of request
-         * considerations [DATETIME, STATUS]
-         * add return TransactionUtil::transact(null, [], function () use ($request) { });
-         * $rARequestInfoId = $request->rARequestInfoId;
-         * $rAEquipmentsId = $request->rAEquipmentsId;
-         * $rows = $request->row; ARRAY e.g., [{
-         *    rowId: 1,
-         *    rowStatus: 'RECEIVED'
-         *    rowRemarks: null
-         * },{
-         *    rowId: 2,
-         *    rowStatus: 'RECEIVED'
-         *    rowRemarks: "Sample Remarks"
-         * }]
-         */
-
-        $request->validate([
-            'id'     => 'required|exists:ra_equipment_requests,id',
-            'status' => 'required|in:APPROVED,REJECTED,PENDING'
-        ]);
 
 
-        /**
-         * apply filters or considerations
-         * apply date time validations
-         * must use foreach loop
-         */
-        RAEquipmentRequest::where('id', $request->id)->update([
-            'status'     => $request->status,
-            'updated_at' => now()
-        ]);
+        $status = ['PENDING', 'ACTIVE', 'FOR CSM', 'COMPLETED'];
 
-        /**
-         * @var mixed
-         * useless ??
-         *
-         */
-        $raRequests = RAEquipmentRequest::whereIn('status', [
-            'APPROVED',
-            'REJECTED',
-            'PENDING'
-        ])->get();
+        $counts = RARequestInfo::whereIn('status', $status)
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $total_count = RARequestInfo::count();
 
         return response()->json([
-            'message'    => 'Request updated successfully',
-            'raRequests' => $raRequests
+            'count_pending'  => min($counts['PENDING'] ?? 0, 99),
+            'count_active' => min($counts['ACTIVE'] ?? 0, 99),
+            'count_forCSM' => min($counts['FOR CSM'] ?? 0, 99),
+            'count_complete' => min($counts['COMPLETED'] ?? 0, 99),
+            'count_total' => min($total_count ?? 0, 99),
         ], 200);
     }
 
-
-
-
-    /**
-     * Summary of ra_equipments
-     * @param Request $request
-     */
     public function ra_equipments(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {

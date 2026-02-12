@@ -18,7 +18,8 @@ return new class extends Migration
             $table->enum("service_type", [
                 "DORMITORY",
                 "ENROLLMENT",
-                "LIBRARY"
+                "LIBRARY",
+                "RECREATIONAL"
             ]);
             $table->enum("status", [
                 "AVAILABLE",

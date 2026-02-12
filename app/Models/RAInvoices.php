@@ -12,4 +12,8 @@ class RAInvoices extends Model
     public function cashier_or() {
         return $this->hasOne(CashierOR::class);
     }
+
+    public function payee() {
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
 }
