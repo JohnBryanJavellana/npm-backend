@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recreational\RecreationalRequest;
+use App\Http\Requests\Recreational\ViewRecreationalRequest;
 use App\Http\Requests\Recreational\ViewUserRecRecord;
 use App\Http\Resources\Recreational\ViewRecFacilities;
 use App\Http\Resources\Trainee\Recreationals\ViewRecEquipment;
@@ -18,6 +19,8 @@ use Illuminate\Http\Request;
 
 use App\Utils\TransactionUtil;
 use App\Models\RARequestInfo;
+use DomainException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TraineeRecreational extends Controller
 {
@@ -87,9 +90,9 @@ class TraineeRecreational extends Controller
                 ?  $recRequests->where('trace_number', $request->traceNumber)
                     ->with([
                         'equipment_request',
-                        'equipment_request.equipment',
+                        'equipment_request.equipment.images',
                         'facility_request',
-                        'facility_request.facility',
+                        'facility_request.facility.images',
                         ])
                     ->get()
                     ->map(function($request) {
@@ -121,15 +124,33 @@ class TraineeRecreational extends Controller
                 'r_a_request_info_id' => $request->rARequestInfoId,
                 'r_a_equipments_id' => $request->rAEquipmentsId
             ])->with([
-                'equipment_stock'
+                'equipment_stock',
+                'equipment.images'
             ])->get();
 
             return response()->json(['raEquipmentRequests' => $raEquipmentRequests], 200);
         });
     }
 
+    public function getRecreationalRequest(ViewRecreationalRequest $request)
+    {   
+        $validated = $request->validated();
+        try
+        {
+            $result = match ($validated["type"] ) {
+                "EQUIPMENT" =>  $this->recreationalService->getEquipmentRequests($validated),
+                "FACILITY" =>  $this->recreationalService->getFacilityRequests($validated)
+            };
+            return response()->json(['raEquipmentRequests' => $result], 200);
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+    }
+
     public function cancel_requested_units(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
+            \Log::info("deleteShit", [$request->all()]);
             $model = match ($request->documentType) {
                 'EQUIPMENT'  => RAEquipmentRequest::class,
                 'FACILITY' => RAFacilityRequest::class,
@@ -165,8 +186,14 @@ class TraineeRecreational extends Controller
         $validated = $request->validated();
         try
         {
-            $this->recreationalService->storeRecreationalRequests($validated);
-            return response()->json(["message" => "Successfully requested!"], 200);;
+            $data = $this->recreationalService->storeRecreationalRequests($validated);
+            return response()->json(["message" => $data], 200);;
+        }
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (ModelNotFoundException $e) {
+            return response()->json(["message" => "Facility/Equipment unavailable"], 404);
         }
         catch (\Exception $e) {
             \Log::info("requestEquipmentError", [$e]);

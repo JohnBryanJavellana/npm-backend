@@ -45,7 +45,7 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'
 /** testing routes */
 Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
 Route::post('items', [TraineeRecreational::class, 'getUserRecRequest']);
-Route::post('item', [TraineeRecreational::class, 'get_recreational_request']);
+Route::post('item', [TraineeRecreational::class, 'requestEquipment']);
 
 
 /** authenticated routes */
@@ -201,7 +201,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('facilities', [TraineeRecreational::class, 'viewFacilities']);
             Route::post('requests', [TraineeRecreational::class, 'requestEquipment']);
             Route::post('get_recreational_request', [TraineeRecreational::class, 'get_recreational_request']);
-            Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'get_requested_equipments']);
+            Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'getRecreationalRequest']);
             Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancel_requested_units']);
         });
     });

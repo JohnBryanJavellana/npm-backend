@@ -10,6 +10,7 @@ use App\Models\RAFacility;
 use App\Models\RAFacilityRequest;
 use App\Models\RARequestInfo;
 use App\Utils\GenerateTrace;
+use DomainException;
 use Illuminate\Support\Facades\DB;
 
 class RecreationalService {
@@ -92,24 +93,64 @@ class RecreationalService {
         ->get(["id","name","location","additional_details","open_time","close_time","condition_status","availability_status"]);
     }
 
-    public function prepareEquipment($validated)
+    public function getFacilityRequests($validated)
     {
-        // $requested = collect($validated["data"])->filter(fn($data) => $data["type"] === "EQUIPMENT")->pluck("id");
-        return collect($validated["data"])->unique("type")->pluck("type");
-
-
-        return $this->raequipmentsModel->query()
-        ->whereIn("id", $requested)
+        return $this->rafacilityRequestModel->query()
+        ->where([
+            "r_a_facility_id" => $validated["id"],
+            "r_a_request_info_id" => $validated["rARequestInfoId"]
+        ])
+        ->with([
+            "facility.images"
+        ])
         ->get();
     }
 
+    public function getEquipmentRequests($validated)
+    {
+        return $this->raequipmentRequestModel->query()
+        ->where([
+            "r_a_equipments_id" => $validated["id"],
+            "r_a_request_info_id" => $validated["rARequestInfoId"]
+        ])->with([
+            'equipment_stock',
+            'equipment.images'
+        ])->get();
+    }
+
+    public function prepareEquipment($validated)
+    {
+        $eq_id = collect($validated["data"])->filter(fn($data) => $data["type"] === "EQUIPMENT")->pluck("id");
+
+        $equipments = $this->raequipmentsModel->query()
+        ->select("id", "name")
+        ->withCount("stocks")
+        ->whereIn("id", $eq_id)
+        ->get()
+        ->keyBy("id");
+        
+        $equipmentWithoutStock = $equipments->filter(function($query) {
+            return $query["stocks_count"] <= 6;
+        });
+
+        $titles = implode(", ", $equipmentWithoutStock->pluck("name")->toArray());
+
+        if(!empty($equipmentWithoutStock)) {
+            throw new DomainException(count($equipmentWithoutStock) > 1 ? "Equipments" : "Equipment" . " does not have stock available. ". $titles);
+        }
+
+        return $equipments;
+    }
 
     public function storeRecreationalRequests($validated)
     {
-        DB::transaction(function() use ($validated) {
+        return DB::transaction(function() use ($validated) {
+
+            //prepare data
+            return $this->prepareEquipment($validated);
+            $equipments = $this->prepareEquipment($validated);
 
             $types = collect($validated["data"])->unique("type")->pluck("type");
-
             $selectedType = match ($types->count()) {
                 1 => $types->first(),
                 default => 'HYBRID',
@@ -125,43 +166,56 @@ class RecreationalService {
             //separate and group and validate
             foreach($validated["data"] as $info) {
                 if ($info["type"] === "EQUIPMENT") {
-                    $stock = $this->raequipmentStockModel->query()->where("unique_identifier", $validated["unique_identifier"])->lockForUpdate()->available()->okayCondition()->firstOrFail();
-                    $this->raequipmentRequestModel->create([
-                        "r_a_request_info_id" => $record->id,
-                        // "r_a_equipment_stock_id" => $stock->id, if has unique identifier passed get the equipment_id
-                        "start_date" => $info["from_datetime"],
-                        "end_date" => $info["to_datetime"],
-                        "issued_condition" => $stock->condition_status,
-                    ]);
-                    $stock->update([
-                        "condition_status" => "BORROWED"
-                    ]);
+                    $this->storeEquipmentRequest($info, $record);
                 } else {
-
-                    $this->rafacilityRequestModel->create([
-                        "r_a_request_info_id" => $record->id,
-                        "r_a_facility_id" => $info["id"],
-                        "start_date" => $info["from_datetime"],
-                        "end_date" => $info["to_datetime"],
-                        // "issued_condition" =>$stock->condition_status, MUST THROW AN ERROR
-                    ]);
+                    $this->storeFacilitiesRequest($info, $record);
                 }
             }
         });
     }
 
-    public function storeEquipmentRequest()
-    {
-        return; 
+    public function storeEquipmentRequest($info, $record)
+    { 
+        if(!empty($info["unique_identifier"])) {
+            $stock = $this->raequipmentStockModel->query()
+            ->where("unique_identifier", $info["unique_identifier"])
+            ->lockForUpdate()
+            ->available()
+            ->okayCondition()
+            ->firstOrFail();
+        }
+
+        $this->raequipmentRequestModel->create([
+            "r_a_request_info_id" => $record->id,
+            "r_a_equipment_stock_id" => $stock->id ?? null,
+            "start_date" => $info["from_datetime"],
+            "end_date" => $info["to_datetime"],
+            "issued_condition" => $stock->condition_status,
+        ]);
     }
 
-    public function storeFacilitiesRequest()
+    public function storeFacilitiesRequest($info, $record)
     {
-        return;
+        $facility = $this->rafacilityModel->query()
+        ->select("id", "condition_status")
+        ->whereKey($info["id"])
+        ->whereHas("hasData", fn($query) => $query->whereIn("status", [RequestStatus::APPROVED->value, RequestStatus::OCCUPIED->value]))
+        ->available()
+        ->okayCondition()
+        ->firstOrFail();
+
+        $this->rafacilityRequestModel->create([
+            "r_a_request_info_id" => $record->id,
+            "r_a_facility_id" => $info["id"],
+            "start_date" => $info["from_datetime"],
+            "end_date" => $info["to_datetime"],
+            "issued_condition" =>$facility->condition_status
+        ]);
     }   
 
     public function cancelRequests()
     {
         return;
+        // DB::transaction()
     }
 }
