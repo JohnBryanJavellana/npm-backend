@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SaveAvatar;
+use App\Jobs\SendingEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Utils\TransactionUtil;
@@ -16,7 +18,8 @@ use App\Enums\{
     UserRoleEnum
 };
 use App\Http\Requests\Admin\Account\{
-    UpdatePassword
+    UpdatePassword,
+    UpdatePersonal
 };
 use App\Events\{
     BEAccount,
@@ -30,7 +33,7 @@ use App\Models\{
 };
 use App\Utils\{
     AuditHelper,
-    ConvertToBase64
+    ConvertToBase64,
 };
 use Illuminate\Support\Facades\{
     DB,
@@ -39,6 +42,11 @@ use Illuminate\Support\Facades\{
 
 class Account extends Controller
 {
+    /**
+     * Summary of trainee_info
+     * @param Request $request
+     * @param int $traineeId
+     */
     public function trainee_info (Request $request, int $traineeId) {
         return TransactionUtil::transact(null, [], function() use ($traineeId) {
             $traineeInfo = User::with([
@@ -68,6 +76,10 @@ class Account extends Controller
         });
     }
 
+    /**
+     * Summary of get_activities
+     * @param Request $request
+     */
     public function get_activities (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $activities = AuditTrail::orderBy('created_at', 'DESC');
@@ -77,83 +89,64 @@ class Account extends Controller
         });
     }
 
-    public function update_personal(Request $request) {
-        $validation = [
-            'firstName' => 'required|string',
-            'gender' => 'required|string',
-            'middleName' => 'string',
-            'lastName' => 'required|string',
-            'birthdate' => 'required|date|before:today',
-            'email' => 'required|email|unique:users,email,' . $request->user()->id,
-        ];
+    /**
+     * Summary of update_personal
+     * @param UpdatePersonal $request
+     */
+    public function update_personal(UpdatePersonal $request) {
+        return TransactionUtil::transact($request, ['user_profile_' . $request->user()->id], function() use ($request) {
+            $reloggin = false;
+            $user = User::findOrFail($request->documentId ?? $request->user()->id);
 
-        $validator = \Validator::make($request->all(), $validation);
+            $user->fname = $request->firstName;
+            $user->mname = $request->middleName;
+            $user->lname = $request->lastName;
+            $user->gender = $request->gender;
+            $user->suffix = $request->suffix;
+            $user->birthdate = $request->birthdate;
 
-        if ($validator->fails()) {
-            $errors = $validator->messages()->all();
-            return response()->json(['message' => implode(', ', $errors)], 422);
-        } else {
-            try {
-                DB::beginTransaction();
-
-                $reloggin = false;
-                $user = User::findOrFail($request->user()->id);
-
-                $user->fname = $request->firstName;
-                $user->mname = $request->middleName;
-                $user->lname = $request->lastName;
-                $user->gender = $request->gender;
-                $user->suffix = $request?->suffix;
-                $user->birthdate = $request->birthdate;
-
-                if ($user->email !== $request->email) {
-                    $random_password = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
-                    $user->password = bcrypt($random_password);
-
-                    \Mail::to($request->email)->send(new UpdatePasswordMail(['password' => $random_password]));
-                    $reloggin = true;
-                }
-
-                $user->email = $request->email;
-
-                if ($request->avatar) {
-                    if (($request->avatar !== $user->profile_picture) && $user->profile_picture !== 'default-avatar.png') {
-                        if (file_exists(public_path('user-images/' . $user->profile_picture))){
-                            unlink(public_path('user-images/' . $user->profile_picture));
-                        }
-                    }
-
-                    $image_name = Str::uuid() . '.png';
-                    ConvertToBase64::generate($request->avatar, 'image', "user_images/$image_name");
-                    $user->profile_picture = $image_name;
-                }
-
-                $user->save();
-
-                AuditHelper::log($request->user()->id, "Updated personal account information.");
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEAccount(''),
-                        new BEAuditTrail(''),
-                    );
-                }
-
-                $cacheKey = 'user_profile_' . $request->user()->id;
-                Cache::forget($cacheKey);
-
-                DB::commit();
-
-                return response()->json([
-                    'message' => "You've updated your account personal information.",
-                    'reloggin' => $reloggin
-                ], 200);
-            } catch (\Exception $e) {
-                DB::rollback();
-                return response()->json(['message' => $e->getMessage()], 500);
+            if ($user->email !== $request->email) {
+                $random_password = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+                $user->password = bcrypt($random_password);
+                SendingEmail::dispatch($user, new UpdatePasswordMail(['password' => $random_password]));
+                $reloggin = true;
             }
-        }
+
+            if ($request->avatar) {
+                if (($request->avatar !== $user->profile_picture) && $user->profile_picture !== 'default-avatar.png') {
+                    if (file_exists(public_path('user-images/' . $user->profile_picture))){
+                        unlink(public_path('user-images/' . $user->profile_picture));
+                    }
+                }
+
+                $image_name = Str::uuid() . '.png';
+                SaveAvatar::dispatch($request->avatar, $image_name, "user_images/", false, true, null);
+                $user->profile_picture = $image_name;
+            }
+
+            $user->email = $request->email;
+            $user->save();
+
+            AuditHelper::log($request->user()->id, "Updated personal account information.");
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEAccount(''),
+                    new BEAuditTrail(''),
+                );
+            }
+
+            return response()->json([
+                'message' => "Account personal information is updated.",
+                'reloggin' => $reloggin
+            ], 200);
+        });
     }
 
+    /**
+     * Summary of update_password
+     * @param UpdatePassword $request
+     */
     public function update_password(UpdatePassword $request){
         return TransactionUtil::transact($request, [], function() use ($request) {
             $user = User::findOrFail($request->user()->id);
@@ -182,6 +175,10 @@ class Account extends Controller
         });
     }
 
+    /**
+     * Summary of change_theme
+     * @param Request $request
+     */
     public function change_theme(Request $request) {
         return TransactionUtil::transact(null, ['user_profile_' . $request->user()->id], function() use ($request) {
             $user = User::find($request->user()->id);
