@@ -13,9 +13,17 @@ class CsmRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        \Log::info("dataCsm", [$this->all()]);
+        return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $serviceType = $this->input("service", "");
+        $this->merge([
+            "service" => strtoupper($serviceType)
+        ]);
+    }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,7 +33,7 @@ class CsmRequest extends FormRequest
     {
         return [
             "reference_id" => "required",
-            "service" => "required|in:ENROLLMENT,DORMITORY,LIBRARY",
+            "service" => "required|in:ENROLLMENT,DORMITORY,LIBRARY,RECREATIONAL",
             "cc1" => "required|int",
             "cc2" => "required|int",
             "cc3" => "required|int",

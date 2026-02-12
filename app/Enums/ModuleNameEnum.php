@@ -2,8 +2,7 @@
 
 namespace App\Enums;
 
-enum NotificationEnum: string {
-
+enum ModuleNameEnum : string {
     case DORMITORY = "DORMITORY";
     case ENROLLMENT = "ENROLLMENT";
     case LIBRARY = "LIBRARY";

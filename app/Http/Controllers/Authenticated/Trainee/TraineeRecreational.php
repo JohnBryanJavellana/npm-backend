@@ -93,6 +93,7 @@ class TraineeRecreational extends Controller
                         'equipment_request.equipment.images',
                         'facility_request',
                         'facility_request.facility.images',
+                        'csm'
                         ])
                     ->get()
                     ->map(function($request) {
@@ -186,8 +187,10 @@ class TraineeRecreational extends Controller
         $validated = $request->validated();
         try
         {
-            $data = $this->recreationalService->storeRecreationalRequests($validated);
-            return response()->json(["message" => $data], 200);;
+            $this->recreationalService->storeRecreationalRequests($validated);
+
+            
+            return response()->json(["message" => "Successfully sent a recreational request."], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -197,8 +200,7 @@ class TraineeRecreational extends Controller
         }
         catch (\Exception $e) {
             \Log::info("requestEquipmentError", [$e]);
-            return response()->json([$e], 500);
-            return response()->json(["Something went wrong."], 500);
+            return response()->json(["message" => "Something went wrong."], 500);
         }
     }
 }
