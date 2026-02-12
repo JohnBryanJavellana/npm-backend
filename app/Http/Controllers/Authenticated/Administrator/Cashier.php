@@ -12,6 +12,8 @@ use App\Models\DormitoryTenant;
 use App\Models\EnrolledCourse;
 use App\Models\EnrollmentInvoice;
 use App\Models\LibraryInvoice;
+use App\Models\RAInvoices;
+use App\Models\RARequestInfo;
 use App\Models\User;
 use App\Utils\Notifications;
 use Illuminate\Http\Request;
@@ -44,9 +46,10 @@ class Cashier extends Controller
 {
     protected function getTable(string $service, ?int $referenceId, ?array $whereIns, bool $isMainTable = false, bool $isInitialTable = false) {
         $modelMap = [
-            NotificationEnum::DORMITORY->value  => $isMainTable || $isInitialTable ? DormitoryTenant::class : DormitoryInvoice::class,
-            NotificationEnum::ENROLLMENT->value => $isMainTable || $isInitialTable ? EnrolledCourse::class : EnrollmentInvoice::class,
-            NotificationEnum::LIBRARY->value    => $isMainTable || $isInitialTable ? BookRes::class : LibraryInvoice::class,
+            NotificationEnum::DORMITORY->value       => $isMainTable || $isInitialTable ? DormitoryTenant::class : DormitoryInvoice::class,
+            NotificationEnum::ENROLLMENT->value      => $isMainTable || $isInitialTable ? EnrolledCourse::class : EnrollmentInvoice::class,
+            NotificationEnum::LIBRARY->value         => $isMainTable || $isInitialTable ? BookRes::class : LibraryInvoice::class,
+            NotificationEnum::RECREATIONAL->value    => $isMainTable || $isInitialTable ? RARequestInfo::class : RAInvoices::class,
         ];
 
         if (!array_key_exists($service, $modelMap)) {
@@ -109,7 +112,13 @@ class Cashier extends Controller
 
             if($request->service === NotificationEnum::DORMITORY->value) {
                 $relations = array_merge($relations, [
-                    'tenant'
+                    'payee'
+                ]);
+            }
+
+            if($request->service === NotificationEnum::RECREATIONAL->value) {
+                $relations = array_merge($relations, [
+                    'requestor'
                 ]);
             }
 
