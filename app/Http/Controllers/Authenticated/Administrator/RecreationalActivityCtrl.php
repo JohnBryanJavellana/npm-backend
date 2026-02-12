@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Authenticated\Administrator;
 
+use App\Events\BERecreational;
 use App\Http\Controllers\Controller;
 use App\Models\RAEquipmentRequest;
 use App\Models\RARelationship;
@@ -161,6 +162,12 @@ class RecreationalActivityCtrl extends Controller
                 RAEnum::PENDING
             ])->exists() ? RAEnum::FOR_CSM : RAEnum::ACTIVE;
             $this_request_info->save();
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BERecreational('')
+                );
+            }
 
             return response()->json(['message' => 'Issued successfully!']);
         });
