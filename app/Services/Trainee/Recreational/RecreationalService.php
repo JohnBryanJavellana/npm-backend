@@ -147,8 +147,8 @@ class RecreationalService {
         return DB::transaction(function() use ($validated) {
 
             //prepare data
-            return $this->prepareEquipment($validated);
-            $equipments = $this->prepareEquipment($validated);
+            // return $this->prepareEquipment($validated);
+            // $equipments = $this->prepareEquipment($validated);
 
             $types = collect($validated["data"])->unique("type")->pluck("type");
             $selectedType = match ($types->count()) {
@@ -176,21 +176,22 @@ class RecreationalService {
 
     public function storeEquipmentRequest($info, $record)
     { 
-        if(!empty($info["unique_identifier"])) {
-            $stock = $this->raequipmentStockModel->query()
-            ->where("unique_identifier", $info["unique_identifier"])
-            ->lockForUpdate()
-            ->available()
-            ->okayCondition()
-            ->firstOrFail();
-        }
+        // if(!empty($info["unique_identifier"])) {
+        //     $stock = $this->raequipmentStockModel->query()
+        //     ->where("unique_identifier", $info["unique_identifier"])
+        //     ->lockForUpdate()
+        //     ->available()
+        //     ->okayCondition()
+        //     ->firstOrFail();
+        // }
 
         $this->raequipmentRequestModel->create([
             "r_a_request_info_id" => $record->id,
-            "r_a_equipment_stock_id" => $stock->id ?? null,
+            "r_a_equipment_stock_id" => null,
+            "r_a_equipments_id" => $info["id"],
             "start_date" => $info["from_datetime"],
             "end_date" => $info["to_datetime"],
-            "issued_condition" => $stock->condition_status,
+            "issued_condition" => null,
         ]);
     }
 
