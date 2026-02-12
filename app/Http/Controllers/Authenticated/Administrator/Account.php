@@ -102,7 +102,7 @@ class Account extends Controller
             $user->mname = $request->middleName;
             $user->lname = $request->lastName;
             $user->gender = $request->gender;
-            $user->suffix = $request->suffix;
+            $user->suffix = $request->suffix === "NA" ? NULL : $request->suffix;
             $user->birthdate = $request->birthdate;
 
             if ($user->email !== $request->email) {
@@ -120,7 +120,7 @@ class Account extends Controller
                 }
 
                 $image_name = Str::uuid() . '.png';
-                SaveAvatar::dispatch($request->avatar, $image_name, "user_images/", false, true, null);
+                SaveAvatar::dispatch($request->avatar, $image_name, "user_images/", false, true, "");
                 $user->profile_picture = $image_name;
             }
 

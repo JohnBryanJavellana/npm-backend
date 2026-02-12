@@ -26,8 +26,8 @@ class UpdatePersonal extends FormRequest
             'gender' => ['required', 'string'],
             'middleName' => ['string'],
             'lastName' => ['required', 'string'],
-            'birthdate' => ['required', 'date|before:today'],
-            'email' => ['required', 'email|unique:users,email,' . $this->user()->id],
+            'birthdate' => ['required', 'date', 'before:today'],
+            'email' => ['required', 'email', 'unique:users,email,' . $this->user()->id],
         ];
     }
 }
