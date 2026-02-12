@@ -130,12 +130,12 @@ class RecreationalService {
         ->keyBy("id");
         
         $equipmentWithoutStock = $equipments->filter(function($query) {
-            return $query["stocks_count"] <= 6;
+            return $query["stocks_count"] <= 0;
         });
 
         $titles = implode(", ", $equipmentWithoutStock->pluck("name")->toArray());
 
-        if(!empty($equipmentWithoutStock)) {
+        if(!$equipmentWithoutStock->isEmpty()) {
             throw new DomainException(count($equipmentWithoutStock) > 1 ? "Equipments" : "Equipment" . " does not have stock available. ". $titles);
         }
 

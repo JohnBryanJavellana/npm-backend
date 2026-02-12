@@ -168,7 +168,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix('/client_satisfaction/')->group(function() {
             Route::get('surveys', [CsmsController::class, 'view']);
-            Route::post('surveys/create', [CsmsController::class, 'create']);
+            Route::post('surveys/create', [CsmsController::class, 'createV1']);
             Route::post('surveys/delete/{id}', [CsmsController::class, 'delete']);
         });
 
