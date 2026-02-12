@@ -12,6 +12,8 @@ use App\Models\DormitoryTenant;
 use App\Models\EnrolledCourse;
 use App\Models\EnrollmentInvoice;
 use App\Models\LibraryInvoice;
+use App\Models\RAInvoices;
+use App\Models\RARequestInfo;
 use App\Models\User;
 use App\Utils\Notifications;
 use Illuminate\Http\Request;
@@ -42,11 +44,21 @@ use App\Helpers\Administrator\General\CheckForDocumentExistence;
 
 class Cashier extends Controller
 {
+    /**
+     * Summary of getTable
+     * @param string $service
+     * @param mixed $referenceId
+     * @param mixed $whereIns
+     * @param bool $isMainTable
+     * @param bool $isInitialTable
+     * @throws \InvalidArgumentException
+     */
     protected function getTable(string $service, ?int $referenceId, ?array $whereIns, bool $isMainTable = false, bool $isInitialTable = false) {
         $modelMap = [
-            NotificationEnum::DORMITORY->value  => $isMainTable || $isInitialTable ? DormitoryTenant::class : DormitoryInvoice::class,
-            NotificationEnum::ENROLLMENT->value => $isMainTable || $isInitialTable ? EnrolledCourse::class : EnrollmentInvoice::class,
-            NotificationEnum::LIBRARY->value    => $isMainTable || $isInitialTable ? BookRes::class : LibraryInvoice::class,
+            NotificationEnum::DORMITORY->value       => $isMainTable || $isInitialTable ? DormitoryTenant::class : DormitoryInvoice::class,
+            NotificationEnum::ENROLLMENT->value      => $isMainTable || $isInitialTable ? EnrolledCourse::class : EnrollmentInvoice::class,
+            NotificationEnum::LIBRARY->value         => $isMainTable || $isInitialTable ? BookRes::class : LibraryInvoice::class,
+            NotificationEnum::RECREATIONAL->value    => $isMainTable || $isInitialTable ? RARequestInfo::class : RAInvoices::class,
         ];
 
         if (!array_key_exists($service, $modelMap)) {
@@ -85,6 +97,10 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of get_payments
+     * @param Request $request
+     */
     public function get_payments (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $payments = self::getTable($request->service, null, ['invoice_status' => $request->statuses]);
@@ -109,7 +125,13 @@ class Cashier extends Controller
 
             if($request->service === NotificationEnum::DORMITORY->value) {
                 $relations = array_merge($relations, [
-                    'tenant'
+                    'payee'
+                ]);
+            }
+
+            if($request->service === NotificationEnum::RECREATIONAL->value) {
+                $relations = array_merge($relations, [
+                    'requestor'
                 ]);
             }
 
@@ -118,6 +140,10 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of pay_walkin
+     * @param Request $request
+     */
     public function pay_walkin (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_payment = self::getTable($request->service, $request->documentId, null)->first();
@@ -172,6 +198,10 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of get_charges_category
+     * @param Request $request
+     */
     public function get_charges_category (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request)  {
             $categories = ChargeCategory::withCount(['hasData'])->get();
@@ -179,6 +209,10 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_charge_category
+     * @param CreateOrUpdateFeeCategory $request
+     */
     public function create_or_update_charge_category (CreateOrUpdateFeeCategory $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -212,6 +246,11 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of remove_charge_category
+     * @param Request $request
+     * @param int $fee_category_id
+     */
     public function remove_charge_category (Request $request, int $fee_category_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $fee_category_id) {
             $this_fee = ChargeCategory::withCount(['hasData'])->where('id', $fee_category_id)->first();
@@ -233,6 +272,10 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of verify_payment
+     * @param Request $request
+     */
     public function verify_payment (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_payment = self::getTable($request->service, $request->documentId, null);
@@ -282,6 +325,10 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of get_or_numbers
+     * @param Request $request
+     */
     public function get_or_numbers (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $orNumbersTemp = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment']);
@@ -289,7 +336,7 @@ class Cashier extends Controller
             if($request->service) {
                 $orNumbersTemp->where([
                     "service_type" => $request->service,
-                    'status' => CashierEnum::AVAILABLE->value
+                    'status' => CashierEnum::AVAILABLE
                 ]);
             }
 
@@ -298,6 +345,10 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_or_number
+     * @param CreateOrUpdateOR $request
+     */
     public function create_or_update_or_number (CreateOrUpdateOR $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -332,6 +383,11 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of remove_or_number
+     * @param Request $request
+     * @param int $orNumber
+     */
     public function remove_or_number (Request $request, int $orNumber) {
         return TransactionUtil::transact(null, [], function() use ($request, $orNumber) {
             $this_or = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment'])->where('id', $orNumber)->first();
