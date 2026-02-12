@@ -262,6 +262,12 @@ class RecreationalActivityCtrl extends Controller
                 }
             };
 
+            if(env('USE_EVENT')) {
+                event(
+                    new BERecreational('')
+                );
+            }
+
             return response()->json(['message' => "Issued Successfully!"], 200);
         });
     }
@@ -337,6 +343,12 @@ class RecreationalActivityCtrl extends Controller
                 }, $summary['failed_items']);
 
                 return response()->json(['message' => "Update partially completed. $successCount successful, $failCount failed. Summary: " . implode(', ', $errorDetails)], 207);
+            }
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BERecreational('')
+                );
             }
 
             return response()->json(['message' => "All items updated successfully!"], 200);
@@ -422,6 +434,12 @@ class RecreationalActivityCtrl extends Controller
                 }
             }
 
+            if(env('USE_EVENT')) {
+                event(
+                    new BERecreational('')
+                );
+            }
+
             AuditHelper::log($request->user()->id, ($isPost ? 'Created' : 'Updated') . " an facility. ID#" . $this_facility->id);
             return response()->json(['message' => "Success!"], 200);
         });
@@ -450,6 +468,12 @@ class RecreationalActivityCtrl extends Controller
 
                 $this_facility->delete();
                 AuditHelper::log($request->user()->id, "Removed an facility. ID#$facility_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BERecreational('')
+                    );
+                }
                 return response()->json(['message' => "Success!"], 200);
             }
         });
@@ -526,6 +550,12 @@ class RecreationalActivityCtrl extends Controller
             } else {
                 $this_equipment_stock->delete();
                 AuditHelper::log($request->user()->id, "Removed an equipment stock. ID#$equipment_stock_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BERecreational('')
+                    );
+                }
                 return response()->json(['message' => "Success!"], 200);
             }
         });
@@ -585,6 +615,13 @@ class RecreationalActivityCtrl extends Controller
             }
 
             AuditHelper::log($request->user()->id, ($isPost ? 'Created' : 'Updated') . " an equipment. ID#" . $this_equipment->id);
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BERecreational('')
+                );
+            }
+
             return response()->json([
                 'message' => "Success!",
                 'returnedData' => $dataToReturn
@@ -612,6 +649,12 @@ class RecreationalActivityCtrl extends Controller
 
                     array_push($stockData, $new_equipment_stock_ui);
                 }
+            }
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BERecreational('')
+                );
             }
 
             return $request->insideJob ? $stockData : response()->json([
@@ -644,6 +687,12 @@ class RecreationalActivityCtrl extends Controller
 
                 $this_equipment->delete();
                 AuditHelper::log($request->user()->id, "Removed an equipment. ID#$equipment_id");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BERecreational('')
+                    );
+                }
                 return response()->json(['message' => "Success!"], 200);
             }
         });
