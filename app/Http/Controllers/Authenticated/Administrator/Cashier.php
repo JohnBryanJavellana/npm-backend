@@ -283,7 +283,7 @@ class Cashier extends Controller
             $this_fee = ChargeCategory::withCount(['hasData'])->where('id', $fee_category_id)->first();
 
             if($this_fee->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove fee category. It already has connected data."], 409);
+                return response()->json(['message' => "Can't remove fee category. It already has connected data.OK "], 409);
             } else {
                 $this_fee->delete();
                 AuditHelper::log(
@@ -315,7 +315,7 @@ class Cashier extends Controller
             $this_fee = $this_payment->lockForUpdate()->first();
 
             if(\in_array($this_fee->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
-                return response()->json(['message' => "Can't update payment."], 200);
+                return response()->json(['message' => "Can't update payment.OK"], 200);
             } else {
                 $this_fee->invoice_status = $request->verificationStatus;
                 $this_fee->save();
@@ -433,7 +433,7 @@ class Cashier extends Controller
             $this_or = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment'])->where('id', $orNumber)->first();
 
             if($this_or->connection_in_library_count > 0 || $this_or->connection_in_dormitory_count > 0 || $this_or->connection_in_enrollment_count > 0 || $this_or->status === "UNAVAILABLE") {
-                return response()->json(['message' => "Can't remove OR Number. It already has connected data."], 409);
+                return response()->json(['message' => "Can't remove OR Number. It already has connected data.OK"], 409);
             } else {
                 $this_or->delete();
                 AuditHelper::log(

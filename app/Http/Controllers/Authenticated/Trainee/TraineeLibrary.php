@@ -387,7 +387,7 @@ class TraineeLibrary extends Controller
             $this->libraryExtendService->cancelExtendRequest($validated);
             $this->forgetCache($validated["user_id"]);
 
-            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} sent a book extension request.");
+            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} cancel a book extension request.");
 
             return response()->json(["message" => "Cancelled extension request successfully!"], 200);
         }

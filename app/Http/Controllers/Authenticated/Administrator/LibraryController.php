@@ -157,7 +157,7 @@ class LibraryController extends Controller
             }
 
             return response()->json([
-                'message' => "You've " . ($isPost ? 'created' : 'updated') . " book. ID#$book->id",
+                'message' => "You've " . ($isPost ? 'created' : 'updated') . " book. OKID#$book->id",
                 'returnedData' => $dataToReturn
             ], 200);
         });
@@ -224,7 +224,7 @@ class LibraryController extends Controller
             $this_book = Book::withCount(['hasData', 'copies'])->where('id', $book_id)->first();
 
             if($this_book->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove book. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove book. It already has connected data.OK"], 200);
             } else {
                 if(file_exists(public_path('book-images/' . $this_book->photo))){
                     unlink(public_path('book-images/' . $this_book->photo));
@@ -243,7 +243,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a book. ID#$book_id"], 200);
+                return response()->json(['message' => "You've removed a book.OK ID#$book_id"], 200);
             }
         });
     }
@@ -299,7 +299,7 @@ class LibraryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . " a book entry. ID#" . $this_genre->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . " a book entry.OK ID#" . $this_genre->id], 201);
         });
     }
 
@@ -315,7 +315,7 @@ class LibraryController extends Controller
             $this_book_genre = BookGenre::withCount(['hasData'])->where('id', $entry_id)->first();
 
             if($this_book_genre->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove book entry. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove book entry. It already has connected data.OK"], 200);
             } else {
                 $this_book_genre->delete();
 
@@ -331,7 +331,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a book entry. ID#$entry_id"], 200);
+                return response()->json(['message' => "You've removed a book entry.OK ID#$entry_id"], 200);
             }
         });
     }
@@ -381,7 +381,7 @@ class LibraryController extends Controller
             $this_book = BookCopy::withCount(['hasData'])->where('id', $copy_id)->first();
 
             if($this_book->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove book. It already has connected data."], 200);
+                return response()->json(['message' => "Can't remove book copy. It already has connected data.ok"], 200);
             } else {
                 $this_book->delete();
 
@@ -397,7 +397,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed book copy. ID#$copy_id"], 200);
+                return response()->json(['message' => "You've removed book copy.ok ID#$copy_id"], 200);
             }
         });
     }
@@ -597,7 +597,7 @@ class LibraryController extends Controller
                 event(new BELibrary(''), new BEAuditTrail(''));
             }
 
-            return response()->json(['message' => "You've successfully updated a book reservation {$tempStatus} request."], 201);
+            return response()->json(['message' => "You've successfully updated a book reservation {$tempStatus} request.ok"], 201);
         });
     }
 
@@ -652,7 +652,7 @@ class LibraryController extends Controller
                 event(new BELibrary(''), new BEAuditTrail(''));
             }
 
-            return response()->json(['message' => "Updated book request ID#{$request->documentId}"], 200);
+            return response()->json(['message' => "Updated book request OK ID#{$request->documentId}"], 200);
         });
     }
 
@@ -745,7 +745,7 @@ class LibraryController extends Controller
             $libraryInvoice = LibraryInvoice::find($id);
 
             if($libraryInvoice->status !== "PENDING") {
-                return response()->json(['message' => "Can't delete book reservation fine."], 400);
+                return response()->json(['message' => "Can't delete book reservation fine.OK"], 400);
             } else {
                 $libraryInvoice->delete();
 
@@ -754,7 +754,7 @@ class LibraryController extends Controller
                     AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYREQFINE . " ID#$id"
                 );
 
-                return response()->json(['message' => "You've deleted a book reservation fine."], 200);
+                return response()->json(['message' => "You've deleted a book reservation fine.OK"], 200);
             }
         });
     }
@@ -806,7 +806,7 @@ class LibraryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . " a request fine. ID#" . $new_fine->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . " a request fine.OK ID#" . $new_fine->id], 201);
         });
     }
 }
