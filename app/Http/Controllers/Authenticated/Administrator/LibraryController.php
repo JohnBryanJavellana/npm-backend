@@ -9,11 +9,6 @@ use App\Http\Requests\Trainee\Library\RenewBookRequest;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\{
-    Cache,
-    Response,
-    File
-};
 use App\Utils\{
     TransactionUtil,
 };
@@ -44,8 +39,6 @@ use App\Models\{
     BookCopy,
     BookTrainingRelated,
     BookReservation,
-    EnrolledCourse,
-    User,
     ExtensionRequest,
     LibraryInvoice,
     LISelectedBook
