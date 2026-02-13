@@ -96,6 +96,8 @@ class Account extends Controller
 
     /**
      * Summary of update_personal
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param UpdatePersonal $request
      */
     public function update_personal(UpdatePersonal $request) {
@@ -150,6 +152,8 @@ class Account extends Controller
 
     /**
      * Summary of update_password
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param UpdatePassword $request
      */
     public function update_password(UpdatePassword $request){

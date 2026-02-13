@@ -3,8 +3,15 @@
 namespace App\Enums;
 
 enum AdministratorAuditActions: string {
+    /**
+     * Summary of ACCOUNTCTRL
+     */
     case ACCOUNTCTRL_UPDATE_PERSONAL = "Updated personal account information.";
     case ACCOUNTCTRL_UPDATE_PASSWORD = "Updated account password.";
+
+    /**
+     * Summary of CASHIERCTRL
+     */
     case CASHIERCTRL_PROCESSED_WALKIN = "Processed a walk-in payment.";
     case CASHIERCTRL_CREATED_CATEGORY = "Created a fee category.";
     case CASHIERCTRL_UPDATED_CATEGORY = "Updated a fee category.";
@@ -13,6 +20,10 @@ enum AdministratorAuditActions: string {
     case CASHIERCTRL_UPDATED_OR = "Updated an OR Number.";
     case CASHIERCTRL_REMOVED_OR = "Removed an OR Number.";
     case CASHIERCTRL_UPDATED_PAYMENT = "Updated a payment.";
+
+    /**
+     * Summary of DORMITORYCTRL
+     */
     case DORMITORYCTRL_CREATED_DORMITORY = "Created a dormitory.";
     case DORMITORYCTRL_UPDATED_DORMITORY = "Updated a dormitory.";
     case DORMITORYCTRL_REMOVED_DORMITORY = "Removed a dormitory room.";
@@ -26,7 +37,6 @@ enum AdministratorAuditActions: string {
     case DORMITORYCTRL_CREATED_DORMITORYSERV = "Created a dormitory service.";
     case DORMITORYCTRL_UPDATED_DORMITORYSERV = "Updated a dormitory service.";
     case DORMITORYCTRL_REMOVED_DORMITORYSERV = "Removed a dormitory service.";
-
     case DORMITORYCTRL_UPDATED_DORMITORYSTCKSTATUS = "Updated provided item stock status.";
     case DORMITORYCTRL_UPDATED_DORMITORYSTCKLIST = "Updated provided item stock list.";
     case DORMITORYCTRL_CREATED_DORMITORYSERVICEREQ = "Created a dormitory service request.";
@@ -34,6 +44,10 @@ enum AdministratorAuditActions: string {
     case DORMITORYCTRL_CREATED_DORMITORYCHARGE = "Created a dormitory charge.";
     case DORMITORYCTRL_UPDATED_DORMITORYCHARGE = "Updated a dormitory charge.";
     case DORMITORYCTRL_CANCELLED_DORMITORYCHARGE = "Cancelled a dormitory charge.";
+
+    /**
+     * Summary of ENROLLMENTCTRL
+     */
     case ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREREMARKS = "Created a remark.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREREMARKS = "Updated a remark.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTAPPSTAT = "Updated enrollment application status.";
@@ -76,16 +90,26 @@ enum AdministratorAuditActions: string {
     case ENROLLMENTCTRL_CREATED_ENROLLMENTTRAININGFEE = "Created a training fee.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE = "Updated a training fee.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE = "Removed a training fee.";
+
+    /**
+     * Summary of LIBRARYCTRL
+     */
     case LIBRARYCTRL_CREATED_LIBRARYBOOK = "Created a book.";
     case LIBRARYCTRL_UPDATED_LIBRARYBOOK = "Updated a book.";
+    case LIBRARYCTRL_REMOVED_LIBRARYBOOK = "Removed a book.";
     case LIBRARYCTRL_CREATED_LIBRARYBOOKENTRY = "Created a book entry.";
     case LIBRARYCTRL_UPDATED_LIBRARYBOOKENTRY = "Updated a book entry.";
     case LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY = "Removed a book entry.";
+    case LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY = "Removed a book copy.";
     case LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVREQ = "Updated a book request.";
     case LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVSTATUS = "Updated book reservation status.";
     case LIBRARYCTRL_REMOVED_LIBRARYREQFINE = "Removed a request fine.";
     case LIBRARYCTRL_CREATED_LIBRARYREQFINE = "Created a request fine.";
     case LIBRARYCTRL_UPDATED_LIBRARYREQFINE = "Updated a request fine.";
+
+    /**
+     * Summary of MASTERLISTCTRL
+     */
     case MASTERLISTCTRL_CREATED_MASTERLISTQRASSIGN = "Created a QR Reader assignment.";
     case MASTERLISTCTRL_UPDATED_MASTERLISTQRASSIGN = "Updated a QR Reader assignment.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTUSER = "Removed a user.";
@@ -99,6 +123,10 @@ enum AdministratorAuditActions: string {
     case MASTERLISTCTRL_UPDATED_MASTERLISTQRLOC = "Updated a QR Reader location.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADERASSIGNMENT = "Removed a position.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADER = "Removed a qr reader.";
+
+    /**
+     * Summary of RECREATIONALACTIVITYCTRL
+     */
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY = "Created an facility.";
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY = "Updated an facility.";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY = "Removed an facility.";
