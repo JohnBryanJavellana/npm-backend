@@ -221,8 +221,9 @@ class EnrollmentCtrl extends Controller
                 'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0, 99),
                 'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0, 99),
                 'count_denied' => min($counts['DECLINED'] ?? 0, 99) +
-                                  min($counts['CSFB'] ?? 0, 99) +
-                                  min($counts['CANCELLED'] ?? 0, 99),
+                    min($counts['CSFB'] ?? 0, 99) +
+                    min($counts['CANCELLED'] ?? 0, 99) + min($counts['IR'] ?? 0, 99),
+
                 'count_remarks' => \count(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications']),
             ], 200);
         });
