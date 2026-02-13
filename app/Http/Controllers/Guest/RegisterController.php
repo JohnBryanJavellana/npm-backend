@@ -85,7 +85,8 @@ class RegisterController extends Controller
                     return response()->json([
                         'token' => $token,
                         'role' => $user->role,
-                        'autoLogin' => true
+                        'autoLogin' => true,
+                        'showEmailVerification' => false
                     ], 200);
 
                 } catch (\Exception $e) {
@@ -104,6 +105,10 @@ class RegisterController extends Controller
                 ])->exists()) {
 
                 return response()->json(['message' => 'Account already exists.'], 422);
+            }
+
+            if($request->password !== $request->password_confirmation) {
+                return response()->json(['message' => "Password doesn't match"], 422);
             }
 
             $user = new User();
@@ -134,7 +139,11 @@ class RegisterController extends Controller
             }
 
             event(new Registered($user));
-            return response()->json(['message' => 'Registration successful!'], 201);
+
+            return response()->json([
+                'message' => 'Registration successful!',
+                'showEmailVerification' => true
+            ], 201);
         });
     }
 
