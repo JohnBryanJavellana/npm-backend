@@ -5,13 +5,16 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
 
 /** guest controllers */
+
 use App\Http\Controllers\Guest\{
     LoginController,
     RegisterController,
     ForgotPasswordController,
     EmailVerificationController
 };
+
 /** trainee controllers */
+
 use App\Http\Controllers\Authenticated\Trainee\{
     MyAccount,
     TraineeDormitory,
@@ -23,24 +26,31 @@ use App\Http\Controllers\Authenticated\Trainee\{
     CreditController,
     TraineeRecreational
 };
+
 /** administrator controllers */
+
 use App\Http\Controllers\Authenticated\Administrator\{
     Account,
     NotificationCtrl
 };
+
 /** other controllers */
+
 use App\Http\Controllers\Authenticated\Logout;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
+use App\Http\Controllers\QRReaderCheckInOutCtrl;
 
 /** imported models */
+
 use App\Models\User;
 
 /** guest routes */
 Route::match(['GET', 'POST'], '/login', [LoginController::class, 'login_user']);
-Route::post('/register', [RegisterController::class,'register_user']);
+Route::post('/register', [RegisterController::class, 'register_user']);
 Route::get('/email/verify', [EmailVerificationController::class, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+Route::get('/qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
 
 /** testing routes */
 Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
@@ -55,7 +65,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     /** current user */
-    Route::post('/user', function(Request $request) {
+    Route::post('/user', function (Request $request) {
         $user = User::where('id', $request->incomingId ?? $request->user()->id);
 
         if ($user && $request->user()->role === "TRAINEE") {
@@ -84,14 +94,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::prefix('/enrollment/')->group(function () {
-            Route::match(["GET", "POST"],'get_requirements/{module}', [TraineeEnrollment::class, 'view_module_requirements_v2']);
+            Route::match(["GET", "POST"], 'get_requirements/{module}', [TraineeEnrollment::class, 'view_module_requirements_v2']);
             Route::post('remove_training_request/{course}', [TraineeEnrollment::class, 'remove_training_request']);
-            Route::match(['POST', 'GET'],'get_available_trainings', [TraineeEnrollment::class,'get_available_trainings']);
-            Route::post('send_enrollment_request', [TraineeEnrollment::class,'send_enrollment_request']);
-            Route::post('send_training_requirements', [TraineeEnrollment::class,'send_training_requirements']);
-            Route::post('update_enrollment_request', [TraineeEnrollment::class,'update_requirements_request']);
-            Route::post('update_invoice_trainings', [TraineeEnrollment::class,'update_invoice_trainings']);
-            Route::post('get_all_trainee_invoices_two', [TraineeEnrollment::class,'get_all_trainee_invoices_two']);
+            Route::match(['POST', 'GET'], 'get_available_trainings', [TraineeEnrollment::class, 'get_available_trainings']);
+            Route::post('send_enrollment_request', [TraineeEnrollment::class, 'send_enrollment_request']);
+            Route::post('send_training_requirements', [TraineeEnrollment::class, 'send_training_requirements']);
+            Route::post('update_enrollment_request', [TraineeEnrollment::class, 'update_requirements_request']);
+            Route::post('update_invoice_trainings', [TraineeEnrollment::class, 'update_invoice_trainings']);
+            Route::post('get_all_trainee_invoices_two', [TraineeEnrollment::class, 'get_all_trainee_invoices_two']);
             //status
             Route::post('get_applications/', [TraineeEnrollment::class, 'get_applications']);
             //byId
@@ -100,12 +110,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
         });
 
-        Route::prefix('/trainings/')->group(function() {
+        Route::prefix('/trainings/')->group(function () {
             Route::get('get_all_courses', [TraineeCourses::class, 'get_all_courses']);
             Route::get('get_trainee_trainings', [TraineeCourses::class, 'get_trainee_courses']);
         });
 
-        Route::prefix('/dormitories/')->group(function() {
+        Route::prefix('/dormitories/')->group(function () {
             //DORM REQUEST
             Route::post('rooms', [TraineeDormitory::class, 'viewRecommendedRooms']);
 
@@ -115,8 +125,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('remove_applied_dormitories/{dormitory_id}', [TraineeDormitory::class, 'remove_applied_dormitories']);
             Route::get('check_pending_request', [TraineeDormitory::class, 'check_pending_request']);
             Route::get('get_personal_dormitory', [TraineeDormitory::class, 'get_personal_dormitory']);
-            Route::post('request_tenant_room', [TraineeDormitory::class,'request_tenant_room']);
-            Route::post('update_status_dormitory', [TraineeDormitory::class,'update_status_dormitory']);
+            Route::post('request_tenant_room', [TraineeDormitory::class, 'request_tenant_room']);
+            Route::post('update_status_dormitory', [TraineeDormitory::class, 'update_status_dormitory']);
             Route::post('get_filtered_dorms', [TraineeDormitory::class, 'get_filtered_dorms']);
             Route::get('dormitory_record', [TraineeDormitory::class, 'dormitory_record']);
 
@@ -148,7 +158,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('count_book_reservation', [TraineeDormitory::class, 'count_book_reservation']);
         });
 
-        Route::prefix('/libraries/')->group(function() {
+        Route::prefix('/libraries/')->group(function () {
             Route::post('request_books', [TraineeLibrary::class, 'send_request_book']);
             Route::post('get_all_books', [TraineeLibrary::class, 'view_books']);
             Route::get('book_overdues', [TraineeLibrary::class, 'view_over_due']);
@@ -157,7 +167,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::match(['GET', 'POST'], 'book_info/{book_id}', [TraineeLibrary::class, 'get_book_info']);
             Route::post('requests/', [TraineeLibrary::class, 'get_book_records']);
             Route::post('request/details', [TraineeLibrary::class, 'view_request_details']);
-            Route::match(['GET', 'POST'],'requests/count', [TraineeLibrary::class, 'count_book_reservation']);
+            Route::match(['GET', 'POST'], 'requests/count', [TraineeLibrary::class, 'count_book_reservation']);
             Route::post('requests/extension', [TraineeLibrary::class, 'view_extend_request']);
             Route::post('requests/available_extension', [TraineeLibrary::class, 'view_available_extension']);
             Route::post('requests/submit_extension', [TraineeLibrary::class, 'extend']);
@@ -166,13 +176,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('renew/cancel', [TraineeLibrary::class, 'cancelRenew']);
         });
 
-        Route::prefix('/client_satisfaction/')->group(function() {
+        Route::prefix('/client_satisfaction/')->group(function () {
             Route::get('surveys', [CsmsController::class, 'view']);
             Route::post('surveys/create', [CsmsController::class, 'create']);
             Route::post('surveys/delete/{id}', [CsmsController::class, 'delete']);
         });
 
-        Route::prefix('/invoices/')->group(function() {
+        Route::prefix('/invoices/')->group(function () {
             Route::get('get_all_invoices', [TraineeInvoices::class, 'get_all_trainee_invoices']);
             Route::get('view/penalties', [TraineeInvoices::class, 'library_penalties']);
             Route::post('update/penalties', [TraineeInvoices::class, 'updateLibInvoice']);
@@ -181,10 +191,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('enrollment/update', [TraineeInvoices::class, 'updateEnrollmentInvoice']);
         });
 
-        Route::prefix('/credits/')->group(function() {
+        Route::prefix('/credits/')->group(function () {
             Route::get("audits", [CreditController::class, "show"]);
             Route::post("audits/create", [CreditController::class, "store"]);
-
         });
     });
 
@@ -213,4 +222,3 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('change-theme', [Account::class, 'change_theme']);
     Route::post('logout', [Logout::class, 'logout_user']);
 });
-

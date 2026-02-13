@@ -498,11 +498,11 @@ class RecreationalActivityCtrl extends Controller
         $total_count = RARequestInfo::count();
 
         return response()->json([
-            'count_pending'  => min($counts['PENDING'] ?? 0, 99),
-            'count_active' => min($counts['ACTIVE'] ?? 0, 99),
-            'count_forCSM' => min($counts['FOR CSM'] ?? 0, 99),
-            'count_complete' => min($counts['COMPLETED'] ?? 0, 99),
-            'count_total' => min($total_count ?? 0, 99),
+            'count_pending'  => min($counts['PENDING'] ?? 0,),
+            'count_active' => min($counts['ACTIVE'] ?? 0,),
+            'count_forCSM' => min($counts['FOR CSM'] ?? 0,),
+            'count_complete' => min($counts['COMPLETED'] ?? 0,),
+            'count_total' => min($total_count ?? 0,),
         ], 200);
     }
 
