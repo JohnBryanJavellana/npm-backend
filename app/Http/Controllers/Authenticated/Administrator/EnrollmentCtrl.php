@@ -64,6 +64,7 @@ class EnrollmentCtrl extends Controller
      */
     public function get_applications(Request $request)
     {
+
         return TransactionUtil::transact(null, [], function () use ($request) {
             $allRequirements = Requirement::where('status', 'ACTIVE')->get();
             $basicRequirements = $allRequirements->where('isBasic', 'YES');
@@ -190,7 +191,8 @@ class EnrollmentCtrl extends Controller
      * Summary of get_enrollment_count
      * @param Request $request
      */
-    public function get_enrollment_count(Request $request){
+    public function get_enrollment_count(Request $request)
+    {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $couse_status = [
                 'PENDING',
@@ -212,29 +214,16 @@ class EnrollmentCtrl extends Controller
                 ->pluck('total', 'enrolled_course_status');
 
             return response()->json([
-                'count_forVerification'  => min($counts['PENDING'] ?? 0, 99),
-                'count_forReserved'  => min($counts['RESERVED'] ?? 0, 99),
-                'count_forEnrolled'  => min($counts['ENROLLED'] ?? 0, 99),
-                'count_forFinished'  => min($counts['COMPLETED'] ?? 0, 99),
-                'count_forPaid'  => min($counts['PAID'] ?? 0, 99),
-                'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0, 99),
-                'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0, 99),
-                'count_denied' => min($counts['DECLINED'] ?? 0, 99) + min($counts['IR'] ?? 0, 99) + min($counts['CSFB'] ?? 0, 99) + min($counts['CANCELLED'] ?? 0, 99),
-
+                'count_forVerification'  => min($counts['RESERVED'] ?? 0,),
+                'count_forEnrolled'  => min($counts['ENROLLED'] ?? 0,),
+                'count_forFinished'  => min($counts['COMPLETED'] ?? 0,),
+                'count_forPaid'  => min($counts['PAID'] ?? 0,),
+                'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0,),
+                'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0,),
+                'count_denied' => min($counts['DECLINED'] ?? 0,) + min($counts['CSFB'] ?? 0,) + min($counts['CANCELLED'] ?? 0,),
+                'count_remarks' => count(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications']),
             ], 200);
         });
-    }
-
-    public function get_remarks_count(Request $request)
-    {
-
-        $traineeRemarks = TraineeRequirement::whereNotNull('remarks', $request->id)->count() +
-            TrainingRegFile::whereNotNull('remarks', $request->id)->count();
-
-
-        return response()->json([
-            'total_remarks' => $traineeRemarks,
-        ], 200);
     }
 
 
