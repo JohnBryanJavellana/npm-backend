@@ -214,13 +214,13 @@ class EnrollmentCtrl extends Controller
                 ->pluck('total', 'enrolled_course_status');
 
             return response()->json([
-                'count_forVerification'  => min($counts['RESERVED'] ?? 0,),
-                'count_forEnrolled'  => min($counts['ENROLLED'] ?? 0,),
-                'count_forFinished'  => min($counts['COMPLETED'] ?? 0,),
-                'count_forPaid'  => min($counts['PAID'] ?? 0,),
-                'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0,),
-                'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0,),
-                'count_denied' => min($counts['DECLINED'] ?? 0,) + min($counts['CSFB'] ?? 0,) + min($counts['CANCELLED'] ?? 0,),
+                'count_forVerification'  => min($counts['RESERVED'] ?? 0, 99),
+                'count_forEnrolled'  => min($counts['ENROLLED'] ?? 0, 99),
+                'count_forFinished'  => min($counts['COMPLETED'] ?? 0, 99),
+                'count_forPaid'  => min($counts['PAID'] ?? 0, 99),
+                'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0, 99),
+                'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0, 99),
+                'count_denied' => min($counts['DECLINED'] ?? 0,) + min($counts['CSFB'] ?? 0,) + min($counts['CANCELLED'] ?? 0, 99),
                 'count_remarks' => \count(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications']),
             ], 200);
         });
