@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Authenticated\Administrator;
 
+use App\Enums\{
+    AdministratorAuditActions,
+    AdministratorReturnResponse
+};
 use App\Http\Controllers\Controller;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
@@ -98,10 +102,9 @@ class DormitoryController extends Controller
      */
     public function create_or_update_dormitory (CreateOrUpdateDormitory $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $this_dormitory = $request->httpMethod === "POST"
-                ? new Dormitory()
-                : Dormitory::findOrFail($request->documentId);
+            $isPost = $request->httpMethod === "POST";
 
+            $this_dormitory = $isPost ? new Dormitory() : Dormitory::findOrFail($request->documentId);
             $this_dormitory->room_name = $request->room_name;
             $this_dormitory->room_description = $request->room_description;
             $this_dormitory->room_cost = $request->room_cost;
@@ -110,7 +113,7 @@ class DormitoryController extends Controller
             $this_dormitory->is_air_conditioned = $request->room_type;
             $this_dormitory->save();
 
-            if($request->httpMethod === "POST"){
+            if($isPost){
                 $fixedRequest = $request->merge([
                     'insideJob' => true,
                     'dormitoryId' => $this_dormitory->id
@@ -144,7 +147,10 @@ class DormitoryController extends Controller
                 }
             }
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory. ID#" . $this_dormitory->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORY : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORY . " ID#$this_dormitory->id"
+            );
 
             if(env('USE_EVENT')) {
                 event(
@@ -153,7 +159,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory. ID# " . $this_dormitory->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORY : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORY) . "ID#$this_dormitory->id"], 201);
         });
     }
 
@@ -178,10 +184,7 @@ class DormitoryController extends Controller
                     'is_air_conditioned' => $request->room_type
                 ])->get();
 
-            return response()->json([
-                'dorms' => $dorms,
-                'isValid' => true
-            ], 200);
+            return response()->json(['dorms' => $dorms, 'isValid' => true], 200);
         });
     }
 
