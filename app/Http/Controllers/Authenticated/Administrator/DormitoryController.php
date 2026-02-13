@@ -54,6 +54,11 @@ class DormitoryController extends Controller
         $this->cashierCtrl = $cashier;
     }
 
+    /**
+     * Summary of addDescription
+     * @param string $content
+     * @return string
+     */
     private function addDescription (string $content) {
         return "<div style='margin-top: 8px; padding: 16px; border: 1px dashed lightgrey; background-color: #FFFDD0;'>
             <div style='font-weight: bold; font-size: 1.25rem;'>Payable Amount</div>
@@ -98,7 +103,9 @@ class DormitoryController extends Controller
 
     /**
      * Summary of create_or_update_dormitory
-     * @param CreateOrUpdateDormitory $request OK
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
+     * @param CreateOrUpdateDormitory $request
      */
     public function create_or_update_dormitory (CreateOrUpdateDormitory $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
@@ -163,6 +170,10 @@ class DormitoryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_available_dorms
+     * @param GetAvailableDorms $request
+     */
     public function get_available_dorms (GetAvailableDorms $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             if($request->userId) {
@@ -188,6 +199,10 @@ class DormitoryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_available_supplies
+     * @param Request $request
+     */
     public function get_available_supplies (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $availableSupplies = DormitoryInventory::withCount([
@@ -227,6 +242,10 @@ class DormitoryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_available_rooms
+     * @param Request $request
+     */
     public function get_available_rooms (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $targetRoomId = $request->roomId;
@@ -278,6 +297,8 @@ class DormitoryController extends Controller
 
     /**
      * Summary of remove_room
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
      * @param Request $request
      * @param int $room_id
      */
@@ -290,7 +311,10 @@ class DormitoryController extends Controller
             } else {
                 $this_dorm->delete();
 
-                AuditHelper::log($request->user()->id, "Removed a dormitory room. ID#$room_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORY . " ID#$room_id"
+                );
 
                 if(env('USE_EVENT')) {
                     event(
@@ -326,6 +350,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of create_dormitory_inventory_stock
+     * @param bool returnedMessage === FALSE
      * @param Request $request
      */
     public function create_dormitory_inventory_stock (Request $request) {
@@ -352,20 +377,21 @@ class DormitoryController extends Controller
 
     /**
      * Summary of create_or_update_dormitory_inventory
-     * @param CreateOrUpdateDormitoryInv $request ok
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateDormitoryInv $request
      */
     public function create_or_update_dormitory_inventory (CreateOrUpdateDormitoryInv $request) {
         return TransactionUtil::transact($request, ["inventoryItems", "dormitory:inclusions:all"], function() use ($request) {
-            $dorm_inventory = $request->httpMethod === "POST"
-                ? new DormitoryInventory()
-                : DormitoryInventory::findOrFail($request->documentId);
+            $isPost = $request->httpMethod === "POST";
 
+            $dorm_inventory = $isPost ? new DormitoryInventory() : DormitoryInventory::findOrFail($request->documentId);
             $dorm_inventory->name = $request->name;
             $dorm_inventory->charge = $request->amount;
             $dorm_inventory->description = $request->description;
             $dorm_inventory->is_consumable = $request->isConsumable;
 
-            if($request->httpMethod === "POST") $dorm_inventory->control_number = GenerateTrace::createTraceNumber(DormitoryInventory::class, "-DI-", 'control_number');
+            if($isPost) $dorm_inventory->control_number = GenerateTrace::createTraceNumber(DormitoryInventory::class, "-DI-", 'control_number');
             if($request->filename) {
                 $filename = Str::uuid() . '.png';
                 SaveAvatar::dispatch($request->filename, $filename, "dormitory/inventory", false, true, $filename);
@@ -384,7 +410,10 @@ class DormitoryController extends Controller
                 $dataToReturn = $this->create_dormitory_inventory_stock($adjustedRequest);
             }
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory inventory. ID#$dorm_inventory->id");
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYINV : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYINV . " ID#$dorm_inventory->id"
+            );
 
             if(env('USE_EVENT')) {
                 event(
@@ -394,7 +423,7 @@ class DormitoryController extends Controller
             }
 
             return response()->json([
-                'message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " dormitory room. ID#$dorm_inventory->id",
+                'message' => "You've " . ($isPost ? 'created' : 'updated') . " dormitory room. ID#$dorm_inventory->id",
                 'returnedData' => $dataToReturn
             ], 200);
         });
@@ -417,7 +446,9 @@ class DormitoryController extends Controller
 
     /**
      * Summary of remove_dorm_inventory_stock
-     * @param Request $request OOK
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
      * @param int $stock_id
      */
     public function remove_dorm_inventory_stock (Request $request, int $stock_id) {
@@ -428,7 +459,10 @@ class DormitoryController extends Controller
                 return response()->json(['message' => "Can't remove item. It already has connected data."], 200);
             } else {
                 $this_stock->delete();
-                AuditHelper::log($request->user()->id, "Removed a dormitory inventory item stock. ID#$stock_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYINVSTOCK . " ID#$stock_id"
+                );
 
                 if(env('USE_EVENT')) {
                     event(
@@ -444,7 +478,9 @@ class DormitoryController extends Controller
 
     /**
      * Summary of remove_dorm_inventory
-     * @param Request $request OK
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
      * @param int $inv_id
      */
     public function remove_dorm_inventory (Request $request, int $inv_id) {
@@ -459,7 +495,11 @@ class DormitoryController extends Controller
                 }
 
                 $this_dorm->delete();
-                AuditHelper::log($request->user()->id, "Removed a dormitory inventory item. ID#$inv_id");
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYINV . " ID#$inv_id"
+                );
 
                 if(env('USE_EVENT')) {
                     event(
@@ -687,6 +727,7 @@ class DormitoryController extends Controller
         });
     }
 
+    // DI SURE
     public function cancel_dorm_request (Request $request, int $dormReqId) {
         return TransactionUtil::transact(null, [], function() use ($request, $dormReqId) {
             $this_dorm_request = DormitoryTenant::where('id', $dormReqId)->lockForUpdate()->first();
@@ -754,21 +795,25 @@ class DormitoryController extends Controller
 
     /**
      * Summary of create_or_update_service
-     * @param CreateOrUpdateService $request ok
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateService $request
      */
     public function create_or_update_service (CreateOrUpdateService $request) {
         return TransactionUtil::transact($request, ["dormitory:services:all"], function() use ($request) {
-            $this_service = $request->httpMethod === "POST"
-                ? new DormitoryService()
-                : DormitoryService::findOrFail($request->documentId);
+            $isPost = $request->httpMethod === "POST";
 
+            $this_service = $isPost ? new DormitoryService() : DormitoryService::findOrFail($request->documentId);
             $this_service->name = $request->name;
             $this_service->description = $request->description;
             $this_service->charge = $request->charge;
             if($request->status) $this_service->status = $request->status;
             $this_service->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory service. ID#" . $this_service->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERV : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERV . " ID#$this_service->id"
+            );
 
             if(env('USE_EVENT')) {
                 event(
@@ -777,10 +822,17 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory service. ID# " . $this_service->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . " a dormitory service. ID# " . $this_service->id], 201);
         });
     }
 
+    /**
+     * Summary of remove_service
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $service_id
+     */
     public function remove_service (Request $request, int $service_id) {
         return TransactionUtil::transact(null, [], function() use ($request, $service_id) {
             $this_service = DormitoryService::withCount(['requestedService'])->where('id', $service_id)->first();
@@ -789,7 +841,11 @@ class DormitoryController extends Controller
                 return response()->json(['message' => "Can't remove service. It already has connected data."], 200);
             } else {
                 $this_service->delete();
-                AuditHelper::log($request->user()->id, "Removed a dormitory service. ID#$service_id");
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYSERV . " ID#$service_id"
+                );
 
                 if(env('USE_EVENT')) {
                     event(
@@ -803,6 +859,12 @@ class DormitoryController extends Controller
         });
     }
 
+    /**
+     * Summary of update_provided_stock_status
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     */
     public function update_provided_stock_status (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $a = DormitoryItemBorrowing::where('id', $request->documentId)->lockForUpdate()->first();
@@ -825,7 +887,10 @@ class DormitoryController extends Controller
                 $this_stock->save();
             }
 
-            AuditHelper::log($request->user()->id, "Updated provided item stock status.");
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKSTATUS
+            );
 
             if(env('USE_EVENT')) {
                 event(
@@ -838,6 +903,12 @@ class DormitoryController extends Controller
         });
     }
 
+    /**
+     * Summary of update_provided_stock_list
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     */
     public function update_provided_stock_list (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $borrowing = DormitoryItemBorrowing::findOrFail($request->documentId);
@@ -859,7 +930,10 @@ class DormitoryController extends Controller
                 }
             }
 
-            AuditHelper::log($request->user()->id, "Updated provided item stock list.");
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKLIST
+            );
 
             if(env('USE_EVENT')) {
                 event(
@@ -904,10 +978,6 @@ class DormitoryController extends Controller
         });
     }
 
-    /**
-     * Summary of request_service
-     * @param CreateOrUpdateServiceReq $request ok
-     */
     public function request_service (CreateOrUpdateServiceReq $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_service = $request->httpMethod === "POST"
@@ -994,7 +1064,9 @@ class DormitoryController extends Controller
 
     /**
      * Summary of update_requested_service
-     * @param Request $request OK
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
      */
     public function update_requested_service (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
@@ -1011,7 +1083,10 @@ class DormitoryController extends Controller
                 $invoice->save();
             }
 
-            AuditHelper::log($request->user()->id, "Updated requested service. ID#$request->documentId");
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQSERV . " ID#$request->documentId"
+            );
 
             if(env('USE_EVENT')) {
                 event(
@@ -1024,6 +1099,10 @@ class DormitoryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_trainee_enrolled_trainings
+     * @param Request $request
+     */
     public function get_trainee_enrolled_trainings (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $user = User::findOrFail($request->userId);
@@ -1116,6 +1195,13 @@ class DormitoryController extends Controller
         });
     }
 
+    /**
+     * Summary of cancel_charge
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $chargeId
+     */
     public function cancel_charge (Request $request, int $chargeId) {
         return TransactionUtil::transact(null, [], function() use ($request, $chargeId) {
             $this_charge = DormitoryInvoice::where('id', $chargeId)->lockForUpdate()->first();
@@ -1126,7 +1212,10 @@ class DormitoryController extends Controller
                 $this_charge->invoice_status = DormitoryEnum::CANCELLED->value;
                 $this_charge->save();
 
-                AuditHelper::log($request->user()->id, "Cancelled a dormitory charge. ID#$chargeId");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYCHARGE . " ID#$chargeId"
+                );
 
                 if(env('USE_EVENT')) {
                     event(
@@ -1142,6 +1231,8 @@ class DormitoryController extends Controller
 
     /**
      * Summary of set_status
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
      * @param Request $request
      */
     public function set_status (Request $request) {
@@ -1151,7 +1242,10 @@ class DormitoryController extends Controller
             $this_dormitory_tenant->save();
 
             Notifications::notify($request->user()->id, $this_dormitory_tenant->user_id, "DORMITORY", "has updated your dormitory request.");
-            AuditHelper::log($request->user()->id, "Updated a dormitory request. ID#$request->documentId");
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQ . " ID#$request->documentId"
+            );
 
             if(env('USE_EVENT')) {
                 event(

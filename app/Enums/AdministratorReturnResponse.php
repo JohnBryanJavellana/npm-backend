@@ -3,8 +3,15 @@
 namespace App\Enums;
 
 enum AdministratorReturnResponse: string {
+    /**
+     * Summary of ACCOUNTCTRL
+     */
     case ACCOUNTCTRL_UPDATE_PERSONAL = "Account personal information is updated.";
     case ACCOUNTCTRL_UPDATE_PASSWORD = "Password changed successfully. You will reloggin again.";
+
+    /**
+     * Summary of CASHIERCTRL
+     */
     case CASHIERCTRL_PAY_WALKIN = "You've processed a walk-in payment.";
     case CASHIERCTRL_CREATED_CHARGECATEGORY = "You've created a fee category.";
     case CASHIERCTRL_UPDATED_CHARGECATEGORY = "You've updated a fee category.";
@@ -13,6 +20,10 @@ enum AdministratorReturnResponse: string {
     case CASHIERCTRL_CREATED_ORNUMBER = "OR Number successfully saved";
     case CASHIERCTRL_UPDATED_ORNUMBER = "OR Number successfully updated";
     case CASHIERCTRL_REMOVED_ORNUMBER = "You've removed an OR Number.";
+
+    /**
+     * Summary of DORMITORYCTRL
+     */
     case DORMITORYCTRL_CREATED_DORMITORY = "You've created a dormitory.";
     case DORMITORYCTRL_UPDATED_DORMITORY = "You've updated a dormitory.";
 }

@@ -86,6 +86,10 @@ class Cashier extends Controller
         return $query;
     }
 
+    /**
+     * Summary of get_charges
+     * @param Request $request
+     */
     public function get_charges (Request $request) {
         return TransactionUtil::transact(null, [], function() use($request)  {
             $charges = Charge::with('chargeCategory')->get();
@@ -93,6 +97,10 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of get_charges_predata
+     * @param Request $request
+     */
     public function get_charges_predata (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             return response()->json([
@@ -146,6 +154,9 @@ class Cashier extends Controller
 
     /**
      * Summary of pay_walkin
+     * @param bool notifications === FALSE
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param Request $request
      */
     public function pay_walkin (Request $request) {
@@ -218,6 +229,8 @@ class Cashier extends Controller
 
     /**
      * Summary of create_or_update_charge_category
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param CreateOrUpdateFeeCategory $request
      */
     public function create_or_update_charge_category (CreateOrUpdateFeeCategory $request) {
@@ -258,6 +271,8 @@ class Cashier extends Controller
 
     /**
      * Summary of remove_charge_category
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param Request $request
      * @param int $fee_category_id
      */
@@ -287,6 +302,9 @@ class Cashier extends Controller
 
     /**
      * Summary of verify_payment
+     * @param bool notifications === FALSE
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param Request $request
      */
     public function verify_payment (Request $request) {
@@ -294,7 +312,7 @@ class Cashier extends Controller
             $this_payment = self::getTable($request->service, $request->documentId, null);
             $this_fee = $this_payment->lockForUpdate()->first();
 
-            if(in_array($this_fee->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
+            if(\in_array($this_fee->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
                 return response()->json(['message' => "Can't update payment."], 200);
             } else {
                 $this_fee->invoice_status = $request->verificationStatus;
@@ -363,6 +381,8 @@ class Cashier extends Controller
 
     /**
      * Summary of create_or_update_or_number
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param CreateOrUpdateOR $request
      */
     public function create_or_update_or_number (CreateOrUpdateOR $request) {
@@ -401,6 +421,8 @@ class Cashier extends Controller
 
     /**
      * Summary of remove_or_number
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param Request $request
      * @param int $orNumber
      */
