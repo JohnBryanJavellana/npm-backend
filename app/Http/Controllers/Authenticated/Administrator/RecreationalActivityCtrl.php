@@ -169,7 +169,7 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => 'Issued successfully!']);
+            return response()->json(['message' => 'Issued Successfully!']);
         });
     }
 

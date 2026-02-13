@@ -51,6 +51,7 @@ enum AdministratorAuditActions: string {
     case ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREREMARKS = "Created a remark.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREREMARKS = "Updated a remark.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTAPPSTAT = "Updated enrollment application status.";
+    case ENROLLMENTCTRL_UPDATED_ENROLLMENTEXPIREDSTATUS = "User has updated an enrolled course expiry status .";
     case ENROLLMENTCTRL_CREATED_ENROLLMENTSCHED = "Created a schedule.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHED = "Updated a schedule.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHED = "Removed a schedule.";
@@ -110,8 +111,8 @@ enum AdministratorAuditActions: string {
     /**
      * Summary of MASTERLISTCTRL
      */
-    case MASTERLISTCTRL_CREATED_MASTERLISTQRASSIGN = "Created a QR Reader assignment.";
-    case MASTERLISTCTRL_UPDATED_MASTERLISTQRASSIGN = "Updated a QR Reader assignment.";
+    case MASTERLISTCTRL_CREATED_MASTERLISTQRASSIGNMENT = "Created a QR Reader assignment.";
+    case MASTERLISTCTRL_UPDATED_MASTERLISTQRASSIGNMENT = "Updated a QR Reader assignment.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTUSER = "Removed a user.";
     case MASTERLISTCTRL_CREATED_MASTERLISTEMPLOYER = "Created an employer.";
     case MASTERLISTCTRL_UPDATED_MASTERLISTEMPLOYER = "Updated an employer.";
@@ -133,4 +134,22 @@ enum AdministratorAuditActions: string {
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUPSTCK = "Removed an equipment stock.";
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIP = "Created an equipment.";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIP = "Removed an equipment.";
+
+      /**
+     * Summary of CSMSCTRL
+     */
+    case CSMSCTRL_REMOVED_CSMSREQUEST = "User has successfully submitted a service survey.";
+
+    /**
+     * Summary MYACCOUNTCTRL
+     */
+    case MYACCOUNTCTRL_UPDATED_MYACCOUNTADMINPROFPIC = "An Admin has updated user's profile picture.";
+    case MYACCOUNTCTRL_UPDATED_MYACCOUNTUSERPROFPIC = "User profile picture has been updated.";
+    case MYACCOUNTCTRL_UPDATED_MYACCOUNTADDINFO = "You have posted your new information!";
+    case MYACCOUNTCTRL_SEND_MYACCOUNTREQBOOK = "User sent a book request.";
+    case MYACCOUNTCTRL_CANCELLED_MYACCOUNTREQBOOK = "User cancelled a book request.";
+    case MYACCOUNTCTRL_CREATE_MYACCOUNTEXTENDREQ = "User sent a book extension request.";
+    case MYACCOUNTCTRL_CANCELLED_MYACCOUNTEXTENDREQ = "User cancel a book extension request.";
+    case MYACCOUNTCTRL_CREATED_MYACCOUNTRENEWREQ = "User created a book renewal request.";
+
 }
