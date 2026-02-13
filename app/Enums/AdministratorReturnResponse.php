@@ -13,6 +13,6 @@ enum AdministratorReturnResponse: string {
     case CASHIERCTRL_CREATED_ORNUMBER = "OR Number successfully saved";
     case CASHIERCTRL_UPDATED_ORNUMBER = "OR Number successfully updated";
     case CASHIERCTRL_REMOVED_ORNUMBER = "You've removed an OR Number.";
-    case CASHIERCTRL_CREATED_DORMITORY = "You've created a dormitory.";
-    case CASHIERCTRL_UPDATED_DORMITORY = "You've updated a dormitory.";
+    case DORMITORYCTRL_CREATED_DORMITORY = "You've created a dormitory.";
+    case DORMITORYCTRL_UPDATED_DORMITORY = "You've updated a dormitory.";
 }
