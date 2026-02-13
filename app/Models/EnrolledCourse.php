@@ -10,27 +10,33 @@ class EnrolledCourse extends Model
     protected $guarded = ["id"];
 
     /** RELATIONS */
-    public function enrolled_course_certificate() {
+    public function enrolled_course_certificate()
+    {
         return $this->hasMany(Certificate::class);
     }
-    
-    public function trainee() {
+
+    public function trainee()
+    {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
 
-    public function training() {
+    public function training()
+    {
         return $this->hasOne(Training::class, 'id', 'training_id');
     }
 
-    public function trainee_requirement() {
+    public function trainee_requirement()
+    {
         return $this->hasMany(TraineeRequirement::class);
     }
 
-     public function invoices() {
+    public function invoices()
+    {
         return $this->hasMany(EnrollmentInvoice::class);
     }
 
-    public function invoice() {
+    public function invoice()
+    {
         return $this->hasOne(EnrollmentInvoice::class, 'enrolled_course_id', 'id');
     }
 

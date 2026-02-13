@@ -17,6 +17,7 @@ use App\Enums\Administrator\{
 };
 use App\Models\{
     CheckInOutLog,
+    QrReaderLocation,
     UserAssignedQrLocation
 };
 
@@ -26,16 +27,17 @@ class QRReaderCheckInOutCtrl extends Controller
      * Summary of get_log_in_out_records
      * @param Request $request
      */
-    public function get_log_in_out_records(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+    public function get_log_in_out_records(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $userRole = $request->user()->role;
 
-            if($userRole !== UserRoleEnum::SUPERADMIN->value && $request->type) {
+            if ($userRole !== UserRoleEnum::SUPERADMIN->value && $request->type) {
                 $check = UserAssignedQrLocation::where('user_id', $request->user()->id)
                     ->with('qrLocation')
                     ->first();
 
-                if($check->qrLocation->whereIn('type', $request->type)) {
+                if ($check->qrLocation->whereIn('type', $request->type)) {
                     return response()->json(['message' => "We are sorry. You do not have enough permission to view records for " . implode(', ', $request->type)], 409);
                 }
             }
@@ -57,8 +59,9 @@ class QRReaderCheckInOutCtrl extends Controller
      * Summary of check_in_out
      * @param CheckInOut $request
      */
-    public function check_in_out(CheckInOut $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+    public function check_in_out(CheckInOut $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
             $dateToday = Carbon::now();
             $userId = $request->userId;
             $qrLocation = $request->qrLocation;
@@ -70,7 +73,7 @@ class QRReaderCheckInOutCtrl extends Controller
                 'created_at' => $dateToday
             ]);
 
-            if($checkForUpdate->exists()) {
+            if ($checkForUpdate->exists()) {
                 $updateRecord = $checkForUpdate->first();
                 $this->supplyDateTime($dateToday, $checkInOrOut, $updateRecord, strtolower($checkInOrOut));
                 $updateRecord->save();
@@ -86,6 +89,21 @@ class QRReaderCheckInOutCtrl extends Controller
         });
     }
 
+    public function qrReader(Request $request)
+    {
+        return TransactionUtil::transact(
+            null,
+            [],
+            function () {
+
+                $locations = QRReaderLocation::all();
+
+
+                return response()->json(['locations' => $locations], 200);
+            }
+        );
+    }
+
     /**
      * Summary of supplyDateTime
      * @param mixed $dateToday
@@ -93,8 +111,9 @@ class QRReaderCheckInOutCtrl extends Controller
      * @param mixed $model
      * @param mixed $column
      */
-    private function supplyDateTime($dateToday, $checkInOrOut, $model, $column) {
-        if(in_array($checkInOrOut, [QrReaderEnum::CHECK_IN->value, QrReaderEnum::CHECK_OUT->value])) {
+    private function supplyDateTime($dateToday, $checkInOrOut, $model, $column)
+    {
+        if (in_array($checkInOrOut, [QrReaderEnum::CHECK_IN->value, QrReaderEnum::CHECK_OUT->value])) {
             $model->{$column} = $dateToday;
         } else {
             return response()->json(['message' => "We are sorry. It seems that the data provided is not valid."], 409);
