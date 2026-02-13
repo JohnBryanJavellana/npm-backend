@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\AutoPrint;
 use App\Jobs\SendingEmail;
 use App\Mail\CashierEmail;
 use App\Models\BookRes;
@@ -16,6 +17,7 @@ use App\Models\RAInvoices;
 use App\Models\RARequestInfo;
 use App\Models\User;
 use App\Utils\Notifications;
+
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Utils\{

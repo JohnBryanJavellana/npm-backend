@@ -2,39 +2,37 @@
 <html>
 <head>
     <style>
-        @page {
-            margin: 0cm;
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 40mm;
+            height: 30mm;
+            background-color: white;
+            overflow: hidden;
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: sans-serif;
-        }
-
-        .page {
+        .page-break {
             page-break-after: always;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        }
+
+        .qr-container {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(90deg);
             text-align: center;
         }
 
-        .page:last-child {
-            page-break-after: avoid;
-        }
-
-        .qr-wrapper {
-            padding-top: 2%;
+        .qr-image {
+            width: 25mm;
+            height: 25mm;
         }
     </style>
 </head>
 <body>
-    @foreach($data as $path)
-        <div class="page">
-            <div class="qr-wrapper">
-                <img src="data:image/png;base64,{{ base64_encode(file_get_contents($path)) }}" width="690">
+    @foreach($copies as $copy)
+        <div class="page-break">
+            <div class="qr-container">
+                <img class="qr-image" src="data:image/png;base64,{{ $copy['qr'] }}">
             </div>
         </div>
     @endforeach
