@@ -41,7 +41,10 @@ use App\Models\{
     ChargeCategory
 };
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
-use App\Enums\AdministratorAuditActions;
+use App\Enums\{
+    AdministratorAuditActions,
+    AdministratorReturnResponse
+};
 
 class Cashier extends Controller
 {
@@ -198,7 +201,7 @@ class Cashier extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've processed a walk-in payment."], 201);
+            return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_PAY_WALKIN], 201);
         });
     }
 
@@ -249,7 +252,7 @@ class Cashier extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a fee category. ID#" . $fee_category->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::CASHIERCTRL_CREATED_CHARGECATEGORY : AdministratorReturnResponse::CASHIERCTRL_UPDATED_CHARGECATEGORY) . " ID#$fee_category->id"], 201);
         });
     }
 
@@ -277,7 +280,7 @@ class Cashier extends Controller
                         new BEAuditTrail('')
                     );
                 }
-                return response()->json(['message' => "You've removed a fee category. ID#$fee_category_id"], 200);
+                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_REMOVED_CHARGECATEGORY . "ID#$fee_category_id"], 200);
             }
         });
     }
@@ -333,7 +336,7 @@ class Cashier extends Controller
                         new BEAuditTrail('')
                     );
                 }
-                return response()->json(['message' => "You've updated a payment. ID#$$this_fee->id"], 200);
+                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_UPDATED_PAYMENT . "ID#$this_fee->id"], 200);
             }
         });
     }
@@ -392,7 +395,7 @@ class Cashier extends Controller
                 event(new BEInvoice(''), new BEAuditTrail(''));
             }
 
-            return response()->json(['success' => true, 'message' => "OR Number successfully saved."], 200);
+            return response()->json(['success' => true, 'message' => ($isPost ? AdministratorReturnResponse::CASHIERCTRL_CREATED_ORNUMBER : AdministratorReturnResponse::CASHIERCTRL_UPDATED_ORNUMBER) . "ID#$this_or->id"], 200);
         });
     }
 
@@ -420,7 +423,7 @@ class Cashier extends Controller
                         new BEAuditTrail('')
                     );
                 }
-                return response()->json(['message' => "You've removed an OR Number. ID#$orNumber"], 200);
+                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_REMOVED_ORNUMBER . "ID#$orNumber"], 200);
             }
         });
     }

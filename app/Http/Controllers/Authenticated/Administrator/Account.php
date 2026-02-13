@@ -40,7 +40,10 @@ use Illuminate\Support\Facades\{
     Hash
 };
 
-use App\Enums\AdministratorAuditActions;
+use App\Enums\{
+    AdministratorAuditActions,
+    AdministratorReturnResponse
+};
 
 class Account extends Controller
 {
@@ -93,7 +96,7 @@ class Account extends Controller
 
     /**
      * Summary of update_personal
-     * @param UpdatePersonal $request 🤪
+     * @param UpdatePersonal $request
      */
     public function update_personal(UpdatePersonal $request) {
         return TransactionUtil::transact($request, ['user_profile_' . $request->user()->id], function() use ($request) {
@@ -139,7 +142,7 @@ class Account extends Controller
             }
 
             return response()->json([
-                'message' => "Account personal information is updated.",
+                'message' => AdministratorReturnResponse::ACCOUNTCTRL_UPDATE_PERSONAL,
                 'reloggin' => $reloggin
             ], 200);
         });
@@ -171,7 +174,7 @@ class Account extends Controller
             }
 
             return response()->json([
-                'message' => 'Password changed successfully. You will reloggin again.',
+                'message' => AdministratorReturnResponse::ACCOUNTCTRL_UPDATE_PASSWORD,
                 'reloggin' => true
             ], 200);
         });
