@@ -94,7 +94,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of create_or_update_dormitory
-     * @param CreateOrUpdateDormitory $request
+     * @param CreateOrUpdateDormitory $request OK
      */
     public function create_or_update_dormitory (CreateOrUpdateDormitory $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
@@ -255,7 +255,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of create_dormitory_rooms
-     * @param Request $request
+     * @param Request $request OK
      */
     public function create_dormitory_rooms (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
@@ -349,7 +349,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of create_or_update_dormitory_inventory
-     * @param CreateOrUpdateDormitoryInv $request
+     * @param CreateOrUpdateDormitoryInv $request ok
      */
     public function create_or_update_dormitory_inventory (CreateOrUpdateDormitoryInv $request) {
         return TransactionUtil::transact($request, ["inventoryItems", "dormitory:inclusions:all"], function() use ($request) {
@@ -414,7 +414,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of remove_dorm_inventory_stock
-     * @param Request $request
+     * @param Request $request OOK
      * @param int $stock_id
      */
     public function remove_dorm_inventory_stock (Request $request, int $stock_id) {
@@ -441,7 +441,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of remove_dorm_inventory
-     * @param Request $request
+     * @param Request $request OK
      * @param int $inv_id
      */
     public function remove_dorm_inventory (Request $request, int $inv_id) {
@@ -751,7 +751,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of create_or_update_service
-     * @param CreateOrUpdateService $request
+     * @param CreateOrUpdateService $request ok
      */
     public function create_or_update_service (CreateOrUpdateService $request) {
         return TransactionUtil::transact($request, ["dormitory:services:all"], function() use ($request) {
@@ -903,7 +903,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of request_service
-     * @param CreateOrUpdateServiceReq $request
+     * @param CreateOrUpdateServiceReq $request ok
      */
     public function request_service (CreateOrUpdateServiceReq $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
@@ -991,7 +991,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of update_requested_service
-     * @param Request $request
+     * @param Request $request OK
      */
     public function update_requested_service (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
@@ -1064,7 +1064,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of get_dormitory_charges
-     * @param Request $request
+     * @param Request $request ok
      */
     public function get_dormitory_charges (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {

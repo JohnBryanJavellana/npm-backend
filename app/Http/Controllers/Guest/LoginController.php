@@ -8,6 +8,8 @@ use App\Utils\AuditHelper;
 use Illuminate\Support\Facades\Auth;
 use App\Utils\TransactionUtil;
 
+use App\Enums\GuestAuditActions;
+
 class LoginController extends Controller
 {
     public function login_user(LoginRequest $request) {
@@ -20,7 +22,7 @@ class LoginController extends Controller
                     return response()->json(['message' => 'Your email address is not yet verified. Please check your inbox.'], 403);
                 }
 
-                AuditHelper::log($request->user()->id, "Logged in account");
+                AuditHelper::log($request->user()->id, GuestAuditActions::LOGIN_USER);
                 $token = $user->createToken('auth_token')->plainTextToken;
                 return response()->json(['token' => $token, 'role' => $user->role], 200);
             } else {
