@@ -6,14 +6,18 @@ use App\Http\Controllers\Authenticated\Trainee\TraineeLibrary;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
+use App\Jobs\AutoPrint;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Utils\{
     TransactionUtil,
 };
-use App\Http\Requests\Trainee\Library\BookRequest;
 
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+use App\Http\Requests\Trainee\Library\BookRequest;
 use App\Http\Requests\Admin\Library\{
     CreateOrUpdateBookRequest,
     CreateOrUpdateGenre,
@@ -164,7 +168,7 @@ class LibraryController extends Controller
      * @param bool returnedMessage === FALSE
      * @param Request $request
      */
-    public function create_book_copies (Request $request) {
+    public function create_book_copies(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $copiesData = [];
 
@@ -177,12 +181,32 @@ class LibraryController extends Controller
                     $book_copy->book_id = $request->documentId;
                     $book_copy->save();
 
-                    array_push($copiesData, $new_book_ui);
+                    $qrCode = base64_encode(QrCode::format('png')
+                        ->size(750)
+                        ->margin(1)
+                        ->errorCorrection('M')
+                        ->generate($new_book_ui));
+
+                    $copiesData[] = [
+                        'identifier' => $new_book_ui,
+                        'qr' => $qrCode
+                    ];
                 }
             }
 
+            $customPaper = [0, 0, 113.39, 85.04];
+            $pdf = Pdf::loadView('pdf.book_labels', ['copies' => $copiesData])->setPaper($customPaper, 'landscape');
+            $fileName = 'labels-' . time() . '.pdf';
+            $filePath = public_path('book-uploaded-files/pdf/' . $fileName);
+            $pdf->save($filePath);
+
+            AutoPrint::dispatch($filePath);
+
+            unset($copiesData['qr']);
+
             return $request->insideJob ? $copiesData : response()->json([
-                'message' => "You've added a book copies.",
+                'message' => "You've added " . count($copiesData) . " book copies.",
+                'pdf_url' => asset('book-uploaded-files/pdf/' . $fileName),
                 'returnedData' => $copiesData
             ], 201);
         });
