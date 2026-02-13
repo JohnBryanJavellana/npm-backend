@@ -40,6 +40,8 @@ use Illuminate\Support\Facades\{
     Hash
 };
 
+use App\Enums\AdministratorAuditActions;
+
 class Account extends Controller
 {
     /**
@@ -91,7 +93,7 @@ class Account extends Controller
 
     /**
      * Summary of update_personal
-     * @param UpdatePersonal $request
+     * @param UpdatePersonal $request 🤪
      */
     public function update_personal(UpdatePersonal $request) {
         return TransactionUtil::transact($request, ['user_profile_' . $request->user()->id], function() use ($request) {
@@ -127,7 +129,7 @@ class Account extends Controller
             $user->email = $request->email;
             $user->save();
 
-            AuditHelper::log($request->user()->id, "Updated personal account information.");
+            AuditHelper::log($request->user()->id, AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PERSONAL);
 
             if(env('USE_EVENT')) {
                 event(
@@ -159,7 +161,7 @@ class Account extends Controller
             $user->isSocial = UserDetailsEnum::HARD_ACCOUNT;
             $user->save();
 
-            AuditHelper::log($request->user()->id, "Updated account password.");
+            AuditHelper::log($request->user()->id, AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PASSWORD);
 
             if(env('USE_EVENT')) {
                 event(

@@ -41,6 +41,7 @@ use App\Models\{
     ChargeCategory
 };
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
+use App\Enums\AdministratorAuditActions;
 
 class Cashier extends Controller
 {
@@ -185,7 +186,10 @@ class Cashier extends Controller
             ], User::find($this_payment->user_id)));
 
             Notifications::notify($request->user()->id, $this_payment->user_id, $request->service, "processed a walk-in payment for you.");
-            AuditHelper::log($request->user()->id, "Processed a walk-in payment. ID# $this_payment->id");
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::CASHIERCTRL_PROCESSED_WALKIN->value . " ID# $this_payment->id"
+            );
 
             if(env('USE_EVENT')) {
                 event(
@@ -233,7 +237,10 @@ class Cashier extends Controller
             $fee_category->name = $request->name;
             $fee_category->save();
 
-            AuditHelper::log($request->user()->id,($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a fee category. ID#" . $fee_category->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $request->httpMethod === "POST" ? AdministratorAuditActions::CASHIERCTRL_CREATED_CATEGORY->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_CATEGORY->value . " ID#$fee_category->id"
+            );
 
             if(env('USE_EVENT')) {
                 event(
@@ -259,7 +266,10 @@ class Cashier extends Controller
                 return response()->json(['message' => "Can't remove fee category. It already has connected data."], 409);
             } else {
                 $this_fee->delete();
-                AuditHelper::log($request->user()->id, "Removed a fee category. ID#$fee_category_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::CASHIERCTRL_REMOVED_CATEGORY->value . " ID#$fee_category_id"
+                );
 
                 if(env('USE_EVENT')) {
                     event(
@@ -312,7 +322,10 @@ class Cashier extends Controller
                 ], User::find($this_fee->user_id)));
 
                 Notifications::notify($request->user()->id, $this_fee->user_id, $request->service, "updated your " . strtolower($request->service) . " invoice status.");
-                AuditHelper::log($request->user()->id, "Updated a payment. ID#$$this_fee->id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::CASHIERCTRL_UPDATED_PAYMENT . " ID#$this_fee->id"
+                );
 
                 if(env('USE_EVENT')) {
                     event(
@@ -372,7 +385,7 @@ class Cashier extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                ($isPost ? 'Created' : 'Updated') . " OR Number ID# " . $this_or->id
+                $isPost ? AdministratorAuditActions::CASHIERCTRL_CREATED_OR->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_OR->value . " ID#$this_or->id"
             );
 
             if (env('USE_EVENT')) {
@@ -396,7 +409,10 @@ class Cashier extends Controller
                 return response()->json(['message' => "Can't remove OR Number. It already has connected data."], 409);
             } else {
                 $this_or->delete();
-                AuditHelper::log($request->user()->id, "Removed an OR Number. ID#$orNumber");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::CASHIERCTRL_REMOVED_OR->value . " ID#$orNumber"
+                );
 
                 if(env('USE_EVENT')) {
                     event(

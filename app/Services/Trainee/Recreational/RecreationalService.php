@@ -66,7 +66,7 @@ class RecreationalService {
                 "equipment_request.equipment",
                 "facility_request",
                 "facility_request.facility",
-            ]) 
+            ])
             ->get();
         }
         return $recordsQuery->get();
@@ -152,13 +152,13 @@ class RecreationalService {
 
     public function storeEquipmentRequest()
     {
-        return; 
+        return;
     }
 
     public function storeFacilitiesRequest()
     {
         return;
-    }   
+    }
 
     public function cancelRequests()
     {
