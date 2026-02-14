@@ -117,7 +117,6 @@ class DormitoryController extends Controller
             $this_dormitory->room_cost = $request->room_cost;
             $this_dormitory->guest_cost = $request->room_guest_cost;
             $this_dormitory->room_fee_type = $request->room_fee_type;
-            $this_dormitory->is_air_conditioned = $request->room_type;
             $this_dormitory->save();
 
             if($isPost){
@@ -156,7 +155,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORY : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORY . " ID#$this_dormitory->id"
+                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORY->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORY->value . " ID#$this_dormitory->id"
             );
 
             if(env('USE_EVENT')) {
@@ -166,7 +165,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORY : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORY) . "ID#$this_dormitory->id"], 201);
+            return response()->json(['message' => $isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORY->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORY->value . " ID#$this_dormitory->id"], 201);
         });
     }
 
@@ -277,7 +276,7 @@ class DormitoryController extends Controller
 
     /**
      * Summary of create_dormitory_rooms
-     * @param Request $request OK
+     * @param Request $request
      */
     public function create_dormitory_rooms (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
@@ -285,13 +284,45 @@ class DormitoryController extends Controller
                 for($i = 0; $i < $request->room_count; $i++) {
                     $room = new DormitoryRoom;
                     $room->dormitory_id = $request->dormitoryId;
+                    $room->room_name = "R$request->dormitoryId-" . $i + 1;
                     $room->room_slot = $request->room_slot;
+                    $room->is_air_conditioned = "NO";
                     $room->room_available_slot = $request->room_slot;
                     $room->save();
                 }
             }
 
             return $request->insideJob ? true : response()->json(['message' => "You've added a dormitory room.OK"], 201);
+        });
+    }
+
+    /**
+     * Summary of update_dormitory_room
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
+     * @param Request $request
+     */
+    public function update_dormitory_room (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this_room = DormitoryRoom::findOrFail($request->documentId);
+            $this_room->is_air_conditioned = $request->is_air_conditioned;
+            $this_room->remarks = $request->remarks === 'null' ? NULL : $request->remarks;
+            $this_room->room_status = $request->status;
+            $this_room->save();
+
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYR->value . " ID#$this_room->id"
+            );
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"], 200);
         });
     }
 
@@ -313,7 +344,7 @@ class DormitoryController extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORY . " ID#$room_id"
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYR->value . " ID#$room_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -394,7 +425,7 @@ class DormitoryController extends Controller
             if($isPost) $dorm_inventory->control_number = GenerateTrace::createTraceNumber(DormitoryInventory::class, "-DI-", 'control_number');
             if($request->filename) {
                 $filename = Str::uuid() . '.png';
-                SaveAvatar::dispatch($request->filename, $filename, "dormitory/inventory", false, true, $filename);
+                SaveAvatar::dispatch($request->filename, $filename, "dormitory/inventory", false, true, $dorm_inventory->filename);
                 $dorm_inventory->filename = $filename;
             }
 
@@ -412,7 +443,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYINV : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYINV . " ID#$dorm_inventory->id"
+                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYINV->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYINV->value . " ID#$dorm_inventory->id"
             );
 
             if(env('USE_EVENT')) {
@@ -461,7 +492,7 @@ class DormitoryController extends Controller
                 $this_stock->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYINVSTOCK . " ID#$stock_id"
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYINVSTOCK->value . " ID#$stock_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -498,7 +529,7 @@ class DormitoryController extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYINV . " ID#$inv_id"
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYINV->value . " ID#$inv_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -525,7 +556,7 @@ class DormitoryController extends Controller
             }
 
             $this_dormitory_request = $request->httpMethod === "POST"
-                ? new DormitoryTenant
+                ? new DormitoryTenant()
                 : DormitoryTenant::findOrFail($request->documentId);
 
             $this_dormitory_request->user_id = $request->userId;

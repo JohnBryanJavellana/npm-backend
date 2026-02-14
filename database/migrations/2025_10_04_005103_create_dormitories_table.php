@@ -17,10 +17,10 @@ return new class extends Migration
             $table->string('room_name');
             $table->longText('room_description');
             $table->enum('room_fee_type',["OFFICERS", "RATINGS"])->nullable();
-            $table->enum('is_air_conditioned',["YES", "NO"]);
             $table->double('room_cost', 65,2);
             $table->double('guest_cost', 65,2);
 
+            // $table->enum('is_air_conditioned',["YES", "NO"]);
             // $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             // $table->foreignIdFor(Charge::class, 'charge_id_room_cost');
             // $table->foreignIdFor(Charge::class, 'charge_id_guest_cost');

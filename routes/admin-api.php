@@ -115,6 +115,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
             Route::post('create_or_update_dormitory', [DormitoryController::class, 'create_or_update_dormitory']);
             Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms']);
+            Route::post('update_dormitory_room', [DormitoryController::class, 'update_dormitory_room']);
             Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms']);
             Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms']);
             Route::post('create-walk-in-request/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);

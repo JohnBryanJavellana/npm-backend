@@ -407,11 +407,12 @@ class RecreationalActivityCtrl extends Controller
                 }
             }
 
-            if ($request->data_photos) {
-                $room_images = RAFacilityImage::whereNotIn('id', $request->data_photos)
-                    ->where('r_a_facility_id', $request->documentId)
-                    ->get();
+            $dataPhotos = $request->input('data_photos', []);
+            $room_images = RAFacilityImage::whereNotIn('id', $dataPhotos)
+                ->where('r_a_facility_id', $request->documentId)
+                ->get();
 
+            if($room_images->isNotEmpty()) {
                 foreach ($room_images as $item) {
                     if (file_exists(public_path('recreational-activity/facility/image/' . $item->filename))) {
                         unlink(public_path('recreational-activity/facility/image/' . $item->filename));
@@ -581,7 +582,7 @@ class RecreationalActivityCtrl extends Controller
             if ($request->copies) {
                 $request->merge([
                     'insideJob' => true,
-                    'r_a_equipments_id' => $this_equipment->id
+                    'documentId' => $this_equipment->id
                 ]);
 
                 $dataToReturn = $this->ra_equipment_create_stock($request);
