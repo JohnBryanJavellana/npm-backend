@@ -106,7 +106,6 @@ class CsmsController extends Controller
             throw $e;
         }
         catch (\Exception $e) {
-            DB::rollBack();
             \Log::error("error cms", [$e]);
             return response()->json(["message" => $e], 500);
         }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 use App\Events\BENotification;
 use App\Events\BERecreational;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Recreational\CancelRecRequest;
 use App\Http\Requests\Recreational\RecreationalRequest;
 use App\Http\Requests\Recreational\ViewRecreationalRequest;
 use App\Http\Requests\Recreational\ViewUserRecRecord;
@@ -155,7 +156,6 @@ class TraineeRecreational extends Controller
 
     public function cancel_requested_units(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            \Log::info("deleteShit", [$request->all()]);
             $model = match ($request->documentType) {
                 'EQUIPMENT'  => RAEquipmentRequest::class,
                 'FACILITY' => RAFacilityRequest::class,
@@ -169,20 +169,42 @@ class TraineeRecreational extends Controller
             } else {
                 $thisRequest->status = "CANCELLED";
                 $thisRequest->save();
-
-                if($model instanceof RAEquipmentRequest) {
+                
+                if($model === RAEquipmentRequest::class && $thisRequest->r_a_equipment_stock_id !== null) {
                     $mainStock = RAEquipmentStock::findOrFail($thisRequest->r_a_equipment_stock_id);
                     $mainStock->availability_status = "AVAILABLE";
                     $mainStock->save();   
-                } else { 
+                } 
+
+                if ($model === RAFacilityRequest::class) { 
                     $mainFacility = RAFacility::findOrFail($thisRequest->r_a_facility_id);
                     $mainFacility->availability_status = "AVAILABLE";
                     $mainFacility->save(); 
                 }
-
-                return response()->json(['message' => "Success! Unit has been cancelled."], 200); 
+                // AuditHelper::log($user_id, "User {$user_id} cancelled a unit request.");
+                return response()->json(['message' => "Success! Unit has been successfully cancelled."], 200); 
             }
         });
+    }
+
+    public function cancelUnitsRequest(CancelRecRequest $request)
+    {
+        $validated = $request->validated();
+        try
+        {
+            $this->recreationalService->cancelRequests($validated);
+
+            return response()->json(["message" => "Success! Unit has been successfully cancelled."], 200);
+        }
+        catch (ModelNotFoundException $e) {
+            return response()->json(["message" => "Request not found"], 404);
+        }
+        catch (DomainException $e) {
+            throw $e;
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
     }
 
     public function requestEquipment(RecreationalRequest $request)
@@ -191,10 +213,10 @@ class TraineeRecreational extends Controller
         $validated = $request->validated();
         try
         {
-            $this->recreationalService->storeRecreationalRequests($validated);
+            $data = $this->recreationalService->storeRecreationalRequests($validated);
 
-            AuditHelper::log();
-            Notifications::notify();
+            // AuditHelper::log($validated["user_id"], "gjksdfjhkasdhjk");
+            Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has sent a recreational request.');
 
             if(env("USE_EVENT")) {
                 try
@@ -206,7 +228,7 @@ class TraineeRecreational extends Controller
                 catch (\Exception $e) {
                 }                
             }
-
+            // AuditHelper::log($user_id, "User {$user_id} cancelled a recreational request.");
             return response()->json(["message" => "Successfully sent a recreational request."], 200);
         }
         catch (DomainException $e) {
@@ -216,8 +238,24 @@ class TraineeRecreational extends Controller
             return response()->json(["message" => "Facility/Equipment unavailable"], 404);
         }
         catch (\Exception $e) {
-            \Log::info("requestEquipmentError", [$e]);
+            \Log::error("requestEquipmentError", [$e]);
             return response()->json(["message" => "Something went wrong."], 500);
+        }
+    }
+
+    public function checkUniqueIdentifier(Request $request)
+    {
+        \Log::info("message", [$request->all()]);
+        try
+        {
+            $exists = $this->recreationalService->isUniqueIdenfierExistV1($request);
+            return response()->json(["data" => $exists], 200);
+        }
+        catch (ModelNotFoundException $e) {
+            return response()->json(["message" => "Record not found!"], 422);
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 }

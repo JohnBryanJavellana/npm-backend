@@ -40,6 +40,7 @@ class ViewRecEquipment extends JsonResource
                         "from_datetime" => $data->start_date,
                         "to_datetime" => $data->end_date
                     ]),
+                    "images" => $facility->facility?->images
                 ];
             }),
             "disabled_date_times" => $this->hasData->map(fn($query) => [

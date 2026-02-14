@@ -205,6 +205,7 @@ class TraineeEnrollment extends Controller
             }
 
             DB::commit();
+            AuditHelper::log($user_id, "User " . $user_id . " sent enrolment request.");
             return response()->json(['message' => 'Enrollment request sent successfully'], 201);
         }
         catch (ModelNotFoundException $e) {
@@ -233,7 +234,7 @@ class TraineeEnrollment extends Controller
             if(env("USE_EVENT")) {
                 event(new BETraineeApplication(''));
             }
-
+            // AuditHelper::log($user_id, "User " . $user_id . " cancelled training request.");
             return response()->json(['message' => "You've successully cancelled a training request."], 200);
         }
         catch (DomainException $e) {
