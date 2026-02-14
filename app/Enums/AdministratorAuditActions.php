@@ -26,7 +26,8 @@ enum AdministratorAuditActions: string {
      */
     case DORMITORYCTRL_CREATED_DORMITORY = "Created a dormitory.";
     case DORMITORYCTRL_UPDATED_DORMITORY = "Updated a dormitory.";
-    case DORMITORYCTRL_REMOVED_DORMITORY = "Removed a dormitory room.";
+    case DORMITORYCTRL_UPDATED_DORMITORYR = "Updated a dormitory room.";
+    case DORMITORYCTRL_REMOVED_DORMITORYR = "Removed a dormitory room.";
     case DORMITORYCTRL_CREATED_DORMITORYINV = "Created a dormitory inventory.";
     case DORMITORYCTRL_UPDATED_DORMITORYINV = "Updated a dormitory inventory.";
     case DORMITORYCTRL_REMOVED_DORMITORYINVSTOCK = "Removed a dormitory inventory item stock.";
