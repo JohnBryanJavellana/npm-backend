@@ -19,6 +19,16 @@ class RAEquipmentStock extends Model
         return $this->hasMany(RAEquipmentRequest::class);
     }
 
+    public function equipment()
+    {
+        return $this->belongsTo(RAEquipments::class, "r_a_equipments_id", "id");
+    }
+    
+    public function siblings()
+    {
+        return $this->hasMany(self::class, "r_a_equipments_id", "r_a_equipments_id");
+    }
+
     /**
      * Scopes
      **/
@@ -30,5 +40,10 @@ class RAEquipmentStock extends Model
     public function scopeOkayCondition(Builder $query)
     {
         return $query->whereIn("condition_status", ["GOOD CONDITION", "DAMAGED"]);
+    }
+
+    public function scopeUniqueIdentifier(Builder $query,string $unique)
+    {
+        return $query->where("unique_identifier", $unique);
     }
 }
