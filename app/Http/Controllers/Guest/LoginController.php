@@ -17,7 +17,7 @@ class LoginController extends Controller
             if(Auth::attempt($request->only('email', 'password'))){
                 $user = Auth::user();
 
-                if (is_null($user->email_verified_at)) {
+                if ($user->email_verified_at !== null) {
                     Auth::logout();
                     return response()->json(['message' => 'Your email address is not yet verified. Please check your inbox.'], 403);
                 }
