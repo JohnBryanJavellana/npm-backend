@@ -46,6 +46,8 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'
 Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
 Route::post('items', [TraineeRecreational::class, 'getUserRecRequest']);
 Route::post('item', [TraineeRecreational::class, 'requestEquipment']);
+Route::post('cancelTest', [TraineeRecreational::class, 'cancelUnitsRequest']);
+
 
 
 /** authenticated routes */
@@ -184,7 +186,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('/credits/')->group(function() {
             Route::get("audits", [CreditController::class, "show"]);
             Route::post("audits/create", [CreditController::class, "store"]);
-
         });
     });
 
@@ -197,12 +198,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->group(function () {
         Route::prefix('recreationals/')->group(function() {
+            Route::post("qr_checker", [TraineeRecreational::class, "checkUniqueIdentifier"]);
             Route::get('equipment', [TraineeRecreational::class, 'viewEquipment']);
             Route::get('facilities', [TraineeRecreational::class, 'viewFacilities']);
             Route::post('requests', [TraineeRecreational::class, 'requestEquipment']);
             Route::post('get_recreational_request', [TraineeRecreational::class, 'get_recreational_request']);
             Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'getRecreationalRequest']);
-            Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancel_requested_units']);
+            Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancelUnitsRequest']);
         });
     });
 

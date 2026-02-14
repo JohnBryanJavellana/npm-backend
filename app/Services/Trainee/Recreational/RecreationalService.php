@@ -31,7 +31,7 @@ class RecreationalService {
             "stocks" => function($query) {
                 $query->available()->okayCondition();
             },
-        ])
+        ]) 
         ->with([
             "hasData" => function($query){
                 $query->where("status", RequestStatus::APPROVED->value);
@@ -83,7 +83,7 @@ class RecreationalService {
             "images:id,r_a_facility_id,filename",
             "relatedEquipment:id,r_a_facility_id,r_a_equipments_id",
             "relatedEquipment.equipment.images:id,r_a_equipments_id,filename",
-            "relatedEquipment.equipment:id,name,additional_details",
+            "relatedEquipment.equipment:id,name,additional_details,availability_status",
             "relatedEquipment.equipment.hasData" => function($query){
                 $query->where("status", RequestStatus::APPROVED->value);
             },
@@ -118,14 +118,35 @@ class RecreationalService {
         ])->get();
     }
 
+    /**
+     * fetch all based on the ids
+     * (additional) what if fetched with() stock also and fetch a single and available.
+     * check if the fetched data is the same as the ids that were passed
+     * store and return if same
+     * else throw error
+     * 
+     * create a separate methods for storing with UI and without
+     */
+
     public function prepareEquipment($validated)
     {
-        $eq_id = collect($validated["data"])->filter(fn($data) => $data["type"] === "EQUIPMENT")->pluck("id");
+        $eq_id = collect($validated["data"])->filter(fn($data) => $data["type"] === "EQUIPMENT")->pluck("unique_identifier","id");
+        $equipments = $this->raequipmentsModel->query();
+        $ui = $eq_id->values()->flatten()->filter()->unique();
 
-        $equipments = $this->raequipmentsModel->query()
-        ->select("id", "name")
-        ->withCount("stocks")
-        ->whereIn("id", $eq_id)
+        if($eq_id->values()->filter()->isNotEmpty()) {
+            $equipments->with([
+                "stocks" => function($query)use ($ui){
+                    $query->whereIn("unique_identifier",$ui)->available()->okayCondition();
+                }
+            ]);
+        }
+
+        $equipments = $equipments->select("id", "name")
+        ->withCount(["stocks" => function($query) {
+            $query->available()->okayCondition();
+        }])
+        ->whereIn("id", $eq_id->keys())
         ->get()
         ->keyBy("id");
         
@@ -136,7 +157,9 @@ class RecreationalService {
         $titles = implode(", ", $equipmentWithoutStock->pluck("name")->toArray());
 
         if(!$equipmentWithoutStock->isEmpty()) {
-            throw new DomainException(count($equipmentWithoutStock) > 1 ? "Equipments" : "Equipment" . " does not have stock available. ". $titles);
+            throw new DomainException(count($equipmentWithoutStock) > 1 
+            ? "Equipments does not have stock available. $titles"
+            : "Equipment does not have stock available. $titles");
         }
 
         return $equipments;
@@ -146,8 +169,6 @@ class RecreationalService {
     {
         return DB::transaction(function() use ($validated) {
 
-            //prepare data
-            // return $this->prepareEquipment($validated);
             // $equipments = $this->prepareEquipment($validated);
 
             $types = collect($validated["data"])->unique("type")->pluck("type");
@@ -155,7 +176,7 @@ class RecreationalService {
                 1 => $types->first(),
                 default => 'HYBRID',
             };
-            //create a separate method
+
             $record = $this->rarequestInfoModel->create([
                 "user_id" => $validated["user_id"],
                 "trace_number" => GenerateTrace::createTraceNumber($this->rarequestInfoModel,"-RAR-"),
@@ -163,7 +184,8 @@ class RecreationalService {
                 "reason" => $validated["purpose"],
             ]);
 
-            //separate and group and validate
+            \Log::info("dataWhat", [$validated]);
+
             foreach($validated["data"] as $info) {
                 if ($info["type"] === "EQUIPMENT") {
                     $this->storeEquipmentRequest($info, $record);
@@ -173,26 +195,43 @@ class RecreationalService {
             }
         });
     }
-
+    
     public function storeEquipmentRequest($info, $record)
     { 
-        // if(!empty($info["unique_identifier"])) {
-        //     $stock = $this->raequipmentStockModel->query()
-        //     ->where("unique_identifier", $info["unique_identifier"])
-        //     ->lockForUpdate()
-        //     ->available()
-        //     ->okayCondition()
-        //     ->firstOrFail();
-        // }
+        $uniqueIdentifiers = $info["UI"] ?? null;
+        if(!empty($uniqueIdentifiers)) {
+            foreach($uniqueIdentifiers as $unique_identifier) {
+                $stock = $this->raequipmentStockModel->query()
+                ->uniqueIdentifier($unique_identifier)
+                ->available()
+                ->okayCondition()
+                ->firstOrFail();
 
-        $this->raequipmentRequestModel->create([
-            "r_a_request_info_id" => $record->id,
-            "r_a_equipment_stock_id" => null,
-            "r_a_equipments_id" => $info["id"],
-            "start_date" => $info["from_datetime"],
-            "end_date" => $info["to_datetime"],
-            "issued_condition" => null,
-        ]);
+                $this->raequipmentRequestModel->create([
+                    "r_a_request_info_id" => $record->id,
+                    "r_a_equipment_stock_id" => $stock->id,
+                    "r_a_equipments_id" => $info["id"],
+                    "start_date" => $info["from_datetime"],
+                    "end_date" => $info["to_datetime"],
+                    "issued_condition" => $stock->condition_status,
+                ]);
+            }
+        }
+
+        for($default = 0; $default < $info["quantity"]; $default++) {
+            $this->raequipmentRequestModel->create([
+                "r_a_request_info_id" => $record->id,
+                "r_a_equipment_stock_id" => null,
+                "r_a_equipments_id" => $info["id"],
+                "start_date" => $info["from_datetime"],
+                "end_date" => $info["to_datetime"],
+                "issued_condition" => null,
+            ]);
+        }
+    }
+    public function storeEquipmentV1($info, $record)
+    { 
+        
     }
 
     public function storeFacilitiesRequest($info, $record)
@@ -200,11 +239,15 @@ class RecreationalService {
         $facility = $this->rafacilityModel->query()
         ->select("id", "condition_status")
         ->whereKey($info["id"])
-        ->whereHas("hasData", fn($query) => $query->whereIn("status", [RequestStatus::APPROVED->value, RequestStatus::OCCUPIED->value]))
+        //look for the overlapping of this facility, still lacks for the dates in between
+        ->whereDoesntHave("hasData", fn($query) => $query->where([
+            "start_date" => $info["from_datetime"],
+            "end_date" => $info["to_datetime"],
+            ]))
         ->available()
         ->okayCondition()
         ->firstOrFail();
-
+        //we can ready the data and just insert for not multiple creation
         $this->rafacilityRequestModel->create([
             "r_a_request_info_id" => $record->id,
             "r_a_facility_id" => $info["id"],
@@ -214,9 +257,114 @@ class RecreationalService {
         ]);
     }   
 
-    public function cancelRequests()
+    public function isUniqueIdenfierExist($validated)
     {
-        return;
-        // DB::transaction()
+        $model = match ($validated->type) {
+            'EQUIPMENT'  => $this->raequipmentStockModel,
+            'FACILITY' => $this->rafacilityModel,
+            default    => throw new DomainException("Invalid request!")
+        };
+
+        $record = $model->query()
+        ->where("unique_identifier", $validated->UIId)
+        ->with([
+            "equipment" => function($q) {
+                $q->withCount([
+                    "stocks" => function($qq) {
+                $qq->available()->okayCondition();
+            }]);
+            }
+        ])
+        ->available()
+        ->okayCondition()
+        ->firstOrFail();
+
+        return $record;
+    }
+    public function isUniqueIdenfierExistV1($validated)
+    {
+        $model = match ($validated->type) {
+            'EQUIPMENT'  => $this->raequipmentStockModel,
+            'FACILITY' => $this->rafacilityModel,
+            default    => throw new DomainException("Invalid request!")
+        };
+
+        $record = $model->query()
+        ->where("unique_identifier", $validated->UIId)
+        ->withCount([
+            "siblings as stock_count" => function($q) {
+                $q->available()->okayCondition();
+            }
+        ])
+        ->available()
+        ->okayCondition()
+        ->firstOrFail();
+
+        return $record;
+    }
+    public function prepareForCancellation($record)
+    {
+        $restrictedStatuses = ["CANCELLED", "RECEIVED"];
+
+        if(in_array($record->status, $restrictedStatuses)) {
+            throw new DomainException("Cant cancel unit. It is already $record->status.");
+        }
+    }
+    public function cancelRequests($validated)
+    {
+        /**
+         * 
+         * Ready the data for cancellation
+         *  if the request is already cancelled or received
+         *  
+         */
+
+        DB::transaction(function() use ($validated){
+        \Log::info("cancelDataOnArray", [$validated]);
+            $restrictedStatus = ["CANCELLED","RETURNED","DONE","DECLINED"];
+
+            $model = match ($validated["documentType"]) {
+                'EQUIPMENT'  => RAEquipmentRequest::class,
+                'FACILITY' => RAFacilityRequest::class,
+                default    => throw new \Exception("Invalid document type")
+            };
+            
+            $thisRequest = $model::findOrFail($validated["documentId"]);
+
+            $this->prepareForCancellation($thisRequest);
+
+            $thisRequest->status = "CANCELLED";
+            $thisRequest->save();
+            
+            if($model === RAEquipmentRequest::class && $thisRequest->r_a_equipment_stock_id !== null) {
+                $mainStock = RAEquipmentStock::findOrFail($thisRequest->r_a_equipment_stock_id);
+                $mainStock->availability_status = RequestStatus::AVAILABLE->value;
+                $mainStock->save();
+            } 
+
+            if ($model === RAFacilityRequest::class) { 
+                $mainFacility = RAFacility::findOrFail($thisRequest->r_a_facility_id);
+                $mainFacility->availability_status = RequestStatus::AVAILABLE->value;
+                $mainFacility->save(); 
+            }
+
+            $exists = $this->rarequestInfoModel->query()
+            ->with([
+                "equipment_request" => function($query) use ($restrictedStatus) {
+                    $query->whereNotIn("status", $restrictedStatus);
+            },
+                "facility_request" => function($query) use ($restrictedStatus) {
+                    $query->whereNotIn("status", $restrictedStatus);
+                }
+            ])
+            ->whereKey($thisRequest->r_a_request_info_id)
+            ->first();
+
+            if($exists->equipment_request->isEmpty() && $exists->facility_request->isEmpty()) {
+                $exists->update([
+                    "status" => RequestStatus::FOR_CSM->value
+                ]);
+            }
+        });
     }
 }
