@@ -424,7 +424,7 @@ class TraineeLibrary extends Controller
         {
             $validated = $request->validated();
             $this->libraryRenewService->cancelRenewRequest($validated);
-
+            AuditHelper::log($user_id, "User {$user_id} renewed a book.");
             return response()->json(["You've successfully cancelled a book renewal request."], 200);
         }
         catch (ModelNotFoundException) {

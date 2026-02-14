@@ -15,19 +15,12 @@ class RecreationalRequest extends FormRequest
      */
     public function authorize(): bool
     {   
-        \Log::info("recRequest", [$this->all()]);
+        \Log::info("dataRequest", $this->all());
         return true;
     }
 
     protected function prepareForValidation()
     {
-        // $this->merge([
-        //     "user_id" => in_array($this->user()->role, UserRoleEnum::recreationalRoles()) 
-        //         ?  $this->input("userId")
-        //         :  $this->user()->id,
-        //     "data.*.type" => strtoupper($this->input("type"))
-        // ]);     
-
         $data = $this->input("data", []);
 
         $data = array_map(function($item) {
@@ -59,6 +52,7 @@ class RecreationalRequest extends FormRequest
             "data" => "required|array",
             "data.*.id" => "required|integer",
             "data.*.from_datetime" => "required|date_format:Y-m-d H:i",
+            "data.*.UI" => "nullable|array|exists:r_a_equipment_stocks,unique_identifier",
             "data.*.to_datetime" => "required|date_format:Y-m-d H:i|after:data.*.from_datetime",
             "data.*.quantity" => "integer",
             "data.*.type" => "required|in:EQUIPMENT,FACILITY,HYBRID",
@@ -74,7 +68,7 @@ class RecreationalRequest extends FormRequest
             response()->json([
                 "message" => $firstError,
                 "errors" => $errors
-            ])
+            ], 422)
         );
     }
 }
