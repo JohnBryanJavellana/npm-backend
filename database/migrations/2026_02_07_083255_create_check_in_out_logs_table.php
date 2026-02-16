@@ -18,7 +18,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(QrReaderLocation::class)->constrained()->cascadeOnDelete();
-            $table->dateTime('check_in');
+            $table->dateTime('check_in')->nullable();
             $table->dateTime('check_out')->nullable();
             $table->longText('purpose')->nullable();
             $table->timestamps();

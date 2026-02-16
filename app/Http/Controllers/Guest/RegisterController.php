@@ -163,7 +163,6 @@ class RegisterController extends Controller
     }
 
     protected function processAvatar($avatarUrl, $filename, $isBase64 = false) {
-        $filename = Str::uuid() . '.png';
         SaveAvatar::dispatch($avatarUrl, $filename, "user_images/", true, $isBase64);
         return $filename;
     }

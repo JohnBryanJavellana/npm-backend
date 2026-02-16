@@ -47,7 +47,7 @@ class QRReaderCheckInOutCtrl extends Controller
     private function supplyDateTime($dateToday, $checkInOrOut, $model, $column)
     {
         if (\in_array($checkInOrOut, [QrReaderEnum::CHECK_IN->value, QrReaderEnum::CHECK_OUT->value])) {
-            $model->{$column} = $dateToday;
+            return $model->{$column} = $dateToday;
         } else {
             return response()->json(['message' => "We are sorry. It seems that the data provided is not valid."], 409);
         }
@@ -98,10 +98,9 @@ class QRReaderCheckInOutCtrl extends Controller
             $checkInOrOut = $request->checkInOrOut;
 
             $checkForUpdate = CheckInOutLog::where([
-                'userId' => $userId,
+                'user_id' => $userId,
                 'qr_reader_location_id' => $qrLocation,
-                'created_at' => $dateToday
-            ]);
+            ])->whereDate('created_at', $dateToday->format('Y-m-d'));
 
             $record = $checkForUpdate->exists() ? $checkForUpdate->first() : new CheckInOutLog();
             $record->user_id = $userId;
