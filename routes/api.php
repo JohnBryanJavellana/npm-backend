@@ -50,7 +50,6 @@ Route::post('/register', [RegisterController::class, 'register_user']);
 Route::get('/email/verify', [EmailVerificationController::class, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
-Route::get('/qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
 
 /** testing routes */
 Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
