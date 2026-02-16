@@ -11,6 +11,7 @@ use App\Models\RAFacilityRequest;
 use App\Models\RARequestInfo;
 use App\Utils\GenerateTrace;
 use DomainException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 class RecreationalService {
@@ -199,39 +200,62 @@ class RecreationalService {
     public function storeEquipmentRequest($info, $record)
     {
         $uniqueIdentifiers = $info["UI"] ?? null;
+        $data = [];
         if(!empty($uniqueIdentifiers)) {
             foreach($uniqueIdentifiers as $unique_identifier) {
+                
                 $stock = $this->raequipmentStockModel->query()
+                ->where
                 ->uniqueIdentifier($unique_identifier)
                 ->available()
                 ->okayCondition()
-                ->firstOrFail();
+                ->firstOr(function() use ($unique_identifier) {
+                    throw new ModelNotFoundException("Equipment with this code {$unique_identifier} is not unavailable anymore.");
+                });
 
-                $this->raequipmentRequestModel->create([
+                $data[] = [
                     "r_a_request_info_id" => $record->id,
                     "r_a_equipment_stock_id" => $stock->id,
                     "r_a_equipments_id" => $info["id"],
                     "start_date" => $info["from_datetime"],
                     "end_date" => $info["to_datetime"],
                     "issued_condition" => $stock->condition_status,
-                ]);
+                    "updated_at" => now(),
+                    "created_at" => now(),
+                ];
+                // $this->raequipmentRequestModel->create([
+                //     "r_a_request_info_id" => $record->id,
+                //     "r_a_equipment_stock_id" => $stock->id,
+                //     "r_a_equipments_id" => $info["id"],
+                //     "start_date" => $info["from_datetime"],
+                //     "end_date" => $info["to_datetime"],
+                //     "issued_condition" => $stock->condition_status,
+                // ]);
             }
         }
 
         for($default = 0; $default < $info["quantity"]; $default++) {
-            $this->raequipmentRequestModel->create([
+            $data[] = [
                 "r_a_request_info_id" => $record->id,
                 "r_a_equipment_stock_id" => null,
                 "r_a_equipments_id" => $info["id"],
                 "start_date" => $info["from_datetime"],
                 "end_date" => $info["to_datetime"],
                 "issued_condition" => null,
-            ]);
-        }
-    }
-    public function storeEquipmentV1($info, $record)
-    {
+                "updated_at" => now(),
+                "created_at" => now(),
+            ];
 
+            // $this->raequipmentRequestModel->create([
+            //     "r_a_request_info_id" => $record->id,
+            //     "r_a_equipment_stock_id" => null,
+            //     "r_a_equipments_id" => $info["id"],
+            //     "start_date" => $info["from_datetime"],
+            //     "end_date" => $info["to_datetime"],
+            //     "issued_condition" => null,
+            // ]);
+        }
+        $this->raequipmentRequestModel->insert($data);
     }
 
     public function storeFacilitiesRequest($info, $record)
@@ -247,6 +271,8 @@ class RecreationalService {
         ->available()
         ->okayCondition()
         ->firstOrFail();
+
+        if(!$facility)
         //we can ready the data and just insert for not multiple creation
         $this->rafacilityRequestModel->create([
             "r_a_request_info_id" => $record->id,
@@ -312,15 +338,8 @@ class RecreationalService {
     }
     public function cancelRequests($validated)
     {
-        /**
-         *
-         * Ready the data for cancellation
-         *  if the request is already cancelled or received
-         *
-         */
 
         DB::transaction(function() use ($validated){
-        \Log::info("cancelDataOnArray", [$validated]);
             $restrictedStatus = ["CANCELLED","RETURNED","DONE","DECLINED"];
 
             $model = match ($validated["documentType"]) {
