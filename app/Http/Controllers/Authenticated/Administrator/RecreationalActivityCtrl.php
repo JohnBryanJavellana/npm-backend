@@ -83,7 +83,8 @@ class RecreationalActivityCtrl extends Controller
     public function get_requested_equipments(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $raEquipmentRequests_temp = RAEquipmentRequest::with([
-                'equipment_stock'
+                'equipment_stock',
+                'equipment'
             ])
             ->where([
                 'r_a_request_info_id' => $request->rARequestInfoId,
