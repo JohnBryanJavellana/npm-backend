@@ -541,10 +541,7 @@ class EnrollmentCtrl extends Controller
 
             $check = CheckForDocumentExistence::exists(
                 ModuleType::class,
-                [
-                    'name' => $request->name,
-                    'category' => $request->category
-                ],
+                [ 'name' => $request->name ],
                 !$isPost,
                 $documentId,
                 'id',
@@ -560,7 +557,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTMODTYPE : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTMODTYPE . " ID#$this_module_type->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTMODTYPE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTMODTYPE->value . " ID#$this_module_type->id"
             );
 
             if (env('USE_EVENT')) {

@@ -383,6 +383,7 @@ class RecreationalActivityCtrl extends Controller
             $documentId = $request->documentId;
 
             $this_facility = $isPost ? new RAFacility() : RAFacility::findOrFail($documentId);
+            if($isPost) $this_facility->unique_identifier = GenerateTrace::createTraceNumber(RAFacility::class, '-RAF-', 'unique_identifier', 10, 99);
             $this_facility->name = $request->name;
             $this_facility->additional_details = $request->additionalDetails;
             $this_facility->location = $request->location;
