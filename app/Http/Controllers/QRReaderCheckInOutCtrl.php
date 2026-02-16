@@ -91,17 +91,10 @@ class QRReaderCheckInOutCtrl extends Controller
 
     public function qrReader(Request $request)
     {
-        return TransactionUtil::transact(
-            null,
-            [],
-            function () {
-
-                $locations = QRReaderLocation::all();
-
-
-                return response()->json(['locations' => $locations], 200);
-            }
-        );
+        return TransactionUtil::transact(null, [], function () {
+            $locations = QRReaderLocation::all();
+            return response()->json(['locations' => $locations], 200);
+        });
     }
 
     /**
@@ -113,7 +106,7 @@ class QRReaderCheckInOutCtrl extends Controller
      */
     private function supplyDateTime($dateToday, $checkInOrOut, $model, $column)
     {
-        if (in_array($checkInOrOut, [QrReaderEnum::CHECK_IN->value, QrReaderEnum::CHECK_OUT->value])) {
+        if (\in_array($checkInOrOut, [QrReaderEnum::CHECK_IN->value, QrReaderEnum::CHECK_OUT->value])) {
             $model->{$column} = $dateToday;
         } else {
             return response()->json(['message' => "We are sorry. It seems that the data provided is not valid."], 409);
