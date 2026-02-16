@@ -214,7 +214,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('ra_remove_facility/{facility_id}', [RecreationalActivityCtrl::class, 'ra_remove_facility']);
         });
 
-        Route::get('/qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
+        Route::get('qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
         Route::post('check-in-out', [QRReaderCheckInOutCtrl::class, 'check_in_out']);
         Route::post('get_charges_predata', [DormitoryController::class, 'get_charges_predata']);
         Route::post('get_trainee_enrolled_trainings', [DormitoryController::class, 'get_trainee_enrolled_trainings']);
