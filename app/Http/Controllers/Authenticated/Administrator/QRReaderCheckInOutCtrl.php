@@ -81,17 +81,11 @@ class QRReaderCheckInOutCtrl extends Controller
                 'created_at' => $dateToday
             ]);
 
-            if ($checkForUpdate->exists()) {
-                $updateRecord = $checkForUpdate->first();
-                $this->supplyDateTime($dateToday, $checkInOrOut, $updateRecord, strtolower($checkInOrOut));
-                $updateRecord->save();
-            } else {
-                $newRecord = new CheckInOutLog();
-                $newRecord->user_id = $userId;
-                $newRecord->qr_reader_location_id = $qrLocation;
-                $this->supplyDateTime($dateToday, $checkInOrOut, $newRecord, strtolower($checkInOrOut));
-                $newRecord->save();
-            }
+            $record = $checkForUpdate->exists() ? $checkForUpdate->first() : new CheckInOutLog();
+            $record->user_id = $userId;
+            $record->qr_reader_location_id = $qrLocation;
+            $this->supplyDateTime($dateToday, $checkInOrOut, $record, strtolower($checkInOrOut));
+            $record->save();
 
             return response()->json(['message' => "Success!"], 200);
         });
