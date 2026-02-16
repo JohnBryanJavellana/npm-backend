@@ -215,7 +215,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::get('qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
-        Route::post('check-in-out', [QRReaderCheckInOutCtrl::class, 'check_in_out']);
+        Route::post('qrreader/check-in-out', [QRReaderCheckInOutCtrl::class, 'check_in_out']);
         Route::post('get_charges_predata', [DormitoryController::class, 'get_charges_predata']);
         Route::post('get_trainee_enrolled_trainings', [DormitoryController::class, 'get_trainee_enrolled_trainings']);
         Route::post('submit-csm', [Account::class, 'submit_csm']);
