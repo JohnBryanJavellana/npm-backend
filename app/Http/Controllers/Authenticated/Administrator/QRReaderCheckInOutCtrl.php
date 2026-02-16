@@ -67,7 +67,7 @@ class QRReaderCheckInOutCtrl extends Controller
                     ->with('qrLocation')
                     ->first();
 
-                if ($check->qrLocation->whereIn('type', $request->type)) {
+                if ($check->qrLocation->whereNotIn('type', $request->type)) {
                     return response()->json(['message' => "We are sorry. You do not have enough permission to view records for " . implode(', ', $request->type)], 409);
                 }
             }
