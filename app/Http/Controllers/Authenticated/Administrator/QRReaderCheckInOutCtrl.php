@@ -97,12 +97,6 @@ class QRReaderCheckInOutCtrl extends Controller
             $qrLocation = $request->qrLocation;
             $checkInOrOut = $request->checkInOrOut;
 
-            $checkUserExistence = User::find($userId);
-
-            if(!$checkUserExistence) {
-                return response()->json(['message' => "We are sorry. We noticed that the user ($userId) is not yet in our users list."], 409);
-            }
-
             $checkForUpdate = CheckInOutLog::where([
                 'userId' => $userId,
                 'qr_reader_location_id' => $qrLocation,

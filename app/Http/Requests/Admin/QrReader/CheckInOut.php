@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Admin\QrReader;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CheckInOut extends FormRequest
 {
