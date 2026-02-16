@@ -19,7 +19,8 @@ use App\Enums\Administrator\{
 use App\Models\{
     CheckInOutLog,
     QrReaderLocation,
-    UserAssignedQrLocation
+    UserAssignedQrLocation,
+    User
 };
 
 class QRReaderCheckInOutCtrl extends Controller
@@ -68,6 +69,12 @@ class QRReaderCheckInOutCtrl extends Controller
             $qrLocation = $request->qrLocation;
             $checkInOrOut = $request->checkInOrOut;
 
+            $checkUserExistence = User::find($userId);
+
+            if(!$checkUserExistence) {
+                return response()->json(['message' => "We are sorry. We noticed that the user ($userId) is not yet in our user list."], 409);
+            }
+
             $checkForUpdate = CheckInOutLog::where([
                 'userId' => $userId,
                 'qr_reader_location_id' => $qrLocation,
@@ -90,6 +97,10 @@ class QRReaderCheckInOutCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of qrReader
+     * @param Request $request
+     */
     public function qrReader(Request $request)
     {
         return TransactionUtil::transact(null, [], function () {
