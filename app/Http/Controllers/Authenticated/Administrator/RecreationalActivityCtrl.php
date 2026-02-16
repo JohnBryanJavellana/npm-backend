@@ -365,7 +365,11 @@ class RecreationalActivityCtrl extends Controller
         return TransactionUtil::transact(null, [], function () use ($request) {
             $ra_facilities_temp = RAFacility::withCount(['hasData']);
             $ra_facilities = $request->documentId
-                ? $ra_facilities_temp->where('id', $request->documentId)->with(['images', 'relationships'])->first()
+                ? $ra_facilities_temp->where('id', $request->documentId)->with([
+                    'images',
+                    'relationships',
+                    'relationships.equipment'
+                ])->first()
                 : $ra_facilities_temp->get();
 
             return response()->json(['ra_facilities' => $ra_facilities], 200);
