@@ -185,8 +185,6 @@ class RecreationalService {
                 "reason" => $validated["purpose"],
             ]);
 
-            \Log::info("dataWhat", [$validated]);
-
             foreach($validated["data"] as $info) {
                 if ($info["type"] === "EQUIPMENT") {
                     $this->storeEquipmentRequest($info, $record);
@@ -203,14 +201,12 @@ class RecreationalService {
         $data = [];
         if(!empty($uniqueIdentifiers)) {
             foreach($uniqueIdentifiers as $unique_identifier) {
-                
                 $stock = $this->raequipmentStockModel->query()
-                ->where
                 ->uniqueIdentifier($unique_identifier)
                 ->available()
                 ->okayCondition()
                 ->firstOr(function() use ($unique_identifier) {
-                    throw new ModelNotFoundException("Equipment with this code {$unique_identifier} is not unavailable anymore.");
+                    throw new ModelNotFoundException("Selected equipment with ID {$unique_identifier} is not unavailable anymore.");
                 });
 
                 $data[] = [
@@ -223,37 +219,22 @@ class RecreationalService {
                     "updated_at" => now(),
                     "created_at" => now(),
                 ];
-                // $this->raequipmentRequestModel->create([
-                //     "r_a_request_info_id" => $record->id,
-                //     "r_a_equipment_stock_id" => $stock->id,
-                //     "r_a_equipments_id" => $info["id"],
-                //     "start_date" => $info["from_datetime"],
-                //     "end_date" => $info["to_datetime"],
-                //     "issued_condition" => $stock->condition_status,
-                // ]);
             }
         }
-
-        for($default = 0; $default < $info["quantity"]; $default++) {
-            $data[] = [
-                "r_a_request_info_id" => $record->id,
-                "r_a_equipment_stock_id" => null,
-                "r_a_equipments_id" => $info["id"],
-                "start_date" => $info["from_datetime"],
-                "end_date" => $info["to_datetime"],
-                "issued_condition" => null,
-                "updated_at" => now(),
-                "created_at" => now(),
-            ];
-
-            // $this->raequipmentRequestModel->create([
-            //     "r_a_request_info_id" => $record->id,
-            //     "r_a_equipment_stock_id" => null,
-            //     "r_a_equipments_id" => $info["id"],
-            //     "start_date" => $info["from_datetime"],
-            //     "end_date" => $info["to_datetime"],
-            //     "issued_condition" => null,
-            // ]);
+        //check forr what if no quantity just qr
+        if(!empty($info["quantity"])) {
+            for($default = 0; $default < $info["quantity"]; $default++) {
+                $data[] = [
+                    "r_a_request_info_id" => $record->id,
+                    "r_a_equipment_stock_id" => null,
+                    "r_a_equipments_id" => $info["id"],
+                    "start_date" => $info["from_datetime"],
+                    "end_date" => $info["to_datetime"],
+                    "issued_condition" => null,
+                    "updated_at" => now(),
+                    "created_at" => now(),
+                ];
+            }
         }
         $this->raequipmentRequestModel->insert($data);
     }
@@ -263,23 +244,29 @@ class RecreationalService {
         $facility = $this->rafacilityModel->query()
         ->select("id", "condition_status")
         ->whereKey($info["id"])
-        //look for the overlapping of this facility, still lacks for the dates in between
-        ->whereDoesntHave("hasData", fn($query) => $query->where([
-            "start_date" => $info["from_datetime"],
-            "end_date" => $info["to_datetime"],
-            ]))
+        ->whereDoesntHave("hasData", function ($query) use ($info) {
+            $query->where(function ($q) use ($info) {
+                $q->whereBetween('start_date', [$info['from_datetime'], $info['to_datetime']])
+                ->orWhereBetween('end_date', [$info['from_datetime'], $info['to_datetime']])
+                ->orWhere(function ($subQ) use ($info) {
+                    $subQ->where('start_date', '<=', $info['from_datetime'])
+                        ->where('end_date', '>=', $info['to_datetime']);
+                });
+            });
+        })
         ->available()
         ->okayCondition()
-        ->firstOrFail();
+        ->firstOr(function() {
+            throw new ModelNotFoundException("Selected facility is not available anymore.");
+        });
 
         if(!$facility)
-        //we can ready the data and just insert for not multiple creation
-        $this->rafacilityRequestModel->create([
-            "r_a_request_info_id" => $record->id,
-            "r_a_facility_id" => $info["id"],
-            "start_date" => $info["from_datetime"],
-            "end_date" => $info["to_datetime"],
-            "issued_condition" =>$facility->condition_status
+            $this->rafacilityRequestModel->create([
+                "r_a_request_info_id" => $record->id,
+                "r_a_facility_id" => $info["id"],
+                "start_date" => $info["from_datetime"],
+                "end_date" => $info["to_datetime"],
+                "issued_condition" =>$facility->condition_status
         ]);
     }
 
@@ -291,9 +278,15 @@ class RecreationalService {
             default    => throw new DomainException("Invalid request!")
         };
 
-        $record = $model->query()
-        ->where("unique_identifier", $validated->UIId)
-        ->with([
+        $record = $model->query();
+
+        if($validated->type === "EQUIPMENT") {
+            $record->where("unique_identifier", $validated->UIId);
+        } else {
+            $record->whereKey($validated->UIId);
+        }
+
+        $record->with([
             "equipment" => function($q) {
                 $q->withCount([
                     "stocks" => function($qq) {
@@ -324,7 +317,12 @@ class RecreationalService {
         ])
         ->available()
         ->okayCondition()
-        ->firstOrFail();
+        ->first();
+
+        if(!$record) {
+            throw new DomainException($validated["type"] === "EQUIPMENT" ? "Equipment" : "Facility" . "not found");
+        }
+        
 
         return $record;
     }

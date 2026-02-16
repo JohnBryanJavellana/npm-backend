@@ -3,9 +3,11 @@
 namespace App\Http\Requests\Recreational;
 
 use App\Enums\UserRoleEnum;
+use App\Rules\Trainee\Recreational\QuantityRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class RecreationalRequest extends FormRequest
 {
@@ -33,12 +35,42 @@ class RecreationalRequest extends FormRequest
         , $data);
 
         $this->merge([
-            "user_id" => $this->has("userId")
-                ?  $this->input("userId")
+            "user_id" => $this->has("user_id")
+                ?  $this->input("user_id")
                 :  $this->user()->id,
             "data" => $data
         ]);     
     }
+
+
+
+    public function attributes(): array
+    {
+        $attributes = [];
+        $rows = $this->input('data', []);
+        $totalRows = count($rows);
+
+        foreach ($rows as $index => $row) {
+
+            if ($totalRows === 1) {
+                $attributes["data.$index.quantity"] = "Quantity";
+            } else {
+                $attributes["data.$index.quantity"] =
+                    "Item " . ($index + 1) . ":";
+            }
+        }
+
+        return $attributes;
+    }
+
+    public function messages(): array
+    {
+        return [
+            'data.*.quantity.required_without' =>
+                ':attribute No selected item!',
+        ];
+    }
+
 
     /**
      * Get the validation rules that apply to the request.
@@ -54,7 +86,13 @@ class RecreationalRequest extends FormRequest
             "data.*.from_datetime" => "required|date_format:Y-m-d H:i",
             "data.*.UI" => "nullable|array|exists:r_a_equipment_stocks,unique_identifier",
             "data.*.to_datetime" => "required|date_format:Y-m-d H:i|after:data.*.from_datetime",
-            "data.*.quantity" => "integer",
+            'data.*.quantity' => [
+                'required_without:data.*.UI',
+                'nullable', 
+                'numeric',
+                'min:1'
+                // new QuantityRule()
+            ],
             "data.*.type" => "required|in:EQUIPMENT,FACILITY,HYBRID",
             "purpose" => "required|string|max:255"
         ];

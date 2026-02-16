@@ -33,13 +33,6 @@ class DormitoryRequestService {
         protected DormitoryItemBorrowing $dormitoryItemBorrowing,
     ) {}
 
-    // public function viewUserRequest($userId, $traceNumber)
-    // {
-    //     $cacheKey = "a$userId";
-    //     return Cache::remember($cacheKey, self::LONG_TTL, function() {
-
-    //     });
-    // }
 
 public function getRecommendedRoom($validated)
 {
