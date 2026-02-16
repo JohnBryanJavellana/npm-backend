@@ -24,11 +24,12 @@ class CSMService {
 
     public function checkExistingCSM($validated, $userId)
     {
+        \Log::info("inside_csm_service", [$validated]);
         $CSM = $this->csmModel->query()
-        ->forUser($userId)
-        ->where('reference_id' , $validated["reference_id"])
-        ->exists();
-
+            ->forUser($userId)
+            ->where('reference_id' , $validated["reference_id"])
+            ->exists();
+                                
         if($CSM) {
             throw new DomainException("A CSM is already existing for this request.");
         }

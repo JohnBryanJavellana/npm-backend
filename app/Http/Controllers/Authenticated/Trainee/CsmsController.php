@@ -88,7 +88,7 @@ class CsmsController extends Controller
     public function createV1(CsmRequest $request)
     {
         try {
-            $validated = $request->validated;
+            $validated = $request->validated();
             $userId = $request->user()->id;
 
             $this->csmService->checkExistingCSM($validated, $userId);
