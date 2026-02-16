@@ -26,6 +26,34 @@ use App\Models\{
 class QRReaderCheckInOutCtrl extends Controller
 {
     /**
+     * Summary of qrReader
+     * @param Request $request
+     */
+    public function qrReader(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $locations = QRReaderLocation::all();
+            return response()->json(['locations' => $locations], 200);
+        });
+    }
+
+    /**
+     * Summary of supplyDateTime
+     * @param mixed $dateToday
+     * @param mixed $checkInOrOut
+     * @param mixed $model
+     * @param mixed $column
+     */
+    private function supplyDateTime($dateToday, $checkInOrOut, $model, $column)
+    {
+        if (\in_array($checkInOrOut, [QrReaderEnum::CHECK_IN->value, QrReaderEnum::CHECK_OUT->value])) {
+            $model->{$column} = $dateToday;
+        } else {
+            return response()->json(['message' => "We are sorry. It seems that the data provided is not valid."], 409);
+        }
+    }
+
+    /**
      * Summary of get_log_in_out_records
      * @param Request $request
      */
@@ -89,33 +117,5 @@ class QRReaderCheckInOutCtrl extends Controller
 
             return response()->json(['message' => "Success!"], 200);
         });
-    }
-
-    /**
-     * Summary of qrReader
-     * @param Request $request
-     */
-    public function qrReader(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () {
-            $locations = QRReaderLocation::all();
-            return response()->json(['locations' => $locations], 200);
-        });
-    }
-
-    /**
-     * Summary of supplyDateTime
-     * @param mixed $dateToday
-     * @param mixed $checkInOrOut
-     * @param mixed $model
-     * @param mixed $column
-     */
-    private function supplyDateTime($dateToday, $checkInOrOut, $model, $column)
-    {
-        if (\in_array($checkInOrOut, [QrReaderEnum::CHECK_IN->value, QrReaderEnum::CHECK_OUT->value])) {
-            $model->{$column} = $dateToday;
-        } else {
-            return response()->json(['message' => "We are sorry. It seems that the data provided is not valid."], 409);
-        }
     }
 }
