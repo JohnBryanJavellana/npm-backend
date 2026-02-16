@@ -283,7 +283,7 @@ class RecreationalService {
         if($validated->type === "EQUIPMENT") {
             $record->where("unique_identifier", $validated->UIId);
         } else {
-            $record->whereKey($validated->UIId);
+            $record->whereKey($validated->itemId);
         }
 
         $record->with([
