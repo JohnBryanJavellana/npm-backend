@@ -72,7 +72,7 @@ class QRReaderCheckInOutCtrl extends Controller
             $checkUserExistence = User::find($userId);
 
             if(!$checkUserExistence) {
-                return response()->json(['message' => "We are sorry. We noticed that the user ($userId) is not yet in our user list."], 409);
+                return response()->json(['message' => "We are sorry. We noticed that the user ($userId) is not yet in our users list."], 409);
             }
 
             $checkForUpdate = CheckInOutLog::where([
