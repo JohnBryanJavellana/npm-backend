@@ -11,12 +11,9 @@ use App\Http\Controllers\Authenticated\Administrator\{
     LibraryController,
     Cashier,
     Masterlist,
-    RecreationalActivityCtrl
+    RecreationalActivityCtrl,
+    QRReaderCheckInOutCtrl
 };
-
-
-// Route::post('request', [RecreationalActivityCtrl::class, 'aarequest']);
-
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -217,6 +214,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('ra_remove_facility/{facility_id}', [RecreationalActivityCtrl::class, 'ra_remove_facility']);
         });
 
+        Route::get('/qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
+        Route::post('check_in_out', [QRReaderCheckInOutCtrl::class, 'check_in_out']);
         Route::post('get_charges_predata', [DormitoryController::class, 'get_charges_predata']);
         Route::post('get_trainee_enrolled_trainings', [DormitoryController::class, 'get_trainee_enrolled_trainings']);
         Route::post('submit-csm', [Account::class, 'submit_csm']);
