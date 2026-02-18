@@ -29,6 +29,10 @@ use App\Http\Requests\Admin\RecreationalActivity\{
 };
 use Carbon\Carbon;
 use App\Enums\Administrator\RAEnum;
+use App\Enums\{
+    AdministratorAuditActions,
+    AdministratorReturnResponse
+};
 
 class RecreationalActivityCtrl extends Controller
 {
@@ -563,7 +567,41 @@ class RecreationalActivityCtrl extends Controller
                         new BERecreational('')
                     );
                 }
-                return response()->json(['message' => "Success!"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPSTCK->value], 200);
+            }
+        });
+    }
+
+    /**
+     * Summary of ra_update_equipment_stock
+     * @param Request $request
+     */
+    public function ra_update_equipment_stock(Request $request) {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $documentId = $request->documentId;
+            $conditionStatus = $request->conditionStatus;
+            $availabilityStatus = $request->availabilityStatus;
+
+            $this_equipment_stock = RAEquipmentStock::where('id', $documentId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$this_equipment_stock) {
+                return response()->json(['message' => "Equipment stock not found. Please try again."], 409);
+            } else {
+                $this_equipment_stock->condition_status = $conditionStatus;
+                $this_equipment_stock->availability_status = $availabilityStatus;
+                $this_equipment_stock->save();
+
+                AuditHelper::log($request->user()->id, "Updated an equipment stock. ID#$documentId");
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BERecreational('')
+                    );
+                }
+
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPSTCK->value], 200);
             }
         });
     }

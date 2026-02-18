@@ -78,7 +78,9 @@ class QRReaderCheckInOutCtrl extends Controller
             ])->orderBy('created_at', 'DESC');
 
             $records = $request->type
-                ? $records_temp->qrLocation()->whereIn('type', $request->type)->get()
+                ? $records_temp->whereHas('qrLocation', function($query) use($request) {
+                    $query->whereIn('type', $request->type);
+                })->get()
                 : $records_temp->get();
 
             return response()->json(['records' => $records], 200);
