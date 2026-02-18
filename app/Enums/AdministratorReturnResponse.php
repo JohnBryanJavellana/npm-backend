@@ -156,6 +156,7 @@ enum AdministratorReturnResponse: string {
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY = "You've updated facility successfully!";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY = "You've removed facility successfully!";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPSTCK = "You've removed equipment stock successfully!";
+    case RECREATIONALACTIVITYCTRL_ERR_UPDATED_RECREATIONALACTIVITYEQUIPSTCK = "Equipment stock not found. Please try again.";
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPSTCK = "You've updated an equipment stock successfully!";
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENT = "You've created an equipment successfully!";
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPMENT = "You've updated an equipment successfully!";

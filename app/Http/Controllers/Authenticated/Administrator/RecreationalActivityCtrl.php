@@ -546,6 +546,8 @@ class RecreationalActivityCtrl extends Controller
 
     /**
      * Summary of ra_remove_equipment_stock
+     * @param bool auditActions === FALSE
+     * @param bool returnedMessage === TRUE
      * @param Request $request
      * @param int $equipment_stock_id
      */
@@ -574,6 +576,8 @@ class RecreationalActivityCtrl extends Controller
 
     /**
      * Summary of ra_update_equipment_stock
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param Request $request
      */
     public function ra_update_equipment_stock(Request $request) {
@@ -587,13 +591,16 @@ class RecreationalActivityCtrl extends Controller
                 ->first();
 
             if (!$this_equipment_stock) {
-                return response()->json(['message' => "Equipment stock not found. Please try again."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_UPDATED_RECREATIONALACTIVITYEQUIPSTCK->value], 409);
             } else {
                 $this_equipment_stock->condition_status = $conditionStatus;
                 $this_equipment_stock->availability_status = $availabilityStatus;
                 $this_equipment_stock->save();
 
-                AuditHelper::log($request->user()->id, "Updated an equipment stock. ID#$documentId");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUPSTCK->value . " ID#$documentId"
+                );
 
                 if(env('USE_EVENT')) {
                     event(
