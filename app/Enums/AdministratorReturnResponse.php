@@ -35,6 +35,7 @@ enum AdministratorReturnResponse: string {
     case DORMITORYCTRL_CREATED_DORMITORYINVSTOCK = "You've added a dormitory inventory stock.";
     case DORMITORYCTRL_CREATED_DORMITORYINV = "You've created a dormitory inventory.";
     case DORMITORYCTRL_UPDATED_DORMITORYINV = "You've updated a dormitory inventory.";
+    case DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK = "You've updated a dormitory inventory stock.";
     case DORMITORYCTRL_REMOVED_DORMITORYINVSTOCK = "You've removed a dormitory inventory stock.";
     case DORMITORYCTRL_ERR_DORMITORYINVSTOCK = "Can't remove item. It already has connected data.";
     case DORMITORYCTRL_REMOVED_DORMITORYINV = "You've removed a dormitory inventory item.";

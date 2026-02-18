@@ -123,6 +123,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories']);
             Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock']);
             Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock']);
+            Route::post('get_inventories/update_dormitory_inventory_stock', [DormitoryController::class, 'update_dormitory_inventory_stock']);
             Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
             Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock']);
             Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);

@@ -476,6 +476,41 @@ class DormitoryController extends Controller
     }
 
     /**
+     * Summary of update_dormitory_inventory_stock
+     * @param Request $request
+     */
+    public function update_dormitory_inventory_stock(Request $request) {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $documentId = $request->documentId;
+            $availabilityStatus = $request->availabilityStatus;
+
+            $this_inventory_stock = DormitoryInventoryItem::where('id', $documentId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$this_inventory_stock) {
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK->value], 409);
+            } else {
+                $this_inventory_stock->status = $availabilityStatus;
+                $this_inventory_stock->save();
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK->value . " ID#$documentId"
+                );
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEDormitory('')
+                    );
+                }
+
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK->value], 200);
+            }
+        });
+    }
+
+    /**
      * Summary of remove_dorm_inventory_stock
      * @param bool auditActions === TRUE
      * @param bool returnedMessage === FALSE
