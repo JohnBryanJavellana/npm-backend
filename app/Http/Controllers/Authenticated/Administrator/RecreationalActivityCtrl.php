@@ -124,7 +124,7 @@ class RecreationalActivityCtrl extends Controller
                 return response()->json(['message' => "Sorry your status is already " . ucfirst(strtolower($this_facility->status))], 409);
             }
 
-            $hasDateTimeConflicts = RAFacilityRequest::where('r_a_request_info_id', '!=', $documentId)
+            $hasDateTimeConflicts = RAFacilityRequest::where('id', '!=', $documentId)
                 ->where('r_a_facility_id', $this_facility->r_a_facility_id)
                 ->whereIn('status', [
                     RAEnum::APPROVED,
