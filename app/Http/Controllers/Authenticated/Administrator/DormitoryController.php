@@ -292,7 +292,7 @@ class DormitoryController extends Controller
                 }
             }
 
-            return $request->insideJob ? true : response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYROOM->value .], 201);
+            return $request->insideJob ? true : response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYROOM->value], 201);
         });
     }
 

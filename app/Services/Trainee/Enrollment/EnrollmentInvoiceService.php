@@ -83,6 +83,10 @@ class EnrollmentInvoiceService {
                 "received_amount" => $validated["total_amount"],
                 "datePaid" => Carbon::now()
             ]);
+
+             $this->enrolledCourseModel->whereKey($validated["enrolled_course_id"])->update([
+                "enrolled_course_status" => RequestStatus::PROCESSING_PAYMENT->value
+            ]);
         });
     }
 }

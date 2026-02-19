@@ -292,7 +292,7 @@ class EnrollmentCtrl extends Controller
             Notifications::notify($request->user()->id, $this_training_status->user_id, NotificationEnum::DORMITORY, 'updated your enrollment application status.');
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTAPPSTAT . " ID#$this_training_status->id"
+                AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTAPPSTAT->value . " ID#$this_training_status->id"
             );
 
             if (env('USE_EVENT')) {

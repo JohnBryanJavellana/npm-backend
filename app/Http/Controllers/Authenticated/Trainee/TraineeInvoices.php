@@ -47,6 +47,8 @@ class TraineeInvoices extends Controller
         {
             $validated = $request->validated();
             $this->enrollmentInvoiceService->updateTemporarily($validated);
+
+            return response()->json(["message" => "Payment successfully!"], 200);
         }
         catch (DomainException $e) {
             throw $e;
