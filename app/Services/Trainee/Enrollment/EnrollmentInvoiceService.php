@@ -26,19 +26,6 @@ class EnrollmentInvoiceService {
         RequestStatus::FOR_VERIFICATION
     ];
 
-    //REMOVE
-    public function createEnrollmentInvoice($validated)
-    {
-        DB::transaction(function() use ($validated){
-            $this->enrollmentInvoiceModel->create([
-                "enrolled_course_id" => $validated["enrolled_course_id"],
-                "user_id" => $validated["userId"],
-                "charge_id" => $validated["charge_id"],
-                "trace_number" => GenerateTrace::createTraceNumber($this->enrollmentInvoiceModel, self::prefix),
-            ]);
-        });
-    }
-
     protected function prepareData($validated){
         $record = $this->enrollmentInvoiceModel->query()
         ->forUser($validated["user_id"])
@@ -75,7 +62,6 @@ class EnrollmentInvoiceService {
                     $this->enrolledCourseModel->whereKey($validated["enrolled_course_id"])->update([
                         "enrolled_course_status" => RequestStatus::PROCESSING_PAYMENT->value
                     ]);
-
                 }
                 $this->creditService->storeUserAudit($validated, $validated["user_id"]);
             }
@@ -83,6 +69,20 @@ class EnrollmentInvoiceService {
             return (float) (
               round($validated["total_amount"], 2) - round($validated["credit_amount"], 2)
             );
+        });
+    }
+
+    public function updateTemporarily($validated)
+    {
+        DB::transaction(function() use ($validated) {
+            $invoiceRecord = $this->prepareData($validated);
+            $invoiceRecord->update([
+                "invoice_reference" => $validated["ref_number"],
+                "invoice_status" => RequestStatus::FOR_VERIFICATION,
+                "payment_type" => 'ONLINE',
+                "received_amount" => $validated["total_amount"],
+                "datePaid" => Carbon::now()
+            ]);
         });
     }
 }

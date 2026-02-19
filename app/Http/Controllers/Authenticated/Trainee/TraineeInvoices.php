@@ -46,8 +46,7 @@ class TraineeInvoices extends Controller
         try
         {
             $validated = $request->validated();
-            $this->enrollmentInvoiceService->updateEnrollmentInvoice($validated);
-
+            $this->enrollmentInvoiceService->updateTemporarily($validated);
         }
         catch (DomainException $e) {
             throw $e;

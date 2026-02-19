@@ -18,7 +18,7 @@ class DApplicationResource extends JsonResource
         return [
             "app_id" => $this->id,
             "app_trace_number" => $this->trace_number,
-            "app_room_for_type" => $this->room_for_type,
+            "app_room_for_type" => $this->dormitory_room?->dormitory?->room_fee_type,
             "app_is_air_conditioned" => $this->is_air_conditioned,
             "app_purpose" => $this->purpose,
             "app_filename" => $this->filename,

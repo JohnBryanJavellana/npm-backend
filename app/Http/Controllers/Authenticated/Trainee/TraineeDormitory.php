@@ -206,9 +206,6 @@ class TraineeDormitory extends Controller
         }
     }
 
-    /**
-     * Methods for Dorm Extension
-     */
     public function create_extend_request(CreateExtendRequest $request)
     {
         $validated = $request->validated();
@@ -236,6 +233,7 @@ class TraineeDormitory extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+    
     public function cancel_extend_request(Request $request, $id)
     {
         $user_id = $request->user()->id;
