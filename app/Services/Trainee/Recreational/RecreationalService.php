@@ -228,11 +228,7 @@ class RecreationalService {
                 ];
             }
         }
-<<<<<<< HEAD
-        //check forr what if no quantity just qr
-=======
         //check for what if no quantity just qr
->>>>>>> c3fd2e50a79883850210af25b1e742208bcb28fe
         if(!empty($info["quantity"])) {
             for($default = 0; $default < $info["quantity"]; $default++) {
                 $data[] = [
