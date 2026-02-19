@@ -468,7 +468,6 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $stock = DormitoryInventoryItem::withCount('borrowed')
                 ->where('dormitory_inventory_id', $request->documentId)
-                ->orderBy('status', 'ASC')
                 ->get();
 
             return response()->json(['stocks' => $stock], 200);
