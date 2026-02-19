@@ -17,7 +17,7 @@ class RAFacilityRequest extends Model
 
     public function requestInfo()
     {
-        return $this->belongsTo(RARequestInfo::class);
+        return $this->belongsTo(RARequestInfo::class, "r_a_request_info_id", "id");
     }
 
     public function updatedByWhom() {

@@ -242,7 +242,7 @@ class TraineeDormitory extends Controller
 
             AuditHelper::log($user_id, "User {$user_id} cancelled a dormitory request.");
 
-            return response()->json(["message" => "Your extend request has been successfully cancelled."], 200);
+            return response()->json(["message" => "Your extend request has been successfully cancelled."], status: 200);
         }
         catch (\Exception $e) {
             \Log::info("cancel_extend_request", [$e->getMessage()]);

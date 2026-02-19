@@ -169,7 +169,7 @@ class TraineeRecreational extends Controller
         try
         {
             $this->recreationalService->cancelRequests($validated);
-            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has cancelled a recreational request.");
+            // AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has cancelled a recreational request.");
             // Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has cancelled a recreational request.');
 
             return response()->json(["message" => "Success! Unit has been successfully cancelled."], 200);

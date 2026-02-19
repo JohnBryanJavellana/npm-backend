@@ -32,7 +32,7 @@ class DormitoryTenantService {
         ->lockForUpdate()
         ->whereKey($tenantId)
         ->forUser($userId)
-        ->get();
+        ->first();
 
         $record->update([
             "tenant_status" => $status

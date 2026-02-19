@@ -55,11 +55,11 @@ class DormitoryExtendService {
             throw new DomainException("Dormitory request is not approved yet or an extending request is already existing.");
         }
 
-        if(!$record->transferRequest()->exists()) {
+        if($record->transferRequest()->exists()) {
             throw new DomainException("A pending or approved transfering request already exists.");
         }
 
-        if(!$record->extendRequest()->exists()) {
+        if($record->extendRequest()->exists()) {
             throw new DomainException("A pending or approved extending request already exists.");
         }
     }
@@ -102,9 +102,9 @@ class DormitoryExtendService {
             }
 
             if (!in_array($extend->status, [
-                RequestStatus::PENDING,
-                RequestStatus::APPROVED,
-                RequestStatus::FOR_PAYMENT
+                RequestStatus::PENDING->value,
+                RequestStatus::APPROVED->value,
+                RequestStatus::FOR_PAYMENT->value
             ])) {
                 throw new DomainException('Extending request cancellation is not permitted.');
             }
