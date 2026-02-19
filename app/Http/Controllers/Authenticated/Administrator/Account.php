@@ -153,6 +153,7 @@ class Account extends Controller
     /**
      * Summary of update_password
      * @param bool auditActions === TRUE
+     * ....
      * @param bool returnedMessage === TRUE
      * @param UpdatePassword $request
      */
