@@ -152,7 +152,10 @@ enum AdministratorReturnResponse: string {
      * Summary of RECREATIONALACTIVITYCTRL
      */
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY = "Facility updated successfully!";
+    case RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQFACILITY = "Sorry your status is already";
+    case RECREATIONALACTIVITYCTRL_CONFLICT_ERR_RECREATIONALACTIVITYREQFACILITY = "Scheduling conflict detected. This facility is already booked for the selected time range.";
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQEQUIPMENT = "All items updated successfully!";
+    case RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQEQUIPMENT = "Update partially completed. successCount successful, $failCount failed. Summary:";
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY = "You've created facility successfully!";
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY = "You've updated facility successfully!";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY = "You've removed facility successfully!";
