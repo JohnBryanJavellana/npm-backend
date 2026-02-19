@@ -169,7 +169,19 @@ class RecreationalService {
 
     public function validateFacilityRequest($info, $user_id)
     {
+        $exists = $this->rafacilityRequestModel->where([
+            "r_a_facility_id" => $info["id"],
+            "start_date" => $info["from_datetime"],
+            "end_date" => $info["to_datetime"],
+        ])
+        ->whereHas("requestInfo", function($query) use ($user_id) { 
+            $query->forUser($user_id);
+        })
+        ->exists();
 
+        if($exists) {
+            throw new DomainException("The selected facility is already reserved within the chosen time range. Please select a different schedule.");
+        }
     }
 
     public function storeRecreationalRequests($validated)
@@ -195,7 +207,7 @@ class RecreationalService {
                 if ($info["type"] === "EQUIPMENT") {
                     $this->storeEquipmentRequest($info, $record);
                 } else {
-                    $this->
+                    $this->validateFacilityRequest($info, $validated["user_id"]);
                     $this->storeFacilitiesRequest($info, $record);
                 }
             }
@@ -279,37 +291,6 @@ class RecreationalService {
         ]);
     }
 
-    public function isUniqueIdenfierExist($validated)
-    {
-        $model = match ($validated->type) {
-            'EQUIPMENT'  => $this->raequipmentStockModel,
-            'FACILITY' => $this->rafacilityModel,
-            default    => throw new DomainException("Invalid request!")
-        };
-
-        $record = $model->query();
-
-        if($validated->type === "EQUIPMENT") {
-            $record
-            ->where("unique_identifier", $validated->UIId);
-        } else {
-            $record->whereKey($validated->itemId);
-        }
-
-        $record->with([
-            "equipment" => function($q) {
-                $q->withCount([
-                    "stocks" => function($qq) {
-                $qq->available()->okayCondition();
-            }]);
-            }
-        ])
-        ->available()
-        ->okayCondition()
-        ->firstOrFail();
-
-        return $record;
-    }
     public function isUniqueIdenfierExistV1($validated)
     {
         if (!isset($validated->UIId) || $validated->UIId === false) {
@@ -341,12 +322,6 @@ class RecreationalService {
         }
         return $record;
     }
-
-    /**
-     * prepare the retrived data, separate each type
-     * fetch each Id in the separated values, using whereIn()
-     * and lockForUpdate, update those records that were fetched
-     */
 
     public function prepareForCancellation($record)
     {

@@ -13,7 +13,6 @@ use App\Models\{
 use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
-use App\Utils\SaveFile;
 use Illuminate\Support\Facades\DB;
 use DomainException;
 
@@ -59,7 +58,6 @@ public function getRecommendedRoom($validated)
         ->havingRaw("overlapping_tenants_count + ? <= ?", [$requiredSlots, $capacity])
         ->orderBy('overlapping_tenants_count', 'asc')
         // ->orderBy('room_cost', 'asc')
-
         ->get();
 }
 

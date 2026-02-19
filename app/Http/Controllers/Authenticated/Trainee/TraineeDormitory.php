@@ -206,9 +206,6 @@ class TraineeDormitory extends Controller
         }
     }
 
-    /**
-     * Methods for Dorm Extension
-     */
     public function create_extend_request(CreateExtendRequest $request)
     {
         $validated = $request->validated();
@@ -236,6 +233,7 @@ class TraineeDormitory extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+    
     public function cancel_extend_request(Request $request, $id)
     {
         $user_id = $request->user()->id;
@@ -244,7 +242,11 @@ class TraineeDormitory extends Controller
 
             AuditHelper::log($user_id, "User {$user_id} cancelled a dormitory request.");
 
+<<<<<<< HEAD
             return response()->json(["message" => "Your extend request has been successfully cancelled.OK"], 200);
+=======
+            return response()->json(["message" => "Your extend request has been successfully cancelled."], status: 200);
+>>>>>>> ab2e4379b924edb0bf62d72809588d45fc30ddc0
         }
         catch (\Exception $e) {
             \Log::info("cancel_extend_request", [$e->getMessage()]);
