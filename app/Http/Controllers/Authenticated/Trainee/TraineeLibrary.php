@@ -269,10 +269,10 @@ class TraineeLibrary extends Controller
             //EMAIL ABOUT SENDING A BORROWING A BOOK
             //CHANGE THE imbed images TO BASE-64 FOR EMAIL??
             SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
-            AuditHelper::log($userId, "User {$userId} sent a book request.");
+            AuditHelper::log($userId, "User {$userId} sent a book request.OK");
             Notifications::notify($userId, null, 'LIBRARY', 'has sent a book request.');
 
-            return response()->json(['message' => 'Your book request was sent successfully!'], 200);
+            return response()->json(['message' => 'Your book request was sent successfully!OK'], 200);
         }
         catch (ModelNotFoundException) {
             return response()->json(["message" => "User record not found."], 404);
@@ -344,10 +344,10 @@ class TraineeLibrary extends Controller
             $this->forgetCache($user_id);
 
             SendingEmail::dispatch($request->user(), new BookReservationStatus(['status' => "CANCELLED"], $request->user()));
-            AuditHelper::log($user_id, "User {$user_id} cancelled a book request.");
+            AuditHelper::log($user_id, "User {$user_id} cancelled a book request.OK");
 
             DB::commit();
-            return response()->json(['message' => "You're request has been cancelled successfully."], 200);
+            return response()->json(['message' => "You're request has been cancelled successfully.OK"], 200);
         } catch (\Exception $e){
             \Log::error('error_cancel_book', [$e]);
             return response()->json(["message" => "Something went wrong, Please try again"], 500);
@@ -405,9 +405,9 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $this->libraryRenewService->storeRenewRequest($validated);
 
-            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} sent a book renewal request.");
+            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} sent a book renewal request.OK");
 
-            return response()->json(["message" => "You've successfully sent a book renewal request."], 200);
+            return response()->json(["message" => "You've successfully sent a book renewal request.OK"], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -425,7 +425,7 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $this->libraryRenewService->cancelRenewRequest($validated);
             // AuditHelper::log($user_id, "User {$user_id} renewed a book.");
-            return response()->json(["You've successfully cancelled a book renewal request."], 200);
+            return response()->json(["You've successfully cancelled a book renewal request.OK"], 200);
         }
         catch (ModelNotFoundException) {
             return response()->json(["wow not found"], 404);

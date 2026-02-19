@@ -52,7 +52,7 @@ class CsmsController extends Controller
             return response()->json(["message" => "No Record Found!"], 404);
         }
     }
-    
+
     public function create(Request $request)
     {
         try {
@@ -73,11 +73,11 @@ class CsmsController extends Controller
             if(strtoupper($request->service) === 'LIBRARY' && $request->has('reference_id')) {
                 $this->forgetUserCache($userId);
             }
-            
-            AuditHelper::log($userId, "User {$userId} has successfully submitted a service survey.");
+
+            AuditHelper::log($userId, "User {$userId} has successfully submitted a service survey.OK");
             DB::commit();
 
-            return response()->json(["Successfully Submitted!"], 200);
+            return response()->json(["Successfully Submitted!OK"], 200);
         }
         catch (\Exception $e) {
             DB::rollBack();
@@ -93,7 +93,7 @@ class CsmsController extends Controller
 
             $this->csmService->checkExistingCSM($validated, $userId);
             $this->csmService->storeCustomerSatisfactionSurvey($validated, $userId);
-            
+
             if($request->service === ModuleNameEnum::LIBRARY->value && $request->has('reference_id')) {
                 $this->forgetUserCache($userId);
             }
@@ -114,14 +114,14 @@ class CsmsController extends Controller
 
     public function delete($id)
     {
-        try {   
+        try {
         DB::beginTransaction();
-            
+
         $csm_record = CSM::findOrFail($id);
         $csm_record->delete();
-            
+
         DB::commit();
-        return response()->json(["message" => "Deleted Successfully!"], 204);
+        return response()->json(["message" => "Deleted Successfully!OK"], 204);
         }
         catch (\Exception $e) {
         DB::rollBack();

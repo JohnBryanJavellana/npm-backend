@@ -62,7 +62,7 @@ class TraineeRecreational extends Controller
         {
             return RecreationalsViewRecFacilities::collection($this->recreationalService->getFacilities());
         }
-        catch (\Exception $e) { 
+        catch (\Exception $e) {
             return response()->json([$e], 500);
         }
     }
@@ -136,14 +136,14 @@ class TraineeRecreational extends Controller
             return response()->json(['recRequests' => $recRequests], 200);
         });
     }
-    
+
     /**
      * Summary of getRecreationalRequest
      * @param ViewRecreationalRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function getRecreationalRequest(ViewRecreationalRequest $request)
-    {   
+    {
         $validated = $request->validated();
         try
         {
@@ -170,10 +170,10 @@ class TraineeRecreational extends Controller
         {
             $this->recreationalService->cancelRequests($validated);
 
-            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has cancelled a recreational request.");
+            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has cancelled a recreational request.OK");
             // Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has cancelled a recreational request.');
 
-            return response()->json(["message" => "Success! Unit has been successfully cancelled."], 200);
+            return response()->json(["message" => "Success! Unit has been successfully cancelled.OK"], 200);
         }
         catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Request not found"], 404);
@@ -200,7 +200,7 @@ class TraineeRecreational extends Controller
             $this->recreationalService->storeRecreationalRequests($validated);
 
 
-            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has sent a recreational request.");
+            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has sent a recreational request.OK");
             Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has sent a recreational request.');
 
             if(env("USE_EVENT")) {
@@ -211,9 +211,9 @@ class TraineeRecreational extends Controller
                     );
                 }
                 catch (\Exception $e) {
-                }                
+                }
             }
-            return response()->json(["message" => "Successfully sent a recreational request."], 200);
+            return response()->json(["message" => "Successfully sent a recreational request.OK"], 200);
         }
         catch (DomainException $e) {
             throw $e;
