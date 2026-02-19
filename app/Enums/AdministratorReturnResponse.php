@@ -35,6 +35,7 @@ enum AdministratorReturnResponse: string {
     case DORMITORYCTRL_CREATED_DORMITORYINVSTOCK = "You've added a dormitory inventory stock.";
     case DORMITORYCTRL_CREATED_DORMITORYINV = "You've created a dormitory inventory.";
     case DORMITORYCTRL_UPDATED_DORMITORYINV = "You've updated a dormitory inventory.";
+    case DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK = "You've updated a dormitory inventory stock.";
     case DORMITORYCTRL_REMOVED_DORMITORYINVSTOCK = "You've removed a dormitory inventory stock.";
     case DORMITORYCTRL_ERR_DORMITORYINVSTOCK = "Can't remove item. It already has connected data.";
     case DORMITORYCTRL_REMOVED_DORMITORYINV = "You've removed a dormitory inventory item.";
@@ -147,19 +148,54 @@ enum AdministratorReturnResponse: string {
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADERASSIGNMENT = "You've removed a qr reader assignment.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADER = "You've removed a qr reader.";
     case MASTERLISTCTRL_ERR_REMOVED_MASTERLISTQRREADER = "Can't remove qr reader. It already has connected data.";
-      /**
-     * Summary of RECREATIONALACTIVITYCTRL
+
+    /**
+     * Summary of QRREADERCHECKINOUTCTRL
      */
+    case QRREADERCHECKINOUTCTRL_SEND_QRREADERCHECKINOUT = "Enrollment request sent successfully";
+
+
+     /**
+    * Summary of RECREATIONALACTIVITYCTRL
+    */
+
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY = "Facility updated successfully!";
+    case RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQFACILITY = "Sorry your status is already";
+    case RECREATIONALACTIVITYCTRL_CONFLICT_ERR_RECREATIONALACTIVITYREQFACILITY = "Scheduling conflict detected. This facility is already booked for the selected time range.";
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQEQUIPMENT = "All items updated successfully!";
+    case RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQEQUIPMENT = "Update partially completed. successCount successful, failCount failed. Summary:";
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY = "You've created facility successfully!";
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY = "You've updated facility successfully!";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY = "You've removed facility successfully!";
+    case RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYFACILITY = "Can't remove facility. It already has connected data.";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPSTCK = "You've removed equipment stock successfully!";
+    case RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYEQUIPSTCK = "Can't remove equipment stock. It already has connected data.";
+    case RECREATIONALACTIVITYCTRL_ERR_UPDATED_RECREATIONALACTIVITYEQUIPSTCK = "Equipment stock not found. Please try again.";
+    case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPSTCK = "You've updated an equipment stock successfully!";
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENT = "You've created an equipment successfully!";
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPMENT = "You've updated an equipment successfully!";
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENTSTCK = "You've added an equipment stock!";
-     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT = "You've removed an equipment successfully!";
+    case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT = "You've removed an equipment successfully!";
+    case RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYEQUIPMENT = "Can't remove equipment. It already has connected data.";
+
+    /**
+     * Summary of TRAINEEDORMITORYCTRL
+     */
+    case TRAINEEDORMITORYCTRL_CREATED_TRAINEEDORMITOREXTENDREQUEST = "Your extension request has been successfully submitted for review.";
+    case TRAINEEDORMITORYCTRL_CANCEL_TRAINEEDORMITORYEXTENDREQUEST = "Your extend request has been successfully cancelled.";
+    case TRAINEEDORMITORYCTRL_CREATED_TRAINEEDORMITORYTRANSFERREQUEST = "Transfer request sent! We're processing your request and will update you soon.";
+    case TRAINEEDORMITORYCTRL_CANCEL_TRAINEEDORMITORYTRANSFERREQUEST = "Your transfer request has been successfully cancelled.";
+    case TRAINEEDORMITORYCTRL_CREATE_TRAINEEDORMITORYREQUESTTENANTROOM = "Dormitory request sent successfully.";
+    case TRAINEEDORMITORYCTRL_CANCEL_TRAINEEDORMITORYAPPLIEDDORM = "Dormitory request cancelled successfully.";
+    case TRAINEEDORMITORYCTRL_CREATE_TRAINEEDORMITORYINCLUSIONREQ = "You've have successfully sent items request!";
+    case TRAINEEDORMITORYCTRL_CREATED_TRAINEEDORMITORYSERVICEREQ = "Your service request has been sent successfully!";
+    case TRAINEEDORMITORYCTRL_CANCEL_TRAINEEDORMITORYSERVICEREQ = "Service request has cancelled successfully!";
+
+
+    /**
+     * Summary of TRAINEEENROLLMENTCTRL
+     */
+    // case TRAINEEENROLLMENTCTRL_SEND_TRAINEEENROLLMENTREQ = "Enrollment request sent successfully";
 
 
 }

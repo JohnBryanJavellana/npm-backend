@@ -30,6 +30,7 @@ enum AdministratorAuditActions: string {
     case DORMITORYCTRL_REMOVED_DORMITORYR = "Removed a dormitory room.";
     case DORMITORYCTRL_CREATED_DORMITORYINV = "Created a dormitory inventory.";
     case DORMITORYCTRL_UPDATED_DORMITORYINV = "Updated a dormitory inventory.";
+    case DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK = "Updated a dormitory inventory item stock.";
     case DORMITORYCTRL_REMOVED_DORMITORYINVSTOCK = "Removed a dormitory inventory item stock.";
     case DORMITORYCTRL_REMOVED_DORMITORYINV = "Removed a dormitory inventory item.";
     case DORMITORYCTRL_CREATED_DORMITORYREQ = "Created a dormitory request.";
@@ -132,6 +133,7 @@ enum AdministratorAuditActions: string {
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY = "Created an facility.";
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY = "Updated an facility.";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY = "Removed an facility.";
+    case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUPSTCK = "Updated an equipment stock.";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUPSTCK = "Removed an equipment stock.";
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIP = "Created an equipment.";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIP = "Removed an equipment.";
@@ -147,10 +149,23 @@ enum AdministratorAuditActions: string {
     case MYACCOUNTCTRL_UPDATED_MYACCOUNTADMINPROFPIC = "An Admin has updated user's profile picture.";
     case MYACCOUNTCTRL_UPDATED_MYACCOUNTUSERPROFPIC = "User profile picture has been updated.";
     case MYACCOUNTCTRL_UPDATED_MYACCOUNTADDINFO = "You have posted your new information!";
+
+    /**
+     * Summary TRAINEEDORMITORYCTRL
+     */
+    case TRAINEEDORMITORYTRL_CREATED_TRAINEEDORMITORYEXTENDREQUEST = "User sent a dorm extension request.";
+    case TRAINEEDORMITORYTRL_CANCEL_TRAINEEDORMITORYEXTENDREQUEST = "User cancelled a dormitory request.";
+
     case MYACCOUNTCTRL_SEND_MYACCOUNTREQBOOK = "User sent a book request.";
     case MYACCOUNTCTRL_CANCELLED_MYACCOUNTREQBOOK = "User cancelled a book request.";
     case MYACCOUNTCTRL_CREATE_MYACCOUNTEXTENDREQ = "User sent a book extension request.";
     case MYACCOUNTCTRL_CANCELLED_MYACCOUNTEXTENDREQ = "User cancel a book extension request.";
     case MYACCOUNTCTRL_CREATED_MYACCOUNTRENEWREQ = "User created a book renewal request.";
+    /**
+    * Summary TRAINEEENROLLMENTCTRL
+    */
+
+
+
 
 }

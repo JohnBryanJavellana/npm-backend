@@ -123,7 +123,7 @@ class Masterlist extends Controller
             $this_qr_assignments->qr_reader_location_id = $request->qrReader;
             $this_qr_assignments->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a QR Reader assignment.OK ID#" . $this_qr_assignments->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a QR Reader assignment. ID#" . $this_qr_assignments->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -132,7 +132,7 @@ class Masterlist extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a QR Reader assignment.OK ID#" . $this_qr_assignments->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a QR Reader assignment. ID#" . $this_qr_assignments->id], 201);
         });
     }
 
@@ -155,11 +155,11 @@ class Masterlist extends Controller
             $this_user = User::withCount(['hasData'])->where('id', $user_id)->first();
 
             if($this_user->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove user. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove user. It already has connected data."], 409);
             } else {
                 $this_user->delete();
 
-                AuditHelper::log($request->user()->id, "Removed a user.OK ID#$user_id");
+                AuditHelper::log($request->user()->id, "Removed a user. ID#$user_id");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -168,7 +168,7 @@ class Masterlist extends Controller
                     );
                 }
 
-                return response()->json(['message' => "Removed a user.OK ID#$user_id"], 200);
+                return response()->json(['message' => "Removed a user. ID#$user_id"], 200);
             }
         });
     }
@@ -210,7 +210,7 @@ class Masterlist extends Controller
             if(!$isPost) $this_employer->status = $request->status;
             $this_employer->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " an employer.OK ID#" . $this_employer->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " an employer. ID#" . $this_employer->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -219,7 +219,7 @@ class Masterlist extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " an employer. OKID#" . $this_employer->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " an employer. ID#" . $this_employer->id], 201);
         });
     }
 
@@ -233,10 +233,10 @@ class Masterlist extends Controller
             $this_employer = Employer::where('id', $employer_id)->first();
 
             if(!$this_employer) {
-                return response()->json(['message' => "Can't remove employer. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove employer. It already has connected data."], 409);
             } else {
                 $this_employer->delete();
-                AuditHelper::log($request->user()->id, "Removed an employer.OK ID#$employer_id");
+                AuditHelper::log($request->user()->id, "Removed an employer. ID#$employer_id");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -245,7 +245,7 @@ class Masterlist extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed an employer. OK ID#$employer_id"], 200);
+                return response()->json(['message' => "You've removed an employer.  ID#$employer_id"], 200);
             }
         });
     }
@@ -287,7 +287,7 @@ class Masterlist extends Controller
             if(!$isPost) $this_position->status = $request->status;
             $this_position->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a position.OK ID#" . $this_position->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a position. ID#" . $this_position->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -296,7 +296,7 @@ class Masterlist extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a position.OK ID#" . $this_position->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a position. ID#" . $this_position->id], 201);
         });
     }
 
@@ -310,11 +310,11 @@ class Masterlist extends Controller
             $this_position = Position::where('id', $position_id)->first();
 
             if(!$this_position) {
-                return response()->json(['message' => "Can't remove position. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove position. It already has connected data."], 409);
             } else {
                 $this_position->delete();
 
-                AuditHelper::log($request->user()->id, "Removed a position. OKID#$position_id");
+                AuditHelper::log($request->user()->id, "Removed a position. ID#$position_id");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -323,7 +323,7 @@ class Masterlist extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a position.OK ID#$position_id"], 200);
+                return response()->json(['message' => "You've removed a position. ID#$position_id"], 200);
             }
         });
     }
@@ -386,7 +386,7 @@ class Masterlist extends Controller
             $this_qr_reader_location->type = $request->type;
             $this_qr_reader_location->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a QR Reader location.OK ID#" . $this_qr_reader_location->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a QR Reader location. ID#" . $this_qr_reader_location->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -395,7 +395,7 @@ class Masterlist extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a QR Reader location.OK ID#" . $this_qr_reader_location->id], 201);
+            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a QR Reader location. ID#" . $this_qr_reader_location->id], 201);
         });
     }
 
@@ -409,7 +409,7 @@ class Masterlist extends Controller
             $this_qr_assignment = UserAssignedQrLocation::where('id', $qr_reader_id)->first();
             $this_qr_assignment->delete();
 
-            AuditHelper::log($request->user()->id, "Removed a qr reader assignment. OKID#$qr_reader_id");
+            AuditHelper::log($request->user()->id, "Removed a qr reader assignment. ID#$qr_reader_id");
 
             if(env('USE_EVENT')) {
                 event(
@@ -418,7 +418,7 @@ class Masterlist extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've removed a qr reader assignment.OK ID#$qr_reader_id"], 200);
+            return response()->json(['message' => "You've removed a qr reader assignment. ID#$qr_reader_id"], 200);
         });
     }
 
@@ -436,11 +436,11 @@ class Masterlist extends Controller
                 ->first();
 
             if($this_qr_reader->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove qr reader. It already has connected data.OK"], status: 409);
+                return response()->json(['message' => "Can't remove qr reader. It already has connected data."], status: 409);
             } else {
                 $this_qr_reader->delete();
 
-                AuditHelper::log($request->user()->id, "Removed a qr reader.OK ID#$qr_reader_id");
+                AuditHelper::log($request->user()->id, "Removed a qr reader. ID#$qr_reader_id");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -449,7 +449,7 @@ class Masterlist extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a qr reader. OKID#$qr_reader_id"], 200);
+                return response()->json(['message' => "You've removed a qr reader. ID#$qr_reader_id"], 200);
             }
         });
     }

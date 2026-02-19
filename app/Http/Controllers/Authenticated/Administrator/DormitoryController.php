@@ -292,7 +292,7 @@ class DormitoryController extends Controller
                 }
             }
 
-            return $request->insideJob ? true : response()->json(['message' => "You've added a dormitory room.OK"], 201);
+            return $request->insideJob ? true : response()->json(['message' => "You've added a dormitory room"], 201);
         });
     }
 
@@ -338,7 +338,7 @@ class DormitoryController extends Controller
             $this_dorm = DormitoryRoom::withCount(['hasData'])->where('id', $room_id)->first();
 
             if($this_dorm->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove room. It already has connected data.OK"], 200);
+                return response()->json(['message' => "Can't remove room. It already has connected data"], 200);
             } else {
                 $this_dorm->delete();
 
@@ -354,7 +354,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed dormitory room.OK ID#$room_id"], 200);
+                return response()->json(['message' => "You've removed dormitory room ID#$room_id"], 200);
             }
         });
     }
@@ -468,10 +468,44 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $stock = DormitoryInventoryItem::withCount('borrowed')
                 ->where('dormitory_inventory_id', $request->documentId)
-                ->orderBy('status', 'ASC')
                 ->get();
 
             return response()->json(['stocks' => $stock], 200);
+        });
+    }
+
+    /**
+     * Summary of update_dormitory_inventory_stock
+     * @param Request $request
+     */
+    public function update_dormitory_inventory_stock(Request $request) {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $documentId = $request->documentId;
+            $availabilityStatus = $request->availabilityStatus;
+
+            $this_inventory_stock = DormitoryInventoryItem::where('id', $documentId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$this_inventory_stock) {
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK->value], 409);
+            } else {
+                $this_inventory_stock->status = $availabilityStatus;
+                $this_inventory_stock->save();
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK->value . " ID#$documentId"
+                );
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEDormitory('')
+                    );
+                }
+
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK->value], 200);
+            }
         });
     }
 
@@ -487,7 +521,7 @@ class DormitoryController extends Controller
             $this_stock = DormitoryInventoryItem::withCount(['borrowed'])->where('id', $stock_id)->first();
 
             if($this_stock->borrowed_count > 0) {
-                return response()->json(['message' => "Can't remove item. It already has connected data.OK"], 200);
+                return response()->json(['message' => "Can't remove item. It already has connected data"], 200);
             } else {
                 $this_stock->delete();
                 AuditHelper::log(
@@ -502,7 +536,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed dormitory inventory item stock.OK ID#$stock_id"], 200);
+                return response()->json(['message' => "You've removed dormitory inventory item stock ID#$stock_id"], 200);
             }
         });
     }
@@ -519,7 +553,7 @@ class DormitoryController extends Controller
             $this_dorm = DormitoryInventory::withCount(['borrowings'])->where('id', $inv_id)->first();
 
             if($this_dorm->borrowings_count > 0) {
-                return response()->json(['message' => "Can't remove dorm inventory. It already has connected data.ok"], 200);
+                return response()->json(['message' => "Can't remove dorm inventory. It already has connected data"], 200);
             } else {
                 if(file_exists(public_path("dormitory/inventory/" . $this_dorm->filename))) {
                     unlink(public_path("dormitory/inventory/" . $this_dorm->filename));
@@ -869,7 +903,7 @@ class DormitoryController extends Controller
             $this_service = DormitoryService::withCount(['requestedService'])->where('id', $service_id)->first();
 
             if($this_service->requested_service_count > 0) {
-                return response()->json(['message' => "Can't remove service. It already has connected data.OK"], 200);
+                return response()->json(['message' => "Can't remove service. It already has connected data"], 200);
             } else {
                 $this_service->delete();
 
@@ -885,7 +919,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed dormitory service.OK ID#$service_id"], 200);
+                return response()->json(['message' => "You've removed dormitory service ID#$service_id"], 200);
             }
         });
     }
@@ -930,7 +964,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've updated provided item stock status.OK"], 200);
+            return response()->json(['message' => "You've updated provided item stock status"], 200);
         });
     }
 
@@ -973,7 +1007,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've updated provided item stock list.OK"], 200);
+            return response()->json(['message' => "You've updated provided item stock list"], 200);
         });
     }
 
@@ -1126,7 +1160,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've updated requested service.OK"], 200);
+            return response()->json(['message' => "You've updated requested service"], 200);
         });
     }
 
@@ -1238,7 +1272,7 @@ class DormitoryController extends Controller
             $this_charge = DormitoryInvoice::where('id', $chargeId)->lockForUpdate()->first();
 
             if(!\in_array($this_charge->invoice_status, [DormitoryEnum::PENDING->value])) {
-                return response()->json(['message' => "Can't cancel charge.OK"], 200);
+                return response()->json(['message' => "Can't cancel charge"], 200);
             } else {
                 $this_charge->invoice_status = DormitoryEnum::CANCELLED->value;
                 $this_charge->save();
@@ -1255,7 +1289,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've cancelled dormitory charge.OKID#$chargeId"], 200);
+                return response()->json(['message' => "You've cancelled dormitory chargeID#$chargeId"], 200);
             }
         });
     }

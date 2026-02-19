@@ -95,8 +95,10 @@ class TraineeRecreational extends Controller
                 ?  $recRequests->where('trace_number', $request->traceNumber)
                     ->with([
                         'equipment_request',
+                        'equipment_request.updatedByWhom',
                         'equipment_request.equipment.images',
                         'facility_request',
+                        'facility_request.updatedByWhom',
                         'facility_request.facility.images',
                         'csm'
                         ])
@@ -253,6 +255,9 @@ class TraineeRecreational extends Controller
         }
         catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Record not found!"], 422);
+        }
+        catch (DomainException $e) {
+            throw $e;
         }
         catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('r_a_facilities', function (Blueprint $table) {
             $table->engine = "innoDB";
             $table->id();
+            $table->longText('unique_identifier');
             $table->string('name', 255);
             $table->longText('location');
             $table->longText('additional_details')->nullable();

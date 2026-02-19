@@ -197,7 +197,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a remark.OK ID# ' . $this_remark->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a remark ID# ' . $this_remark->id], 201);
         });
     }
 
@@ -302,7 +302,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've Updated enrollment application status.OK ID#" . $this_training_status->id], 201);
+            return response()->json(['message' => "You've Updated enrollment application status ID#" . $this_training_status->id], 201);
         });
     }
 
@@ -320,13 +320,13 @@ class EnrollmentCtrl extends Controller
             $this_training->isExpired = $request->isExpired;
             $this_training->save();
 
-            AuditHelper::log($request->user()->id, 'User has updated an enrolled course expiry status.OK ID# ' . $this_training->id);
+            AuditHelper::log($request->user()->id, 'User has updated an enrolled course expiry status ID# ' . $this_training->id);
 
             if (env('USE_EVENT')) {
                 event(new BETraineeApplication(''));
             }
 
-            return response()->json(['message' => "You've updated an enrolled course expiry status.OKID# " . $this_training->id], 201);
+            return response()->json(['message' => "You've updated an enrolled course expiry statusID# " . $this_training->id], 201);
         });
     }
 
@@ -412,7 +412,7 @@ class EnrollmentCtrl extends Controller
             $this_schedule = Training::withCount(['hasData'])->where('id', $schedule_id)->first();
 
             if ($this_schedule->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove schedule. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove schedule. It already has connected data"], 409);
             } else {
                 $this_schedule->delete();
                 AuditHelper::log(
@@ -427,7 +427,7 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed schedule.OK ID#$schedule_id"], 200);
+                return response()->json(['message' => "You've removed schedule ID#$schedule_id"], 200);
             }
         });
     }
@@ -495,7 +495,7 @@ class EnrollmentCtrl extends Controller
             $this_module = CourseModule::withCount(['hasData'])->where('id', $module_id)->first();
 
             if ($this_module->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove module. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove module. It already has connected data"], 409);
             } else {
                 $this_module->delete();
                 AuditHelper::log(
@@ -541,10 +541,7 @@ class EnrollmentCtrl extends Controller
 
             $check = CheckForDocumentExistence::exists(
                 ModuleType::class,
-                [
-                    'name' => $request->name,
-                    'category' => $request->category
-                ],
+                [ 'name' => $request->name ],
                 !$isPost,
                 $documentId,
                 'id',
@@ -560,7 +557,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTMODTYPE : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTMODTYPE . " ID#$this_module_type->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTMODTYPE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTMODTYPE->value . " ID#$this_module_type->id"
             );
 
             if (env('USE_EVENT')) {
@@ -570,7 +567,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a module type.OK ID#' . $this_module_type->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a module type ID#' . $this_module_type->id], 201);
         });
     }
 
@@ -587,7 +584,7 @@ class EnrollmentCtrl extends Controller
             $this_module_type = ModuleType::withCount(['hasData'])->where('id', $module_type_id)->first();
 
             if ($this_module_type->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove module type. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove module type. It already has connected data"], 409);
             } else {
                 $this_module_type->delete();
                 AuditHelper::log(
@@ -602,7 +599,7 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed module type.OK ID#$module_type_id"], 200);
+                return response()->json(['message' => "You've removed module type ID#$module_type_id"], 200);
             }
         });
     }
@@ -656,7 +653,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a certificate.OK ID#' . $this_certificate->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a certificate ID#' . $this_certificate->id], 201);
         });
     }
 
@@ -677,7 +674,7 @@ class EnrollmentCtrl extends Controller
             }])->where('id', $certificate_id)->first();
 
             if ($this_certificate->module_count > 0) {
-                return response()->json(['message' => "Can't remove certificate. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove certificate. It already has connected data"], 409);
             } else {
                 $this_certificate->delete();
                 AuditHelper::log(
@@ -775,7 +772,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a requirement.OK ID#' . $this_requirement->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a requirement ID#' . $this_requirement->id], 201);
         });
     }
 
@@ -790,7 +787,7 @@ class EnrollmentCtrl extends Controller
             $this_requirement = Requirement::withCount(['hasData', 'trainee_file'])->where('id', $requirement_id)->first();
 
             if ($this_requirement->has_data_count > 0 || $this_requirement->trainee_file_count > 0 || $this_requirement->for_modules_count > 0) {
-                return response()->json(['message' => "Can't remove requirement. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove requirement. It already has connected data"], 409);
             } else {
                 $this_requirement->delete();
 
@@ -806,7 +803,7 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed requirement.OK ID#$requirement_id"], 200);
+                return response()->json(['message' => "You've removed requirement ID#$requirement_id"], 200);
             }
         });
     }
@@ -867,7 +864,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . ' a school.OK ID#' . $this_school->id], 200);
+            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . ' a school ID#' . $this_school->id], 200);
         });
     }
 
@@ -882,7 +879,7 @@ class EnrollmentCtrl extends Controller
             $this_school = MainSchool::withCount(['hasData'])->where('id', $school_id)->first();
 
             if ($this_school->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove school. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove school. It already has connected data"], 409);
             } else {
                 $this_school->delete();
 
@@ -972,7 +969,7 @@ class EnrollmentCtrl extends Controller
             $this_course = MainCourse::withCount(['hasData'])->where('id', $course_id)->first();
 
             if ($this_course->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove course. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove course. It already has connected data"], 409);
             } else {
                 $this_course->delete();
 
@@ -988,7 +985,7 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed course.OK ID#$course_id"], 200);
+                return response()->json(['message' => "You've removed course ID#$course_id"], 200);
             }
         });
     }
@@ -1049,7 +1046,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a voucher.OK ID#' . $this_voucher->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a voucher ID#' . $this_voucher->id], 201);
         });
     }
 
@@ -1066,7 +1063,7 @@ class EnrollmentCtrl extends Controller
             $this_voucher = Voucher::where('id', $voucher_id)->first();
 
             if ($this_voucher->has_data_count > 0 && $this_voucher->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove voucher. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove voucher. It already has connected data"], 409);
             } else {
                 $this_voucher->delete();
                 AuditHelper::log(
@@ -1142,7 +1139,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a sponsor.OK ID#' . $this_sponsor->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a sponsor ID#' . $this_sponsor->id], 201);
         });
     }
 
@@ -1159,7 +1156,7 @@ class EnrollmentCtrl extends Controller
             $this_sponsor = Sponsor::where('id', $sponsor_id)->first();
 
             if (!$this_sponsor) {
-                return response()->json(['message' => "Can't remove sponsor. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove sponsor. It already has connected data"], 409);
             } else {
                 $this_sponsor->delete();
                 AuditHelper::log(
@@ -1234,7 +1231,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a license.OK ID#' . $this_license->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a license ID#' . $this_license->id], 201);
         });
     }
 
@@ -1251,7 +1248,7 @@ class EnrollmentCtrl extends Controller
             $this_license = License::withCount(['hasData'])->where('id', $license_id)->first();
 
             if ($this_license->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove license. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove license. It already has connected data"], 409);
             } else {
                 $this_license->delete();
 
@@ -1267,7 +1264,7 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed license.OK ID#$license_id"], 200);
+                return response()->json(['message' => "You've removed license ID#$license_id"], 200);
             }
         });
     }
@@ -1329,7 +1326,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a rank.OK ID# ' . $this_rank->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a rank ID# ' . $this_rank->id], 201);
         });
     }
 
@@ -1346,7 +1343,7 @@ class EnrollmentCtrl extends Controller
             $this_rank = Rank::withCount(['hasData'])->where('id', $rank_id)->first();
 
             if ($this_rank->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove rank. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove rank. It already has connected data"], 409);
             } else {
                 $this_rank->delete();
 
@@ -1362,7 +1359,7 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed rank.OK ID#$rank_id"], 200);
+                return response()->json(['message' => "You've removed rank ID#$rank_id"], 200);
             }
         });
     }
@@ -1428,7 +1425,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a facilitator.OK ID# ' . $this_facilitator->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a facilitator ID# ' . $this_facilitator->id], 201);
         });
     }
 
@@ -1445,7 +1442,7 @@ class EnrollmentCtrl extends Controller
             $this_facilitator = TrainingFacilitator::withCount(['hasData'])->where('id', $facilitator_id)->first();
 
             if ($this_facilitator->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove facilitator. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove facilitator. It already has connected data"], 409);
             } else {
                 $this_facilitator->delete();
 
@@ -1547,7 +1544,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a training fee.OK ID# ' . $this_course_fee->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a training fee ID# ' . $this_course_fee->id], 201);
         });
     }
 
@@ -1564,7 +1561,7 @@ class EnrollmentCtrl extends Controller
             $this_course_fee = CourseModuleFee::where('id', $course_fee_id)->first();
 
             if ($this_course_fee->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove training fee. It already has connected data.OK"], 409);
+                return response()->json(['message' => "Can't remove training fee. It already has connected data"], 409);
             } else {
                 $this_course_fee->delete();
 
@@ -1580,7 +1577,7 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed training fee.OK ID#$course_fee_id"], 200);
+                return response()->json(['message' => "You've removed training fee ID#$course_fee_id"], 200);
             }
         });
     }
