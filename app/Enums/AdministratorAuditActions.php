@@ -156,14 +156,29 @@ enum AdministratorAuditActions: string {
     case TRAINEEDORMITORYTRL_CREATED_TRAINEEDORMITORYEXTENDREQUEST = "User sent a dorm extension request.";
     case TRAINEEDORMITORYTRL_CANCEL_TRAINEEDORMITORYEXTENDREQUEST = "User cancelled a dormitory request.";
 
-    case MYACCOUNTCTRL_SEND_MYACCOUNTREQBOOK = "User sent a book request.";
-    case MYACCOUNTCTRL_CANCELLED_MYACCOUNTREQBOOK = "User cancelled a book request.";
-    case MYACCOUNTCTRL_CREATE_MYACCOUNTEXTENDREQ = "User sent a book extension request.";
+
     case MYACCOUNTCTRL_CANCELLED_MYACCOUNTEXTENDREQ = "User cancel a book extension request.";
     case MYACCOUNTCTRL_CREATED_MYACCOUNTRENEWREQ = "User created a book renewal request.";
     /**
     * Summary TRAINEEENROLLMENTCTRL
     */
+    case TRAINEEENROLLMENTCTRL_REMOVE_TRAINEEENROLLMENTTRAININGREQ = "You've successully cancelled a training request.";
+    case TRAINEEENROLLMENTCTRL_UPDATEADMIN_TRAINEEENROLLMENTTRAININGREQ = "Admin updated the enrollment request of trainee.";
+    case TRAINEEENROLLMENTCTRL_UPDATEUSER_TRAINEEENROLLMENTTRAININGREQ = "User updated an enrollment request.";
+    case TRAINEEENROLLMENTCTRL_UPDATE_TRAINEEENROLLMENTINVOICETRAINING = "User has proceed training/s for verification.";
+    /**
+    * Summary TRAINEELIBRARYCTRL
+    */
+
+    case TRAINEELIBRARYCTRL_SEND_TRAINEELIBRARYREQBOOK = "User sent a book request.";
+    case TRAINEELIBRARYCTRL_CANCEL_TRAINEELIBRARYBOOKREQ = "User cancelled a book request.";
+    case TRAINEELIBRARYCTRL_CREATED_TRAINEELIBRARYEXTENDREQ = "User sent a book extension request.";
+    // case TRAINEELIBRARYCTRL_CANCEL_TRAINEELIBRARYEXTENDREQ = "User cancel a book extension request.";
+
+
+
+
+
 
 
 

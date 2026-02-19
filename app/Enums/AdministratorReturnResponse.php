@@ -193,9 +193,28 @@ enum AdministratorReturnResponse: string {
 
 
     /**
-     * Summary of TRAINEEENROLLMENTCTRL
-     */
-    // case TRAINEEENROLLMENTCTRL_SEND_TRAINEEENROLLMENTREQ = "Enrollment request sent successfully";
+    * Summary of TRAINEEENROLLMENTCTRL
+    */
+    case TRAINEEENROLLMENTCTRL_SEND_TRAINEEENROLLMENTREQ = "Enrollment request sent successfully!";
+    case TRAINEEENROLLMENTCTRL_REMOVE_TRAINEEENROLLMENTREQUIREMENTSREQ = "User has cancelled training request.";
+    case TRAINEEENROLLMENTCTRL_UPDATE_TRAINEEENROLLMENTTRAININGREQ = "Enrollment request updated successfully!";
+    case TRAINEEENROLLMENTCTRL_UPDATE_TRAINEEENROLLMENTINVOICETRAINING = "Successfully updated!";
+    case TRAINEEENROLLMENTCTRL_CHANGE_TRAINEEENROLLMENTCARDCOLOR = "Success!";
+    case TRAINEEENROLLMENTCTRL_GETALL_TRAINEEENROLLMENTTRAINEEINVOICES = "Invoices Fetched Successfully!";
+    case TRAINEEENROLLMENTCTRL_UPDATE_TRAINEEENROLLMENTLIBINVOICE = "Successfully Paid balance!";
+
+
+    /**
+    * Summary of TRAINEELIBRARYCTRL
+    */
+    case TRAINEELIBRARYCTRL_SEND_TRAINEELIBRARYREQBOOK = "Your book request was sent successfully!";
+    case TRAINEELIBRARYCTRL_CANCEL_TRAINEELIBRARYBOOKREQ = "You're request has been cancelled successfully.";
+    case TRAINEELIBRARYCTRL_CREATED_TRAINEELIBRARYEXTENDREQ = "Extension request has sent successfully!";
+    case TRAINEELIBRARYCTRL_CANCEL_TRAINEELIBRARYEXTENDREQ = "Cancelled extension request successfully!";
+    // case TRAINEELIBRARYCTRL_CANCEL_TRAINEELIBRARYEXTENDREQ = "Cancelled extension request successfully!";
+
+
+
 
 
 }
