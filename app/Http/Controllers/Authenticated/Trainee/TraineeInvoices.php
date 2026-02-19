@@ -53,7 +53,7 @@ class TraineeInvoices extends Controller
         }
         catch (\Exception $e) {
             \Log::error("updateEnrollmentInvoiceError", [$e]);
-            return response()->json(["message" => "Something went wrong, Please try again."], 500);
+            return response()->json(["message" => $e], 500);
         }
     }
 

@@ -29,6 +29,7 @@ enum AdministratorReturnResponse: string {
      */
     case DORMITORYCTRL_CREATED_DORMITORY = "You've created a dormitory.";
     case DORMITORYCTRL_UPDATED_DORMITORY = "You've updated a dormitory.";
+    case DORMITORYCTRL_CREATED_DORMITORYROOM = "You've added a dormitory room";
     case DORMITORYCTRL_UPDATED_DORMITORYROOM = "You've updated dormitory room.";
     case DORMITORYCTRL_REMOVED_DORMITORYROOM = "You've removed dormitory room.";
     case DORMITORYCTRL_ERR_DORMITORYROOM = "Can't remove room. It already has connected data.";
