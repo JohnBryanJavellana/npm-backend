@@ -56,6 +56,7 @@ Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
 Route::post('items', [TraineeRecreational::class, 'getUserRecRequest']);
 Route::post('item', [TraineeRecreational::class, 'requestEquipment']);
 Route::post('cancelTest', [TraineeRecreational::class, 'cancelUnitsRequest']);
+Route::post('qr', [TraineeRecreational::class, 'checkUniqueIdentifier']);
 
 
 

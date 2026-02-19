@@ -31,7 +31,7 @@ class CancelRecRequest extends FormRequest
         return [
             "documentType" => "required|in:EQUIPMENT,FACILITY",
             "documentId" => "required",
-            // "requestInfoId" => "required|exists:r_a_request_infos,id"
+            "requestInfoId" => "required|exists:r_a_request_infos,id"
         ];
     }
 
@@ -43,7 +43,7 @@ class CancelRecRequest extends FormRequest
             response()->json([
                 "message" => $firstError,
                 "errors" => $errors,
-            ])
+            ], 422)
         );
     }
 }

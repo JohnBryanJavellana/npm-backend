@@ -20,7 +20,8 @@ return new class extends Migration
             $table->enum('service', [
                 'ENROLLMENT',
                 'DORMITORY',
-                'LIBRARY'
+                'LIBRARY',
+                'RECREATIONAL',
             ]);
             $table->integer('cc1');
             $table->integer('cc2');
