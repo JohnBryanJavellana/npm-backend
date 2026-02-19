@@ -149,10 +149,23 @@ enum AdministratorAuditActions: string {
     case MYACCOUNTCTRL_UPDATED_MYACCOUNTADMINPROFPIC = "An Admin has updated user's profile picture.";
     case MYACCOUNTCTRL_UPDATED_MYACCOUNTUSERPROFPIC = "User profile picture has been updated.";
     case MYACCOUNTCTRL_UPDATED_MYACCOUNTADDINFO = "You have posted your new information!";
+
+    /**
+     * Summary TRAINEEDORMITORYCTRL
+     */
+    case TRAINEEDORMITORYTRL_CREATED_TRAINEEDORMITORYEXTENDREQUEST = "User sent a dorm extension request.";
+    case TRAINEEDORMITORYTRL_CANCEL_TRAINEEDORMITORYEXTENDREQUEST = "User cancelled a dormitory request.";
+
     case MYACCOUNTCTRL_SEND_MYACCOUNTREQBOOK = "User sent a book request.";
     case MYACCOUNTCTRL_CANCELLED_MYACCOUNTREQBOOK = "User cancelled a book request.";
     case MYACCOUNTCTRL_CREATE_MYACCOUNTEXTENDREQ = "User sent a book extension request.";
     case MYACCOUNTCTRL_CANCELLED_MYACCOUNTEXTENDREQ = "User cancel a book extension request.";
     case MYACCOUNTCTRL_CREATED_MYACCOUNTRENEWREQ = "User created a book renewal request.";
+    /**
+    * Summary TRAINEEENROLLMENTCTRL
+    */
+
+
+
 
 }

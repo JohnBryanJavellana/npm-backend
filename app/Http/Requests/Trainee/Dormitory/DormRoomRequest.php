@@ -27,7 +27,7 @@ class DormRoomRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "room_id" => "nullable|exists:dormitories,id",
+            "room_id" => "nullable|exists:dormitory_rooms,id",
             "is_air_conditioned" => "required|in:YES,NO",
             "single_accomodation" => "required|in:YES,NO",
             "purpose" => "required|string|max:255",
