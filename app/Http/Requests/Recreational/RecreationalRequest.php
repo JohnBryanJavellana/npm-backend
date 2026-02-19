@@ -84,14 +84,14 @@ class RecreationalRequest extends FormRequest
             "data" => "required|array",
             "data.*.id" => "required|integer",
             "data.*.from_datetime" => "required|date_format:Y-m-d H:i",
-            "data.*.UI" => "nullable|array|exists:r_a_equipment_stocks,unique_identifier",
+            "data.*.UI" => "nullable|array",
             "data.*.to_datetime" => "required|date_format:Y-m-d H:i|after:data.*.from_datetime",
             'data.*.quantity' => [
+                'exclude_if:data.*.type,FACILITY',    
                 'required_without:data.*.UI',
                 'nullable', 
                 'numeric',
-                'min:1'
-                // new QuantityRule()
+                'min:1',
             ],
             "data.*.type" => "required|in:EQUIPMENT,FACILITY,HYBRID",
             "purpose" => "required|string|max:255"
