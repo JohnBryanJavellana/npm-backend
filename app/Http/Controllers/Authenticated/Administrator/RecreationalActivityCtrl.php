@@ -517,6 +517,10 @@ class RecreationalActivityCtrl extends Controller
         ], 200);
     }
 
+    /**
+     * Summary of ra_equipments
+     * @param Request $request
+     */
     public function ra_equipments(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
