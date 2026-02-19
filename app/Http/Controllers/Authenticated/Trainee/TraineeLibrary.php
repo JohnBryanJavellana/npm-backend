@@ -362,12 +362,12 @@ class TraineeLibrary extends Controller
             $user_id = $validated["user_id"];
 
             $this->libraryExtendService->storeExtendRequest($validated);
-            AuditHelper::log($user_id, "User {$user_id} sent a book extension request.");
+            AuditHelper::log($user_id, "User {$user_id} sent a book extension request.OK");
             Notifications::notify($user_id, null, 'LIBRARY', 'has sent a book extension request.');
 
             $this->forgetCache($user_id);
 
-            return response()->json(["message" => "Extension request has sent successfully!"], 201);
+            return response()->json(["message" => "Extension request has sent successfully!OK"], 201);
         }
         catch (DomainException$e) {
             throw $e;
@@ -424,7 +424,7 @@ class TraineeLibrary extends Controller
         {
             $validated = $request->validated();
             $this->libraryRenewService->cancelRenewRequest($validated);
-            AuditHelper::log($user_id, "User {$user_id} renewed a book.");
+            // AuditHelper::log($user_id, "User {$user_id} renewed a book.");
             return response()->json(["You've successfully cancelled a book renewal request."], 200);
         }
         catch (ModelNotFoundException) {
