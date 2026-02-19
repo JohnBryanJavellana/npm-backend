@@ -253,12 +253,8 @@ class RecreationalService {
         ->uniqueIdentifier($info["UI"])
         ->whereKey($info["id"])
         ->whereDoesntHave("hasData", function ($query) use ($info) {
-<<<<<<< HEAD
-            $query->where(function ($q) use ($info) {
-=======
             $query->whereIn("status", [RequestStatus::APPROVED->value, RequestStatus::OCCUPIED->value])
             ->where(function ($q) use ($info) {
->>>>>>> c3fd2e50a79883850210af25b1e742208bcb28fe
                 $q->whereBetween('start_date', [$info['from_datetime'], $info['to_datetime']])
                 ->orWhereBetween('end_date', [$info['from_datetime'], $info['to_datetime']])
                 ->orWhere(function ($subQ) use ($info) {
@@ -270,18 +266,6 @@ class RecreationalService {
         ->available()
         ->okayCondition()
         ->firstOr(function() {
-<<<<<<< HEAD
-            throw new ModelNotFoundException("Selected facility is not available anymore.");
-        });
-
-        if(!$facility)
-            $this->rafacilityRequestModel->create([
-                "r_a_request_info_id" => $record->id,
-                "r_a_facility_id" => $info["id"],
-                "start_date" => $info["from_datetime"],
-                "end_date" => $info["to_datetime"],
-                "issued_condition" =>$facility->condition_status
-=======
             throw new DomainException("Selected facility is not available anymore.");
         });
 
@@ -292,7 +276,6 @@ class RecreationalService {
             "start_date" => $info["from_datetime"],
             "end_date" => $info["to_datetime"],
             "issued_condition" =>$facility->condition_status
->>>>>>> c3fd2e50a79883850210af25b1e742208bcb28fe
         ]);
     }
 
@@ -307,12 +290,8 @@ class RecreationalService {
         $record = $model->query();
 
         if($validated->type === "EQUIPMENT") {
-<<<<<<< HEAD
-            $record->where("unique_identifier", $validated->UIId);
-=======
             $record
             ->where("unique_identifier", $validated->UIId);
->>>>>>> c3fd2e50a79883850210af25b1e742208bcb28fe
         } else {
             $record->whereKey($validated->itemId);
         }
@@ -349,20 +328,8 @@ class RecreationalService {
             "siblings as stock_count" => function($q) {
                 $q->available()->okayCondition();
             }
-<<<<<<< HEAD
-        ])
-        ->available()
-        ->okayCondition()
-        ->first();
-
-        if(!$record) {
-            throw new DomainException($validated["type"] === "EQUIPMENT" ? "Equipment" : "Facility" . "not found");
-        }
-
-=======
             ]);
         }
->>>>>>> c3fd2e50a79883850210af25b1e742208bcb28fe
 
         $record = $record->available()
         ->okayCondition()
@@ -391,13 +358,7 @@ class RecreationalService {
     }
     public function cancelRequests($validated)
     {
-<<<<<<< HEAD
-
         DB::transaction(function() use ($validated){
-            $restrictedStatus = ["CANCELLED","RETURNED","DONE","DECLINED"];
-=======
-        DB::transaction(function() use ($validated){
->>>>>>> c3fd2e50a79883850210af25b1e742208bcb28fe
 
             $model = match ($validated["documentType"]) {
                 'EQUIPMENT'  => RAEquipmentRequest::class,
