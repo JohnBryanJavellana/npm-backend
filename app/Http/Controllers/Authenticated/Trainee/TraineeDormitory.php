@@ -67,10 +67,10 @@ class TraineeDormitory extends Controller
             return DormRoomsResource::collection($rooms);
         }
         catch (\Exception $e) {
+            return response()->json([$e], 500);
         }
     }
 
-    //for removal
     public function get_filtered_dorms (Request $request) {
         try {
             $cost = $request->cost;
@@ -252,9 +252,6 @@ class TraineeDormitory extends Controller
         }
     }
 
-    /**
-     * Methods for Dorm Transfer
-     */
     public function create_transfer_request(CreateTransferRequest $request)
     {
         try {
