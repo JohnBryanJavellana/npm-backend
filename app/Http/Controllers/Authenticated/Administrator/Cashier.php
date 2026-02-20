@@ -315,7 +315,7 @@ class Cashier extends Controller
             $this_fee = $this_payment->lockForUpdate()->first();
 
             if(\in_array($this_fee->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
-                return response()->json(['message' => "Can't update payment.OK"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_ERR_PAYMENT->value], 200);
             } else {
                 $this_fee->invoice_status = $request->verificationStatus;
                 $this_fee->save();
