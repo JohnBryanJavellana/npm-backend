@@ -31,6 +31,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished']);
             Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
             Route::get('get_schedules', [EnrollmentCtrl::class, 'get_schedules']);
+            Route::post('training/schedules/traineelist', [EnrollmentCtrl::class, 'get_trainees_by_schedule']);
             Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
             Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
             Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);

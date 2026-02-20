@@ -1581,4 +1581,20 @@ class EnrollmentCtrl extends Controller
             }
         });
     }
+        // EDRASCOE
+
+        /** */
+    public function get_trainees_by_schedule(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $scheduleId = $request->scheduleId;
+
+            $trainees = EnrolledCourse::with('trainee')
+                ->where('training_id', $scheduleId)
+                ->get();
+
+            return response()->json(['trainees' => $trainees], 200);
+        });
+
+    }
 }

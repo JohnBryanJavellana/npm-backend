@@ -50,4 +50,5 @@ class EnrolledCourse extends Model
     {
         return $query->whereIn("enrolled_course_status", $status);
     }
+
 }
