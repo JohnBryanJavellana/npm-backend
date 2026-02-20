@@ -45,6 +45,7 @@ use App\Models\{
     User,
     DormitoryTenantHistory
 };
+use App\Helpers\Administrator\General\CountCollection;
 
 class DormitoryController extends Controller
 {
@@ -1019,24 +1020,15 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = DormitoryTenant::query();
 
-            if($request->userId) {
-                $reservations->where('user_id', $request->userId);
-            }
-
-            $get_count = function ($collection) {
-                $count = $collection->count();
-                return $count > 99 ? '99+' : $count;
-            };
-
             $count = [
-                'total' => $get_count($reservations),
-                'pending' => $get_count($reservations->clone()->where('tenant_status', DormitoryEnum::PENDING->value)),
-                'paid' => $get_count($reservations->clone()->where('tenant_status', DormitoryEnum::PAID->value)),
-                'processing_payment' => $get_count($reservations->clone()->where('tenant_status', DormitoryEnum::PROCESSING_PAYMENT->value)),
-                'approved' => $get_count($reservations->clone()->whereIn('tenant_status', [DormitoryEnum::APPROVED->value, DormitoryEnum::RESERVED->value])),
-                'active' => $get_count($reservations->clone()->whereIn('tenant_status', [DormitoryEnum::ACTIVE->value, DormitoryEnum::FOR_PAYMENT->value, DormitoryEnum::PAID->value, DormitoryEnum::PROCESSING_PAYMENT->value])),
-                'extending' => $get_count($reservations->clone()->where('tenant_status', DormitoryEnum::EXTENDING->value)),
-                'settled' => $get_count($reservations->clone()->whereIn('tenant_status', [DormitoryEnum::CANCELLED->value, DormitoryEnum::REJECTED->value, DormitoryEnum::TERMINATED->value])),
+                'total' => CountCollection::startCount($reservations),
+                'pending' => CountCollection::startCount($reservations->clone()->where('tenant_status', DormitoryEnum::PENDING->value)),
+                'paid' => CountCollection::startCount($reservations->clone()->where('tenant_status', DormitoryEnum::PAID->value)),
+                'processing_payment' => CountCollection::startCount($reservations->clone()->where('tenant_status', DormitoryEnum::PROCESSING_PAYMENT->value)),
+                'approved' => CountCollection::startCount($reservations->clone()->whereIn('tenant_status', [DormitoryEnum::APPROVED->value, DormitoryEnum::RESERVED->value])),
+                'active' => CountCollection::startCount($reservations->clone()->whereIn('tenant_status', [DormitoryEnum::ACTIVE->value, DormitoryEnum::FOR_PAYMENT->value, DormitoryEnum::PAID->value, DormitoryEnum::PROCESSING_PAYMENT->value])),
+                'extending' => CountCollection::startCount($reservations->clone()->where('tenant_status', DormitoryEnum::EXTENDING->value)),
+                'settled' => CountCollection::startCount($reservations->clone()->whereIn('tenant_status', [DormitoryEnum::CANCELLED->value, DormitoryEnum::REJECTED->value, DormitoryEnum::TERMINATED->value])),
             ];
 
             return response()->json(['reservationCount' => $count], 200);
