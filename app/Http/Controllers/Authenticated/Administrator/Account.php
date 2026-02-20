@@ -134,7 +134,10 @@ class Account extends Controller
             $user->email = $request->email;
             $user->save();
 
-            AuditHelper::log($request->user()->id, AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PERSONAL);
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PERSONAL->value
+            );
 
             if(env('USE_EVENT')) {
                 event(
@@ -144,7 +147,7 @@ class Account extends Controller
             }
 
             return response()->json([
-                'message' => AdministratorReturnResponse::ACCOUNTCTRL_UPDATE_PERSONAL,
+                'message' => AdministratorReturnResponse::ACCOUNTCTRL_UPDATE_PERSONAL->value,
                 'reloggin' => $reloggin
             ], 200);
         });
@@ -169,7 +172,10 @@ class Account extends Controller
             $user->isSocial = UserDetailsEnum::HARD_ACCOUNT;
             $user->save();
 
-            AuditHelper::log($request->user()->id, AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PASSWORD);
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PASSWORD->value
+            );
 
             if(env('USE_EVENT')) {
                 event(
@@ -179,7 +185,7 @@ class Account extends Controller
             }
 
             return response()->json([
-                'message' => AdministratorReturnResponse::ACCOUNTCTRL_UPDATE_PASSWORD,
+                'message' => AdministratorReturnResponse::ACCOUNTCTRL_UPDATE_PASSWORD->value,
                 'reloggin' => true
             ], 200);
         });

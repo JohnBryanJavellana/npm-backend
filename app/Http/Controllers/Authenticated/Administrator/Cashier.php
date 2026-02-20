@@ -214,7 +214,7 @@ class Cashier extends Controller
                 );
             }
 
-            return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_PAY_WALKIN], 201);
+            return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_PAY_WALKIN->value], 201);
         });
     }
 

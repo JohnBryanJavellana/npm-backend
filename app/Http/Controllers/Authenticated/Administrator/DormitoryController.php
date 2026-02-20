@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Authenticated\Administrator;
 
+// asasas
 use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
@@ -174,28 +175,74 @@ class DormitoryController extends Controller
      * Summary of get_available_dorms
      * @param GetAvailableDorms $request
      */
-    public function get_available_dorms (GetAvailableDorms $request) {
+    public function get_available_dorms(GetAvailableDorms $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            if($request->userId) {
-                $checkForPending = DormitoryTenant::where('user_id', $request->userId)
-                    ->whereIn('tenant_status', ['PENDING', 'APPROVED', 'EXTENDING', 'FOR PAYMENT', 'PAID', 'PROCESSING PAYMENT', 'ACTIVE', 'RESERVED'])
-                    ->exists();
+            $roomId = $request->roomId;
+            $isAirConditioned = $request->isAirConditioned;
+            $singleAccommodation = $request->singleAccommodation;
+            $dateFrom = $request->dateFrom;
+            $dateTo = $request->dateTo;
+            $userId = $request->userId;
 
-                if($checkForPending) {
-                    return response()->json([
-                        'dorms' => [],
-                        'isValid' => false
-                    ], 200);
-                }
-            }
+            $tenant = User::findOrFail($userId);
+            $getAdditionalTraineeInfo = $tenant->additional_trainee_info;
+            $isOfficer = $getAdditionalTraineeInfo && $tenant->role !== "GUEST" && ($getAdditionalTraineeInfo->latest_shipboard_attainment?->rank !== null);
+            $tempDorm = Dormitory::query();
 
-            $dorms = Dormitory::withCount('rooms')
-                ->has('rooms')
-                ->where([
-                    'is_air_conditioned' => $request->room_type
-                ])->get();
+            $tempDorm->where('room_fee_type', $isOfficer ? DormitoryEnum::OFFICERS : DormitoryEnum::RATINGS);
+            $roomFilter = function($query) use ($isAirConditioned, $singleAccommodation, $dateFrom, $dateTo, $roomId) {
+                $query->where('is_air_conditioned', $isAirConditioned)
+                    ->where('room_status', 'AVAILABLE')
+                    ->where(function($q) use ($singleAccommodation, $dateFrom, $dateTo) {
+                        $occupancyConstraint = function($tenantQuery) use ($dateFrom, $dateTo) {
+                            $tenantQuery->where('tenant_from_date', '<', $dateTo)
+                                        ->where('tenant_to_date', '>', $dateFrom)
+                                        ->whereNotIn('tenant_status', [
+                                            DormitoryEnum::CANCELLED,
+                                            DormitoryEnum::REJECTED,
+                                            DormitoryEnum::TERMINATED
+                                        ]);
+                        };
 
-            return response()->json(['dorms' => $dorms, 'isValid' => true], 200);
+                        if ($singleAccommodation === 'YES') {
+                            $q->whereDoesntHave('hasData', $occupancyConstraint);
+                        } else {
+                            $q->whereHas('hasData', $occupancyConstraint, '<', \DB::raw('room_slot'))
+                              ->orWhereDoesntHave('hasData', $occupancyConstraint);
+                        }
+                    });
+            };
+
+            $dorms = $tempDorm->whereHas('rooms', $roomFilter)
+                ->with(['rooms' => function($query) use ($roomFilter, $dateFrom, $dateTo) {
+                    $roomFilter($query);
+                    $query->with(['hasData' => function($q) use ($dateFrom, $dateTo) {
+                        $q->where('tenant_from_date', '<', $dateTo)
+                          ->where('tenant_to_date', '>', $dateFrom)
+                          ->whereNotIn('tenant_status', [
+                                DormitoryEnum::CANCELLED,
+                                DormitoryEnum::REJECTED,
+                                DormitoryEnum::TERMINATED
+                            ]);
+                    }]);
+                }])->get();
+
+            $dorms->transform(function($dorm) use ($singleAccommodation) {
+                $dorm->rooms->transform(function($room) use ($singleAccommodation) {
+                    $takenSlots = $room->hasData->pluck('for_slot')->map(fn($val) => (int)$val)->toArray();
+                    $allSlots = range(1, $room->room_slot);
+                    $availableSlots = array_values(array_diff($allSlots, $takenSlots));
+                    $room->suggested_slot = !empty($availableSlots) ? ($singleAccommodation === "NO" ? $availableSlots[0] : 3) : null;
+                    $room->canChoose = \count($availableSlots) > 0;
+                    unset($room->hasData);
+
+                    return $room;
+                });
+
+                return $dorm;
+            });
+
+            return response()->json(['dorms' => $dorms], 200);
         });
     }
 
@@ -288,7 +335,6 @@ class DormitoryController extends Controller
                     $room->room_name = "R$request->dormitoryId-" . $i + 1;
                     $room->room_slot = $request->room_slot;
                     $room->is_air_conditioned = "NO";
-                    $room->room_available_slot = $request->room_slot;
                     $room->save();
                 }
             }
@@ -355,7 +401,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYROOM->value ], 200);
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYROOM->value], 200);
             }
         });
     }
@@ -878,7 +924,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERV : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERV . " ID#$this_service->id"
+                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERV->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERV->value . " ID#$this_service->id"
             );
 
             if(env('USE_EVENT')) {
@@ -910,7 +956,7 @@ class DormitoryController extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYSERV . " ID#$service_id"
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYSERV->value . " ID#$service_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -955,7 +1001,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKSTATUS
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKSTATUS->value
             );
 
             if(env('USE_EVENT')) {
@@ -998,7 +1044,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKLIST
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKLIST->value
             );
 
             if(env('USE_EVENT')) {
@@ -1142,7 +1188,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQSERV . " ID#$request->documentId"
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQSERV->value . " ID#$request->documentId"
             );
 
             if(env('USE_EVENT')) {
@@ -1271,7 +1317,7 @@ class DormitoryController extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYCHARGE ->value. " ID#$chargeId"
+                    AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYCHARGE->value. " ID#$chargeId"
                 );
 
                 if(env('USE_EVENT')) {
@@ -1281,7 +1327,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYCHARGE . ID#$chargeId"], 200);
+                return response()->json(['message' => AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYCHARGE->value . " ID#$chargeId"], 200);
             }
         });
     }
@@ -1301,7 +1347,7 @@ class DormitoryController extends Controller
             Notifications::notify($request->user()->id, $this_dormitory_tenant->user_id, "DORMITORY", "has updated your dormitory request.");
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQ . " ID#$request->documentId"
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQ->value . " ID#$request->documentId"
             );
 
             if(env('USE_EVENT')) {

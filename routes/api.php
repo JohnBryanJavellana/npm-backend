@@ -43,6 +43,7 @@ use App\Http\Controllers\QRReaderCheckInOutCtrl;
 /** imported models */
 
 use App\Models\User;
+use App\Services\Trainee\Dormitory\DormitoryTransferService;
 
 /** guest routes */
 Route::match(['GET', 'POST'], '/login', [LoginController::class, 'login_user']);
@@ -50,15 +51,6 @@ Route::post('/register', [RegisterController::class, 'register_user']);
 Route::get('/email/verify', [EmailVerificationController::class, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
-
-/** testing routes */
-Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
-Route::post('items', [TraineeRecreational::class, 'getUserRecRequest']);
-Route::post('item', [TraineeRecreational::class, 'requestEquipment']);
-Route::post('cancelTest', [TraineeRecreational::class, 'cancelUnitsRequest']);
-Route::post('qr', [TraineeRecreational::class, 'checkUniqueIdentifier']);
-
-
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -120,6 +112,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('/dormitories/')->group(function () {
             //DORM REQUEST
             Route::post('rooms', [TraineeDormitory::class, 'viewRecommendedRooms']);
+            Route::post('testRecords', [DormitoryTransferService::class, 'prepareData']);
 
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);

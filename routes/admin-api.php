@@ -203,6 +203,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('ra_requests/update_requested_facility', [RecreationalActivityCtrl::class, 'update_requested_facility']);
             Route::post('ra_requests/update_requested_equipment', [RecreationalActivityCtrl::class, 'update_requested_equipment']);
 
+            Route::post('ra_requests/ra_create_charges',[RecreationalActivityCtrl::class, 'ra_create_charges']);
+            Route::post('ra_requests/ra_update_charges',[RecreationalActivityCtrl::class, 'ra_update_charges']);
+            Route::get('ra_requests/ra_request_charges', [RecreationalActivityCtrl::class, 'ra_request_charges']);
+            Route::delete('ra_requests/ra_delete_charges/{id}', [RecreationalActivityCtrl::class, 'ra_delete_charges']);
+            
             Route::post('ra_equipments', [RecreationalActivityCtrl::class, 'ra_equipments']);
             Route::post('ra_equipment_stock', [RecreationalActivityCtrl::class, 'ra_equipment_stock']);
             Route::post('ra_create_or_update_equipment', [RecreationalActivityCtrl::class, 'ra_create_or_update_equipment']);

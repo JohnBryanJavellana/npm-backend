@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Admin\Dormitory;
+namespace App\Http\Requests\Admin\Library;
+
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Validator;
 
-class GetAvailableDorms extends FormRequest
+
+class RequestInvoice extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +25,11 @@ class GetAvailableDorms extends FormRequest
     public function rules(): array
     {
         return [
-            'isAirConditioned' => ['required'],
-            'dateFrom' => ['required', 'date'],
-            'dateTo' => ['required', 'date'],
-            'userId' => ['required', 'exists:users,id'],
-            'singleAccommodation' => ['required'],
+            'r_a_request_info_id' => ['required', 'integer'],
+            'user_id'   => ['required', 'integer'],
+            'description'   => ['required', 'string'],
+            'trace_number'   => ['required', 'string'],
+            'invoice_amount'   => ['required', 'numeric', 'min:0'],
         ];
     }
 }

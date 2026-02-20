@@ -8,6 +8,7 @@ use App\Models\RAEquipmentRequest;
 use App\Models\RARelationship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use App\Utils\{
     TransactionUtil,
     AuditHelper,
@@ -21,7 +22,8 @@ use App\Models\{
     RAEquipmentStock,
     RAEquipmentImage,
     RAFacilityImage,
-    RAFacilityRequest
+    RAFacilityRequest,
+    RAInvoices
 };
 use App\Http\Requests\Admin\RecreationalActivity\{
     CreateOrUpdateEquipment,
@@ -33,6 +35,7 @@ use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
 };
+use App\Helpers\Administrator\General\CountCollection;
 
 class RecreationalActivityCtrl extends Controller
 {
@@ -499,17 +502,12 @@ class RecreationalActivityCtrl extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = RARequestInfo::query();
 
-            $get_count = function ($collection) {
-                $count = $collection->count();
-                return $count > 99 ? '99+' : $count;
-            };
-
             $count = [
-                'count_total'    => $get_count($reservations),
-                'count_active'   => $get_count($reservations->clone()->where('status', 'ACTIVE')),
-                'count_forCSM'   => $get_count($reservations->clone()->where('status', 'FOR CSM')),
-                'count_complete' => $get_count($reservations->clone()->where('status', 'COMPLETED')),
-                'count_pending'  => $get_count($reservations->clone()->where('status', 'PENDING')),
+                'count_total'    => CountCollection::startCount($reservations),
+                'count_active'   => CountCollection::startCount($reservations->clone()->where('status', 'ACTIVE')),
+                'count_forCSM'   => CountCollection::startCount($reservations->clone()->where('status', 'FOR CSM')),
+                'count_complete' => CountCollection::startCount($reservations->clone()->where('status', 'COMPLETED')),
+                'count_pending'  => CountCollection::startCount($reservations->clone()->where('status', 'PENDING')),
             ];
 
             return response()->json(['reservationCount' => $count], 200);
@@ -753,4 +751,101 @@ class RecreationalActivityCtrl extends Controller
             }
         });
     }
+
+public function ra_create_charges(Request $request)
+{
+    return TransactionUtil::transact(null, [], function () use ($request) {
+        $r_a_request_info_id = $request->r_a_request_info_id;
+        $user_Id = $request->user_id;
+        $description = $request->description;
+        $trace_number = $request->trace_number;
+        $invoice_status = $request->invoice_status;
+        $invoice_amount = $request->invoice_amount;
+
+
+        $newRaRequest = RAInvoices::create([
+            'r_a_request_info_id' => $r_a_request_info_id,
+            'user_id' => $user_Id, 
+            'description' => $description,
+            'trace_number' => $trace_number,
+            'invoice_status' => $invoice_status,
+            'invoice_amount' => $invoice_amount,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json([
+            'r_a_request_info_id' => $newRaRequest->r_a_request_info_id,
+            'user_id' => $newRaRequest->user_id,
+            'description' => $newRaRequest->description,
+            'trace_number' => $newRaRequest->trace_number,
+            'invoice_status' => $newRaRequest->invoice_status,
+            'invoice_amount' => $newRaRequest->$invoice_amount,
+
+        ], 201);
+    });
+}
+
+public function ra_request_charges(Request $request)
+{
+    return TransactionUtil::transact(null, [], function () {
+
+        $raRequests = RAInvoices::select(
+            'r_a_request_info_id',
+            'user_id',
+            'description',
+            'trace_number',
+            'invoice_status',
+            'invoice_amount'
+        )->get();
+
+        return response()->json([
+            'ra_requests' => $raRequests
+        ], 200);
+    });
+}
+
+public function ra_update_charges(Request $request, $id)
+{
+    return TransactionUtil::transact(null, [], function () use ($request, $id) {
+
+        $raRequest = RAInvoices::findOrFail($id);
+
+        $raRequest->update($request->only([
+            'r_a_request_info_id',
+            'user_id',
+            'description',
+            'trace_number',
+            'invoice_status',
+            'invoice_amount'
+        ]));
+
+        return response()->json($raRequest, 200);
+    });
+}
+
+public function ra_delete_charges(Request $request, $id)
+{
+    return TransactionUtil::transact(null, [], function () use ($id) {
+
+        $raInvoice = RAInvoices::find($id);
+
+        if (!$raInvoice) {
+            return response()->json([
+                'message' => "RA Invoice with ID #$id not found."
+            ], 404);
+        }
+
+        $raInvoice->delete();
+
+        AuditHelper::log(
+            $request->user()->id,
+            "Deleted RA Invoice ID#$id"
+        );
+
+        return response()->json([
+            'message' => "RA Invoice ID#$id has been deleted successfully."
+        ], 200);
+    });
+}
 }

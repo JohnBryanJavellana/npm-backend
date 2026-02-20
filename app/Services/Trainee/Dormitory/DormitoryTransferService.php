@@ -13,9 +13,10 @@ use App\Models\{
 };
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use DomainException;
-use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Http\Request;
 
 class DormitoryTransferService extends DormitoryHistoryService {
 
@@ -29,32 +30,41 @@ class DormitoryTransferService extends DormitoryHistoryService {
         protected DormitoryExtendRequest $dormitoryExtendRequest,
     ) {}
 
-    private function prepareData($userId, $documentId) {
+    public function prepareData($userId, $documentId) {
         $record = $this->tenantModel
         ->with([
             "transferRequest" => function($query) {
                 $query->where("status", "PENDING")->select("id", "dormitory_tenant_id", "status");
+            },
+            "extendRequest" => function($query) {
+                $query->where("status", "PENDING")->select("id", "dormitory_tenant_id", "status");
             }
-
-            //include the extending requests
         ])
-        ->where([
-            "id" => $documentId,
-            "user_id" => $userId
-        ])
+        ->forUser($userId)
+        ->whereKey($documentId)
         ->first(["id", "user_id", "tenant_status"]);
+
+        // return response()->json(["data" => $record->extendRequest->isEmpty()], 200);
 
         if(!$record) {
             throw new DomainException("Invalid tenant record or unauthorized access.");
         }
 
-        if(!in_array($record->tenant_status, [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value])) {
-            throw new DomainException("No active tenant record was found. Room transfer requests can only be made by active tenants.");
+        if(!in_array($record->tenant_status, [RequestStatus::ACTIVE->value])) {
+            throw new DomainException("Room transfer requests require an ACTIVE dormitory tenant record. Please ensure your tenant status is ACTIVE before submitting a transfer request.");
         }
 
-        if($record->transfers !== null) {
+        if(!$record->extendRequest->isEmpty()) {
+            throw new DomainException("A pending extending request is already active. You may only submit a new request once the current one has been resolved.");
+        }
+
+        if(!$record->transferRequest->isEmpty()) {
             throw new DomainException("A pending transfer request already exists. You may only submit a new request once the current one has been resolved.");
         }
+
+        // if ($record->isExpired()) {
+        //     throw new DomainException("This dormitory tenant record is already terminated.");
+        // }
     }
 
     public function viewTransferRequests($documentId, $userId, array $status = [])
@@ -126,11 +136,11 @@ class DormitoryTransferService extends DormitoryHistoryService {
                 throw new DomainException("Transfer request cancellation is not permitted.");
             }
 
-            // $status = $record->tenant->tenant_to_date->isPast() ? RequestStatus::ACTIVE : ;
+            $status = Carbon::parse($record->tenant->tenant_to_date)->isPast() ? RequestStatus::TERMINATED->value : RequestStatus::ACTIVE->value;
 
             $record->update(["status" => RequestStatus::CANCELLED]);
 
-            $this->dormitoryTenantService->updateTenantRecordById($record->dormitory_tenant_id, $userId, RequestStatus::ACTIVE->value);
+            $this->dormitoryTenantService->updateTenantRecordById($record->dormitory_tenant_id, $userId, $status);
 
             $this->loggingDetails(
                 $record->dormitory_tenant_id,
