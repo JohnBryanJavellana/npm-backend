@@ -8,8 +8,6 @@ use App\Utils\GenerateTrace;
 use DomainException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\Request;
-use Termwind\Components\Raw;
 
 class DormitoryExtraService {
 
@@ -23,6 +21,7 @@ class DormitoryExtraService {
     ) {}
     public function viewServices()
     {
+        \Log::info("not_found",[Cache::has("dormitory:services:all")]);
         $cacheKey = "dormitory:services:all";
         return Cache::remember($cacheKey, self::LONG_TTL, function() { 
            return $this->dormitoryService
@@ -60,7 +59,7 @@ class DormitoryExtraService {
         ])
         ->select("id")
         ->whereKey($validated["dormitory_id"])
-        ->forStatus([RequestStatus::APPROVED, RequestStatus::EXTENDING])
+        ->forStatus([RequestStatus::APPROVED, RequestStatus::ACTIVE, RequestStatus::EXTENDING])
         ->forUser($userId)
         ->first();
 
@@ -71,9 +70,8 @@ class DormitoryExtraService {
         if($record->services->isNotEmpty()) {
             $services = $record->services->pluck("services")->flatten()->pluck("name")->filter()->implode(', ');
             throw new DomainException("You already have an active request for this service. Please wait for the current request to be completed before submitting a new one. Service: $services");
-        } 
+        }
 
-        //service validation
         $service = $this->dormitoryService->query()
         ->select("id", "name", "status")
         ->whereKey($validated["service_id"])

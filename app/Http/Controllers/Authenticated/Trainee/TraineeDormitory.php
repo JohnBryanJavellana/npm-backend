@@ -398,6 +398,7 @@ class TraineeDormitory extends Controller
     public function view_service()
     {
         try {
+            \Log::info("not_found");
             return AvailableServicesResource::collection($this->dormitoryExtraService->viewServices());
         } catch (\Exception $e) {
             \Log::error("error_view_service", [$e->getMessage()]);

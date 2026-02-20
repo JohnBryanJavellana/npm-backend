@@ -15,7 +15,6 @@ class CancelRecRequest extends FormRequest
     public function authorize(): bool
     {
         \Log::info("cancelData", [$this->all()]);
-        return true;
         return $this->user() !== null;
     }
 
