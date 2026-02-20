@@ -213,14 +213,14 @@ class EnrollmentCtrl extends Controller
 
                 $count = [
                     'total' => CountCollection::startCount($reservations),
-                    'count_forVerification' => CountCollection::startCount($reservations->clone()->where('tenant_status', EnrollmentEnum::RESERVED->value)),
-                    'count_forEnrolled' => CountCollection::startCount($reservations->clone()->where('tenant_status', EnrollmentEnum::ENROLLED->value)),
-                    'count_forFinished' => CountCollection::startCount($reservations->clone()->where('tenant_status', EnrollmentEnum::COMPLETED->value)),
-                    'count_forPaid' => CountCollection::startCount($reservations->clone()->where('tenant_status', EnrollmentEnum::PAID->value)),
-                    'count_forProcessPayment' => CountCollection::startCount($reservations->clone()->where('tenant_status', EnrollmentEnum::PROCESSING_PAYMENT->value)),
-                    'count_forPayment' => CountCollection::startCount($reservations->clone()->where('tenant_status', EnrollmentEnum::FOR_PAYMENT->value)),
-                    'count_denied' => CountCollection::startCount($reservations->clone()->whereIn('tenant_status', [EnrollmentEnum::CANCELLED->value, EnrollmentEnum::DECLINED->value, EnrollmentEnum::COURSE_STATUS_FULLY_BOOKED->value, EnrollmentEnum::INCOMPLETE_REQUIREMENTS->value])),
-                    'count_remarks' => CountCollection::startCount(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications']),
+                    'count_forVerification' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::RESERVED->value)),
+                    'count_forEnrolled' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::ENROLLED->value)),
+                    'count_forFinished' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::COMPLETED->value)),
+                    'count_forPaid' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PAID->value)),
+                    'count_forProcessPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PROCESSING_PAYMENT->value)),
+                    'count_forPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::FOR_PAYMENT->value)),
+                    'count_denied' => CountCollection::startCount($reservations->clone()->whereIn('enrolled_course_status', [EnrollmentEnum::CANCELLED->value, EnrollmentEnum::DECLINED->value, EnrollmentEnum::COURSE_STATUS_FULLY_BOOKED->value, EnrollmentEnum::INCOMPLETE_REQUIREMENTS->value])),
+                    'count_remarks' => CountCollection::startCount(collect(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications'])),
                 ];
 
                 return response()->json(['applicationCount' => $count], 200);
