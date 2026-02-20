@@ -13,6 +13,7 @@ use App\Models\{
 use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
+use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +31,6 @@ class DormitoryExtendService {
         protected DormitoryExtensionRequest $dormitoryExtensionRequest,
     ) {}
 
-     
     private function prepareData($userId, $documentId)
     {
         $record = $this->tenantModel
@@ -43,25 +43,32 @@ class DormitoryExtendService {
             "extendRequest" => function ($query)use ($userId, $documentId) {
                 $query->forUser($userId)
                     ->where("dormitory_tenant_id", $documentId)
-                    ->status([RequestStatus::PENDING, RequestStatus::APPROVED]);
+                    ->status([RequestStatus::PENDING, RequestStatus::APPROVED ,RequestStatus::FOR_PAYMENT]);
             }
         ])
         ->forUser($userId)
-        ->forStatus([RequestStatus::APPROVED, RequestStatus::EXTENDING])
         ->whereKey($documentId)
         ->first();
-
+        
         if(!$record) {
             throw new DomainException("Dormitory request is not approved yet or an extending request is already existing.");
         }
 
-        if($record->transferRequest()->exists()) {
-            throw new DomainException("A pending or approved transfering request already exists.");
+        if(!in_array($record->tenant_status, [RequestStatus::ACTIVE->value])) {
+            throw new DomainException("Room extension requests require an ACTIVE dormitory tenant record. Please ensure your tenant status is ACTIVE before submitting an extention request.");
         }
 
-        if($record->extendRequest()->exists()) {
-            throw new DomainException("A pending or approved extending request already exists.");
+        if($record->transferRequest->isNotEmpty()) {
+            throw new DomainException("A pending or approved TRANSFERING request already exists.");
         }
+
+        if($record->extendRequest->isNotEmpty()) {
+            throw new DomainException("A pending or approved EXTENDING request already exists.");
+        }
+
+        // if ($record->isExpired()) {
+        //     throw new DomainException("This dormitory tenant record is already terminated.");
+        // }
     }
     public function createExtendRequest($userId, $validated)
     {
@@ -75,7 +82,7 @@ class DormitoryExtendService {
                 "new_end_date" => $validated["extension_date"],
             ]);
 
-            $this->dormitoryTenantService->updateTenantRecordById($validated["document_id"], $userId, RequestStatus::ACTIVE);
+            $this->dormitoryTenantService->updateTenantRecordById($validated["document_id"], $userId, RequestStatus::EXTENDING);
 
             $this->loggingDetails(
                 $validated["document_id"], 
@@ -91,7 +98,8 @@ class DormitoryExtendService {
     public function cancelExtendRequest($requestId, $userId)
     {
         DB::transaction(function() use ($requestId, $userId) {
-            $extend = $this->dormitoryExtensionRequest
+            $extend = $this->dormitoryExtensionRequest->query()
+            ->with("tenant")
             ->whereRelation("tenant", "user_id", "=", $userId)
             ->wherekey($requestId)
             ->lockForUpdate()
@@ -113,7 +121,10 @@ class DormitoryExtendService {
                 "status" => RequestStatus::CANCELLED
             ]);
 
-            $this->dormitoryTenantService->updateTenantRecordById($extend->dormitory_tenant_id, $userId, RequestStatus::ACTIVE);
+            $status = Carbon::parse($extend->tenant?->tenant_to_date)->isPast() ? RequestStatus::TERMINATED->value : RequestStatus::ACTIVE->value;
+
+
+            $this->dormitoryTenantService->updateTenantRecordById($extend->dormitory_tenant_id, $userId, $status);
         
             $this->loggingDetails(
                 $extend->dormitory_tenant_id,
@@ -122,16 +133,6 @@ class DormitoryExtendService {
                 "You cancelled your room extend request."
             );
         });
-    }
-
-    private function updateTenantRecord($tenantId, $status) {
-        $record = $this->tenantModel->query()
-            ->lockForUpdate()
-            ->findOrFail($tenantId);
-
-        $record->update([
-            "tenant_status" => $status
-        ]);
     }
 
     private function loggingDetails(int $tenant_id, int $userId, string $action, string $reason) {
