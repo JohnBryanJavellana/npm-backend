@@ -13,7 +13,7 @@ def main():
         return
 
     branch = sys.argv[1]
-    message = sys.argv[2] or 123
+    message = 123
     runProcess(branch=branch, message=message)
 
 if __name__ == "__main__":
