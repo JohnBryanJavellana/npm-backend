@@ -31,6 +31,7 @@ class ViewRecEquipment extends JsonResource
                     "id" => $facility->facility->id,
                     "name" => $facility->facility->name,
                     "location" => $facility->facility->location,
+                    "UI" => $facility->facility->unique_identifier,
                     "additional_details" => $facility->facility->additional_details,
                     "open_time" => $facility->facility->open_time,
                     "close_time" => $facility->facility->close_time,

@@ -141,14 +141,14 @@ enum AdministratorAuditActions: string {
       /**
      * Summary of CSMSCTRL
      */
-    case CSMSCTRL_REMOVED_CSMSREQUEST = "User has successfully submitted a service survey.";
+    case CSMSCTRL_CREATE_CSMSREQUEST = "User has successfully submitted a service survey.";
 
     /**
      * Summary MYACCOUNTCTRL
      */
-    case MYACCOUNTCTRL_UPDATED_MYACCOUNTADMINPROFPIC = "An Admin has updated user's profile picture.";
-    case MYACCOUNTCTRL_UPDATED_MYACCOUNTUSERPROFPIC = "User profile picture has been updated.";
-    case MYACCOUNTCTRL_UPDATED_MYACCOUNTADDINFO = "You have posted your new information!";
+    case MYACCOUNTCTRL_UPDATED_MYACCOUNTADMINPFP = "An Admin has updated user's profile picture.";
+    case MYACCOUNTCTRL_UPDATED_MYACCOUNTUSERPFP = "User profile picture has been updated.";
+    case MYACCOUNTCTRL_CREATED_UPDATED_MYACCOUNTADDINFO = "You have posted your new information!";
 
     /**
      * Summary TRAINEEDORMITORYCTRL
@@ -156,16 +156,28 @@ enum AdministratorAuditActions: string {
     case TRAINEEDORMITORYTRL_CREATED_TRAINEEDORMITORYEXTENDREQUEST = "User sent a dorm extension request.";
     case TRAINEEDORMITORYTRL_CANCEL_TRAINEEDORMITORYEXTENDREQUEST = "User cancelled a dormitory request.";
 
-    case MYACCOUNTCTRL_SEND_MYACCOUNTREQBOOK = "User sent a book request.";
-    case MYACCOUNTCTRL_CANCELLED_MYACCOUNTREQBOOK = "User cancelled a book request.";
-    case MYACCOUNTCTRL_CREATE_MYACCOUNTEXTENDREQ = "User sent a book extension request.";
-    case MYACCOUNTCTRL_CANCELLED_MYACCOUNTEXTENDREQ = "User cancel a book extension request.";
-    case MYACCOUNTCTRL_CREATED_MYACCOUNTRENEWREQ = "User created a book renewal request.";
     /**
     * Summary TRAINEEENROLLMENTCTRL
     */
+    case TRAINEEENROLLMENTCTRL_SEND_TRAINEEENROLLMENTREQ = "User sent enrolment request.";
+    case TRAINEEENROLLMENTCTRL_CANCEL_TRAINEEENROLLMENTTRAININREQ = "User  has cancelled training request training_id.";
+    case TRAINEEENROLLMENTCTRL_UPDATEADMIN_TRAINEEENROLLMENTTRAININGREQ = "Admin updated the enrollment request of trainee.";
+    case TRAINEEENROLLMENTCTRL_UPDATEUSER_TRAINEEENROLLMENTTRAININGREQ = "User updated an enrollment request.";
+    case TRAINEEENROLLMENTCTRL_UPDATE_TRAINEEENROLLMENTINVOICETRAINING = "User has proceed training/s for verification.";
+    /**
+    * Summary TRAINEELIBRARYCTRL
+    */
 
+    case TRAINEELIBRARYCTRL_SEND_TRAINEELIBRARYREQBOOK = "User sent a book request.";
+    case TRAINEELIBRARYCTRL_CANCEL_TRAINEELIBRARYBOOKREQ = "User cancelled a book request.";
+    case TRAINEELIBRARYCTRL_CREATED_TRAINEELIBRARYEXTENDREQ = "User sent a book extension request.";
+    case TRAINEELIBRARYCTRL_CREATE_TRAINEELIBRARYRENEWBOOKREQ = "User sent a book renewal request..";
 
+    /**
+    * Summary of TRAINEERECREATIONALCTRL
+    */
+    case TRAINEERECREATIONALCTRL_CANCEL_TRAINEERECREATIONALUNITREQ = "User has cancelled a recreational request.";
+    case TRAINEERECREATIONALCTRL_SEND_TRAINEERECREATIONALREQEQUIPMENT = "User has sent a recreational request";
 
 
 }

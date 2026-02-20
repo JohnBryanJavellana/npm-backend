@@ -111,6 +111,7 @@ class QRReaderCheckInOutCtrl extends Controller
             $record->save();
 
             return response()->json(['message' => "Success!"], 200);
+        //OK TANAN SIR HAHA
         });
     }
 }

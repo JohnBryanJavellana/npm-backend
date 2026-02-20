@@ -39,4 +39,9 @@ class RARequestInfo extends Model
     {
         return $query->whereIn("status", $statuses);
     }
+
+    public function scopeForUser(Builder $query, int $user_id)
+    {
+        return $query->where("user_id", $user_id);
+    }
 }

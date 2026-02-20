@@ -48,6 +48,11 @@ enum RequestStatus: string {
     case LOST = "LOST";
     case DAMAGED = "DAMAGED";
 
+    //RECREATIONAL
+
+    case DONE = "DONE";
+    case RETURNED = "RETURNED";
+
 
     public static function renewableStatuses(): array {
         return [
@@ -65,6 +70,16 @@ enum RequestStatus: string {
             RequestStatus::DECLINED->value,
             RequestStatus::IR->value,
             RequestStatus::CSFB->value,
+        ];
+    }
+
+    public static function CompletingRecRequest(): array
+    {
+        return [
+            RequestStatus::DONE->value,
+            RequestStatus::CANCELLED->value,
+            RequestStatus::DECLINED->value,
+            RequestStatus::RETURNED->value,
         ];
     }
 }

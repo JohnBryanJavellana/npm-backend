@@ -62,6 +62,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
+use App\Helpers\Administrator\General\CountCollection;
 
 class EnrollmentCtrl extends Controller
 {
@@ -71,7 +72,6 @@ class EnrollmentCtrl extends Controller
      */
     public function get_applications(Request $request)
     {
-
         return TransactionUtil::transact(null, [], function () use ($request) {
             $allRequirements = Requirement::where('status', 'ACTIVE')->get();
             $basicRequirements = $allRequirements->where('isBasic', 'YES');
@@ -187,7 +187,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREREMARKS : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREREMARKS . " ID#$this_remark->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREREMARKS->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREREMARKS->value . " ID#$this_remark->id"
             );
 
             if (env('USE_EVENT')) {
@@ -197,7 +197,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . ' a remark ID# ' . $this_remark->id], 201);
+            return response()->json(['message' => $isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTREMARK->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTREMARK->value . " ID#$this_remark->id"], 201);
         });
     }
 
@@ -208,38 +208,23 @@ class EnrollmentCtrl extends Controller
     public function get_enrollment_count(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-            $couse_status = [
-                'PENDING',
-                'RESERVED',
-                'ENROLLED',
-                'COMPLETED',
-                'CANCELLED',
-                'PAID',
-                'DECLINED',
-                'FOR-PAYMENT',
-                'IR',
-                'CSFB',
-                'PROCESSING PAYMENT'
-            ];
+            return TransactionUtil::transact(null, [], function() use ($request) {
+                $reservations = EnrolledCourse::query();
 
-            $counts = EnrolledCourse::whereIn('enrolled_course_status', $couse_status)
-                ->selectRaw('enrolled_course_status, COUNT(*) as total')
-                ->groupBy('enrolled_course_status')
-                ->pluck('total', 'enrolled_course_status');
+                $count = [
+                    'total' => CountCollection::startCount($reservations),
+                    'count_forVerification' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::RESERVED->value)),
+                    'count_forEnrolled' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::ENROLLED->value)),
+                    'count_forFinished' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::COMPLETED->value)),
+                    'count_forPaid' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PAID->value)),
+                    'count_forProcessPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PROCESSING_PAYMENT->value)),
+                    'count_forPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::FOR_PAYMENT->value)),
+                    'count_denied' => CountCollection::startCount($reservations->clone()->whereIn('enrolled_course_status', [EnrollmentEnum::CANCELLED->value, EnrollmentEnum::DECLINED->value, EnrollmentEnum::COURSE_STATUS_FULLY_BOOKED->value, EnrollmentEnum::INCOMPLETE_REQUIREMENTS->value])),
+                    'count_remarks' => CountCollection::startCount(collect(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications'])),
+                ];
 
-            return response()->json([
-                'count_forVerification'  => min($counts['RESERVED'] ?? 0, 99),
-                'count_forEnrolled'  => min($counts['ENROLLED'] ?? 0, 99),
-                'count_forFinished'  => min($counts['COMPLETED'] ?? 0, 99),
-                'count_forPaid'  => min($counts['PAID'] ?? 0, 99),
-                'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0, 99),
-                'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0, 99),
-                'count_denied' => min($counts['DECLINED'] ?? 0, 99) +
-                                  min($counts['CSFB'] ?? 0, 99) +
-                                  min($counts['CANCELLED'] ?? 0, 99) +
-                                  min($counts['IR'] ?? 0, 99),
-                'count_remarks' => \count(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications']),
-            ], 200);
+                return response()->json(['applicationCount' => $count], 200);
+            });
         });
     }
 
@@ -292,7 +277,7 @@ class EnrollmentCtrl extends Controller
             Notifications::notify($request->user()->id, $this_training_status->user_id, NotificationEnum::DORMITORY, 'updated your enrollment application status.');
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTAPPSTAT . " ID#$this_training_status->id"
+                AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTAPPSTAT->value . " ID#$this_training_status->id"
             );
 
             if (env('USE_EVENT')) {
@@ -385,7 +370,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHED : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHED . " ID#$this_schedule->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHED->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHED->value . " ID#$this_schedule->id"
             );
 
             if (env('USE_EVENT')) {
@@ -417,7 +402,7 @@ class EnrollmentCtrl extends Controller
                 $this_schedule->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHED . " ID#$schedule_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHED->value . " ID#$schedule_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -468,7 +453,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTMOD : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTMOD . " ID#$this_module->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTMOD->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTMOD->value . " ID#$this_module->id"
             );
 
             if (env('USE_EVENT')) {
@@ -589,7 +574,7 @@ class EnrollmentCtrl extends Controller
                 $this_module_type->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTMODTYPE . " ID#$module_type_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTMODTYPE->value . " ID#$module_type_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -643,7 +628,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTCERT : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTCERT . " ID#$this_certificate->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTCERT->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTCERT->value . " ID#$this_certificate->id"
             );
 
             if (env('USE_EVENT')) {
@@ -679,7 +664,7 @@ class EnrollmentCtrl extends Controller
                 $this_certificate->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTCERT . " ID#$certificate_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTCERT->value . " ID#$certificate_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -762,7 +747,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENT : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREMENT . " ID#$this_requirement->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENT->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREMENT->value . " ID#$this_requirement->id"
             );
 
             if (env('USE_EVENT')) {
@@ -793,7 +778,7 @@ class EnrollmentCtrl extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTREQUIREMENT . " ID#$requirement_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTREQUIREMENT->value . " ID#$requirement_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -854,7 +839,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHL : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHL . " ID#$this_school->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHL->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHL->value . " ID#$this_school->id"
             );
 
             if (env('USE_EVENT')) {
@@ -885,7 +870,7 @@ class EnrollmentCtrl extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHL . " ID#$school_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHL->value . " ID#$school_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -942,7 +927,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTCOURSE : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTCOURSE . " ID#$this_course->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTCOURSE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTCOURSE->value . " ID#$this_course->id"
             );
 
             if (env('USE_EVENT')) {
@@ -975,7 +960,7 @@ class EnrollmentCtrl extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTCOURSE . " ID#$course_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTCOURSE->value . " ID#$course_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -1036,7 +1021,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTVOUCHER : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTVOUCHER . " ID#$this_voucher->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTVOUCHER->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTVOUCHER->value . " ID#$this_voucher->id"
             );
 
             if (env('USE_EVENT')) {
@@ -1068,7 +1053,7 @@ class EnrollmentCtrl extends Controller
                 $this_voucher->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTVOUCHER . " ID#$voucher_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTVOUCHER->value . " ID#$voucher_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -1129,7 +1114,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSPNSR : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSPNSR . " ID#$this_sponsor->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSPNSR->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSPNSR->value . " ID#$this_sponsor->id"
             );
 
             if (env('USE_EVENT')) {
@@ -1161,7 +1146,7 @@ class EnrollmentCtrl extends Controller
                 $this_sponsor->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSPNSR . " ID#$sponsor_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSPNSR->value . " ID#$sponsor_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -1221,7 +1206,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTLICENSE : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTLICENSE . " ID#$this_license->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTLICENSE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTLICENSE->value . " ID#$this_license->id"
             );
 
             if (env('USE_EVENT')) {
@@ -1254,7 +1239,7 @@ class EnrollmentCtrl extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTLICENSE . " ID#$license_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTLICENSE->value . " ID#$license_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -1316,7 +1301,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTRANK : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTRANK . " ID#$this_rank->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTRANK->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTRANK->value . " ID#$this_rank->id"
             );
 
             if (env('USE_EVENT')) {
@@ -1349,7 +1334,7 @@ class EnrollmentCtrl extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTRANK . " ID#$rank_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTRANK->value . " ID#$rank_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -1415,7 +1400,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTFACILITATOR : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTFACILITATOR . " ID#$this_facilitator->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTFACILITATOR->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTFACILITATOR->value . " ID#$this_facilitator->id"
             );
 
             if (env('USE_EVENT')) {
@@ -1448,7 +1433,7 @@ class EnrollmentCtrl extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTFACILITATOR . " ID#$facilitator_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTFACILITATOR->value . " ID#$facilitator_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -1534,7 +1519,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTTRAININGFEE : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE . " ID#$this_course_fee->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTTRAININGFEE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE->value . " ID#$this_course_fee->id"
             );
 
             if (env('USE_EVENT')) {
@@ -1567,7 +1552,7 @@ class EnrollmentCtrl extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE . " ID#$course_fee_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE->value . " ID#$course_fee_id"
                 );
 
                 if (env('USE_EVENT')) {

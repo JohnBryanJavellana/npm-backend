@@ -18,6 +18,7 @@ class ViewRecFacilities extends JsonResource
         return [
             "id" => $this->id,
             "name" => $this->name,
+            "UI" => $this->unique_identifier,
             "location" => $this->location,
             "additional_details" => $this->additional_details,
             "open_time" => $this->open_time,
@@ -36,6 +37,7 @@ class ViewRecFacilities extends JsonResource
                     "additional_details" => $query?->equipment?->additional_details,
                     "status" => $query?->equipment?->availability_status,
                     "images" => $query?->equipment?->images,
+                    "stocks" => $query?->equipment?->equipmentStocks,
                     "disabled_dates" => $query?->equipment?->hasData->map(fn($data) => [
                         "from_datetime" => $data->start_date,
                         "to_datetime" => $data->end_date

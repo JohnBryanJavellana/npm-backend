@@ -48,7 +48,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
             throw new DomainException("Invalid tenant record or unauthorized access.");
         }
 
-        if($record->tenant_status !== "APPROVED") {
+        if(!in_array($record->tenant_status, [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value])) {
             throw new DomainException("No active tenant record was found. Room transfer requests can only be made by active tenants.");
         }
 

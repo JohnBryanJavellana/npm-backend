@@ -495,26 +495,25 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function get_ra_count(Request $request)
-    {
+    public function get_ra_count(Request $request){
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $reservations = RARequestInfo::query();
 
+            $get_count = function ($collection) {
+                $count = $collection->count();
+                return $count > 99 ? '99+' : $count;
+            };
 
-        $status = ['PENDING', 'ACTIVE', 'FOR CSM', 'COMPLETED'];
+            $count = [
+                'count_total'    => $get_count($reservations),
+                'count_active'   => $get_count($reservations->clone()->where('status', 'ACTIVE')),
+                'count_forCSM'   => $get_count($reservations->clone()->where('status', 'FOR CSM')),
+                'count_complete' => $get_count($reservations->clone()->where('status', 'COMPLETED')),
+                'count_pending'  => $get_count($reservations->clone()->where('status', 'PENDING')),
+            ];
 
-        $counts = RARequestInfo::whereIn('status', $status)
-            ->selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
-
-        $total_count = RARequestInfo::count();
-
-        return response()->json([
-            'count_pending'  => min($counts['PENDING'] ?? 0, 99),
-            'count_active' => min($counts['ACTIVE'] ?? 0, 99),
-            'count_forCSM' => min($counts['FOR CSM'] ?? 0, 99),
-            'count_complete' => min($counts['COMPLETED'] ?? 0, 99),
-            'count_total' => min($total_count ?? 0, 99),
-        ], 200);
+            return response()->json(['reservationCount' => $count], 200);
+        });
     }
 
     /**
@@ -750,6 +749,7 @@ class RecreationalActivityCtrl extends Controller
                     );
                 }
                 return response()->json(['message' => "Success!"], 200);
+                //OK TANAN
             }
         });
     }

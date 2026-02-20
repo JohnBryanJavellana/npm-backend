@@ -52,6 +52,7 @@ use App\Enums\{
     AdministratorReturnResponse
 };
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
+use App\Helpers\Administrator\General\CountCollection;
 
 class LibraryController extends Controller
 {
@@ -410,21 +411,12 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = BookRes::query();
 
-            if($request->userId) {
-                $reservations->where('user_id', $request->userId);
-            }
-
-            $get_count = function ($collection) {
-                $count = $collection->count();
-                return $count > 99 ? '99+' : $count;
-            };
-
             $count = [
-                'total'     => $get_count($reservations),
-                'active'    => $get_count($reservations->clone()->where('status', 'ACTIVE')),
-                'for_csm'   => $get_count($reservations->clone()->where('status', 'FOR CSM')),
-                'extending' => $get_count($reservations->clone()->where('status', 'EXTENDING')),
-                'completed' => $get_count($reservations->clone()->where('status', 'COMPLETED')),
+                'total'     => CountCollection::startCount($reservations),
+                'active'    => CountCollection::startCount($reservations->clone()->where('status', 'ACTIVE')),
+                'for_csm'   => CountCollection::startCount($reservations->clone()->where('status', 'FOR CSM')),
+                'extending' => CountCollection::startCount($reservations->clone()->where('status', 'EXTENDING')),
+                'completed' => CountCollection::startCount($reservations->clone()->where('status', 'COMPLETED')),
             ];
 
             return response()->json(['reservationCount' => $count], 200);

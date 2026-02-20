@@ -61,4 +61,9 @@ class LibraryInvoiceService {
         //onSuccess from the Paymaya
         $userRec->decrement("credit_amount", $validated["credit_amount"]);
     }
+
+    public function updateTemporarily($validated)
+    {
+        return;
+    }
 }

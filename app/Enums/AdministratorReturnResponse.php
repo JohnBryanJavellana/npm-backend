@@ -29,6 +29,7 @@ enum AdministratorReturnResponse: string {
      */
     case DORMITORYCTRL_CREATED_DORMITORY = "You've created a dormitory.";
     case DORMITORYCTRL_UPDATED_DORMITORY = "You've updated a dormitory.";
+    case DORMITORYCTRL_CREATED_DORMITORYROOM = "You've added a dormitory room";
     case DORMITORYCTRL_UPDATED_DORMITORYROOM = "You've updated dormitory room.";
     case DORMITORYCTRL_REMOVED_DORMITORYROOM = "You've removed dormitory room.";
     case DORMITORYCTRL_ERR_DORMITORYROOM = "Can't remove room. It already has connected data.";
@@ -178,6 +179,17 @@ enum AdministratorReturnResponse: string {
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT = "You've removed an equipment successfully!";
     case RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYEQUIPMENT = "Can't remove equipment. It already has connected data.";
 
+     /**
+     * Summary CSMSCTRL
+     */
+    case CSMSCTRL_CREATE_CSMSREQUEST = "Successfully Submitted!";
+    case CSMSCTRL_DELETE_CSMSREQUEST = "Deleted Submitted!";
+
+     /**
+     * Summary MYACCOUNTCTRL
+     */
+    case MYACCOUNTCTRL_UPDATED_MYACCOUNTPFP = "You have successfully updated the avatar!";
+
     /**
      * Summary of TRAINEEDORMITORYCTRL
      */
@@ -187,15 +199,49 @@ enum AdministratorReturnResponse: string {
     case TRAINEEDORMITORYCTRL_CANCEL_TRAINEEDORMITORYTRANSFERREQUEST = "Your transfer request has been successfully cancelled.";
     case TRAINEEDORMITORYCTRL_CREATE_TRAINEEDORMITORYREQUESTTENANTROOM = "Dormitory request sent successfully.";
     case TRAINEEDORMITORYCTRL_CANCEL_TRAINEEDORMITORYAPPLIEDDORM = "Dormitory request cancelled successfully.";
-    case TRAINEEDORMITORYCTRL_CREATE_TRAINEEDORMITORYINCLUSIONREQ = "You've have successfully sent items request!";
+    case TRAINEEDORMITORYCTRL_CREATE_TRAINEEDORMITORYREQINCLUSION = "You've have successfully sent items request!";
     case TRAINEEDORMITORYCTRL_CREATED_TRAINEEDORMITORYSERVICEREQ = "Your service request has been sent successfully!";
     case TRAINEEDORMITORYCTRL_CANCEL_TRAINEEDORMITORYSERVICEREQ = "Service request has cancelled successfully!";
 
 
     /**
-     * Summary of TRAINEEENROLLMENTCTRL
-     */
-    // case TRAINEEENROLLMENTCTRL_SEND_TRAINEEENROLLMENTREQ = "Enrollment request sent successfully";
+    * Summary of TRAINEEENROLLMENTCTRL
+    */
+    case TRAINEEENROLLMENTCTRL_SEND_TRAINEEENROLLMENTREQ = "Enrollment request sent successfully!";
+    case TRAINEEENROLLMENTCTRL_REMOVE_TRAINEEENROLLMENTTRAININGREQ = "You've successully cancelled a training request.";
+    case TRAINEEENROLLMENTCTRL_REMOVE_TRAINEEENROLLMENTREQUIREMENTSREQ = "User has cancelled training request.";
+    case TRAINEEENROLLMENTCTRL_UPDATE_TRAINEEENROLLMENTTRAININGREQ = "Enrollment request updated successfully!";
+    case TRAINEEENROLLMENTCTRL_UPDATE_TRAINEEENROLLMENTINVOICETRAINING = "Successfully updated!";
+    case TRAINEEENROLLMENTCTRL_CHANGE_TRAINEEENROLLMENTCARDCOLOR = "Success!";
+
+
+    /**
+    * Summary of TRAINEEEINVOICESCTRL
+    */
+
+    case TRAINEEINVOICESCTRL_GETALL_TRAINEEINVOICESTRAINEEINVOICES = "Invoices Fetched Successfully!";
+    case TRAINEEINVOICESCTRL_UPDATE_TRAINEEINVOICESLIBINVOICE = "Successfully Paid!";
+
+
+    /**
+    * Summary of TRAINEELIBRARYCTRL
+    */
+    case TRAINEELIBRARYCTRL_SEND_TRAINEELIBRARYREQBOOK = "Your book request was sent successfully!";
+    case TRAINEELIBRARYCTRL_CANCEL_TRAINEELIBRARYBOOKREQ = "You're request has been cancelled successfully.";
+    case TRAINEELIBRARYCTRL_CREATED_TRAINEELIBRARYEXTENDREQ = "Extension request has sent successfully!";
+    case TRAINEELIBRARYCTRL_CANCEL_TRAINEELIBRARYEXTENDREQ = "Cancelled extension request successfully!";
+    case TRAINEELIBRARYCTRL_CREATE_TRAINEELIBRARYRENEWBOOKREQ = "You've successfully sent a book renewal request.";
+
+    /**
+    * Summary of TRAINEERECREATIONALCTRL
+    */
+    case TRAINEERECREATIONALCTRL_CANCEL_TRAINEERECREATIONALUNITREQ = "Success! Unit has been successfully cancelled.";
+    case TRAINEERECREATIONALCTRL_SEND_TRAINEERECREATIONALREQEQUIPMENT = "Successfully sent a recreational request.";
+
+
+
+
+
 
 
 }
