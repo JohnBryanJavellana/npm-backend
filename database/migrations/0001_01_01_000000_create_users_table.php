@@ -31,6 +31,7 @@ return new class extends Migration
                 'TRAINER',
                 'ADMIN-CASHIER',
                 'ADMIN-RA',
+                'GUEST',
                 'GUARD'
             ])->default('SUPERADMIN');
             $table->string('password');
