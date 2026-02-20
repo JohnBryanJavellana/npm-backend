@@ -33,6 +33,7 @@ use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
 };
+use App\Helpers\Administrator\General\CountCollection;
 
 class RecreationalActivityCtrl extends Controller
 {
@@ -499,17 +500,12 @@ class RecreationalActivityCtrl extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = RARequestInfo::query();
 
-            $get_count = function ($collection) {
-                $count = $collection->count();
-                return $count > 99 ? '99+' : $count;
-            };
-
             $count = [
-                'count_total'    => $get_count($reservations),
-                'count_active'   => $get_count($reservations->clone()->where('status', 'ACTIVE')),
-                'count_forCSM'   => $get_count($reservations->clone()->where('status', 'FOR CSM')),
-                'count_complete' => $get_count($reservations->clone()->where('status', 'COMPLETED')),
-                'count_pending'  => $get_count($reservations->clone()->where('status', 'PENDING')),
+                'count_total'    => CountCollection::startCount($reservations),
+                'count_active'   => CountCollection::startCount($reservations->clone()->where('status', 'ACTIVE')),
+                'count_forCSM'   => CountCollection::startCount($reservations->clone()->where('status', 'FOR CSM')),
+                'count_complete' => CountCollection::startCount($reservations->clone()->where('status', 'COMPLETED')),
+                'count_pending'  => CountCollection::startCount($reservations->clone()->where('status', 'PENDING')),
             ];
 
             return response()->json(['reservationCount' => $count], 200);

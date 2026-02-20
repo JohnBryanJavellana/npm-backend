@@ -137,7 +137,7 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYBOOK : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOK . " ID#$book->id"
+                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYBOOK->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOK->value . " ID#$book->id"
             );
 
             if(env('USE_EVENT')) {
@@ -234,7 +234,7 @@ class LibraryController extends Controller
                 $this_book->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOK .  " ID#$book_id"
+                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOK->value . " ID#$book_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -290,7 +290,7 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYBOOKENTRY : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOKENTRY . " ID#$this_genre->id"
+                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYBOOKENTRY->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOKENTRY->value . " ID#$this_genre->id"
             );
 
             if(env('USE_EVENT')) {
@@ -322,7 +322,7 @@ class LibraryController extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY . " ID#$entry_id"
+                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY->value . " ID#$entry_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -388,7 +388,7 @@ class LibraryController extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY . " ID#$copy_id"
+                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY->value . " ID#$copy_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -448,8 +448,8 @@ class LibraryController extends Controller
             ])->whereIn('invoice_status', ['PENDING', 'VERIFICATION'])->exists();
 
             $count =  [
-                'hasBooksNeedAction' => $bookReservationCheck && count($bookReservationCheck->library->borrowedBooks) > 0,
-                'hasPendingReservation' => $bookReservationCheck && ($bookReservationCheck->extendingBooks && count($bookReservationCheck->extendingBooks) > 0),
+                'hasBooksNeedAction' => $bookReservationCheck && \count($bookReservationCheck->library->borrowedBooks) > 0,
+                'hasPendingReservation' => $bookReservationCheck && ($bookReservationCheck->extendingBooks && \count($bookReservationCheck->extendingBooks) > 0),
                 'hasPendingFines' => $pendingFines
             ];
 
@@ -563,7 +563,7 @@ class LibraryController extends Controller
                 $isPastDue => 'EXPIRED',
                 $request->status === "APPROVED" => $request->acceptedStatus,
                 \in_array($request->status, ["REJECTED", "CANCELLED"]) => 'RECEIVED',
-                default => 'HAHAHAH'
+                default => 'ERROR'
             };
 
             if (\in_array($tempStatus, ["EXTENDED", "RENEWED"])) {
@@ -605,7 +605,7 @@ class LibraryController extends Controller
             $reservation = BookReservation::findOrFail($request->documentId);
             $reservation->status = $request->status;
 
-            if ($reservation->type === "HARD-COPY" && is_null($reservation->book_copy_id)) {
+            if ($reservation->type === "HARD-COPY" && $reservation->book_copy_id === null) {
                 $copy = BookCopy::where('status', 'AVAILABLE')->first();
                 if (!$copy) return response()->json(['message' => "No available copies for this book."], 422);
                 $reservation->book_copy_id = $copy->id;
@@ -637,7 +637,7 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVSTATUS . " ID#$request->documentId"
+                AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVSTATUS->value . " ID#$request->documentId"
             );
 
             if (env('USE_EVENT')) {
@@ -743,7 +743,7 @@ class LibraryController extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYREQFINE . " ID#$id"
+                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYREQFINE->value . " ID#$id"
                 );
 
                 return response()->json(['message' => "You've deleted a book reservation fine"], 200);
@@ -788,7 +788,7 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYREQFINE : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYREQFINE . " ID#$new_fine->id"
+                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYREQFINE->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYREQFINE->value . " ID#$new_fine->id"
             );
 
             if(env('USE_EVENT')) {

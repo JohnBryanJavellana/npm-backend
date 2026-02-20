@@ -425,7 +425,6 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () {
             $modules = CourseModule::withCount(['hasData'])->with('moduleType')->get();
-
             return response()->json(['modules' => $modules], 200);
         });
     }
@@ -485,7 +484,7 @@ class EnrollmentCtrl extends Controller
                 $this_module->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTMOD . " ID#$module_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTMOD->value . " ID#$module_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -717,7 +716,7 @@ class EnrollmentCtrl extends Controller
             }
 
             if ($request->upload_reference) {
-                if (!is_null($this_requirement->upload_reference) && file_exists(public_path('upload-reference/' . $this_requirement->upload_reference))) {
+                if ($this_requirement->upload_reference !== null && file_exists(public_path('upload-reference/' . $this_requirement->upload_reference))) {
                     unlink(public_path('upload-reference/' . $this_requirement->upload_reference));
                 }
 
