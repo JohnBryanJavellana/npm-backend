@@ -176,26 +176,48 @@ class DormitoryController extends Controller
      */
     public function get_available_dorms (GetAvailableDorms $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            if($request->userId) {
-                $checkForPending = DormitoryTenant::where('user_id', $request->userId)
-                    ->whereIn('tenant_status', ['PENDING', 'APPROVED', 'EXTENDING', 'FOR PAYMENT', 'PAID', 'PROCESSING PAYMENT', 'ACTIVE', 'RESERVED'])
-                    ->exists();
+            $isAirConditioned = $request->isAirConditioned;
+            $singleAccommodation = $request->singleAccommodation;
+            $dateFrom = $request->dateFrom;
+            $dateTo = $request->dateTo;
+            $userId = $request->userId;
 
-                if($checkForPending) {
-                    return response()->json([
-                        'dorms' => [],
-                        'isValid' => false
-                    ], 200);
-                }
-            }
+            $tenant = User::with('additional_trainee_info.latest_shipboard_attainment')
+                ->where('id', $userId)
+                ->first();
 
-            $dorms = Dormitory::withCount('rooms')
-                ->has('rooms')
-                ->where([
-                    'is_air_conditioned' => $request->room_type
-                ])->get();
+            $isOfficer = $tenant->additional_trainee_info?->latest_shipboard_attainment?->rank !== null;
 
-            return response()->json(['dorms' => $dorms, 'isValid' => true], 200);
+            $dorms = Dormitory::where('room_fee_type', $isOfficer ? 'OFFICERS' : 'RATINGS')
+                ->whereHas('rooms', function($query) use($isAirConditioned, $singleAccommodation, $dateTo, $dateFrom) {
+                    $query->where('is_air_conditioned', $isAirConditioned)
+                          ->where('room_status', '!=', 'UNAVAILABLE');
+
+                    $query->where(function($q) use ($singleAccommodation, $dateFrom, $dateTo) {
+                        $q->whereDoesntHave('tenants', function($tenantQuery) use ($dateFrom, $dateTo) {
+                            $tenantQuery->where(function($dateQuery) use ($dateFrom, $dateTo) {
+                                $dateQuery->where('tenant_from_date', '<', $dateTo)
+                                          ->where('tenant_to_date', '>', $dateFrom);
+                            })->whereIn('tenant_status', ['APPROVED', 'ACTIVE', 'RESERVED', 'PROCESSING PAYMENT']);
+                        }, '=', 0);
+
+                        if ($singleAccommodation === 'NO') {
+                            $q->orWhereHas('tenants', function($tenantQuery) use ($dateFrom, $dateTo) {
+                                $tenantQuery->where('tenant_from_date', '<', $dateTo)
+                                            ->where('tenant_to_date', '>', $dateFrom)
+                                            ->whereIn('tenant_status', ['APPROVED', 'ACTIVE', 'RESERVED', 'PROCESSING PAYMENT']);
+                            }, '<', \DB::raw('room_slot'));
+                        } else {
+                            $q->whereDoesntHave('tenants', function($tenantQuery) use ($dateFrom, $dateTo) {
+                                $tenantQuery->where('tenant_from_date', '<', $dateTo)
+                                            ->where('tenant_to_date', '>', $dateFrom)
+                                            ->whereIn('tenant_status', ['APPROVED', 'ACTIVE', 'RESERVED', 'PROCESSING PAYMENT']);
+                            });
+                        }
+                    });
+                })->get();
+
+            return response()->json(['dorms' => $dorms], 200);
         });
     }
 
@@ -270,6 +292,15 @@ class DormitoryController extends Controller
                         'disabled_dates' => $disabled
                     ];
                 });
+
+            return response()->json(['rooms' => $rooms], 200);
+        });
+    }
+
+    public function get_available_rooms_v2 (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $isAirConditioned = $request->isAirConditioned;
+            $dorms = Dormitory::whereHas('rooms', fn($query) => $query->is_air_conditioned == $isAirConditioned)->get();
 
             return response()->json(['rooms' => $rooms], 200);
         });
