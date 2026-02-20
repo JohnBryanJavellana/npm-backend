@@ -335,7 +335,6 @@ class DormitoryController extends Controller
                     $room->room_name = "R$request->dormitoryId-" . $i + 1;
                     $room->room_slot = $request->room_slot;
                     $room->is_air_conditioned = "NO";
-                    $room->room_available_slot = $request->room_slot;
                     $room->save();
                 }
             }
