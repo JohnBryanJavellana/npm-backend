@@ -31,7 +31,8 @@ use App\Http\Controllers\Authenticated\Trainee\{
 
 use App\Http\Controllers\Authenticated\Administrator\{
     Account,
-    NotificationCtrl
+    NotificationCtrl,
+
 };
 
 /** other controllers */
@@ -106,6 +107,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('/trainings/')->group(function () {
             Route::get('get_all_courses', [TraineeCourses::class, 'get_all_courses']);
+            Route::get('get_trainees_enrollment_status', [EnrollmentCtrl::class, 'get_all_schedules']);
             Route::get('get_trainee_trainings', [TraineeCourses::class, 'get_trainee_courses']);
         });
 

@@ -1565,4 +1565,85 @@ class EnrollmentCtrl extends Controller
             }
         });
     }
+        // EDRASCOE
+        /** */
+    public function get_trainees_by_schedule(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $scheduleId = $request->scheduleId;
+
+            $trainees = EnrolledCourse::with('trainee')
+                ->where('training_id', $scheduleId)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+
+                'schedule_id' => $scheduleId,
+                'count' => $trainees->count(),
+                'trainees' => $trainees,], 200);
+        });
+
+    }
+/**
+ * Move trainees to another schedule
+ * @param Request $request
+ */
+//no api yet
+public function move_trainees(Request $request)
+{
+    return TransactionUtil::transact(null, ['schedules_cache'], function () use ($request) {
+
+        $request->validate([
+            'fromScheduleId' => 'required|exists:trainings,id',
+            'toScheduleId'   => 'required|exists:trainings,id|different:fromScheduleId',
+            'enrollmentIds'  => 'required|array'
+        ]);
+
+        $fromScheduleId = $request->fromScheduleId;
+        $toScheduleId   = $request->toScheduleId;
+        $enrollmentIds  = $request->enrollmentIds;
+
+        $moved = [];
+
+        foreach ($enrollmentIds as $enrollmentId) {
+
+            $enrollment = EnrolledCourse::where('id', $enrollmentId)
+                ->where('training_id', $fromScheduleId)
+                ->first();
+
+            if (!$enrollment) continue;
+
+            $exists = EnrolledCourse::where('training_id', $toScheduleId)
+                ->where('user_id', $enrollment->user_id)
+                ->exists();
+
+            if ($exists) continue;
+
+            $enrollment->training_id = $toScheduleId;
+            $enrollment->save();
+
+            $moved[] = $enrollment->id;
+        }
+
+        AuditHelper::log(
+            $request->user()->id,
+            "Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId"
+        );
+
+        if (env('USE_EVENT')) {
+            event(
+                new BEEnrollment(''),
+                new BEAuditTrail('')
+            );
+        }
+
+        return response()->json([
+            'message' => 'Trainees moved successfully.',
+            'moved_count' => count($moved),
+            'moved_ids' => $moved
+        ], 200);
+    });
 }
+}
+
