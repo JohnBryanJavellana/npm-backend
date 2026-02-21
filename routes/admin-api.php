@@ -205,6 +205,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::post('ra_requests/ra_request_charges', [RecreationalActivityCtrl::class, 'ra_request_charges']);
             Route::post('ra_requests/ra_create_or_update_charge',[RecreationalActivityCtrl::class, 'ra_create_or_update_charge']);
+            Route::put('ra_requests/ra_create_or_update_charge',[RecreationalActivityCtrl::class, 'ra_create_or_update_charge']);
             Route::delete('ra_requests/ra_delete_charge/{id}', [RecreationalActivityCtrl::class, 'ra_delete_charge']);
 
             Route::post('ra_equipments', [RecreationalActivityCtrl::class, 'ra_equipments']);

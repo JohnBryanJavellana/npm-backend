@@ -9,6 +9,7 @@ use App\Models\RARelationship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use App\Utils\{
     TransactionUtil,
     AuditHelper,
@@ -757,71 +758,85 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      */
     public function ra_request_charges(Request $request){
+        $request->validate([
+            'raRequestInfoId' => ['required', 'integer'],]);
+
         return TransactionUtil::transact(null, [], function () use($request) {
             $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
                 ->orderBy('created_at', 'DESC')
                 ->get();
-
-            return response()->json(['ra_charges' => $raCharges ], 200);
+        
+            return response()->json(['ra_charges' => $raCharges], 200);
         });
     }
-
     /**
      * Summary of ra_create_or_update_charge
-     * @param Request $request
+     * @param Request $request  
      */
-    public function ra_create_or_update_charge(Request $request){
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
+        public function ra_create_or_update_charge(Request $request){
 
-            $r_a_request_info_id = $request->r_a_request_info_id;
-            $userId = $request->userId;
-            $description = $request->description;
-            $invoiceAmount = $request->invoiceAmount;
-            $status = $request->status;
+            $isPost = $request->isMethod('post');
 
-            $this_charge = $isPost ? new RAInvoices() : RAInvoices::findOrFail($documentId);
-            $checkIfWeCanUpdate = !$isPost && \in_array($this_charge->invoice_status, [
-                RAEnum::CANCELLED,
-                RAEnum::PAID
+            $request->validate([
+                'r_a_request_info_id' => ['required', 'integer'],
+                'userId'              => ['required', 'integer'],
+                'description'         => ['nullable', 'string'],
+                'invoiceAmount'       => ['required', 'numeric', 'regex:/^\d+(\.\d{1,2})?$/'],
+                'documentId'          => [$isPost ? 'nullable' : 'required', 'integer'],
+                'status'              => [$isPost ? 'nullable' : 'required',Rule::in(['PENDING','PAID','CANCELLED','FOR-VERIFICATION'])],
             ]);
 
-            if(!$checkIfWeCanUpdate) {
-                return response()->json(['message' => "We're sorry. You can't update this charge for the moment."], 409);
-            }
+            return TransactionUtil::transact(null, [], function () use ($request, $isPost) {
 
-            $this_charge->r_a_request_info_id = $r_a_request_info_id;
-            $this_charge->user_id = $userId;
-            $this_charge->description = $description;
-            $this_charge->invoice_amount = $invoiceAmount;
-            if(!$isPost) $this_charge->invoice_status = $status;
-            $this_charge->save();
+                $this_charge = $isPost ? new RAInvoices(): RAInvoices::findOrFail($request->documentId);
 
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? 'Created' : 'Updated' . " a charge. ID#$this_charge->id"
-            );
+                    if (!$isPost && in_array($this_charge->invoice_status, [
+                    RAEnum::CANCELLED,
+                    RAEnum::PAID
+                ])) {
+                    return response()->json([
+                        'message' => "We're sorry. You can't update this charge for the moment."], 409);
+                }
+                
+                $this_charge->r_a_request_info_id = $request->r_a_request_info_id;
+                $this_charge->user_id = $request->userId;
+                $this_charge->description = $request->description;
+                $this_charge->invoice_amount = $request->invoiceAmount;
 
-            return response()->json(['message' => $isPost ? 'created' : 'updated' . " a charge. ID#$this_charge->id"], 201);
-        });
-    }
+                if(!$isPost) {
+                    $this_charge->invoice_status = $request->status;
+                }
 
+                $this_charge->save();
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    ($isPost ? 'Created' : 'Updated') . " a charge. ID#$this_charge->id"
+                );
+
+                return response()->json([
+                    'message' => ($isPost ? 'created' : 'updated') . " a charge. ID#$this_charge->id"
+                ], 200);
+            });
+        }
     /**
      * Summary of ra_delete_charge
      * @param Request $request
      * @param mixed $id
      */
-    public function ra_delete_charge(Request $request, $id){
+        public function ra_delete_charge(Request $request, $id)
+    {
+        $request->validate([
+            'id' => ['integer']
+        ]);
+
         return TransactionUtil::transact(null, [], function () use ($request, $id) {
             $raInvoice = RAInvoices::findOrFail($id);
-            $checkIfWeCanDelete = $raInvoice && \in_array($raInvoice->invoice_status, [
-                RAEnum::CANCELLED,
-                RAEnum::PAID
-            ]);
 
-            if (!$checkIfWeCanDelete) {
-                return response()->json([ 'message' => "We're sorry. You can't delete this charge for the moment." ], 409);
+            if (in_array($raInvoice->invoice_status, [RAEnum::PAID, RAEnum::CANCELLED])) {
+                return response()->json([
+                    'message' => "We're sorry. You can't delete this charge for the moment."
+                ], 409);
             }
 
             $raInvoice->delete();
@@ -831,7 +846,9 @@ class RecreationalActivityCtrl extends Controller
                 "Deleted RA Invoice ID#$id"
             );
 
-            return response()->json([ 'message' => "RA Invoice ID#$id has been deleted successfully." ], 200);
+            return response()->json([
+                'message' => "RA Invoice ID#$id has been deleted successfully."
+            ], 200);
         });
     }
 }
