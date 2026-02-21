@@ -95,7 +95,7 @@ class RegisterController extends Controller
                 }
             }
 
-            if (User::where('email', $request->email)->exists() ||
+            if (($request->email && User::where('email', $request->email)->exists()) ||
                 User::where([
                     'fname' => $fname,
                     'mname' => $mname,
@@ -107,7 +107,7 @@ class RegisterController extends Controller
                 return response()->json(['message' => 'Account already exists.'], 422);
             }
 
-            if($request->password !== $request->password_confirmation) {
+            if($request->password && ($request->password !== $request->password_confirmation)) {
                 return response()->json(['message' => "Password doesn't match"], 422);
             }
 
@@ -116,8 +116,8 @@ class RegisterController extends Controller
             $user->fname = $fname;
             $user->mname = $mname;
             $user->lname = $lname;
-            $user->email = $request->email;
-            $user->password = bcrypt($request->password);
+            $user->email = $request?->email;
+            $user->password = $request->password ? bcrypt($request->password) : null;
             $user->isSocial = UserDetailsEnum::HARD_ACCOUNT;
             $user->birthdate = $request->birthdate;
             $user->role = $request->role ?? UserRoleEnum::TRAINEE;
@@ -138,7 +138,7 @@ class RegisterController extends Controller
                 }
             }
 
-            event(new Registered($user));
+            if($request->email) event(new Registered($user));
 
             return response()->json([
                 'message' => 'Registration successful!',
