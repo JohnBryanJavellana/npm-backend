@@ -504,10 +504,10 @@ class RecreationalActivityCtrl extends Controller
 
             $count = [
                 'count_total'    => CountCollection::startCount($reservations),
-                'count_active'   => CountCollection::startCount($reservations->clone()->where('status', 'ACTIVE')),
-                'count_forCSM'   => CountCollection::startCount($reservations->clone()->where('status', 'FOR CSM')),
-                'count_complete' => CountCollection::startCount($reservations->clone()->where('status', 'COMPLETED')),
-                'count_pending'  => CountCollection::startCount($reservations->clone()->where('status', 'PENDING')),
+                'count_active'   => CountCollection::startCount($reservations->clone()->where('status', RAEnum::ACTIVE)),
+                'count_forCSM'   => CountCollection::startCount($reservations->clone()->where('status', RAEnum::FOR_CSM)),
+                'count_complete' => CountCollection::startCount($reservations->clone()->where('status', RAEnum::COMPLETED)),
+                'count_pending'  => CountCollection::startCount($reservations->clone()->where('status', RAEnum::PENDING)),
             ];
 
             return response()->json(['reservationCount' => $count], 200);
@@ -753,6 +753,20 @@ class RecreationalActivityCtrl extends Controller
     }
 
     /**
+     * Summary of ra_request_charges
+     * @param Request $request
+     */
+    public function ra_request_charges(Request $request){
+        return TransactionUtil::transact(null, [], function () use($request) {
+            $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
+                ->orderBy('created_at', 'DESC')
+                ->get();
+
+            return response()->json(['ra_charges' => $raCharges ], 200);
+        });
+    }
+
+    /**
      * Summary of ra_create_or_update_charge
      * @param Request $request
      */
@@ -765,6 +779,7 @@ class RecreationalActivityCtrl extends Controller
             $userId = $request->userId;
             $description = $request->description;
             $invoiceAmount = $request->invoiceAmount;
+            $status = $request->status;
 
             $this_charge = $isPost ? new RAInvoices() : RAInvoices::findOrFail($documentId);
             $checkIfWeCanUpdate = !$isPost && \in_array($this_charge->invoice_status, [
@@ -780,6 +795,7 @@ class RecreationalActivityCtrl extends Controller
             $this_charge->user_id = $userId;
             $this_charge->description = $description;
             $this_charge->invoice_amount = $invoiceAmount;
+            if(!$isPost) $this_charge->invoice_status = $status;
             $this_charge->save();
 
             AuditHelper::log(
@@ -788,20 +804,6 @@ class RecreationalActivityCtrl extends Controller
             );
 
             return response()->json(['message' => $isPost ? 'created' : 'updated' . " a charge. ID#$this_charge->id"], 201);
-        });
-    }
-
-    /**
-     * Summary of ra_request_charges
-     * @param Request $request
-     */
-    public function ra_request_charges(Request $request){
-        return TransactionUtil::transact(null, [], function () use($request) {
-            $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
-                ->orderBy('created_at', 'DESC')
-                ->get();
-
-            return response()->json(['ra_charges' => $raCharges ], 200);
         });
     }
 
