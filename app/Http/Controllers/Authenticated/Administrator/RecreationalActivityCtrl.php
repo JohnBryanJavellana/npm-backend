@@ -504,10 +504,10 @@ class RecreationalActivityCtrl extends Controller
 
             $count = [
                 'count_total'    => CountCollection::startCount($reservations),
-                'count_active'   => CountCollection::startCount($reservations->clone()->where('status', 'ACTIVE')),
-                'count_forCSM'   => CountCollection::startCount($reservations->clone()->where('status', 'FOR CSM')),
-                'count_complete' => CountCollection::startCount($reservations->clone()->where('status', 'COMPLETED')),
-                'count_pending'  => CountCollection::startCount($reservations->clone()->where('status', 'PENDING')),
+                'count_active'   => CountCollection::startCount($reservations->clone()->where('status', RAEnum::ACTIVE)),
+                'count_forCSM'   => CountCollection::startCount($reservations->clone()->where('status', RAEnum::FOR_CSM)),
+                'count_complete' => CountCollection::startCount($reservations->clone()->where('status', RAEnum::COMPLETED)),
+                'count_pending'  => CountCollection::startCount($reservations->clone()->where('status', RAEnum::PENDING)),
             ];
 
             return response()->json(['reservationCount' => $count], 200);
@@ -752,100 +752,86 @@ class RecreationalActivityCtrl extends Controller
         });
     }
 
-public function ra_create_charges(Request $request)
-{
-    return TransactionUtil::transact(null, [], function () use ($request) {
-        $r_a_request_info_id = $request->r_a_request_info_id;
-        $user_Id = $request->user_id;
-        $description = $request->description;
-        $trace_number = $request->trace_number;
-        $invoice_status = $request->invoice_status;
-        $invoice_amount = $request->invoice_amount;
+    /**
+     * Summary of ra_request_charges
+     * @param Request $request
+     */
+    public function ra_request_charges(Request $request){
+        return TransactionUtil::transact(null, [], function () use($request) {
+            $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
+                ->orderBy('created_at', 'DESC')
+                ->get();
 
+            return response()->json(['ra_charges' => $raCharges ], 200);
+        });
+    }
 
-        $newRaRequest = RAInvoices::create([
-            'r_a_request_info_id' => $r_a_request_info_id,
-            'user_id' => $user_Id, 
-            'description' => $description,
-            'trace_number' => $trace_number,
-            'invoice_status' => $invoice_status,
-            'invoice_amount' => $invoice_amount,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+    /**
+     * Summary of ra_create_or_update_charge
+     * @param Request $request
+     */
+    public function ra_create_or_update_charge(Request $request){
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
 
-        return response()->json([
-            'r_a_request_info_id' => $newRaRequest->r_a_request_info_id,
-            'user_id' => $newRaRequest->user_id,
-            'description' => $newRaRequest->description,
-            'trace_number' => $newRaRequest->trace_number,
-            'invoice_status' => $newRaRequest->invoice_status,
-            'invoice_amount' => $newRaRequest->$invoice_amount,
+            $r_a_request_info_id = $request->r_a_request_info_id;
+            $userId = $request->userId;
+            $description = $request->description;
+            $invoiceAmount = $request->invoiceAmount;
+            $status = $request->status;
 
-        ], 201);
-    });
-}
+            $this_charge = $isPost ? new RAInvoices() : RAInvoices::findOrFail($documentId);
+            $checkIfWeCanUpdate = !$isPost && \in_array($this_charge->invoice_status, [
+                RAEnum::CANCELLED,
+                RAEnum::PAID
+            ]);
 
-public function ra_request_charges(Request $request)
-{
-    return TransactionUtil::transact(null, [], function () {
+            if(!$checkIfWeCanUpdate) {
+                return response()->json(['message' => "We're sorry. You can't update this charge for the moment."], 409);
+            }
 
-        $raRequests = RAInvoices::select(
-            'r_a_request_info_id',
-            'user_id',
-            'description',
-            'trace_number',
-            'invoice_status',
-            'invoice_amount'
-        )->get();
+            $this_charge->r_a_request_info_id = $r_a_request_info_id;
+            $this_charge->user_id = $userId;
+            $this_charge->description = $description;
+            $this_charge->invoice_amount = $invoiceAmount;
+            if(!$isPost) $this_charge->invoice_status = $status;
+            $this_charge->save();
 
-        return response()->json([
-            'ra_requests' => $raRequests
-        ], 200);
-    });
-}
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? 'Created' : 'Updated' . " a charge. ID#$this_charge->id"
+            );
 
-public function ra_update_charges(Request $request, $id)
-{
-    return TransactionUtil::transact(null, [], function () use ($request, $id) {
+            return response()->json(['message' => $isPost ? 'created' : 'updated' . " a charge. ID#$this_charge->id"], 201);
+        });
+    }
 
-        $raRequest = RAInvoices::findOrFail($id);
+    /**
+     * Summary of ra_delete_charge
+     * @param Request $request
+     * @param mixed $id
+     */
+    public function ra_delete_charge(Request $request, $id){
+        return TransactionUtil::transact(null, [], function () use ($request, $id) {
+            $raInvoice = RAInvoices::findOrFail($id);
+            $checkIfWeCanDelete = $raInvoice && \in_array($raInvoice->invoice_status, [
+                RAEnum::CANCELLED,
+                RAEnum::PAID
+            ]);
 
-        $raRequest->update($request->only([
-            'r_a_request_info_id',
-            'user_id',
-            'description',
-            'trace_number',
-            'invoice_status',
-            'invoice_amount'
-        ]));
+            if (!$checkIfWeCanDelete) {
+                return response()->json([ 'message' => "We're sorry. You can't delete this charge for the moment." ], 409);
+            }
 
-        return response()->json($raRequest, 200);
-    });
-}
+            $raInvoice->delete();
 
-public function ra_delete_charges(Request $request, $id)
-{
-    return TransactionUtil::transact(null, [], function () use ($id) {
+            AuditHelper::log(
+                $request->user()->id,
+                "Deleted RA Invoice ID#$id"
+            );
 
-        $raInvoice = RAInvoices::find($id);
-
-        if (!$raInvoice) {
-            return response()->json([
-                'message' => "RA Invoice with ID #$id not found."
-            ], 404);
-        }
-
-        $raInvoice->delete();
-
-        AuditHelper::log(
-            $request->user()->id,
-            "Deleted RA Invoice ID#$id"
-        );
-
-        return response()->json([
-            'message' => "RA Invoice ID#$id has been deleted successfully."
-        ], 200);
-    });
-}
+            return response()->json([ 'message' => "RA Invoice ID#$id has been deleted successfully." ], 200);
+        });
+    }
 }
