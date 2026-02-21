@@ -77,7 +77,7 @@ class Cashier extends Controller
             $query->where('id', $referenceId);
         }
 
-        if(!is_null($whereIns)) {
+        if($whereIns !== null) {
             foreach ($whereIns as $column => $values) {
                 if (!empty($values)) {
                     $query->whereIn($column, $values);
@@ -134,18 +134,6 @@ class Cashier extends Controller
             if($request->service === NotificationEnum::ENROLLMENT->value) {
                 $relations = array_merge($relations, [
                     'training'
-                ]);
-            }
-
-            if($request->service === NotificationEnum::DORMITORY->value) {
-                $relations = array_merge($relations, [
-                    'payee'
-                ]);
-            }
-
-            if($request->service === NotificationEnum::RECREATIONAL->value) {
-                $relations = array_merge($relations, [
-                    'requestor'
                 ]);
             }
 
