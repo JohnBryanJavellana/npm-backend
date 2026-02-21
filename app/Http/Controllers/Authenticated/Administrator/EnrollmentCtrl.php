@@ -1587,7 +1587,7 @@ class EnrollmentCtrl extends Controller
      */
     public function move_trainees(Request $request){
         return TransactionUtil::transact(null, [], function () use ($request) {
-            // CREATE REQUEST FILE
+            // CREATE REQUEST FILE 🥲
             // validate if ids in $request->enrollmentIds actually exists
             $request->validate([
                 'fromScheduleId' => 'required|exists:trainings,id',
@@ -1608,6 +1608,8 @@ class EnrollmentCtrl extends Controller
                 ])->first();
 
                 // validate application status. use Enums\Administrator\EnrollmentEnum.php
+                // add to $moved the success.
+                // create new array for errors with their corresponding error message
             }
 
             // create a new case message. add in Enums\AdministratorAuditActions.php
