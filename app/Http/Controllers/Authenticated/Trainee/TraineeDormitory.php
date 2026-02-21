@@ -58,6 +58,11 @@ class TraineeDormitory extends Controller
         protected DormitoryInclusionService $dormitoryInclusionService,
     ){}
 
+    public function viewTenantCount(Request $request)
+    {
+        return $this->dormitory_service->getDormRequestCount($request->user()->id);
+    }
+
     public function viewRecommendedRooms(RoomPreferRequest $request)
     {
         try
@@ -71,8 +76,10 @@ class TraineeDormitory extends Controller
         }
     }
 
-    public function get_filtered_dorms (Request $request) {
-        try {
+    public function get_filtered_dorms (Request $request) 
+    {
+        try 
+        {
             $cost = $request->cost;
             $dormitories = DormitoryRoom::with("room_images")
                 ->where('room_status', 'ACTIVE')
@@ -95,8 +102,8 @@ class TraineeDormitory extends Controller
                 "dormitory_room.dormitory"
             ]);
 
-            if(empty($request->type)) $applications->whereNot("tenant_status", RequestStatus::CANCELLED->value);
-            if($request->type) $applications->whereIn("tenant_status", $request->type);
+            if(empty($request->tenantStatus)) $applications->whereNot("tenant_status", RequestStatus::CANCELLED->value);
+            if($request->tenantStatus) $applications->whereIn("tenant_status", $request->tenantStatus);
 
             $apps = $applications->latest("created_at")->get();
             return DApplicationResource::collection($apps);
@@ -284,9 +291,6 @@ class TraineeDormitory extends Controller
         }
     }
 
-    /**
-     * Methods for Dorm Occupancy
-     */
     public function request_tenant_room(DormRoomRequest $request) {
         // \Log::info("controller dorm", [$request->all()]);
         $user = $request->user();

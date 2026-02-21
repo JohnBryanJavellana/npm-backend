@@ -102,6 +102,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
+            Route::get("counts", [TraineeEnrollment::class, 'viewEnrolledCount']);
         });
 
         Route::prefix('/trainings/')->group(function () {
@@ -112,7 +113,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('/dormitories/')->group(function () {
             //DORM REQUEST
             Route::post('rooms', [TraineeDormitory::class, 'viewRecommendedRooms']);
-            Route::post('testRecords', [DormitoryTransferService::class, 'prepareData']);
+            Route::get('counts', [TraineeDormitory::class, 'viewTenantCount']);
 
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
@@ -169,6 +170,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('requests/extension/cancel', [TraineeLibrary::class, 'cancel_extend']);
             Route::post('requests/renew', [TraineeLibrary::class, 'renew']);
             Route::post('renew/cancel', [TraineeLibrary::class, 'cancelRenew']);
+            Route::get("counts", [TraineeLibrary::class, 'viewLibRequestCount']);
         });
 
         Route::prefix('/client_satisfaction/')->group(function () {
@@ -195,7 +197,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['user_role:TRAINER', 'throttle:60,1'])->prefix('/trainer/')->group(function () {
         Route::prefix('enrollment/')->group(function() {
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
-            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
+            Route::get('trainings', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
         });
     });
 
@@ -208,7 +210,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_recreational_request', [TraineeRecreational::class, 'get_recreational_request']);
             Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'getRecreationalRequest']);
             Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancelUnitsRequest']);
-        });
+            Route::get('counts', [TraineeRecreational::class, 'viewRecRequestCount']);
+        
+            }); 
     });
 
     //FOR RECREATIONALS
