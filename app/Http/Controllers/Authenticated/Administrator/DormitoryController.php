@@ -227,13 +227,15 @@ class DormitoryController extends Controller
                     }]);
                 }])->get();
 
-            $dorms->transform(function($dorm) use ($singleAccommodation) {
-                $dorm->rooms->transform(function($room) use ($singleAccommodation) {
+            $dorms->transform(function($dorm) use ($singleAccommodation, $roomId) {
+                $dorm->rooms->transform(function($room, $index) use ($singleAccommodation, $roomId) {
                     $takenSlots = $room->hasData->pluck('for_slot')->map(fn($val) => (int)$val)->toArray();
                     $allSlots = range(1, $room->room_slot);
                     $availableSlots = array_values(array_diff($allSlots, $takenSlots));
+
                     $room->suggested_slot = !empty($availableSlots) ? ($singleAccommodation === "NO" ? $availableSlots[0] : 3) : null;
                     $room->canChoose = \count($availableSlots) > 0;
+                    $room->isRecommended = ($roomId && $room->id === $roomId) || $index === 0;
                     unset($room->hasData);
 
                     return $room;
@@ -243,6 +245,44 @@ class DormitoryController extends Controller
             });
 
             return response()->json(['dorms' => $dorms], 200);
+        });
+    }
+
+    /**
+     * Summary of update_dormitory_room_request
+     * @param Request $request
+     */
+    public function update_dormitory_room_request(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $status = $request->status;
+            $remarks = $request->remarks;
+            $dormitoryRequestId = $request->dormitoryRequestId;
+            $roomId = $request->roomId;
+            $slot = $request->slot;
+
+            $this_request = DormitoryTenant::findOrFail($dormitoryRequestId);
+
+            $checkIfWeCantUpdate = $status === DormitoryEnum::APPROVED->value && \in_array($this_request->tenant_status, [
+                DormitoryEnum::CANCELLED,
+                DormitoryEnum::TERMINATED,
+                DormitoryEnum::REJECTED
+            ]);
+
+            if($checkIfWeCantUpdate) {
+                return response()->json(['message' => "We're sorry. You can't update the dormitory request for the moment."], 409);
+            }
+
+            $this_request->dormitory_room_id = $roomId;
+            $this_request->remarks = $remarks;
+            $this_request->for_slot = $slot;
+            $this_request->save();
+
+            AuditHelper::log(
+                $request->user()->id,
+                "Dormitory request has been updated. ID#$this_request->id"
+            );
+
+            return response()->json(['message' => "Dormitory request has been updated."], 200);
         });
     }
 
