@@ -213,13 +213,13 @@ class EnrollmentCtrl extends Controller
 
                 $count = [
                     'total' => CountCollection::startCount($reservations),
-                    'count_forVerification' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::RESERVED->value)),
-                    'count_forEnrolled' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::ENROLLED->value)),
-                    'count_forFinished' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::COMPLETED->value)),
-                    'count_forPaid' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PAID->value)),
-                    'count_forProcessPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PROCESSING_PAYMENT->value)),
-                    'count_forPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::FOR_PAYMENT->value)),
-                    'count_denied' => CountCollection::startCount($reservations->clone()->whereIn('enrolled_course_status', [EnrollmentEnum::CANCELLED->value, EnrollmentEnum::DECLINED->value, EnrollmentEnum::COURSE_STATUS_FULLY_BOOKED->value, EnrollmentEnum::INCOMPLETE_REQUIREMENTS->value])),
+                    'count_forVerification' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::RESERVED)),
+                    'count_forEnrolled' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::ENROLLED)),
+                    'count_forFinished' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::COMPLETED)),
+                    'count_forPaid' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PAID)),
+                    'count_forProcessPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PROCESSING_PAYMENT)),
+                    'count_forPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::FOR_PAYMENT)),
+                    'count_denied' => CountCollection::startCount($reservations->clone()->whereIn('enrolled_course_status', [EnrollmentEnum::CANCELLED, EnrollmentEnum::DECLINED, EnrollmentEnum::COURSE_STATUS_FULLY_BOOKED, EnrollmentEnum::INCOMPLETE_REQUIREMENTS])),
                     'count_remarks' => CountCollection::startCount(collect(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications'])),
                 ];
 
@@ -1565,4 +1565,106 @@ class EnrollmentCtrl extends Controller
             }
         });
     }
+
+    /**
+     * Summary of get_trainees_by_schedule
+     * @param Request $request
+     */
+    public function get_trainees_by_schedule(Request $request){
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $scheduleId = $request->scheduleId;
+            $trainees = EnrolledCourse::with('trainee')
+                ->where('training_id', $scheduleId)
+                ->get();
+
+            return response()->json(['trainees' => $trainees], 200);
+        });
+    }
+
+    /**
+     * Move trainees to another schedule
+     * @param Request $request
+     */
+    public function move_trainees(Request $request)
+{
+    // CREATE REQUEST FILE 🥲
+    // validate if ids in $request->enrollmentIds actually exists
+    // Moved outside TransactionUtil so ValidationException isn't swallowed
+    $request->validate([
+        'fromScheduleId'  => 'required|exists:trainings,id',
+        'toScheduleId'    => 'required|exists:trainings,id|different:fromScheduleId',
+        'enrollmentIds'   => 'required|array',
+        'enrollmentIds.*' => 'required|integer|exists:enrolled_courses,id',
+    ]);
+
+    return TransactionUtil::transact(null, [], function () use ($request) {
+        $fromScheduleId = $request->fromScheduleId;
+        $toScheduleId   = $request->toScheduleId;
+        $enrollmentIds  = $request->enrollmentIds;
+
+        $moved  = [];
+        $errors = [];
+
+        // Only allow moving enrollments in these statuses
+        $allowedStatuses = [
+            EnrollmentEnum::ENROLLED->value,
+            EnrollmentEnum::RESERVED->value,
+        ];
+
+        foreach ($enrollmentIds as $enrollmentId) {
+            $application = EnrolledCourse::where([
+                'id'          => $enrollmentId,
+                'training_id' => $fromScheduleId,
+            ])->first();
+
+            // validate application status. use Enums\Administrator\EnrollmentEnum.php
+            // add to $moved the success.
+            // create new array for errors with their corresponding error message
+            if (!$application) {
+                $errors[] = [
+                    'id'      => $enrollmentId,
+                    'message' => "Enrollment ID#$enrollmentId not found on schedule ID#$fromScheduleId.",
+                ];
+                continue;
+            }
+
+            if (!in_array($application->enrolled_course_status, $allowedStatuses, true)) {
+                $errors[] = [
+                    'id'      => $enrollmentId,
+                    'status'  => $application->enrolled_course_status,
+                    'message' => "Cannot move enrollment ID#$enrollmentId with status '{$application->enrolled_course_status}'.",
+                ];
+                continue;
+            }
+
+
+            $application->training_id = $toScheduleId;
+            $application->save();
+            $moved[] = $application->id;
+        }
+
+        // create a new case message. add in Enums\AdministratorAuditActions.php
+        // AuditHelper::log(
+        //     $request->user()->id,
+        //     AdministratorAuditActions::ENROLLMENTCTRL_MOVED_TRAINEE->value
+        //         . " Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId"
+        // );
+
+        if (env('USE_EVENT')) {
+            event(
+                new BEEnrollment(''),
+                new BEAuditTrail('')
+            );
+        }
+
+        // enhance message return
+        // create a new case message. add in Enums\AdministratorReturnResponse.php
+        return response()->json([
+            'message' => "Moved Schedule succeeded",
+            'moved'   => $moved,
+            'errors'  => $errors,
+        ], !empty($moved) ? 200 : 422);
+    });
 }
+}
+

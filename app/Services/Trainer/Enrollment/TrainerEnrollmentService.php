@@ -12,6 +12,7 @@ class TrainerEnrollmentService {
         protected Training $trainingModel
     ) {}
 
+
     public function getDataFacilitator()
     {
         $userId = Auth::id();
@@ -20,14 +21,21 @@ class TrainerEnrollmentService {
         ->get();
     }
 
-    public function getTrainingSchedules($course_module_id)
+    public function getTrainingSchedules()
     {
         $userId = Auth::id();
         return $this->trainingModel->query()
-        ->where("course_module_id", $course_module_id)
+        ->with([
+            "module.facilitator"
+        ])
         ->whereHas("module", function($query) use ($userId) {
             $query->whereRelation("facilitator", "user_id", $userId);
         })
         ->get();
+    }
+
+    public function functionName()
+    {
+        return;
     }
 }

@@ -57,6 +57,12 @@ class TraineeEnrollment extends Controller
     )
     {}
 
+    public function viewEnrolledCount(Request $request)
+    {
+        $userId = $request->user()->id;
+        return $this->enrollmentService->getEnrolledCount($userId);
+    }
+
     /** GET/VIEW REQUIREMENTS */
     public function view_module_requirements_v2(Request $request, $module,  $enrolled_id = null)
     {

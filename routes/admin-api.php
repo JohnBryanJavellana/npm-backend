@@ -31,6 +31,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished']);
             Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
             Route::get('get_schedules', [EnrollmentCtrl::class, 'get_schedules']);
+            Route::post('training/schedules/traineelist', [EnrollmentCtrl::class, 'get_trainees_by_schedule']);
+            Route::post('/move_trainees', [EnrollmentCtrl::class, 'move_trainees']);//edrascoe
             Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
             Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
             Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
@@ -205,6 +207,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::post('ra_requests/ra_request_charges', [RecreationalActivityCtrl::class, 'ra_request_charges']);
             Route::post('ra_requests/ra_create_or_update_charge',[RecreationalActivityCtrl::class, 'ra_create_or_update_charge']);
+            Route::put('ra_requests/ra_create_or_update_charge',[RecreationalActivityCtrl::class, 'ra_create_or_update_charge']);
             Route::delete('ra_requests/ra_delete_charge/{id}', [RecreationalActivityCtrl::class, 'ra_delete_charge']);
 
             Route::post('ra_equipments', [RecreationalActivityCtrl::class, 'ra_equipments']);
