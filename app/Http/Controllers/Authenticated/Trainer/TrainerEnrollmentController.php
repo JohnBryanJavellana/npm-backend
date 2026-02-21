@@ -25,11 +25,11 @@ class TrainerEnrollmentController extends Controller
         }
     }
 
-    public function viewTrainingSchedules(Request $request, $course)
+    public function viewTrainingSchedules(Request $request)
     {
         try
         {
-            return response()->json(["data" => $this->trainerEnrollmentService->getTrainingSchedules($course)], 200);
+            return response()->json(["data" => $this->trainerEnrollmentService->getTrainingSchedules()], 200);
         }
         catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
