@@ -125,8 +125,6 @@ class RegisterController extends Controller
             $user->qr = $filename;
             $user->save();
 
-            $this->generateAndSendQR($user, $filename);
-
             if($request->adminSettings) {
                 AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a user account. ID#" . $user->id);
 
@@ -138,12 +136,12 @@ class RegisterController extends Controller
                 }
             }
 
-            if($request->email) event(new Registered($user));
+            if($request->email) {
+                $this->generateAndSendQR($user, $filename);
+                event(new Registered($user));
+            }
 
-            return response()->json([
-                'message' => 'Registration successful!',
-                'showEmailVerification' => true
-            ], 201);
+            return response()->json([ 'message' => 'Registration successful!', 'showEmailVerification' => true ], 201);
         });
     }
 
@@ -158,12 +156,9 @@ class RegisterController extends Controller
 
         (new GenerateQR())->generate($filename, $user->id, $user->id, "qr/user/");
         SendingEmail::dispatch($user, new WelcomeAboard(['image_path' => $qrPath]));
-
-        return $filename;
     }
 
     protected function processAvatar($avatarUrl, $filename, $isBase64 = false) {
         SaveAvatar::dispatch($avatarUrl, $filename, "user_images/", true, $isBase64);
-        return $filename;
     }
 }
