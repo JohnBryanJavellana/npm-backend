@@ -1585,50 +1585,86 @@ class EnrollmentCtrl extends Controller
      * Move trainees to another schedule
      * @param Request $request
      */
-    public function move_trainees(Request $request){
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            // CREATE REQUEST FILE 🥲
-            // validate if ids in $request->enrollmentIds actually exists
-            $request->validate([
-                'fromScheduleId' => 'required|exists:trainings,id',
-                'toScheduleId'   => 'required|exists:trainings,id|different:fromScheduleId',
-                'enrollmentIds'  => 'required|array'
-            ]);
+    public function move_trainees(Request $request)
+{
+    // CREATE REQUEST FILE 🥲
+    // validate if ids in $request->enrollmentIds actually exists
+    // Moved outside TransactionUtil so ValidationException isn't swallowed
+    $request->validate([
+        'fromScheduleId'  => 'required|exists:trainings,id',
+        'toScheduleId'    => 'required|exists:trainings,id|different:fromScheduleId',
+        'enrollmentIds'   => 'required|array',
+        'enrollmentIds.*' => 'required|integer|exists:enrolled_courses,id',
+    ]);
 
-            $fromScheduleId = $request->fromScheduleId;
-            $toScheduleId   = $request->toScheduleId;
-            $enrollmentIds  = $request->enrollmentIds;
+    return TransactionUtil::transact(null, [], function () use ($request) {
+        $fromScheduleId = $request->fromScheduleId;
+        $toScheduleId   = $request->toScheduleId;
+        $enrollmentIds  = $request->enrollmentIds;
 
-            $moved = [];
+        $moved  = [];
+        $errors = [];
 
-            foreach ($enrollmentIds as $enrollmentId) {
-                $application = EnrolledCourse::where([
-                    'id' => $enrollmentId,
-                    'training_id' => $fromScheduleId
-                ])->first();
+        // Only allow moving enrollments in these statuses
+        $allowedStatuses = [
+            EnrollmentEnum::ENROLLED->value,
+            EnrollmentEnum::RESERVED->value,
+        ];
 
-                // validate application status. use Enums\Administrator\EnrollmentEnum.php
-                // add to $moved the success.
-                // create new array for errors with their corresponding error message
+        foreach ($enrollmentIds as $enrollmentId) {
+            $application = EnrolledCourse::where([
+                'id'          => $enrollmentId,
+                'training_id' => $fromScheduleId,
+            ])->first();
+
+            // validate application status. use Enums\Administrator\EnrollmentEnum.php
+            // add to $moved the success.
+            // create new array for errors with their corresponding error message
+            if (!$application) {
+                $errors[] = [
+                    'id'      => $enrollmentId,
+                    'message' => "Enrollment ID#$enrollmentId not found on schedule ID#$fromScheduleId.",
+                ];
+                continue;
             }
 
-            // create a new case message. add in Enums\AdministratorAuditActions.php
-            AuditHelper::log(
-                $request->user()->id,
-                "Moved " . \count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId"
+            if (!in_array($application->enrolled_course_status, $allowedStatuses, true)) {
+                $errors[] = [
+                    'id'      => $enrollmentId,
+                    'status'  => $application->enrolled_course_status,
+                    'message' => "Cannot move enrollment ID#$enrollmentId with status '{$application->enrolled_course_status}'.",
+                ];
+                continue;
+            }
+
+
+            $application->training_id = $toScheduleId;
+            $application->save();
+            $moved[] = $application->id;
+        }
+
+        // create a new case message. add in Enums\AdministratorAuditActions.php
+        // AuditHelper::log(
+        //     $request->user()->id,
+        //     AdministratorAuditActions::ENROLLMENTCTRL_MOVED_TRAINEE->value
+        //         . " Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId"
+        // );
+
+        if (env('USE_EVENT')) {
+            event(
+                new BEEnrollment(''),
+                new BEAuditTrail('')
             );
+        }
 
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail('')
-                );
-            }
-
-            // enhance message return
-            // create a new case message. add in Enums\AdministratorReturnResponse.php
-            return response()->json(['message' => 'Trainees moved successfully.'], 200);
-        });
-    }
+        // enhance message return
+        // create a new case message. add in Enums\AdministratorReturnResponse.php
+        return response()->json([
+            'message' => "Moved Schedule succeeded",
+            'moved'   => $moved,
+            'errors'  => $errors,
+        ], !empty($moved) ? 200 : 422);
+    });
+}
 }
 

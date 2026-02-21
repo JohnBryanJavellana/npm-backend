@@ -94,6 +94,9 @@ enum AdministratorAuditActions: string {
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE = "Updated a training fee.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE = "Removed a training fee.";
 
+    case ENROLLMENTCTRL_MOVED_TRAINEE = 'Trainees move operation completed.';
+    case ENROLLMENTCTRL_MOVED_TRAINEE = 'Administrator moved trainee(s) to a new schedule.';
+
     /**
      * Summary of LIBRARYCTRL
      */
