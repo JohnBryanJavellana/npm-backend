@@ -792,6 +792,7 @@ class RecreationalActivityCtrl extends Controller
             }
 
             $this_charge->r_a_request_info_id = $r_a_request_info_id;
+            if($isPost) $this_charge->trace_number = GenerateTrace::createTraceNumber(RAInvoices::class, '-RAINV-');
             $this_charge->user_id = $userId;
             $this_charge->description = $description;
             $this_charge->invoice_amount = $invoiceAmount;
