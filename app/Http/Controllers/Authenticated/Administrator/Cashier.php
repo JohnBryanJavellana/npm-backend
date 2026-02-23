@@ -214,7 +214,7 @@ class Cashier extends Controller
                 );
             }
 
-            return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_PAY_WALKIN], 201);
+            return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_PAY_WALKIN ->value], 201);
         });
     }
 
@@ -257,7 +257,7 @@ class Cashier extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $request->httpMethod === "POST" ? AdministratorAuditActions::CASHIERCTRL_CREATED_CATEGORY->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_CATEGORY->value . " ID#$fee_category->id"
+                $request->httpMethod === "POST" ? AdministratorAuditActions::CASHIERCTRL_CREATED_CHARGECATEGORY->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_CHARGECATEGORY->value . " ID#$fee_category->id"
             );
 
             if(env('USE_EVENT')) {
@@ -288,7 +288,7 @@ class Cashier extends Controller
                 $this_fee->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::CASHIERCTRL_REMOVED_CATEGORY->value . " ID#$fee_category_id"
+                    AdministratorAuditActions::CASHIERCTRL_REMOVED_CHARGECATEGORY->value . " ID#$fee_category_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -347,7 +347,7 @@ class Cashier extends Controller
                 Notifications::notify($request->user()->id, $this_fee->user_id, $request->service, "updated your " . strtolower($request->service) . " invoice status.");
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::CASHIERCTRL_UPDATED_PAYMENT . " ID#$this_fee->id"
+                    AdministratorAuditActions::CASHIERCTRL_UPDATED_PAYMENT->value. " ID#$this_fee->id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -410,7 +410,7 @@ class Cashier extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::CASHIERCTRL_CREATED_OR->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_OR->value . " ID#$this_or->id"
+                $isPost ? AdministratorAuditActions::CASHIERCTRL_CREATED_ORNUMBER->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_ORNUMBER->value . " ID#$this_or->id"
             );
 
             if (env('USE_EVENT')) {
@@ -438,7 +438,7 @@ class Cashier extends Controller
                 $this_or->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::CASHIERCTRL_REMOVED_OR->value . " ID#$orNumber"
+                    AdministratorAuditActions::CASHIERCTRL_REMOVED_ORNUMBER->value . " ID#$orNumber"
                 );
 
                 if(env('USE_EVENT')) {

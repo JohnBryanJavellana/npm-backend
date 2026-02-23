@@ -312,7 +312,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYR->value . " ID#$this_room->id"
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"
             );
 
             if(env('USE_EVENT')) {
@@ -344,7 +344,7 @@ class DormitoryController extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYR->value . " ID#$room_id"
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYROOM->value . " ID#$room_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -454,7 +454,7 @@ class DormitoryController extends Controller
             }
 
             return response()->json([
-                'message' => "You've " . ($isPost ? 'created' : 'updated') . " dormitory room. ID#$dorm_inventory->id",
+                'message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYINV->value . " ID#$dorm_inventory->id",
                 'returnedData' => $dataToReturn
             ], 200);
         });
@@ -573,7 +573,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed dormitory inventory item. OKID#$inv_id"], 200);
+                return response()->json(['message' => AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYINV->value . "ID#$inv_id"], 200);
             }
         });
     }
@@ -688,7 +688,7 @@ class DormitoryController extends Controller
                 $totalGuestCharge = $guestCount * $guestRate;
                 $totalTraineeCharge = $traineeCount * $traineeRate;
 
-                \Log::info("$totalGuestCharge -- $guestCount");
+                //\Log::info("$totalGuestCharge -- $guestCount");
 
                 $descriptionHtml = $this->addDescription(
            "<div style='font-weight: bold;'>
@@ -736,7 +736,7 @@ class DormitoryController extends Controller
             $dormitory_tenant_history->history_reason = ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory request.";
             $dormitory_tenant_history->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory request. ID#" . $this_dormitory_request->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYREQ->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQ->value). "ID#" . $this_dormitory_request->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -745,7 +745,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory request. ID# " . $this_dormitory_request->id], 201);
+            return response()->json(['message' => ($request->httpMethod === "POST" ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYREQ->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYREQ->value). "ID# " . $this_dormitory_request->id], 201);
         });
     }
 
@@ -833,7 +833,7 @@ class DormitoryController extends Controller
                 }
 
                 Notifications::notify($request->user()->id, $this_dorm_request->user_id, "DORMITORY", "has cancelled your dormitory request.");
-                AuditHelper::log($request->user()->id, "Cancelled a dormitory request. ID#$dormReqId");
+                AuditHelper::log($request->user()->id, AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYREQ->value."ID#$dormReqId");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -842,7 +842,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've cancelled dormitory request. ID#$dormReqId"], 200);
+                return response()->json(['message' => AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYREQ->value. "ID#$dormReqId"], 200);
             }
         });
     }
@@ -877,7 +877,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERV : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERV . " ID#$this_service->id"
+                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value . " ID#$this_service->id"
             );
 
             if(env('USE_EVENT')) {
@@ -887,7 +887,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'created' : 'updated') . " a dormitory service. ID# " . $this_service->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value) . "ID# " . $this_service->id], 201);
         });
     }
 
@@ -903,13 +903,13 @@ class DormitoryController extends Controller
             $this_service = DormitoryService::withCount(['requestedService'])->where('id', $service_id)->first();
 
             if($this_service->requested_service_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICES->value], 200);
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value], 200);
             } else {
                 $this_service->delete();
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYSERV . " ID#$service_id"
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYSERVICE->value . " ID#$service_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -919,7 +919,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICES->value], 200);
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value], 200);
             }
         });
     }
@@ -954,7 +954,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKSTATUS
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKSTATUS->value
             );
 
             if(env('USE_EVENT')) {
@@ -997,7 +997,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKLIST
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKLIST->value
             );
 
             if(env('USE_EVENT')) {
@@ -1088,7 +1088,7 @@ class DormitoryController extends Controller
             $this_service->save();
 
             Notifications::notify($request->user()->id, $request->userId, "DORMITORY", "We have ". ($request->httpMethod === "POST" ? 'created' : 'updated') . " a dormitory service request for you.");
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory service request. ID#" . $this_service->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICEREQ->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERVICEREQ->value). "ID#" . $this_service->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -1097,7 +1097,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory service request. ID# " . $this_service->id], 201);
+            return response()->json(['message' => ($request->httpMethod == "POST" ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYSERVICEREQ->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYSERVICEREQ->value). "ID# " . $this_service->id], 201);
         });
     }
 
@@ -1150,7 +1150,7 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQSERV . " ID#$request->documentId"
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQUESTEDSERV->value. " ID#$request->documentId"
             );
 
             if(env('USE_EVENT')) {
@@ -1160,7 +1160,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've updated requested service"], 200);
+            return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYREQUESTEDSERVICE->value ], 200);
         });
     }
 
@@ -1247,7 +1247,7 @@ class DormitoryController extends Controller
             if($request->charge <= 0) $charge->status = DormitoryEnum::PAID->value;
             $charge->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a dormitory charge. ID#" . $charge->id);
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYCHARGE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID#" . $charge->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -1256,7 +1256,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod == "POST" ? 'created' : 'updated') . " a dormitory charge. ID# " . $charge->id], 201);
+            return response()->json(['message' => ($request->httpMethod == "POST" ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYCHARGE->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID# " . $charge->id], 201);
         });
     }
 
@@ -1272,14 +1272,14 @@ class DormitoryController extends Controller
             $this_charge = DormitoryInvoice::where('id', $chargeId)->lockForUpdate()->first();
 
             if(!\in_array($this_charge->invoice_status, [DormitoryEnum::PENDING->value])) {
-                return response()->json(['message' => "Can't cancel charge"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYCHARGE->value], 200);
             } else {
                 $this_charge->invoice_status = DormitoryEnum::CANCELLED->value;
                 $this_charge->save();
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYCHARGE ->value. " ID#$chargeId"
+                    AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYCHARGE->value. " ID#$chargeId"
                 );
 
                 if(env('USE_EVENT')) {
@@ -1289,7 +1289,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYCHARGE . ID#$chargeId"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_CANCELLED_DORMITORYCHARGE->value. "ID#$chargeId"], 200);
             }
         });
     }
@@ -1309,7 +1309,7 @@ class DormitoryController extends Controller
             Notifications::notify($request->user()->id, $this_dormitory_tenant->user_id, "DORMITORY", "has updated your dormitory request.");
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQ . " ID#$request->documentId"
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTATUS->value. " ID#$request->documentId"
             );
 
             if(env('USE_EVENT')) {
@@ -1319,7 +1319,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've updated dormitory request. OKID#$request->documentId"], 200);
+            return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYSTATUS->value. "ID#$request->documentId"], 200);
         });
     }
 }
