@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Authenticated\Administrator;
-use App\Http\Requests\Admin\Library\RequestInvoice;
 
 use App\Events\BERecreational;
 use App\Http\Controllers\Controller;
@@ -29,7 +28,8 @@ use App\Models\{
 };
 use App\Http\Requests\Admin\RecreationalActivity\{
     CreateOrUpdateEquipment,
-    CreateOrUpdateFacility
+    CreateOrUpdateFacility,
+    RequestInvoice
 };
 use Carbon\Carbon;
 use App\Enums\Administrator\RAEnum;
@@ -774,55 +774,52 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_create_or_update_charge
      * @param Request $request  
      */
-      public function ra_create_or_update_charge(RequestInvoice $request)
-{
-    $isPost = $request->httpMethod === 'POST';
+    public function ra_create_or_update_charge(RequestInvoice $request){
+        $isPost = $request->httpMethod === 'POST';
 
-    return TransactionUtil::transact(null, [], function () use ($request, $isPost) {
+        return TransactionUtil::transact(null, [], function () use ($request, $isPost) {
+            $this_charge = $isPost? new RAInvoices(): RAInvoices::findOrFail($request->documentId);
 
-        $this_charge = $isPost
-            ? new RAInvoices()
-            : RAInvoices::findOrFail($request->documentId);
+            if (!$isPost && in_array($this_charge->invoice_status, [
+                RAEnum::CANCELLED,
+                RAEnum::PAID
+            ])) {
+                return response()->json([
+                    'message' => "We're sorry. You can't update this charge for the moment."
+                ], 409);
+            }
 
-        if (!$isPost && in_array($this_charge->invoice_status, [
-            RAEnum::CANCELLED,
-            RAEnum::PAID
-        ])) {
-            return response()->json([
-                'message' => "We're sorry. You can't update this charge for the moment."
-            ], 409);
-        }
+            $this_charge->r_a_request_info_id = $request->r_a_request_info_id;
 
-        $this_charge->r_a_request_info_id = $request->r_a_request_info_id;
+            if ($isPost) {
+                $this_charge->trace_number = GenerateTrace::createTraceNumber(
+                    RAInvoices::class,
+                    '-RAINV-'
+                );
+                $this_charge->invoice_status = 'PENDING';
+            }
 
-        if ($isPost) {
-            $this_charge->trace_number = GenerateTrace::createTraceNumber(
-                RAInvoices::class,
-                '-RAINV-'
+            $this_charge->user_id = $request->userId;
+            $this_charge->description = $request->description;
+            $this_charge->invoice_amount = $request->invoiceAmount;
+
+            if (!$isPost) {
+                $this_charge->invoice_status = $request->status;
+            }
+
+            $this_charge->save();
+
+            AuditHelper::log(
+                $request->user()->id,
+                ($isPost ? 'Created' : 'Updated') . " a charge. ID#{$this_charge->id}"
             );
-            $this_charge->invoice_status = 'PENDING';
-        }
 
-        $this_charge->user_id = $request->userId;
-        $this_charge->description = $request->description;
-        $this_charge->invoice_amount = $request->invoiceAmount;
-
-        if (!$isPost) {
-            $this_charge->invoice_status = $request->status;
-        }
-
-        $this_charge->save();
-
-        AuditHelper::log(
-            $request->user()->id,
-            ($isPost ? 'Created' : 'Updated') . " a charge. ID#{$this_charge->id}"
-        );
-
-        return response()->json([
-            'message' => ($isPost ? 'created' : 'updated') . " a charge. ID#{$this_charge->id}"
-        ], 200);
-    });
-}
+            return response()->json([
+                'message' => ($isPost ? 'created' : 'updated') . " a charge. ID#{$this_charge->id}"
+            ], 200);
+        });
+    }
+    
     /**
      * Summary of ra_delete_charge
      * @param Request $request
