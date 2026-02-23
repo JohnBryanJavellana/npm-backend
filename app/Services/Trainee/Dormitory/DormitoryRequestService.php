@@ -57,7 +57,6 @@ public function getRecommendedRoom($validated)
         ])
         ->havingRaw("overlapping_tenants_count + ? <= ?", [$requiredSlots, $capacity])
         ->orderBy('overlapping_tenants_count', 'asc')
-        // ->orderBy('room_cost', 'asc')
         ->get();
 }
 
@@ -167,5 +166,14 @@ public function getRecommendedRoom($validated)
             "dormitory_tenant_id" => $record->id,
             "history_reason" => $reason,
         ]);
+    }
+
+    public function getDormRequestCount($userId)
+    {
+    return $this->tenantModel->query()
+        ->select(DB::raw("count(*) as status_count"), "tenant_status")
+        ->forUser($userId)
+        ->groupBy("tenant_status")
+        ->pluck("status_count", "tenant_status");
     }
 }

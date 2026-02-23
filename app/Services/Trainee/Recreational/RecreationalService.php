@@ -379,4 +379,13 @@ class RecreationalService {
             }
         });
     }
+
+    public function getRecRequestCount($userId)
+    {
+        return $this->rarequestInfoModel->query()
+        ->select(DB::raw("count(*) as status_count"), "status")
+        ->forUser($userId)
+        ->groupBy("status")
+        ->pluck("status_count", "status");
+    }
 }

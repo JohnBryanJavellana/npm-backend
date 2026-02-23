@@ -35,32 +35,6 @@ class LibraryService {
         });
     }
 
-    // public function createReservation($validated, $user)
-    // {
-    //     return DB::transaction(function() use ($validated, $user) {
-
-    //         $this->validateBook($validated["book_id"]);
-
-    //         $res = $this->createBookRes(
-    //             $user->id,
-    //         );
-
-    //         $BookData = $this->prepareData($validated["book_id"]);
-
-    //         foreach($validated["book_id"] as $book) {
-    //             $this->reserveBook(
-    //         $res,
-    //         $BookData[$book],
-    //         $validated["from"],
-    //         $validated["to"],
-    //         $book,
-    //         $user
-    //             );
-    //         }
-    //     });
-    // }
-
-
     public function preparedData($validated)
     {
 
@@ -161,63 +135,15 @@ class LibraryService {
         $unavailable = collect($physical_books)->reject(fn($book) => ($available[$book] ?? 0) > 0);
 
         if($unavailable->isNotEmpty()) {
-            throw new \DomainException("The following books have no available copies: " . $unavailable->implode(', '));
+            throw new DomainException("The following books have no available copies: " . $unavailable->implode(', '));
         }
     }
-
-    //remove
-    // private function prepareData(array $book_id) {
-    //     $books = $this->bookModel::whereIn("id" , $book_id)
-    //     ->select("id", "pdf_copy")
-    //     ->get()
-    //     ->keyBy("id");
-
-    //     $physical_books = $books->filter(fn($book) => !$book->pdf_copy)
-    //     ->pluck('id')
-    //     ->toArray();
-
-    //     $copies = [];
-    //     if(!empty($physical_books)) {
-    //         $copies = BookCopy::whereIn('book_id', $physical_books)
-    //         ->where("status", "AVAILABLE")
-    //         ->lockForUpdate()
-    //         ->get()
-    //         ->groupBy('book_id');
-    //     }
-
-    //     return $books->map(function($book) use($copies) {
-    //         return [
-    //             "book" => $book,
-    //             "copy" => $book->pdf_copy ? null : $copies[$book->id]->first()
-    //         ];
-    //     });
-    // }
-
-    //stay
     private function createBookRes($validated) {
         return  $this->bookResModel::create([
             "user_id" => $validated["user_id"],
             "trace_number" => GenerateTrace::createTraceNumber(BookRes::class),
             "type" => $this->bookResModel::TYPE_ONLINE,
         ]);
-    }
-
-    //remove
-    private function reserveBook($res, $book_data, $from, $to, $book_id, $user) {
-        $copy = $book_data["copy"];
-
-        BookReservation::create([
-            "book_res_id" => $res->id,
-            "book_copy_id" => $copy?->id,
-            "from_date" => Carbon::parse($from)->format('Y-m-d'),
-            "book_id" => $book_id,
-        ]);
-
-        if($copy) {
-            $copy->update(["status" => "RESERVED"]);
-        }
-
-        BookCart::where(['book_id' => $book_id, 'user_id' => $user->id])->delete();
     }
 
     public function cancelBookReservation()
@@ -228,5 +154,14 @@ class LibraryService {
     public function updateBookRequest()
     {
         return;
+    }
+
+    public function getLibRequestCount($userId)
+    {
+        return $this->bookResModel->query()
+        ->select(DB::raw("count(*) as status_count"), "status")
+        ->forUser($userId)
+        ->groupBy("status")
+        ->pluck("status_count", "status");
     }
 }

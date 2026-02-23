@@ -29,7 +29,7 @@ enum RequestStatus: string {
     //PAYMENT TYPE
     case ONLINE = "ONLINE";
     case WALK_IN = "WALK-IN";
-    //DORM INVOICE TYPE
+    //DORM INVOICE TYPE 
     case INCLUSION = "INCLUSION";
     case SERVICE = "SERVICE";
     case DORMITORY = "DORMITORY";

@@ -227,13 +227,15 @@ class DormitoryController extends Controller
                     }]);
                 }])->get();
 
-            $dorms->transform(function($dorm) use ($singleAccommodation) {
-                $dorm->rooms->transform(function($room) use ($singleAccommodation) {
+            $dorms->transform(function($dorm) use ($singleAccommodation, $roomId) {
+                $dorm->rooms->transform(function($room, $index) use ($singleAccommodation, $roomId) {
                     $takenSlots = $room->hasData->pluck('for_slot')->map(fn($val) => (int)$val)->toArray();
                     $allSlots = range(1, $room->room_slot);
                     $availableSlots = array_values(array_diff($allSlots, $takenSlots));
+
                     $room->suggested_slot = !empty($availableSlots) ? ($singleAccommodation === "NO" ? $availableSlots[0] : 3) : null;
                     $room->canChoose = \count($availableSlots) > 0;
+                    $room->isRecommended = ($roomId && $room->id === $roomId) || $index === 0;
                     unset($room->hasData);
 
                     return $room;
@@ -247,6 +249,45 @@ class DormitoryController extends Controller
     }
 
     /**
+     * Summary of update_dormitory_room_request
+     * @param Request $request
+     */
+    public function update_dormitory_room_request(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $status = $request->status;
+            $remarks = $request->remarks;
+            $dormitoryRequestId = $request->dormitoryRequestId;
+            $roomId = $request->roomId;
+            $slot = $request->slot;
+
+            $this_request = DormitoryTenant::findOrFail($dormitoryRequestId);
+
+            $checkIfWeCantUpdate = $status === DormitoryEnum::APPROVED->value && \in_array($this_request->tenant_status, [
+                DormitoryEnum::CANCELLED,
+                DormitoryEnum::TERMINATED,
+                DormitoryEnum::REJECTED
+            ]);
+
+            if($checkIfWeCantUpdate) {
+                return response()->json(['message' => "We're sorry. You can't update the dormitory request for the moment."], 409);
+            }
+
+            $this_request->dormitory_room_id = $roomId;
+            $this_request->remarks = $remarks;
+            $this_request->for_slot = $slot;
+            $this_request->tenant_status = $status;
+            $this_request->save();
+
+            AuditHelper::log(
+                $request->user()->id,
+                "Dormitory request has been updated. ID#$this_request->id"
+            );
+
+            return response()->json(['message' => "Dormitory request has been updated."], 200);
+        });
+    }
+
+    /**
      * Summary of get_available_supplies
      * @param Request $request
      */
@@ -254,25 +295,27 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $availableSupplies = DormitoryInventory::withCount([
                 'stock' => fn($query) => $query->whereIn('status', ['AVAILABLE'])
-            ])->with([
-                'charge'
             ])->get()->map(function ($self) use ($request) {
-                $availabilityStatus = (function() use ($self, $request) {
-                    $checkIfReserved = $self->borrowings()
+                return (function() use ($self, $request) {
+                    $checkIfReservedTemp = $self->borrowings()
                         ->where('status', '!=', "DONE")
-                        ->where('dormitory_tenant_id', $request->userId)
-                        ->exists();
+                        ->where('dormitory_tenant_id', $request->userId);
+                    $checkIfReserved = $checkIfReservedTemp->exists();
+                    $status = null;
 
                     if ($checkIfReserved) {
-                        return 'ADDED';
+                        $status = 'ADDED';
                     } else if ($self->stock()->whereIn('status', ['AVAILABLE'])->exists()) {
-                        return 'AVAILABLE';
+                        $status = 'AVAILABLE';
                     } else {
-                        return 'OUT OF STOCK';
+                        $status = 'OUT OF STOCK';
                     }
+
+                    $self->provided = \count($checkIfReservedTemp->get());
+                    $self->availabilityStatus = $status;
+
+                    return $self;
                 })();
-                $self->availabilityStatus = $availabilityStatus;
-                return $self;
             })->sortBy(function ($item) {
                 $order = [
                     'AVAILABLE' => 2,
@@ -286,6 +329,16 @@ class DormitoryController extends Controller
             return response()->json([
                 'availableSupplies' => $availableSupplies
             ], 200);
+        });
+    }
+
+    /**
+     * Summary of get_and_provide
+     * @param Request $request
+     */
+    public function get_and_provide(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+
         });
     }
 
@@ -844,19 +897,14 @@ class DormitoryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request, $dormReqId) {
             $this_dorm_request = DormitoryTenant::where('id', $dormReqId)->lockForUpdate()->first();
 
-            if(!\in_array($this_dorm_request->tenant_status, [DormitoryEnum::PENDING->value, DormitoryEnum::CANCELLED->value, DormitoryEnum::FOR_PAYMENT->value])) {
+            if(\in_array($this_dorm_request->tenant_status, [DormitoryEnum::CANCELLED->value, DormitoryEnum::FOR_PAYMENT->value])) {
                 return response()->json(['message' => "Can't cancel request."], 422);
             } else {
                 $this_dorm_request->tenant_status = DormitoryEnum::CANCELLED->value;
                 $this_dorm_request->save();
 
-                if(!is_null($this_dorm_request->dormitory_room_id)) {
+                if($this_dorm_request->dormitory_room_id !== null) {
                     $dorm = DormitoryRoom::findOrFail($this_dorm_request->dormitory_room_id);
-
-                    $dorm->room_available_slot = ($this_dorm_request->room_for_type === DormitoryEnum::COUPLE->value || $this_dorm_request->single_accommodation)
-                        ? 2
-                        : 1;
-
                     $dorm->room_status = DormitoryEnum::AVAILABLE->value;
                     $dorm->save();
                 }
@@ -1360,4 +1408,31 @@ class DormitoryController extends Controller
             return response()->json(['message' => "You've updated dormitory request. OKID#$request->documentId"], 200);
         });
     }
+
+    //edrascoe create  two api for get  a view  provided items and add selected items
+    // add functions that will list all items. 'AVAILABLE','BORROWED','LOST','DAMAGED','RESERVED','UNAVAILABLE'
+public function get_all_inventory_items(Request $request)
+{
+    return TransactionUtil::transact(null, [], function () {
+
+        $statusOrder = [
+            'AVAILABLE',
+            'BORROWED',
+            'LOST',
+            'DAMAGED',
+            'RESERVED',
+            'UNAVAILABLE'
+        ];
+
+        $items = DormitoryInventoryItem::with('inventory')
+            ->orderByRaw("
+                FIELD(status, 'AVAILABLE','BORROWED','LOST','DAMAGED','RESERVED','UNAVAILABLE')
+            ")
+            ->get();
+
+        return response()->json([
+            'inventoryItems' => $items
+        ], 200);
+    });
+}
 }

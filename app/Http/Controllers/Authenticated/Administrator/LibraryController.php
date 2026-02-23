@@ -53,6 +53,9 @@ use App\Enums\{
 };
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
 use App\Helpers\Administrator\General\CountCollection;
+use App\Enums\Administrator\{
+    LibraryEnum
+};
 
 class LibraryController extends Controller
 {
@@ -195,13 +198,15 @@ class LibraryController extends Controller
                 }
             }
 
-            $customPaper = [0, 0, 113.39, 85.04];
-            $pdf = Pdf::loadView('pdf.book_labels', ['copies' => $copiesData])->setPaper($customPaper, 'landscape');
-            $fileName = 'labels-' . time() . '.pdf';
-            $filePath = public_path('book-uploaded-files/pdf/' . $fileName);
-            $pdf->save($filePath);
+            if($request->autoPrint) {
+                $customPaper = [0, 0, 113.39, 85.04];
+                $pdf = Pdf::loadView('pdf.book_labels', ['copies' => $copiesData])->setPaper($customPaper, 'landscape');
+                $fileName = 'labels-' . time() . '.pdf';
+                $filePath = public_path('book-uploaded-files/pdf/' . $fileName);
+                $pdf->save($filePath);
 
-            AutoPrint::dispatch($filePath);
+                AutoPrint::dispatch($filePath);
+            }
 
             unset($copiesData['qr']);
 
@@ -244,7 +249,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a book ID#$book_id"], 200);
+                return response()->json(['message' => "You've removed a book. ID#$book_id"], 200);
             }
         });
     }
@@ -300,7 +305,7 @@ class LibraryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . " a book entry ID#" . $this_genre->id], 201);
+            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . " a book entry. ID#" . $this_genre->id], 201);
         });
     }
 
@@ -332,7 +337,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a book entry ID#$entry_id"], 200);
+                return response()->json(['message' => "You've removed a book entry. ID#$entry_id"], 200);
             }
         });
     }
@@ -398,7 +403,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed book copy ID#$copy_id"], 200);
+                return response()->json(['message' => "You've removed book copy. ID#$copy_id"], 200);
             }
         });
     }
@@ -413,10 +418,10 @@ class LibraryController extends Controller
 
             $count = [
                 'total'     => CountCollection::startCount($reservations),
-                'active'    => CountCollection::startCount($reservations->clone()->where('status', 'ACTIVE')),
-                'for_csm'   => CountCollection::startCount($reservations->clone()->where('status', 'FOR CSM')),
-                'extending' => CountCollection::startCount($reservations->clone()->where('status', 'EXTENDING')),
-                'completed' => CountCollection::startCount($reservations->clone()->where('status', 'COMPLETED')),
+                'active'    => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::ACTIVE)),
+                'for_csm'   => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::FOR_CSM)),
+                'extending' => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::EXTENDING)),
+                'completed' => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::COMPLETED)),
             ];
 
             return response()->json(['reservationCount' => $count], 200);

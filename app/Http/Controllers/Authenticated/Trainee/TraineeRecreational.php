@@ -33,6 +33,11 @@ class TraineeRecreational extends Controller
         protected RecreationalService $recreationalService
     ){}
 
+    public function viewRecRequestCount(Request $request)
+    {
+        return $this->recreationalService->getRecRequestCount($request->user()->id);
+    }
+
     /**
      * Summary of viewEquipment
      * @param Request $request

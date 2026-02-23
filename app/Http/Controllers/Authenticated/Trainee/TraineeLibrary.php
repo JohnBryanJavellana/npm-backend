@@ -43,6 +43,17 @@ class TraineeLibrary extends Controller
         ) {}
 
     /** GET ALL AVAILABLE BOOKS */
+
+    public function viewLibRequestCount(Request $request)
+    {
+        try
+        {
+            \Log::info("count_lib", [$request->user()->id]);
+            return $this->library_service->getLibRequestCount($request->user()->id);
+        }
+        catch (\Exception $e) {
+        }
+    }
     public function view_books(ViewAllByUserRequest $request)
     {
         try {
