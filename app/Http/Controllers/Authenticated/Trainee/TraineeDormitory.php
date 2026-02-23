@@ -76,9 +76,9 @@ class TraineeDormitory extends Controller
         }
     }
 
-    public function get_filtered_dorms (Request $request) 
+    public function get_filtered_dorms (Request $request)
     {
-        try 
+        try
         {
             $cost = $request->cost;
             $dormitories = DormitoryRoom::with("room_images")
@@ -293,8 +293,9 @@ class TraineeDormitory extends Controller
 
     public function request_tenant_room(DormRoomRequest $request) {
         // \Log::info("controller dorm", [$request->all()]);
-        $user = $request->user();
+        $user = User::findOrFail($request->userId ?? $request->user()->id);
         $validated = $request->validated();
+
         try {
             $this->dormitory_service->createRequest($validated, $user->id);
 
