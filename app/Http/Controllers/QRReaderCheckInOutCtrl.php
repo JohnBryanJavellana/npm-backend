@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use App\Utils\{
     TransactionUtil
@@ -18,7 +19,8 @@ use App\Enums\Administrator\{
 use App\Models\{
     CheckInOutLog,
     QrReaderLocation,
-    UserAssignedQrLocation
+    UserAssignedQrLocation,
+    User
 };
 
 class QRReaderCheckInOutCtrl extends Controller
@@ -89,6 +91,7 @@ class QRReaderCheckInOutCtrl extends Controller
         });
     }
 
+
     public function qrReader(Request $request)
     {
         return TransactionUtil::transact(
@@ -96,13 +99,71 @@ class QRReaderCheckInOutCtrl extends Controller
             [],
             function () {
 
-                $locations = QRReaderLocation::all();
+                $unit_name = QRReaderLocation::all();
 
 
-                return response()->json(['locations' => $locations], 200);
+                return response()->json(['unit_name' => $unit_name], 200);
             }
         );
     }
+
+
+    //userID
+    //locationID
+    //checkInOrOut
+
+    public function QRReader_check_in_out(Request $request, $id)
+    {
+
+        return TransactionUtil::transact(null, [], function () use ($request, $id) {
+
+            $user = User::findOrFail(user_id()->id);
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
+
+            $userId = $user->id;
+            $location = QrReaderLocation::find($id);
+
+            if (!$location) {
+                return response()->json(['message' => 'QR location not found.'], 404);
+            }
+
+            $today = Carbon::today();
+
+            $logEntry = CheckInOutLog::where('user_id', $userId)
+                ->where('qr_reader_location_id', $id)
+                ->whereDate('created_at', $today)
+                ->latest()
+                ->first();
+
+            if ($logEntry) {
+
+                $logEntry->check_out = Carbon::now();
+                $logEntry->save();
+
+                return response()->json([
+                    'message' => 'Checked out successfully',
+                    'user_id' => $userId,
+                    'location_id' => $id,
+                ], 200);
+            }
+
+            CheckInOutLog::create([
+                'user_id' => $userId,
+                'qr_reader_location_id' => $id,
+                'check_in' => Carbon::now(),
+            ]);
+
+            return response()->json([
+                'message' => 'Checked in successfully',
+                'user_id' => $userId,
+                'location_id' => $id,
+            ], 200);
+        });
+    }
+
+
 
     /**
      * Summary of supplyDateTime

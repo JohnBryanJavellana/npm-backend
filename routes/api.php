@@ -52,6 +52,8 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPasswor
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 Route::get('/qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
 
+
+
 /** testing routes */
 Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
 Route::post('items', [TraineeRecreational::class, 'getUserRecRequest']);
@@ -59,7 +61,7 @@ Route::post('item', [TraineeRecreational::class, 'get_recreational_request']);
 
 
 /** authenticated routes */
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::post('/broadcasting/auth', function (Request $request) {
         return Broadcast::auth($request);
     });
@@ -81,10 +83,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return response()->json(['user' => $user->first()]);
     });
 
-    Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-ENROLLMENT', 'throttle:60,1'])->group(function () {
-        Route::prefix('/my-account/')->group(function() {
-            Route::post('create_or_update_additional_info', [MyAccount::class,'create_or_update_additional_info']);
-            Route::post('upload_profile_picture', [MyAccount::class,'upload_profile_picture']);
+    Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () {
+        Route::prefix('/my-account/')->group(function () {
+            Route::post('create_or_update_additional_info', [MyAccount::class, 'create_or_update_additional_info']);
+            Route::post('upload_profile_picture', [MyAccount::class, 'upload_profile_picture']);
             Route::get('get_trainee_general_info/{user}', [MyAccount::class, 'get_trainee_general_info']);
             Route::post('update_password', [Account::class, 'update_password']);
             Route::get('get_activities', [Account::class, 'get_activities']);
@@ -197,15 +199,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
     });
 
-    Route::middleware(['user_role:TRAINER', 'throttle:60,1'])->prefix('/trainer/')->group(function () {
-        Route::prefix('enrollment/')->group(function() {
+    Route::middleware('user_role:TRAINER')->prefix('/trainer/')->group(function () {
+        Route::prefix('enrollment/')->group(function () {
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
             Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
         });
     });
 
-    Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->group(function () {
-        Route::prefix('recreationals/')->group(function() {
+    Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN')->group(function () {
+        Route::prefix('recreationals/')->group(function () {
             Route::get('equipment', [TraineeRecreational::class, 'viewEquipment']);
             Route::get('facilities', [TraineeRecreational::class, 'viewFacilities']);
             Route::post('requests', [TraineeRecreational::class, 'requestEquipment']);

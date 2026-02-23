@@ -13,6 +13,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
     Masterlist,
     RecreationalActivityCtrl
 };
+use App\Http\Controllers\QRReaderCheckInOutCtrl;
 
 
 // Route::post('request', [RecreationalActivityCtrl::class, 'aarequest']);
@@ -21,9 +22,11 @@ use App\Http\Controllers\Authenticated\Administrator\{
 /** authenticated routes */
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA', 'throttle:60,1'])->group(function () {
+        Route::post('/qrreader/check-in-out/{id}', [QRReaderCheckInOutCtrl::class, 'QRReader_check_in_out']);
         Route::prefix('/enrollment/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT')->group(function () {
             Route::get('course/remarks', [EnrollmentCtrl::class, 'get_remarks_count']);
             Route::get('course/enrollment/count', [EnrollmentCtrl::class, 'get_enrollment_count']);
+
 
             Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications']);
             Route::post('get_applications/requirement_remark', [EnrollmentCtrl::class, 'requirement_remark']);
