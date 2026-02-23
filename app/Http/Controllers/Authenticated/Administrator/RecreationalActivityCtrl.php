@@ -323,7 +323,7 @@ class RecreationalActivityCtrl extends Controller
                     RAEnum::RETURNED->value
                 ];
 
-                if (in_array($equipment->status, $terminalStatuses)) {
+                if (\in_array($equipment->status, $terminalStatuses)) {
                     $summary['failed_items'][] = ['id' => $requestId, 'reason' => 'Already in terminal state'];
                     continue;
                 }
@@ -344,8 +344,8 @@ class RecreationalActivityCtrl extends Controller
                 }
             }
 
-            $failCount = count($summary['failed_items']);
-            $successCount = count($summary['success_ids']);
+            $failCount = \count($summary['failed_items']);
+            $successCount = \count($summary['success_ids']);
 
             if ($failCount > 0) {
                 $errorDetails = array_map(function($item) {
