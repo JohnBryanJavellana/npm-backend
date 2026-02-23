@@ -108,60 +108,8 @@ class QRReaderCheckInOutCtrl extends Controller
     }
 
 
-    //userID
-    //locationID
-    //checkInOrOut
 
-    public function QRReader_check_in_out(Request $request, $id)
-    {
-
-        return TransactionUtil::transact(null, [], function () use ($request, $id) {
-
-            $user = User::findOrFail(user_id()->id);
-            if (!$user) {
-                return response()->json(['message' => 'Unauthenticated'], 401);
-            }
-
-            $userId = $user->id;
-            $location = QrReaderLocation::find($id);
-
-            if (!$location) {
-                return response()->json(['message' => 'QR location not found.'], 404);
-            }
-
-            $today = Carbon::today();
-
-            $logEntry = CheckInOutLog::where('user_id', $userId)
-                ->where('qr_reader_location_id', $id)
-                ->whereDate('created_at', $today)
-                ->latest()
-                ->first();
-
-            if ($logEntry) {
-
-                $logEntry->check_out = Carbon::now();
-                $logEntry->save();
-
-                return response()->json([
-                    'message' => 'Checked out successfully',
-                    'user_id' => $userId,
-                    'location_id' => $id,
-                ], 200);
-            }
-
-            CheckInOutLog::create([
-                'user_id' => $userId,
-                'qr_reader_location_id' => $id,
-                'check_in' => Carbon::now(),
-            ]);
-
-            return response()->json([
-                'message' => 'Checked in successfully',
-                'user_id' => $userId,
-                'location_id' => $id,
-            ], 200);
-        });
-    }
+    
 
 
 
