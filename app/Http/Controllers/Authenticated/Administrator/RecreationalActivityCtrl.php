@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Authenticated\Administrator;
-use App\Http\Requests\Admin\Library\RequestInvoice;
 
 use App\Events\BERecreational;
 use App\Http\Controllers\Controller;
@@ -29,7 +28,8 @@ use App\Models\{
 };
 use App\Http\Requests\Admin\RecreationalActivity\{
     CreateOrUpdateEquipment,
-    CreateOrUpdateFacility
+    CreateOrUpdateFacility,
+    RequestInvoice
 };
 use Carbon\Carbon;
 use App\Enums\Administrator\RAEnum;
@@ -777,22 +777,24 @@ class RecreationalActivityCtrl extends Controller
     public function ra_create_or_update_charge(RequestInvoice $request){
         return TransactionUtil::transact(null, [], function () use ($request) {
             $isPost = $request->httpMethod === 'POST';
-            $documentId = $request->documentId;
-            $raRequestInfoId = $request->r_a_request_info_id;
-
-            $this_charge = $isPost ? new RAInvoices() : RAInvoices::findOrFail($documentId);
+            $this_charge = $isPost? new RAInvoices(): RAInvoices::findOrFail($request->documentId);
 
             if (!$isPost && \in_array($this_charge->invoice_status, [
                 RAEnum::CANCELLED,
                 RAEnum::PAID
             ])) {
-                return response()->json(['message' => "We're sorry. You can't update this charge for the moment."], 409);
+                return response()->json([
+                    'message' => "We're sorry. You can't update this charge for the moment."
+                ], 409);
             }
 
-            $this_charge->r_a_request_info_id = $raRequestInfoId;
+            $this_charge->r_a_request_info_id = $request->r_a_request_info_id;
 
             if ($isPost) {
-                $this_charge->trace_number = GenerateTrace::createTraceNumber(RAInvoices::class, '-RAINV-');
+                $this_charge->trace_number = GenerateTrace::createTraceNumber(
+                    RAInvoices::class,
+                    '-RAINV-'
+                );
                 $this_charge->invoice_status = 'PENDING';
             }
 
@@ -831,7 +833,7 @@ class RecreationalActivityCtrl extends Controller
         return TransactionUtil::transact(null, [], function () use ($request, $id) {
             $raInvoice = RAInvoices::findOrFail($id);
 
-            if (in_array($raInvoice->invoice_status, [RAEnum::PAID, RAEnum::CANCELLED])) {
+            if (\in_array($raInvoice->invoice_status, [RAEnum::PAID, RAEnum::CANCELLED])) {
                 return response()->json([
                     'message' => "We're sorry. You can't delete this charge for the moment."
                 ], 409);
