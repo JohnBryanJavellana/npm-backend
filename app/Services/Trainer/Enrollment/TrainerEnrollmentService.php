@@ -24,7 +24,7 @@ class TrainerEnrollmentService {
         ->get();
     }
 
-    public function getAllTrainee($trainingId)
+    public function getTrainees($trainingId)
     {
         return $this->enrolledCourseModel->query()
         ->whereIn("enrolled_course_status", RequestStatus::ActiveEnrollmentStatus())
@@ -52,7 +52,7 @@ class TrainerEnrollmentService {
         ->get();
     }
 
-    public function functionName()
+    public function getTrainingDetails()
     {
         return;
     }

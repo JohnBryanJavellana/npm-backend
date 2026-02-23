@@ -23,7 +23,7 @@ class TrainerEnrollmentController extends Controller
     {
         try
         {            
-            return $this->trainerEnrollmentService->getAllTrainee($training);
+            return $this->trainerEnrollmentService->getTrainees($training);
         }
         catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
@@ -52,13 +52,25 @@ class TrainerEnrollmentController extends Controller
         }
     }
 
-    public function viewTrainingDetails(Request $request)
+    public function viewTrainingScheduleDetails(Request $request)
     {
-        return;
+        try
+        {
+            return $this->trainerEnrollmentService->getTrainingDetails();
+        }
+        catch (\Exception $e) {
+            return response()->json([$e->getMessage()], 500);
+        }
     }
     
-    public function viewTrainees(Request $request)
+    public function viewTrainees(Request $request, $trainingId)
     {
-        return;
+        try
+        {
+            return $this->trainerEnrollmentService->getTrainees($trainingId);
+        }
+        catch (\Exception $e) {
+            return response()->json([$e->getMessage()], 500);
+        }
     }
 }
