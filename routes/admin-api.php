@@ -21,7 +21,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT', 'throttle:60,1'])->group(function () {
             Route::get('course/remarks', [EnrollmentCtrl::class, 'get_remarks_count']);
             Route::get('course/enrollment/count', [EnrollmentCtrl::class, 'get_enrollment_count']);
-
             Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications']);
             Route::post('get_applications/requirement_remark', [EnrollmentCtrl::class, 'requirement_remark']);
             Route::post('get_applications/set_training_status', [EnrollmentCtrl::class, 'set_training_status']);

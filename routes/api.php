@@ -196,8 +196,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::middleware(['user_role:TRAINER', 'throttle:60,1'])->prefix('/trainer/')->group(function () {
         Route::prefix('enrollment/')->group(function() {
+            Route::get('training', [TrainerEnrollmentController::class, 'viewAllTrainingsAndFacilitators']);
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
-            Route::get('trainings', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
+            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
         });
     });
 
