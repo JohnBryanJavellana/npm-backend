@@ -28,6 +28,7 @@ use App\Http\Requests\Admin\Enrollment\{
     CreateOrUpdateSchedule,
     CreateOrUpdateSchool,
     CreateOrUpdateSponsor,
+    MoveTrainees,
     CreateOrUpdateVoucher
 };
 use App\Models\{
@@ -1585,86 +1586,62 @@ class EnrollmentCtrl extends Controller
      * Move trainees to another schedule
      * @param Request $request
      */
-    public function move_trainees(Request $request)
-{
-    // CREATE REQUEST FILE 🥲
-    // validate if ids in $request->enrollmentIds actually exists
-    // Moved outside TransactionUtil so ValidationException isn't swallowed
-    $request->validate([
-        'fromScheduleId'  => 'required|exists:trainings,id',
-        'toScheduleId'    => 'required|exists:trainings,id|different:fromScheduleId',
-        'enrollmentIds'   => 'required|array',
-        'enrollmentIds.*' => 'required|integer|exists:enrolled_courses,id',
-    ]);
+    public function move_trainees(MoveTrainees $request) {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $fromScheduleId = $request->fromScheduleId;
+            $toScheduleId   = $request->toScheduleId;
+            $enrollmentIds  = $request->enrollmentIds;
+            $moved  = [];
+            $errors = [];
 
-    return TransactionUtil::transact(null, [], function () use ($request) {
-        $fromScheduleId = $request->fromScheduleId;
-        $toScheduleId   = $request->toScheduleId;
-        $enrollmentIds  = $request->enrollmentIds;
+            foreach ($enrollmentIds as $enrollmentId) {
+                $application = EnrolledCourse::where([
+                    'id'          => $enrollmentId,
+                    'training_id' => $fromScheduleId,
+                ])->first();
 
-        $moved  = [];
-        $errors = [];
+                if (!$application) {
+                    $errors[] = ['id' => $enrollmentId, 'message' => "Enrollment ID#$enrollmentId not found on schedule ID#$fromScheduleId."];
+                    continue;
+                }
 
-        $allowedStatuses = [
-            EnrollmentEnum::ENROLLED->value,
-            EnrollmentEnum::RESERVED->value,
-        ];
+                if (!\in_array($application->enrolled_course_status, [EnrollmentEnum::ENROLLED->value, EnrollmentEnum::RESERVED->value], true)) {
+                    $errors[] = [
+                        'id'      => $enrollmentId,
+                        'status'  => $application->enrolled_course_status,
+                        'message' => "Cannot move enrollment ID#$enrollmentId with status '{$application->enrolled_course_status}'.",
+                    ];
+                    continue;
+                }
 
-        foreach ($enrollmentIds as $enrollmentId) {
-            $application = EnrolledCourse::where([
-                'id'          => $enrollmentId,
-                'training_id' => $fromScheduleId,
-            ])->first();
+                $application->training_id = $toScheduleId;
+                $application->save();
 
-            // validate application status. use Enums\Administrator\EnrollmentEnum.php
-            // add to $moved the success.
-            // create new array for errors with their corresponding error message
-            if (!$application) {
-                $errors[] = [
-                    'id'      => $enrollmentId,
-                    'message' => "Enrollment ID#$enrollmentId not found on schedule ID#$fromScheduleId.",
-                ];
-                continue;
+                $moved[] = $application->id;
             }
 
-            if (!in_array($application->enrolled_course_status, $allowedStatuses, true)) {
-                $errors[] = [
-                    'id'      => $enrollmentId,
-                    'status'  => $application->enrolled_course_status,
-                    'message' => "Cannot move enrollment ID#$enrollmentId with status '{$application->enrolled_course_status}'.",
-                ];
-                continue;
-            }
-
-            $application->training_id = $toScheduleId;
-            $application->save();
-            $moved[] = $application->id;
-        }
-
-        // create a new case message. add in Enums\AdministratorAuditActions.php
-        AuditHelper::log(
-            $request->user()->id,
-            AdministratorAuditActions::ENROLLMENTCTRL_MOVED_TRAINEE->value
-                . " Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId"
-        );
-
-        if (env('USE_EVENT')) {
-            event(
-                new BEEnrollment(''),
-                new BEAuditTrail('')
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::ENROLLMENTCTRL_MOVED_TRAINEE->value . " Moved " . \count($moved) . " trainee(s) from schedule. ID#$fromScheduleId to ID#$toScheduleId"
             );
-        }
 
-        // enhance message return
-        // create a new case message. add in Enums\AdministratorReturnResponse.php
-        return response()->json([
-            'message' => !empty($moved)
-                ? AdministratorReturnResponse::ENROLLMENTCTRL_MOVED_TRAINEE_SUCCESS->value . " Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId."
-                : AdministratorReturnResponse::ENROLLMENTCTRL_MOVED_TRAINEE_FAILED->value,
-            'moved'   => $moved,
-            'errors'  => $errors,
-        ], !empty($moved) ? 200 : 422);
-    });
-}
+            if (env('USE_EVENT')) {
+                event(
+                    new BEEnrollment(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            $message = !empty($moved)
+                    ? AdministratorReturnResponse::ENROLLMENTCTRL_MOVED_TRAINEE_SUCCESS->value . " Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId."
+                    : AdministratorReturnResponse::ENROLLMENTCTRL_MOVED_TRAINEE_FAILED->value;
+
+            return response()->json([
+                'message' => $message,
+                'moved'   => $moved,
+                'errors'  => $errors,
+            ], !empty($moved) ? 200 : 422);
+        });
+    }
 }
 
