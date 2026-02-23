@@ -1409,30 +1409,91 @@ class DormitoryController extends Controller
         });
     }
 
-    //edrascoe create  two api for get  a view  provided items and add selected items
-    // add functions that will list all items. 'AVAILABLE','BORROWED','LOST','DAMAGED','RESERVED','UNAVAILABLE'
-public function get_all_inventory_items(Request $request)
-{
-    return TransactionUtil::transact(null, [], function () {
+    //edrascoe
+    /**
+ * Summary of provide_stocks
+ * @param Request $request
+ */
+public function provide_stocks(Request $request) {
+    return TransactionUtil::transact(null, ["dormitory:inclusions:all"], function() use ($request) {
+        $dormitoryTenantId = $request->dormitoryTenantId;
+        $inventoryId       = $request->inventoryId;
+        $stockIds          = $request->stockIds; // array of DormitoryInventoryItem IDs
+        $withFee           = $request->withFee ?? false;
 
-        $statusOrder = [
-            'AVAILABLE',
-            'BORROWED',
-            'LOST',
-            'DAMAGED',
-            'RESERVED',
-            'UNAVAILABLE'
-        ];
+        // Validate tenant request exists
+        $tenantRequest = DormitoryTenant::findOrFail($dormitoryTenantId);
 
-        $items = DormitoryInventoryItem::with('inventory')
-            ->orderByRaw("
-                FIELD(status, 'AVAILABLE','BORROWED','LOST','DAMAGED','RESERVED','UNAVAILABLE')
-            ")
-            ->get();
+        // Find or create a borrowing record for this tenant + inventory
+        $borrowing = DormitoryItemBorrowing::firstOrNew([
+            'dormitory_tenant_id'    => $dormitoryTenantId,
+            'dormitory_inventory_id' => $inventoryId,
+        ]);
+
+        $provided    = [];
+        $unavailable = [];
+
+        foreach ($stockIds as $stockId) {
+            $stock = DormitoryInventoryItem::where('id', $stockId)
+                ->where('status', DormitoryEnum::AVAILABLE->value)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$stock) {
+                $unavailable[] = $stockId;
+                continue;
+            }
+
+            // Reserve the stock
+            $stock->status = DormitoryEnum::RESERVED->value;
+            $stock->save();
+
+            $provided[] = [
+                'id'                => $stock->id,
+                'unique_identifier' => $stock->unique_identifier,
+            ];
+        }
+
+        if (empty($provided)) {
+            return response()->json([
+                'message'     => "No stocks were provided. All selected items are unavailable.",
+                'unavailable' => $unavailable,
+            ], 409);
+        }
+
+        // Save borrowing with final count
+        $existingCount      = $borrowing->exists ? $borrowing->items()->count() : 0;
+        $borrowing->count   = $existingCount + count($provided);
+        $borrowing->status  = DormitoryEnum::ACTIVE->value;
+        $borrowing->save();
+
+        // Create DormitoryItemBI records for each provided stock
+        foreach ($provided as $item) {
+            $itemDetail = new DormitoryItemBI();
+            $itemDetail->dormitory_item_borrowing_id  = $borrowing->id;
+            $itemDetail->dormitory_inventory_item_id  = $item['id'];
+            $itemDetail->withFee                      = $withFee;
+            $itemDetail->status                       = DormitoryEnum::APPROVED->value;
+            $itemDetail->save();
+        }
+
+        AuditHelper::log(
+            $request->user()->id,
+            AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKLIST->value . " for Tenant ID#$dormitoryTenantId"
+        );
+
+        if (env('USE_EVENT')) {
+            event(new BEDormitory(''), new BEAuditTrail(''));
+        }
 
         return response()->json([
-            'inventoryItems' => $items
-        ], 200);
+            'message'     => "Stocks successfully provided for dormitory request ID#$dormitoryTenantId.",
+            'provided'    => $provided,
+            'unavailable' => $unavailable,
+            'borrowing'   => $borrowing,
+        ], 201);
     });
 }
+
+
 }
