@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class EnrolledCourse extends Model
 {
@@ -51,4 +52,8 @@ class EnrolledCourse extends Model
         return $query->whereIn("enrolled_course_status", $status);
     }
 
+    public function scopeForTraining(Builder $query, $trainingId)
+    {
+        return $query->where("training_id", $trainingId);
+    }
 }

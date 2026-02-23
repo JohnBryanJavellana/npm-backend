@@ -82,4 +82,18 @@ enum RequestStatus: string {
             RequestStatus::RETURNED->value,
         ];
     }
+
+    public static function ActiveEnrollmentStatus(): array
+    {
+        return [
+            RequestStatus::PENDING->value,
+            RequestStatus::ENROLLED->value,
+            RequestStatus::RESERVED->value,
+            RequestStatus::COMPLETED->value,
+            RequestStatus::PAID->value,
+            RequestStatus::FOR_PAYMENT->value,
+            RequestStatus::IR->value,
+            RequestStatus::PROCESSING_PAYMENT->value,
+        ];
+    }
 }

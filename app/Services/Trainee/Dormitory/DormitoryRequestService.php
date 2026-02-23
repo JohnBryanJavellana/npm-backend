@@ -33,15 +33,16 @@ class DormitoryRequestService {
     ) {}
 
 
-public function getRecommendedRoom($validated)
-{
-    $start = $validated['fromDate'];
-    $end   = $validated['toDate'];
+    public function getRecommendedRoom($validated)
+    {
+        $start = $validated['fromDate'];
+        $end   = $validated['toDate'];
 
-    $requiredSlots = $validated['single_accomodation'] === 'YES' ? 2 : 1;
-    $capacity = 2;
+        $requiredSlots = $validated['single_accomodation'] === 'YES' ? 2 : 1;
+        $capacity = 2;
 
-    return $this->roomModel->query()
+        return $this->roomModel->query()
+        ->select()
         ->with([
             "dormitory",
             "dormitory.room_images"
@@ -51,14 +52,14 @@ public function getRecommendedRoom($validated)
         ->withCount([
             'hasData as overlapping_tenants_count' => function ($q) use ($start, $end) {
                 $q->where('tenant_from_date', '<', $end)
-                  ->where('tenant_to_date', '>', $start)
-                  ->whereIn('tenant_status', ['APPROVED', 'ACTIVE']);
+                    ->where('tenant_to_date', '>', $start)
+                    ->whereIn('tenant_status', ['APPROVED', 'ACTIVE']);
             }
         ])
         ->havingRaw("overlapping_tenants_count + ? <= ?", [$requiredSlots, $capacity])
         ->orderBy('overlapping_tenants_count', 'asc')
         ->get();
-}
+    }
 
 
     public function createRequest($validated, $userId)
