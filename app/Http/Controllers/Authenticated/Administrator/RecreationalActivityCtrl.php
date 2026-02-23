@@ -352,7 +352,7 @@ class RecreationalActivityCtrl extends Controller
                     return "ID {$item['id']} ({$item['reason']})";
                 }, $summary['failed_items']);
 
-                return response()->json(['message' => "Update partially completed. $successCount successful, $failCount failed. Summary: " . implode(', ', $errorDetails)], 207);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQFACILITY->value. implode(', ', $errorDetails)], 207);
             }
 
             if(env('USE_EVENT')) {
@@ -361,7 +361,7 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "All items updated successfully!"], 200);
+            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY->value], 200);
         });
     }
 
@@ -456,8 +456,8 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            AuditHelper::log($request->user()->id, ($isPost ? 'Created' : 'Updated') . " an facility. ID#" . $this_facility->id);
-            return response()->json(['message' => "Success!"], 200);
+            AuditHelper::log($request->user()->id, ($isPost ? AdministratorAuditActions::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY->value : AdministratorAuditActions::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY->value). " ID#" . $this_facility->id);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY->value : AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY->value)." ID#" .$this_facility->id] , 200);
         });
     }
 
@@ -474,7 +474,7 @@ class RecreationalActivityCtrl extends Controller
                 ->first();
 
             if ($this_facility->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove facility. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYFACILITY->value], 409);
             } else {
                 foreach ($this_facility->images as $images) {
                     if (file_exists(public_path('recreational-activity/facility/image/' . $images->filename))) {
@@ -483,14 +483,14 @@ class RecreationalActivityCtrl extends Controller
                 }
 
                 $this_facility->delete();
-                AuditHelper::log($request->user()->id, "Removed an facility. ID#$facility_id");
+                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY->value. " ID#$facility_id");
 
                 if(env('USE_EVENT')) {
                     event(
                         new BERecreational('')
                     );
                 }
-                return response()->json(['message' => "Success!"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY->value], 200);
             }
         });
     }
@@ -562,10 +562,10 @@ class RecreationalActivityCtrl extends Controller
                 ->first();
 
             if ($this_equipment_stock->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove equipment stock. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYFACILITY->value], 409);
             } else {
                 $this_equipment_stock->delete();
-                AuditHelper::log($request->user()->id, "Removed an equipment stock. ID#$equipment_stock_id");
+                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY->value. " ID#$equipment_stock_id");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -669,7 +669,7 @@ class RecreationalActivityCtrl extends Controller
                 }
             }
 
-            AuditHelper::log($request->user()->id, ($isPost ? 'Created' : 'Updated') . " an equipment. ID#" . $this_equipment->id);
+            AuditHelper::log($request->user()->id, ($isPost ? AdministratorAuditActions::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENT->value : AdministratorAuditActions::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPMENT->value). " ID#" . $this_equipment->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -678,7 +678,7 @@ class RecreationalActivityCtrl extends Controller
             }
 
             return response()->json([
-                'message' => "Success!",
+                'message' => ($isPost ? AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENT->value : AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPMENT->value),
                 'returnedData' => $dataToReturn
             ], 200);
         });
@@ -713,7 +713,7 @@ class RecreationalActivityCtrl extends Controller
             }
 
             return $request->insideJob ? $stockData : response()->json([
-                'message' => "You've added an equipment stock",
+                'message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENTSTCK->value,
                 'returnedData' => $stockData
             ], 201);
         });
@@ -732,7 +732,7 @@ class RecreationalActivityCtrl extends Controller
                 ->first();
 
             if ($this_equipment->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove equipment. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYEQUIPMENT->value], 409);
             } else {
                 foreach ($this_equipment->images as $images) {
                     if (file_exists(public_path('recreational-activity/equipment/image/' . $images->filename))) {
@@ -741,14 +741,14 @@ class RecreationalActivityCtrl extends Controller
                 }
 
                 $this_equipment->delete();
-                AuditHelper::log($request->user()->id, "Removed an equipment. ID#$equipment_id");
+                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT->value. " ID#$equipment_id");
 
                 if(env('USE_EVENT')) {
                     event(
                         new BERecreational('')
                     );
                 }
-                return response()->json(['message' => "Success!"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT->value], 200);
                 //OK TANAN
             }
         });
