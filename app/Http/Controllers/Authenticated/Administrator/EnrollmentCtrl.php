@@ -1622,7 +1622,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::ENROLLMENTCTRL_MOVED_TRAINEE->value . " Moved " . \count($moved) . " trainee(s) from schedule. ID#$fromScheduleId to ID#$toScheduleId"
+                AdministratorAuditActions::ENROLLMENTCTRL_MOVED_TRAINEE->value . "ID#$fromScheduleId to ID#$toScheduleId"
             );
 
             if (env('USE_EVENT')) {

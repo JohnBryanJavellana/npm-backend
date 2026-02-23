@@ -161,7 +161,7 @@ class LibraryController extends Controller
             }
 
             return response()->json([
-                'message' => "You've " . ($isPost ? 'created' : 'updated') . " book. OKID#$book->id",
+                'message' =>  ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYBOOK->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOK->value). " book. OKID#$book->id",
                 'returnedData' => $dataToReturn
             ], 200);
         });
@@ -230,7 +230,7 @@ class LibraryController extends Controller
             $this_book = Book::withCount(['hasData', 'copies'])->where('id', $book_id)->first();
 
             if($this_book->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove book. It already has connected data"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYBOOK->value], 200);
             } else {
                 if(file_exists(public_path('book-images/' . $this_book->photo))){
                     unlink(public_path('book-images/' . $this_book->photo));
@@ -249,7 +249,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a book. ID#$book_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYBOOK->value. "ID#$book_id"], 200);
             }
         });
     }
@@ -305,7 +305,7 @@ class LibraryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . " a book entry. ID#" . $this_genre->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYBOOKENTRY->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKENTRY->value). "ID#" . $this_genre->id], 201);
         });
     }
 
@@ -321,13 +321,13 @@ class LibraryController extends Controller
             $this_book_genre = BookGenre::withCount(['hasData'])->where('id', $entry_id)->first();
 
             if($this_book_genre->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove book entry. It already has connected data"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYBOOKENTRY->value], 200);
             } else {
                 $this_book_genre->delete();
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY->value . " ID#$entry_id"
+                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY->value. " ID#$entry_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -337,7 +337,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a book entry. ID#$entry_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY->value. "ID#$entry_id"], 200);
             }
         });
     }
@@ -387,7 +387,7 @@ class LibraryController extends Controller
             $this_book = BookCopy::withCount(['hasData'])->where('id', $copy_id)->first();
 
             if($this_book->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove book copy. It already has connected data"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYBOOKCOPY->value], 200);
             } else {
                 $this_book->delete();
 
@@ -403,7 +403,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed book copy. ID#$copy_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY->value."ID#$copy_id"], 200);
             }
         });
     }
@@ -587,14 +587,13 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                "Updated a book reservation {$tempStatus} request."
-            );
+                 AdministratorAuditActions:: LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVREQ->value);
 
             if (env('USE_EVENT')) {
                 event(new BELibrary(''), new BEAuditTrail(''));
             }
 
-            return response()->json(['message' => "You've successfully updated a book reservation {$tempStatus} request"], 201);
+            return response()->json([AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKREQ->value], 201);
         });
     }
 
@@ -649,7 +648,7 @@ class LibraryController extends Controller
                 event(new BELibrary(''), new BEAuditTrail(''));
             }
 
-            return response()->json(['message' => "Updated book request OK ID#{$request->documentId}"], 200);
+            return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKREQ->value], 200);
         });
     }
 
@@ -742,16 +741,16 @@ class LibraryController extends Controller
             $libraryInvoice = LibraryInvoice::find($id);
 
             if($libraryInvoice->status !== "PENDING") {
-                return response()->json(['message' => "Can't delete book reservation fine"], 400);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYFINE->value], 400);
             } else {
                 $libraryInvoice->delete();
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYREQFINE->value . " ID#$id"
+                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYFINE->value . " ID#$id"
                 );
 
-                return response()->json(['message' => "You've deleted a book reservation fine"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYFINE->value], 200);
             }
         });
     }
@@ -793,7 +792,7 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYREQFINE->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYREQFINE->value . " ID#$new_fine->id"
+                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value . " ID#$new_fine->id"
             );
 
             if(env('USE_EVENT')) {
@@ -803,7 +802,7 @@ class LibraryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . " a request fine ID#" . $new_fine->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value). " a request fine ID#" . $new_fine->id], 201);
         });
     }
 }

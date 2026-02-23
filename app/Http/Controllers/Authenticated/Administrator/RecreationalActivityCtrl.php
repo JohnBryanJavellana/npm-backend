@@ -126,7 +126,7 @@ class RecreationalActivityCtrl extends Controller
                 RAEnum::CANCELLED->value,
                 RAEnum::DECLINED->value
             ])) {
-                return response()->json(['message' => "Sorry your status is already " . ucfirst(strtolower($this_facility->status))], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQFACILITY->value . ucfirst(strtolower($this_facility->status))], 409);
             }
 
             $hasDateTimeConflicts = RAFacilityRequest::where('id', '!=', $documentId)
@@ -142,7 +142,7 @@ class RecreationalActivityCtrl extends Controller
                 ->exists();
 
             if ($hasDateTimeConflicts && \in_array($documentStatus, [RAEnum::APPROVED->value, RAEnum::OCCUPIED->value])) {
-                return response()->json(['message' => "Scheduling conflict detected. This facility is already booked for the selected time range."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CONFLICT_ERR_RECREATIONALACTIVITYREQFACILITY->value], 409);
             }
 
             $isClosing = \in_array($documentStatus, [RAEnum::DONE->value, RAEnum::DAMAGED->value]);
@@ -179,7 +179,7 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => 'Issued Successfully!']);
+            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY->value]);
         });
     }
 
@@ -278,7 +278,7 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "Issued Successfully!"], 200);
+            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY->value], 200);
         });
     }
 

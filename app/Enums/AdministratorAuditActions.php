@@ -96,7 +96,6 @@ enum AdministratorAuditActions: string {
     case ENROLLMENTCTRL_CREATED_ENROLLMENTTRAININGFEE = "Created a training fee.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE = "Updated a training fee.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE = "Removed a training fee.";
-
     case ENROLLMENTCTRL_MOVED_TRAINEE = 'Administrator moved trainee(s) to a new schedule.';
 
     /**
@@ -111,9 +110,9 @@ enum AdministratorAuditActions: string {
     case LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY = "Removed a book copy.";
     case LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVREQ = "Updated a book request.";
     case LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVSTATUS = "Updated book reservation status.";
-    case LIBRARYCTRL_REMOVED_LIBRARYREQFINE = "Removed a request fine.";
-    case LIBRARYCTRL_CREATED_LIBRARYREQFINE = "Created a request fine.";
-    case LIBRARYCTRL_UPDATED_LIBRARYREQFINE = "Updated a request fine.";
+    case LIBRARYCTRL_REMOVED_LIBRARYFINE = "Removed a request fine.";
+    case LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE = "Created a request fine.";
+    case LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE = "Updated a request fine.";
 
     /**
      * Summary of MASTERLISTCTRL
@@ -127,8 +126,8 @@ enum AdministratorAuditActions: string {
     case MASTERLISTCTRL_CREATED_MASTERLISTPOSITION = "Created a position.";
     case MASTERLISTCTRL_UPDATED_MASTERLISTPOSITION = "Updated a position.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTPOSITION = "Remove a position.";
-    case MASTERLISTCTRL_CREATED_MASTERLISTQRLOC = "Created a QR Reader location.";
-    case MASTERLISTCTRL_UPDATED_MASTERLISTQRLOC = "Updated a QR Reader location.";
+    case MASTERLISTCTRL_CREATED_MASTERLISTQRREADERLOC = "Created a QR Reader location.";
+    case MASTERLISTCTRL_UPDATED_MASTERLISTQRREADERLOC = "Updated a QR Reader location.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADERASSIGNMENT = "Removed a position.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADER = "Removed a qr reader.";
 

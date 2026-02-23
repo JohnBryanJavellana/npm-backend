@@ -116,7 +116,6 @@ enum AdministratorReturnResponse: string {
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE = "You've updated a training fee.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE = "You've removed a training fee.";
     case ENROLLMENTCTRL_ERR_ENROLLMENTTRAININGFEE = "Can't remove training fee. It already has connected data.";
-
     case ENROLLMENTCTRL_MOVED_TRAINEE_SUCCESS = 'Successfully moved trainee(s) to another schedule.';
     case ENROLLMENTCTRL_MOVED_TRAINEE_FAILED  = 'No trainees were moved. Check errors for details.';
      /**
@@ -153,11 +152,11 @@ enum AdministratorReturnResponse: string {
     case MASTERLISTCTRL_UPDATED_MASTERLISTPOSITION = "You've updated a position.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTPOSITION = "You've removed a position.";
     case MASTERLISTCTRL_ERR_MASTERLISTPOSITION = "Can't remove position. It already has connected data.";
-    case MASTERLISTCTRL_CREATED_MASTERLISTQRREADER = "You've created a QR Reader location.";
-    case MASTERLISTCTRL_UPDATED_MASTERLISTQRREADER = "You've updated a QR Reader location.";
+    case MASTERLISTCTRL_CREATED_MASTERLISTQRREADERLOC = "You've created a QR Reader location.";
+    case MASTERLISTCTRL_UPDATED_MASTERLISTQRREADERLOC = "You've updated a QR Reader location.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADERASSIGNMENT = "You've removed a qr reader assignment.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADER = "You've removed a qr reader.";
-    case MASTERLISTCTRL_ERR_REMOVED_MASTERLISTQRREADER = "Can't remove qr reader. It already has connected data.";
+    case MASTERLISTCTRL_ERR__MASTERLISTQRREADER = "Can't remove qr reader. It already has connected data.";
 
     /**
      * Summary of QRREADERCHECKINOUTCTRL
