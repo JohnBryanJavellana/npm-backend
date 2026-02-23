@@ -1605,7 +1605,6 @@ class EnrollmentCtrl extends Controller
         $moved  = [];
         $errors = [];
 
-        // Only allow moving enrollments in these statuses
         $allowedStatuses = [
             EnrollmentEnum::ENROLLED->value,
             EnrollmentEnum::RESERVED->value,
@@ -1637,18 +1636,17 @@ class EnrollmentCtrl extends Controller
                 continue;
             }
 
-
             $application->training_id = $toScheduleId;
             $application->save();
             $moved[] = $application->id;
         }
 
         // create a new case message. add in Enums\AdministratorAuditActions.php
-        // AuditHelper::log(
-        //     $request->user()->id,
-        //     AdministratorAuditActions::ENROLLMENTCTRL_MOVED_TRAINEE->value
-        //         . " Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId"
-        // );
+        AuditHelper::log(
+            $request->user()->id,
+            AdministratorAuditActions::ENROLLMENTCTRL_MOVED_TRAINEE->value
+                . " Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId"
+        );
 
         if (env('USE_EVENT')) {
             event(
@@ -1660,7 +1658,9 @@ class EnrollmentCtrl extends Controller
         // enhance message return
         // create a new case message. add in Enums\AdministratorReturnResponse.php
         return response()->json([
-            'message' => "Moved Schedule succeeded",
+            'message' => !empty($moved)
+                ? AdministratorReturnResponse::ENROLLMENTCTRL_MOVED_TRAINEE_SUCCESS->value . " Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId."
+                : AdministratorReturnResponse::ENROLLMENTCTRL_MOVED_TRAINEE_FAILED->value,
             'moved'   => $moved,
             'errors'  => $errors,
         ], !empty($moved) ? 200 : 422);

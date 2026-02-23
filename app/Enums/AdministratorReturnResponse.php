@@ -110,6 +110,9 @@ enum AdministratorReturnResponse: string {
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE = "You've updated a training fee.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE = "You've removed a training fee.";
     case ENROLLMENTCTRL_ERR_ENROLLMENTTRAININGFEE = "Can't remove training fee. It already has connected data.";
+
+    case ENROLLMENTCTRL_MOVED_TRAINEE_SUCCESS = 'Successfully moved trainee(s) to another schedule.';
+    case ENROLLMENTCTRL_MOVED_TRAINEE_FAILED  = 'No trainees were moved. Check errors for details.';
      /**
      * Summary of LIBRARYCTRL
      */
