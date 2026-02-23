@@ -134,10 +134,7 @@ class Account extends Controller
             $user->email = $request->email;
             $user->save();
 
-            AuditHelper::log(
-                $request->user()->id,
-                AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PERSONAL->value
-            );
+            AuditHelper::log($request->user()->id, AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PERSONAL->value);
 
             if(env('USE_EVENT')) {
                 event(
@@ -172,10 +169,7 @@ class Account extends Controller
             $user->isSocial = UserDetailsEnum::HARD_ACCOUNT;
             $user->save();
 
-            AuditHelper::log(
-                $request->user()->id,
-                AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PASSWORD->value
-            );
+            AuditHelper::log($request->user()->id, AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PASSWORD->value);
 
             if(env('USE_EVENT')) {
                 event(
