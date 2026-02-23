@@ -33,7 +33,6 @@ enum AdministratorReturnResponse: string {
     case DORMITORYCTRL_UPDATED_DORMITORYROOM = "You've updated dormitory room.";
     case DORMITORYCTRL_REMOVED_DORMITORYROOM = "You've removed dormitory room.";
     case DORMITORYCTRL_ERR_DORMITORYROOM = "Can't remove room. It already has connected data.";
-    case DORMITORYCTRL_CREATED_DORMITORYINVSTOCK = "You've added a dormitory inventory stock.";
     case DORMITORYCTRL_CREATED_DORMITORYINV = "You've created a dormitory inventory.";
     case DORMITORYCTRL_UPDATED_DORMITORYINV = "You've updated a dormitory inventory.";
     case DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK = "You've updated a dormitory inventory stock.";
@@ -41,21 +40,28 @@ enum AdministratorReturnResponse: string {
     case DORMITORYCTRL_ERR_DORMITORYINVSTOCK = "Can't remove item. It already has connected data.";
     case DORMITORYCTRL_REMOVED_DORMITORYINV = "You've removed a dormitory inventory item.";
     case DORMITORYCTRL_ERR_DORMITORYINV = "Can't remove dorm inventory. It already has connected data.";
-    case DORMITORYCTRL_CREATED_DORMITORYSERVICES = "You've created a dormitory service.";
-    case DORMITORYCTRL_UPDATED_DORMITORYSERVICES = "You've updated  a dormitory service.";
-    case DORMITORYCTRL_REMOVED_DORMITORYSERVICES = "You've removed  a dormitory service.";
-    case DORMITORYCTRL_ERR_DORMITORYSERVICES = "Can't remove service. It already has connected data.";
+    case DORMITORYCTRL_CREATED_DORMITORYREQ = "You've created a dormitory request.";
+    case DORMITORYCTRL_UPDATED_DORMITORYREQ = "You've updated a dormitory request.";
+    case DORMITORYCTRL_CANCELLED_DORMITORYREQ = "You've cancelled a dormitory request.";
+    case DORMITORYCTRL_CREATED_DORMITORYSERVICE = "You've created a dormitory service.";
+    case DORMITORYCTRL_UPDATED_DORMITORYSERVICE = "You've updated  a dormitory service.";
+    case DORMITORYCTRL_REMOVED_DORMITORYSERVICE = "You've removed  a dormitory service.";
+    case DORMITORYCTRL_ERR_DORMITORYSERVICE = "Can't remove service. It already has connected data.";
     case DORMITORYCTRL_UPDATED_DORMITORYSTCKSTATUS = "You've updated provided item stock status.";
     case DORMITORYCTRL_UPDATED_DORMITORYSTCKLIST = "You've updated provided item stock list.";
-    case DORMITORYCTRL_UPDATED_DORMITORYREQSERVICE = "You've updated requested service.";
+    case DORMITORYCTRL_CREATED_DORMITORYSERVICEREQ = "You've created a dormitory service request.";
+    case DORMITORYCTRL_UPDATED_DORMITORYSERVICEREQ = "You've updated a dormitory service request.";
+    case DORMITORYCTRL_UPDATED_DORMITORYREQUESTEDSERVICE = "You've updated requested service.";
+    case DORMITORYCTRL_CREATED_DORMITORYCHARGE = "You've created a dormitory charge.";
+    case DORMITORYCTRL_UPDATED_DORMITORYCHARGE = "You've updated a dormitory charge.";
     case DORMITORYCTRL_CANCELLED_DORMITORYCHARGE = "You've cancelled dormitory charge.";
     case DORMITORYCTRL_ERR_DORMITORYCHARGE = "Can't cancel charge.";
     case DORMITORYCTRL_UPDATED_DORMITORYSTATUS = "You've updated dormitory request .";
     /**
      * Summary of ENROLLMENTCTRL
      */
-    case ENROLLMENTCTRL_CREATED_ENROLLMENTREMARK = "You've created a remark .";
-    case ENROLLMENTCTRL_UPDATED_ENROLLMENTREMARK = "You've updated a remark .";
+    case ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENTSREMARK = "You've created a remark .";
+    case ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIRENTSREMARK = "You've updated a remark .";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGSTATUS = "You've Updated enrollment application status .";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTEXPIREDSTATUS = "You've updated an enrolled course expiry status .";
     case ENROLLMENTCTRL_CREATED_ENROLLMENTSCHED = "You've created a schedule .";
