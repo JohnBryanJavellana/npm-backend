@@ -53,7 +53,7 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'
 Route::get('/qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
 
 
-// Route::get("details", [TrainerEnrollmentController::class, 'detailsss']);
+Route::get("details", [TrainerEnrollmentController::class, 'detailsss']);
 // Route::post("course_detail", [TrainerEnrollmentController::class, 'getCourseDetails']);
 
 Route::post('attendance_lists', [TrainerEnrollmentController::class, 'attendace_lists']);
@@ -208,16 +208,13 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     //! TRAINER/TRAINEE
     Route::middleware('user_role:TRAINER')->prefix('/trainer/')->group(function () {
         Route::prefix('enrollment/')->group(function () {
-
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
-            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
+            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']); //*
+            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //*
+            Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
 
-            Route::get("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
-
-            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
-            Route::post('attendance_list', [TrainerEnrollmentController::class, 'attendace_list']);
-
-
+            //* ATTENTANCE PART
+            Route::get('attendance_list', [TrainerEnrollmentController::class, 'attendace_list']);
         });
     });
 

@@ -4,13 +4,16 @@ namespace App\Http\Controllers\Authenticated\Trainer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
+use App\Models\ChargeCategory;
 use App\Models\CourseModule;
+use App\Models\CourseModuleFee;
 use App\Models\EnrolledCourse;
 use App\Models\Training;
 use App\Models\TrainingSchedule;
 use App\Models\User;
 use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Can;
 
 class TrainerEnrollmentController extends Controller
 {
@@ -35,61 +38,34 @@ class TrainerEnrollmentController extends Controller
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
-
-    public function detailsss(Request $request)
-    {
-
-
-        $record = Training::with([
-            "module:id,module_type_id,name",
-            "module.moduleType"
-        ])->get();
-
-        return response()->json([
-            "courseDetails" => $record
-        ], 200);
-    }
-
+    //! Tigaman
     public function getCourseDetails(Request $request)
     {
-        // \Log::info("message", [$request->all()]);
-
 
         $record = Training::with([
             "module:id,module_type_id,name",
             "module.moduleType",
-        ])->get();
-        return response()->json(["courseDetails" => $record], 200);
+            "module.trainingFees:id,course_module_id,charge_category_id,name,amount",
+            "module.trainingFees.category:id,name",
+            "module.specific_requirements",
+            "module.schedules",
+        ])
+            ->where('id', $request->trainingId)
+            ->get();
 
-        // ->where('id', 20260001)
-        // ->get();
-
-
-        // $course_details = CourseModule::with('course_module_id')
-        //     ->where('specific_requirements')
-        //     ->get();
-
-        // $courseSchedules = Training::all();
-
-        // return response()->json(["courseDetails" => $course_details], 200);
+        return response()->json([
+            "training" => $record,
+        ], 200);
     }
-
 
     public function getTraineeDetails(Request $request)
     {
-
-
-        // $list = EnrolledCourse::where('training_id', 'user_id')
-        //     ->with(['trainee'])
-        //     ->get();
-
-
-        // return response()->json(["data" => $list], 200);
-
-
         try {
             $list = EnrolledCourse::where('training_id', $request->trainingId)
-                ->with(['trainee'])
+                ->with([
+                    'trainee',
+                ])
+                ->where('enrolled_course_status', 'ENROLLED')
                 ->get();
 
             return response()->json(["data" => $list], 200);
