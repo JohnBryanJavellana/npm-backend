@@ -774,7 +774,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_create_or_update_charge
      * @param Request $request
      */
-    public function ra_create_or_update_charge(RequestInvoice $request){
+    public function ra_create_or_update_charge (RequestInvoice $request){
         return TransactionUtil::transact(null, [], function () use ($request) {
             $isPost = $request->httpMethod === 'POST';
             $this_charge = $isPost? new RAInvoices(): RAInvoices::findOrFail($request->documentId);

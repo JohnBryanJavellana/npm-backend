@@ -144,6 +144,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_dormitory_charges', [DormitoryController::class, 'get_dormitory_charges']);
             Route::post('created_or_update_dormitory_charge', [DormitoryController::class, 'created_or_update_dormitory_charge']);
             Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
+
         });
 
         Route::prefix('/masterlist/')->middleware(['user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD', 'throttle:60,1'])->group(function () {
@@ -205,6 +206,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('ra_requests/issue_requested_equipments', [RecreationalActivityCtrl::class, 'issue_requested_equipments']);
             Route::post('ra_requests/update_requested_facility', [RecreationalActivityCtrl::class, 'update_requested_facility']);
             Route::post('ra_requests/update_requested_equipment', [RecreationalActivityCtrl::class, 'update_requested_equipment']);
+
+            Route::post('ra_requests/ra_request_charges', [RecreationalActivityCtrl::class, 'ra_request_charges']); //UserKenneth22
+            Route::post('ra_requests/ra_create_or_update_charge', [RecreationalActivityCtrl::class, 'ra_create_or_update_charge']); //UserKenneth22
+            Route::put('ra_requests/ra_create_or_update_charge/{documentId}', [RecreationalActivityCtrl::class, 'ra_create_or_update_charge']); //UserKenneth22
+            Route::delete('ra_requests/ra_delete_charge/{id}', [RecreationalActivityCtrl::class, 'ra_delete_charge']); //UserKenneth22
 
             Route::post('ra_equipments', [RecreationalActivityCtrl::class, 'ra_equipments']);
             Route::post('ra_equipment_stock', [RecreationalActivityCtrl::class, 'ra_equipment_stock']);
