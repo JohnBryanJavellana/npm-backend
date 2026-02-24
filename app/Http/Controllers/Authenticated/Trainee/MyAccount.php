@@ -108,8 +108,8 @@ class MyAccount extends Controller
             }
 
             AuditHelper::log($user_id, $request->user()->role === UserRoleEnum::SUPERADMIN
-                ? "An Admin has updated user's {$user_id} profile picture."
-                : "User {$user_id} profile picture has been updated.");
+                ? "An Admin has updated user's {$user_id} profile picture.ok"
+                : "User {$user_id} profile picture has been updated.ok");
 
             Cache::forget('user_profile_' . $user_id);
 
@@ -117,7 +117,7 @@ class MyAccount extends Controller
                 event(new BEAccount(''));
             }
 
-            return response()->json(['message' => "You have successfully updated the avatar!"], 200);
+            return response()->json(['message' => "You have successfully updated the avatar!OK"], 200);
         }
         catch (ModelNotFoundException $e) {
             return response()->json(["User not found."], 404);
@@ -303,7 +303,7 @@ class MyAccount extends Controller
                     }
                 }
 
-                AuditHelper::log($request->user_id, "You have posted your new information!");
+                AuditHelper::log($request->user_id, "You have posted your new information!OK");
                 Cache::forget('user_profile_' . $request->user_id);
 
                 if(env("USE_EVENT")) {
@@ -312,7 +312,7 @@ class MyAccount extends Controller
 
                 DB::commit();
 
-                return response()->json(['message' => "You have posted your new information!", 'reloggin' => $reloggin], 201);
+                return response()->json(['message' => "You have posted your new information!OK", 'reloggin' => $reloggin], 201);
             } catch (\Exception $e) {
                 \Log::error("errorr", [$e]);
                 DB::rollback();

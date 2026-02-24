@@ -28,6 +28,7 @@ use App\Http\Requests\Admin\Enrollment\{
     CreateOrUpdateSchedule,
     CreateOrUpdateSchool,
     CreateOrUpdateSponsor,
+    MoveTrainees,
     CreateOrUpdateVoucher
 };
 use App\Models\{
@@ -62,6 +63,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
+use App\Helpers\Administrator\General\CountCollection;
 
 class EnrollmentCtrl extends Controller
 {
@@ -71,7 +73,6 @@ class EnrollmentCtrl extends Controller
      */
     public function get_applications(Request $request)
     {
-
         return TransactionUtil::transact(null, [], function () use ($request) {
             $allRequirements = Requirement::where('status', 'ACTIVE')->get();
             $basicRequirements = $allRequirements->where('isBasic', 'YES');
@@ -208,38 +209,23 @@ class EnrollmentCtrl extends Controller
     public function get_enrollment_count(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-            $couse_status = [
-                'PENDING',
-                'RESERVED',
-                'ENROLLED',
-                'COMPLETED',
-                'CANCELLED',
-                'PAID',
-                'DECLINED',
-                'FOR-PAYMENT',
-                'IR',
-                'CSFB',
-                'PROCESSING PAYMENT'
-            ];
+            return TransactionUtil::transact(null, [], function() use ($request) {
+                $reservations = EnrolledCourse::query();
 
-            $counts = EnrolledCourse::whereIn('enrolled_course_status', $couse_status)
-                ->selectRaw('enrolled_course_status, COUNT(*) as total')
-                ->groupBy('enrolled_course_status')
-                ->pluck('total', 'enrolled_course_status');
+                $count = [
+                    'total' => CountCollection::startCount($reservations),
+                    'count_forVerification' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::RESERVED)),
+                    'count_forEnrolled' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::ENROLLED)),
+                    'count_forFinished' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::COMPLETED)),
+                    'count_forPaid' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PAID)),
+                    'count_forProcessPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PROCESSING_PAYMENT)),
+                    'count_forPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::FOR_PAYMENT)),
+                    'count_denied' => CountCollection::startCount($reservations->clone()->whereIn('enrolled_course_status', [EnrollmentEnum::CANCELLED, EnrollmentEnum::DECLINED, EnrollmentEnum::COURSE_STATUS_FULLY_BOOKED, EnrollmentEnum::INCOMPLETE_REQUIREMENTS])),
+                    'count_remarks' => CountCollection::startCount(collect(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications'])),
+                ];
 
-            return response()->json([
-                'count_forVerification'  => min($counts['RESERVED'] ?? 0, 99),
-                'count_forEnrolled'  => min($counts['ENROLLED'] ?? 0, 99),
-                'count_forFinished'  => min($counts['COMPLETED'] ?? 0, 99),
-                'count_forPaid'  => min($counts['PAID'] ?? 0, 99),
-                'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0, 99),
-                'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0, 99),
-                'count_denied' => min($counts['DECLINED'] ?? 0, 99) +
-                                  min($counts['CSFB'] ?? 0, 99) +
-                                  min($counts['CANCELLED'] ?? 0, 99) +
-                                  min($counts['IR'] ?? 0, 99),
-                'count_remarks' => \count(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications']),
-            ], 200);
+                return response()->json(['applicationCount' => $count], 200);
+            });
         });
     }
 
@@ -440,7 +426,6 @@ class EnrollmentCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () {
             $modules = CourseModule::withCount(['hasData'])->with('moduleType')->get();
-
             return response()->json(['modules' => $modules], 200);
         });
     }
@@ -732,7 +717,7 @@ class EnrollmentCtrl extends Controller
             }
 
             if ($request->upload_reference) {
-                if (!is_null($this_requirement->upload_reference) && file_exists(public_path('upload-reference/' . $this_requirement->upload_reference))) {
+                if ($this_requirement->upload_reference !== null && file_exists(public_path('upload-reference/' . $this_requirement->upload_reference))) {
                     unlink(public_path('upload-reference/' . $this_requirement->upload_reference));
                 }
 
@@ -1254,7 +1239,7 @@ class EnrollmentCtrl extends Controller
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTLICENSE . " ID#$license_id"
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTLICENSE->value . " ID#$license_id"
                 );
 
                 if (env('USE_EVENT')) {
@@ -1581,4 +1566,82 @@ class EnrollmentCtrl extends Controller
             }
         });
     }
+
+    /**
+     * Summary of get_trainees_by_schedule
+     * @param Request $request
+     */
+    public function get_trainees_by_schedule(Request $request){
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $scheduleId = $request->scheduleId;
+            $trainees = EnrolledCourse::with('trainee')
+                ->where('training_id', $scheduleId)
+                ->get();
+
+            return response()->json(['trainees' => $trainees], 200);
+        });
+    }
+
+    /**
+     * Move trainees to another schedule
+     * @param Request $request
+     */
+    public function move_trainees(MoveTrainees $request) {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $fromScheduleId = $request->fromScheduleId;
+            $toScheduleId   = $request->toScheduleId;
+            $enrollmentIds  = $request->enrollmentIds;
+            $moved  = [];
+            $errors = [];
+
+            foreach ($enrollmentIds as $enrollmentId) {
+                $application = EnrolledCourse::where([
+                    'id'          => $enrollmentId,
+                    'training_id' => $fromScheduleId,
+                ])->first();
+
+                if (!$application) {
+                    $errors[] = ['id' => $enrollmentId, 'message' => "Enrollment ID#$enrollmentId not found on schedule ID#$fromScheduleId."];
+                    continue;
+                }
+
+                if (!\in_array($application->enrolled_course_status, [EnrollmentEnum::ENROLLED->value, EnrollmentEnum::RESERVED->value], true)) {
+                    $errors[] = [
+                        'id'      => $enrollmentId,
+                        'status'  => $application->enrolled_course_status,
+                        'message' => "Cannot move enrollment ID#$enrollmentId with status '{$application->enrolled_course_status}'.",
+                    ];
+                    continue;
+                }
+
+                $application->training_id = $toScheduleId;
+                $application->save();
+
+                $moved[] = $application->id;
+            }
+
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::ENROLLMENTCTRL_MOVED_TRAINEE->value . "ID#$fromScheduleId to ID#$toScheduleId"
+            );
+
+            if (env('USE_EVENT')) {
+                event(
+                    new BEEnrollment(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            $message = !empty($moved)
+                    ? AdministratorReturnResponse::ENROLLMENTCTRL_MOVED_TRAINEE_SUCCESS->value . " Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId."
+                    : AdministratorReturnResponse::ENROLLMENTCTRL_MOVED_TRAINEE_FAILED->value;
+
+            return response()->json([
+                'message' => $message,
+                'moved'   => $moved,
+                'errors'  => $errors,
+            ], !empty($moved) ? 200 : 422);
+        });
+    }
 }
+

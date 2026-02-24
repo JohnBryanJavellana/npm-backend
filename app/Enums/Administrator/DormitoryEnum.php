@@ -19,4 +19,6 @@ enum DormitoryEnum : string
     case RECEIVED = 'RECEIVED';
     case BORROWED = 'BORROWED';
     case COUPLE = 'COUPLE';
+    case OFFICERS = 'OFFICERS';
+    case RATINGS = 'RATINGS';
 }

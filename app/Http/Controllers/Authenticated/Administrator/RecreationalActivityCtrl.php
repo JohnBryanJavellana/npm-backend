@@ -8,6 +8,8 @@ use App\Models\RAEquipmentRequest;
 use App\Models\RARelationship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use App\Utils\{
     TransactionUtil,
     AuditHelper,
@@ -21,11 +23,13 @@ use App\Models\{
     RAEquipmentStock,
     RAEquipmentImage,
     RAFacilityImage,
-    RAFacilityRequest
+    RAFacilityRequest,
+    RAInvoices
 };
 use App\Http\Requests\Admin\RecreationalActivity\{
     CreateOrUpdateEquipment,
-    CreateOrUpdateFacility
+    CreateOrUpdateFacility,
+    RequestInvoice
 };
 use Carbon\Carbon;
 use App\Enums\Administrator\RAEnum;
@@ -33,6 +37,7 @@ use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
 };
+use App\Helpers\Administrator\General\CountCollection;
 
 class RecreationalActivityCtrl extends Controller
 {
@@ -121,7 +126,7 @@ class RecreationalActivityCtrl extends Controller
                 RAEnum::CANCELLED->value,
                 RAEnum::DECLINED->value
             ])) {
-                return response()->json(['message' => "Sorry your status is already " . ucfirst(strtolower($this_facility->status))], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQFACILITY->value . ucfirst(strtolower($this_facility->status))], 409);
             }
 
             $hasDateTimeConflicts = RAFacilityRequest::where('id', '!=', $documentId)
@@ -137,7 +142,7 @@ class RecreationalActivityCtrl extends Controller
                 ->exists();
 
             if ($hasDateTimeConflicts && \in_array($documentStatus, [RAEnum::APPROVED->value, RAEnum::OCCUPIED->value])) {
-                return response()->json(['message' => "Scheduling conflict detected. This facility is already booked for the selected time range."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CONFLICT_ERR_RECREATIONALACTIVITYREQFACILITY->value], 409);
             }
 
             $isClosing = \in_array($documentStatus, [RAEnum::DONE->value, RAEnum::DAMAGED->value]);
@@ -174,7 +179,7 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => 'Issued Successfully!']);
+            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY->value]);
         });
     }
 
@@ -273,7 +278,7 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "Issued Successfully!"], 200);
+            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY->value], 200);
         });
     }
 
@@ -318,7 +323,7 @@ class RecreationalActivityCtrl extends Controller
                     RAEnum::RETURNED->value
                 ];
 
-                if (in_array($equipment->status, $terminalStatuses)) {
+                if (\in_array($equipment->status, $terminalStatuses)) {
                     $summary['failed_items'][] = ['id' => $requestId, 'reason' => 'Already in terminal state'];
                     continue;
                 }
@@ -339,15 +344,15 @@ class RecreationalActivityCtrl extends Controller
                 }
             }
 
-            $failCount = count($summary['failed_items']);
-            $successCount = count($summary['success_ids']);
+            $failCount = \count($summary['failed_items']);
+            $successCount = \count($summary['success_ids']);
 
             if ($failCount > 0) {
                 $errorDetails = array_map(function($item) {
                     return "ID {$item['id']} ({$item['reason']})";
                 }, $summary['failed_items']);
 
-                return response()->json(['message' => "Update partially completed. $successCount successful, $failCount failed. Summary: " . implode(', ', $errorDetails)], 207);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQFACILITY->value. implode(', ', $errorDetails)], 207);
             }
 
             if(env('USE_EVENT')) {
@@ -356,7 +361,7 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "All items updated successfully!"], 200);
+            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY->value], 200);
         });
     }
 
@@ -451,8 +456,8 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            AuditHelper::log($request->user()->id, ($isPost ? 'Created' : 'Updated') . " an facility. ID#" . $this_facility->id);
-            return response()->json(['message' => "Success!"], 200);
+            AuditHelper::log($request->user()->id, ($isPost ? AdministratorAuditActions::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY->value : AdministratorAuditActions::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY->value). " ID#" . $this_facility->id);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY->value : AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY->value)." ID#" .$this_facility->id] , 200);
         });
     }
 
@@ -469,7 +474,7 @@ class RecreationalActivityCtrl extends Controller
                 ->first();
 
             if ($this_facility->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove facility. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYFACILITY->value], 409);
             } else {
                 foreach ($this_facility->images as $images) {
                     if (file_exists(public_path('recreational-activity/facility/image/' . $images->filename))) {
@@ -478,14 +483,14 @@ class RecreationalActivityCtrl extends Controller
                 }
 
                 $this_facility->delete();
-                AuditHelper::log($request->user()->id, "Removed an facility. ID#$facility_id");
+                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY->value. " ID#$facility_id");
 
                 if(env('USE_EVENT')) {
                     event(
                         new BERecreational('')
                     );
                 }
-                return response()->json(['message' => "Success!"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY->value], 200);
             }
         });
     }
@@ -499,17 +504,12 @@ class RecreationalActivityCtrl extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = RARequestInfo::query();
 
-            $get_count = function ($collection) {
-                $count = $collection->count();
-                return $count > 99 ? '99+' : $count;
-            };
-
             $count = [
-                'count_total'    => $get_count($reservations),
-                'count_active'   => $get_count($reservations->clone()->where('status', 'ACTIVE')),
-                'count_forCSM'   => $get_count($reservations->clone()->where('status', 'FOR CSM')),
-                'count_complete' => $get_count($reservations->clone()->where('status', 'COMPLETED')),
-                'count_pending'  => $get_count($reservations->clone()->where('status', 'PENDING')),
+                'count_total'    => CountCollection::startCount($reservations),
+                'count_active'   => CountCollection::startCount($reservations->clone()->where('status', RAEnum::ACTIVE)),
+                'count_forCSM'   => CountCollection::startCount($reservations->clone()->where('status', RAEnum::FOR_CSM)),
+                'count_complete' => CountCollection::startCount($reservations->clone()->where('status', RAEnum::COMPLETED)),
+                'count_pending'  => CountCollection::startCount($reservations->clone()->where('status', RAEnum::PENDING)),
             ];
 
             return response()->json(['reservationCount' => $count], 200);
@@ -562,10 +562,10 @@ class RecreationalActivityCtrl extends Controller
                 ->first();
 
             if ($this_equipment_stock->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove equipment stock. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYFACILITY->value], 409);
             } else {
                 $this_equipment_stock->delete();
-                AuditHelper::log($request->user()->id, "Removed an equipment stock. ID#$equipment_stock_id");
+                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY->value. " ID#$equipment_stock_id");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -669,7 +669,7 @@ class RecreationalActivityCtrl extends Controller
                 }
             }
 
-            AuditHelper::log($request->user()->id, ($isPost ? 'Created' : 'Updated') . " an equipment. ID#" . $this_equipment->id);
+            AuditHelper::log($request->user()->id, ($isPost ? AdministratorAuditActions::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENT->value : AdministratorAuditActions::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPMENT->value). " ID#" . $this_equipment->id);
 
             if(env('USE_EVENT')) {
                 event(
@@ -678,7 +678,7 @@ class RecreationalActivityCtrl extends Controller
             }
 
             return response()->json([
-                'message' => "Success!",
+                'message' => ($isPost ? AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENT->value : AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPMENT->value),
                 'returnedData' => $dataToReturn
             ], 200);
         });
@@ -713,7 +713,7 @@ class RecreationalActivityCtrl extends Controller
             }
 
             return $request->insideJob ? $stockData : response()->json([
-                'message' => "You've added an equipment stock",
+                'message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENTSTCK->value,
                 'returnedData' => $stockData
             ], 201);
         });
@@ -732,7 +732,7 @@ class RecreationalActivityCtrl extends Controller
                 ->first();
 
             if ($this_equipment->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove equipment. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYEQUIPMENT->value], 409);
             } else {
                 foreach ($this_equipment->images as $images) {
                     if (file_exists(public_path('recreational-activity/equipment/image/' . $images->filename))) {
@@ -741,15 +741,93 @@ class RecreationalActivityCtrl extends Controller
                 }
 
                 $this_equipment->delete();
-                AuditHelper::log($request->user()->id, "Removed an equipment. ID#$equipment_id");
+                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT->value. " ID#$equipment_id");
 
                 if(env('USE_EVENT')) {
                     event(
                         new BERecreational('')
                     );
                 }
-                return response()->json(['message' => "Success!"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT->value], 200);
+                //OK TANAN
             }
+        });
+    }
+
+    /**
+     * Summary of ra_request_charges
+     * @param Request $request
+     */
+    public function ra_request_charges(Request $request){
+        return TransactionUtil::transact(null, [], function () use($request) {
+            $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
+                ->orderBy('created_at', 'DESC')
+                ->get();
+
+            return response()->json(['ra_charges' => $raCharges], 200);
+        });
+    }
+
+    /**
+     * Summary of ra_create_or_update_charge
+     * @param Request $request
+     */
+    public function ra_create_or_update_charge(RequestInvoice $request){
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $isPost = $request->httpMethod === 'POST';
+            $this_charge = $isPost
+                ? new RAInvoices()
+                : RAInvoices::where('id', $request->documentId)->lockForUpdate()->first();
+
+            if (!$isPost && \in_array($this_charge->invoice_status, [
+                RAEnum::CANCELLED,
+                RAEnum::PAID
+            ])) {
+                return response()->json(['message' => "We're sorry. You can't update this charge for the moment."], 409);
+            }
+
+            if ($isPost) {
+                $this_charge->user_id = $request->userId;
+                $this_charge->r_a_request_info_id = $request->r_a_request_info_id;
+                $this_charge->trace_number = GenerateTrace::createTraceNumber(RAInvoices::class, '-RAINV-');
+            } else {
+                $this_charge->invoice_status = $request->status;
+            }
+
+            $this_charge->description = $request->description;
+            $this_charge->invoice_amount = $request->invoiceAmount;
+            $this_charge->save();
+
+            AuditHelper::log(
+                $request->user()->id,
+                ($isPost ? 'Created' : 'Updated') . " a charge. ID#{$this_charge->id}"
+            );
+
+            return response()->json(['message' => ($isPost ? 'created' : 'updated') . " a charge. ID#{$this_charge->id}"], 200);
+        });
+    }
+
+    /**
+     * Summary of ra_delete_charge
+     * @param Request $request
+     * @param mixed $id
+     */
+    public function ra_delete_charge(Request $request, $id){
+        return TransactionUtil::transact(null, [], function () use ($request, $id) {
+            $raInvoice = RAInvoices::findOrFail($id);
+
+            if (\in_array($raInvoice->invoice_status, [RAEnum::PAID, RAEnum::CANCELLED])) {
+                return response()->json([ 'message' => "We're sorry. You can't delete this charge for the moment." ], 409);
+            }
+
+            $raInvoice->delete();
+
+            AuditHelper::log(
+                $request->user()->id,
+                "Deleted RA Invoice ID#$id"
+            );
+
+            return response()->json(['message' => "RA Invoice ID#$id has been deleted successfully."], 200);
         });
     }
 }

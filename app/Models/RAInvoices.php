@@ -9,11 +9,27 @@ class RAInvoices extends Model
 {
     use HasFactory;
 
+    protected $table = 'r_a_invoices';
+
+    protected $fillable = [
+        'r_a_request_info_id',
+        'user_id',
+        'description',
+        'trace_number',
+        'invoice_status',
+        'created_at',
+        'updated_at',
+    ];
+
     public function cashier_or() {
         return $this->hasOne(CashierOR::class);
     }
 
     public function payee() {
         return $this->hasOne(User::class, 'id', 'user_id');
+    }
+
+    public function orNumber(){
+        return $this->hasOne(CashierOR::class, 'id', 'cashier_o_r_id');
     }
 }

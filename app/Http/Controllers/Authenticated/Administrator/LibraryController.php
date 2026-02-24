@@ -52,6 +52,10 @@ use App\Enums\{
     AdministratorReturnResponse
 };
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
+use App\Helpers\Administrator\General\CountCollection;
+use App\Enums\Administrator\{
+    LibraryEnum
+};
 
 class LibraryController extends Controller
 {
@@ -136,7 +140,7 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYBOOK : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOK . " ID#$book->id"
+                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYBOOK->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOK->value . " ID#$book->id"
             );
 
             if(env('USE_EVENT')) {
@@ -157,7 +161,7 @@ class LibraryController extends Controller
             }
 
             return response()->json([
-                'message' => "You've " . ($isPost ? 'created' : 'updated') . " book. OKID#$book->id",
+                'message' =>  ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYBOOK->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOK->value). " book. OKID#$book->id",
                 'returnedData' => $dataToReturn
             ], 200);
         });
@@ -194,13 +198,15 @@ class LibraryController extends Controller
                 }
             }
 
-            $customPaper = [0, 0, 113.39, 85.04];
-            $pdf = Pdf::loadView('pdf.book_labels', ['copies' => $copiesData])->setPaper($customPaper, 'landscape');
-            $fileName = 'labels-' . time() . '.pdf';
-            $filePath = public_path('book-uploaded-files/pdf/' . $fileName);
-            $pdf->save($filePath);
+            if($request->autoPrint) {
+                $customPaper = [0, 0, 113.39, 85.04];
+                $pdf = Pdf::loadView('pdf.book_labels', ['copies' => $copiesData])->setPaper($customPaper, 'landscape');
+                $fileName = 'labels-' . time() . '.pdf';
+                $filePath = public_path('book-uploaded-files/pdf/' . $fileName);
+                $pdf->save($filePath);
 
-            AutoPrint::dispatch($filePath);
+                AutoPrint::dispatch($filePath);
+            }
 
             unset($copiesData['qr']);
 
@@ -224,7 +230,7 @@ class LibraryController extends Controller
             $this_book = Book::withCount(['hasData', 'copies'])->where('id', $book_id)->first();
 
             if($this_book->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove book. It already has connected data"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYBOOK->value], 200);
             } else {
                 if(file_exists(public_path('book-images/' . $this_book->photo))){
                     unlink(public_path('book-images/' . $this_book->photo));
@@ -233,7 +239,7 @@ class LibraryController extends Controller
                 $this_book->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOK .  " ID#$book_id"
+                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOK->value . " ID#$book_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -243,7 +249,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a book ID#$book_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYBOOK->value. "ID#$book_id"], 200);
             }
         });
     }
@@ -289,7 +295,7 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYBOOKENTRY : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOKENTRY . " ID#$this_genre->id"
+                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYBOOKENTRY->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOKENTRY->value . " ID#$this_genre->id"
             );
 
             if(env('USE_EVENT')) {
@@ -299,7 +305,7 @@ class LibraryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . " a book entry ID#" . $this_genre->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYBOOKENTRY->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKENTRY->value). "ID#" . $this_genre->id], 201);
         });
     }
 
@@ -315,13 +321,13 @@ class LibraryController extends Controller
             $this_book_genre = BookGenre::withCount(['hasData'])->where('id', $entry_id)->first();
 
             if($this_book_genre->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove book entry. It already has connected data"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYBOOKENTRY->value], 200);
             } else {
                 $this_book_genre->delete();
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY . " ID#$entry_id"
+                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY->value. " ID#$entry_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -331,7 +337,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a book entry ID#$entry_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY->value. "ID#$entry_id"], 200);
             }
         });
     }
@@ -381,13 +387,13 @@ class LibraryController extends Controller
             $this_book = BookCopy::withCount(['hasData'])->where('id', $copy_id)->first();
 
             if($this_book->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove book copy. It already has connected data"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYBOOKCOPY->value], 200);
             } else {
                 $this_book->delete();
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY . " ID#$copy_id"
+                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY->value . " ID#$copy_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -397,7 +403,7 @@ class LibraryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed book copy ID#$copy_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY->value."ID#$copy_id"], 200);
             }
         });
     }
@@ -410,21 +416,12 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = BookRes::query();
 
-            if($request->userId) {
-                $reservations->where('user_id', $request->userId);
-            }
-
-            $get_count = function ($collection) {
-                $count = $collection->count();
-                return $count > 99 ? '99+' : $count;
-            };
-
             $count = [
-                'total'     => $get_count($reservations),
-                'active'    => $get_count($reservations->clone()->where('status', 'ACTIVE')),
-                'for_csm'   => $get_count($reservations->clone()->where('status', 'FOR CSM')),
-                'extending' => $get_count($reservations->clone()->where('status', 'EXTENDING')),
-                'completed' => $get_count($reservations->clone()->where('status', 'COMPLETED')),
+                'total'     => CountCollection::startCount($reservations),
+                'active'    => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::ACTIVE)),
+                'for_csm'   => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::FOR_CSM)),
+                'extending' => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::EXTENDING)),
+                'completed' => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::COMPLETED)),
             ];
 
             return response()->json(['reservationCount' => $count], 200);
@@ -456,8 +453,8 @@ class LibraryController extends Controller
             ])->whereIn('invoice_status', ['PENDING', 'VERIFICATION'])->exists();
 
             $count =  [
-                'hasBooksNeedAction' => $bookReservationCheck && count($bookReservationCheck->library->borrowedBooks) > 0,
-                'hasPendingReservation' => $bookReservationCheck && ($bookReservationCheck->extendingBooks && count($bookReservationCheck->extendingBooks) > 0),
+                'hasBooksNeedAction' => $bookReservationCheck && \count($bookReservationCheck->library->borrowedBooks) > 0,
+                'hasPendingReservation' => $bookReservationCheck && ($bookReservationCheck->extendingBooks && \count($bookReservationCheck->extendingBooks) > 0),
                 'hasPendingFines' => $pendingFines
             ];
 
@@ -571,7 +568,7 @@ class LibraryController extends Controller
                 $isPastDue => 'EXPIRED',
                 $request->status === "APPROVED" => $request->acceptedStatus,
                 \in_array($request->status, ["REJECTED", "CANCELLED"]) => 'RECEIVED',
-                default => 'HAHAHAH'
+                default => 'ERROR'
             };
 
             if (\in_array($tempStatus, ["EXTENDED", "RENEWED"])) {
@@ -590,14 +587,13 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                "Updated a book reservation {$tempStatus} request."
-            );
+                 AdministratorAuditActions:: LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVREQ->value);
 
             if (env('USE_EVENT')) {
                 event(new BELibrary(''), new BEAuditTrail(''));
             }
 
-            return response()->json(['message' => "You've successfully updated a book reservation {$tempStatus} request"], 201);
+            return response()->json([AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKREQ->value], 201);
         });
     }
 
@@ -613,7 +609,7 @@ class LibraryController extends Controller
             $reservation = BookReservation::findOrFail($request->documentId);
             $reservation->status = $request->status;
 
-            if ($reservation->type === "HARD-COPY" && is_null($reservation->book_copy_id)) {
+            if ($reservation->type === "HARD-COPY" && $reservation->book_copy_id === null) {
                 $copy = BookCopy::where('status', 'AVAILABLE')->first();
                 if (!$copy) return response()->json(['message' => "No available copies for this book."], 422);
                 $reservation->book_copy_id = $copy->id;
@@ -645,14 +641,14 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVSTATUS . " ID#$request->documentId"
+                AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVSTATUS->value . " ID#$request->documentId"
             );
 
             if (env('USE_EVENT')) {
                 event(new BELibrary(''), new BEAuditTrail(''));
             }
 
-            return response()->json(['message' => "Updated book request OK ID#{$request->documentId}"], 200);
+            return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKREQ->value], 200);
         });
     }
 
@@ -745,16 +741,16 @@ class LibraryController extends Controller
             $libraryInvoice = LibraryInvoice::find($id);
 
             if($libraryInvoice->status !== "PENDING") {
-                return response()->json(['message' => "Can't delete book reservation fine"], 400);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYFINE->value], 400);
             } else {
                 $libraryInvoice->delete();
 
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYREQFINE . " ID#$id"
+                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYFINE->value . " ID#$id"
                 );
 
-                return response()->json(['message' => "You've deleted a book reservation fine"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYFINE->value], 200);
             }
         });
     }
@@ -796,7 +792,7 @@ class LibraryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYREQFINE : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYREQFINE . " ID#$new_fine->id"
+                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value . " ID#$new_fine->id"
             );
 
             if(env('USE_EVENT')) {
@@ -806,7 +802,8 @@ class LibraryController extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($isPost ? 'Created' : 'Updated') . " a request fine ID#" . $new_fine->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value). " a request fine ID#" . $new_fine->id], 201);
         });
     }
 }
+

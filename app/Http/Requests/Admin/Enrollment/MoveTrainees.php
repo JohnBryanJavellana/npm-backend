@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Admin\Dormitory;
+namespace App\Http\Requests\Admin\Enrollment;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetAvailableDorms extends FormRequest
+class MoveTrainees extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,10 @@ class GetAvailableDorms extends FormRequest
     public function rules(): array
     {
         return [
-            'isAirConditioned' => ['required'],
-            'dateFrom' => ['required', 'date'],
-            'dateTo' => ['required', 'date'],
-            'userId' => ['required', 'exists:users,id'],
-            'singleAccommodation' => ['required'],
+            'fromScheduleId'  => ['required', 'exists:trainings,id'],
+            'toScheduleId'    => ['required', 'exists:trainings,id', 'different:fromScheduleId'],
+            'enrollmentIds'   => ['required', 'array'],
+            'enrollmentIds.*' => ['required', 'integer', 'exists:enrolled_courses,id'],
         ];
     }
 }

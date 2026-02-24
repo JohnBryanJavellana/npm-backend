@@ -30,6 +30,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished']);
             Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
             Route::get('get_schedules', [EnrollmentCtrl::class, 'get_schedules']);
+            Route::post('training/schedules/traineelist', [EnrollmentCtrl::class, 'get_trainees_by_schedule']);
+            Route::post('/move_trainees', [EnrollmentCtrl::class, 'move_trainees']);//edrascoe.
             Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
             Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
             Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
@@ -114,8 +116,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('update_dormitory_room', [DormitoryController::class, 'update_dormitory_room']);
             Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms']);
             Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms']);
-            Route::post('create-walk-in-request/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
-            Route::post('create-walk-in-request/create_or_update_request', [DormitoryController::class, 'create_or_update_request']);
+
+            Route::post('requests/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
+            Route::post('requests/update_dormitory_room_request', [DormitoryController::class, 'update_dormitory_room_request']);
+
             Route::post('get_all_requests', [DormitoryController::class, 'get_all_requests']);
             Route::delete('cancel_dorm_request/{dormReqId}', [DormitoryController::class, 'cancel_dorm_request']);
             Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room']);
@@ -123,6 +127,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock']);
             Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock']);
             Route::post('get_inventories/update_dormitory_inventory_stock', [DormitoryController::class, 'update_dormitory_inventory_stock']);
+            Route::post('provide_stocks', [DormitoryController::class, 'provide_stocks']);//edrascoe provide stocks to dorm request.
             Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
             Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock']);
             Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);

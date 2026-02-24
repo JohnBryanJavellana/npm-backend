@@ -77,7 +77,7 @@ class Cashier extends Controller
             $query->where('id', $referenceId);
         }
 
-        if(!is_null($whereIns)) {
+        if($whereIns !== null) {
             foreach ($whereIns as $column => $values) {
                 if (!empty($values)) {
                     $query->whereIn($column, $values);
@@ -134,18 +134,6 @@ class Cashier extends Controller
             if($request->service === NotificationEnum::ENROLLMENT->value) {
                 $relations = array_merge($relations, [
                     'training'
-                ]);
-            }
-
-            if($request->service === NotificationEnum::DORMITORY->value) {
-                $relations = array_merge($relations, [
-                    'payee'
-                ]);
-            }
-
-            if($request->service === NotificationEnum::RECREATIONAL->value) {
-                $relations = array_merge($relations, [
-                    'requestor'
                 ]);
             }
 
@@ -214,7 +202,7 @@ class Cashier extends Controller
                 );
             }
 
-            return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_PAY_WALKIN ->value], 201);
+            return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_PAY_WALKIN->value], 201);
         });
     }
 
@@ -315,7 +303,7 @@ class Cashier extends Controller
             $this_fee = $this_payment->lockForUpdate()->first();
 
             if(\in_array($this_fee->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
-                return response()->json(['message' => "Can't update payment.OK"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_ERR_PAYMENT->value], 200);
             } else {
                 $this_fee->invoice_status = $request->verificationStatus;
                 $this_fee->save();
