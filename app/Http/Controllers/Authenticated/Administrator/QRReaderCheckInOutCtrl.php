@@ -49,7 +49,7 @@ class QRReaderCheckInOutCtrl extends Controller
         if (\in_array($checkInOrOut, [QrReaderEnum::CHECK_IN->value, QrReaderEnum::CHECK_OUT->value])) {
             return $model->{$column} = $dateToday;
         } else {
-            return response()->json(['message' => "We are sorry. It seems that the data provided is not valid."], 409);
+            return response()->json(['message' => AdministratorReturnResponse::QRREADERCHECKINOUTCTRL_ERR_QRREADERCHECKINOUTSUPPLYDATETIME->value], 409);
         }
     }
 
@@ -68,7 +68,7 @@ class QRReaderCheckInOutCtrl extends Controller
                     ->first();
 
                 if ($check->qrLocation->whereNotIn('type', $request->type)) {
-                    return response()->json(['message' => "We are sorry. You do not have enough permission to view records for " . implode(', ', $request->type)], 409);
+                    return response()->json(['message' => AdministratorReturnResponse::QRREADERCHECKINOUTCTRL_ERR_QRREADERCHECKINOUTLOGINOUT->value . implode(', ', $request->type)], 409);
                 }
             }
 
@@ -110,7 +110,7 @@ class QRReaderCheckInOutCtrl extends Controller
             $this->supplyDateTime($dateToday, $checkInOrOut, $record, strtolower($checkInOrOut));
             $record->save();
 
-            return response()->json(['message' => "Success!"], 200);
+            return response()->json(['message' => AdministratorReturnResponse::QRREADERCHECKINOUTCTRL_UPDATED_QRREADERCHECKINOUT->value], 200);
         //OK TANAN SIR HAHA
         });
     }

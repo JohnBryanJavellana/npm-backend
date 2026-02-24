@@ -562,10 +562,10 @@ class RecreationalActivityCtrl extends Controller
                 ->first();
 
             if ($this_equipment_stock->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYFACILITY->value], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYEQUIPSTCK->value], 409);
             } else {
                 $this_equipment_stock->delete();
-                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY->value. " ID#$equipment_stock_id");
+                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPSTCK->value. " ID#$equipment_stock_id");
 
                 if(env('USE_EVENT')) {
                     event(
@@ -783,7 +783,7 @@ class RecreationalActivityCtrl extends Controller
                 RAEnum::CANCELLED,
                 RAEnum::PAID
             ])) {
-                return response()->json(['message' => "We're sorry. You can't update this charge for the moment."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYCHARGE->value], 409);
             }
 
             if ($isPost) {
@@ -800,10 +800,10 @@ class RecreationalActivityCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                ($isPost ? 'Created' : 'Updated') . " a charge. ID#{$this_charge->id}"
+                ($isPost ? AdministratorAuditActions::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYCHARGE->value : AdministratorAuditActions::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYCHARGE->value). "ID#{$this_charge->id}"
             );
 
-            return response()->json(['message' => ($isPost ? 'created' : 'updated') . " a charge. ID#{$this_charge->id}"], 200);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYCHARGE->value : AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYCHARGE->value). "ID#{$this_charge->id}"], 200);
         });
     }
 
@@ -817,17 +817,17 @@ class RecreationalActivityCtrl extends Controller
             $raInvoice = RAInvoices::findOrFail($id);
 
             if (\in_array($raInvoice->invoice_status, [RAEnum::PAID, RAEnum::CANCELLED])) {
-                return response()->json([ 'message' => "We're sorry. You can't delete this charge for the moment." ], 409);
+                return response()->json([ 'message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_DELETEDERR_RECREATIONALACTIVITYCHARGE->value ], 409);
             }
 
             $raInvoice->delete();
 
             AuditHelper::log(
                 $request->user()->id,
-                "Deleted RA Invoice ID#$id"
+                AdministratorAuditActions::RECREATIONALACTIVITYCTRL_DELETED_RECREATIONALACTIVITYCHARGE->value. "ID#$id"
             );
 
-            return response()->json(['message' => "RA Invoice ID#$id has been deleted successfully."], 200);
+            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_DELETED_RECREATIONALACTIVITYCHARGE->value], 200);
         });
     }
 }

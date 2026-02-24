@@ -280,10 +280,10 @@ class DormitoryController extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                "Dormitory request has been updated. ID#$this_request->id"
+                AdministratorAuditResponse::DORMITORYCTRL_UPDATED_DORMITORYROOMREQ->value . " ID#$this_request->id"
             );
 
-            return response()->json(['message' => "Dormitory request has been updated."], 200);
+            return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYROOMREQ->value], 200);
         });
     }
 
@@ -500,7 +500,7 @@ class DormitoryController extends Controller
             }
 
             return $request->insideJob ? $dataToReturn : response()->json([
-                'message' => "You've added a dormitory inventory stock.",
+                'message' => AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYINVSTOCK  ->value,
                 'returnedData' => $dataToReturn
             ], 201);
         });
@@ -554,7 +554,7 @@ class DormitoryController extends Controller
             }
 
             return response()->json([
-                'message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYINV->value . " ID#$dorm_inventory->id",
+                'message' => $isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYINV->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYINV->value. " ID#$dorm_inventory->id",
                 'returnedData' => $dataToReturn
             ], 200);
         });
@@ -982,7 +982,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => ($isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value) . "ID# " . $this_service->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value) . "ID# " . $this_service->id], 201);
         });
     }
 
@@ -1014,7 +1014,7 @@ class DormitoryController extends Controller
                     );
                 }
 
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value], 200);
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYSERVICE->value], 200);
             }
         });
     }

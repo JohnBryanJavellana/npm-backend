@@ -29,12 +29,14 @@ enum AdministratorReturnResponse: string {
      */
     case DORMITORYCTRL_CREATED_DORMITORY = "You've created a dormitory.";
     case DORMITORYCTRL_UPDATED_DORMITORY = "You've updated a dormitory.";
+    case DORMITORYCTRL_UPDATED_DORMITORYROOMREQ = "Dormitory request has been updated.";
     case DORMITORYCTRL_CREATED_DORMITORYROOM = "You've added a dormitory room";
     case DORMITORYCTRL_UPDATED_DORMITORYROOM = "You've updated dormitory room.";
     case DORMITORYCTRL_REMOVED_DORMITORYROOM = "You've removed dormitory room.";
     case DORMITORYCTRL_ERR_DORMITORYROOM = "Can't remove room. It already has connected data.";
     case DORMITORYCTRL_CREATED_DORMITORYINV = "You've created a dormitory inventory.";
     case DORMITORYCTRL_UPDATED_DORMITORYINV = "You've updated a dormitory inventory.";
+    case DORMITORYCTRL_CREATED_DORMITORYINVSTOCK = "You've added a dormitory inventory stock.";
     case DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK = "You've updated a dormitory inventory stock.";
     case DORMITORYCTRL_REMOVED_DORMITORYINVSTOCK = "You've removed a dormitory inventory stock.";
     case DORMITORYCTRL_ERR_DORMITORYINVSTOCK = "Can't remove item. It already has connected data.";
@@ -156,7 +158,7 @@ enum AdministratorReturnResponse: string {
     case MASTERLISTCTRL_UPDATED_MASTERLISTQRREADERLOC = "You've updated a QR Reader location.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADERASSIGNMENT = "You've removed a qr reader assignment.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADER = "You've removed a qr reader.";
-    case MASTERLISTCTRL_ERR__MASTERLISTQRREADER = "Can't remove qr reader. It already has connected data.";
+    case MASTERLISTCTRL_ERR_MASTERLISTQRREADER = "Can't remove qr reader. It already has connected data.";
 
     /**
      * Summary of QRREADERCHECKINOUTCTRL
@@ -185,7 +187,21 @@ enum AdministratorReturnResponse: string {
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPMENT = "You've updated an equipment successfully!";
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENTSTCK = "You've added an equipment stock!";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT = "You've removed an equipment successfully!";
-    case RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYEQUIPMENT = "Can't remove equipment. It already has connected data.";
+    case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYCHARGE = "Created a charge.";
+    case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYCHARGE = "Updated a charge.";
+    case RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYCHARGE = "We're sorry. You can't update this charge for the moment.";
+    case RECREATIONALACTIVITYCTRL_DELETED_RECREATIONALACTIVITYCHARGE = "RA Invoice ID has been deleted successfully.";
+    case RECREATIONALACTIVITYCTRL_DELETEDERR_RECREATIONALACTIVITYCHARGE = "We're sorry. You can't delete this charge for the moment.";
+
+    
+     /**
+     * Summary QRREADERCHECKINOUTCTRL
+     */
+    case QRREADERCHECKINOUTCTRL_ERR_QRREADERCHECKINOUTSUPPLYDATETIME = "We are sorry. It seems that the data provided is not valid.";
+    case QRREADERCHECKINOUTCTRL_GETERR_QRREADERCHECKINOUTLOGINOUT = "We are sorry. You do not have enough permission to view records for";
+    case QRREADERCHECKINOUTCTRL_UPDATED_QRREADERCHECKINOUT = "Success!";
+
+
 
      /**
      * Summary CSMSCTRL

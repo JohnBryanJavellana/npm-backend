@@ -552,7 +552,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTMODULETYPE->value : AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTMODULETYPE->value). "ID#" . $this_module_type->id], 201);
+            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTMODULETYPE->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTMODULETYPE->value). "ID#" . $this_module_type->id], 201);
         });
     }
 
