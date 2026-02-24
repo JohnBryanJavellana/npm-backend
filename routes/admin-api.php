@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 /** administrator controllers */
 
 use App\Http\Controllers\Authenticated\Administrator\{
+    DashboardCtrl,
     Account,
     DormitoryController,
     EnrollmentCtrl,
@@ -18,6 +19,8 @@ use App\Http\Controllers\Authenticated\Administrator\{
 /** authenticated routes */
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA'])->group(function () {
+        Route::post('dashboard_data', [DashboardCtrl::class, 'dashboard_data']);
+
         Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT', 'throttle:60,1'])->group(function () {
             Route::get('course/remarks', [EnrollmentCtrl::class, 'get_remarks_count']);
             Route::get('course/enrollment/count', [EnrollmentCtrl::class, 'get_enrollment_count']);
