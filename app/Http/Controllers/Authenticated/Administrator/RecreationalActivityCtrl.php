@@ -759,8 +759,6 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      */
     public function ra_request_charges(Request $request){
-        $request->validate([ 'raRequestInfoId' => ['required', 'integer'],]);
-
         return TransactionUtil::transact(null, [], function () use($request) {
             $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
                 ->orderBy('created_at', 'DESC')
@@ -777,35 +775,27 @@ class RecreationalActivityCtrl extends Controller
     public function ra_create_or_update_charge (RequestInvoice $request){
         return TransactionUtil::transact(null, [], function () use ($request) {
             $isPost = $request->httpMethod === 'POST';
-            $this_charge = $isPost? new RAInvoices(): RAInvoices::findOrFail($request->documentId);
+            $this_charge = $isPost
+                ? new RAInvoices()
+                : RAInvoices::where('id', $request->documentId)->lockForUpdate()->first();
 
             if (!$isPost && \in_array($this_charge->invoice_status, [
                 RAEnum::CANCELLED,
                 RAEnum::PAID
             ])) {
-                return response()->json([
-                    'message' => "We're sorry. You can't update this charge for the moment."
-                ], 409);
+                return response()->json(['message' => "We're sorry. You can't update this charge for the moment."], 409);
             }
-
-            $this_charge->r_a_request_info_id = $request->r_a_request_info_id;
 
             if ($isPost) {
-                $this_charge->trace_number = GenerateTrace::createTraceNumber(
-                    RAInvoices::class,
-                    '-RAINV-'
-                );
-                $this_charge->invoice_status = 'PENDING';
-            }
-
-            $this_charge->user_id = $request->userId;
-            $this_charge->description = $request->description;
-            $this_charge->invoice_amount = $request->invoiceAmount;
-
-            if (!$isPost) {
+                $this_charge->user_id = $request->userId;
+                $this_charge->r_a_request_info_id = $request->r_a_request_info_id;
+                $this_charge->trace_number = GenerateTrace::createTraceNumber(RAInvoices::class, '-RAINV-');
+            } else {
                 $this_charge->invoice_status = $request->status;
             }
 
+            $this_charge->description = $request->description;
+            $this_charge->invoice_amount = $request->invoiceAmount;
             $this_charge->save();
 
             AuditHelper::log(
@@ -813,9 +803,7 @@ class RecreationalActivityCtrl extends Controller
                 ($isPost ? 'Created' : 'Updated') . " a charge. ID#{$this_charge->id}"
             );
 
-            return response()->json([
-                'message' => ($isPost ? 'created' : 'updated') . " a charge. ID#{$this_charge->id}"
-            ], 200);
+            return response()->json(['message' => ($isPost ? 'created' : 'updated') . " a charge. ID#{$this_charge->id}"], 200);
         });
     }
 
@@ -824,19 +812,12 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      * @param mixed $id
      */
-        public function ra_delete_charge(Request $request, $id)
-    {
-        $request->validate([
-            'id' => ['integer']
-        ]);
-
+    public function ra_delete_charge(Request $request, $id){
         return TransactionUtil::transact(null, [], function () use ($request, $id) {
             $raInvoice = RAInvoices::findOrFail($id);
 
             if (\in_array($raInvoice->invoice_status, [RAEnum::PAID, RAEnum::CANCELLED])) {
-                return response()->json([
-                    'message' => "We're sorry. You can't delete this charge for the moment."
-                ], 409);
+                return response()->json([ 'message' => "We're sorry. You can't delete this charge for the moment." ], 409);
             }
 
             $raInvoice->delete();
@@ -846,9 +827,7 @@ class RecreationalActivityCtrl extends Controller
                 "Deleted RA Invoice ID#$id"
             );
 
-            return response()->json([
-                'message' => "RA Invoice ID#$id has been deleted successfully."
-            ], 200);
+            return response()->json(['message' => "RA Invoice ID#$id has been deleted successfully."], 200);
         });
     }
 }
