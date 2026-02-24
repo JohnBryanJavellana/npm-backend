@@ -53,9 +53,10 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'
 Route::get('/qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
 
 
-// Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
-
+// Route::get("details", [TrainerEnrollmentController::class, 'detailsss']);
 // Route::post("course_detail", [TrainerEnrollmentController::class, 'getCourseDetails']);
+
+Route::post('attendance_lists', [TrainerEnrollmentController::class, 'attendace_lists']);
 
 
 /** testing routes */
@@ -210,8 +211,13 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
             Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
+
             Route::get("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
+
             Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
+            Route::post('attendance_list', [TrainerEnrollmentController::class, 'attendace_list']);
+
+
         });
     });
 

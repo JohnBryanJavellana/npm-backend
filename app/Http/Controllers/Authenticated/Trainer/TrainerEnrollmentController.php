@@ -36,15 +36,29 @@ class TrainerEnrollmentController extends Controller
         }
     }
 
+    public function detailsss(Request $request)
+    {
+
+
+        $record = Training::with([
+            "module:id,module_type_id,name",
+            "module.moduleType"
+        ])->get();
+
+        return response()->json([
+            "courseDetails" => $record
+        ], 200);
+    }
+
     public function getCourseDetails(Request $request)
     {
-        \Log::info("message", [$request->all()]);
+        // \Log::info("message", [$request->all()]);
+
+
         $record = Training::with([
-            "module:id,module_type_id,name,",
+            "module:id,module_type_id,name",
             "module.moduleType",
-        ])
-            ->where('id', 20260001)
-            ->first();
+        ])->get();
         return response()->json(["courseDetails" => $record], 200);
 
         // ->where('id', 20260001)
