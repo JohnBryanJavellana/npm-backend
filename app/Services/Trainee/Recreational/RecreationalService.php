@@ -314,40 +314,8 @@ class RecreationalService {
         return $model;
     }
 
-    //you can use when()
-    public function isUniqueIdenfierExistV1($validated)
-    {
-        $type = $this->checkPrefix($validated->UIId);
-
-        $model = match ($validated->type) {
-            'EQUIPMENT'  => $this->raequipmentStockModel,
-            'FACILITY' => $this->rafacilityModel,
-            default    => throw new DomainException("Invalid request!")
-        };
-
-        $record = $model->query()->where("unique_identifier", $validated->UIId);
-        if($validated->type === "EQUIPMENT") {
-            $record->withCount([
-            "siblings as stock_count" => function($q) {
-                $q->available()->okayCondition();
-            }
-            ]);
-        }
-
-        $record = $record->available()
-        ->okayCondition()
-        ->first();
-
-        if(!$record) {
-            throw new DomainException(
-        ($validated["type"] === "EQUIPMENT" ? "Equipment" : "Facility") . " not found");
-        }
-        return $record;
-    }
-
     public function isUniqueIdenfierExistV2($validated)
     {
-        \Log::info("isUniqueIdenfierExistV2", ["test"]);
         $model = $this->checkPrefix($validated->UIId);
         return $model->query()->where("unique_identifier", $validated->UIId)
         ->when($model instanceof RAEquipmentStock, function($query) {
