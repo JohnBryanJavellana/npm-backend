@@ -13,8 +13,13 @@ use App\Utils\GenerateTrace;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class RecreationalService {
+
+    private const EQUIPMENTPREFIX = "NMP-RAE";
+    private const FACILITYPREFIX = "NMP-RAF";
+
     public function __construct(
         protected RAEquipments $raequipmentsModel,
         protected RAEquipmentStock $raequipmentStockModel,
@@ -291,11 +296,28 @@ class RecreationalService {
         ]);
     }
 
-    public function isUniqueIdenfierExistV1($validated)
+    public function checkPrefix($UIId)
     {
-        if (!isset($validated->UIId) || $validated->UIId === false) {
+        if (!isset($UIId) || $UIId === false) {
             throw new DomainException("Unique identifier is required.");
         }
+
+        
+        $prefix = Str::of($UIId)->explode("-")->take(2)->implode("-");
+        $model = match ($prefix) {
+            self::EQUIPMENTPREFIX => $this->raequipmentStockModel,
+            self::FACILITYPREFIX => $this->rafacilityModel,
+            default => throw new DomainException("Invalid QR!")
+        };
+        
+        \Log::info("checkPrefix", ["value" => $model, "type" => gettype($model)]);
+        return $model;
+    }
+
+    //you can use when()
+    public function isUniqueIdenfierExistV1($validated)
+    {
+        $type = $this->checkPrefix($validated->UIId);
 
         $model = match ($validated->type) {
             'EQUIPMENT'  => $this->raequipmentStockModel,
@@ -321,6 +343,23 @@ class RecreationalService {
         ($validated["type"] === "EQUIPMENT" ? "Equipment" : "Facility") . " not found");
         }
         return $record;
+    }
+
+    public function isUniqueIdenfierExistV2($validated)
+    {
+        \Log::info("isUniqueIdenfierExistV2", ["test"]);
+        $model = $this->checkPrefix($validated->UIId);
+        return $model->query()->where("unique_identifier", $validated->UIId)
+        ->when($model instanceof RAEquipmentStock, function($query) {
+            $query->withCount([
+            "siblings as stock_count" => function($q) {
+                $q->available()->okayCondition();
+            }
+            ]);
+        })
+        ->available()
+        ->okayCondition()
+        ->firstOr(fn() => throw new DomainException(($model instanceof RAEquipmentStock ? "Equipment" : "Facility") . " not found"));
     }
 
     public function prepareForCancellation($record)

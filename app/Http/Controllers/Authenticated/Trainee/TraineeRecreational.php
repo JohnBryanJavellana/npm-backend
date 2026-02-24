@@ -35,7 +35,13 @@ class TraineeRecreational extends Controller
 
     public function viewRecRequestCount(Request $request)
     {
-        return $this->recreationalService->getRecRequestCount($request->user()->id);
+        try
+        {
+            return $this->recreationalService->getRecRequestCount($request->user()->id);
+        }
+        catch (\Exception $e) {
+            \Log::error("viewRecRequestCountError", [$e]);
+        }
     }
 
     /**
@@ -81,7 +87,6 @@ class TraineeRecreational extends Controller
     {
         $validated = $request->validated();
         $validated["userId"] = $request->user()->id ?? 202600001;
-        \Log::info("validated", $validated);
         try
         {
             \Log::info("data", [$validated]);
@@ -234,10 +239,9 @@ class TraineeRecreational extends Controller
 
     public function checkUniqueIdentifier(Request $request)
     {
-        \Log::info("messagecheckUniqueIdentifier", [$request->all()]);
         try
         {
-            $exists = $this->recreationalService->isUniqueIdenfierExistV1($request);
+            $exists = $this->recreationalService->isUniqueIdenfierExistV2($request);
             return response()->json(["data" => $exists], 200);
         }
         catch (ModelNotFoundException $e) {

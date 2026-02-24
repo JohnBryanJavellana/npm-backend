@@ -44,6 +44,7 @@ use App\Http\Controllers\QRReaderCheckInOutCtrl;
 
 use App\Models\User;
 use App\Services\Trainee\Dormitory\DormitoryTransferService;
+use App\Services\Trainee\Recreational\RecreationalService;
 
 /** guest routes */
 Route::match(['GET', 'POST'], '/login', [LoginController::class, 'login_user']);
@@ -212,7 +213,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'getRecreationalRequest']);
             Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancelUnitsRequest']);
             Route::get('counts', [TraineeRecreational::class, 'viewRecRequestCount']);
-        
+            Route::get("testTest/{UIId}", [RecreationalService::class, 'checkPrefix']);
             }); 
     });
 
