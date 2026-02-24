@@ -14,17 +14,17 @@ class RequestInvoice extends FormRequest
     {
         return $this->user() !== null;
     }
-    
+
     /**
      * Get the validation rules that apply to the request.
      */
     public function rules(): array
     {
         return [
-            'r_a_request_info_id' => ['required', 'integer'],
+            'r_a_request_info_id' => ['required', 'integer', 'exists:r_a_request_infos,id'],
             'userId'              => ['required', 'integer', 'exists:users,id'],
             'description'         => ['required', 'string'],
-            'invoiceAmount'       => ['required','numeric','regex:/^\d+(\.\d{1,2})?$/'],
+            'invoiceAmount'       => ['required', 'numeric'],
             'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
             'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
         ];

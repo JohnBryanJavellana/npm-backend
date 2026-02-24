@@ -116,8 +116,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('update_dormitory_room', [DormitoryController::class, 'update_dormitory_room']);
             Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms']);
             Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms']);
-            Route::post('create-walk-in-request/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
-            Route::post('create-walk-in-request/create_or_update_request', [DormitoryController::class, 'create_or_update_request']);
+
+            Route::post('requests/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
+            Route::post('requests/update_dormitory_room_request', [DormitoryController::class, 'update_dormitory_room_request']);
 
             Route::post('get_all_requests', [DormitoryController::class, 'get_all_requests']);
             Route::delete('cancel_dorm_request/{dormReqId}', [DormitoryController::class, 'cancel_dorm_request']);
