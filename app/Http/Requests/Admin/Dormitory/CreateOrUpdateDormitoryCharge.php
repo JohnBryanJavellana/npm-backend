@@ -23,12 +23,12 @@ class CreateOrUpdateDormitoryCharge extends FormRequest
     public function rules(): array
     {
         return [
-            'userId' => ['required'],
-            'roomId' => ['required'],
-            'tenantId' => ['required'],
-            'amount' => ['required'],
-            'description' => ['required'],
-            'httpMethod' => ['required'],
+            'userId'      => ['required', 'integer', 'exists:users,id'],
+            'roomId'      => ['required', 'integer', 'exists:dormitory_rooms,id'],
+            'tenantId'    => ['required', 'integer', 'exists:dormitory_tenants,id'],
+            'amount'      => ['required', 'numeric'],
+            'description' => ['required', 'string'],
+            'httpMethod'  => ['required', 'string'],
             'documentId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ],
             'status' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ]
         ];

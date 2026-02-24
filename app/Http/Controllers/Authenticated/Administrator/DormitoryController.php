@@ -1314,16 +1314,10 @@ class DormitoryController extends Controller
 {
     return TransactionUtil::transact(null, [], function () use ($request) {
         $isPost = $request->httpMethod === 'POST';
-        $charge = $isPost
-            ? new DormitoryInvoice()
-            : DormitoryInvoice::where('id', $request->documentId)
-                ->lockForUpdate()   
-                ->first();
+        $charge = $isPost? new DormitoryInvoice(): DormitoryInvoice::where('id', $request->documentId)->lockForUpdate()->first();
 
         if (!$isPost && $charge->status === DormitoryEnum::PAID) {
-            return response()->json([
-                'message' => "We're sorry. You can't update this charge for the moment."
-            ], 409);
+            return response()->json(['message' => "We're sorry. You can't update this charge for the moment."], 409);
         }
 
         if ($isPost) {
