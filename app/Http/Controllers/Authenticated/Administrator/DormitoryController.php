@@ -565,8 +565,8 @@ class DormitoryController extends Controller
      * @param Request $request
      */
     public function get_dormitory_inventory_stock (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $stock = DormitoryInventoryItem::withCount('borrowed')
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $stock = DormitoryInventoryItem::withCount('borrowed')
                 ->where('dormitory_inventory_id', $request->documentId)
                 ->get();
 
@@ -1414,84 +1414,49 @@ class DormitoryController extends Controller
  * Summary of provide_stocks
  * @param Request $request
  */
+/**
+ * Summary of provide_stocks
+ * @param Request $request
+ */
 public function provide_stocks(Request $request) {
-    return TransactionUtil::transact(null, ["dormitory:inclusions:all"], function() use ($request) {
-        $dormitoryTenantId = $request->dormitoryTenantId;
-        $inventoryId       = $request->inventoryId;
-        $stockIds          = $request->stockIds; // array of DormitoryInventoryItem IDs
-        $withFee           = $request->withFee ?? false;
+    return TransactionUtil::transact(null, [], function() use ($request) {
 
-        // Validate tenant request exists
-        $tenantRequest = DormitoryTenant::findOrFail($dormitoryTenantId);
+        $availableStocks = DormitoryInventory::withCount([
+            'stock as total_stock_count',
+            'stock as available_stock_count' => fn($q) => $q->where('status', DormitoryEnum::AVAILABLE->value),
+            'stock as reserved_stock_count'  => fn($q) => $q->where('status', DormitoryEnum::RESERVED->value),
+            'stock as borrowed_stock_count'  => fn($q) => $q->where('status', DormitoryEnum::BORROWED->value),
+            'stock as damaged_stock_count'   => fn($q) => $q->where('status', 'DAMAGED'),
+        ])
+        ->with([
+            'stock' => fn($q) => $q->where('status', DormitoryEnum::AVAILABLE->value)
+                ->select([
+                    'id',
+                    'dormitory_inventory_id',
+                    'unique_identifier',
+                    'status',
+                ])
+        ])
+        ->get()
+        ->map(function($inventory) {
+            $inventory->availability_status = match(true) {
+                $inventory->available_stock_count > 0 => 'AVAILABLE',
+                $inventory->reserved_stock_count > 0  => 'RESERVED',
+                default                                => 'OUT OF STOCK',
+            };
 
-        // Find or create a borrowing record for this tenant + inventory
-        $borrowing = DormitoryItemBorrowing::firstOrNew([
-            'dormitory_tenant_id'    => $dormitoryTenantId,
-            'dormitory_inventory_id' => $inventoryId,
-        ]);
-
-        $provided    = [];
-        $unavailable = [];
-
-        foreach ($stockIds as $stockId) {
-            $stock = DormitoryInventoryItem::where('id', $stockId)
-                ->where('status', DormitoryEnum::AVAILABLE->value)
-                ->lockForUpdate()
-                ->first();
-
-            if (!$stock) {
-                $unavailable[] = $stockId;
-                continue;
-            }
-
-            // Reserve the stock
-            $stock->status = DormitoryEnum::RESERVED->value;
-            $stock->save();
-
-            $provided[] = [
-                'id'                => $stock->id,
-                'unique_identifier' => $stock->unique_identifier,
-            ];
-        }
-
-        if (empty($provided)) {
-            return response()->json([
-                'message'     => "No stocks were provided. All selected items are unavailable.",
-                'unavailable' => $unavailable,
-            ], 409);
-        }
-
-        // Save borrowing with final count
-        $existingCount      = $borrowing->exists ? $borrowing->items()->count() : 0;
-        $borrowing->count   = $existingCount + count($provided);
-        $borrowing->status  = DormitoryEnum::ACTIVE->value;
-        $borrowing->save();
-
-        // Create DormitoryItemBI records for each provided stock
-        foreach ($provided as $item) {
-            $itemDetail = new DormitoryItemBI();
-            $itemDetail->dormitory_item_borrowing_id  = $borrowing->id;
-            $itemDetail->dormitory_inventory_item_id  = $item['id'];
-            $itemDetail->withFee                      = $withFee;
-            $itemDetail->status                       = DormitoryEnum::APPROVED->value;
-            $itemDetail->save();
-        }
-
-        AuditHelper::log(
-            $request->user()->id,
-            AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSTCKLIST->value . " for Tenant ID#$dormitoryTenantId"
-        );
-
-        if (env('USE_EVENT')) {
-            event(new BEDormitory(''), new BEAuditTrail(''));
-        }
+            return $inventory;
+        })
+        ->sortBy(fn($i) => [
+            'AVAILABLE'    => 1,
+            'RESERVED'     => 2,
+            'OUT OF STOCK' => 3,
+        ][$i->availability_status] ?? 99)
+        ->values();
 
         return response()->json([
-            'message'     => "Stocks successfully provided for dormitory request ID#$dormitoryTenantId.",
-            'provided'    => $provided,
-            'unavailable' => $unavailable,
-            'borrowing'   => $borrowing,
-        ], 201);
+            'availableStocks' => $availableStocks,
+        ], 200);
     });
 }
 
