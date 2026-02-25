@@ -1310,39 +1310,48 @@ class DormitoryController extends Controller
         });
     }
 
-   public function created_or_update_dormitory_charge(CreateOrUpdateDormitoryCharge $request)
+ public function created_or_update_dormitory_charge(CreateOrUpdateDormitoryCharge $request)
 {
     return TransactionUtil::transact(null, [], function () use ($request) {
-        $isPost = $request->httpMethod === 'POST';
-        $charge = $isPost? new DormitoryInvoice(): DormitoryInvoice::where('id', $request->documentId)->lockForUpdate()->first();
 
-        if (!$isPost && $charge->status === DormitoryEnum::PAID) {
-            return response()->json(['message' => "We're sorry. You can't update this charge for the moment."], 409);
+        $isPost = $request->httpMethod === 'POST';
+
+        $charge = $isPost
+            ? new DormitoryInvoice()
+            : DormitoryInvoice::where('id', $request->documentId)
+                ->lockForUpdate()
+                ->first();
+
+        if (!$isPost && $charge->invoice_status === 'PAID') {
+            return response()->json([
+                'message' => "We're sorry. You can't update this charge for the moment."
+            ], 409);
         }
 
         if ($isPost) {
             $charge->user_id = $request->userId;
             $charge->dormitory_tenant_id = $request->tenantId;
-            $charge->dormitory_room_id = $request->roomId;
-            $charge->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
-            $charge->isInitial = "N";
+            $charge->trace_number = GenerateTrace::createTraceNumber(
+                DormitoryInvoice::class,
+                '-DRINV-'
+            );
         } else {
-            $charge->status = $request->status;
+            $charge->invoice_status = $request->status;
         }
 
         $descriptionHtml = $this->addDescription(
-            "<div style='display: flex; align-items: center; justify-content: space-between;'>
-                <div style='color: #6c757d;'>{$request->details}</div>
-                <div>₱" . number_format((float) $request->charge) . "</div>
+            "<div style='display: flex; align-items: center; justify-content: space-between;' >
+                <div style='color: #6c757d;'>{$request->description}</div>
+                <div>₱" . number_format((float) $request->amount) . "</div>
             </div>"
         );
 
-        $charge->description = $descriptionHtml;
+        $charge->description = $request->description;
         $charge->total_amount = $request->amount;
         $charge->remarks = $request->remarks ?? '';
 
-        if ($request->charge <= 0) {
-            $charge->status = DormitoryEnum::PAID;
+        if ($request->amount <= 0) {
+            $charge->invoice_status = 'PAID';
         }
 
         $charge->save();
@@ -1360,7 +1369,8 @@ class DormitoryController extends Controller
         }
 
         return response()->json([
-            'message' => ($isPost ? 'created' : 'updated') . " a dormitory charge. ID#{$charge->id}"
+            'message' => ($isPost ? 'created' : 'updated') .
+                " a dormitory charge. ID#{$charge->id}"
         ], 200);
     });
 }
@@ -1379,7 +1389,7 @@ class DormitoryController extends Controller
             if(!\in_array($this_charge->invoice_status, [DormitoryEnum::PENDING->value])) {
                 return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYCHARGE->value], 200);
             } else {
-                $this_charge->invoice_status = DormitoryEnum::CANCELLED->value;
+                $this_charge->invoice_status = ormitoryEnum::CANCELLED->value;
                 $this_charge->save();
 
                 AuditHelper::log(
