@@ -117,16 +117,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
             //DORM REQUEST
             Route::post('rooms', [TraineeDormitory::class, 'viewRecommendedRooms']);
             Route::get('counts', [TraineeDormitory::class, 'viewTenantCount']);
-
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
-
             Route::get('remove_applied_dormitories/{dormitory_id}', [TraineeDormitory::class, 'remove_applied_dormitories']);
             Route::get('check_pending_request', [TraineeDormitory::class, 'check_pending_request']);
             Route::get('get_personal_dormitory', [TraineeDormitory::class, 'get_personal_dormitory']);
             Route::post('request_tenant_room', [TraineeDormitory::class, 'request_tenant_room']);
             Route::post('update_status_dormitory', [TraineeDormitory::class, 'update_status_dormitory']);
-            Route::post('get_filtered_dorms', [TraineeDormitory::class, 'get_filtered_dorms']);
+            // Route::post('get_filtered_dorms', [TraineeDormitory::class, 'get_filtered_dorms']);
             Route::get('dormitory_record', [TraineeDormitory::class, 'dormitory_record']);
 
             //INCLUSIONS
@@ -186,8 +184,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('get_all_invoices', [TraineeInvoices::class, 'get_all_trainee_invoices']);
             Route::get('view/penalties', [TraineeInvoices::class, 'library_penalties']);
             Route::post('update/penalties', [TraineeInvoices::class, 'updateLibInvoice']);
-            Route::get('view/{id}', [TraineeInvoices::class, 'view_dormitory_invoices']);
-            Route::post('billing/update', [TraineeInvoices::class, 'updateDormInvoice']);
+            // Work-on
+            Route::get('view/{tenant}', [TraineeInvoices::class, 'viewDormitoryInvoices']);
+            Route::post('billing/update', [TraineeInvoices::class, 'updatefDormInvoice']);
             Route::post('enrollment/update', [TraineeInvoices::class, 'updateEnrollmentInvoice']);
         });
 
@@ -214,9 +213,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_recreational_request', [TraineeRecreational::class, 'get_recreational_request']);
             Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'getRecreationalRequest']);
             Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancelUnitsRequest']);
-            Route::get('counts', [TraineeRecreational::class, 'viewRecRequestCount']);
-            Route::get("testTest/{UIId}", [RecreationalService::class, 'checkPrefix']);
-            }); 
+            Route::get('counts', [TraineeRecreational::class, 'testFetch']);
+        }); 
     });
 
     //FOR RECREATIONALS

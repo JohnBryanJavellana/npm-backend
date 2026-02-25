@@ -2,6 +2,7 @@
 
 namespace App\Services\Trainee\Dormitory;
 
+use App\Enums\ProcessEnum;
 use App\Enums\RequestStatus;
 use App\Http\Controllers\Authenticated\Trainee\CreditController;
 use App\Models\{DormitoryInvoice, DormitoryTenant, User};
@@ -29,7 +30,8 @@ class DormitoryInvoiceService {
             "dormitory_tenant_id" => $documentId,
             "user_id" => $userId
             ])
-        ->whereNotNull("description")
+        // FOR NOW
+        // ->whereNotNull("description")
         ->latest("created_at")
         ->get();
     }
@@ -37,49 +39,26 @@ class DormitoryInvoiceService {
     public function updateDormitoryInvoice($validated, $userId): float
     {
         return DB::transaction(function() use ($validated, $userId) {
-            $this->prepareData($validated, $userId);
-
+            // $this->prepareData($validated, $userId);
             //temporary
-            if(round($validated["total_amount"], 2) === round($validated["credit_amount"], 2)) {
-                $this->dormitoryInvoice->query()
-                ->forUser($userId)
-                ->where("dormitory_tenant_id", $validated["tenant_id"])
-                ->whereKey($validated["billing_id"])
-                ->update([
-                    "invoice_reference" => $validated["ref_number"],
-                    "invoice_status" => RequestStatus::FOR_VERIFICATION,
-                    "payment_type" => "ONLINE",
-                    "datePaid" => Carbon::now()
-                ]);
+            $this->dormitoryInvoice->query()
+            ->forUser($userId)
+            ->where("dormitory_tenant_id", $validated["tenant_id"])
+            ->whereKey($validated["billing_id"])
+            ->update([
+                "invoice_reference" => $validated["ref_number"],
+                "invoice_status" => RequestStatus::FOR_VERIFICATION->value,
+                "payment_type" => ProcessEnum::ONLINE->value,
+                "datePaid" => Carbon::now()
+            ]);
 
-                $this->dormitoryTenantModel->whereKey($validated["tenant_id"])->update([
-                    "tenant_status" => RequestStatus::PROCESSING_PAYMENT
-                ]);
-            }
-
-            $this->creditController->store($validated, $userId);
-
-            return (float) (
-              $validated["total_amount"] - $validated["credit_amount"]
-            );
+            $this->dormitoryTenantModel->whereKey($validated["tenant_id"])->update([
+                "tenant_status" => RequestStatus::PROCESSING_PAYMENT->value
+            ]);
         });
     }
 
     private function prepareData($validated, $userId){
-        $userRec = $this->user->query()
-        ->whereKey($userId)
-        ->lockForUpdate()
-        ->first();
-
-        if(!$userRec) {
-        throw new DomainException("User not found.");
-        }
-
-        if($userRec->credit_amount < $validated["credit_amount"]) {
-            throw new DomainException("Insufficient credit.");
-        }
-
-        //onSuccess from the Paymaya
-        $userRec->decrement("credit_amount", $validated["credit_amount"]);
+      return;
     }
 }

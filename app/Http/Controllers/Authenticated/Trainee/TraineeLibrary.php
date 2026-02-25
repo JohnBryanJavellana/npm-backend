@@ -12,7 +12,6 @@ use App\Http\Requests\Trainee\Library\CancelBookRequest;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use App\Mail\BookReservationStatus;
 use App\Utils\{AuditHelper, Notifications, TransactionUtil};
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use App\Http\Resources\{BookResource, BookRequestResource, PdfCopyResource, BookExtensionResource, AvailableBooksResource, BookOverDueResource};
 use App\Jobs\SendingEmail;
@@ -48,10 +47,10 @@ class TraineeLibrary extends Controller
     {
         try
         {
-            \Log::info("count_lib", [$request->user()->id]);
             return $this->library_service->getLibRequestCount($request->user()->id);
         }
         catch (\Exception $e) {
+            \Log::info("viewLibRequestCountError", [$e]);
         }
     }
     public function view_books(ViewAllByUserRequest $request)
@@ -60,31 +59,21 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $userId = $validated["user_id"];
 
-            $statuses = [
-                RequestStatus::PENDING->value,
-                RequestStatus::APPROVED->value,
-                RequestStatus::EXTENDING->value,
-                RequestStatus::EXTENDED->value,
-                RequestStatus::RENEWING->value,
-                RequestStatus::RENEWED->value,
-                RequestStatus::RECEIVED->value
-            ];
-
             //SEPARATE
             $record = EnrolledCourse::query()
                 ->where('user_id', $userId)
                 ->select('training_id')
-                ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
+                ->whereNotIn('enrolled_course_status', RequestStatus::notAllowedStatuses())
                 ->get();
 
             //SEPARATE
             $books = Book::with([
                 'catalog.genre',
-                'hasData' => function($q) use ($userId, $statuses) {
-                    $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $userId);
+                'hasData' => function($q) use ($userId) {
+                    $q->whereIn('status', RequestStatus::ActiveBookRequest())->whereRelation('bookRes', 'user_id', '=', $userId);
                 },
                 'hasData.bookRes' => function ($query) use ($userId) {
-                    $query->where(['user_id' => $userId, 'status' => 'FOR CSM']);
+                    $query->where(['user_id' => $userId, 'status' => RequestStatus::FOR_CSM->value]);
                 },
                 "related" => function($q) use ($record) {
                     $q->whereIn('training_id', $record);
@@ -94,8 +83,8 @@ class TraineeLibrary extends Controller
             ])
             ->withCount([
                 'copies' => fn ($q) => $q->where('status', RequestStatus::AVAILABLE),
-                'hasData' => function ($q) use ($userId, $statuses) {
-                    $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $userId);
+                'hasData' => function ($q) use ($userId) {
+                    $q->whereIn('status', RequestStatus::ActiveBookRequest())->whereRelation('bookRes', 'user_id', '=', $userId);
                 },
                 'related as enrolled_trainings_count' => function ($query) use ($record) {
                     $query->whereIn('training_id', $record);

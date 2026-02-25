@@ -92,6 +92,7 @@ class DormitoryExtraService {
             $this->prepareData($validated, $userId);
             $invoice =$this->dormitoryInvoiceModel->create([
                 "dormitory_tenant_id" => $validated["dormitory_id"],
+                "user_id" => $userId,
                 "type" => RequestStatus::SERVICE,
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
             ]);
