@@ -111,7 +111,7 @@ class QRReaderCheckInOutCtrl extends Controller
             $this->supplyDateTime($dateToday, $checkInOrOut, $record, strtolower($checkInOrOut));
             $record->save();
 
-            return response()->json(data: ['message' => "Success!"], 200);
+            return response()->json(['message' => "Success!"], 200);
         //OK TANAN SIR HAHA
         });
     }

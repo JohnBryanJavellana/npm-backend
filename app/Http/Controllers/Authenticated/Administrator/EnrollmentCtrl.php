@@ -224,29 +224,8 @@ class EnrollmentCtrl extends Controller
                     'count_remarks' => CountCollection::startCount(collect(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications'])),
                 ];
 
-<<<<<<< HEAD
                 return response()->json(['applicationCount' => $count], 200);
             });
-=======
-
-
-            return response()->json([
-                'count_forVerification'  => min($counts['RESERVED'] ?? 0, 99, "99+"),
-                'count_forEnrolled'  => min($counts['ENROLLED'] ?? 0, 99, "99+"),
-                'count_forFinished'  => min($counts['COMPLETED'] ?? 0, 99, "99+"),
-                'count_forPaid'  => min($counts['PAID'] ?? 0, 99, "99+"),
-                'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0, 99, "99+"),
-                'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0, 99, "99+"),
-                'count_denied' => min($counts['DECLINED'] ?? 0, 99) +
-                    min($counts['CSFB'] ?? 0, 99) +
-                    min($counts['CANCELLED'] ?? 0, 99) +
-                    min($counts['IR'] ?? 0, 99),
-                'count_remarks' => \count(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications']),
-
-
-
-            ], 200);
->>>>>>> dffe0bf9ac0c4b6a8063cd05e7cb797be99b0e4f
         });
     }
 
