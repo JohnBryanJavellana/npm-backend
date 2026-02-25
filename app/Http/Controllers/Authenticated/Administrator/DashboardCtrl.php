@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Enums\NotificationEnum;
+use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
@@ -47,14 +48,17 @@ class DashboardCtrl extends Controller
         return $modelTemp->count();
     }
 
+
+
     /**
      * Summary of dashboard_data
      * @param Request $request
      */
     public function dashboard_data(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $givenYear = $request->input('year', null);
+            $userRole = $request->user()->role;
 
+            $givenYear = $request->input('year', null);
             $userInstance = User::query();
             $auditTrailInstance = AuditTrail::query();
             $qrReaderLocationInstance = QrReaderLocation::query();
@@ -90,175 +94,218 @@ class DashboardCtrl extends Controller
                 $trainingInstance->whereYear('created_at', $givenYear);
             }
 
-            /** CARDS */
-            $totalEnrollmentApplications = $enrolledCourseInstance->clone()->count();
-            $totalPaymentTransactions = $this->count_document($dormitoryInvoiceInstance->clone()) +
-                $this->count_document($enrollmentInvoiceInstance->clone()) +
-                $this->count_document($libraryInvoiceInstance->clone()) +
-                $this->count_document($raInvoiceInvoiceInstance->clone());
-            $totalDormitoryApplications = $dormitoryInstance->clone()->count();
-            $totalLibraryApplications = $bookResInstance->clone()->count();
-            $totalRecreationalApplications = $recreationalInstance->clone()->count();
-            $totalUserRegistration = $userInstance->clone()->count();
-
             /** ENROLLMENT OVERVIEW */
-            $targetDate = Carbon::now()->subMonth();
-            $trends = $enrolledCourseInstance
-                ->whereMonth('created_at', $targetDate->month)
-                ->whereYear('created_at', $targetDate->year)
-                ->get()
-                ->groupBy(fn($item) => Carbon::parse($item->created_at)->weekOfMonth);
+            $totalEnrollmentApplications = null;
+            $enrollmentTrend = null;
+            $topPopularCourse = null;
+            $enrollmentPayments = null;
 
-            $enrollmentTrend = collect(range(1, 5))->map(function ($weekNumber) use ($trends) {
-                return [
-                    'week'  => "Week $weekNumber",
-                    'count' => isset($trends[$weekNumber]) ? $trends[$weekNumber]->count() : 0,
+            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_ENROLLMENT->value])) {
+                $totalEnrollmentApplications = $enrolledCourseInstance->clone()->count();
+
+                $targetDate = Carbon::now()->subMonth();
+                $trends = $enrolledCourseInstance
+                    ->whereMonth('created_at', $targetDate->month)
+                    ->whereYear('created_at', $targetDate->year)
+                    ->get()
+                    ->groupBy(fn($item) => Carbon::parse($item->created_at)->weekOfMonth);
+
+                $enrollmentTrend = collect(range(1, 5))->map(function ($weekNumber) use ($trends) {
+                    return [
+                        'week'  => "Week $weekNumber",
+                        'count' => isset($trends[$weekNumber]) ? $trends[$weekNumber]->count() : 0,
+                    ];
+                })->values();
+
+                $topPopularCourse = $trainingInstance->with('module')
+                    ->has('hasData')
+                    ->withCount(['hasData'])
+                    ->orderByDesc('has_data_count')
+                    ->take(10)
+                    ->get()
+                    ->map(fn($query) => [
+                        'course' => $query->module?->acronym,
+                        'count' => $query->has_data_count
+                    ])->values();
+
+                $enrollmentPayments = [
+                    'PENDING' => $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]),
+                    'FOR VERIFICATION' => $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::FOR_VERIFICATION]),
+                    'PAID' => $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID]),
+                    'CANCELLED' => $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::CANCELLED])
                 ];
-            })->values();
-
-            $topPopularCourse = $trainingInstance->with('module')
-                ->has('hasData')
-                ->withCount(['hasData'])
-                ->orderByDesc('has_data_count')
-                ->take(10)
-                ->get()
-                ->map(fn($query) => [
-                    'course' => $query->module?->acronym,
-                    'count' => $query->has_data_count
-                ])->values();
-
-            $enrollmentPayments = [
-                'PENDING' => $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]),
-                'FOR VERIFICATION' => $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::FOR_VERIFICATION]),
-                'PAID' => $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID]),
-                'CANCELLED' => $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::CANCELLED])
-            ];
+            }
 
             /** DORMITORY OVERVIEW */
-            $dormitoryOccupancy = [
-                'PENDING' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::PENDING]),
-                'APPROVED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::APPROVED]),
-                'TERMINATED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::TERMINATED]),
-                'ACTIVE' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::ACTIVE]),
-                'CANCELLED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::CANCELLED]),
-                'EXTENDING' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::EXTENDING]),
-                'TRANSFERRING' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::TRANSFERRING]),
-                'TRANSFERRED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::TRANSFERRED]),
-                'FOR PAYMENT' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::FOR_PAYMENT]),
-                'REJECTED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::REJECTED]),
-                'PAID' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::PAID]),
-                'PROCESSING PAYMENT' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::PROCESSING_PAYMENT]),
-                'RESERVED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::RESERVED])
-            ];
+            $totalDormitoryApplications = null;
+            $dormitoryOccupancy = null;
+            $finalData = null;
+            $inventoryAlerts = null;
+            $serviceRequestStatus = null;
+            $dormitoryPayments = null;
 
-            $annualDormitoryRequest = [];
-            for ($m = 1; $m <= 12; $m++) {
-                $annualDormitoryRequest[date('M', mktime(0, 0, 0, $m, 1))] = 0;
-            }
+            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_DORMITORY->value])) {
+                $totalDormitoryApplications = $dormitoryInstance->clone()->count();
 
-            $annualDormitoryRequestTemp = $dormitoryInstance->clone()->get();
-            foreach ($annualDormitoryRequestTemp as $requestTemp) {
-                $month = $requestTemp->created_at->format('M');
-                if (isset($annualDormitoryRequest[$month])) {
-                    $annualDormitoryRequest[$month]++;
+                $dormitoryOccupancy = [
+                    'PENDING' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::PENDING]),
+                    'APPROVED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::APPROVED]),
+                    'TERMINATED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::TERMINATED]),
+                    'ACTIVE' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::ACTIVE]),
+                    'CANCELLED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::CANCELLED]),
+                    'EXTENDING' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::EXTENDING]),
+                    'TRANSFERRING' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::TRANSFERRING]),
+                    'TRANSFERRED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::TRANSFERRED]),
+                    'FOR PAYMENT' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::FOR_PAYMENT]),
+                    'REJECTED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::REJECTED]),
+                    'PAID' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::PAID]),
+                    'PROCESSING PAYMENT' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::PROCESSING_PAYMENT]),
+                    'RESERVED' => $this->count_document($dormitoryInstance->clone(), 'tenant_status', [DormitoryEnum::RESERVED])
+                ];
+
+                $annualDormitoryRequest = [];
+                for ($m = 1; $m <= 12; $m++) {
+                    $annualDormitoryRequest[date('M', mktime(0, 0, 0, $m, 1))] = 0;
                 }
-            }
 
-            $finalData = [];
-            foreach ($annualDormitoryRequest as $name => $total) {
-                $finalData[] = [
-                    'month' => $name,
-                    'count' => $total
+                $annualDormitoryRequestTemp = $dormitoryInstance->clone()->get();
+                foreach ($annualDormitoryRequestTemp as $requestTemp) {
+                    $month = $requestTemp->created_at->format('M');
+                    if (isset($annualDormitoryRequest[$month])) {
+                        $annualDormitoryRequest[$month]++;
+                    }
+                }
+
+                $finalData = [];
+                foreach ($annualDormitoryRequest as $name => $total) {
+                    $finalData[] = [
+                        'month' => $name,
+                        'count' => $total
+                    ];
+                }
+
+                $inventoryAlerts = $dormitoryInventoryInstance->clone()
+                    ->with('stock')
+                    ->withCount([
+                        'stock as available_count' => fn($query) => $query->where('status', 'AVAILABLE'),
+                        'stock as total_stock_count'
+                    ])
+                    ->havingRaw('available_count <= (total_stock_count * 0.50)')
+                    ->orderBy('available_count', 'ASC')
+                    ->take(3)
+                    ->get()
+                    ->map(fn($item) => [
+                        'item'          => $item->name,
+                        'total_count'   => $item->total_stock_count,
+                        'available'     => $item->available_count,
+                        'status'        => $item->available_count === 0 ? 'Out of Stock' : 'Low Stock',
+                    ])
+                    ->values();
+
+                $serviceRequestStatus = $dormitoryServiceInstance->clone()
+                    ->with(['services'])
+                    ->orderBy('created_at', 'DESC')
+                    ->take(3)
+                    ->get()
+                    ->map(fn($query) => [
+                        'id' => $query->id,
+                        'service' => $query->services->name,
+                        'status' => $query->status,
+                        'remarks' => $query->remarks
+                    ])
+                    ->values();
+
+                $dormitoryPayments = [
+                    'PENDING' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]),
+                    'FOR VERIFICATION' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::FOR_VERIFICATION]),
+                    'PAID' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID]),
+                    'CANCELLED' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::CANCELLED])
                 ];
             }
 
-            $inventoryAlerts = $dormitoryInventoryInstance->clone()
-                ->with('stock')
-                ->withCount([
-                    'stock as available_count' => fn($query) => $query->where('status', 'AVAILABLE'),
-                    'stock as total_stock_count'
-                ])
-                ->havingRaw('available_count <= (total_stock_count * 0.50)')
-                ->orderBy('available_count', 'ASC')
-                ->take(3)
-                ->get()
-                ->map(fn($item) => [
-                    'item'          => $item->name,
-                    'total_count'   => $item->total_stock_count,
-                    'available'     => $item->available_count,
-                    'status'        => $item->available_count === 0 ? 'Out of Stock' : 'Low Stock',
-                ])
-                ->values();
-
-            $serviceRequestStatus = $dormitoryServiceInstance->clone()
-                ->with(['services'])
-                ->orderBy('created_at', 'DESC')
-                ->take(3)
-                ->get()
-                ->map(fn($query) => [
-                    'id' => $query->id,
-                    'service' => $query->services->name,
-                    'status' => $query->status,
-                    'remarks' => $query->remarks
-                ])
-                ->values();
-
-            $dormitoryPayments = [
-                'PENDING' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]),
-                'FOR VERIFICATION' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::FOR_VERIFICATION]),
-                'PAID' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID]),
-                'CANCELLED' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::CANCELLED])
-            ];
-
             /** LIBRARY OVERVIEW */
-            $libraryHealthCount = [
-                'total' => $bookCopyInstance->clone()->count(),
-                'available' => $bookCopyInstance->clone()->where('status', 'AVAILABLE')->count(),
-            ];
+            $totalLibraryApplications = null;
+            $libraryHealthCount = null;
+            $actionCenter = null;
+            $recentActivity = null;
 
-            $actionCenter = [
-                'overdue' => 0,
-                'new_reservations' => $this->count_document($bookResInstance->clone(), 'status', [LibraryEnum::ACTIVE])
-            ];
+            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_LIBRARY->value])) {
+                $totalLibraryApplications = $bookResInstance->clone()->count();
 
-            $recentActivity = $notificationInstance->clone()
-                ->with('sender')
-                ->where('type', NotificationEnum::LIBRARY)
-                ->orderBy('created_at', 'DESC')
-                ->take(3)
-                ->get();
+                $libraryHealthCount = [
+                    'total' => $bookCopyInstance->clone()->count(),
+                    'available' => $bookCopyInstance->clone()->where('status', 'AVAILABLE')->count(),
+                ];
+
+                $actionCenter = [
+                    'overdue' => 0,
+                    'new_reservations' => $this->count_document($bookResInstance->clone(), 'status', [LibraryEnum::ACTIVE])
+                ];
+
+                $recentActivity = $notificationInstance->clone()
+                    ->with('sender')
+                    ->where('type', NotificationEnum::LIBRARY)
+                    ->orderBy('created_at', 'DESC')
+                    ->take(3)
+                    ->get();
+            }
 
             /** RECREATIONAL OVERVIEW */
-            $raApplications = [
-                'PENDING' => $this->count_document($recreationalInstance->clone(), 'status', [RAEnum::PENDING]),
-                'FOR CSM' => $this->count_document($recreationalInstance->clone(), 'status', [RAEnum::FOR_CSM]),
-                'ACTIVE' => $this->count_document($recreationalInstance->clone(), 'status', [RAEnum::ACTIVE]),
-                'COMPLETED' => $this->count_document($recreationalInstance->clone(), 'status', [RAEnum::COMPLETED])
-            ];
+            $totalRecreationalApplications = null;
+            $raApplications = null;
+
+            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_RA->value])) {
+                $totalRecreationalApplications = $recreationalInstance->clone()->count();
+
+                $raApplications = [
+                    'PENDING' => $this->count_document($recreationalInstance->clone(), 'status', [RAEnum::PENDING]),
+                    'FOR CSM' => $this->count_document($recreationalInstance->clone(), 'status', [RAEnum::FOR_CSM]),
+                    'ACTIVE' => $this->count_document($recreationalInstance->clone(), 'status', [RAEnum::ACTIVE]),
+                    'COMPLETED' => $this->count_document($recreationalInstance->clone(), 'status', [RAEnum::COMPLETED])
+                ];
+            }
 
             /** MASTERLIST OVERVIEW */
-            $totalEmployer = [
-                'total' => $this->count_document($employerInstance->clone()),
-                'this_month' => $employerInstance->clone()->whereMonth('created_at', Carbon::now()->format('m'))->count()
-            ];
+            $totalUserRegistration = null;
+            $totalEmployer = null;
+            $userStatus = null;
 
-            $userStatus = [
-                'VERIFIED' => $userInstance->clone()->whereNotNull('email_verified_at')->count(),
-                'UNVERIFIED' => $userInstance->clone()->whereNull('email_verified_at')->count()
-            ];
+            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value])) {
+                $totalUserRegistration = $userInstance->clone()->count();
+
+                $totalEmployer = [
+                    'total' => $this->count_document($employerInstance->clone()),
+                    'this_month' => $employerInstance->clone()->whereMonth('created_at', Carbon::now()->format('m'))->count()
+                ];
+
+                $userStatus = [
+                    'VERIFIED' => $userInstance->clone()->whereNotNull('email_verified_at')->count(),
+                    'UNVERIFIED' => $userInstance->clone()->whereNull('email_verified_at')->count()
+                ];
+            }
 
             /** CASHIER OVERVIEW */
-            $cashierCounts = [
-                'orNumbers' => $this->count_document($qrReaderLocationInstance->clone()),
-                'pendingPayment' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]) +
-                                    $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]) +
-                                    $this->count_document($libraryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]) +
-                                    $this->count_document($raInvoiceInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]),
-                'verifiedPayment' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID]) +
-                                    $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID]) +
-                                    $this->count_document($libraryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID]) +
-                                    $this->count_document($raInvoiceInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID])
-            ];
+            $cashierCounts = null;
+            $totalPaymentTransactions = null;
+
+            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::CASHIER->value])) {
+                $totalPaymentTransactions = $this->count_document($dormitoryInvoiceInstance->clone()) +
+                    $this->count_document($enrollmentInvoiceInstance->clone()) +
+                    $this->count_document($libraryInvoiceInstance->clone()) +
+                    $this->count_document($raInvoiceInvoiceInstance->clone());
+
+                $cashierCounts = [
+                    'orNumbers' => $this->count_document($qrReaderLocationInstance->clone()),
+                    'pendingPayment' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]) +
+                                        $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]) +
+                                        $this->count_document($libraryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]) +
+                                        $this->count_document($raInvoiceInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PENDING]),
+                    'verifiedPayment' => $this->count_document($dormitoryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID]) +
+                                        $this->count_document($enrollmentInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID]) +
+                                        $this->count_document($libraryInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID]) +
+                                        $this->count_document($raInvoiceInvoiceInstance->clone(), 'invoice_status', [CashierEnum::PAID])
+                ];
+            }
 
             /** ACCOUNT OVERVIEW */
             $accountActions = [
