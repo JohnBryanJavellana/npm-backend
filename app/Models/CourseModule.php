@@ -50,6 +50,7 @@ class CourseModule extends Model
         return $this->hasMany(TrainingFacilitator::class, "course_module_id", "id");
     }
 
+
     public function certificates()
     {
         return $this->hasMany(MainCertificate::class, "course_module_id", "id");

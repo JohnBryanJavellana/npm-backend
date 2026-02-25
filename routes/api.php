@@ -37,6 +37,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
 /** other controllers */
 
 use App\Http\Controllers\Authenticated\Logout;
+use App\Http\Controllers\Authenticated\Trainer\AttendanceController;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
 use App\Http\Controllers\QRReaderCheckInOutCtrl;
 
@@ -52,18 +53,7 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPasswor
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 Route::get('/qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
 
-
-Route::get("details", [TrainerEnrollmentController::class, 'detailsss']);
-// Route::post("course_detail", [TrainerEnrollmentController::class, 'getCourseDetails']);
-
-Route::post('attendance_lists', [TrainerEnrollmentController::class, 'attendace_lists']);
-
-
 /** testing routes */
-Route::get('test', [TraineeRecreational::class, 'viewFacilities']);
-Route::post('items', [TraineeRecreational::class, 'getUserRecRequest']);
-Route::post('item', [TraineeRecreational::class, 'get_recreational_request']);
-
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
@@ -214,7 +204,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
 
             //* ATTENTANCE PART
-            Route::get('attendance_list', [TrainerEnrollmentController::class, 'attendace_list']);
+            Route::get('trainee', [AttendanceController::class, 'test']);
         });
     });
 

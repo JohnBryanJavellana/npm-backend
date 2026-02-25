@@ -13,6 +13,7 @@ class Training extends Model
     public const STATUS_ACTIVE = 'ACTIVE';
     public const STATUS_INACTIVE = 'INACTIVE';
 
+
     public function hasData()
     {
         return $this->hasMany(EnrolledCourse::class, 'training_id', 'id');

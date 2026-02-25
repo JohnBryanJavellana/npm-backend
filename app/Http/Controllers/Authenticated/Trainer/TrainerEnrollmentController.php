@@ -38,6 +38,7 @@ class TrainerEnrollmentController extends Controller
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
+
     //! Tigaman
     public function getCourseDetails(Request $request)
     {
@@ -49,6 +50,7 @@ class TrainerEnrollmentController extends Controller
             "module.trainingFees.category:id,name",
             "module.specific_requirements",
             "module.schedules",
+
         ])
             ->where('id', $request->trainingId)
             ->get();
@@ -57,14 +59,13 @@ class TrainerEnrollmentController extends Controller
             "training" => $record,
         ], 200);
     }
+    
 
     public function getTraineeDetails(Request $request)
     {
         try {
             $list = EnrolledCourse::where('training_id', $request->trainingId)
-                ->with([
-                    'trainee',
-                ])
+                ->with(['trainee',])
                 ->where('enrolled_course_status', 'ENROLLED')
                 ->get();
 
