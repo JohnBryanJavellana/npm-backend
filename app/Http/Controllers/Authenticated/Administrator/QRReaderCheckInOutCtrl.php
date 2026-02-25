@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use App\Utils\{
     TransactionUtil
@@ -110,7 +111,7 @@ class QRReaderCheckInOutCtrl extends Controller
             $this->supplyDateTime($dateToday, $checkInOrOut, $record, strtolower($checkInOrOut));
             $record->save();
 
-            return response()->json(['message' => "Success!"], 200);
+            return response()->json(data: ['message' => "Success!"], 200);
         //OK TANAN SIR HAHA
         });
     }

@@ -9,7 +9,8 @@ class DormitoryRoom extends Model
 
     protected $guarded = ['id'];
 
-    public function hasData () {
+    public function hasData()
+    {
         return $this->hasMany(DormitoryTenant::class);
     }
     public function dormitory()

@@ -2,11 +2,11 @@
 
 namespace App\Services\Trainer\Enrollment;
 
-use App\Enums\RequestStatus;
-use App\Models\{CourseModule, EnrolledCourse, Training,TrainingFacilitator};
+use App\Models\{CourseModule, Training, TrainingFacilitator};
 use Illuminate\Support\Facades\Auth;
 
-class TrainerEnrollmentService {
+class TrainerEnrollmentService
+{
     public function __construct(
         protected TrainingFacilitator $trainingFacilitatorModel,
         protected EnrolledCourse $enrolledCourseModel,
@@ -31,13 +31,13 @@ class TrainerEnrollmentService {
         ->forTraining($trainingId)
         ->first();
     }
-    
+
     public function getDataFacilitator()
     {
         $userId = Auth::id();
         return $this->courseModuleModel->query()
-        ->whereRelation("facilitator", "user_id", $userId)
-        ->get();
+            ->whereRelation("facilitator", "user_id", $userId)
+            ->get();
     }
 
 
@@ -45,15 +45,10 @@ class TrainerEnrollmentService {
     {
         $userId = Auth::id();
         return $this->trainingModel->query()
-        ->where("course_module_id", $course_module_id)
-        ->whereHas("module", function($query) use ($userId) {
-            $query->whereRelation("facilitator", "user_id", $userId);
-        })
-        ->get();
-    }
-
-    public function getTrainingDetails()
-    {
-        return;
+            ->where("course_module_id", $course_module_id)
+            ->whereHas("module", function ($query) use ($userId) {
+                $query->whereRelation("facilitator", "user_id", $userId);
+            })
+            ->get();
     }
 }
