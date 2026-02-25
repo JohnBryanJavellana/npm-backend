@@ -1415,7 +1415,7 @@ class DormitoryController extends Controller
  * Summary of provide_stocks_to_boarder
  * @param Request $request
  */
-public function provide_stocks_to_boarder(Request $request) {
+public function provide_stocks_t    o_boarder(Request $request) {
     return TransactionUtil::transact(null, ["dormitory:inclusions:all"], function() use ($request) {
         $dormitoryTenantId = $request->dormitoryTenantId;
         $inventoryId       = $request->inventoryId;
@@ -1496,7 +1496,8 @@ public function provide_stocks_to_boarder(Request $request) {
         }
 
         return response()->json([
-            'message' => "Stocks successfully provided to Tenant ID#$dormitoryTenantId.",
+
+           'message' => "Stocks successfully provided to Tenant: {$tenantRequest->boarder->fname} {$tenantRequest->boarder->lname}.",
             'boarder'     => [
                 'id'        => $tenantRequest->boarder->id,
                 'name'      => $tenantRequest->boarder->full_name,
@@ -1518,4 +1519,64 @@ public function provide_stocks_to_boarder(Request $request) {
         ], 201);
     });
 }
+//  show reserved stocks for boarder
+/**
+ * Summary of get_provided_stocks
+ * @param Request $request
+ */
+public function get_provided_stocks(Request $request) {
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $dormitoryTenantId = $request->dormitoryTenantId;
+        $inventoryId = $request->inventoryId;
+
+        $tenantRequest = DormitoryTenant::with([
+            'boarder',
+            'dormitory_room',
+            'dormitory_room.dormitory',
+        ])->findOrFail($dormitoryTenantId);
+
+        $provisions = DormitoryItemBorrowing::with([
+            'inventory',
+            'items' => function($q) {
+                $q->with('item')
+                  ->whereHas('item', fn($q2) =>
+                      $q2->where('status', DormitoryEnum::RESERVED->value)
+                  );
+            }
+        ])
+        ->where('dormitory_tenant_id', $dormitoryTenantId)
+        ->where('status', DormitoryEnum::ACTIVE->value)
+        ->when($inventoryId, fn($q) => $q->where('dormitory_inventory_id', $inventoryId))
+        ->get()
+        ->map(function($provision) {
+            return [
+                'provision_id'   => $provision->id,
+                'inventory_id'   => $provision->inventory->id,
+                'inventory_name' => $provision->inventory->name,
+                'total_count'    => $provision->count,
+                'stocks'         => $provision->items->map(fn($detail) => [
+                    'detail_id'         => $detail->id,
+                    'stock_id'          => $detail->item->id,
+                    'unique_identifier' => $detail->item->unique_identifier,
+                    'status'            => $detail->item->status,
+                    'provision_status'  => $detail->status,
+                    'reserved_at'       => $detail->created_at,
+                ])->values(),
+            ];
+        });
+
+      return response()->json([
+    'boarder' => [
+        'id'        => $tenantRequest->boarder->id,
+        'name'      => "{$tenantRequest->boarder->fname} {$tenantRequest->boarder->lname}",
+        'room'      => $tenantRequest->dormitory_room?->room_name ?? 'No room assigned',
+        'dormitory' => $tenantRequest->dormitory_room?->dormitory?->room_name ?? 'No dormitory assigned',
+        'status'    => $tenantRequest->tenant_status,
+    ],
+    'provisions' => $provisions,
+], 200);
+    });
+}
+
+
 }
