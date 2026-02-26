@@ -1314,23 +1314,16 @@ class DormitoryController extends Controller
         return TransactionUtil::transact($request, [], function() use ($request) {
             $charge = new DormitoryInvoice();
 
-            $descriptionHtml = $this->addDescription(
-           "<div style='display: flex; align-items: center; justify-content: space-between;'>
-                    <div style='color: #6c757d;'>$request->details</div>
-                    <div>₱" . number_format((float) $request->charge) . "</div>
-                </div>"
-            );
-
             $charge->user_id = $request->userId;
             $charge->dormitory_tenant_id = $request->tenantId;
             $charge->dormitory_room_id = $request->roomId;
             $charge->charge_id = $request->charge;
             $charge->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
             $charge->invoice_amount = $request->amount;
-            $charge->description = $descriptionHtml;
+            $charge->description = $request->details;
             $charge->isInitial = "N";
             $charge->remarks = $request->remarks ?? '';
-            if($request->charge <= 0) $charge->status = DormitoryEnum::PAID->value;
+            if($request->status) $charge->status = DormitoryEnum::PAID->value;
             $charge->save();
 
             AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYCHARGE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID#" . $charge->id);
