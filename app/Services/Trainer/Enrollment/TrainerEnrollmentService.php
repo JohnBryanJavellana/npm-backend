@@ -2,7 +2,8 @@
 
 namespace App\Services\Trainer\Enrollment;
 
-use App\Models\{CourseModule, Training, TrainingFacilitator};
+use App\Enums\RequestStatus;
+use App\Models\{CourseModule, EnrolledCourse, Training, TrainingFacilitator};
 use Illuminate\Support\Facades\Auth;
 
 class TrainerEnrollmentService
