@@ -37,6 +37,8 @@ class RegisterController extends Controller
 {
     public function register_user(Request $request){
         return DB::transaction(function () use ($request) {
+            \Log::info($request->all());
+
             if($request->token) {
                 $socialUser = Socialite::driver($request->provider)->stateless()->userFromToken($request->token);
                 $socialData = $socialUser->getRaw();
