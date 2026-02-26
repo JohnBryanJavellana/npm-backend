@@ -113,7 +113,6 @@ class TraineeLibrary extends Controller
             $user_id = $request->user()->id;
             $cache_key = "user_id:$user_id:status:$status";
             $this->library_service->updateOverDue($user_id);
-
             \Log::info("CACHE: ", [Cache::has($cache_key), $cache_key]);
 
             $records = Cache::remember($cache_key, $this->ttl, function () use ($user_id, $status) {
@@ -212,7 +211,6 @@ class TraineeLibrary extends Controller
     /** GET AVAILABLE BOOKS FOR EXTENSION */
     public function view_available_extension(Request $request)
     {
-        \Log::info("data_view_available_extension", [$request->all(), $request->user()->id]);
         try {
             $userId = $request->user()->id;
             $traceNum = $request->traceNumber;

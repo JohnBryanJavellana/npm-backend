@@ -13,6 +13,7 @@ use App\Models\{
 use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
+use App\Utils\SaveFile;
 use Illuminate\Support\Facades\DB;
 use DomainException;
 
@@ -71,7 +72,6 @@ class DormitoryRequestService {
 
             $data = [
                 "user_id" => $userId,
-                // "room_for_type" => $validated["forType"],
                 "dormitory_room_id" => $validated["room_id"] ?? null,
                 "trace_number" => GenerateTrace::createTraceNumber($this->tenantModel, self::PREFIX),
                 "is_air_conditioned" => $validated["is_air_conditioned"],
@@ -81,9 +81,9 @@ class DormitoryRequestService {
                 "purpose" => $validated["purpose"],
             ];
 
-            // if($validated["forType"] === $this->tenantModel::COUPLE) {
-            //     $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document');
-            // }
+            if(isset($validated["file"])) {
+                $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document') ?? null;
+            }
 
             $record = $this->tenantModel->create($data);
 
@@ -151,8 +151,9 @@ class DormitoryRequestService {
     }
 
     private function validateData($userId) {
-        $existing_request = $this->tenantModel
-        ->where(['user_id' => $userId, 'tenant_status' => RequestStatus::PENDING])
+        $existing_request = $this->tenantModel->query()
+        ->forUser($userId)
+        ->active()
         ->exists();
 
         if ($existing_request) {

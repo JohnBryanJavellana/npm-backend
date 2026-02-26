@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class DormitoryTenant extends Model {
@@ -67,5 +69,10 @@ class DormitoryTenant extends Model {
     public function scopeForStatus($query, array $status)
     {
         return $query->whereIn("tenant_status", $status);
+    }
+
+    public function scopeActive(Builder $query)
+    {
+        return $query->whereIn("tenant_status", RequestStatus::ActiveDomitoryRequests());
     }
 }
