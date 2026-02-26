@@ -40,7 +40,10 @@ use Illuminate\Support\Facades\{
     Hash
 };
 
-use App\Enums\AdministratorAuditActions;
+use App\Enums\{
+    AdministratorAuditActions,
+    AdministratorReturnResponse
+};
 
 class Account extends Controller
 {
@@ -93,7 +96,9 @@ class Account extends Controller
 
     /**
      * Summary of update_personal
-     * @param UpdatePersonal $request 🤪
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
+     * @param UpdatePersonal $request
      */
     public function update_personal(UpdatePersonal $request) {
         return TransactionUtil::transact($request, ['user_profile_' . $request->user()->id], function() use ($request) {
@@ -129,7 +134,7 @@ class Account extends Controller
             $user->email = $request->email;
             $user->save();
 
-            AuditHelper::log($request->user()->id, AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PERSONAL);
+            AuditHelper::log($request->user()->id, AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PERSONAL->value);
 
             if(env('USE_EVENT')) {
                 event(
@@ -139,7 +144,7 @@ class Account extends Controller
             }
 
             return response()->json([
-                'message' => "Account personal information is updated.",
+                'message' => AdministratorReturnResponse::ACCOUNTCTRL_UPDATE_PERSONAL->value,
                 'reloggin' => $reloggin
             ], 200);
         });
@@ -147,6 +152,9 @@ class Account extends Controller
 
     /**
      * Summary of update_password
+     * @param bool auditActions === TRUE
+     * ....
+     * @param bool returnedMessage === TRUE
      * @param UpdatePassword $request
      */
     public function update_password(UpdatePassword $request){
@@ -161,7 +169,7 @@ class Account extends Controller
             $user->isSocial = UserDetailsEnum::HARD_ACCOUNT;
             $user->save();
 
-            AuditHelper::log($request->user()->id, AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PASSWORD);
+            AuditHelper::log($request->user()->id, AdministratorAuditActions::ACCOUNTCTRL_UPDATE_PASSWORD->value);
 
             if(env('USE_EVENT')) {
                 event(
@@ -171,7 +179,7 @@ class Account extends Controller
             }
 
             return response()->json([
-                'message' => 'Password changed successfully. You will reloggin again.',
+                'message' => AdministratorReturnResponse::ACCOUNTCTRL_UPDATE_PASSWORD->value,
                 'reloggin' => true
             ], 200);
         });

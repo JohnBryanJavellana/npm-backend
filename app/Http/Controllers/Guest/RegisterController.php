@@ -85,7 +85,8 @@ class RegisterController extends Controller
                     return response()->json([
                         'token' => $token,
                         'role' => $user->role,
-                        'autoLogin' => true
+                        'autoLogin' => true,
+                        'showEmailVerification' => false
                     ], 200);
 
                 } catch (\Exception $e) {
@@ -94,7 +95,7 @@ class RegisterController extends Controller
                 }
             }
 
-            if (User::where('email', $request->email)->exists() ||
+            if (($request->email && User::where('email', $request->email)->exists()) ||
                 User::where([
                     'fname' => $fname,
                     'mname' => $mname,
@@ -106,21 +107,23 @@ class RegisterController extends Controller
                 return response()->json(['message' => 'Account already exists.'], 422);
             }
 
+            if($request->password && ($request->password !== $request->password_confirmation)) {
+                return response()->json(['message' => "Password doesn't match"], 422);
+            }
+
             $user = new User();
             $user->id = $this->generateCustomId();
             $user->fname = $fname;
             $user->mname = $mname;
             $user->lname = $lname;
-            $user->email = $request->email;
-            $user->password = bcrypt($request->password);
+            $user->email = $request?->email;
+            $user->password = $request->password ? bcrypt($request->password) : null;
             $user->isSocial = UserDetailsEnum::HARD_ACCOUNT;
             $user->birthdate = $request->birthdate;
             $user->role = $request->role ?? UserRoleEnum::TRAINEE;
             $filename = "{$user->id}.png";
             $user->qr = $filename;
             $user->save();
-
-            $this->generateAndSendQR($user, $filename);
 
             if($request->adminSettings) {
                 AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? 'Created' : 'Updated') . " a user account. ID#" . $user->id);
@@ -133,8 +136,12 @@ class RegisterController extends Controller
                 }
             }
 
-            event(new Registered($user));
-            return response()->json(['message' => 'Registration successful!'], 201);
+            if($request->email) {
+                $this->generateAndSendQR($user, $filename);
+                event(new Registered($user));
+            }
+
+            return response()->json([ 'message' => 'Registration successful!', 'showEmailVerification' => true ], 201);
         });
     }
 
@@ -149,13 +156,9 @@ class RegisterController extends Controller
 
         (new GenerateQR())->generate($filename, $user->id, $user->id, "qr/user/");
         SendingEmail::dispatch($user, new WelcomeAboard(['image_path' => $qrPath]));
-
-        return $filename;
     }
 
     protected function processAvatar($avatarUrl, $filename, $isBase64 = false) {
-        $filename = Str::uuid() . '.png';
         SaveAvatar::dispatch($avatarUrl, $filename, "user_images/", true, $isBase64);
-        return $filename;
     }
 }

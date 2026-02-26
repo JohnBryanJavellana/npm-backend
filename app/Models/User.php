@@ -53,31 +53,38 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function additional_trainee_info() {
+    public function additional_trainee_info()
+    {
         return $this->hasOne(AdditionalTraineeInfo::class, 'user_id', 'id');
     }
 
-    public function trainee_dormitory()  {
+    public function trainee_dormitory()
+    {
         return $this->hasMany(DormitoryTenant::class, 'user_id', 'id');
     }
 
-    public function trainee_enrolled_courses() {
+    public function trainee_enrolled_courses()
+    {
         return $this->hasMany(EnrolledCourse::class);
     }
 
-    public function latest_trainee_enrolled_courses() {
+    public function latest_trainee_enrolled_courses()
+    {
         return $this->hasOne(EnrolledCourse::class)->where('enrolled_course_status', 'ENROLLED')->latestOfMany('training_schedule_id');
     }
 
-    public function hasData () {
+    public function hasData()
+    {
         return $this->hasMany(AuditTrail::class);
     }
 
-    public function creditAmount () {
+    public function creditAmount()
+    {
         return $this->hasMany(Credit::class);
     }
 
-    public function trainee_enrolled_invoices() {
+    public function trainee_enrolled_invoices()
+    {
         return $this->hasManyThrough(
             EnrollmentInvoice::class,
             EnrolledCourse::class,
@@ -86,13 +93,23 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
-    public function trainee_dormitory_invoices() {
+    public function trainee_dormitory_invoices()
+    {
         return $this->hasManyThrough(
             DormitoryInvoice::class,
             DormitoryTenant::class,
             'user_id',
             'user_id',
         );
+    }
+    
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'user_id', 'id');
+    }
+    public function attendance_records()
+    {
+        return $this->hasMany(AttendanceRecord::class, 'user_id', 'id');
     }
 
     public function scopeForUser($query, $user_id)

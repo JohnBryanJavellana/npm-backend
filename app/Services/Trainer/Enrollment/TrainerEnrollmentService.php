@@ -9,9 +9,28 @@ class TrainerEnrollmentService
 {
     public function __construct(
         protected TrainingFacilitator $trainingFacilitatorModel,
+        protected EnrolledCourse $enrolledCourseModel,
         protected CourseModule $courseModuleModel,
         protected Training $trainingModel
     ) {}
+
+    public function getAllTrainingsAndFacilitators()
+    {
+        return $this->trainingModel->query()
+        ->with([
+            "module",
+            "module.facilitator.facilitator"
+        ])
+        ->get();
+    }
+
+    public function getTrainees($trainingId)
+    {
+        return $this->enrolledCourseModel->query()
+        ->whereIn("enrolled_course_status", RequestStatus::ActiveEnrollmentStatus())
+        ->forTraining($trainingId)
+        ->first();
+    }
 
     public function getDataFacilitator()
     {
@@ -20,6 +39,7 @@ class TrainerEnrollmentService
             ->whereRelation("facilitator", "user_id", $userId)
             ->get();
     }
+
 
     public function getTrainingSchedules($course_module_id)
     {

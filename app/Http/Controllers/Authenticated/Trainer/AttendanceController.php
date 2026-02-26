@@ -4,105 +4,101 @@ namespace App\Http\Controllers\Authenticated\Trainer;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\{User, Attendance, TransactionUtil, QrReaderLocation};
+use App\Models\{User, Attendance, AttendanceRecord, QrReaderLocation};
 use Illuminate\Http\Request;
-use App\Models\QrReaderEnum;
-use App\Models\UserAssignedQrLocation;
-
 use function Symfony\Component\String\u;
 
 class AttendanceController extends Controller
 {
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Returns all attendance records.
+ *
+ * @return \Illuminate\Database\Eloquent\Collection
+ */
+/*******  1ea9a542-a8a0-4d6e-897d-2eeaf4f86ff9  *******/
     public function test()
     {
         return Attendance::all();
     }
 
-    // public function qrReader(Request $request)
-    // {
-    //     return User::transact(null, [], function () {
-    //         $locations = QRReaderLocation::all();
-    //         return response()->json(['locations' => $locations], 200);
-    //     });
-    // }
 
-    // private function supplyDateTime($dateToday, $checkInOrOut, $model, $column)
-    // {
-    //     if (\in_array($checkInOrOut, [UserAssignedQrLocation::TIME_IN->value, UserAssignedQrLocation::TIME_OUT->value])) {
-    //         return $model->{$column} = $dateToday;
-    //     } else {
-    //         return response()->json(['message' => "We are sorry. It seems that the data provided is not valid."], 409);
-    //     }
-    // }
-
-
-    // public function get_log_in_out_records(Request $request)
-    // {
-    //     return TransactionUtil::transact(null, [], function () use ($request) {
-    //         $userRole = $request->user()->role;
-
-    //         if ($userRole !== UserRoleEnum::SUPERADMIN->value && $request->type) {
-    //             $check = UserAssignedQrLocation::where('user_id', $request->user()->id)
-    //                 ->with('qrLocation')
-    //                 ->first();
-
-    //             if ($check->qrLocation->whereNotIn('type', $request->type)) {
-    //                 return response()->json(['message' => "We are sorry. You do not have enough permission to view records for " . implode(', ', $request->type)], 409);
-    //             }
-    //         }
-
-    //         $records_temp = CheckInOutLog::with([
-    //             'initiator',
-    //             'qrLocation'
-    //         ])->orderBy('created_at', 'DESC');
-
-    //         $records = $request->type
-    //             ? $records_temp->whereHas('qrLocation', function($query) use($request) {
-    //                 $query->whereIn('type', $request->type);
-    //             })->get()
-    //             : $records_temp->get();
-
-    //         return response()->json(['records' => $records], 200);
-    //     });
-    // }
-
-    public function trainee_attendance(Request $request)
+    public function scanQr(Request $request)
     {
+        $request->validate([
+            'user_id' => 'required',
+            'training_id' => 'required'
+        ]);
+        $user = User::where('student_id', $request->user_id)
+            ->where('role', 'TRAINEE')
+            ->first();
 
+        if (!$user) {
+            return response()->json([
+                'message' => 'Invalid QR Code'
+            ], 404);
+        }
+        $attendance = Attendance::where('training_id', $request->training_id)
+            ->whereDate('training_date', now()->toDateString())
+            ->first();
+        if (!$attendance) {
+            return response()->json([
+                'message' => 'No training scheduled today'
+            ], 404);
+        }
 
+        $record = AttendanceRecord::where('attendance_id', $attendance->id)
+            ->where('user_id', $user->id)
+            ->first();
 
-        //     $sessions = Training::all();
+        if (!$record) {
+            AttendanceRecord::create([
+                'attendance_id' => $attendance->id,
+                'user_id' => $user->id,
+                'status' => 'PRESENT',
+                'time_in' => now(),
+            ]);
 
-        //     $data = [];
+            return response()->json([
+                'message' => 'Time In recorded',
+                'type' => 'TIME_IN'
+            ]);
+        }
 
-        //     foreach ($sessions as $session) {
+        if (!$record->time_out) {
+            $record->update([
+                'time_out' => now()
+            ]);
 
+            return response()->json([
+                'message' => 'Time Out recorded',
+                'type' => 'TIME_OUT'
+            ]);
+        }
 
-        //         $totalTrainees = User::where('role', 'TRAINEE')
-        //             ->where('training_id', $session->id)
-        //             ->count();
+        return response()->json([
+            'message' => 'Attendance already completed today'
+        ], 400);
+    }
 
+    public function attendance_list_trainee(Request $request)
+    {
+        try {
+            $record = User::with([
+                'module.attendances',
+                'module.attendance_records'
+            ])
+                ->where('id', $request->user_id)
+                ->get();
 
-        //         $presentCount = EnrolledCourse::where('training_id', $session->id)
-        //             ->whereNotNull('check_in')
-        //             ->count();
-
-        //         $absentCount = $totalTrainees - $presentCount;
-
-        //         $attendanceRate = $totalTrainees > 0
-        //             ? round(($presentCount / $totalTrainees) * 100, 2)
-        //             : 0;
-
-        //         $data[] = [
-        //             "session_id" => $session->id,
-        //             "date" => $session->date,
-        //             "total_trainees" => $totalTrainees,
-        //             "present_count" => $presentCount,
-        //             "absent_count" => $absentCount,
-        //             "attendance_rate" => $attendanceRate,
-        //         ];
-        //     }
-
-        //     return response()->json($data, 200);
+            return response()->json([
+                "trainee" => $record,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "message" => "Server Error",
+                "error" => $e->getMessage()
+            ], 500);
+        }
     }
 }

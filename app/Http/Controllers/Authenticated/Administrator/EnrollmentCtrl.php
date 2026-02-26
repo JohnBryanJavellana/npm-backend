@@ -3,7 +3,13 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
-use App\Enums\Administrator\EnrollmentEnum;
+use App\Enums\Administrator\{
+    EnrollmentEnum
+};
+use App\Enums\{
+    AdministratorAuditActions,
+    AdministratorReturnResponse
+};
 use App\Enums\NotificationEnum;
 use App\Events\{
     BEAuditTrail,
@@ -22,6 +28,7 @@ use App\Http\Requests\Admin\Enrollment\{
     CreateOrUpdateSchedule,
     CreateOrUpdateSchool,
     CreateOrUpdateSponsor,
+    MoveTrainees,
     CreateOrUpdateVoucher
 };
 use App\Models\{
@@ -56,15 +63,16 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
+use App\Helpers\Administrator\General\CountCollection;
 
 class EnrollmentCtrl extends Controller
 {
     /**
      * Summary of get_applications
+     * @param Request $request
      */
     public function get_applications(Request $request)
     {
-
         return TransactionUtil::transact(null, [], function () use ($request) {
             $allRequirements = Requirement::where('status', 'ACTIVE')->get();
             $basicRequirements = $allRequirements->where('isBasic', 'YES');
@@ -109,7 +117,7 @@ class EnrollmentCtrl extends Controller
                     'training' => [
                         'main' => [
                             'info' => $self->toArray(),
-                            'charge' => $self->training->module->trainingFees()->latest()->first()->toArray(),
+                            'charge' => $self->training->module->trainingFees()->latest()->first(),
                             'name' => [
                                 'module' => $self->training->module,
                                 'moduleType' => $self->training->module->moduleType,
@@ -162,10 +170,14 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of requirement_remark
+     * @param Request $request
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
      */
     public function requirement_remark(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
+            $isPost = $request->httpMethod == 'POST';
             $this_remark = $request->isBasic === EnrollmentEnum::BASIC_REQUIREMENT->value
                 ? TrainingRegFile::findOrFail($request->documentId)
                 : TraineeRequirement::findOrFail($request->documentId);
@@ -174,7 +186,10 @@ class EnrollmentCtrl extends Controller
             $this_remark->locked = EnrollmentEnum::UNVERIFIED_REQUIREMENT;
             $this_remark->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod == 'POST' ? 'Created' : 'Updated') . ' a remark. ID# ' . $this_remark->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENTSREMARK->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREMENTSREMARK->value . " ID#$this_remark->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -183,7 +198,7 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod == 'POST' ? 'created' : 'updated') . ' a remark. ID# ' . $this_remark->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENTSREMARK->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREMENT->value). "ID# " . $this_remark->id], 201);
         });
     }
 
@@ -194,49 +209,29 @@ class EnrollmentCtrl extends Controller
     public function get_enrollment_count(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-            $couse_status = [
-                'PENDING',
-                'RESERVED',
-                'ENROLLED',
-                'COMPLETED',
-                'CANCELLED',
-                'PAID',
-                'DECLINED',
-                'FOR-PAYMENT',
-                'IR',
-                'CSFB',
-                'PROCESSING PAYMENT'
-            ];
+            return TransactionUtil::transact(null, [], function() use ($request) {
+                $reservations = EnrolledCourse::query();
 
-            $counts = EnrolledCourse::whereIn('enrolled_course_status', $couse_status)
-                ->selectRaw('enrolled_course_status, COUNT(*) as total')
-                ->groupBy('enrolled_course_status')
-                ->pluck('total', 'enrolled_course_status');
+                $count = [
+                    'total' => CountCollection::startCount($reservations),
+                    'count_forVerification' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::RESERVED)),
+                    'count_forEnrolled' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::ENROLLED)),
+                    'count_forFinished' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::COMPLETED)),
+                    'count_forPaid' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PAID)),
+                    'count_forProcessPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::PROCESSING_PAYMENT)),
+                    'count_forPayment' => CountCollection::startCount($reservations->clone()->where('enrolled_course_status', EnrollmentEnum::FOR_PAYMENT)),
+                    'count_denied' => CountCollection::startCount($reservations->clone()->whereIn('enrolled_course_status', [EnrollmentEnum::CANCELLED, EnrollmentEnum::DECLINED, EnrollmentEnum::COURSE_STATUS_FULLY_BOOKED, EnrollmentEnum::INCOMPLETE_REQUIREMENTS])),
+                    'count_remarks' => CountCollection::startCount(collect(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications'])),
+                ];
 
-
-
-            return response()->json([
-                'count_forVerification'  => min($counts['RESERVED'] ?? 0, 99, "99+"),
-                'count_forEnrolled'  => min($counts['ENROLLED'] ?? 0, 99, "99+"),
-                'count_forFinished'  => min($counts['COMPLETED'] ?? 0, 99, "99+"),
-                'count_forPaid'  => min($counts['PAID'] ?? 0, 99, "99+"),
-                'count_forProcessPayment' => min($counts['PROCESSING PAYMENT'] ?? 0, 99, "99+"),
-                'count_forPayment' => min($counts['FOR-PAYMENT'] ?? 0, 99, "99+"),
-                'count_denied' => min($counts['DECLINED'] ?? 0, 99) +
-                    min($counts['CSFB'] ?? 0, 99) +
-                    min($counts['CANCELLED'] ?? 0, 99) +
-                    min($counts['IR'] ?? 0, 99),
-                'count_remarks' => \count(json_decode($this->get_applications($request->merge(['onlyWithRemarks' => true]))->getContent(), true)['applications']),
-
-
-
-            ], 200);
+                return response()->json(['applicationCount' => $count], 200);
+            });
         });
     }
 
-
     /**
      * Summary of lock_requirement
+     * @param Request $request
      */
     public function lock_requirement(Request $request)
     {
@@ -259,6 +254,10 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of set_training_status
+     * @param Request $request
+     * @param bool notifications === FALSE
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
      */
     public function set_training_status(Request $request)
     {
@@ -277,7 +276,10 @@ class EnrollmentCtrl extends Controller
             }
 
             Notifications::notify($request->user()->id, $this_training_status->user_id, NotificationEnum::DORMITORY, 'updated your enrollment application status.');
-            AuditHelper::log($request->user()->id, 'Updated enrollment application status. ID#' . $this_training_status->id);
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGSTATUS->value.  "ID#$this_training_status->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -286,14 +288,15 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've Updated enrollment application status. ID#" . $this_training_status->id], 201);
+            return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGSTATUS->value. "ID#" . $this_training_status->id], 201);
         });
     }
 
     /**
      * Summary of set_expired_status
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @param bool auditActions === FALSE
+     * @param bool returnedMessage === FALSE
      */
     public function set_expired_status(Request $request)
     {
@@ -303,18 +306,19 @@ class EnrollmentCtrl extends Controller
             $this_training->isExpired = $request->isExpired;
             $this_training->save();
 
-            AuditHelper::log($request->user()->id, 'User has updated an enrolled course expiry status. ID# ' . $this_training->id);
+            AuditHelper::log($request->user()->id, AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTEXPIREDSTATUS->value. ' ID# ' . $this_training->id);
 
             if (env('USE_EVENT')) {
                 event(new BETraineeApplication(''));
             }
 
-            return response()->json(['message' => "You've updated an enrolled course expiry status. ID# " . $this_training->id], 201);
+            return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTEXPIREDSTATUS->value. "ID# " . $this_training->id], 201);
         });
     }
 
     /**
      * Summary of get_schedules
+     * @param Request $request
      */
     public function get_schedules(Request $request)
     {
@@ -335,15 +339,19 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_schedule
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateSchedule $request
      */
     public function create_or_update_schedule(CreateOrUpdateSchedule $request)
     {
         return TransactionUtil::transact($request, ['schedules_cache'], function () use ($request) {
-            $this_schedule = $request->httpMethod === 'POST'
+            $isPost = $request->httpMethod === 'POST';
+            $this_schedule = $isPost
                 ? new Training()
                 : Training::findOrFail($request->documentId);
 
-            $this_schedule->id = $request->httpMethod === 'POST'
+            $this_schedule->id = $isPost
                 ? Carbon::now()->year . str_pad((int) substr(Training::max('id'), 4) + 1, 4, 0, STR_PAD_LEFT)
                 : $request->documentId;
 
@@ -361,7 +369,10 @@ class EnrollmentCtrl extends Controller
             }
             $this_schedule->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a schedule. ID#' . $this_schedule->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHED->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHED->value . " ID#$this_schedule->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -370,12 +381,16 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a schedule. ID# ' . $this_schedule->id], 200);
+            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHED->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHED->value) . 'ID# ' . $this_schedule->id], 200);
         });
     }
 
     /**
      * Summary of remove_schedule
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $schedule_id
      */
     public function remove_schedule(Request $request, int $schedule_id)
     {
@@ -383,10 +398,13 @@ class EnrollmentCtrl extends Controller
             $this_schedule = Training::withCount(['hasData'])->where('id', $schedule_id)->first();
 
             if ($this_schedule->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove module. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTSCHED->value], 409);
             } else {
                 $this_schedule->delete();
-                AuditHelper::log($request->user()->id, "Removed a schedule. ID#$schedule_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHED->value. " ID#$schedule_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -395,33 +413,35 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed schedule. ID#$schedule_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHED->value. " ID#$schedule_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_modules
+     * @param Request $request
      */
     public function get_modules(Request $request)
     {
         return TransactionUtil::transact(null, [], function () {
             $modules = CourseModule::withCount(['hasData'])->with('moduleType')->get();
-
             return response()->json(['modules' => $modules], 200);
         });
     }
 
     /**
      * Summary of create_or_update_module
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateModule $request
      */
     public function create_or_update_module(CreateOrUpdateModule $request)
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
-            $this_module = $request->httpMethod === 'POST'
-                ? new CourseModule()
-                : CourseModule::findOrFail($request->documentId);
+            $isPost = $request->httpMethod === 'POST';
 
+            $this_module = $isPost ? new CourseModule() : CourseModule::findOrFail($request->documentId);
             $this_module->module_type_id = $request->module;
             $this_module->name = $request->name;
             $this_module->acronym = $request->short_name;
@@ -431,7 +451,10 @@ class EnrollmentCtrl extends Controller
             }
             $this_module->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a module. ID#' . $this_module->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTMODULE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTMODULE->value . " ID#$this_module->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -440,12 +463,16 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a module. ID#' . $this_module->id], 201);
+            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTMODULE->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTMODULE->value). "ID#" . $this_module->id], 201);
         });
     }
 
     /**
      * Summary of remove_module
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $module_id
      */
     public function remove_module(Request $request, int $module_id)
     {
@@ -453,10 +480,13 @@ class EnrollmentCtrl extends Controller
             $this_module = CourseModule::withCount(['hasData'])->where('id', $module_id)->first();
 
             if ($this_module->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove module. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTMODULE->value], 409);
             } else {
                 $this_module->delete();
-                AuditHelper::log($request->user()->id, "Removed a module. ID#$module_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTMODULE->value. " ID#$module_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -465,13 +495,14 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a module. ID#$module_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTMODULE->value. "ID#$module_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_module_types
+     * @param Request $request
      */
     public function get_module_types(Request $request)
     {
@@ -483,6 +514,9 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_module_type
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateModuleType $request
      */
     public function create_or_update_module_type(CreateOrUpdateModuleType $request)
     {
@@ -492,10 +526,7 @@ class EnrollmentCtrl extends Controller
 
             $check = CheckForDocumentExistence::exists(
                 ModuleType::class,
-                [
-                    'name' => $request->name,
-                    'category' => $request->category
-                ],
+                [ 'name' => $request->name ],
                 !$isPost,
                 $documentId,
                 'id',
@@ -509,7 +540,10 @@ class EnrollmentCtrl extends Controller
             if (!$isPost) $this_module_type->status = $request->status;
             $this_module_type->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a module type. ID#' . $this_module_type->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTMODULETYPE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTMODULETYPE->value . " ID#$this_module_type->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -518,12 +552,16 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a module type. ID#' . $this_module_type->id], 201);
+            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTMODULETYPE->value : AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTMODULETYPE->value). "ID#" . $this_module_type->id], 201);
         });
     }
 
     /**
      * Summary of remove_module_type
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $module_type_id
      */
     public function remove_module_type(Request $request, int $module_type_id)
     {
@@ -531,10 +569,13 @@ class EnrollmentCtrl extends Controller
             $this_module_type = ModuleType::withCount(['hasData'])->where('id', $module_type_id)->first();
 
             if ($this_module_type->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove module type. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTMODULETYPE->value], 409);
             } else {
                 $this_module_type->delete();
-                AuditHelper::log($request->user()->id, "Removed a module type. ID#$module_type_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTMODULETYPE->value . " ID#$module_type_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -543,13 +584,14 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed module type. ID#$module_type_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTMODULETYPE->value. "ID#$module_type_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_certificates
+     * @param Request $request
      */
     public function get_certificates(Request $request)
     {
@@ -566,14 +608,16 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_certificate
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateCertificate $request
      */
     public function create_or_update_certificate(CreateOrUpdateCertificate $request)
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
-            $this_certificate = $request->httpMethod === 'POST'
-                ? new MainCertificate()
-                : MainCertificate::findOrFail($request->documentId);
+            $isPost = $request->httpMethod === 'POST';
 
+            $this_certificate = $isPost ? new MainCertificate() : MainCertificate::findOrFail($request->documentId);
             $this_certificate->course_module_id = $request->module;
             $this_certificate->name = $request->name;
             $this_certificate->header = $request->header;
@@ -582,7 +626,10 @@ class EnrollmentCtrl extends Controller
             $this_certificate->body = $request->body;
             $this_certificate->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a certificate. ID#' . $this_certificate->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTCERT->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTCERT->value . " ID#$this_certificate->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -591,12 +638,16 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a certificate. ID#' . $this_certificate->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTCERT->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTCERT->value). "ID#" . $this_certificate->id], 201);
         });
     }
 
     /**
      * Summary of remove_certificate
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $certificate_id
      */
     public function remove_certificate(Request $request, int $certificate_id)
     {
@@ -608,10 +659,13 @@ class EnrollmentCtrl extends Controller
             }])->where('id', $certificate_id)->first();
 
             if ($this_certificate->module_count > 0) {
-                return response()->json(['message' => "Can't remove certificate. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTCERT->value ], 409);
             } else {
                 $this_certificate->delete();
-                AuditHelper::log($request->user()->id, "Removed a certificate. ID#$certificate_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTCERT->value. " ID#$certificate_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -620,13 +674,14 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a certificate. ID#$certificate_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTCERT->value. "ID#$certificate_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_requirements
+     * @param Request $request
      */
     public function get_requirements(Request $request)
     {
@@ -643,14 +698,16 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_requirement
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateRequirement $request
      */
     public function create_or_update_requirement(CreateOrUpdateRequirement $request)
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
-            $this_requirement = $request->httpMethod === 'POST'
-                ? new Requirement()
-                : Requirement::findOrFail($request->documentId);
+            $isPost = $request->httpMethod === 'POST';
 
+            $this_requirement = $isPost ? new Requirement() : Requirement::findOrFail($request->documentId);
             $this_requirement->name = $request->name;
             $this_requirement->description = $request->description;
             $this_requirement->isRequired = $request->requiredStatus;
@@ -660,7 +717,7 @@ class EnrollmentCtrl extends Controller
             }
 
             if ($request->upload_reference) {
-                if (!is_null($this_requirement->upload_reference) && file_exists(public_path('upload-reference/' . $this_requirement->upload_reference))) {
+                if ($this_requirement->upload_reference !== null && file_exists(public_path('upload-reference/' . $this_requirement->upload_reference))) {
                     unlink(public_path('upload-reference/' . $this_requirement->upload_reference));
                 }
 
@@ -688,7 +745,10 @@ class EnrollmentCtrl extends Controller
                 }
             }
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a requirement. ID#' . $this_requirement->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENT->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREMENT->value . " ID#$this_requirement->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -697,12 +757,14 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a requirement. ID#' . $this_requirement->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENT->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREMENT->value). " ID# " . $this_requirement->id], 201);
         });
     }
 
     /**
      * Summary of remove_requirement
+     * @param Request $request
+     * @param int $requirement_id
      */
     public function remove_requirement(Request $request, int $requirement_id)
     {
@@ -710,10 +772,14 @@ class EnrollmentCtrl extends Controller
             $this_requirement = Requirement::withCount(['hasData', 'trainee_file'])->where('id', $requirement_id)->first();
 
             if ($this_requirement->has_data_count > 0 || $this_requirement->trainee_file_count > 0 || $this_requirement->for_modules_count > 0) {
-                return response()->json(['message' => "Can't remove requirement. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTREQUIREMENT->value], 409);
             } else {
                 $this_requirement->delete();
-                AuditHelper::log($request->user()->id, "Removed a requirement. ID#$requirement_id");
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTREQUIREMENT->value. " ID#$requirement_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -722,13 +788,14 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed requirement. ID#$requirement_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTREQUIREMENT->value. " ID#$requirement_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_schools
+     * @param Request $request
      */
     public function get_schools(Request $request)
     {
@@ -740,6 +807,9 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_school
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateSchool $request
      */
     public function create_or_update_school(CreateOrUpdateSchool $request)
     {
@@ -767,7 +837,10 @@ class EnrollmentCtrl extends Controller
             if (!$isPost) $this_school->school_status = $request->status;
             $this_school->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a school. ID#' . $this_school->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHL->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHL->value . " ID#$this_school->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -776,12 +849,14 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a school. ID#' . $this_school->id], 200);
+            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHL->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHL->value). "ID#" . $this_school->id], 200);
         });
     }
 
     /**
      * Summary of remove_school
+     * @param Request $request
+     * @param int $school_id
      */
     public function remove_school(Request $request, int $school_id)
     {
@@ -789,11 +864,14 @@ class EnrollmentCtrl extends Controller
             $this_school = MainSchool::withCount(['hasData'])->where('id', $school_id)->first();
 
             if ($this_school->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove school. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTSCHL->value], 409);
             } else {
                 $this_school->delete();
 
-                AuditHelper::log($request->user()->id, "Removed a school. ID#$school_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHL->value. " ID#$school_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -802,13 +880,14 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a school. ID#$school_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHL->value. "ID#$school_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_courses
+     * @param Request $request
      */
     public function get_courses(Request $request)
     {
@@ -820,6 +899,9 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_course
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateCourse $request
      */
     public function create_or_update_course(CreateOrUpdateCourse $request)
     {
@@ -843,7 +925,10 @@ class EnrollmentCtrl extends Controller
             if (!$isPost) $this_course->course_status = $request->status;
             $this_course->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a course. ID#' . $this_course->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTCOURSE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTCOURSE->value . " ID#$this_course->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -852,12 +937,16 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a course. ID#' . $this_course->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTCOURSE->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTCOURSE->value)." ID#" . $this_course->id], 201);
         });
     }
 
     /**
      * Summary of remove_course
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $course_id
      */
     public function remove_course(Request $request, int $course_id)
     {
@@ -865,10 +954,14 @@ class EnrollmentCtrl extends Controller
             $this_course = MainCourse::withCount(['hasData'])->where('id', $course_id)->first();
 
             if ($this_course->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove course. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTCOURSE->value], 409);
             } else {
                 $this_course->delete();
-                AuditHelper::log($request->user()->id, "Removed a course. ID#$course_id");
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTCOURSE->value . " ID#$course_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -877,13 +970,14 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed course. ID#$course_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTCOURSE->value. " ID#$course_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_vouchers
+     * @param Request $request
      */
     public function get_vouchers(Request $request)
     {
@@ -895,6 +989,9 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_voucher
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateVoucher $request
      */
     public function create_or_update_voucher(CreateOrUpdateVoucher $request)
     {
@@ -922,7 +1019,10 @@ class EnrollmentCtrl extends Controller
             if (!$isPost) $this_voucher->status = $request->status;
             $this_voucher->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a voucher. ID#' . $this_voucher->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTVOUCHER->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTVOUCHER->value. "ID#$this_voucher->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -931,12 +1031,16 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a voucher. ID#' . $this_voucher->id], 201);
+            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTVOUCHER->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTVOUCHER->value). ' ID#' . $this_voucher->id], 201);
         });
     }
 
     /**
      * Summary of remove_voucher
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $voucher_id
      */
     public function remove_voucher(Request $request, int $voucher_id)
     {
@@ -944,10 +1048,13 @@ class EnrollmentCtrl extends Controller
             $this_voucher = Voucher::where('id', $voucher_id)->first();
 
             if ($this_voucher->has_data_count > 0 && $this_voucher->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove voucher. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTCOURSE->value], 409);
             } else {
                 $this_voucher->delete();
-                AuditHelper::log($request->user()->id, "Removed a voucher. ID#$voucher_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTVOUCHER->value . " ID#$voucher_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -956,13 +1063,14 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed voucher. ID#$voucher_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTCOURSE->value. "ID#$voucher_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_sponsors
+     * @param Request $request
      */
     public function get_sponsors(Request $request)
     {
@@ -974,6 +1082,9 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_sponsor
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateSponsor $request
      */
     public function create_or_update_sponsor(CreateOrUpdateSponsor $request)
     {
@@ -1001,7 +1112,10 @@ class EnrollmentCtrl extends Controller
             if (!$isPost) $this_sponsor->status = $request->status;
             $this_sponsor->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a sponsor. ID#' . $this_sponsor->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSPONSOR->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSPONSOR->value . " ID#$this_sponsor->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -1010,23 +1124,30 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a sponsor. ID#' . $this_sponsor->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTSPONSOR->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTSPONSOR->value). 'ID#' . $this_sponsor->id], 201);
         });
     }
 
     /**
      * Summary of remove_sponsor
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $sponsor_id
      */
     public function remove_sponsor(Request $request, int $sponsor_id)
     {
         return TransactionUtil::transact(null, [], function () use ($request, $sponsor_id) {
             $this_sponsor = Sponsor::where('id', $sponsor_id)->first();
 
-            if (! $this_sponsor) {
-                return response()->json(['message' => "Can't remove sponsor. It already has connected data."], 409);
+            if (!$this_sponsor) {
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTSPONSOR->value], 409);
             } else {
                 $this_sponsor->delete();
-                AuditHelper::log($request->user()->id, "Removed a sponsor. ID#$sponsor_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSPONSOR->value. " ID#$sponsor_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -1035,7 +1156,7 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed a sponsor. ID#$sponsor_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTSPONSOR->value. "ID#$sponsor_id"], 200);
             }
         });
     }
@@ -1054,6 +1175,9 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_license
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateLicense $request
      */
     public function create_or_update_license(CreateOrUpdateLicense $request)
     {
@@ -1080,7 +1204,10 @@ class EnrollmentCtrl extends Controller
             $this_license->license = $request->license;
             $this_license->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a license. ID#' . $this_license->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTLICENSE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTLICENSE->value . " ID#$this_license->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -1089,12 +1216,16 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a license. ID#' . $this_license->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTLICENSE->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTLICENSE->value). 'ID#' . $this_license->id], 201);
         });
     }
 
     /**
      * Summary of remove_license
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $license_id
      */
     public function remove_license(Request $request, int $license_id)
     {
@@ -1102,10 +1233,14 @@ class EnrollmentCtrl extends Controller
             $this_license = License::withCount(['hasData'])->where('id', $license_id)->first();
 
             if ($this_license->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove license. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTLICENSE->value], 409);
             } else {
                 $this_license->delete();
-                AuditHelper::log($request->user()->id, "Removed a license. ID#$license_id");
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTLICENSE->value . " ID#$license_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -1114,13 +1249,14 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed license. ID#$license_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTLICENSE->value. "ID#$license_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_ranks
+     * @param Request $request
      */
     public function get_ranks(Request $request)
     {
@@ -1132,6 +1268,9 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_rank
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateRank $request
      */
     public function create_or_update_rank(CreateOrUpdateRank $request)
     {
@@ -1160,7 +1299,10 @@ class EnrollmentCtrl extends Controller
             $this_rank->type = $request->type;
             $this_rank->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a rank. ID#' . $this_rank->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTRANK->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTRANK->value . " ID#$this_rank->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -1169,12 +1311,16 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a rank. ID# ' . $this_rank->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTLICENSE->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTLICENSE->value). 'ID# ' . $this_rank->id], 201);
         });
     }
 
     /**
      * Summary of remove_rank
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $rank_id
      */
     public function remove_rank(Request $request, int $rank_id)
     {
@@ -1182,11 +1328,14 @@ class EnrollmentCtrl extends Controller
             $this_rank = Rank::withCount(['hasData'])->where('id', $rank_id)->first();
 
             if ($this_rank->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove rank. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTRANK->value ], 409);
             } else {
                 $this_rank->delete();
 
-                AuditHelper::log($request->user()->id, "Removed a rank. ID#$rank_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTRANK->value . " ID#$rank_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -1195,13 +1344,14 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed rank. ID#$rank_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTRANK->value. "ID#$rank_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_facilitators
+     * @param Request $request
      */
     public function get_facilitators(Request $request)
     {
@@ -1217,6 +1367,9 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_facilitator
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateFacilitator $request
      */
     public function create_or_update_facilitator(CreateOrUpdateFacilitator $request)
     {
@@ -1245,7 +1398,10 @@ class EnrollmentCtrl extends Controller
             $this_facilitator->role = $request->role;
             $this_facilitator->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a facilitator. ID#' . $this_facilitator->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTFACILITATOR->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTFACILITATOR->value . " ID#$this_facilitator->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -1254,12 +1410,16 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a facilitator. ID# ' . $this_facilitator->id], 201);
+            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTFACILITATOR->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTFACILITATOR->value). 'ID# ' . $this_facilitator->id], 201);
         });
     }
 
     /**
      * Summary of remove_facilitator
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $facilitator_id
      */
     public function remove_facilitator(Request $request, int $facilitator_id)
     {
@@ -1267,10 +1427,14 @@ class EnrollmentCtrl extends Controller
             $this_facilitator = TrainingFacilitator::withCount(['hasData'])->where('id', $facilitator_id)->first();
 
             if ($this_facilitator->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove facilitator. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTFACILITATOR->value ], 409);
             } else {
                 $this_facilitator->delete();
-                AuditHelper::log($request->user()->id, "Removed a facilitator. ID#$facilitator_id");
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTFACILITATOR->value. " ID#$facilitator_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -1279,13 +1443,14 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed facilitator. ID#$facilitator_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTFACILITATOR->value. " ID#$facilitator_id"], 200);
             }
         });
     }
 
     /**
      * Summary of get_course_module_fees
+     * @param Request $request
      */
     public function get_course_module_fees(Request $request)
     {
@@ -1301,6 +1466,7 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of get_training_fees_predata
+     * @param Request $request
      */
     public function get_training_fees_predata(Request $request)
     {
@@ -1317,6 +1483,9 @@ class EnrollmentCtrl extends Controller
 
     /**
      * Summary of create_or_update_course_fee
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
      */
     public function create_or_update_course_fee(Request $request)
     {
@@ -1348,7 +1517,10 @@ class EnrollmentCtrl extends Controller
             if (!$isPost) $this_course_fee->status = $request->status;
             $this_course_fee->save();
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === 'POST' ? 'Created' : 'Updated') . ' a training fee. ID#' . $this_course_fee->id);
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTTRAININGFEE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE->value . " ID#$this_course_fee->id"
+            );
 
             if (env('USE_EVENT')) {
                 event(
@@ -1357,12 +1529,16 @@ class EnrollmentCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === 'POST' ? 'created' : 'updated') . ' a training fee. ID# ' . $this_course_fee->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTTRAININGFEE->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE->value).'ID# ' . $this_course_fee->id], 201);
         });
     }
 
     /**
      * Summary of remove_course_fee
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param Request $request
+     * @param int $course_fee_id
      */
     public function remove_course_fee(Request $request, int $course_fee_id)
     {
@@ -1370,11 +1546,14 @@ class EnrollmentCtrl extends Controller
             $this_course_fee = CourseModuleFee::where('id', $course_fee_id)->first();
 
             if ($this_course_fee->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove training fee. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTTRAININGFEE->value], 409);
             } else {
                 $this_course_fee->delete();
 
-                AuditHelper::log($request->user()->id, "Removed a training fee. ID#$course_fee_id");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE->value. " ID#$course_fee_id"
+                );
 
                 if (env('USE_EVENT')) {
                     event(
@@ -1383,8 +1562,86 @@ class EnrollmentCtrl extends Controller
                     );
                 }
 
-                return response()->json(['message' => "You've removed training fee. ID#$course_fee_id"], 200);
+                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE->value. "ID#$course_fee_id"], 200);
             }
         });
     }
+
+    /**
+     * Summary of get_trainees_by_schedule
+     * @param Request $request
+     */
+    public function get_trainees_by_schedule(Request $request){
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $scheduleId = $request->scheduleId;
+            $trainees = EnrolledCourse::with('trainee')
+                ->where('training_id', $scheduleId)
+                ->get();
+
+            return response()->json(['trainees' => $trainees], 200);
+        });
+    }
+
+    /**
+     * Move trainees to another schedule
+     * @param Request $request
+     */
+    public function move_trainees(MoveTrainees $request) {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $fromScheduleId = $request->fromScheduleId;
+            $toScheduleId   = $request->toScheduleId;
+            $enrollmentIds  = $request->enrollmentIds;
+            $moved  = [];
+            $errors = [];
+
+            foreach ($enrollmentIds as $enrollmentId) {
+                $application = EnrolledCourse::where([
+                    'id'          => $enrollmentId,
+                    'training_id' => $fromScheduleId,
+                ])->first();
+
+                if (!$application) {
+                    $errors[] = ['id' => $enrollmentId, 'message' => "Enrollment ID#$enrollmentId not found on schedule ID#$fromScheduleId."];
+                    continue;
+                }
+
+                if (!\in_array($application->enrolled_course_status, [EnrollmentEnum::ENROLLED->value, EnrollmentEnum::RESERVED->value], true)) {
+                    $errors[] = [
+                        'id'      => $enrollmentId,
+                        'status'  => $application->enrolled_course_status,
+                        'message' => "Cannot move enrollment ID#$enrollmentId with status '{$application->enrolled_course_status}'.",
+                    ];
+                    continue;
+                }
+
+                $application->training_id = $toScheduleId;
+                $application->save();
+
+                $moved[] = $application->id;
+            }
+
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::ENROLLMENTCTRL_MOVED_TRAINEE->value . "ID#$fromScheduleId to ID#$toScheduleId"
+            );
+
+            if (env('USE_EVENT')) {
+                event(
+                    new BEEnrollment(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            $message = !empty($moved)
+                    ? AdministratorReturnResponse::ENROLLMENTCTRL_MOVED_TRAINEE_SUCCESS->value . " Moved " . count($moved) . " trainee(s) from schedule ID#$fromScheduleId to ID#$toScheduleId."
+                    : AdministratorReturnResponse::ENROLLMENTCTRL_MOVED_TRAINEE_FAILED->value;
+
+            return response()->json([
+                'message' => $message,
+                'moved'   => $moved,
+                'errors'  => $errors,
+            ], !empty($moved) ? 200 : 422);
+        });
+    }
 }
+

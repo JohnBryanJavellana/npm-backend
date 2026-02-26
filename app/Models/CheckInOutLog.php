@@ -10,10 +10,10 @@ class CheckInOutLog extends Model
     use HasFactory;
 
     public function initiator() {
-        return $this->hasOne(User::class);
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
 
     public function qrLocation() {
-        return $this->hasOne(QrReaderLocation::class);
+        return $this->hasOne(QrReaderLocation::class, 'id', 'qr_reader_location_id');
     }
 }

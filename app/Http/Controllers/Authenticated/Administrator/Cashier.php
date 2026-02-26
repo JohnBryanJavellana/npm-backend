@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\AutoPrint;
 use App\Jobs\SendingEmail;
 use App\Mail\CashierEmail;
 use App\Models\BookRes;
@@ -16,6 +17,7 @@ use App\Models\RAInvoices;
 use App\Models\RARequestInfo;
 use App\Models\User;
 use App\Utils\Notifications;
+
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Utils\{
@@ -41,7 +43,10 @@ use App\Models\{
     ChargeCategory
 };
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
-use App\Enums\AdministratorAuditActions;
+use App\Enums\{
+    AdministratorAuditActions,
+    AdministratorReturnResponse
+};
 
 class Cashier extends Controller
 {
@@ -62,7 +67,7 @@ class Cashier extends Controller
             NotificationEnum::RECREATIONAL->value    => $isMainTable || $isInitialTable ? RARequestInfo::class : RAInvoices::class,
         ];
 
-        if (!array_key_exists($service, $modelMap)) {
+        if (!\array_key_exists($service, $modelMap)) {
             throw new \InvalidArgumentException("Invalid service type: $service", 500);
         }
 
@@ -72,7 +77,7 @@ class Cashier extends Controller
             $query->where('id', $referenceId);
         }
 
-        if(!is_null($whereIns)) {
+        if($whereIns !== null) {
             foreach ($whereIns as $column => $values) {
                 if (!empty($values)) {
                     $query->whereIn($column, $values);
@@ -83,6 +88,10 @@ class Cashier extends Controller
         return $query;
     }
 
+    /**
+     * Summary of get_charges
+     * @param Request $request
+     */
     public function get_charges (Request $request) {
         return TransactionUtil::transact(null, [], function() use($request)  {
             $charges = Charge::with('chargeCategory')->get();
@@ -90,6 +99,10 @@ class Cashier extends Controller
         });
     }
 
+    /**
+     * Summary of get_charges_predata
+     * @param Request $request
+     */
     public function get_charges_predata (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             return response()->json([
@@ -108,41 +121,38 @@ class Cashier extends Controller
             $relations = ['payee', 'orNumber'];
 
             if($request->service === NotificationEnum::LIBRARY->value) {
-                $relations = array_merge($relations, [
+                $relations = [
+                    ...$relations,
                     'bookRes',
                     'selectedBooks',
                     'selectedBooks.bookReservation',
                     'selectedBooks.bookReservation.book',
                     'selectedBooks.bookReservation.books',
                     'selectedBooks.bookReservation.books.catalog'
-                ]);
+                ];
             }
 
             if($request->service === NotificationEnum::ENROLLMENT->value) {
-                $relations = array_merge($relations, [
+                $relations = [
+                    ...$relations,
                     'training'
-                ]);
+                ];
             }
 
-            if($request->service === NotificationEnum::DORMITORY->value) {
-                $relations = array_merge($relations, [
-                    'payee'
-                ]);
-            }
+            $paymentsData = $payments->with($relations)->orderBy('created_at', 'DESC');
 
-            if($request->service === NotificationEnum::RECREATIONAL->value) {
-                $relations = array_merge($relations, [
-                    'requestor'
-                ]);
-            }
+            if($request->limitter) $paymentsData->take($request->limitter);
+            $paymentsData = $paymentsData ->get();
 
-            $paymentsData = $payments->with($relations)->orderBy('created_at', 'DESC')->get();
             return response()->json(['payments' => $paymentsData], 200);
         });
     }
 
     /**
      * Summary of pay_walkin
+     * @param bool notifications === FALSE
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param Request $request
      */
     public function pay_walkin (Request $request) {
@@ -198,7 +208,7 @@ class Cashier extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've processed a walk-in payment."], 201);
+            return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_PAY_WALKIN->value], 201);
         });
     }
 
@@ -215,6 +225,8 @@ class Cashier extends Controller
 
     /**
      * Summary of create_or_update_charge_category
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param CreateOrUpdateFeeCategory $request
      */
     public function create_or_update_charge_category (CreateOrUpdateFeeCategory $request) {
@@ -239,7 +251,7 @@ class Cashier extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $request->httpMethod === "POST" ? AdministratorAuditActions::CASHIERCTRL_CREATED_CATEGORY->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_CATEGORY->value . " ID#$fee_category->id"
+                $request->httpMethod === "POST" ? AdministratorAuditActions::CASHIERCTRL_CREATED_CHARGECATEGORY->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_CHARGECATEGORY->value . " ID#$fee_category->id"
             );
 
             if(env('USE_EVENT')) {
@@ -249,12 +261,14 @@ class Cashier extends Controller
                 );
             }
 
-            return response()->json(['message' => "You've " . ($request->httpMethod === "POST" ? 'created' : 'updated') . " a fee category. ID#" . $fee_category->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::CASHIERCTRL_CREATED_CHARGECATEGORY->value : AdministratorReturnResponse::CASHIERCTRL_UPDATED_CHARGECATEGORY->value) . " ID#$fee_category->id"], 201);
         });
     }
 
     /**
      * Summary of remove_charge_category
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param Request $request
      * @param int $fee_category_id
      */
@@ -263,12 +277,12 @@ class Cashier extends Controller
             $this_fee = ChargeCategory::withCount(['hasData'])->where('id', $fee_category_id)->first();
 
             if($this_fee->has_data_count > 0) {
-                return response()->json(['message' => "Can't remove fee category. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_ERR_CHARGECATEGORY->value], 409);
             } else {
                 $this_fee->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::CASHIERCTRL_REMOVED_CATEGORY->value . " ID#$fee_category_id"
+                    AdministratorAuditActions::CASHIERCTRL_REMOVED_CHARGECATEGORY->value . " ID#$fee_category_id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -277,13 +291,16 @@ class Cashier extends Controller
                         new BEAuditTrail('')
                     );
                 }
-                return response()->json(['message' => "You've removed a fee category. ID#$fee_category_id"], 200);
+                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_REMOVED_CHARGECATEGORY->value . "ID#$fee_category_id"], 200);
             }
         });
     }
 
     /**
      * Summary of verify_payment
+     * @param bool notifications === FALSE
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param Request $request
      */
     public function verify_payment (Request $request) {
@@ -291,8 +308,8 @@ class Cashier extends Controller
             $this_payment = self::getTable($request->service, $request->documentId, null);
             $this_fee = $this_payment->lockForUpdate()->first();
 
-            if(in_array($this_fee->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
-                return response()->json(['message' => "Can't update payment."], 200);
+            if(\in_array($this_fee->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
+                return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_ERR_PAYMENT->value], 200);
             } else {
                 $this_fee->invoice_status = $request->verificationStatus;
                 $this_fee->save();
@@ -324,7 +341,7 @@ class Cashier extends Controller
                 Notifications::notify($request->user()->id, $this_fee->user_id, $request->service, "updated your " . strtolower($request->service) . " invoice status.");
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::CASHIERCTRL_UPDATED_PAYMENT . " ID#$this_fee->id"
+                    AdministratorAuditActions::CASHIERCTRL_UPDATED_PAYMENT->value. " ID#$this_fee->id"
                 );
 
                 if(env('USE_EVENT')) {
@@ -333,7 +350,7 @@ class Cashier extends Controller
                         new BEAuditTrail('')
                     );
                 }
-                return response()->json(['message' => "You've updated a payment. ID#$$this_fee->id"], 200);
+                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_UPDATED_PAYMENT->value . "ID#$this_fee->id"], 200);
             }
         });
     }
@@ -360,6 +377,8 @@ class Cashier extends Controller
 
     /**
      * Summary of create_or_update_or_number
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param CreateOrUpdateOR $request
      */
     public function create_or_update_or_number (CreateOrUpdateOR $request) {
@@ -385,19 +404,21 @@ class Cashier extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::CASHIERCTRL_CREATED_OR->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_OR->value . " ID#$this_or->id"
+                $isPost ? AdministratorAuditActions::CASHIERCTRL_CREATED_ORNUMBER->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_ORNUMBER->value . " ID#$this_or->id"
             );
 
             if (env('USE_EVENT')) {
                 event(new BEInvoice(''), new BEAuditTrail(''));
             }
 
-            return response()->json(['success' => true, 'message' => "OR Number successfully saved."], 200);
+            return response()->json(['success' => true, 'message' => ($isPost ? AdministratorReturnResponse::CASHIERCTRL_CREATED_ORNUMBER->value : AdministratorReturnResponse::CASHIERCTRL_UPDATED_ORNUMBER->value) . "ID#$this_or->id"], 200);
         });
     }
 
     /**
      * Summary of remove_or_number
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === TRUE
      * @param Request $request
      * @param int $orNumber
      */
@@ -406,12 +427,12 @@ class Cashier extends Controller
             $this_or = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment'])->where('id', $orNumber)->first();
 
             if($this_or->connection_in_library_count > 0 || $this_or->connection_in_dormitory_count > 0 || $this_or->connection_in_enrollment_count > 0 || $this_or->status === "UNAVAILABLE") {
-                return response()->json(['message' => "Can't remove OR Number. It already has connected data."], 409);
+                return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_ERR_ORNUMBER->value], 409);
             } else {
                 $this_or->delete();
                 AuditHelper::log(
                     $request->user()->id,
-                    AdministratorAuditActions::CASHIERCTRL_REMOVED_OR->value . " ID#$orNumber"
+                    AdministratorAuditActions::CASHIERCTRL_REMOVED_ORNUMBER->value . " ID#$orNumber"
                 );
 
                 if(env('USE_EVENT')) {
@@ -420,7 +441,7 @@ class Cashier extends Controller
                         new BEAuditTrail('')
                     );
                 }
-                return response()->json(['message' => "You've removed an OR Number. ID#$orNumber"], 200);
+                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_REMOVED_ORNUMBER->value . "ID#$orNumber"], 200);
             }
         });
     }

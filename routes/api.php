@@ -31,7 +31,7 @@ use App\Http\Controllers\Authenticated\Trainee\{
 
 use App\Http\Controllers\Authenticated\Administrator\{
     Account,
-    NotificationCtrl
+    NotificationCtrl,
 };
 
 /** other controllers */
@@ -40,10 +40,12 @@ use App\Http\Controllers\Authenticated\Logout;
 use App\Http\Controllers\Authenticated\Trainer\AttendanceController;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
 use App\Http\Controllers\QRReaderCheckInOutCtrl;
+use App\Models\Attendance;
 
 /** imported models */
 
 use App\Models\User;
+use App\Services\Trainee\Dormitory\DormitoryTransferService;
 
 /** guest routes */
 Route::match(['GET', 'POST'], '/login', [LoginController::class, 'login_user']);
@@ -51,9 +53,6 @@ Route::post('/register', [RegisterController::class, 'register_user']);
 Route::get('/email/verify', [EmailVerificationController::class, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
-Route::get('/qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
-
-/** testing routes */
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
@@ -105,16 +104,19 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
+            Route::get("counts", [TraineeEnrollment::class, 'viewEnrolledCount']);
         });
 
         Route::prefix('/trainings/')->group(function () {
             Route::get('get_all_courses', [TraineeCourses::class, 'get_all_courses']);
+            // Route::get('get_trainees_enrollment_status', [EnrollmentCtrl::class, 'get_all_schedules']);
             Route::get('get_trainee_trainings', [TraineeCourses::class, 'get_trainee_courses']);
         });
 
         Route::prefix('/dormitories/')->group(function () {
             //DORM REQUEST
             Route::post('rooms', [TraineeDormitory::class, 'viewRecommendedRooms']);
+            Route::get('counts', [TraineeDormitory::class, 'viewTenantCount']);
 
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
             Route::get('applied_dormitories/view/{dormitory_id}', [TraineeDormitory::class, 'view_applied_dormitories']);
@@ -171,11 +173,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('requests/extension/cancel', [TraineeLibrary::class, 'cancel_extend']);
             Route::post('requests/renew', [TraineeLibrary::class, 'renew']);
             Route::post('renew/cancel', [TraineeLibrary::class, 'cancelRenew']);
+            Route::get("counts", [TraineeLibrary::class, 'viewLibRequestCount']);
         });
 
         Route::prefix('/client_satisfaction/')->group(function () {
             Route::get('surveys', [CsmsController::class, 'view']);
-            Route::post('surveys/create', [CsmsController::class, 'create']);
+            Route::post('surveys/create', [CsmsController::class, 'createV1']);
             Route::post('surveys/delete/{id}', [CsmsController::class, 'delete']);
         });
 
@@ -194,10 +197,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
-
-    //! TRAINER/TRAINEE
-    Route::middleware('user_role:TRAINER')->prefix('/trainer/')->group(function () {
+    Route::middleware(['user_role:TRAINER', 'throttle:60,1'])->prefix('/trainer/')->group(function () {
         Route::prefix('enrollment/')->group(function () {
+            Route::get('training', [TrainerEnrollmentController::class, 'viewAllTrainingsAndFacilitators']);
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
             Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']); //*
             Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //*
@@ -205,19 +207,21 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
             //* ATTENTANCE PART
             Route::get('trainee', [AttendanceController::class, 'test']);
+            Route::post('/scan-qr', [AttendanceController::class, 'scanQr']);
+            Route::get('attendance_list', [AttendanceController::class], 'attendance_list_trainee');
         });
     });
 
-
-
-    Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN')->group(function () {
+    Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->group(function () {
         Route::prefix('recreationals/')->group(function () {
+            Route::post("qr_checker", [TraineeRecreational::class, "checkUniqueIdentifier"]);
             Route::get('equipment', [TraineeRecreational::class, 'viewEquipment']);
             Route::get('facilities', [TraineeRecreational::class, 'viewFacilities']);
             Route::post('requests', [TraineeRecreational::class, 'requestEquipment']);
             Route::post('get_recreational_request', [TraineeRecreational::class, 'get_recreational_request']);
-            Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'get_requested_equipments']);
-            Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancel_requested_units']);
+            Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'getRecreationalRequest']);
+            Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancelUnitsRequest']);
+            Route::get('counts', [TraineeRecreational::class, 'viewRecRequestCount']);
         });
     });
 

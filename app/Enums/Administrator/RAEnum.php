@@ -11,6 +11,7 @@ enum RAEnum : string
     case PENDING = "PENDING";
     case DECLINED = "DECLINED";
     case DAMAGED = "DAMAGED";
+    case COMPLETED = "COMPLETED";
     case GOOD_CONDITION = "GOOD CONDITION";
     case CANCELLED = "CANCELLED";
     case OCCUPIED = "OCCUPIED";

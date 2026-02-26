@@ -21,14 +21,28 @@ class TrainerEnrollmentController extends Controller
         protected TrainerEnrollmentService $trainerEnrollmentService,
     ) {}
 
-    public function view(Request $request)
+    public function viewAllTrainingsAndFacilitators(Request $request)
+    {
+        return $this->trainerEnrollmentService->getAllTrainingsAndFacilitators();
+    }
+
+    public function viewAllTrainee(Request $request, $training)
     {
         try {
-            return CourseModuleResource::collection($this->trainerEnrollmentService->getDataFacilitator());
+            return $this->trainerEnrollmentService->getTrainees($training);
         } catch (\Exception $e) {
-            return response()->json(["message" => $e->getMessage()], 500);
+            return response()->json([$e->getMessage()], 500);
         }
     }
+
+    // public function view(Request $request)
+    // {
+    //     try {
+    //         return CourseModuleResource::collection($this->trainerEnrollmentService->getDataFacilitator());
+    //     } catch (\Exception $e) {
+    //         return response()->json(["message" => $e->getMessage()], 500);
+    //     }
+    // }
 
     public function viewTrainingSchedules(Request $request, $course)
     {

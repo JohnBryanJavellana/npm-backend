@@ -31,6 +31,7 @@ class ViewRecEquipment extends JsonResource
                     "id" => $facility->facility->id,
                     "name" => $facility->facility->name,
                     "location" => $facility->facility->location,
+                    "UI" => $facility->facility->unique_identifier,
                     "additional_details" => $facility->facility->additional_details,
                     "open_time" => $facility->facility->open_time,
                     "close_time" => $facility->facility->close_time,
@@ -40,6 +41,7 @@ class ViewRecEquipment extends JsonResource
                         "from_datetime" => $data->start_date,
                         "to_datetime" => $data->end_date
                     ]),
+                    "images" => $facility->facility?->images
                 ];
             }),
             "disabled_date_times" => $this->hasData->map(fn($query) => [

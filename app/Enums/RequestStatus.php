@@ -29,7 +29,7 @@ enum RequestStatus: string {
     //PAYMENT TYPE
     case ONLINE = "ONLINE";
     case WALK_IN = "WALK-IN";
-    //DORM INVOICE TYPE
+    //DORM INVOICE TYPE 
     case INCLUSION = "INCLUSION";
     case SERVICE = "SERVICE";
     case DORMITORY = "DORMITORY";
@@ -48,6 +48,11 @@ enum RequestStatus: string {
     case LOST = "LOST";
     case DAMAGED = "DAMAGED";
 
+    //RECREATIONAL
+
+    case DONE = "DONE";
+    case RETURNED = "RETURNED";
+
 
     public static function renewableStatuses(): array {
         return [
@@ -65,6 +70,30 @@ enum RequestStatus: string {
             RequestStatus::DECLINED->value,
             RequestStatus::IR->value,
             RequestStatus::CSFB->value,
+        ];
+    }
+
+    public static function CompletingRecRequest(): array
+    {
+        return [
+            RequestStatus::DONE->value,
+            RequestStatus::CANCELLED->value,
+            RequestStatus::DECLINED->value,
+            RequestStatus::RETURNED->value,
+        ];
+    }
+
+    public static function ActiveEnrollmentStatus(): array
+    {
+        return [
+            RequestStatus::PENDING->value,
+            RequestStatus::ENROLLED->value,
+            RequestStatus::RESERVED->value,
+            RequestStatus::COMPLETED->value,
+            RequestStatus::PAID->value,
+            RequestStatus::FOR_PAYMENT->value,
+            RequestStatus::IR->value,
+            RequestStatus::PROCESSING_PAYMENT->value,
         ];
     }
 }

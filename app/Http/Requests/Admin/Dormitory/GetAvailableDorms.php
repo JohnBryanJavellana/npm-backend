@@ -22,8 +22,11 @@ class GetAvailableDorms extends FormRequest
     public function rules(): array
     {
         return [
-            'room_for_type' => ['required'],
-            'room_type' => ['required'],
+            'isAirConditioned' => ['required'],
+            'dateFrom' => ['required', 'date'],
+            'dateTo' => ['required', 'date'],
+            'userId' => ['required', 'exists:users,id'],
+            'singleAccommodation' => ['required'],
         ];
     }
 }

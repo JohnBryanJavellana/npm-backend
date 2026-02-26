@@ -15,6 +15,11 @@ class RAFacilityRequest extends Model
         return $this->hasOne(RAFacility::class, 'id', 'r_a_facility_id');
     }
 
+    public function requestInfo()
+    {
+        return $this->belongsTo(RARequestInfo::class, "r_a_request_info_id", "id");
+    }
+
     public function updatedByWhom() {
         return $this->hasOne(User::class, 'id', 'updated_by_whom');
     }

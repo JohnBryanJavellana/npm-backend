@@ -9,6 +9,6 @@ enum QrReaderEnum : string
     case LIBRARY = "LIBRARY";
     case GUARD_ENTRANCE = "GUARD_ENTRANCE";
     case GUARD_EXIT = "GUARD_EXIT";
-    case CHECK_IN = "CHECK IN";
-    case CHECK_OUT = "CHECK OUT";
+    case CHECK_IN = "CHECK_IN";
+    case CHECK_OUT = "CHECK_OUT";
 }

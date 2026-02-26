@@ -58,6 +58,11 @@ class TraineeDormitory extends Controller
         protected DormitoryInclusionService $dormitoryInclusionService,
     ){}
 
+    public function viewTenantCount(Request $request)
+    {
+        return $this->dormitory_service->getDormRequestCount($request->user()->id);
+    }
+
     public function viewRecommendedRooms(RoomPreferRequest $request)
     {
         try
@@ -67,12 +72,14 @@ class TraineeDormitory extends Controller
             return DormRoomsResource::collection($rooms);
         }
         catch (\Exception $e) {
+            return response()->json([$e], 500);
         }
     }
 
-    //for removal
-    public function get_filtered_dorms (Request $request) {
-        try {
+    public function get_filtered_dorms (Request $request)
+    {
+        try
+        {
             $cost = $request->cost;
             $dormitories = DormitoryRoom::with("room_images")
                 ->where('room_status', 'ACTIVE')
@@ -95,8 +102,8 @@ class TraineeDormitory extends Controller
                 "dormitory_room.dormitory"
             ]);
 
-            if(empty($request->type)) $applications->whereNot("tenant_status", RequestStatus::CANCELLED->value);
-            if($request->type) $applications->whereIn("tenant_status", $request->type);
+            if(empty($request->tenantStatus)) $applications->whereNot("tenant_status", RequestStatus::CANCELLED->value);
+            if($request->tenantStatus) $applications->whereIn("tenant_status", $request->tenantStatus);
 
             $apps = $applications->latest("created_at")->get();
             return DApplicationResource::collection($apps);
@@ -104,7 +111,7 @@ class TraineeDormitory extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
-    
+
     public function count_book_reservation (Request $request){
         $reservations = DormitoryTenant::where('user_id', $request->user()->id);
 
@@ -193,7 +200,7 @@ class TraineeDormitory extends Controller
             return response()->json(["message"=> $e->getMessage()], 500);
         }
     }
-    
+
     public function get_personal_dormitory (Request $request) {
         try {
             $user = User::findOrFail($request->user()->id);
@@ -206,9 +213,6 @@ class TraineeDormitory extends Controller
         }
     }
 
-    /**
-     * Methods for Dorm Extension
-     */
     public function create_extend_request(CreateExtendRequest $request)
     {
         $validated = $request->validated();
@@ -219,14 +223,14 @@ class TraineeDormitory extends Controller
         try {
 
             $this->dormitoryExtendService->createExtendRequest($userId, $validated);
-           
+
             if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
             }
 
             //additional email for sending a extension request
-            AuditHelper::log($request->user()->id, "User {$request->user()->id} sent a dorm extension request.");
-            return response()->json(['message' => "Your extension request has been successfully submitted for review."]);
+            AuditHelper::log($request->user()->id, "User {$request->user()->id} sent a dorm extension request.OK");
+            return response()->json(['message' => "Your extension request has been successfully submitted for review.OK"]);
         }
         catch (DomainException $e) {
             throw $e;
@@ -236,15 +240,16 @@ class TraineeDormitory extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
+
     public function cancel_extend_request(Request $request, $id)
     {
         $user_id = $request->user()->id;
         try {
             $this->dormitoryExtendService->cancelExtendRequest($id, $user_id);
 
-            AuditHelper::log($user_id, "User {$user_id} cancelled a book request.");
+            AuditHelper::log($user_id, "User {$user_id} cancelled a dormitory request.");
 
-            return response()->json(["message" => "Your transfer request has been successfully cancelled."], 200);
+            return response()->json(["message" => "Your extend request has been successfully cancelled."], status: 200);
         }
         catch (\Exception $e) {
             \Log::info("cancel_extend_request", [$e->getMessage()]);
@@ -252,9 +257,6 @@ class TraineeDormitory extends Controller
         }
     }
 
-    /**
-     * Methods for Dorm Transfer
-     */
     public function create_transfer_request(CreateTransferRequest $request)
     {
         try {
@@ -262,10 +264,10 @@ class TraineeDormitory extends Controller
             $validated = $request->validated();
 
             $this->dormitoryTransferService->createTransferRequest($validated, $userId);
-        
+
             event(new BEDormitory(''));
 
-            return response()->json(['message' => "Transfer request sent! We're processing your request and will update you soon."], 200);
+            return response()->json(['message' => "Transfer request sent! We're processing your request and will update you soon.OK"], 200);
 
         }
         catch (DomainException $e) {
@@ -281,7 +283,7 @@ class TraineeDormitory extends Controller
         try {
             $this->dormitoryTransferService->cancelTransferRequest($id, $user_id);
 
-            return response()->json(["message" => "Your transfer request has been successfully cancelled."], 200);
+            return response()->json(["message" => "Your transfer request has been successfully cancelled.OK"], 200);
         }
         catch (\Exception $e) {
             \Log::info("cancel_extend_request", [$e->getMessage()]);
@@ -289,21 +291,19 @@ class TraineeDormitory extends Controller
         }
     }
 
-    /**
-     * Methods for Dorm Occupancy
-     */
     public function request_tenant_room(DormRoomRequest $request) {
         // \Log::info("controller dorm", [$request->all()]);
-        $user = $request->user();
+        $user = User::findOrFail($request->userId ?? $request->user()->id);
         $validated = $request->validated();
+
         try {
             $this->dormitory_service->createRequest($validated, $user->id);
-            
+
             if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
             }
 
-            return response()->json(["message"=> 'Dormitory request sent successfully.'], 200);
+            return response()->json(["message"=> 'Dormitory request sent successfully.OK'], 200);
         } catch (DomainException $e) {
             throw $e;
         }
@@ -314,13 +314,13 @@ class TraineeDormitory extends Controller
     }
     public function remove_applied_dormitories (Request $request, int $dormitory_id) {
         try {
-            $this->dormitory_service->cancelRequest($request, $dormitory_id);                                 
+            $this->dormitory_service->cancelRequest($request, $dormitory_id);
 
             if(env("USE_EVENT")) {
                 event(new BEDormitory(''));
             }
 
-            return response()->json(['message' => "Dormitory request cancelled successfully."], 200);
+            return response()->json(['message' => "Dormitory request cancelled successfully.OK"], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -373,7 +373,7 @@ class TraineeDormitory extends Controller
         $validated = $request->validated();
         try {
             $this->dormitoryInclusionService->createInclusionRequest($validated, $user_id);
-            return response()->json(["message" => "You've have successfully sent items request!"], 200);
+            return response()->json(["message" => "You've have successfully sent items request!ok"], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -388,7 +388,7 @@ class TraineeDormitory extends Controller
     {
         $user_id = $request->user()->id;
         \Log::info("cancel_request_inclusion_passed", [$request->all()]);
-        try {            
+        try {
             $this->dormitoryInclusionService->cancelInclusionRequest($request->all(), $user_id);
         }
         catch (\Exception $e) {
@@ -403,6 +403,7 @@ class TraineeDormitory extends Controller
     public function view_service()
     {
         try {
+            \Log::info("not_found");
             return AvailableServicesResource::collection($this->dormitoryExtraService->viewServices());
         } catch (\Exception $e) {
             \Log::error("error_view_service", [$e->getMessage()]);
@@ -420,7 +421,7 @@ class TraineeDormitory extends Controller
             \Log::error("error_user_service_request", [$e->getMessage()]);
             return response()->json([$e->getMessage()], 500);
         }
-    } 
+    }
 
     public function create_service_request  (CreateServiceRequest $request)
     {
@@ -428,11 +429,11 @@ class TraineeDormitory extends Controller
         $validated = $request->validated();
         \Log::info("request_service", [$validated]);
         try {
-            
+
             $this->dormitoryExtraService->createService($validated, $user_id);
 
-            return response()->json(["message" => "Your service request has been sent successfully!"], 200);
-        } 
+            return response()->json(["message" => "Your service request has been sent successfully!ok"], 200);
+        }
         catch (DomainException $e) {
             throw $e;
         }
@@ -446,11 +447,11 @@ class TraineeDormitory extends Controller
     {
         $user_id = $request->user()->id;
         $validated = $request->validated();
-        try {   
+        try {
             $this->dormitoryExtraService->cancelService($validated['request_id'], $user_id);
 
-            return response()->json(["message" => "Service request has cancelled successfully"], 200);
-        } 
+            return response()->json(["message" => "Service request has cancelled successfully!ok"], 200);
+        }
         catch (DomainException $e) {
             throw $e;
         }

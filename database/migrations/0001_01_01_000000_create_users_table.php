@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('lname')->nullable();
             $table->string('mname')->nullable();
             $table->string('suffix')->nullable();
-            $table->string('email')->unique();
+            $table->string('email')->nullable()->unique();
             $table->enum('gender', ['MALE', 'FEMALE'])->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->date('birthdate')->nullable();
@@ -31,10 +31,10 @@ return new class extends Migration
                 'TRAINER',
                 'ADMIN-CASHIER',
                 'ADMIN-RA',
+                'GUEST',
                 'GUARD'
             ])->default('SUPERADMIN');
-            $table->string('password');
-            $table->decimal('credit_amount', 65, 2)->default(0);
+            $table->string('password')->nullable();
             $table->enum('isSocial', ['YES', 'NO'])->default('NO');
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->enum('dark_mode', ['dark', 'light'])->default('light');

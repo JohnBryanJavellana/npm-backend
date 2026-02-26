@@ -28,10 +28,20 @@ class RARequestInfo extends Model
         return $this->hasMany(RAInvoices::class);
     }
 
+    public function csm()
+    {
+        return $this->hasOne(CSM::class, 'reference_id', 'id');
+    }
+
     /** Scopes */
 
     public function scopeStatus(Builder $query, array $statuses)
     {
         return $query->whereIn("status", $statuses);
+    }
+
+    public function scopeForUser(Builder $query, int $user_id)
+    {
+        return $query->where("user_id", $user_id);
     }
 }

@@ -24,8 +24,6 @@ class DormitoryInvoiceService {
         return $this->dormitoryInvoice->query()
         ->with([
             "orNumber",
-            "charge:id,charge_category_id,name,amount,description,service_type",
-            "charge.chargeCategory:id,name"
          ])
         ->where([
             "dormitory_tenant_id" => $documentId,

@@ -215,7 +215,6 @@ class EnrollmentService {
 
                 $fullPath = public_path($path . '/' . $filename);
 
-                // Normalize path to prevent traversal attacks
                 $realBase = realpath(public_path($path));
                 $realFile = realpath($fullPath);
 
@@ -226,5 +225,14 @@ class EnrollmentService {
                 }
             }
         }
+    }
+
+    public function getEnrolledCount($userId)
+    {
+        return $this->enrolledCourseModel->query()
+        ->select(DB::raw("count(*) as status_count"), "enrolled_course_status")
+        ->forUser($userId)
+        ->groupBy("enrolled_course_status")
+        ->pluck("status_count", "enrolled_course_status");
     }
 }

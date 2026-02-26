@@ -16,9 +16,12 @@ return new class extends Migration
             $table->engine = 'InnoDB';
             $table->id();
             $table->foreignIdFor(Dormitory::class)->constrained()->cascadeOnDelete();
+            $table->string('room_name', 255);
             $table->integer('room_slot');
             $table->integer('room_available_slot');
-            $table->enum('room_status', ['AVAILABLE', 'OCCUPIED', 'RESERVED'])->default('AVAILABLE');
+            $table->enum('room_status', ['AVAILABLE', 'OCCUPIED', 'RESERVED', 'UNAVAILABLE'])->default('AVAILABLE');
+            $table->enum('is_air_conditioned',["YES", "NO"]);
+            $table->longText('remarks')->nullable();
             $table->timestamps();
         });
     }

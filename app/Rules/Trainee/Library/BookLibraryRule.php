@@ -30,7 +30,6 @@ class BookLibraryRule implements ValidationRule, DataAwareRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        \Log::info("extending...", [$this->data]);
         foreach ($this->data["data"] as $book) {
             $available = BookReservation::whereKey($value)?->value("from_date");
             $fromDate = Carbon::parse($available);

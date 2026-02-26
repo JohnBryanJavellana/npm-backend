@@ -67,6 +67,7 @@ class DormitoryInclusionService {
 
             //prepareData
             $invoice =$this->dormitoryInvoiceModel->create([
+                "user_id" => $userId,
                 "dormitory_tenant_id" => $validated["request_id"],
                 "type" => RequestStatus::INCLUSION,
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),

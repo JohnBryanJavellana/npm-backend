@@ -3,49 +3,69 @@
 namespace App\Enums;
 
 enum AdministratorAuditActions: string {
+    /**
+     * Summary of ACCOUNTCTRL
+     */
     case ACCOUNTCTRL_UPDATE_PERSONAL = "Updated personal account information.";
     case ACCOUNTCTRL_UPDATE_PASSWORD = "Updated account password.";
+
+    /**
+     * Summary of CASHIERCTRL
+     */
     case CASHIERCTRL_PROCESSED_WALKIN = "Processed a walk-in payment.";
-    case CASHIERCTRL_CREATED_CATEGORY = "Created a fee category.";
-    case CASHIERCTRL_UPDATED_CATEGORY = "Updated a fee category.";
-    case CASHIERCTRL_REMOVED_CATEGORY = "Removed a fee category.";
-    case CASHIERCTRL_CREATED_OR = "Created an OR Number.";
-    case CASHIERCTRL_UPDATED_OR = "Updated an OR Number.";
-    case CASHIERCTRL_REMOVED_OR = "Removed an OR Number.";
+    case CASHIERCTRL_CREATED_CHARGECATEGORY = "Created a fee category.";
+    case CASHIERCTRL_UPDATED_CHARGECATEGORY = "Updated a fee category.";
+    case CASHIERCTRL_REMOVED_CHARGECATEGORY = "Removed a fee category.";
     case CASHIERCTRL_UPDATED_PAYMENT = "Updated a payment.";
+    case CASHIERCTRL_CREATED_ORNUMBER = "Created an OR Number.";
+    case CASHIERCTRL_UPDATED_ORNUMBER = "Updated an OR Number.";
+    case CASHIERCTRL_REMOVED_ORNUMBER = "Removed an OR Number.";
+
+
+    /**
+     * Summary of DORMITORYCTRL
+     */
     case DORMITORYCTRL_CREATED_DORMITORY = "Created a dormitory.";
     case DORMITORYCTRL_UPDATED_DORMITORY = "Updated a dormitory.";
-    case DORMITORYCTRL_REMOVED_DORMITORY = "Removed a dormitory room.";
+    case DORMITORYCTRL_UPDATED_DORMITORYROOM = "Updated a dormitory room.";
+    case DORMITORYCTRL_REMOVED_DORMITORYROOM = "Removed a dormitory room.";
     case DORMITORYCTRL_CREATED_DORMITORYINV = "Created a dormitory inventory.";
     case DORMITORYCTRL_UPDATED_DORMITORYINV = "Updated a dormitory inventory.";
+    case DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK = "Updated a dormitory inventory item stock.";
     case DORMITORYCTRL_REMOVED_DORMITORYINVSTOCK = "Removed a dormitory inventory item stock.";
     case DORMITORYCTRL_REMOVED_DORMITORYINV = "Removed a dormitory inventory item.";
     case DORMITORYCTRL_CREATED_DORMITORYREQ = "Created a dormitory request.";
     case DORMITORYCTRL_UPDATED_DORMITORYREQ = "Updated a dormitory request.";
     case DORMITORYCTRL_CANCELLED_DORMITORYREQ = "Cancelled a dormitory request.";
-    case DORMITORYCTRL_CREATED_DORMITORYSERV = "Created a dormitory service.";
-    case DORMITORYCTRL_UPDATED_DORMITORYSERV = "Updated a dormitory service.";
-    case DORMITORYCTRL_REMOVED_DORMITORYSERV = "Removed a dormitory service.";
-
+    case DORMITORYCTRL_CREATED_DORMITORYSERVICE = "Created a dormitory service.";
+    case DORMITORYCTRL_UPDATED_DORMITORYSERVICE = "Updated a dormitory service.";
+    case DORMITORYCTRL_REMOVED_DORMITORYSERVICE = "Removed a dormitory service.";
     case DORMITORYCTRL_UPDATED_DORMITORYSTCKSTATUS = "Updated provided item stock status.";
     case DORMITORYCTRL_UPDATED_DORMITORYSTCKLIST = "Updated provided item stock list.";
     case DORMITORYCTRL_CREATED_DORMITORYSERVICEREQ = "Created a dormitory service request.";
-    case DORMITORYCTRL_UPDATED_DORMITORYREQSERV = "Updated requested service.";
+    case DORMITORYCTRL_UPDATED_DORMITORYSERVICEREQ = "Updated a dormitory service request.";
+    case DORMITORYCTRL_UPDATED_DORMITORYREQUESTEDSERV = "Updated requested service.";
     case DORMITORYCTRL_CREATED_DORMITORYCHARGE = "Created a dormitory charge.";
     case DORMITORYCTRL_UPDATED_DORMITORYCHARGE = "Updated a dormitory charge.";
     case DORMITORYCTRL_CANCELLED_DORMITORYCHARGE = "Cancelled a dormitory charge.";
-    case ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREREMARKS = "Created a remark.";
-    case ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREREMARKS = "Updated a remark.";
-    case ENROLLMENTCTRL_UPDATED_ENROLLMENTAPPSTAT = "Updated enrollment application status.";
+    case DORMITORYCTRL_UPDATED_DORMITORYSTATUS = "Updated a dormitory status.";
+
+    /**
+     * Summary of ENROLLMENTCTRL
+     */
+    case ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENTSREMARK = "Created a remark.";
+    case ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREMENTSREMARK = "Updated a remark.";
+    case ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGSTATUS = "Updated enrollment application status.";
+    case ENROLLMENTCTRL_UPDATED_ENROLLMENTEXPIREDSTATUS = "User has updated an enrolled course expiry status .";
     case ENROLLMENTCTRL_CREATED_ENROLLMENTSCHED = "Created a schedule.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHED = "Updated a schedule.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHED = "Removed a schedule.";
-    case ENROLLMENTCTRL_CREATED_ENROLLMENTMOD = "Created a module.";
-    case ENROLLMENTCTRL_UPDATED_ENROLLMENTMOD = "Updated a module.";
-    case ENROLLMENTCTRL_REMOVED_ENROLLMENTMOD = "Removed a module.";
-    case ENROLLMENTCTRL_CREATED_ENROLLMENTMODTYPE = "Created a module type.";
-    case ENROLLMENTCTRL_UPDATED_ENROLLMENTMODTYPE = "Updated a module type.";
-    case ENROLLMENTCTRL_REMOVED_ENROLLMENTMODTYPE = "Removed a module type.";
+    case ENROLLMENTCTRL_CREATED_ENROLLMENTMODULE = "Created a module.";
+    case ENROLLMENTCTRL_UPDATED_ENROLLMENTMODULE = "Updated a module.";
+    case ENROLLMENTCTRL_REMOVED_ENROLLMENTMODULE = "Removed a module.";
+    case ENROLLMENTCTRL_CREATED_ENROLLMENTMODULETYPE = "Created a module type.";
+    case ENROLLMENTCTRL_UPDATED_ENROLLMENTMODULETYPE = "Updated a module type.";
+    case ENROLLMENTCTRL_REMOVED_ENROLLMENTMODULETYPE = "Removed a module type.";
     case ENROLLMENTCTRL_CREATED_ENROLLMENTCERT = "Created a certificate.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTCERT = "Updated a certificate.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTCERT = "Removed a certificate.";
@@ -61,9 +81,9 @@ enum AdministratorAuditActions: string {
     case ENROLLMENTCTRL_CREATED_ENROLLMENTVOUCHER = "Created a voucher.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTVOUCHER = "Updated a voucher.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTVOUCHER = "Removed a voucher.";
-    case ENROLLMENTCTRL_CREATED_ENROLLMENTSPNSR = "Created a sponsor.";
-    case ENROLLMENTCTRL_UPDATED_ENROLLMENTSPNSR = "Updated a sponsor.";
-    case ENROLLMENTCTRL_REMOVED_ENROLLMENTSPNSR = "Removed a sponsor.";
+    case ENROLLMENTCTRL_CREATED_ENROLLMENTSPONSOR = "Created a sponsor.";
+    case ENROLLMENTCTRL_UPDATED_ENROLLMENTSPONSOR = "Updated a sponsor.";
+    case ENROLLMENTCTRL_REMOVED_ENROLLMENTSPONSOR = "Removed a sponsor.";
     case ENROLLMENTCTRL_CREATED_ENROLLMENTLICENSE = "Create a license.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTLICENSE = "Updated a license.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTLICENSE = "Removed a license.";
@@ -76,18 +96,29 @@ enum AdministratorAuditActions: string {
     case ENROLLMENTCTRL_CREATED_ENROLLMENTTRAININGFEE = "Created a training fee.";
     case ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE = "Updated a training fee.";
     case ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE = "Removed a training fee.";
+    case ENROLLMENTCTRL_MOVED_TRAINEE = 'Administrator moved trainee(s) to a new schedule.';
+
+    /**
+     * Summary of LIBRARYCTRL
+     */
     case LIBRARYCTRL_CREATED_LIBRARYBOOK = "Created a book.";
     case LIBRARYCTRL_UPDATED_LIBRARYBOOK = "Updated a book.";
+    case LIBRARYCTRL_REMOVED_LIBRARYBOOK = "Removed a book.";
     case LIBRARYCTRL_CREATED_LIBRARYBOOKENTRY = "Created a book entry.";
     case LIBRARYCTRL_UPDATED_LIBRARYBOOKENTRY = "Updated a book entry.";
     case LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY = "Removed a book entry.";
+    case LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY = "Removed a book copy.";
     case LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVREQ = "Updated a book request.";
     case LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVSTATUS = "Updated book reservation status.";
-    case LIBRARYCTRL_REMOVED_LIBRARYREQFINE = "Removed a request fine.";
-    case LIBRARYCTRL_CREATED_LIBRARYREQFINE = "Created a request fine.";
-    case LIBRARYCTRL_UPDATED_LIBRARYREQFINE = "Updated a request fine.";
-    case MASTERLISTCTRL_CREATED_MASTERLISTQRASSIGN = "Created a QR Reader assignment.";
-    case MASTERLISTCTRL_UPDATED_MASTERLISTQRASSIGN = "Updated a QR Reader assignment.";
+    case LIBRARYCTRL_REMOVED_LIBRARYFINE = "Removed a request fine.";
+    case LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE = "Created a request fine.";
+    case LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE = "Updated a request fine.";
+
+    /**
+     * Summary of MASTERLISTCTRL
+     */
+    case MASTERLISTCTRL_CREATED_MASTERLISTQRASSIGNMENT = "Created a QR Reader assignment.";
+    case MASTERLISTCTRL_UPDATED_MASTERLISTQRASSIGNMENT = "Updated a QR Reader assignment.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTUSER = "Removed a user.";
     case MASTERLISTCTRL_CREATED_MASTERLISTEMPLOYER = "Created an employer.";
     case MASTERLISTCTRL_UPDATED_MASTERLISTEMPLOYER = "Updated an employer.";
@@ -95,14 +126,64 @@ enum AdministratorAuditActions: string {
     case MASTERLISTCTRL_CREATED_MASTERLISTPOSITION = "Created a position.";
     case MASTERLISTCTRL_UPDATED_MASTERLISTPOSITION = "Updated a position.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTPOSITION = "Remove a position.";
-    case MASTERLISTCTRL_CREATED_MASTERLISTQRLOC = "Created a QR Reader location.";
-    case MASTERLISTCTRL_UPDATED_MASTERLISTQRLOC = "Updated a QR Reader location.";
+    case MASTERLISTCTRL_CREATED_MASTERLISTQRREADERLOC = "Created a QR Reader location.";
+    case MASTERLISTCTRL_UPDATED_MASTERLISTQRREADERLOC = "Updated a QR Reader location.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADERASSIGNMENT = "Removed a position.";
     case MASTERLISTCTRL_REMOVED_MASTERLISTQRREADER = "Removed a qr reader.";
+
+    /**
+     * Summary of RECREATIONALACTIVITYCTRL
+     */
     case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY = "Created an facility.";
     case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY = "Updated an facility.";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY = "Removed an facility.";
+    case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUPSTCK = "Updated an equipment stock.";
+    //case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENT = "You've created an equipment!";
+    case RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPMENT = "You've updated an equipment!";
     case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUPSTCK = "Removed an equipment stock.";
-    case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIP = "Created an equipment.";
-    case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIP = "Removed an equipment.";
+    case RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENT = "Created an equipment.";
+    case RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT = "Removed an equipment.";
+
+      /**
+     * Summary of CSMSCTRL
+     */
+    case CSMSCTRL_CREATE_CSMSREQUEST = "User has successfully submitted a service survey.";
+
+    /**
+     * Summary MYACCOUNTCTRL
+     */
+    case MYACCOUNTCTRL_UPDATED_MYACCOUNTADMINPFP = "An Admin has updated user's profile picture.";
+    case MYACCOUNTCTRL_UPDATED_MYACCOUNTUSERPFP = "User profile picture has been updated.";
+    case MYACCOUNTCTRL_CREATED_UPDATED_MYACCOUNTADDINFO = "You have posted your new information!";
+
+    /**
+     * Summary TRAINEEDORMITORYCTRL
+     */
+    case TRAINEEDORMITORYTRL_CREATED_TRAINEEDORMITORYEXTENDREQUEST = "User sent a dorm extension request.";
+    case TRAINEEDORMITORYTRL_CANCEL_TRAINEEDORMITORYEXTENDREQUEST = "User cancelled a dormitory request.";
+
+    /**
+    * Summary TRAINEEENROLLMENTCTRL
+    */
+    case TRAINEEENROLLMENTCTRL_SEND_TRAINEEENROLLMENTREQ = "User sent enrolment request.";
+    case TRAINEEENROLLMENTCTRL_CANCEL_TRAINEEENROLLMENTTRAININREQ = "User  has cancelled training request training_id.";
+    case TRAINEEENROLLMENTCTRL_UPDATEADMIN_TRAINEEENROLLMENTTRAININGREQ = "Admin updated the enrollment request of trainee.";
+    case TRAINEEENROLLMENTCTRL_UPDATEUSER_TRAINEEENROLLMENTTRAININGREQ = "User updated an enrollment request.";
+    case TRAINEEENROLLMENTCTRL_UPDATE_TRAINEEENROLLMENTINVOICETRAINING = "User has proceed training/s for verification.";
+    /**
+    * Summary TRAINEELIBRARYCTRL
+    */
+
+    case TRAINEELIBRARYCTRL_SEND_TRAINEELIBRARYREQBOOK = "User sent a book request.";
+    case TRAINEELIBRARYCTRL_CANCEL_TRAINEELIBRARYBOOKREQ = "User cancelled a book request.";
+    case TRAINEELIBRARYCTRL_CREATED_TRAINEELIBRARYEXTENDREQ = "User sent a book extension request.";
+    case TRAINEELIBRARYCTRL_CREATE_TRAINEELIBRARYRENEWBOOKREQ = "User sent a book renewal request..";
+
+    /**
+    * Summary of TRAINEERECREATIONALCTRL
+    */
+    case TRAINEERECREATIONALCTRL_CANCEL_TRAINEERECREATIONALUNITREQ = "User has cancelled a recreational request.";
+    case TRAINEERECREATIONALCTRL_SEND_TRAINEERECREATIONALREQEQUIPMENT = "User has sent a recreational request";
+
+
 }

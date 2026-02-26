@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Authenticated\Administrator;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -26,6 +27,34 @@ use App\Models\{
 class QRReaderCheckInOutCtrl extends Controller
 {
     /**
+     * Summary of qrReader
+     * @param Request $request
+     */
+    public function qrReader(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $locations = QRReaderLocation::all();
+            return response()->json(['locations' => $locations], 200);
+        });
+    }
+
+    /**
+     * Summary of supplyDateTime
+     * @param mixed $dateToday
+     * @param mixed $checkInOrOut
+     * @param mixed $model
+     * @param mixed $column
+     */
+    private function supplyDateTime($dateToday, $checkInOrOut, $model, $column)
+    {
+        if (\in_array($checkInOrOut, [QrReaderEnum::CHECK_IN->value, QrReaderEnum::CHECK_OUT->value])) {
+            return $model->{$column} = $dateToday;
+        } else {
+            return response()->json(['message' => "We are sorry. It seems that the data provided is not valid."], 409);
+        }
+    }
+
+    /**
      * Summary of get_log_in_out_records
      * @param Request $request
      */
@@ -39,7 +68,7 @@ class QRReaderCheckInOutCtrl extends Controller
                     ->with('qrLocation')
                     ->first();
 
-                if ($check->qrLocation->whereIn('type', $request->type)) {
+                if ($check->qrLocation->whereNotIn('type', $request->type)) {
                     return response()->json(['message' => "We are sorry. You do not have enough permission to view records for " . implode(', ', $request->type)], 409);
                 }
             }
@@ -50,7 +79,9 @@ class QRReaderCheckInOutCtrl extends Controller
             ])->orderBy('created_at', 'DESC');
 
             $records = $request->type
-                ? $records_temp->qrLocation()->whereIn('type', $request->type)->get()
+                ? $records_temp->whereHas('qrLocation', function($query) use($request) {
+                    $query->whereIn('type', $request->type);
+                })->get()
                 : $records_temp->get();
 
             return response()->json(['records' => $records], 200);
@@ -70,62 +101,18 @@ class QRReaderCheckInOutCtrl extends Controller
             $checkInOrOut = $request->checkInOrOut;
 
             $checkForUpdate = CheckInOutLog::where([
-                'userId' => $userId,
+                'user_id' => $userId,
                 'qr_reader_location_id' => $qrLocation,
-                'created_at' => $dateToday
-            ]);
+            ])->whereDate('created_at', $dateToday->format('Y-m-d'));
 
-            if ($checkForUpdate->exists()) {
-                $updateRecord = $checkForUpdate->first();
-                $this->supplyDateTime($dateToday, $checkInOrOut, $updateRecord, strtolower($checkInOrOut));
-                $updateRecord->save();
-            } else {
-                $newRecord = new CheckInOutLog();
-                $newRecord->user_id = $userId;
-                $newRecord->qr_reader_location_id = $qrLocation;
-                $this->supplyDateTime($dateToday, $checkInOrOut, $newRecord, strtolower($checkInOrOut));
-                $newRecord->save();
-            }
+            $record = $checkForUpdate->exists() ? $checkForUpdate->first() : new CheckInOutLog();
+            $record->user_id = $userId;
+            $record->qr_reader_location_id = $qrLocation;
+            $this->supplyDateTime($dateToday, $checkInOrOut, $record, strtolower($checkInOrOut));
+            $record->save();
 
             return response()->json(['message' => "Success!"], 200);
+        //OK TANAN SIR HAHA
         });
-    }
-
-
-    public function qrReader(Request $request)
-    {
-        return TransactionUtil::transact(
-            null,
-            [],
-            function () {
-
-                $unit_name = QRReaderLocation::all();
-
-
-                return response()->json(['unit_name' => $unit_name], 200);
-            }
-        );
-    }
-
-
-
-    
-
-
-
-    /**
-     * Summary of supplyDateTime
-     * @param mixed $dateToday
-     * @param mixed $checkInOrOut
-     * @param mixed $model
-     * @param mixed $column
-     */
-    private function supplyDateTime($dateToday, $checkInOrOut, $model, $column)
-    {
-        if (in_array($checkInOrOut, [QrReaderEnum::CHECK_IN->value, QrReaderEnum::CHECK_OUT->value])) {
-            $model->{$column} = $dateToday;
-        } else {
-            return response()->json(['message' => "We are sorry. It seems that the data provided is not valid."], 409);
-        }
     }
 }

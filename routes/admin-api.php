@@ -5,29 +5,25 @@ use Illuminate\Support\Facades\Route;
 /** administrator controllers */
 
 use App\Http\Controllers\Authenticated\Administrator\{
+    DashboardCtrl,
     Account,
     DormitoryController,
     EnrollmentCtrl,
     LibraryController,
     Cashier,
     Masterlist,
-    RecreationalActivityCtrl
+    RecreationalActivityCtrl,
+    QRReaderCheckInOutCtrl
 };
-use App\Http\Controllers\QRReaderCheckInOutCtrl;
-
-
-// Route::post('request', [RecreationalActivityCtrl::class, 'aarequest']);
-
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA', 'throttle:60,1'])->group(function () {
-        Route::post('/qrreader/check-in-out/{id}', [QRReaderCheckInOutCtrl::class, 'QRReader_check_in_out']);
-        Route::prefix('/enrollment/')->middleware('user_role:SUPERADMIN,ADMIN-ENROLLMENT')->group(function () {
+    Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA'])->group(function () {
+        Route::post('dashboard_data', [DashboardCtrl::class, 'dashboard_data']);
+
+        Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT', 'throttle:60,1'])->group(function () {
             Route::get('course/remarks', [EnrollmentCtrl::class, 'get_remarks_count']);
             Route::get('course/enrollment/count', [EnrollmentCtrl::class, 'get_enrollment_count']);
-
-
             Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications']);
             Route::post('get_applications/requirement_remark', [EnrollmentCtrl::class, 'requirement_remark']);
             Route::post('get_applications/set_training_status', [EnrollmentCtrl::class, 'set_training_status']);
@@ -37,6 +33,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('get_finished', [EnrollmentCtrl::class, 'get_finished']);
             Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
             Route::get('get_schedules', [EnrollmentCtrl::class, 'get_schedules']);
+            Route::post('training/schedules/traineelist', [EnrollmentCtrl::class, 'get_trainees_by_schedule']);
+            Route::post('/move_trainees', [EnrollmentCtrl::class, 'move_trainees']);//edrascoe.
             Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
             Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
             Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
@@ -78,7 +76,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('remove_course_fee/{course_fee_id}', [EnrollmentCtrl::class, 'remove_course_fee']);
         });
 
-        Route::prefix('/books/')->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function () {
+        Route::prefix('/books/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY', 'throttle:60,1'])->group(function () {
             Route::get('get_books', [LibraryController::class, 'get_books']);
             Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
             Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
@@ -105,29 +103,34 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book']);
         });
 
-        Route::prefix('/book_entry/')->middleware('user_role:SUPERADMIN,ADMIN-LIBRARY')->group(function () {
+        Route::prefix('/book_entry/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY', 'throttle:60,1'])->group(function () {
             Route::get('get_book_entries', [LibraryController::class, 'get_book_entries']);
             Route::get('get_active_entries', [LibraryController::class, 'get_active_entries']);
             Route::post('create_or_update_book_entry', [LibraryController::class, 'create_or_update_book_entry']);
             Route::delete('remove_entry/{entry_id}', [LibraryController::class, 'remove_entry']);
         });
 
-        Route::prefix('/dormitory/')->middleware('user_role:SUPERADMIN,ADMIN-DORMITORY')->group(function () {
+        Route::prefix('/dormitory/')->middleware(['user_role:SUPERADMIN,ADMIN-DORMITORY', 'throttle:60,1'])->group(function () {
             Route::get('get', [DormitoryController::class, 'dormitories']);
             Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
             Route::post('create_or_update_dormitory', [DormitoryController::class, 'create_or_update_dormitory']);
             Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms']);
+            Route::post('update_dormitory_room', [DormitoryController::class, 'update_dormitory_room']);
             Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms']);
             Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms']);
-            Route::post('create-walk-in-request/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
-            Route::post('create-walk-in-request/create_or_update_request', [DormitoryController::class, 'create_or_update_request']);
+
+            Route::post('requests/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
+            Route::post('requests/update_dormitory_room_request', [DormitoryController::class, 'update_dormitory_room_request']);
+
             Route::post('get_all_requests', [DormitoryController::class, 'get_all_requests']);
             Route::delete('cancel_dorm_request/{dormReqId}', [DormitoryController::class, 'cancel_dorm_request']);
             Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room']);
             Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories']);
             Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock']);
             Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock']);
+            Route::post('get_inventories/update_dormitory_inventory_stock', [DormitoryController::class, 'update_dormitory_inventory_stock']);
+            Route::post('provide_stocks', [DormitoryController::class, 'provide_stocks']);//edrascoe provide stocks to dorm request.
             Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
             Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock']);
             Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);
@@ -147,7 +150,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
         });
 
-        Route::prefix('/masterlist/')->middleware('user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD')->group(function () {
+        Route::prefix('/masterlist/')->middleware(['user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD', 'throttle:60,1'])->group(function () {
             Route::prefix('/user/')->middleware('user_role:SUPERADMIN')->group(function () {
                 Route::match(['GET', 'POST'], 'get_users', [Masterlist::class, 'get_users']);
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
@@ -179,7 +182,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             });
         });
 
-        Route::prefix('/cashier/')->middleware('user_role:SUPERADMIN,CASHIER')->group(function () {
+        Route::prefix('/cashier/')->middleware(['user_role:SUPERADMIN,CASHIER', 'throttle:60,1'])->group(function () {
             Route::post('get_payments', [Cashier::class, 'get_payments']);
             Route::post('pay-walk-in', [Cashier::class, 'pay_walkin']);
             Route::post('verify_payment', [Cashier::class, 'verify_payment']);
@@ -198,7 +201,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('remove_or_number/{fee_category_id}', [Cashier::class, 'remove_or_number']);
         });
 
-        Route::prefix('/recreational-activity/')->middleware('user_role:SUPERADMIN,ADMIN-RA')->group(function () {
+        Route::prefix('/recreational-activity/')->middleware(['user_role:SUPERADMIN,ADMIN-RA', 'throttle:60,1'])->group(function () {
             Route::get('ra_count/get_ra_count', [RecreationalActivityCtrl::class, 'get_ra_count']);
             Route::post('ra_requests', [RecreationalActivityCtrl::class, 'ra_requests']);
             Route::post('ra_requests/get_requested_equipments', [RecreationalActivityCtrl::class, 'get_requested_equipments']);
@@ -206,11 +209,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('ra_requests/issue_requested_equipments', [RecreationalActivityCtrl::class, 'issue_requested_equipments']);
             Route::post('ra_requests/update_requested_facility', [RecreationalActivityCtrl::class, 'update_requested_facility']);
             Route::post('ra_requests/update_requested_equipment', [RecreationalActivityCtrl::class, 'update_requested_equipment']);
+            Route::post('ra_requests/ra_request_charges', [RecreationalActivityCtrl::class, 'ra_request_charges']);
+            Route::post('ra_requests/ra_create_or_update_charge', [RecreationalActivityCtrl::class, 'ra_create_or_update_charge']);
 
             Route::post('ra_equipments', [RecreationalActivityCtrl::class, 'ra_equipments']);
             Route::post('ra_equipment_stock', [RecreationalActivityCtrl::class, 'ra_equipment_stock']);
             Route::post('ra_create_or_update_equipment', [RecreationalActivityCtrl::class, 'ra_create_or_update_equipment']);
             Route::post('ra_equipment_create_stock', [RecreationalActivityCtrl::class, 'ra_equipment_create_stock']);
+            Route::post('ra_equipment_update_stock', [RecreationalActivityCtrl::class, 'ra_update_equipment_stock']);
             Route::delete('ra_remove_equipment/{equipment_id}', [RecreationalActivityCtrl::class, 'ra_remove_equipment']);
             Route::delete('ra_remove_equipment_stock/{equipment_stock_id}', [RecreationalActivityCtrl::class, 'ra_remove_equipment_stock']);
 
@@ -219,6 +225,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('ra_remove_facility/{facility_id}', [RecreationalActivityCtrl::class, 'ra_remove_facility']);
         });
 
+        Route::get('qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
+        Route::post('qrreader/check-in-out', [QRReaderCheckInOutCtrl::class, 'check_in_out']);
+        Route::post('qrreader/get_log_in_out_records', [QRReaderCheckInOutCtrl::class, 'get_log_in_out_records']);
         Route::post('get_charges_predata', [DormitoryController::class, 'get_charges_predata']);
         Route::post('get_trainee_enrolled_trainings', [DormitoryController::class, 'get_trainee_enrolled_trainings']);
         Route::post('submit-csm', [Account::class, 'submit_csm']);

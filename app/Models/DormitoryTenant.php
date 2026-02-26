@@ -52,6 +52,11 @@ class DormitoryTenant extends Model {
         return $this->hasMany(DormitoryReqService::class, 'dormitory_tenant_id', 'id');
     }
 
+    public function isExpired()
+    {
+        return $this->tenant_to_date < now();
+    }
+
     /**
      * SCOPES
      */
