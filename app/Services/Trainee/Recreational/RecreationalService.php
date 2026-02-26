@@ -318,16 +318,16 @@ class RecreationalService {
             "siblings as stock_count" => function($q) {
                 $q->available()->okayCondition();
             },
-            //remove
-            "hasData as active_count" => function($query) {
-                $query->borrowed();
-            }
+            //for future
+            // "hasData as active_count" => function($query) {
+            //     $query->borrowed();
+            // }
             ]);
         })
-        //remove
-        ->when($model instanceof RAFacility, function($query) {
-            $query->withCount("hasData as occupied_count", fn($q) => $q->occupied());
-        })
+        //for future
+        // ->when($model instanceof RAFacility, function($query) {
+        //     $query->withCount("hasData as occupied_count", fn($q) => $q->occupied());
+        // })
         ->available()
         ->okayCondition()
         ->firstOr(fn() => throw new DomainException(($model instanceof RAEquipmentStock ? "Equipment" : "Facility") . " not found"));
