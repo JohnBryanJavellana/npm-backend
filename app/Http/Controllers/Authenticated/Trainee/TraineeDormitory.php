@@ -306,7 +306,7 @@ class TraineeDormitory extends Controller
                 event(new BEDormitory(''));
             }
 
-            return response()->json(["message"=> 'Dormitory request sent successfully.OK'], 200);
+            return response()->json(["message"=> 'Dormitory request sent successfully.'], 200);
         } catch (DomainException $e) {
             throw $e;
         }

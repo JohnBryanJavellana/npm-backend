@@ -30,6 +30,7 @@ class DormitoryInvoiceRequest extends FormRequest
             "billing_id" => "required|exists:dormitory_invoices,id",
             "tenant_id" => "required|exists:dormitory_tenants,id",
             "ref_number" => "required",
+            "billing_type" => "required|in:INCLUSION,SERVICE,DORMITORY"
         ];
     }
 

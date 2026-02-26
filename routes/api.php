@@ -187,7 +187,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('update/penalties', [TraineeInvoices::class, 'updateLibInvoice']);
             // Work-on
             Route::get('view/{tenant}', [TraineeInvoices::class, 'viewDormitoryInvoices']);
-            Route::post('billing/update', [TraineeInvoices::class, 'updatefDormInvoice']);
+            Route::post('billing/update', [TraineeInvoices::class, 'updateDormInvoice']);
             Route::post('enrollment/update', [TraineeInvoices::class, 'updateEnrollmentInvoice']);
         });
 
@@ -223,7 +223,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             });
     });
 
-    //FOR RECREATIONALS
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
     Route::post('update_notification', [NotificationCtrl::class, 'update_notification']);
     Route::post('get_notifications', [NotificationCtrl::class, 'get_notifications']);

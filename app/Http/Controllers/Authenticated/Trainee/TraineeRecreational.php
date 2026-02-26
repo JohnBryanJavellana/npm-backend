@@ -149,6 +149,7 @@ class TraineeRecreational extends Controller
                         'facility_request',
                         'facility_request.updatedByWhom',
                         'facility_request.facility.images',
+                        'invoices',
                         'csm'
                         ])
                     ->get()
@@ -202,7 +203,7 @@ class TraineeRecreational extends Controller
         $validated = $request->validated();
         try
         {
-            $type = Str::lower($validated->documentType);
+            $type = Str::lower($validated["documentType"]);
             $this->recreationalService->cancelRequests($validated);
             AuditHelper::log($request->user()->id, "User {$request->user()->id} has cancelled a {$type} recreational request.");
             // Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has cancelled a recreational request.');
@@ -244,7 +245,6 @@ class TraineeRecreational extends Controller
                     );
                 }
                 catch (\Exception $e) {
-
                 }
             }
             return response()->json(["message" => "Successfully sent a recreational request"], 200);

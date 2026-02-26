@@ -36,11 +36,11 @@ class DormitoryInvoiceService {
         ->get();
     }
 
-    public function updateDormitoryInvoice($validated, $userId): float
+    public function updateDormitoryInvoice($validated, $userId)
     {
         return DB::transaction(function() use ($validated, $userId) {
             // $this->prepareData($validated, $userId);
-            //temporary
+            // temporary
             $this->dormitoryInvoice->query()
             ->forUser($userId)
             ->where("dormitory_tenant_id", $validated["tenant_id"])
@@ -52,9 +52,11 @@ class DormitoryInvoiceService {
                 "datePaid" => Carbon::now()
             ]);
 
-            $this->dormitoryTenantModel->whereKey($validated["tenant_id"])->update([
-                "tenant_status" => RequestStatus::PROCESSING_PAYMENT->value
-            ]);
+            if($validated["billing_type"] === "DORMITORY") {
+                $this->dormitoryTenantModel->whereKey($validated["tenant_id"])->update([
+                    "tenant_status" => RequestStatus::PROCESSING_PAYMENT->value
+                ]);
+            }
         });
     }
 
