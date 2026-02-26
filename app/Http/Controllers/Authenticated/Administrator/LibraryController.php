@@ -762,12 +762,16 @@ class LibraryController extends Controller
 
             $new_fine = $isPost ? new LibraryInvoice() : LibraryInvoice::find($request->documentId);
 
-            if($isPost) $new_fine->trace_number = GenerateTrace::createTraceNumber(LibraryInvoice::class, '-RFINE-', 'trace_number', 10, 99);
-            $new_fine->user_id = $request->user_id;
-            $new_fine->book_res_id = $request->book_res_id;
+            if($isPost) {
+                $new_fine->trace_number = GenerateTrace::createTraceNumber(LibraryInvoice::class, '-RFINE-', 'trace_number', 10, 99);
+                $new_fine->user_id = $request->user_id;
+                $new_fine->book_res_id = $request->book_res_id;
+            } else {
+                $new_fine->invoice_status = $request->status;
+            }
+
             $new_fine->description = $request->details;
             $new_fine->invoice_amount = $request->amount;
-            if(!$isPost) $new_fine->invoice_status = $request->status;
             $new_fine->save();
 
             Notifications::notify($request->user()->id, $request->user_id, "LIBRARY", ($isPost ? 'created' : 'updated') . " a request fine for you.");
