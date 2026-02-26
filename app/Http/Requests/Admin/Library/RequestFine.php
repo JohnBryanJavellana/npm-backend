@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Library;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RequestFine extends FormRequest
@@ -23,12 +24,11 @@ class RequestFine extends FormRequest
     {
         return [
             'amount' => ['required', 'numeric'],
-            'httpMethod' => ['required', 'string'],
             'details' => ['required', 'string'],
-            'charge' => ['required'],
             'book_res_id' => ['required'],
             'user_id' => ['required'],
-            'selectedBookReservations' => ['required', 'array'],
+            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
+            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
         ];
     }
 }

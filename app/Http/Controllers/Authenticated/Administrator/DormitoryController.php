@@ -1326,7 +1326,7 @@ class DormitoryController extends Controller
             $charge->dormitory_room_id = $request->roomId;
             $charge->charge_id = $request->charge;
             $charge->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
-            $charge->total_amount = $request->amount;
+            $charge->invoice_amount = $request->amount;
             $charge->description = $descriptionHtml;
             $charge->isInitial = "N";
             $charge->remarks = $request->remarks ?? '';

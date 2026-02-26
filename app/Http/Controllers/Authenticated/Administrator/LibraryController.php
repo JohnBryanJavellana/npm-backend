@@ -690,13 +690,8 @@ class LibraryController extends Controller
     public function get_fines(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $fines = LibraryInvoice::with([
-                'charge',
-                'bookRes',
-                'selectedBooks',
-                'selectedBooks.bookReservation',
-                'selectedBooks.bookReservation.book',
-                'selectedBooks.bookReservation.books',
-                'selectedBooks.bookReservation.books.catalog',
+                'payee',
+                'orNumber'
             ])->where([
                 'book_res_id' => $request->libraryId,
                 'user_id' => $request->userId
@@ -766,30 +761,16 @@ class LibraryController extends Controller
             $isPost = $request->httpMethod === "POST";
 
             $new_fine = $isPost ? new LibraryInvoice() : LibraryInvoice::find($request->documentId);
-            $new_fine->trace_number = $isPost
-                ? GenerateTrace::createTraceNumber(LibraryInvoice::class, '-RFINE-', 'trace_number', 10, 99)
-                : $new_fine->trace_number;
 
+            if($isPost) $new_fine->trace_number = GenerateTrace::createTraceNumber(LibraryInvoice::class, '-RFINE-', 'trace_number', 10, 99);
             $new_fine->user_id = $request->user_id;
-            $new_fine->charge_id = $request->charge;
             $new_fine->book_res_id = $request->book_res_id;
-            $new_fine->details = $request->details;
-            $new_fine->amount = $request->amount;
+            $new_fine->description = $request->details;
+            $new_fine->invoice_amount = $request->amount;
+            if(!$isPost) $new_fine->invoice_status = $request->status;
             $new_fine->save();
 
-            LISelectedBook::where('library_invoice_id', $new_fine->id)->delete();
-
-            foreach ($request->selectedBookReservations as $bookReservation) {
-                $bookReserv = BookReservation::find($bookReservation);
-                $new_fine_selected_book_reservation = new LISelectedBook;
-                $new_fine_selected_book_reservation->library_invoice_id = $new_fine->id;
-                $new_fine_selected_book_reservation->book_reservation_id = $bookReservation;
-                $new_fine_selected_book_reservation->remarks = $bookReserv->status;
-                $new_fine_selected_book_reservation->save();
-            }
-
             Notifications::notify($request->user()->id, $request->user_id, "LIBRARY", ($isPost ? 'created' : 'updated') . " a request fine for you.");
-
             AuditHelper::log(
                 $request->user()->id,
                 $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value . " ID#$new_fine->id"
