@@ -1457,6 +1457,13 @@ public function provide_stocks_to_boarder(Request $request) {
         ->first();
 
     if (!$stock) {
+
+        \Log::info("Stock ID $stockId unavailable. Checking...", [
+            'exists'       => DormitoryInventoryItem::where('id', $stockId)->exists(),
+            'inventory_id' => DormitoryInventoryItem::where('id', $stockId)->value('dormitory_inventory_id'),
+            'status'       => DormitoryInventoryItem::where('id', $stockId)->value('status'),
+        ]);
+
         $unavailable[] = $stockId;
         continue;
     }
@@ -1520,64 +1527,7 @@ public function provide_stocks_to_boarder(Request $request) {
         ], 201);
     });
 }
-//  show reserved stocks for boarder
-/**
- * Summary of get_provided_stocks
- * @param Request $request
- */
-//public function get_provided_stocks(Request $request) {
-//    return TransactionUtil::transact(null, [], function() use ($request) {
-//        $dormitoryTenantId = $request->dormitoryTenantId;
-//        $inventoryId = $request->inventoryId;
-//
-//        $tenantRequest = DormitoryTenant::with([
-//            'boarder',
-//            'dormitory_room',
-//            'dormitory_room.dormitory',
-//        ])->findOrFail($dormitoryTenantId);
-//
-//        $provisions = DormitoryItemBorrowing::with([
-//            'inventory',
-//            'items' => function($q) {
-//                $q->with('item')
-//                  ->whereHas('item', fn($q2) =>
-//                      $q2->where('status', DormitoryEnum::RESERVED->value)
-//                  );
-//            }
-//        ])
-//        ->where('dormitory_tenant_id', $dormitoryTenantId)
-//        ->where('status', DormitoryEnum::ACTIVE->value)
-//        ->when($inventoryId, fn($q) => $q->where('dormitory_inventory_id', $inventoryId))
-//        ->get()
-//        ->map(function($provision) {
-//            return [
-//                'provision_id'   => $provision->id,
-//                'inventory_id'   => $provision->inventory->id,
-//                'inventory_name' => $provision->inventory->name,
-//                'total_count'    => $provision->count,
-//                'stocks'         => $provision->items->map(fn($detail) => [
-//                    'detail_id'         => $detail->id,
-//                    'stock_id'          => $detail->item->id,
-//                    'unique_identifier' => $detail->item->unique_identifier,
-//                    'status'            => $detail->item->status,
-//                    'provision_status'  => $detail->status,
-//                    'reserved_at'       => $detail->created_at,
-//                ])->values(),
-//            ];
-//        });
-//
-//      return response()->json([
-//    'boarder' => [
-//        'id'        => $tenantRequest->boarder->id,
-//        'name'      => "{$tenantRequest->boarder->fname} {$tenantRequest->boarder->lname}",
-//        'room'      => $tenantRequest->dormitory_room?->room_name ?? 'No room assigned',
-//        'dormitory' => $tenantRequest->dormitory_room?->dormitory?->room_name ?? 'No dormitory assigned',
-//        'status'    => $tenantRequest->tenant_status,
-//    ],
-//    'provisions' => $provisions,
-//], 200);
-//    });
-//}
+//  show reserved stocks for boarder(?)
 public function get_provided_stocks(Request $request) {
     return TransactionUtil::transact(null, [], function() use ($request) {
         $dormitoryTenantId = $request->dormitoryTenantId;
@@ -1591,14 +1541,19 @@ public function get_provided_stocks(Request $request) {
 
         $inventory = DormitoryInventory::findOrFail($inventoryId);
 
-        $stocks = DormitoryInventoryItem::withCount('borrowed')
-            ->when($inventoryId, fn($q) => $q->where('dormitory_inventory_id', $inventoryId))
-            ->get()
-            ->map(fn($stock) => [
-                'stock_id'          => $stock->id,
-                'unique_identifier' => $stock->unique_identifier,
-                'status'            => $stock->status,
-            ])->values();
+        $provision = DormitoryItemBorrowing::with(['items.item'])
+            ->where('dormitory_tenant_id', $dormitoryTenantId)
+            ->where('dormitory_inventory_id', $inventoryId)
+            ->first();
+
+        $stocks = $provision
+            ?->items->map(fn($detail) => [
+                'stock_id'          => $detail->item->id,
+                'unique_identifier' => $detail->item->unique_identifier,
+                'status'            => $detail->item->status,
+                'provision_status'  => $detail->status,
+                'provided_at'       => $detail->created_at,
+            ])->values() ?? collect([]);
 
         return response()->json([
             'boarder' => [
@@ -1609,12 +1564,67 @@ public function get_provided_stocks(Request $request) {
                 'status'    => $tenantRequest->tenant_status,
             ],
             'inventory' => [
-                'id'   => $inventory->id,
-                'name' => $inventory->name,
+                'id'            => $inventory->id,
+                'name'          => $inventory->name,
+                'total_provided' => $provision?->count ?? 0,  // ← total stocks provided
             ],
             'stocks' => $stocks,
         ], 200);
     });
 }
+// change the status of the provided stocks pending doom
 
+/**
+ * Summary of update_stock_status
+ * @param Request $request (stockId required, status required)
+ */
+public function update_stock_status(Request $request) {
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $stockId = $request->stockId;
+        $status  = $request->status;
+
+        $validStatuses = [
+            DormitoryEnum::AVAILABLE->value,
+            DormitoryEnum::RESERVED->value,
+            DormitoryEnum::BORROWED->value,
+        ];
+
+        if (!in_array($status, $validStatuses)) {
+            return response()->json([
+                'message' => "Invalid status. Allowed statuses: " . implode(', ', $validStatuses)
+            ], 422);
+        }
+
+        $stock = DormitoryInventoryItem::where('id', $stockId)
+            ->lockForUpdate()
+            ->first();
+
+        if (!$stock) {
+            return response()->json(['message' => "Stock not found."], 404);
+        }
+
+        $oldStatus        = $stock->status;
+        $stock->status    = $status;
+        $stock->save();
+
+        AuditHelper::log(
+            $request->user()->id,
+            "Stock ID#$stockId status changed from $oldStatus to $status"
+        );
+
+        if (env('USE_EVENT')) {
+            event(new BEDormitory(''), new BEAuditTrail(''));
+        }
+
+        return response()->json([
+            'message' => "Stock status updated successfully.",
+            'stock'   => [
+                'stock_id'          => $stock->id,
+                'unique_identifier' => $stock->unique_identifier,
+                'old_status'        => $oldStatus,
+                'new_status'        => $stock->status,
+            ]
+        ], 200);
+    });
+}
 }
