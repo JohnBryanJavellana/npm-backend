@@ -253,7 +253,7 @@ class TraineeRecreational extends Controller
             throw $e;
         }
         catch (ModelNotFoundException $e) {
-            throw $e;
+            return response()->json(["message" => "Facility record not found"], 404);
         }
         catch (\Exception $e) {
             \Log::error("requestEquipmentError", [$e]);
