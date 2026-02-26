@@ -1131,46 +1131,15 @@ class DormitoryController extends Controller
 
     public function request_service (CreateOrUpdateServiceReq $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
+
             $this_service = $request->httpMethod === "POST"
                 ? new DormitoryReqService()
                 : DormitoryReqService::where('id', $request->documentId)->lockForUpdate()->first();
 
-            $descriptionHtml = $this->addDescription(
-        "<div style='display: flex; align-items: center; justify-content: space-between;'>
-                    <div style='font-weight: bold; color: #6c757d;'>Service Charge</div>
-                    <div>₱" . number_format((float) $request->charge) . "</div>
-                </div>"
-            );
-
-            $invoiceId = $request->httpMethod === "POST"
-                ? new DormitoryInvoice()
-                : DormitoryInvoice::findOrFail($this_service->dormitory_invoices_id);
-
-            $invoiceId->user_id = $request->userId;
-            $invoiceId->dormitory_tenant_id = $request->tenantId;
-            $invoiceId->charge_id = $request->chargeId;
-
-            if($request->httpMethod === "POST") {
-                $invoiceId->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
-                $invoiceId->isInitial = "N";
-            }
-
-            $invoiceId->description = $descriptionHtml;
-            if($request->charge <= 0 && !\in_array($request->status, ["CANCELLED", "DECLINED"])) $invoiceId->invoice_status = "PAID";
-            if($request->status === "CANCELLED") {;
-                $invoiceId->invoice_status = "CANCELLED";
-            }
-
-            $invoiceId->total_amount = $request->charge;
-            $invoiceId->remarks = $request->remarks;
-            $invoiceId->save();
-
             $this_service->dormitory_tenant_id = $request->tenantId;
-            $this_service->dormitory_service_id = $request->service_id;
-            $this_service->charge = $request->charge;
+            $this_service->dormitory_service_id = $request->serviceId;
             $this_service->remarks = $request->remarks;
-            $this_service->status = $request->httpMethod === "POST" ? "APPROVED" : $request->status;
-            $this_service->dormitory_invoices_id = $invoiceId->id;
+            if($request->status) $this_service->status = $request->status;
             $this_service->save();
 
             Notifications::notify($request->user()->id, $request->userId, "DORMITORY", "We have ". ($request->httpMethod === "POST" ? 'created' : 'updated') . " a dormitory service request for you.");
@@ -1227,12 +1196,6 @@ class DormitoryController extends Controller
 
             $reqTemp->status = $request->status;
             $reqTemp->save();
-
-            if($request->status === DormitoryEnum::CANCELLED->value) {
-                $invoice = DormitoryInvoice::findOrFail($reqTemp->invoice()->id);
-                $invoice->invoice_status = DormitoryEnum::CANCELLED->value;
-                $invoice->save();
-            }
 
             AuditHelper::log(
                 $request->user()->id,
