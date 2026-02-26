@@ -36,7 +36,6 @@ class GenerateQR {
             }
 
             $img->text((string)$qrText, 250, 540, function($font) use ($fontPath) {
-                // Use the absolute path variable
                 $font->file($fontPath);
                 $font->size(25);
                 $font->color('#000000');
