@@ -158,7 +158,8 @@ class Cashier extends Controller
     public function pay_walkin (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_payment = self::getTable($request->service, $request->documentId, null)->first();
-            if($request->isInitial) {
+
+            if($request->isInitial === true) {
                 $this_main_table = self::getTable($request->service, $request->mainTable, null, true, true)->first();
 
                 switch($request->service) {
