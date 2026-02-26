@@ -982,7 +982,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => ($isPost ? AdministratorReturnRespon se::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value) . "ID# " . $this_service->id], 201);
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value) . "ID# " . $this_service->id], 201);
         });
     }
 
