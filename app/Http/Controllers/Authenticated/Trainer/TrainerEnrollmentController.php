@@ -38,7 +38,7 @@ class TrainerEnrollmentController extends Controller
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
-
+    //! AdminDashhboard
     //! Tigaman
     public function getCourseDetails(Request $request)
     {
@@ -59,7 +59,7 @@ class TrainerEnrollmentController extends Controller
             "training" => $record,
         ], 200);
     }
-    
+
 
     public function getTraineeDetails(Request $request)
     {
