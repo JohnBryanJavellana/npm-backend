@@ -735,7 +735,7 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request, $id) {
             $libraryInvoice = LibraryInvoice::find($id);
 
-            if($libraryInvoice->status !== "PENDING") {
+            if($libraryInvoice->invoice_status !== "PENDING") {
                 return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYFINE->value], 400);
             } else {
                 $libraryInvoice->delete();
