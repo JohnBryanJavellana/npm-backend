@@ -267,6 +267,8 @@ class RecreationalService {
         $startDate = $info['from_datetime'];
         $endDate   = $info['to_datetime'];
 
+        $facilityName = $this->rafacilityModel->where("unique_identifier", $info["UI"])->firstOrFail();
+
         $facility = $this->rafacilityModel->query()
             ->select("id", "condition_status", "unique_identifier")
             ->uniqueIdentifier($info["UI"])
@@ -281,8 +283,8 @@ class RecreationalService {
             })
             ->available()
             ->okayCondition()
-            ->firstOr(function () {
-                throw new DomainException("Selected facility is not available anymore.");
+            ->firstOr(function () use ($facilityName) {
+                throw new DomainException("Selected facility is not available anymore: {$facilityName->name}");
             });
 
         $this->rafacilityRequestModel->create([
