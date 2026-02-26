@@ -38,6 +38,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
 /** other controllers */
 
 use App\Http\Controllers\Authenticated\Logout;
+use App\Http\Controllers\Authenticated\Trainer\AttendanceController;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
 use App\Http\Controllers\QRReaderCheckInOutCtrl;
 
@@ -55,7 +56,7 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPasswor
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 /** authenticated routes */
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::post('/broadcasting/auth', function (Request $request) {
         return Broadcast::auth($request);
     });
@@ -77,10 +78,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return response()->json(['user' => $user->first()]);
     });
 
-    Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-ENROLLMENT', 'throttle:60,1'])->group(function () {
-        Route::prefix('/my-account/')->group(function() {
-            Route::post('create_or_update_additional_info', [MyAccount::class,'create_or_update_additional_info']);
-            Route::post('upload_profile_picture', [MyAccount::class,'upload_profile_picture']);
+    Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () {
+        Route::prefix('/my-account/')->group(function () {
+            Route::post('create_or_update_additional_info', [MyAccount::class, 'create_or_update_additional_info']);
+            Route::post('upload_profile_picture', [MyAccount::class, 'upload_profile_picture']);
             Route::get('get_trainee_general_info/{user}', [MyAccount::class, 'get_trainee_general_info']);
             Route::post('update_password', [Account::class, 'update_password']);
             Route::get('get_activities', [Account::class, 'get_activities']);
@@ -200,7 +201,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('enrollment/')->group(function() {
             Route::get('training', [TrainerEnrollmentController::class, 'viewAllTrainingsAndFacilitators']);
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
-            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
+            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']); //*
+            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //*
+            Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
+
+            //* ATTENTANCE PART
+            Route::get('trainee', [AttendanceController::class, 'test']);
         });
     });
 
@@ -213,8 +219,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_recreational_request', [TraineeRecreational::class, 'get_recreational_request']);
             Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'getRecreationalRequest']);
             Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancelUnitsRequest']);
-            Route::get('counts', [TraineeRecreational::class, 'testFetch']);
-        }); 
+            Route::get('counts', [TraineeRecreational::class, 'viewRecRequestCount']);
+            });
     });
 
     //FOR RECREATIONALS

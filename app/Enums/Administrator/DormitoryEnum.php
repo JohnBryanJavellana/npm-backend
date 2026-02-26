@@ -12,6 +12,8 @@ enum DormitoryEnum : string
     case ACTIVE = "ACTIVE";
     case FOR_PAYMENT = "FOR PAYMENT";
     case REJECTED = 'REJECTED';
+    case TRANSFERRING = 'TRANSFERRING';
+    case TRANSFERRED = 'TRANSFERRED';
     case TERMINATED = 'TERMINATED';
     case EXTENDING = 'EXTENDING';
     case CANCELLED = 'CANCELLED';

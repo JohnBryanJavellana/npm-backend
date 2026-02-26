@@ -117,7 +117,7 @@ class EnrollmentCtrl extends Controller
                     'training' => [
                         'main' => [
                             'info' => $self->toArray(),
-                            'charge' => $self->training->module->trainingFees()->latest()->first()->toArray(),
+                            'charge' => $self->training->module->trainingFees()->latest()->first(),
                             'name' => [
                                 'module' => $self->training->module,
                                 'moduleType' => $self->training->module->moduleType,
