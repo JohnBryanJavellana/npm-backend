@@ -67,7 +67,7 @@ class Cashier extends Controller
             NotificationEnum::RECREATIONAL->value    => $isMainTable || $isInitialTable ? RARequestInfo::class : RAInvoices::class,
         ];
 
-        if (!array_key_exists($service, $modelMap)) {
+        if (!\array_key_exists($service, $modelMap)) {
             throw new \InvalidArgumentException("Invalid service type: $service", 500);
         }
 
@@ -121,23 +121,29 @@ class Cashier extends Controller
             $relations = ['payee', 'orNumber'];
 
             if($request->service === NotificationEnum::LIBRARY->value) {
-                $relations = array_merge($relations, [
+                $relations = [
+                    ...$relations,
                     'bookRes',
                     'selectedBooks',
                     'selectedBooks.bookReservation',
                     'selectedBooks.bookReservation.book',
                     'selectedBooks.bookReservation.books',
                     'selectedBooks.bookReservation.books.catalog'
-                ]);
+                ];
             }
 
             if($request->service === NotificationEnum::ENROLLMENT->value) {
-                $relations = array_merge($relations, [
+                $relations = [
+                    ...$relations,
                     'training'
-                ]);
+                ];
             }
 
-            $paymentsData = $payments->with($relations)->orderBy('created_at', 'DESC')->get();
+            $paymentsData = $payments->with($relations)->orderBy('created_at', 'DESC');
+
+            if($request->limitter) $paymentsData->take($request->limitter);
+            $paymentsData = $paymentsData ->get();
+
             return response()->json(['payments' => $paymentsData], 200);
         });
     }

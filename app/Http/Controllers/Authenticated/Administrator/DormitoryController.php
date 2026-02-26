@@ -1389,7 +1389,7 @@ class DormitoryController extends Controller
             if(!\in_array($this_charge->invoice_status, [DormitoryEnum::PENDING->value])) {
                 return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYCHARGE->value], 200);
             } else {
-                $this_charge->invoice_status = ormitoryEnum::CANCELLED->value;
+                $this_charge->invoice_status = DormitoryEnum::CANCELLED->value;
                 $this_charge->save();
 
                 AuditHelper::log(

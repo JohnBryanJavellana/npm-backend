@@ -25,7 +25,7 @@ class CreateOrUpdateDormitoryCharge extends FormRequest
     {
         return [
             'userId'      => ['required', 'integer', 'exists:users,id'],
-            'tenantId'    => ['required', 'integer', 'exists:dormitory_tenants,id'],
+            'tenantId'    => ['required', 'integer'],
             'amount'      => ['required', 'numeric'],
             'description' => ['required', 'string'],
             'httpMethod'  => ['required', 'string'],

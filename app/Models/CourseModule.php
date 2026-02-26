@@ -44,10 +44,12 @@ class CourseModule extends Model
         return $this->hasOne(ModuleType::class, 'id', 'module_type_id');
     }
 
+
     public function facilitator()
     {
         return $this->hasMany(TrainingFacilitator::class, "course_module_id", "id");
     }
+
 
     public function certificates()
     {
