@@ -233,7 +233,7 @@ class TraineeEnrollment extends Controller
             $validated = $request->validated();
             $this->enrollmentService->cancelEnrollmentRequest($validated);
 
-            // //TRAINING ID PASS
+            // //TRAINING ID PASS   
             Training::where("id", $validated["training_id"])->increment('schedule_slot',1);
             AuditHelper::log($validated["user_id"], "User " . $validated["user_id"] . " has cancelled training request. {$validated["training_id_OK"]}");
 
