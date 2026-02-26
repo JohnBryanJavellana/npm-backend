@@ -23,6 +23,7 @@ return new class extends Migration
             $table->longText('description');
             $table->longText('trace_number')->nullable();
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
+            $table->decimal('received_amount', 65, 2)->default(0.00);
             $table->decimal('invoice_amount', 65, 2)->default(0.00);
             $table->enum('invoice_status', ['PENDING', 'PAID', 'CANCELLED', 'FOR-VERIFICATION'])->default('PENDING');
             $table->string('invoice_reference')->nullable();

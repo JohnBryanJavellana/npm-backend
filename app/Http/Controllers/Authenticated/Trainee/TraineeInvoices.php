@@ -125,11 +125,11 @@ class TraineeInvoices extends Controller
         }
     }
 
-    public function view_dormitory_invoices(Request $request, $id)
+    public function viewDormitoryInvoices(Request $request, $tenant)
     {
         $user_id = $request->user()->id;
         try {
-            $invoices = $this->dormitoryInvoiceService->getUserInvoice($id, $user_id);
+            $invoices = $this->dormitoryInvoiceService->getUserInvoice($tenant, $user_id);
 
             return DormitoryInvoiceResource::collection($invoices);
         }
