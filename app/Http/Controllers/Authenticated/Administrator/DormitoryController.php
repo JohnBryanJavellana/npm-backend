@@ -1312,21 +1312,23 @@ class DormitoryController extends Controller
 
     public function created_or_update_dormitory_charge (CreateOrUpdateDormitoryCharge $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $charge = new DormitoryInvoice();
+            $isPost = $request->httpMethod === "POST";
 
-            $charge->user_id = $request->userId;
-            $charge->dormitory_tenant_id = $request->tenantId;
-            $charge->dormitory_room_id = $request->roomId;
-            $charge->charge_id = $request->charge;
-            $charge->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
-            $charge->invoice_amount = $request->amount;
-            $charge->description = $request->details;
-            $charge->isInitial = "N";
-            $charge->remarks = $request->remarks ?? '';
-            if($request->status) $charge->status = DormitoryEnum::PAID->value;
-            $charge->save();
+            $new_fine = $isPost ? new DormitoryInvoice() : DormitoryInvoice::find($request->documentId);
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYCHARGE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID#" . $charge->id);
+            if($isPost) {
+                $new_fine->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
+                $new_fine->user_id = $request->userId;
+                $new_fine->dormitory_tenant_id = $request->tenantId;
+            } else {
+                $new_fine->invoice_status = $request->status;
+            }
+
+            $new_fine->invoice_amount = $request->amount;
+            $new_fine->description = $request->details;
+            $new_fine->save();
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYCHARGE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID#$new_fine->id");
 
             if(env('USE_EVENT')) {
                 event(
@@ -1335,7 +1337,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => ($request->httpMethod == "POST" ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYCHARGE->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID# " . $charge->id], 201);
+            return response()->json(['message' => ($request->httpMethod == "POST" ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORY->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID#$new_fine->id"], 201);
         });
     }
 

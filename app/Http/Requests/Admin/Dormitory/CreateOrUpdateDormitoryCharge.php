@@ -24,11 +24,12 @@ class CreateOrUpdateDormitoryCharge extends FormRequest
     {
         return [
             'userId' => ['required'],
-            'roomId' => ['required'],
             'tenantId' => ['required'],
-            'charge' => ['required'],
+            'amount' => ['required', 'numeric'],
+            'details' => ['required', 'string'],
             'httpMethod' => ['required'],
-            'documentId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ]
+            'documentId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ],
+            'status' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ]
         ];
     }
 }
