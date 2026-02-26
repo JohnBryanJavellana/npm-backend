@@ -3,6 +3,7 @@
 namespace App\Enums\Administrator;
 
 enum LibraryEnum : string {
+    case PENDING = "PENDING";
     case ACTIVE = "ACTIVE";
     case FOR_CSM = "FOR CSM";
     case EXTENDING = "EXTENDING";

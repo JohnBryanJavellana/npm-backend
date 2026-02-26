@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,5 +23,12 @@ class RAEquipmentRequest extends Model
 
     public function updatedByWhom() {
         return $this->hasOne(User::class, 'id', 'updated_by_whom');
+    }
+
+    /** Scopes */
+
+    public function scopeBorrowed(Builder $query)
+    {
+        return $query->whereIn("status", [RequestStatus::APPROVED->value, RequestStatus::RECEIVED->value]);
     }
 }

@@ -14,10 +14,9 @@ class RoomPreferRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
-        // return $this->user() !== null;
+        // return true;
+        return $this->user() !== null;
     }
-
     /**
      * Get the validation rules that apply to the request.
      *

@@ -98,7 +98,7 @@ class TraineeInvoices extends Controller
 
             $balance = $this->libraryInvoiceService->updateLibraryInvoice($validated, $user_id);
 
-            return response()->json(["message" => "Successfully Paid!OK", "balance" => $balance], 200);
+            return response()->json(["message" => "Successfully Paid!", "balance" => $balance], 200);
         }
         catch (\Exception $e) {
             return response()->json(["message" => "Something went wrong, Please try again!"], 500);
@@ -111,9 +111,10 @@ class TraineeInvoices extends Controller
             $validated = $request->validated();
             $user_id = $request->user()->id;
 
-            $total = $this->dormitoryInvoiceService->updateDormitoryInvoice($validated, $user_id);
+            $this->dormitoryInvoiceService->updateDormitoryInvoice($validated, $user_id);
+            // $total = $this->dormitoryInvoiceService->updateDormitoryInvoice($validated, $user_id);
 
-            return response()->json(["balance" => $total], 200);
+            return response()->json(["message" => "Payment Transaction Success!"], 200);
         }
         catch (DomainException $e) {
             \Log::info("updateDormInvoiceDomainException", [$e]);
@@ -125,11 +126,11 @@ class TraineeInvoices extends Controller
         }
     }
 
-    public function view_dormitory_invoices(Request $request, $id)
+    public function viewDormitoryInvoices(Request $request, $tenant)
     {
         $user_id = $request->user()->id;
         try {
-            $invoices = $this->dormitoryInvoiceService->getUserInvoice($id, $user_id);
+            $invoices = $this->dormitoryInvoiceService->getUserInvoice($tenant, $user_id);
 
             return DormitoryInvoiceResource::collection($invoices);
         }

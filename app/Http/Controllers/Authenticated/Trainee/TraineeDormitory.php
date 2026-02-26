@@ -60,13 +60,17 @@ class TraineeDormitory extends Controller
 
     public function viewTenantCount(Request $request)
     {
-        return $this->dormitory_service->getDormRequestCount($request->user()->id);
+        try {
+            return $this->dormitory_service->getDormRequestCount($request->user()->id);            
+        }
+        catch (\Exception $e) {
+            \Log::info("viewTenantCountError", [$e]);
+        }
     }
 
     public function viewRecommendedRooms(RoomPreferRequest $request)
     {
-        try
-        {
+        try {
             $validated = $request->validated();
             $rooms = $this->dormitory_service->getRecommendedRoom($validated);
             return DormRoomsResource::collection($rooms);
@@ -78,11 +82,10 @@ class TraineeDormitory extends Controller
 
     public function get_filtered_dorms (Request $request)
     {
-        try
-        {
+        try {
             $cost = $request->cost;
             $dormitories = DormitoryRoom::with("room_images")
-                ->where('room_status', 'ACTIVE')
+                ->where('room_status', RequestStatus::ACTIVE->value)
                 ->where('room_available_slot', '>', 0);
 
             if($cost) $dormitories = $dormitories->where('room_cost', '<=', $cost);
@@ -229,8 +232,8 @@ class TraineeDormitory extends Controller
             }
 
             //additional email for sending a extension request
-            AuditHelper::log($request->user()->id, "User {$request->user()->id} sent a dorm extension request.OK");
-            return response()->json(['message' => "Your extension request has been successfully submitted for review.OK"]);
+            AuditHelper::log($request->user()->id, "User {$request->user()->id} sent a dorm extension request.");
+            return response()->json(['message' => "Your extension request has been successfully submitted for review."]);
         }
         catch (DomainException $e) {
             throw $e;
@@ -291,8 +294,8 @@ class TraineeDormitory extends Controller
         }
     }
 
+    //additional
     public function request_tenant_room(DormRoomRequest $request) {
-        // \Log::info("controller dorm", [$request->all()]);
         $user = User::findOrFail($request->userId ?? $request->user()->id);
         $validated = $request->validated();
 
@@ -303,7 +306,7 @@ class TraineeDormitory extends Controller
                 event(new BEDormitory(''));
             }
 
-            return response()->json(["message"=> 'Dormitory request sent successfully.OK'], 200);
+            return response()->json(["message"=> 'Dormitory request sent successfully.'], 200);
         } catch (DomainException $e) {
             throw $e;
         }
@@ -432,7 +435,7 @@ class TraineeDormitory extends Controller
 
             $this->dormitoryExtraService->createService($validated, $user_id);
 
-            return response()->json(["message" => "Your service request has been sent successfully!ok"], 200);
+            return response()->json(["message" => "Your service request has been sent successfully!"], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -460,6 +463,4 @@ class TraineeDormitory extends Controller
             return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
         }
     }
-
-
 }

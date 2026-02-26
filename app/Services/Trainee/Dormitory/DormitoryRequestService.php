@@ -13,6 +13,7 @@ use App\Models\{
 use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
+use App\Utils\SaveFile;
 use Illuminate\Support\Facades\DB;
 use DomainException;
 
@@ -44,8 +45,8 @@ class DormitoryRequestService {
         return $this->roomModel->query()
         ->select()
         ->with([
-            "dormitory",
-            "dormitory.room_images"
+            "dormitory:id,room_name,room_description,room_fee_type,room_cost,guest_cost",
+            "dormitory.room_images:id,dormitory_id,filename"
         ])
         ->whereHas('dormitory', fn($query) => $query->where("room_fee_type", $validated["forType"]))
         ->where('is_air_conditioned', $validated["roomType"])
@@ -53,9 +54,10 @@ class DormitoryRequestService {
             'hasData as overlapping_tenants_count' => function ($q) use ($start, $end) {
                 $q->where('tenant_from_date', '<', $end)
                     ->where('tenant_to_date', '>', $start)
-                    ->whereIn('tenant_status', ['APPROVED', 'ACTIVE']);
+                    ->whereIn('tenant_status', [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value]);
             }
         ])
+        ->available()
         ->havingRaw("overlapping_tenants_count + ? <= ?", [$requiredSlots, $capacity])
         ->orderBy('overlapping_tenants_count', 'asc')
         ->get();
@@ -70,7 +72,6 @@ class DormitoryRequestService {
 
             $data = [
                 "user_id" => $userId,
-                // "room_for_type" => $validated["forType"],
                 "dormitory_room_id" => $validated["room_id"] ?? null,
                 "trace_number" => GenerateTrace::createTraceNumber($this->tenantModel, self::PREFIX),
                 "is_air_conditioned" => $validated["is_air_conditioned"],
@@ -80,9 +81,9 @@ class DormitoryRequestService {
                 "purpose" => $validated["purpose"],
             ];
 
-            // if($validated["forType"] === $this->tenantModel::COUPLE) {
-            //     $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document');
-            // }
+            if(isset($validated["file"])) {
+                $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document') ?? null;
+            }
 
             $record = $this->tenantModel->create($data);
 
@@ -150,8 +151,9 @@ class DormitoryRequestService {
     }
 
     private function validateData($userId) {
-        $existing_request = $this->tenantModel
-        ->where(['user_id' => $userId, 'tenant_status' => RequestStatus::PENDING])
+        $existing_request = $this->tenantModel->query()
+        ->forUser($userId)
+        ->active()
         ->exists();
 
         if ($existing_request) {
