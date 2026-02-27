@@ -264,38 +264,43 @@ class RecreationalService {
 
     public function storeFacilitiesRequest($info, $record)
     {
-        $startDate = $info['from_datetime'];
-        $endDate   = $info['to_datetime'];
+        return DB::transaction(function () use ($info, $record) {
 
-        $facilityName = $this->rafacilityModel->where("unique_identifier", $info["UI"])->firstOrFail();
+            $startDate = $info['from_datetime'];
+            $endDate   = $info['to_datetime'];
 
-        $facility = $this->rafacilityModel->query()
-            ->select("id", "condition_status", "unique_identifier")
-            ->uniqueIdentifier($info["UI"])
-            ->whereKey($info["id"])
-            ->whereDoesntHave("hasData", function ($query) use ($startDate, $endDate) {
-                $query->whereIn("status", [
-                        RequestStatus::APPROVED->value,
-                        RequestStatus::OCCUPIED->value
-                    ])
-                    ->where('start_date', '<', $endDate)
-                    ->where('end_date', '>', $startDate);
-            })
-            ->available()
-            ->okayCondition()
-            ->firstOr(function () use ($facilityName) {
-                throw new DomainException("Selected facility is not available anymore: {$facilityName->name}");
-            });
+            $facility = $this->rafacilityModel->query()
+                ->select('id', 'name', 'condition_status')
+                ->whereKey($info['id'])
+                ->uniqueIdentifier($info['UI'])
+                ->available()
+                ->okayCondition()
+                ->whereDoesntHave('hasData', function ($query) use ($startDate, $endDate) {
+                    $query->whereIn('status', [
+                            RequestStatus::APPROVED->value,
+                            RequestStatus::OCCUPIED->value
+                        ])
+                        ->where('start_date', '<', $endDate)
+                        ->where('end_date', '>', $startDate);
+                })
+                ->lockForUpdate() // prevent race condition
+                ->first();
 
-        $this->rafacilityRequestModel->create([
-            "r_a_request_info_id" => $record->id,
-            "r_a_facility_id"     => $facility->id,
-            "start_date"          => $startDate,
-            "end_date"            => $endDate,
-            "issued_condition"    => $facility->condition_status
-        ]);
+            if (!$facility) {
+                throw new DomainException(
+                    "Selected facility is not available anymore."
+                );
+            }
+
+            return $this->rafacilityRequestModel->create([
+                'r_a_request_info_id' => $record->id,
+                'r_a_facility_id'     => $facility->id,
+                'start_date'          => $startDate,
+                'end_date'            => $endDate,
+                'issued_condition'    => $facility->condition_status,
+            ]);
+        });
     }
-
 
     public function checkPrefix($UIId)
     {
