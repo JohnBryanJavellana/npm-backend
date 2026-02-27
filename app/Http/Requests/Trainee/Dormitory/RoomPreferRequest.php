@@ -17,7 +17,6 @@ class RoomPreferRequest extends FormRequest
         // return true;
         return $this->user() !== null;
     }
-
     /**
      * Get the validation rules that apply to the request.
      *

@@ -202,14 +202,16 @@
                 Route::get('training', [TrainerEnrollmentController::class, 'viewAllTrainingsAndFacilitators']);
                 Route::get('courses', [TrainerEnrollmentController::class, 'view']);
                 Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']); //*
-                Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //*
+
                 Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
 
                 //! ATTENTANCE PART
                 Route::get('trainee', [AttendanceController::class, 'test']);
                 Route::get('trainee_attendance_button', [Attendance::class, 'attendance_button']);
                 // Route::post('/scan-qr', [AttendanceController::class, 'scanQr']);
-                Route::get('attendance_list', [AttendanceController::class, 'attendance_list_trainee']);
+                Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //! trainee list
+                Route::post('attendance_dropdown', [AttendanceController::class, 'recordAttendance']); //! for dropdown
+                Route::post('attendance_record_by_date', [AttendanceController::class, 'recordAttendanceByDate']); //! for folder 
 
                 // //! Import CSV
                 // Route::post('/import_csv', [AttendanceController::class, 'ImportCSV']);

@@ -62,7 +62,7 @@ class ImportcsvController extends Controller
 
         $rows = array_map('str_getcsv', file($request->file('file')));
 
-        array_shift($rows); 
+        array_shift($rows);
 
         foreach ($rows as $row) {
 

@@ -16,13 +16,12 @@ class Attendance extends Model
         return $this->hasMany(AttendanceRecord::class, 'attendance_id', 'id');
     }
 
-
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function module()
+    public function enrolled()
     {
         return $this->belongsTo(EnrolledCourse::class, 'enrolled_course_id', 'id');
     }

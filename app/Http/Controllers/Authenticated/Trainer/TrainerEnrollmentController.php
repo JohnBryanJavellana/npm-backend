@@ -4,16 +4,10 @@ namespace App\Http\Controllers\Authenticated\Trainer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
-use App\Models\ChargeCategory;
-use App\Models\CourseModule;
-use App\Models\CourseModuleFee;
-use App\Models\EnrolledCourse;
-use App\Models\Training;
-use App\Models\TrainingSchedule;
-use App\Models\User;
+use App\Models\{EnrolledCourse, Training, AttendanceRecord};
 use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules\Can;
+use Illuminate\Validation\ValidationException;
 
 class TrainerEnrollmentController extends Controller
 {
@@ -87,4 +81,39 @@ class TrainerEnrollmentController extends Controller
             return response()->json(["message" => "Server Error", "error" => $e->getMessage()], 500);
         }
     }
+
+    // public function recordAttendance(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'attendance_id' => 'required|exists:attendances,id',
+    //         'user_id' => 'required|exists:users,id',
+    //         'status' => 'required|string|in:PRESENT,ABSENT,LATE',
+    //     ]);
+
+    //     $today = now()->toDateString();
+
+    //     $attendanceRecord = AttendanceRecord::where('attendance_id', $validated['attendance_id'])
+    //         ->where('user_id', $validated['user_id'])
+    //         ->whereDate('created_at', $today)
+    //         ->first();
+
+    //     if ($attendanceRecord) {
+    //         $attendanceRecord->update([
+    //             'status' => $validated['status'],
+    //             'time_in' => now(),
+    //         ]);
+    //     } else {
+    //         $attendanceRecord = AttendanceRecord::create([
+    //             'attendance_id' => $validated['attendance_id'],
+    //             'user_id' => $validated['user_id'],
+    //             'status' => $validated['status'],
+    //             'time_in' => now(),
+    //         ]);
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Attendance recorded successfully',
+    //         'data' => $attendanceRecord
+    //     ], 200);
+    // }
 }

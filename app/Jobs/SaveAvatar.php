@@ -32,9 +32,17 @@ class SaveAvatar implements ShouldQueue
             }
 
             if($this->isUrl) {
-                $response = Http::get($this->avatar);
+                $response = Http::withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                ])->get($this->avatar);
+
                 if ($response->successful()) {
-                    file_put_contents(public_path($this->path . $this->filename), $response->body());
+                    $contentType = $response->header('Content-Type');
+                    if (str_contains($contentType, 'image')) {
+                        file_put_contents(public_path($this->path . $this->filename), $response->body());
+                    } else {
+                        \Log::error("URL did not return an image. Content-Type: " . $contentType);
+                    }
                 }
             }
 

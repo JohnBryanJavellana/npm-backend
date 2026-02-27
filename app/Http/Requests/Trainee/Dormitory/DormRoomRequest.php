@@ -18,6 +18,16 @@ class DormRoomRequest extends FormRequest
         \Log::info("dormitoryRequest", [$this->all()]);
         return $this->user() !== null;
     }
+    
+
+    // protected function prepareForValidation()
+    // {
+    //     $base = $this->input();
+
+    //     \Log::info("prepareForValidation", [$base]);
+    //     \Log::info("prepareForValidation", [$base["forType"]]);
+
+    // }
 
     /**
      * Get the validation rules that apply to the request.
