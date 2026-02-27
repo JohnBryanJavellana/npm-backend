@@ -226,6 +226,20 @@ class LibraryController extends Controller
     }
 
     /**
+     * Summary of update_book_copy
+     * @param Request $request
+     */
+    public function update_book_copy(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this_copy = BookCopy::findOrFail($request->documentId);
+            $this_copy->status = $request->status;
+            $this_copy->save();
+
+            return response()->json(['message' => "Book copy has been updated."], 201);
+        });
+    }
+
+    /**
      * Summary of remove_book
      * @param bool auditActions === TRUE
      * @param bool returnedMessage === FALSE
