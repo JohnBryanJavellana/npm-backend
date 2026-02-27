@@ -81,7 +81,7 @@ class TraineeRecreational extends Controller
         }
         catch (\Exception $e) {
             \Log::info("viewEquipmentError", [$e]);
-            return response()->json([$e], 500);
+            return response()->json([$e->getMessage()], 500);
             return response()->json(["Something went wrong."], 500);
         }
     }
@@ -122,7 +122,7 @@ class TraineeRecreational extends Controller
         catch (\Exception $e) {
             \Log::error("error_data", [$validated]);
 
-            return response()->json(["message" => $e], 500);
+            return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
@@ -253,7 +253,7 @@ class TraineeRecreational extends Controller
             throw $e;
         }
         catch (ModelNotFoundException $e) {
-            throw $e;
+            return response()->json(["message" => "Facility record not found"], 404);
         }
         catch (\Exception $e) {
             \Log::error("requestEquipmentError", [$e]);

@@ -93,7 +93,7 @@ class MyAccount extends Controller
                 // $user->save();
 
                 /**
-                 * @param string madapaka! 🍆💦
+                 * @param string
                  */
                 if (($request->avatar !== $user->profile_picture) && $user->profile_picture !== 'default-avatar.png') {
                     if (file_exists(public_path('user-images/' . $user->profile_picture))){
@@ -108,8 +108,8 @@ class MyAccount extends Controller
             }
 
             AuditHelper::log($user_id, $request->user()->role === UserRoleEnum::SUPERADMIN
-                ? "An Admin has updated user's {$user_id} profile picture.ok"
-                : "User {$user_id} profile picture has been updated.ok");
+                ? "An Admin has updated user's {$user_id} profile picture."
+                : "User {$user_id} profile picture has been updated.");
 
             Cache::forget('user_profile_' . $user_id);
 
@@ -117,7 +117,7 @@ class MyAccount extends Controller
                 event(new BEAccount(''));
             }
 
-            return response()->json(['message' => "You have successfully updated the avatar!OK"], 200);
+            return response()->json(['message' => "You have successfully updated the avatar!"], 200);
         }
         catch (ModelNotFoundException $e) {
             return response()->json(["User not found."], 404);
@@ -141,7 +141,7 @@ class MyAccount extends Controller
             'email' => 'nullable|string|email',
             'gen_info_status' => 'nullable|in:NEW,RETURNEE',
             'gen_info_trainee_id' => 'nullable',
-            'gen_info_srn' => 'nullable|integer',
+            'gen_info_srn' => 'nullable|integer|digits:10',
             'gen_info_citizenship' => 'nullable|string|max:255',
             'gen_info_civil_status' => 'nullable|in:SINGLE,MARRIED,WIDOWED,DIVORCED,SEPARATED',
             'gen_info_house_no' => 'nullable|string|max:255',
@@ -303,7 +303,7 @@ class MyAccount extends Controller
                     }
                 }
 
-                AuditHelper::log($request->user_id, "You have posted your new information!OK");
+                AuditHelper::log($request->user_id, "You have posted your new information!");
                 Cache::forget('user_profile_' . $request->user_id);
 
                 if(env("USE_EVENT")) {
@@ -312,7 +312,7 @@ class MyAccount extends Controller
 
                 DB::commit();
 
-                return response()->json(['message' => "You have posted your new information!OK", 'reloggin' => $reloggin], 201);
+                return response()->json(['message' => "You have posted your new information!", 'reloggin' => $reloggin], 201);
             } catch (\Exception $e) {
                 \Log::error("errorr", [$e]);
                 DB::rollback();
