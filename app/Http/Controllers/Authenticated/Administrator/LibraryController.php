@@ -94,6 +94,10 @@ class LibraryController extends Controller
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
 
+            if($request->copies && $request->copies > 30) {
+                return response()->json(['message' => "Creating stocks is limited only to 30pcs. Please try again."], 409);
+            }
+
             $book_catalog = $isPost ? new BookCatalog() : BookCatalog::find($request->catalogId);
             $book_catalog->book_genre_id = $request->entry;
             $book_catalog->title = $request->title;
@@ -176,6 +180,10 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $copiesData = [];
 
+            if($request->copies > 30) {
+                return response()->json(['message' => "Creating stocks is limited only to 30pcs. Please try again."], 409);
+            }
+
             if($request->copies) {
                 for ($i = 0; $i < $request->copies; $i++) {
                     $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
@@ -211,8 +219,7 @@ class LibraryController extends Controller
             unset($copiesData['qr']);
 
             return $request->insideJob ? $copiesData : response()->json([
-                'message' => "You've added " . count($copiesData) . " book copies.",
-                'pdf_url' => asset('book-uploaded-files/pdf/' . $fileName),
+                'message' => "You've added " . \count($copiesData) . " book copies.",
                 'returnedData' => $copiesData
             ], 201);
         });
@@ -630,7 +637,7 @@ class LibraryController extends Controller
             }
 
             $hasActiveItems = BookReservation::where('book_res_id', $reservation->book_res_id)
-                ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
+                ->whereNotIn('status', ['PENDING', 'RECEIVED'])
                 ->exists();
 
             if (!$hasActiveItems) {
