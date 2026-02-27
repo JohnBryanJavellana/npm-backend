@@ -35,14 +35,14 @@ class TrainerEnrollmentController extends Controller
         }
     }
 
-    // public function view(Request $request)
-    // {
-    //     try {
-    //         return CourseModuleResource::collection($this->trainerEnrollmentService->getDataFacilitator());
-    //     } catch (\Exception $e) {
-    //         return response()->json(["message" => $e->getMessage()], 500);
-    //     }
-    // }
+    public function view(Request $request)
+    {
+        try {
+            return CourseModuleResource::collection($this->trainerEnrollmentService->getDataFacilitator());
+        } catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+    }
 
     public function viewTrainingSchedules(Request $request, $course)
     {
@@ -52,13 +52,13 @@ class TrainerEnrollmentController extends Controller
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
-    //! AdminDashhboard
-    //! Tigaman
+
+    // ! Tigaman
     public function getCourseDetails(Request $request)
     {
 
         $record = Training::with([
-            "module:id,module_type_id,name",
+            "module:id,module_type_id,name,compendium,acronym",
             "module.moduleType",
             "module.trainingFees:id,course_module_id,charge_category_id,name,amount",
             "module.trainingFees.category:id,name",
@@ -73,7 +73,6 @@ class TrainerEnrollmentController extends Controller
             "training" => $record,
         ], 200);
     }
-
 
     public function getTraineeDetails(Request $request)
     {

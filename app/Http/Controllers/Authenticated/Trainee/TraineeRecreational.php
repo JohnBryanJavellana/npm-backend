@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Authenticated\Trainee;
 
+use App\Enums\RequestStatus;
 use App\Events\BENotification;
 use App\Events\BERecreational;
 use App\Http\Controllers\Controller;
@@ -14,6 +15,7 @@ use App\Http\Resources\Trainee\Recreationals\ViewRecEquipment;
 use App\Http\Resources\Trainee\Recreationals\ViewRecFacilities as RecreationalsViewRecFacilities;
 use App\Models\Equipment;
 use App\Models\RAEquipmentRequest;
+use App\Models\RAEquipments;
 use App\Models\RAEquipmentStock;
 use App\Models\RAFacility;
 use App\Models\RAFacilityRequest;
@@ -26,6 +28,7 @@ use App\Utils\AuditHelper;
 use App\Utils\Notifications;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Str;
 
 class TraineeRecreational extends Controller
 {
@@ -33,9 +36,36 @@ class TraineeRecreational extends Controller
         protected RecreationalService $recreationalService
     ){}
 
+    public function testFetch(Request $request)
+    {
+        $equipment = RAEquipments::with([
+            "images",
+            "relatedFacility.facility",
+            "relatedFacility.facility.images"
+        ])->get();
+        $facility = RAFacility::with([
+            "hasData" => function($query){
+                $query->where("status", [RequestStatus::APPROVED->value, RequestStatus::RECEIVED->value]);
+            },
+            "images",
+            "relatedEquipment.equipment",
+            "relatedEquipment.equipment.images"
+        ])->get();
+
+        $combined =  $facility->toBase()->merge($equipment);
+
+        return $combined;
+    }
+
     public function viewRecRequestCount(Request $request)
     {
-        return $this->recreationalService->getRecRequestCount($request->user()->id);
+        try
+        {
+            return $this->recreationalService->getRecRequestCount($request->user()->id);
+        }
+        catch (\Exception $e) {
+            \Log::error("viewRecRequestCountError", [$e]);
+        }
     }
 
     /**
@@ -81,7 +111,6 @@ class TraineeRecreational extends Controller
     {
         $validated = $request->validated();
         $validated["userId"] = $request->user()->id ?? 202600001;
-        \Log::info("validated", $validated);
         try
         {
             \Log::info("data", [$validated]);
@@ -140,7 +169,7 @@ class TraineeRecreational extends Controller
 
             return response()->json(['recRequests' => $recRequests], 200);
         });
-    }
+    }                            
 
     /**
      * Summary of getRecreationalRequest
@@ -173,11 +202,12 @@ class TraineeRecreational extends Controller
         $validated = $request->validated();
         try
         {
+            $type = Str::lower($validated->documentType);
             $this->recreationalService->cancelRequests($validated);
-            // AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has cancelled a recreational request.");
+            AuditHelper::log($request->user()->id, "User {$request->user()->id} has cancelled a {$type} recreational request.");
             // Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has cancelled a recreational request.');
 
-            return response()->json(["message" => "Success! Unit has been successfully cancelled.OK"], 200);
+            return response()->json(["message" => "Success! Unit has been successfully cancelled."], 200);
         }
         catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Request not found"], 404);
@@ -203,7 +233,6 @@ class TraineeRecreational extends Controller
         {
             $this->recreationalService->storeRecreationalRequests($validated);
 
-
             AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has sent a recreational request.OK");
             Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has sent a recreational request.');
 
@@ -218,7 +247,7 @@ class TraineeRecreational extends Controller
 
                 }
             }
-            return response()->json(["message" => "Successfully sent a recreational request.OK"], 200);
+            return response()->json(["message" => "Successfully sent a recreational request"], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -234,17 +263,16 @@ class TraineeRecreational extends Controller
 
     public function checkUniqueIdentifier(Request $request)
     {
-        \Log::info("messagecheckUniqueIdentifier", [$request->all()]);
         try
         {
-            $exists = $this->recreationalService->isUniqueIdenfierExistV1($request);
+            $exists = $this->recreationalService->isUniqueIdenfierExistV2($request);
             return response()->json(["data" => $exists], 200);
-        }
-        catch (ModelNotFoundException $e) {
-            return response()->json(["message" => "Record not found!"], 422);
         }
         catch (DomainException $e) {
             throw $e;
+        }
+        catch (ModelNotFoundException $e) {
+            return response()->json(["message" => "Record not found!"], 422);
         }
         catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);

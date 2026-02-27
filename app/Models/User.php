@@ -90,6 +90,8 @@ class User extends Authenticatable implements MustVerifyEmail
             EnrolledCourse::class,
             'user_id',
             'enrolled_course_id',
+            'enrolled_course_status',
+
         );
     }
 
@@ -102,7 +104,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'user_id',
         );
     }
-    
+
+
     public function attendances()
     {
         return $this->hasMany(Attendance::class, 'user_id', 'id');
