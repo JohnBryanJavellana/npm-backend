@@ -207,6 +207,7 @@
 
                 //! ATTENTANCE PART
                 Route::get('trainee', [AttendanceController::class, 'test']);
+                Route::get('trainee_attendance_button', [Attendance::class, 'attendance_button']);
                 // Route::post('/scan-qr', [AttendanceController::class, 'scanQr']);
                 Route::get('attendance_list', [AttendanceController::class, 'attendance_list_trainee']);
 

@@ -15,17 +15,17 @@ class AttendanceController extends Controller
         return Attendance::all();
     }
 
+
+
     public function attendance_list_trainee()
     {
         $trainees = User::where('role', 'TRAINEE')
-            ->with('attendance_records.attendance')
-            ->where('enrolled_course_status', 'ENROLLED')
+            // ->where('enrolled_course_status', 'ENROLLED')
+            ->with(['attendance_records.module,attendance'])
             ->get();
 
         return response()->json([
-            "trainees_list" => $trainees,
+            'trainees_list' => $trainees,
         ], 200);
     }
-
-
 }
