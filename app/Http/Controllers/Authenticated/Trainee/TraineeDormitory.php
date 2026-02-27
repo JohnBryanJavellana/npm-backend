@@ -270,7 +270,7 @@ class TraineeDormitory extends Controller
 
             event(new BEDormitory(''));
 
-            return response()->json(['message' => "Transfer request sent! We're processing your request and will update you soon.OK"], 200);
+            return response()->json(['message' => "Transfer request sent! We're processing your request and will update you soon."], 200);
 
         }
         catch (DomainException $e) {
@@ -286,7 +286,7 @@ class TraineeDormitory extends Controller
         try {
             $this->dormitoryTransferService->cancelTransferRequest($id, $user_id);
 
-            return response()->json(["message" => "Your transfer request has been successfully cancelled.OK"], 200);
+            return response()->json(["message" => "Your transfer request has been successfully cancelled."], 200);
         }
         catch (\Exception $e) {
             \Log::info("cancel_extend_request", [$e->getMessage()]);
@@ -323,7 +323,7 @@ class TraineeDormitory extends Controller
                 event(new BEDormitory(''));
             }
 
-            return response()->json(['message' => "Dormitory request cancelled successfully.OK"], 200);
+            return response()->json(['message' => "Dormitory request cancelled successfully."], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -376,7 +376,7 @@ class TraineeDormitory extends Controller
         $validated = $request->validated();
         try {
             $this->dormitoryInclusionService->createInclusionRequest($validated, $user_id);
-            return response()->json(["message" => "You've have successfully sent items request!ok"], 200);
+            return response()->json(["message" => "You've have successfully sent items request!"], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -453,7 +453,7 @@ class TraineeDormitory extends Controller
         try {
             $this->dormitoryExtraService->cancelService($validated['request_id'], $user_id);
 
-            return response()->json(["message" => "Service request has cancelled successfully!ok"], 200);
+            return response()->json(["message" => "Service request has cancelled successfully!"], 200);
         }
         catch (DomainException $e) {
             throw $e;

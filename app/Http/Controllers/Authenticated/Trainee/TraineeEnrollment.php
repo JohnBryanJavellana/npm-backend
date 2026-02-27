@@ -211,8 +211,8 @@ class TraineeEnrollment extends Controller
             }
 
             DB::commit();
-            AuditHelper::log($user_id, "User " . $user_id . " sent enrolment requestOK.");
-            return response()->json(['message' => 'Enrollment request sent successfullyOK'], 201);
+            AuditHelper::log($user_id, "User " . $user_id . " sent enrolment request.");
+            return response()->json(['message' => 'Enrollment request sent successfully'], 201);
         }
         catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Training record not available."], 404);
@@ -235,13 +235,13 @@ class TraineeEnrollment extends Controller
 
             // //TRAINING ID PASS   
             Training::where("id", $validated["training_id"])->increment('schedule_slot',1);
-            AuditHelper::log($validated["user_id"], "User " . $validated["user_id"] . " has cancelled training request. {$validated["training_id_OK"]}");
+            AuditHelper::log($validated["user_id"], "User " . $validated["user_id"] . " has cancelled training request. {$validated["training_id"]}");
 
             if(env("USE_EVENT")) {
                 event(new BETraineeApplication(''));
             }
             // AuditHelper::log($user_id, "User " . $user_id . " cancelled training request.");
-            return response()->json(['message' => "You've successully cancelled a training request.OK"], 200);
+            return response()->json(['message' => "You've successully cancelled a training request."], 200);
         }
         catch (DomainException $e) {
             throw $e;
@@ -291,8 +291,8 @@ class TraineeEnrollment extends Controller
             AuditHelper::log(
                 $validated["user_id"],
                  in_array($request->user()->role, UserRoleEnum::enrollmentRoles())
-                    ? "Admin " . $request->user()->id . " updated the enrollment request of trainee.OK " . $validated["user_id"] . "."
-                    : "User " . $request->user()->id . " updated an enrollment request.OK");
+                    ? "Admin " . $request->user()->id . " updated the enrollment request of trainee. " . $validated["user_id"] . "."
+                    : "User " . $request->user()->id . " updated an enrollment request.");
 
             Notifications::notify(
                 $request->user()->id,
@@ -304,7 +304,7 @@ class TraineeEnrollment extends Controller
                 event(new BETraineeApplication(''), new BENotification(''));
             }
 
-            return response()->json(['message' => 'Enrollment request updated successfully!OK'], 200);
+            return response()->json(['message' => 'Enrollment request updated successfully!'], 200);
         } catch (\Exception $e) {
             //Temporary Method
             $this->enrollmentService->removeFailedUploads($storedFiles);
@@ -339,7 +339,7 @@ class TraineeEnrollment extends Controller
                 $enrolled_training_update->save();
                 $record->save();
 
-                AuditHelper::log($request->user()->id, "User " . $request->user()->id . " has proceed training/s for verification.OK");
+                AuditHelper::log($request->user()->id, "User " . $request->user()->id . " has proceed training/s for verification.");
             }
 
             if(env("USE_EVENT")) {
@@ -347,7 +347,7 @@ class TraineeEnrollment extends Controller
             }
 
             DB::commit();
-            return response()->json(['message'=> 'Successfully updatedOK'], 200);
+            return response()->json(['message'=> 'Successfully updated'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("error update_invoice_trainings", [$e->getMessage()]);
@@ -416,7 +416,7 @@ class TraineeEnrollment extends Controller
                 $training->save();
 
                 DB::commit();
-                return response()->json(['message' => "Success!OK"], 200);
+                return response()->json(['message' => "Success!"], 200);
             } catch (\Exception $e) {
                 DB::rollback();
                 return response()->json(['message' => $e->getMessage()], 500);
