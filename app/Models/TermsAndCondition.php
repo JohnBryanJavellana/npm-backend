@@ -9,6 +9,8 @@ class TermsAndCondition extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function editor() {
         return $this->hasOne(User::class, 'updated_by', 'id');
     }
