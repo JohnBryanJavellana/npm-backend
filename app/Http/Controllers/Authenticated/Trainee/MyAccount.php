@@ -330,11 +330,10 @@ class MyAccount extends Controller
 
                 $file_requested = $fileUploaded;
                 $filename_requested = GenerateUniqueFilename::generate($file_requested);
-                $file_requested->move(public_path('trainee-files'), $filename_requested);
+                $file_requested->move(public_path($path), $filename_requested);
 
                 return $file_requested ? $filename_requested : null;
             }
-            //Exception instance
         } catch(\Exception $e) {
             throw $e;
             return response()->json(['message' => "Something went wrong! Please try again"], 422);
