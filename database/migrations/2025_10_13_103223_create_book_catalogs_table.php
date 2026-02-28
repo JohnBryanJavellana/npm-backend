@@ -16,8 +16,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(BookGenre::class)->constrained()->cascadeOnDelete(); #
             $table->longText('title');
+            $table->longText('abstract')->nullable();
             $table->string('author', 255);
-            $table->longText('editor');
+            $table->longText('editor')->nullable();
             $table->string('publisher', 255);
             $table->string('type', 255);
             $table->integer('pages')->nullable();

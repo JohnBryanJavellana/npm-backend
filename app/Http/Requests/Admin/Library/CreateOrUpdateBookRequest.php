@@ -26,7 +26,6 @@ class CreateOrUpdateBookRequest extends FormRequest
             'title' => ['required', 'string'],
             'entry' => ['required', 'numeric'],
             'isbn' => ['nullable', 'required'],
-            'author' => ['nullable', 'string'],
             'editor' => ['nullable', 'string'],
             'publisher' => ['nullable', 'string'],
             'type' => ['nullable', 'string'],
