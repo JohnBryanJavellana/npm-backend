@@ -24,23 +24,15 @@ class LibraryInvoiceService {
     public function updateLibraryInvoice($validated, $userId)
     {
        return  DB::transaction(function() use ($validated, $userId) {
-            $this->prepareData($validated, $userId);
             
-            if(round($validated["total_amount"], 2) == round($validated["credit_amount"], 2)) {
-                $this->libraryInvoiceModel
-                ->byTraceId($validated["inv_trace_number"], $validated["inv_id"])
-                ->update([
-                    "reference_number" => $validated["inv_reference_number"],
-                    "status" => RequestStatus::VERIFICATION,
-                    "payment_type" => "ONLINE",
-                    "datePaid" => Carbon::now()
-                ]);
-            }
-
-            $this->creditService->storeUserAudit($validated, $userId);
-
-
-            return round(round($validated["total_amount"], 2) - round($validated["credit_amount"], 2), 2);
+            $this->libraryInvoiceModel
+            ->byTraceId($validated["inv_trace_number"], $validated["inv_id"])
+            ->update([
+                "reference_number" => $validated["inv_reference_number"],
+                "status" => RequestStatus::VERIFICATION,
+                "payment_type" => "ONLINE",
+                "datePaid" => Carbon::now()
+            ]);
         });
     }
 

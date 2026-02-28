@@ -74,7 +74,7 @@ class CsmsController extends Controller
                 $this->forgetUserCache($userId);
             }
 
-            AuditHelper::log($userId, "User {$userId} has successfully submitted a service survey.OK");
+            AuditHelper::log($userId, "User {$userId} has successfully submitted a service survey.");
             DB::commit();
 
             return response()->json(["Successfully Submitted!OK"], 200);
@@ -121,7 +121,7 @@ class CsmsController extends Controller
         $csm_record->delete();
 
         DB::commit();
-        return response()->json(["message" => "Deleted Successfully!OK"], 204);
+        return response()->json(["message" => "Deleted Successfully!"], 204);
         }
         catch (\Exception $e) {
         DB::rollBack();

@@ -46,4 +46,9 @@ class RAFacility extends Model
     {
         return $query->whereIn("unique_identifier", $ui);
     }
+
+    public function scopeOccupied(Builder $query)
+    {
+        return $query->whereIn( "status",[RequestStatus::APPROVED->value, RequestStatus::OCCUPIED->value]);
+    }
 }

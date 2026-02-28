@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 use App\Events\BEAccount;
 use App\Http\Controllers\Controller;
 use App\Enums\UserRoleEnum;
+use App\Http\Requests\Trainee\Account\StoreAccountRequest;
 use App\Http\Requests\Trainee\Enrollment\UploadAvatarRequest;
 use App\Mail\UpdatePassword;
 use App\Mail\UpdatePasswordMail;
@@ -93,7 +94,7 @@ class MyAccount extends Controller
                 // $user->save();
 
                 /**
-                 * @param string madapaka! 🍆💦
+                 * @param string
                  */
                 if (($request->avatar !== $user->profile_picture) && $user->profile_picture !== 'default-avatar.png') {
                     if (file_exists(public_path('user-images/' . $user->profile_picture))){
@@ -108,8 +109,8 @@ class MyAccount extends Controller
             }
 
             AuditHelper::log($user_id, $request->user()->role === UserRoleEnum::SUPERADMIN
-                ? "An Admin has updated user's {$user_id} profile picture.ok"
-                : "User {$user_id} profile picture has been updated.ok");
+                ? "An Admin has updated user's {$user_id} profile picture."
+                : "User {$user_id} profile picture has been updated.");
 
             Cache::forget('user_profile_' . $user_id);
 
@@ -117,7 +118,7 @@ class MyAccount extends Controller
                 event(new BEAccount(''));
             }
 
-            return response()->json(['message' => "You have successfully updated the avatar!OK"], 200);
+            return response()->json(['message' => "You have successfully updated the avatar!"], 200);
         }
         catch (ModelNotFoundException $e) {
             return response()->json(["User not found."], 404);
@@ -129,196 +130,198 @@ class MyAccount extends Controller
 
         // }
     }
-    public function create_or_update_additional_info (Request $request) {
-        \Log::info("Send Info", $request->all());
+    public function create_or_update_additional_info (StoreAccountRequest $request) {
+        \Log::info("create_or_update_additional_info", [$request->validated()]);
 
-       $validations = [
-            "user_id" => "required|exists:users,id",
-            'fname' => 'nullable|string|max:255',
-            'lname' => 'nullable|string|max:255',
-            'gender' => 'nullable|in:MALE,FEMALE',
-            'birthdate' => 'nullable|date',
-            'email' => 'nullable|string|email',
-            'gen_info_status' => 'nullable|in:NEW,RETURNEE',
-            'gen_info_trainee_id' => 'nullable',
-            'gen_info_srn' => 'nullable|integer',
-            'gen_info_citizenship' => 'nullable|string|max:255',
-            'gen_info_civil_status' => 'nullable|in:SINGLE,MARRIED,WIDOWED,DIVORCED,SEPARATED',
-            'gen_info_house_no' => 'nullable|string|max:255',
-            'gen_info_region' => 'nullable|string|max:255',
-            'gen_info_province' => 'nullable|string|max:255',
-            'gen_info_municipality' => 'nullable|string|max:255',
-            'gen_info_barangay' => 'nullable|string|max:255',
-            'gen_info_postal' => 'nullable|string|max:255',
-            'gen_info_number_one' => 'nullable|string|max:12',
-            'gen_info_number_two' => 'nullable|string|max:12',
-            "gen_info_birthplace_region" => 'nullable|string|max:255',
-            "gen_info_birthplace_province" => 'nullable|string|max:255',
-            "gen_info_birthplace_municipality" => 'nullable|string|max:255',
-            "gen_info_birthplace_barangay" => 'nullable|string|max:255',
-            //latest_s_b_exps
-            "ship_status" => 'nullable|in:WithShipboardExperience,NoShipboardExperience',
-            "ship_license" =>'nullable|string',
-            "ship_rank" => 'nullable|string',
-            "ship_date_of_embarkment" => 'nullable|date',
-            "ship_principal" => 'nullable|string',
-            "ship_manning" => 'nullable|string',
-            "ship_landline" => 'nullable|string',
-            "ship_number" => 'nullable|string|max:12',
-            //contact person
-            'person_name' => 'nullable|string|max:255',
-            'person_address' => 'nullable|string|max:255',
-            'person_relationship' => 'nullable|string|max:255',
-            'person_email' => 'nullable|string|email',
-            'person_number_one' => 'nullable|string|max:12',
-            'person_number_two' => 'nullable|string|max:12',
-            //educational attainment
-            'school_course_taken' => 'nullable|string|exists:main_courses,id',
-            'school' => 'nullable|string|exists:main_schools,id',
-            'school_year_graduated' => 'nullable|string|max:255',
-            'file_upload' => 'nullable|array',
-            'file_upload.*.req_id' => 'integer',
-            'file_upload.*.file' => 'file|mimes:jpg,png,pdf,docx|max:5120',
-        ];
+    //    $validations = [
+    //         "user_id" => "required|exists:users,id",
+    //         'fname' => 'nullable|string|max:255',
+    //         'lname' => 'nullable|string|max:255',
+    //         'gender' => 'nullable|in:MALE,FEMALE',
+    //         'birthdate' => 'nullable|date',
+    //         'email' => 'nullable|string|email',
+    //         'gen_info_status' => 'nullable|in:NEW,RETURNEE',
+    //         'gen_info_trainee_id' => 'nullable',
+    //         'gen_info_srn' => 'nullable|integer|digits:10',
+    //         'gen_info_citizenship' => 'nullable|string|max:255',
+    //         'gen_info_civil_status' => 'nullable|in:SINGLE,MARRIED,WIDOWED,DIVORCED,SEPARATED',
+    //         'gen_info_house_no' => 'nullable|string|max:255',
+    //         'gen_info_region' => 'nullable|string|max:255',
+    //         'gen_info_province' => 'nullable|string|max:255',
+    //         'gen_info_municipality' => 'nullable|string|max:255',
+    //         'gen_info_barangay' => 'nullable|string|max:255',
+    //         'gen_info_postal' => 'nullable|string|max:255',
+    //         'gen_info_number_one' => 'nullable|string|max:12',
+    //         'gen_info_number_two' => 'nullable|string|max:12',
+    //         "gen_info_birthplace_region" => 'nullable|string|max:255',
+    //         "gen_info_birthplace_province" => 'nullable|string|max:255',
+    //         "gen_info_birthplace_municipality" => 'nullable|string|max:255',
+    //         "gen_info_birthplace_barangay" => 'nullable|string|max:255',
+    //         "gen_info_facebook" => 'nullable|string',
+    //         //latest_s_b_exps
+    //         "ship_status" => 'nullable|in:WithShipboardExperience,NoShipboardExperience',
+    //         "ship_license" =>'nullable|string',
+    //         "ship_rank" => 'nullable|string',
+    //         "ship_date_of_embarkment" => 'nullable|date',
+    //         "ship_principal" => 'nullable|string',
+    //         "ship_manning" => 'nullable|string',
+    //         "ship_landline" => 'nullable|string',
+    //         "ship_number" => 'nullable|string|max:12',
+    //         //contact person
+    //         'person_name' => 'nullable|string|max:255',
+    //         'person_address' => 'nullable|string|max:255',
+    //         'person_relationship' => 'nullable|string|max:255',
+    //         'person_email' => 'nullable|string|email',
+    //         'person_number_one' => 'nullable|string|max:12',
+    //         'person_number_two' => 'nullable|string|max:12',
+    //         //educational attainment
+    //         'school_course_taken' => 'nullable|string|exists:main_courses,id',
+    //         'school' => 'nullable|string|exists:main_schools,id',
+    //         'school_year_graduated' => 'nullable|string|max:255',
+    //         'file_upload' => 'nullable|array',
+    //         'file_upload.*.req_id' => 'integer',
+    //         'file_upload.*.file' => 'file|mimes:jpg,png,pdf,docx|max:5120',
+    //     ];
 
         $user = User::with(['additional_trainee_info'])->find($request->user_id);
 
-        $validator = \Validator::make($request->all(), $validations);
+        // $validator = \Validator::make($request->all(), $validations);
 
-        if($validator->fails()) {
-            $errors = $validator->messages()->all();
-            \Log::error("error validation", $errors);
-            return response()->json(['message' => implode(', ', $errors), ], 422);
-        } else {
-            try {
-                DB::beginTransaction();
-                $reloggin = false;
+        // if($validator->fails()) {
+        //     $errors = $validator->messages()->all();
+        //     \Log::error("error validation", $errors);
+        //     return response()->json(['message' => implode(', ', $errors), ], 422);
+        // } else {
 
-                $user->fname = $request->fname;
-                $user->lname = $request->lname;
-                $user->mname = $request->mname;
-                $user->gender = $request->gender;
-                $user->suffix = $request->suffix;
-                if($user->email !== $request->email){
-                    $user->email = $request->email;
-                    $random_password = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
-                    $user->password = bcrypt($random_password);
+        try {
+            DB::beginTransaction();
+            $reloggin = false;
 
-                    \Mail::to($request->email)->later(Carbon::now()->addSeconds(3), new UpdatePasswordMail(['password' => $random_password]));
+            $user->fname = $request->fname;
+            $user->lname = $request->lname;
+            $user->mname = $request->mname;
+            $user->gender = $request->gender;
+            $user->suffix = $request->suffix;
+            if($user->email !== $request->email){
+                $user->email = $request->email;
+                $random_password = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+                $user->password = bcrypt($random_password);
 
-                    $reloggin = true;
-                }
-                $user->birthdate = $request->birthdate;
-                $user->save();
+                \Mail::to($request->email)->later(Carbon::now()->addSeconds(3), new UpdatePasswordMail(['password' => $random_password]));
 
-                //general info
-                $general_info = $user?->additional_trainee_info?->general_information_id;
-                $this_gen_info = $general_info ? GeneralInformation::findOrFail($general_info) : new GeneralInformation();
+                $reloggin = true;
+            }
+            $user->birthdate = $request->birthdate;
+            $user->save();
 
-                $this_gen_info->gen_info_status = $request->gen_info_status;
-                $this_gen_info->gen_info_trainee_id = $request->gen_info_trainee_id;
-                $this_gen_info->gen_info_srn = $request->gen_info_srn;
-                $this_gen_info->gen_info_citizenship = $request->gen_info_citizenship;
-                $this_gen_info->gen_info_civil_status = $request->gen_info_civil_status;
-                $this_gen_info->gen_info_house_no = $request->gen_info_house_no;
-                $this_gen_info->gen_info_region = $request->gen_info_region;
-                $this_gen_info->sameWithCurrentAddress = $request->useSameAsCurrentAddress;
-                $this_gen_info->gen_info_province = $request->gen_info_province;
-                $this_gen_info->gen_info_municipality = $request->gen_info_municipality;
-                $this_gen_info->gen_info_barangay = $request->gen_info_barangay;
-                $this_gen_info->gen_info_birthplace_region = $request->gen_info_birthplace_region;
-                $this_gen_info->gen_info_birthplace_province = $request->gen_info_birthplace_province;
-                $this_gen_info->gen_info_birthplace_municipality = $request->gen_info_birthplace_municipality;
-                $this_gen_info->gen_info_birthplace_barangay = $request->gen_info_birthplace_barangay;
-                $this_gen_info->gen_info_postal = $request->gen_info_postal;
-                $this_gen_info->gen_info_number_one = $request->gen_info_number_one;
-                $this_gen_info->gen_info_number_two = $request->gen_info_number_two;
-                $this_gen_info->gen_info_landline = $request->gen_info_landline;
-                $this_gen_info->gen_info_facebook = $request->gen_info_facebook;
-                $this_gen_info->save();
+            //general info
+            $general_info = $user?->additional_trainee_info?->general_information_id;
+            $this_gen_info = $general_info ? GeneralInformation::findOrFail($general_info) : new GeneralInformation();
 
-                //contact
-                $contact_info = $user?->additional_trainee_info?->contact_id;
-                $this_contact_info = $contact_info ? Contact::find($contact_info) : New Contact();
+            $this_gen_info->gen_info_status = $request->gen_info_status;
+            $this_gen_info->gen_info_trainee_id = $request->gen_info_trainee_id;
+            $this_gen_info->gen_info_srn = $request->gen_info_srn;
+            $this_gen_info->gen_info_citizenship = $request->gen_info_citizenship;
+            $this_gen_info->gen_info_civil_status = $request->gen_info_civil_status;
+            $this_gen_info->gen_info_house_no = $request->gen_info_house_no;
+            $this_gen_info->gen_info_region = $request->gen_info_region;
+            $this_gen_info->sameWithCurrentAddress = $request->useSameAsCurrentAddress;
+            $this_gen_info->gen_info_province = $request->gen_info_province;
+            $this_gen_info->gen_info_municipality = $request->gen_info_municipality;
+            $this_gen_info->gen_info_barangay = $request->gen_info_barangay;
+            $this_gen_info->gen_info_birthplace_region = $request->gen_info_birthplace_region;
+            $this_gen_info->gen_info_birthplace_province = $request->gen_info_birthplace_province;
+            $this_gen_info->gen_info_birthplace_municipality = $request->gen_info_birthplace_municipality;
+            $this_gen_info->gen_info_birthplace_barangay = $request->gen_info_birthplace_barangay;
+            $this_gen_info->gen_info_postal = $request->gen_info_postal;
+            $this_gen_info->gen_info_number_one = $request->gen_info_number_one;
+            $this_gen_info->gen_info_number_two = $request->gen_info_number_two;
+            $this_gen_info->gen_info_landline = $request->gen_info_landline;
+            $this_gen_info->gen_info_facebook = $request->gen_info_facebook;
+            $this_gen_info->save();
 
-                $this_contact_info->person_name = $request->person_name;
-                $this_contact_info->person_address = $request->person_address;
-                $this_contact_info->person_relationship = $request->person_relationship;
-                $this_contact_info->person_email = $request->person_email;
-                $this_contact_info->person_number_one = $request->person_number_one;
-                $this_contact_info->person_number_two = $request->person_number_two;
-                $this_contact_info->person_landline = $request->landline;
-                $this_contact_info->save();
+            //contact
+            $contact_info = $user?->additional_trainee_info?->contact_id;
+            $this_contact_info = $contact_info ? Contact::find($contact_info) : New Contact();
 
-                //education
-                $education_info = $user?->additional_trainee_info?->educational_attainment_id;
-                $this_education_info = $education_info ? EducationalAttainment::find($education_info) : new EducationalAttainment();
+            $this_contact_info->person_name = $request->person_name;
+            $this_contact_info->person_address = $request->person_address;
+            $this_contact_info->person_relationship = $request->person_relationship;
+            $this_contact_info->person_email = $request->person_email;
+            $this_contact_info->person_number_one = $request->person_number_one;
+            $this_contact_info->person_number_two = $request->person_number_two;
+            $this_contact_info->person_landline = $request->landline;
+            $this_contact_info->save();
 
-                $this_education_info->main_course_id= $request->school_course_taken;
-                $this_education_info->main_school_id = $request->school;
-                $this_education_info->school_graduated = $request->school_year_graduated;
-                $this_education_info->save();
+            //education
+            $education_info = $user?->additional_trainee_info?->educational_attainment_id;
+            $this_education_info = $education_info ? EducationalAttainment::find($education_info) : new EducationalAttainment();
 
-                //disembarkment
-                $latest_disembarkment_info = $user?->additional_trainee_info?->latest_s_b_exp_id;
-                $this_latest_disembarkment_info = $latest_disembarkment_info ? LatestSBExp::find( $latest_disembarkment_info) : new LatestSBExp();
+            $this_education_info->main_course_id= $request->school_course_taken;
+            $this_education_info->main_school_id = $request->school;
+            $this_education_info->school_graduated = $request->school_year_graduated;
+            $this_education_info->save();
 
-                $this_latest_disembarkment_info->ship_status = $request->ship_status;
-                $this_latest_disembarkment_info->license_id = $request->ship_license;
-                $this_latest_disembarkment_info->rank_id = $request->ship_rank;
-                $this_latest_disembarkment_info->ship_date_of_disembarkment = $request->ship_date_of_embarkment;
-                $this_latest_disembarkment_info->ship_principal = $request->ship_principal;
-                $this_latest_disembarkment_info->ship_manning = $request->ship_manning;
-                $this_latest_disembarkment_info->ship_landline = $request->ship_landline;
-                $this_latest_disembarkment_info->ship_number = $request->ship_number;
-                $this_latest_disembarkment_info->save();
+            //disembarkment
+            $latest_disembarkment_info = $user?->additional_trainee_info?->latest_s_b_exp_id;
+            $this_latest_disembarkment_info = $latest_disembarkment_info ? LatestSBExp::find( $latest_disembarkment_info) : new LatestSBExp();
 
-                //Additional Information
-                $additional_info = $user?->additional_trainee_info?->id;
-                $this_additional_info = $general_info ? AdditionalTraineeInfo::findOrFail($additional_info) : new AdditionalTraineeInfo();
+            $this_latest_disembarkment_info->ship_status = $request->ship_status;
+            $this_latest_disembarkment_info->license_id = $request->ship_license;
+            $this_latest_disembarkment_info->rank_id = $request->ship_rank;
+            $this_latest_disembarkment_info->ship_date_of_disembarkment = $request->ship_date_of_embarkment;
+            $this_latest_disembarkment_info->ship_principal = $request->ship_principal;
+            $this_latest_disembarkment_info->ship_manning = $request->ship_manning;
+            $this_latest_disembarkment_info->ship_landline = $request->ship_landline;
+            $this_latest_disembarkment_info->ship_number = $request->ship_number;
+            $this_latest_disembarkment_info->save();
 
-                $this_additional_info->user_id = $request->user_id;
-                $this_additional_info->general_information_id = $this_gen_info->id;
-                $this_additional_info->contact_id = $this_contact_info->id;
-                $this_additional_info->latest_s_b_exp_id = $this_latest_disembarkment_info->id;
-                $this_additional_info->educational_attainment_id = $this_education_info->id;
-                $this_additional_info->save();
+            //Additional Information
+            $additional_info = $user?->additional_trainee_info?->id;
+            $this_additional_info = $general_info ? AdditionalTraineeInfo::findOrFail($additional_info) : new AdditionalTraineeInfo();
 
-                if ($request->has('file_upload')){
-                    foreach($request->file_upload as $key => $file) {
-                        $record = TrainingRegFile::where([
-                            'additional_trainee_info_id' => $this_additional_info->id,
-                            'requirement_id' => $file['req_id']
-                        ])->first();
-                        if ($record) {
-                            $record->filename = $this->savefile("trainee-files", $file['file']);
-                            $record->save();
-                        } else {
-                            $new_record = new TrainingRegFile;
-                            $new_record->additional_trainee_info_id = $this_additional_info->id;
-                            $new_record->requirement_id = (int) $file['req_id'];
-                            $new_record->filename = $this->savefile("trainee-files",$file['file']);
-                            $new_record->save();
-                        }
+            $this_additional_info->user_id = $request->user_id;
+            $this_additional_info->general_information_id = $this_gen_info->id;
+            $this_additional_info->contact_id = $this_contact_info->id;
+            $this_additional_info->latest_s_b_exp_id = $this_latest_disembarkment_info->id;
+            $this_additional_info->educational_attainment_id = $this_education_info->id;
+            $this_additional_info->save();
+
+            if ($request->has('file_upload')){
+                foreach($request->file_upload as $key => $file) {
+                    $record = TrainingRegFile::where([
+                        'additional_trainee_info_id' => $this_additional_info->id,
+                        'requirement_id' => $file['req_id']
+                    ])->first();
+                    if ($record) {
+                        $record->filename = $this->savefile("trainee-files", $file['file']);
+                        $record->save();
+                    } else {
+                        $new_record = new TrainingRegFile;
+                        $new_record->additional_trainee_info_id = $this_additional_info->id;
+                        $new_record->requirement_id = (int) $file['req_id'];
+                        $new_record->filename = $this->savefile("trainee-files",$file['file']);
+                        $new_record->save();
                     }
                 }
-
-                AuditHelper::log($request->user_id, "You have posted your new information!OK");
-                Cache::forget('user_profile_' . $request->user_id);
-
-                if(env("USE_EVENT")) {
-                    event(new BEAccount(''));
-                }
-
-                DB::commit();
-
-                return response()->json(['message' => "You have posted your new information!OK", 'reloggin' => $reloggin], 201);
-            } catch (\Exception $e) {
-                \Log::error("errorr", [$e]);
-                DB::rollback();
-                return response()->json(['message'=> $e->getMessage()], 400);
             }
+
+            AuditHelper::log($request->user_id, "You have posted your new information!");
+            Cache::forget('user_profile_' . $request->user_id);
+
+            if(env("USE_EVENT")) {
+                event(new BEAccount(''));
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => "You have posted your new information!", 'reloggin' => $reloggin], 201);
+        } catch (\Exception $e) {
+            \Log::error("errorr", [$e]);
+            DB::rollback();
+            return response()->json(['message'=> $e->getMessage()], 400);
         }
+        // }
     }
 
     public function savefile($path, $fileUploaded) {

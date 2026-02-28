@@ -12,7 +12,6 @@ use App\Http\Requests\Trainee\Library\CancelBookRequest;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use App\Mail\BookReservationStatus;
 use App\Utils\{AuditHelper, Notifications, TransactionUtil};
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use App\Http\Resources\{BookResource, BookRequestResource, PdfCopyResource, BookExtensionResource, AvailableBooksResource, BookOverDueResource};
 use App\Jobs\SendingEmail;
@@ -48,10 +47,10 @@ class TraineeLibrary extends Controller
     {
         try
         {
-            \Log::info("count_lib", [$request->user()->id]);
             return $this->library_service->getLibRequestCount($request->user()->id);
         }
         catch (\Exception $e) {
+            \Log::info("viewLibRequestCountError", [$e]);
         }
     }
     public function view_books(ViewAllByUserRequest $request)
@@ -60,31 +59,21 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $userId = $validated["user_id"];
 
-            $statuses = [
-                RequestStatus::PENDING->value,
-                RequestStatus::APPROVED->value,
-                RequestStatus::EXTENDING->value,
-                RequestStatus::EXTENDED->value,
-                RequestStatus::RENEWING->value,
-                RequestStatus::RENEWED->value,
-                RequestStatus::RECEIVED->value
-            ];
-
             //SEPARATE
             $record = EnrolledCourse::query()
                 ->where('user_id', $userId)
                 ->select('training_id')
-                ->whereNotIn('enrolled_course_status', ['CANCELLED', 'DECLINED', 'COMPLETED', 'CSFB', 'IR'])
+                ->whereNotIn('enrolled_course_status', RequestStatus::notAllowedStatuses())
                 ->get();
 
             //SEPARATE
             $books = Book::with([
                 'catalog.genre',
-                'hasData' => function($q) use ($userId, $statuses) {
-                    $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $userId);
+                'hasData' => function($q) use ($userId) {
+                    $q->whereIn('status', RequestStatus::ActiveBookRequest())->whereRelation('bookRes', 'user_id', '=', $userId);
                 },
                 'hasData.bookRes' => function ($query) use ($userId) {
-                    $query->where(['user_id' => $userId, 'status' => 'FOR CSM']);
+                    $query->where(['user_id' => $userId, 'status' => RequestStatus::FOR_CSM->value]);
                 },
                 "related" => function($q) use ($record) {
                     $q->whereIn('training_id', $record);
@@ -94,8 +83,8 @@ class TraineeLibrary extends Controller
             ])
             ->withCount([
                 'copies' => fn ($q) => $q->where('status', RequestStatus::AVAILABLE),
-                'hasData' => function ($q) use ($userId, $statuses) {
-                    $q->whereIn('status', $statuses)->whereRelation('bookRes', 'user_id', '=', $userId);
+                'hasData' => function ($q) use ($userId) {
+                    $q->whereIn('status', RequestStatus::ActiveBookRequest())->whereRelation('bookRes', 'user_id', '=', $userId);
                 },
                 'related as enrolled_trainings_count' => function ($query) use ($record) {
                     $query->whereIn('training_id', $record);
@@ -124,7 +113,6 @@ class TraineeLibrary extends Controller
             $user_id = $request->user()->id;
             $cache_key = "user_id:$user_id:status:$status";
             $this->library_service->updateOverDue($user_id);
-
             \Log::info("CACHE: ", [Cache::has($cache_key), $cache_key]);
 
             $records = Cache::remember($cache_key, $this->ttl, function () use ($user_id, $status) {
@@ -223,7 +211,6 @@ class TraineeLibrary extends Controller
     /** GET AVAILABLE BOOKS FOR EXTENSION */
     public function view_available_extension(Request $request)
     {
-        \Log::info("data_view_available_extension", [$request->all(), $request->user()->id]);
         try {
             $userId = $request->user()->id;
             $traceNum = $request->traceNumber;
@@ -280,10 +267,10 @@ class TraineeLibrary extends Controller
             //EMAIL ABOUT SENDING A BORROWING A BOOK
             //CHANGE THE imbed images TO BASE-64 FOR EMAIL??
             SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
-            AuditHelper::log($userId, "User {$userId} sent a book request.OK");
+            AuditHelper::log($userId, "User {$userId} sent a book request.");
             Notifications::notify($userId, null, 'LIBRARY', 'has sent a book request.');
 
-            return response()->json(['message' => 'Your book request was sent successfully!OK'], 200);
+            return response()->json(['message' => 'Your book request was sent successfully!'], 200);
         }
         catch (ModelNotFoundException) {
             return response()->json(["message" => "User record not found."], 404);
@@ -355,10 +342,10 @@ class TraineeLibrary extends Controller
             $this->forgetCache($user_id);
 
             SendingEmail::dispatch($request->user(), new BookReservationStatus(['status' => "CANCELLED"], $request->user()));
-            AuditHelper::log($user_id, "User {$user_id} cancelled a book request.OK");
+            AuditHelper::log($user_id, "User {$user_id} cancelled a book request.");
 
             DB::commit();
-            return response()->json(['message' => "You're request has been cancelled successfully.OK"], 200);
+            return response()->json(['message' => "You're request has been cancelled successfully."], 200);
         } catch (\Exception $e){
             \Log::error('error_cancel_book', [$e]);
             return response()->json(["message" => "Something went wrong, Please try again"], 500);
@@ -373,12 +360,12 @@ class TraineeLibrary extends Controller
             $user_id = $validated["user_id"];
 
             $this->libraryExtendService->storeExtendRequest($validated);
-            AuditHelper::log($user_id, "User {$user_id} sent a book extension request.OK");
+            AuditHelper::log($user_id, "User {$user_id} sent a book extension request.");
             Notifications::notify($user_id, null, 'LIBRARY', 'has sent a book extension request.');
 
             $this->forgetCache($user_id);
 
-            return response()->json(["message" => "Extension request has sent successfully!OK"], 201);
+            return response()->json(["message" => "Extension request has sent successfully!"], 201);
         }
         catch (DomainException$e) {
             throw $e;
@@ -416,9 +403,9 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $this->libraryRenewService->storeRenewRequest($validated);
 
-            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} sent a book renewal request.OK");
+            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} sent a book renewal request.");
 
-            return response()->json(["message" => "You've successfully sent a book renewal request.OK"], 200);
+            return response()->json(["message" => "You've successfully sent a book renewal request."], 200);
         }
         catch (DomainException $e) {
             throw $e;

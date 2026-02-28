@@ -96,4 +96,30 @@ enum RequestStatus: string {
             RequestStatus::PROCESSING_PAYMENT->value,
         ];
     }
+
+    public static function ActiveBookRequest(): array {
+        return [
+            RequestStatus::PENDING->value,
+            RequestStatus::APPROVED->value,
+            RequestStatus::EXTENDING->value,
+            RequestStatus::EXTENDED->value,
+            RequestStatus::RENEWING->value,
+            RequestStatus::RENEWED->value,
+            RequestStatus::RECEIVED->value
+        ];
+    }
+
+    public static function ActiveDomitoryRequests(): array {
+        return [
+            RequestStatus::PENDING->value,
+            RequestStatus::APPROVED->value,
+            RequestStatus::EXTENDING->value,
+            RequestStatus::TRANSFERRING->value,
+            RequestStatus::TRANSFERRED->value,
+            RequestStatus::ACTIVE->value,
+            RequestStatus::PAID->value,
+            RequestStatus::PROCESSING_PAYMENT->value,
+            RequestStatus::RESERVED->value,
+        ];
+    }
 }

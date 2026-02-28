@@ -94,6 +94,10 @@ class LibraryController extends Controller
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
 
+            if($request->copies && $request->copies > 30) {
+                return response()->json(['message' => "Creating stocks is limited only to 30pcs. Please try again."], 409);
+            }
+
             $book_catalog = $isPost ? new BookCatalog() : BookCatalog::find($request->catalogId);
             $book_catalog->book_genre_id = $request->entry;
             $book_catalog->title = $request->title;
@@ -176,6 +180,10 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $copiesData = [];
 
+            if($request->copies > 30) {
+                return response()->json(['message' => "Creating stocks is limited only to 30pcs. Please try again."], 409);
+            }
+
             if($request->copies) {
                 for ($i = 0; $i < $request->copies; $i++) {
                     $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
@@ -211,10 +219,23 @@ class LibraryController extends Controller
             unset($copiesData['qr']);
 
             return $request->insideJob ? $copiesData : response()->json([
-                'message' => "You've added " . count($copiesData) . " book copies.",
-                'pdf_url' => asset('book-uploaded-files/pdf/' . $fileName),
+                'message' => "You've added " . \count($copiesData) . " book copies.",
                 'returnedData' => $copiesData
             ], 201);
+        });
+    }
+
+    /**
+     * Summary of update_book_copy
+     * @param Request $request
+     */
+    public function update_book_copy(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this_copy = BookCopy::findOrFail($request->documentId);
+            $this_copy->status = $request->status;
+            $this_copy->save();
+
+            return response()->json(['message' => "Book copy has been updated."], 201);
         });
     }
 
@@ -630,7 +651,7 @@ class LibraryController extends Controller
             }
 
             $hasActiveItems = BookReservation::where('book_res_id', $reservation->book_res_id)
-                ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
+                ->whereNotIn('status', ['PENDING', 'RECEIVED'])
                 ->exists();
 
             if (!$hasActiveItems) {
@@ -690,13 +711,8 @@ class LibraryController extends Controller
     public function get_fines(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $fines = LibraryInvoice::with([
-                'charge',
-                'bookRes',
-                'selectedBooks',
-                'selectedBooks.bookReservation',
-                'selectedBooks.bookReservation.book',
-                'selectedBooks.bookReservation.books',
-                'selectedBooks.bookReservation.books.catalog',
+                'payee',
+                'orNumber'
             ])->where([
                 'book_res_id' => $request->libraryId,
                 'user_id' => $request->userId
@@ -740,7 +756,7 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request, $id) {
             $libraryInvoice = LibraryInvoice::find($id);
 
-            if($libraryInvoice->status !== "PENDING") {
+            if($libraryInvoice->invoice_status !== "PENDING") {
                 return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYFINE->value], 400);
             } else {
                 $libraryInvoice->delete();
@@ -766,30 +782,20 @@ class LibraryController extends Controller
             $isPost = $request->httpMethod === "POST";
 
             $new_fine = $isPost ? new LibraryInvoice() : LibraryInvoice::find($request->documentId);
-            $new_fine->trace_number = $isPost
-                ? GenerateTrace::createTraceNumber(LibraryInvoice::class, '-RFINE-', 'trace_number', 10, 99)
-                : $new_fine->trace_number;
 
-            $new_fine->user_id = $request->user_id;
-            $new_fine->charge_id = $request->charge;
-            $new_fine->book_res_id = $request->book_res_id;
-            $new_fine->details = $request->details;
-            $new_fine->amount = $request->amount;
-            $new_fine->save();
-
-            LISelectedBook::where('library_invoice_id', $new_fine->id)->delete();
-
-            foreach ($request->selectedBookReservations as $bookReservation) {
-                $bookReserv = BookReservation::find($bookReservation);
-                $new_fine_selected_book_reservation = new LISelectedBook;
-                $new_fine_selected_book_reservation->library_invoice_id = $new_fine->id;
-                $new_fine_selected_book_reservation->book_reservation_id = $bookReservation;
-                $new_fine_selected_book_reservation->remarks = $bookReserv->status;
-                $new_fine_selected_book_reservation->save();
+            if($isPost) {
+                $new_fine->trace_number = GenerateTrace::createTraceNumber(LibraryInvoice::class, '-RFINE-', 'trace_number', 10, 99);
+                $new_fine->user_id = $request->user_id;
+                $new_fine->book_res_id = $request->book_res_id;
+            } else {
+                $new_fine->invoice_status = $request->status;
             }
 
-            Notifications::notify($request->user()->id, $request->user_id, "LIBRARY", ($isPost ? 'created' : 'updated') . " a request fine for you.");
+            $new_fine->description = $request->details;
+            $new_fine->invoice_amount = $request->amount;
+            $new_fine->save();
 
+            Notifications::notify($request->user()->id, $request->user_id, "LIBRARY", ($isPost ? 'created' : 'updated') . " a request fine for you.");
             AuditHelper::log(
                 $request->user()->id,
                 $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value . " ID#$new_fine->id"

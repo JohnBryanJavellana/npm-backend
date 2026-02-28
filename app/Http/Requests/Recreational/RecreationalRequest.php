@@ -17,7 +17,7 @@ class RecreationalRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("dataRequest", $this->all());
+        \Log::info("requestEquipmentData", $this->all());
         return true;
     }
 
@@ -66,8 +66,8 @@ class RecreationalRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'data.*.quantity.required_without' =>
-                ':attribute No selected item!',
+            'data.*.quantity.required_without' => ':attribute No selected item!',
+            'data.*.id.required' => 'To submit your request, please choose an equipment or facility you need.'
         ];
     }
 

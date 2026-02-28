@@ -117,7 +117,7 @@ class EnrollmentCtrl extends Controller
                     'training' => [
                         'main' => [
                             'info' => $self->toArray(),
-                            'charge' => $self->training->module->trainingFees()->latest()->first()->toArray(),
+                            'charge' => $self->training->module->trainingFees()->latest()->first(),
                             'name' => [
                                 'module' => $self->training->module,
                                 'moduleType' => $self->training->module->moduleType,
@@ -1301,7 +1301,7 @@ class EnrollmentCtrl extends Controller
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTRANK->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTRANK->value . " ID#$this_rank->id"
+                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTLICENSE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTLICENSE->value . " ID#$this_rank->id"
             );
 
             if (env('USE_EVENT')) {

@@ -28,8 +28,15 @@ class GenerateQR {
         $img->resizeCanvas(500, 560, 'ffffff', false);
 
         if(!is_null($qrText)) {
-            $img->text($content, 250, 540, function($font) {
-                $font->file(public_path('fonts/Roboto/Roboto.ttf'));
+            // Ensure the path is absolute and real
+            $fontPath = public_path('fonts/Roboto/Roboto.ttf');
+
+            if (!file_exists($fontPath)) {
+                throw new \Exception("Font file not found at: " . $fontPath);
+            }
+
+            $img->text((string)$qrText, 250, 540, function($font) use ($fontPath) {
+                $font->file($fontPath);
                 $font->size(25);
                 $font->color('#000000');
                 $font->align('center');

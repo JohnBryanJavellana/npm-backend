@@ -50,6 +50,7 @@ class TraineeSingleRecResource extends JsonResource
             "invoice_amount" => $this->invoice?->invoice_amount,
             "invoice_reference" => $this->invoice?->invoice_reference,
             "invoice_status" => $this->invoice?->invoice_status,
+            "invoice_description" => $this->invoice?->description,
             "date_paid" => $this->invoice?->datePaid,
             "payment_type" => $this->invoice?->payment_type,
             "received_amount" => $this->invoice?->received_amount,

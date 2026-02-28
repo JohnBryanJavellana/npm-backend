@@ -13,8 +13,13 @@ use App\Utils\GenerateTrace;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class RecreationalService {
+
+    private const EQUIPMENTPREFIX = "NMP-RAE";
+    private const FACILITYPREFIX = "NMP-RAF";
+
     public function __construct(
         protected RAEquipments $raequipmentsModel,
         protected RAEquipmentStock $raequipmentStockModel,
@@ -138,7 +143,7 @@ class RecreationalService {
 
         if($eq_id->values()->filter()->isNotEmpty()) {
             $equipments->with([
-                "stocks" => function($query)use ($ui){
+                "stocks" => function($query) use ($ui){
                     $query->whereIn("unique_identifier",$ui)->available()->okayCondition();
                 }
             ]);
@@ -240,7 +245,6 @@ class RecreationalService {
                 ];
             }
         }
-        //check for what if no quantity just qr
         if(!empty($info["quantity"])) {
             for($default = 0; $default < $info["quantity"]; $default++) {
                 $data[] = [
@@ -260,67 +264,104 @@ class RecreationalService {
 
     public function storeFacilitiesRequest($info, $record)
     {
-        $facility = $this->rafacilityModel->query()
-        ->select("id", "condition_status","unique_identifier")
-        ->uniqueIdentifier($info["UI"])
-        ->whereKey($info["id"])
-        ->whereDoesntHave("hasData", function ($query) use ($info) {
-            $query->whereIn("status", [RequestStatus::APPROVED->value, RequestStatus::OCCUPIED->value])
-            ->where(function ($q) use ($info) {
-                $q->whereBetween('start_date', [$info['from_datetime'], $info['to_datetime']])
-                ->orWhereBetween('end_date', [$info['from_datetime'], $info['to_datetime']])
-                ->orWhere(function ($subQ) use ($info) {
-                    $subQ->where('start_date', '<=', $info['from_datetime'])
-                        ->where('end_date', '>=', $info['to_datetime']);
-                });
-            });
-        })
-        ->available()
-        ->okayCondition()
-        ->firstOr(function() {
-            throw new DomainException("Selected facility is not available anymore.");
-        });
+        return DB::transaction(function () use ($info, $record) {
 
-        if($facility)
-            $this->rafacilityRequestModel->create([
-            "r_a_request_info_id" => $record->id,
-            "r_a_facility_id" => $info["id"],
-            "start_date" => $info["from_datetime"],
-            "end_date" => $info["to_datetime"],
-            "issued_condition" =>$facility->condition_status
-        ]);
+            $startDate = $info['from_datetime'];
+            $endDate   = $info['to_datetime'];
+
+            $facility = $this->rafacilityModel
+                ->select('id', 'name', 'condition_status')
+                ->whereKey($info['id'])
+                ->uniqueIdentifier($info['UI'])
+                ->withCount(['hasData as overlapping_count' => function ($q) use ($startDate, $endDate) {
+                    $q->whereIn('status', [
+                        RequestStatus::APPROVED->value,
+                        RequestStatus::OCCUPIED->value
+                    ])
+                    ->where('start_date', '<', $endDate)
+                    ->where('end_date', '>', $startDate);
+                }])
+                ->first();
+
+                if (!$facility) {
+                    throw new DomainException("Facility not found.");
+                }
+
+                if ($facility->overlapping_count > 0) {
+                    throw new DomainException(
+                        "The facility '{$facility->name}' is not available for the selected dates."
+                    );
+                }
+
+            // $facility = $this->rafacilityModel->query()
+            //     ->select('id', 'name', 'condition_status')
+            //     ->whereKey($info['id'])
+            //     ->uniqueIdentifier($info['UI'])
+            //     ->available()
+            //     ->okayCondition()
+            //     ->whereDoesntHave('hasData', function ($query) use ($startDate, $endDate) {
+            //         $query->whereIn('status', [
+            //                 RequestStatus::APPROVED->value,
+            //                 RequestStatus::OCCUPIED->value
+            //             ])
+            //             ->where('start_date', '<', $endDate)
+            //             ->where('end_date', '>', $startDate);
+            //     })
+            //     ->lockForUpdate() // prevent race condition
+            //     ->first();
+
+            // if (!$facility) {
+            //     throw new DomainException(
+            //         "Selected facility is not available anymore."
+            //     );
+            // }
+
+            return $this->rafacilityRequestModel->create([
+                'r_a_request_info_id' => $record->id,
+                'r_a_facility_id'     => $facility->id,
+                'start_date'          => $startDate,
+                'end_date'            => $endDate,
+                'issued_condition'    => $facility->condition_status,
+            ]);
+        });
     }
 
-    public function isUniqueIdenfierExistV1($validated)
+    public function checkPrefix($UIId)
     {
-        if (!isset($validated->UIId) || $validated->UIId === false) {
+        if (!isset($UIId) || $UIId === false) {
             throw new DomainException("Unique identifier is required.");
         }
+        $prefix = Str::of($UIId)->explode("-")->take(2)->implode("-");
 
-        $model = match ($validated->type) {
-            'EQUIPMENT'  => $this->raequipmentStockModel,
-            'FACILITY' => $this->rafacilityModel,
-            default    => throw new DomainException("Invalid request!")
+        return match ($prefix) {
+            self::EQUIPMENTPREFIX => $this->raequipmentStockModel,
+            self::FACILITYPREFIX => $this->rafacilityModel,
+            default => throw new DomainException("Invalid QR!")
         };
+    }
 
-        $record = $model->query()->where("unique_identifier", $validated->UIId);
-        if($validated->type === "EQUIPMENT") {
-            $record->withCount([
+    public function isUniqueIdenfierExistV2($validated)
+    {
+        $model = $this->checkPrefix($validated->UIId);
+        return $model->query()->where("unique_identifier", $validated->UIId)
+        ->when($model instanceof RAEquipmentStock, function($query) {
+            $query->withCount([
             "siblings as stock_count" => function($q) {
                 $q->available()->okayCondition();
-            }
+            },
+            //for future
+            // "hasData as active_count" => function($query) {
+            //     $query->borrowed();
+            // }
             ]);
-        }
-
-        $record = $record->available()
+        })
+        //for future
+        // ->when($model instanceof RAFacility, function($query) {
+        //     $query->withCount("hasData as occupied_count", fn($q) => $q->occupied());
+        // })
+        ->available()
         ->okayCondition()
-        ->first();
-
-        if(!$record) {
-            throw new DomainException(
-        ($validated["type"] === "EQUIPMENT" ? "Equipment" : "Facility") . " not found");
-        }
-        return $record;
+        ->firstOr(fn() => throw new DomainException(($model instanceof RAEquipmentStock ? "Equipment" : "Facility") . " not found"));
     }
 
     public function prepareForCancellation($record)
@@ -331,6 +372,7 @@ class RecreationalService {
             throw new DomainException("Can't cancel unit. It is already $record->status.");
         }
     }
+
     public function cancelRequests($validated)
     {
         DB::transaction(function() use ($validated){

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 /** administrator controllers */
 
 use App\Http\Controllers\Authenticated\Administrator\{
+    DashboardCtrl,
     Account,
     DormitoryController,
     EnrollmentCtrl,
@@ -18,6 +19,8 @@ use App\Http\Controllers\Authenticated\Administrator\{
 /** authenticated routes */
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA'])->group(function () {
+        Route::post('dashboard_data', [DashboardCtrl::class, 'dashboard_data']);
+
         Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT', 'throttle:60,1'])->group(function () {
             Route::get('course/remarks', [EnrollmentCtrl::class, 'get_remarks_count']);
             Route::get('course/enrollment/count', [EnrollmentCtrl::class, 'get_enrollment_count']);
@@ -78,6 +81,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
             Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
             Route::get('get_book_info/get_copies/{book_id}', [LibraryController::class, 'get_copies']);
+            Route::post('get_book_info/get_copies/update_book_copy', [LibraryController::class, 'update_book_copy']);
             Route::post('create_book_copies', [LibraryController::class, 'create_book_copies']);
             Route::get('get_book_total_reservations/{book_id}', [LibraryController::class, 'get_book_total_reservations']);
             Route::post('update_reservation', [LibraryController::class, 'update_reservation']);
