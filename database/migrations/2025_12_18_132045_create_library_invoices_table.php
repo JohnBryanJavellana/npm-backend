@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\CashierOR;
+use App\Models\TermsAndCondition;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,6 +24,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(BookRes::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(TermsAndCondition::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(CashierOR::class)->nullable();
             $table->longText("trace_number");
             $table->longText("invoice_reference")->nullable();

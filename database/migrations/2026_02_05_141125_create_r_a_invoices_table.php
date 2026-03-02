@@ -2,6 +2,7 @@
 
 use App\Models\CashierOR;
 use App\Models\RARequestInfo;
+use App\Models\TermsAndCondition;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -19,6 +20,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(RARequestInfo::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(TermsAndCondition::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(CashierOR::class)->nullable();
             $table->longText('description');
             $table->longText('trace_number')->nullable();

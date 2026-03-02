@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\CashierOR;
+use App\Models\TermsAndCondition;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -27,6 +28,7 @@ return new class extends Migration
             $table->enum('payment_type', ['ONLINE', 'WALK-IN'])->nullable();
             $table->longText('invoice_reference')->nullable();
             $table->longText('trace_number');
+            $table->foreignIdFor(TermsAndCondition::class)->nullable()->constrained()->cascadeOnDelete();
             $table->decimal('invoice_amount', 65,2)->default(0.0);
             $table->decimal('received_amount', 65,2)->default(0.0);
             $table->longText('description')->nullable();

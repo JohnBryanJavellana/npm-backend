@@ -95,13 +95,14 @@ class LibraryController extends Controller
             $isPost = $request->httpMethod === "POST";
 
             if($request->copies && $request->copies > 30) {
-                return response()->json(['message' => "Creating stocks is limited only to 30pcs. Please try again."], 409);
+                return response()->json(['message' => "Creating copies are limited only to 30pcs. Please try again."], 409);
             }
 
             $book_catalog = $isPost ? new BookCatalog() : BookCatalog::find($request->catalogId);
             $book_catalog->book_genre_id = $request->entry;
             $book_catalog->title = $request->title;
             $book_catalog->author = $request->author;
+            $book_catalog->abstract = $request->abstract;
             $book_catalog->editor = $request->editor;
             $book_catalog->isbn = $request->isbn;
             $book_catalog->publisher = $request->publisher;
@@ -181,7 +182,7 @@ class LibraryController extends Controller
             $copiesData = [];
 
             if($request->copies > 30) {
-                return response()->json(['message' => "Creating stocks is limited only to 30pcs. Please try again."], 409);
+                return response()->json(['message' => "Creating copies are limited only to 30pcs. Please try again."], 409);
             }
 
             if($request->copies) {
@@ -193,30 +194,9 @@ class LibraryController extends Controller
                     $book_copy->book_id = $request->documentId;
                     $book_copy->save();
 
-                    $qrCode = base64_encode(QrCode::format('png')
-                        ->size(750)
-                        ->margin(1)
-                        ->errorCorrection('M')
-                        ->generate($new_book_ui));
-
-                    $copiesData[] = [
-                        'identifier' => $new_book_ui,
-                        'qr' => $qrCode
-                    ];
+                    array_push($copiesData, $new_book_ui);
                 }
             }
-
-            if($request->autoPrint) {
-                $customPaper = [0, 0, 113.39, 85.04];
-                $pdf = Pdf::loadView('pdf.book_labels', ['copies' => $copiesData])->setPaper($customPaper, 'landscape');
-                $fileName = 'labels-' . time() . '.pdf';
-                $filePath = public_path('book-uploaded-files/pdf/' . $fileName);
-                $pdf->save($filePath);
-
-                AutoPrint::dispatch($filePath);
-            }
-
-            unset($copiesData['qr']);
 
             return $request->insideJob ? $copiesData : response()->json([
                 'message' => "You've added " . \count($copiesData) . " book copies.",
@@ -391,7 +371,10 @@ class LibraryController extends Controller
      */
     public function get_copies (Request $request, int $book_id) {
         return TransactionUtil::transact(null, [], function() use ($book_id) {
-            $bookCopies = BookCopy::withCount('hasData')->where('book_id', operator: $book_id)->get();
+            $bookCopies = BookCopy::withCount('hasData')
+                ->with('book.catalog')
+                ->where('book_id', operator: $book_id)
+                ->get();
             return response()->json(['bookCopies' => $bookCopies], 200);
         });
     }

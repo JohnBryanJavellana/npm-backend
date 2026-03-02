@@ -13,7 +13,8 @@ use App\Http\Controllers\Authenticated\Administrator\{
     Cashier,
     Masterlist,
     RecreationalActivityCtrl,
-    QRReaderCheckInOutCtrl
+    QRReaderCheckInOutCtrl,
+    TermsAndConditionCtrl
 };
 
 /** authenticated routes */
@@ -22,6 +23,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('dashboard_data', [DashboardCtrl::class, 'dashboard_data']);
 
         Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT', 'throttle:60,1'])->group(function () {
+            Route::post('get_terms_and_condition', [TermsAndConditionCtrl::class, 'get_terms_and_condition']);
+            Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
+            Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);
+
             Route::get('course/remarks', [EnrollmentCtrl::class, 'get_remarks_count']);
             Route::get('course/enrollment/count', [EnrollmentCtrl::class, 'get_enrollment_count']);
             Route::post('get_applications', [EnrollmentCtrl::class, 'get_applications']);
@@ -77,6 +82,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::prefix('/books/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY', 'throttle:60,1'])->group(function () {
+            Route::post('get_terms_and_condition', [TermsAndConditionCtrl::class, 'get_terms_and_condition']);
+            Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
+            Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);
+
             Route::get('get_books', [LibraryController::class, 'get_books']);
             Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
             Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
@@ -112,6 +121,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::prefix('/dormitory/')->middleware(['user_role:SUPERADMIN,ADMIN-DORMITORY', 'throttle:60,1'])->group(function () {
+            Route::post('get_terms_and_condition', [TermsAndConditionCtrl::class, 'get_terms_and_condition']);
+            Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
+            Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);
+
             Route::get('get', [DormitoryController::class, 'dormitories']);
             Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
@@ -184,6 +197,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::prefix('/cashier/')->middleware(['user_role:SUPERADMIN,CASHIER', 'throttle:60,1'])->group(function () {
+            Route::post('get_terms_and_condition', [TermsAndConditionCtrl::class, 'get_terms_and_condition']);
+            Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
+            Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);
+
             Route::post('get_payments', [Cashier::class, 'get_payments']);
             Route::post('pay-walk-in', [Cashier::class, 'pay_walkin']);
             Route::post('verify_payment', [Cashier::class, 'verify_payment']);
@@ -203,6 +220,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::prefix('/recreational-activity/')->middleware(['user_role:SUPERADMIN,ADMIN-RA', 'throttle:60,1'])->group(function () {
+            Route::post('get_terms_and_condition', [TermsAndConditionCtrl::class, 'get_terms_and_condition']);
+            Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
+            Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);
+
             Route::get('ra_count/get_ra_count', [RecreationalActivityCtrl::class, 'get_ra_count']);
             Route::post('ra_requests', [RecreationalActivityCtrl::class, 'ra_requests']);
             Route::post('ra_requests/get_requested_equipments', [RecreationalActivityCtrl::class, 'get_requested_equipments']);

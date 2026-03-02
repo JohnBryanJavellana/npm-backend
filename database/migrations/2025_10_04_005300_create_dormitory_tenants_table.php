@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\TermsAndCondition;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(DormitoryRoom::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryInvoice::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(TermsAndCondition::class)->constrained()->cascadeOnDelete();
             $table->string('trace_number', 255)->nullable();
             $table->enum('status_of_occupancy', ['TRAINEE', 'NON-PAYING GUEST/VISITOR', 'NMP PERSONNEL (REGULAR/JOW)', 'PAYING GUEST/VISITOR'])->default('TRAINEE');
             // $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);

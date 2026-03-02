@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\TermsAndCondition;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,6 +20,7 @@ return new class extends Migration
             $table->engine = "InnoDB";
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(TermsAndCondition::class)->constrained()->cascadeOnDelete();
             $table->longText('trace_number')->nullable();
             $table->enum('status', ["COMPLETED", "ACTIVE", "FOR CSM", "EXTENDING"])->default("ACTIVE");
             $table->enum('type', ["WALK-IN", "ONLINE"]);

@@ -27,3 +27,5 @@ exit
 /public/trainee-files/*
 /public/training_requirement_files/*
 /public/upload_reference/*
+
+!**/ .gitkeep
