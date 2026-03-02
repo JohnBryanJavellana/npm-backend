@@ -317,7 +317,6 @@ class RecreationalService {
         };
     }
 
-    //validate for the availability of the main equipment and the facility
     public function isUniqueIdenfierExistV2($validated)
     {
         $model = $this->checkPrefix($validated->UIId);
@@ -325,15 +324,15 @@ class RecreationalService {
         ->when($model instanceof RAEquipmentStock, function($query) {
             $query->whereRelation("equipment", "availability_status", RequestStatus::AVAILABLE->value)
             ->withCount([
-            "siblings as stock_count" => function($q) {
-                $q->available()
+            "siblings as stock_count" => function($query) {
+                $query->available()
                 ->okayCondition();
             },
             ]);
         })
         ->available()
         ->okayCondition()
-        ->firstOr(fn() => throw new DomainException(($model instanceof RAEquipmentStock ? "Equipment" : "Facility") . " not found"));
+        ->firstOr(fn() => throw new DomainException(($model instanceof RAEquipmentStock ? "Equipment" : "Facility") . " not available"));
     }
 
     public function prepareForCancellation($record)

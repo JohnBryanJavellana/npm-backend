@@ -39,8 +39,8 @@ class LibraryService {
     public function preparedData($validated)
     {
         $roleMax = match($validated["role"]) {
-            "TRAINEE" => 3,
-            "TRAINER" => 7,
+            "TRAINEE" => self::TRAINEE_MAX,
+            "TRAINER" => self::TRAINER_MAX,
             default => throw new DomainException("Unknown Role, please try again.")
         };
 

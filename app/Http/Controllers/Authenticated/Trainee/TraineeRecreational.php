@@ -110,11 +110,9 @@ class TraineeRecreational extends Controller
     public function getUserRecRequest(ViewUserRecRecord $request)
     {
         $validated = $request->validated();
-        $validated["userId"] = $request->user()->id ?? 202600001;
+        $validated["userId"] = $request->user()->id;
         try
         {
-            \Log::info("data", [$validated]);
-
             $data = $this->recreationalService->getUserRecRecord($validated);
 
             return response()->json(["data" => $data], 200);

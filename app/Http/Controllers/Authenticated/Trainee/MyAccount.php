@@ -207,6 +207,7 @@ class MyAccount extends Controller
                 $random_password = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
                 $user->password = bcrypt($random_password);
 
+                //try to dispatch to a job/queue
                 \Mail::to($request->email)->later(Carbon::now()->addSeconds(3), new UpdatePasswordMail(['password' => $random_password]));
 
                 $reloggin = true;

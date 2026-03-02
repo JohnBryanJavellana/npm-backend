@@ -38,6 +38,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
 /** other controllers */
 
 use App\Http\Controllers\Authenticated\Logout;
+use App\Http\Controllers\Authenticated\QrReader\QrReaderController;
 use App\Http\Controllers\Authenticated\Trainer\AttendanceController;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
 use App\Http\Controllers\QRReaderCheckInOutCtrl;
@@ -45,16 +46,12 @@ use App\Http\Controllers\QRReaderCheckInOutCtrl;
 /** imported models */
 
 use App\Models\User;
-use App\Services\Trainee\Dormitory\DormitoryTransferService;
-use App\Services\Trainee\Recreational\RecreationalService;
-
 /** guest routes */
 Route::match(['GET', 'POST'], '/login', [LoginController::class, 'login_user']);
 Route::post('/register', [RegisterController::class, 'register_user']);
 Route::get('/email/verify', [EmailVerificationController::class, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
-
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::post('/broadcasting/auth', function (Request $request) {
@@ -125,7 +122,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_personal_dormitory', [TraineeDormitory::class, 'get_personal_dormitory']);
             Route::post('request_tenant_room', [TraineeDormitory::class, 'request_tenant_room']);
             Route::post('update_status_dormitory', [TraineeDormitory::class, 'update_status_dormitory']);
-            // Route::post('get_filtered_dorms', [TraineeDormitory::class, 'get_filtered_dorms']);
             Route::get('dormitory_record', [TraineeDormitory::class, 'dormitory_record']);
 
             //INCLUSIONS
@@ -191,21 +187,21 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('enrollment/update', [TraineeInvoices::class, 'updateEnrollmentInvoice']);
         });
 
-        Route::prefix('/credits/')->group(function () {
-            Route::get("audits", [CreditController::class, "show"]);
-            Route::post("audits/create", [CreditController::class, "store"]);
+        Route::prefix("/qr_reader")->group(function() {
+            Route::get("/view/{user}", [QrReaderController::class, "viewUserQrRecord"]);
         });
+
     });
 
     Route::middleware(['user_role:TRAINER', 'throttle:60,1'])->prefix('/trainer/')->group(function () {
         Route::prefix('enrollment/')->group(function() {
             Route::get('training', [TrainerEnrollmentController::class, 'viewAllTrainingsAndFacilitators']);
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
-            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']); //*
-            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //*
+            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
+            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
             Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
 
-            //* ATTENTANCE PART
+            //ATTENTANCE PART
             Route::get('trainee', [AttendanceController::class, 'test']);
         });
     });
