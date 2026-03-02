@@ -10,14 +10,13 @@ use App\Http\Resources\Trainee\Invoices\DormitoryInvoiceResource;
 use App\Http\Requests\Trainee\Library\LibInvoiceRequest;
 use App\Http\Resources\BookRequestResource;
 use App\Http\Resources\LibInvoiceResource;
+use App\Http\Resources\Trainee\Library\LibraryInvoiceResource;
 use Illuminate\Http\Request;
 use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice, BookRes};
 use App\Services\Trainee\Dormitory\DormitoryInvoiceService;
 use App\Services\Trainee\Enrollment\EnrollmentInvoiceService;
 use App\Services\Trainee\Library\LibraryInvoiceService;
 use DomainException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
 
 class TraineeInvoices extends Controller
 {
@@ -63,21 +62,22 @@ class TraineeInvoices extends Controller
     {
         try
         {
-        $penaltiedStatuses = [RequestStatus::DAMAGED->value, RequestStatus::LOST->value];
+        // $penaltiedStatuses = [RequestStatus::PENDING->value, RequestStatus::FOR_VERIFICATION->value];
 
         $records = BookRes::with([
-            "borrowedBooks" => fn($q) => $q->whereIn("status", $penaltiedStatuses),
+            "borrowedBooks",
             "borrowedBooks.books.catalog.genre",
             "borrowedBooks.book",
+            "fines"
             ])
         ->where("user_id", $request->user()->id)
-        ->whereHas("borrowedBooks", function($query) use ($penaltiedStatuses) {
-            $query->whereIn("status", $penaltiedStatuses);
+        ->whereHas("fines", function($query) use ($request) {
+            $query->where("user_id", $request->user()->id);
         })
         ->latest("created_at")
         ->get();
 
-        return BookRequestResource::collection($records);
+        return LibraryInvoiceResource::collection($records);
 
         }
         catch (\Exception $e) {
@@ -90,13 +90,12 @@ class TraineeInvoices extends Controller
     {
         try {
             $validated = $request->validated();
-            $user_id = $request->user()->id;
-
-            $balance = $this->libraryInvoiceService->updateLibraryInvoice($validated, $user_id);
+            $balance = $this->libraryInvoiceService->updateLibraryInvoice($validated);
 
             return response()->json(["message" => "Successfully Paid!", "balance" => $balance], 200);
         }
         catch (\Exception $e) {
+            \Log::error("errorUpdateLibInvoice", [$e]);
             return response()->json(["message" => "Something went wrong, Please try again!"], 500);
         }
     }

@@ -29,8 +29,8 @@ class BookRequest extends FormRequest
     {
         $this->merge([
             "user_id" => in_array($this->user()->role, [UserRoleEnum::SUPERADMIN->value,UserRoleEnum::ADMIN_LIBRARY->value])
-            ? $this->input("userId")
-            : $this->user()->id
+                ? $this->input("userId")
+                : $this->user()->id,
         ]);
     }
 
