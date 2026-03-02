@@ -32,7 +32,7 @@ class CreateOrUpdateBookRequest extends FormRequest
             'pages' => ['nullable', 'string'],
             'call_number' => ['nullable', 'string'],
             'file_location' => ['nullable', 'string'],
-            'publication_year' => ['nullable', 'string', 'min:1000', 'max:' . date('Y')],
+            'publication_year' => ['nullable', 'string', 'min:4', 'max:4'],
             'price' => ['nullable', 'numeric'],
             'pdf_file' => ['nullable', 'string'],
             'copies' => ['nullable', 'string'],
