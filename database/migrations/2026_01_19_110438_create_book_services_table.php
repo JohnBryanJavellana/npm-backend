@@ -16,7 +16,6 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(BookReservation::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-            // $table->foreignIdFor(User::class, "processed_by")->nullable();
             $table->enum("action", ["RENEW", "EXTEND"]);
             $table->dateTime("old_to_date");
             $table->enum("status", ["APPROVED", "CANCELLED", "REJECTED", "PENDING", "COMPLETED"])->default("PENDING");

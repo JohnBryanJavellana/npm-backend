@@ -22,7 +22,7 @@ class CourseModuleResource extends JsonResource
             "acronym" => $this->acronym,
             "type" => $this->moduleType?->name,
             "compendium" => $this->compendium,
-            "price" => $this->trainingFees?->first()->amount,
+            "price" => $this->trainingFees?->first()?->amount,
         ];
     }
 }

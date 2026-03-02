@@ -81,7 +81,7 @@ class TraineeRecreational extends Controller
         }
         catch (\Exception $e) {
             \Log::info("viewEquipmentError", [$e]);
-            return response()->json([$e], 500);
+            return response()->json([$e->getMessage()], 500);
             return response()->json(["Something went wrong."], 500);
         }
     }
@@ -122,7 +122,7 @@ class TraineeRecreational extends Controller
         catch (\Exception $e) {
             \Log::error("error_data", [$validated]);
 
-            return response()->json(["message" => $e], 500);
+            return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
@@ -149,6 +149,7 @@ class TraineeRecreational extends Controller
                         'facility_request',
                         'facility_request.updatedByWhom',
                         'facility_request.facility.images',
+                        'invoices',
                         'csm'
                         ])
                     ->get()
@@ -202,7 +203,7 @@ class TraineeRecreational extends Controller
         $validated = $request->validated();
         try
         {
-            $type = Str::lower($validated->documentType);
+            $type = Str::lower($validated["documentType"]);
             $this->recreationalService->cancelRequests($validated);
             AuditHelper::log($request->user()->id, "User {$request->user()->id} has cancelled a {$type} recreational request.");
             // Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has cancelled a recreational request.');
@@ -244,7 +245,6 @@ class TraineeRecreational extends Controller
                     );
                 }
                 catch (\Exception $e) {
-
                 }
             }
             return response()->json(["message" => "Successfully sent a recreational request"], 200);
@@ -253,7 +253,7 @@ class TraineeRecreational extends Controller
             throw $e;
         }
         catch (ModelNotFoundException $e) {
-            throw $e;
+            return response()->json(["message" => "Facility record not found"], 404);
         }
         catch (\Exception $e) {
             \Log::error("requestEquipmentError", [$e]);

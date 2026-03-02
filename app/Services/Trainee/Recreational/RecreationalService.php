@@ -264,36 +264,67 @@ class RecreationalService {
 
     public function storeFacilitiesRequest($info, $record)
     {
-        $startDate = $info['from_datetime'];
-        $endDate   = $info['to_datetime'];
+        return DB::transaction(function () use ($info, $record) {
 
-        $facility = $this->rafacilityModel->query()
-            ->select("id", "condition_status", "unique_identifier")
-            ->uniqueIdentifier($info["UI"])
-            ->whereKey($info["id"])
-            ->whereDoesntHave("hasData", function ($query) use ($startDate, $endDate) {
-                $query->whereIn("status", [
+            $startDate = $info['from_datetime'];
+            $endDate   = $info['to_datetime'];
+
+            $facility = $this->rafacilityModel
+                ->select('id', 'name', 'condition_status')
+                ->whereKey($info['id'])
+                ->uniqueIdentifier($info['UI'])
+                ->withCount(['hasData as overlapping_count' => function ($q) use ($startDate, $endDate) {
+                    $q->whereIn('status', [
                         RequestStatus::APPROVED->value,
                         RequestStatus::OCCUPIED->value
                     ])
                     ->where('start_date', '<', $endDate)
                     ->where('end_date', '>', $startDate);
-            })
-            ->available()
-            ->okayCondition()
-            ->firstOr(function () {
-                throw new DomainException("Selected facility is not available anymore.");
-            });
+                }])
+                ->first();
 
-        $this->rafacilityRequestModel->create([
-            "r_a_request_info_id" => $record->id,
-            "r_a_facility_id"     => $facility->id,
-            "start_date"          => $startDate,
-            "end_date"            => $endDate,
-            "issued_condition"    => $facility->condition_status
-        ]);
+                if (!$facility) {
+                    throw new DomainException("Facility not found.");
+                }
+
+                if ($facility->overlapping_count > 0) {
+                    throw new DomainException(
+                        "The facility '{$facility->name}' is not available for the selected dates."
+                    );
+                }
+
+            // $facility = $this->rafacilityModel->query()
+            //     ->select('id', 'name', 'condition_status')
+            //     ->whereKey($info['id'])
+            //     ->uniqueIdentifier($info['UI'])
+            //     ->available()
+            //     ->okayCondition()
+            //     ->whereDoesntHave('hasData', function ($query) use ($startDate, $endDate) {
+            //         $query->whereIn('status', [
+            //                 RequestStatus::APPROVED->value,
+            //                 RequestStatus::OCCUPIED->value
+            //             ])
+            //             ->where('start_date', '<', $endDate)
+            //             ->where('end_date', '>', $startDate);
+            //     })
+            //     ->lockForUpdate() // prevent race condition
+            //     ->first();
+
+            // if (!$facility) {
+            //     throw new DomainException(
+            //         "Selected facility is not available anymore."
+            //     );
+            // }
+
+            return $this->rafacilityRequestModel->create([
+                'r_a_request_info_id' => $record->id,
+                'r_a_facility_id'     => $facility->id,
+                'start_date'          => $startDate,
+                'end_date'            => $endDate,
+                'issued_condition'    => $facility->condition_status,
+            ]);
+        });
     }
-
 
     public function checkPrefix($UIId)
     {

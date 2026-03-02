@@ -166,7 +166,7 @@ class BookSeeder extends Seeder
             ],
             [
                 'title' => 'Biomechanics of Sport Performance',
-                'genre' => 'Kinesiology',   
+                'genre' => 'Kinesiology',
                 'category' => 'NON-BOOK',
                 'author' => 'K.W. Johnson',
                 'editor' => 'English',
@@ -185,15 +185,11 @@ class BookSeeder extends Seeder
         DB::beginTransaction();
         try {
             foreach ($booksData as $data) {
-                $genre = BookGenre::firstOrCreate(
-                    [
-                        "name" => $data["genre"],
-                        "category" => $data["category"],
-                        "status" => "ACTIVE"
-                    ]
-                    // ['name' => $data['genre']],
-                    // ['status' => 'ACTIVE']
-                );
+                $genre = BookGenre::firstOrCreate([
+                    "name" => $data["genre"],
+                    "category" => $data["category"],
+                    "status" => "ACTIVE"
+                ]);
 
                 $catalog = BookCatalog::create([
                     'book_genre_id' => $genre->id,

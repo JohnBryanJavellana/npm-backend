@@ -38,7 +38,7 @@ class TraineeInvoices extends Controller
 
         $invoices = $all_user_invoices->select('trainee_enrolled_invoices', 'trainee_dormitory_invoices');
 
-        return response()->json(['message' => 'Invoices Fetched Successfully!OK', 'data' => $invoices], 200);
+        return response()->json(['message' => 'Invoices Fetched Successfully!', 'data' => $invoices], 200);
     }
 
     public function updateEnrollmentInvoice(EnrollmentInvoiceRequest $request)
@@ -84,10 +84,6 @@ class TraineeInvoices extends Controller
             \Log::error("error_library_penalties", [$e]);
             return response()->json(["Something went wrong, Please try again."], 500);
         }
-
-
-        // return response()->json(["invoices" => $records], 200);
-        // return LibInvoiceResource::collection($records);
     }
 
     public function updateLibInvoice(LibInvoiceRequest $request)
@@ -98,7 +94,7 @@ class TraineeInvoices extends Controller
 
             $balance = $this->libraryInvoiceService->updateLibraryInvoice($validated, $user_id);
 
-            return response()->json(["message" => "Successfully Paid!OK", "balance" => $balance], 200);
+            return response()->json(["message" => "Successfully Paid!", "balance" => $balance], 200);
         }
         catch (\Exception $e) {
             return response()->json(["message" => "Something went wrong, Please try again!"], 500);
@@ -111,9 +107,10 @@ class TraineeInvoices extends Controller
             $validated = $request->validated();
             $user_id = $request->user()->id;
 
-            $total = $this->dormitoryInvoiceService->updateDormitoryInvoice($validated, $user_id);
+            $this->dormitoryInvoiceService->updateDormitoryInvoice($validated, $user_id);
+            // $total = $this->dormitoryInvoiceService->updateDormitoryInvoice($validated, $user_id);
 
-            return response()->json(["balance" => $total], 200);
+            return response()->json(["message" => "Payment Transaction Success!"], 200);
         }
         catch (DomainException $e) {
             \Log::info("updateDormInvoiceDomainException", [$e]);

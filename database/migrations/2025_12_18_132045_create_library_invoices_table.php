@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\CashierOR;
+use App\Models\TermsAndCondition;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -21,19 +22,18 @@ return new class extends Migration
         Schema::create('library_invoices', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(Charge::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(BookRes::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(TermsAndCondition::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(CashierOR::class)->nullable();
             $table->longText("trace_number");
             $table->longText("invoice_reference")->nullable();
-            $table->decimal("amount", 65, 2)->default(0.0);
-            $table->longText("details");
+            $table->decimal("invoice_amount", 65, 2)->default(0.0);
+            $table->longText("description");
             $table->longText("remarks")->nullable();
             $table->enum("invoice_status", ["PENDING", "PAID", "FOR-VERIFICATION", "CANCELLED"])->default("PENDING");
             $table->enum("payment_type", ["ONLINE", "WALK-IN"])->nullable();
             $table->decimal("received_amount", 65, 2)->nullable();
-            $table->decimal("credit_deduction", 65, 2)->nullable();
             $table->timestamp('datePaid')->nullable();
             $table->timestamps();
         });

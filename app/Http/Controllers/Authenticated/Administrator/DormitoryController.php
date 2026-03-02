@@ -1312,28 +1312,23 @@ class DormitoryController extends Controller
 
     public function created_or_update_dormitory_charge (CreateOrUpdateDormitoryCharge $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $charge = new DormitoryInvoice();
+            $isPost = $request->httpMethod === "POST";
 
-            $descriptionHtml = $this->addDescription(
-           "<div style='display: flex; align-items: center; justify-content: space-between;'>
-                    <div style='color: #6c757d;'>$request->details</div>
-                    <div>₱" . number_format((float) $request->charge) . "</div>
-                </div>"
-            );
+            $new_fine = $isPost ? new DormitoryInvoice() : DormitoryInvoice::find($request->documentId);
 
-            $charge->user_id = $request->userId;
-            $charge->dormitory_tenant_id = $request->tenantId;
-            $charge->dormitory_room_id = $request->roomId;
-            $charge->charge_id = $request->charge;
-            $charge->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
-            $charge->total_amount = $request->amount;
-            $charge->description = $descriptionHtml;
-            $charge->isInitial = "N";
-            $charge->remarks = $request->remarks ?? '';
-            if($request->charge <= 0) $charge->status = DormitoryEnum::PAID->value;
-            $charge->save();
+            if($isPost) {
+                $new_fine->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
+                $new_fine->user_id = $request->userId;
+                $new_fine->dormitory_tenant_id = $request->tenantId;
+            } else {
+                $new_fine->invoice_status = $request->status;
+            }
 
-            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYCHARGE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID#" . $charge->id);
+            $new_fine->invoice_amount = $request->amount;
+            $new_fine->description = $request->details;
+            $new_fine->save();
+
+            AuditHelper::log($request->user()->id, ($request->httpMethod === "POST" ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYCHARGE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID#$new_fine->id");
 
             if(env('USE_EVENT')) {
                 event(
@@ -1342,7 +1337,7 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => ($request->httpMethod == "POST" ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYCHARGE->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID# " . $charge->id], 201);
+            return response()->json(['message' => ($request->httpMethod == "POST" ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORY->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value). "ID#$new_fine->id"], 201);
         });
     }
 
@@ -1583,19 +1578,15 @@ public function update_stock_status(Request $request) {
         $stockId = $request->stockId;
         $status  = $request->status;
 
-        $validStatuses = [
-            DormitoryEnum::AVAILABLE->value,
-            DormitoryEnum::RESERVED->value,
-            DormitoryEnum::BORROWED->value,
-        ];
+        $provisionDetail = DormitoryItemBI::where('dormitory_inventory_item_id', $stockId)
+            ->lockForUpdate()
+            ->first();
 
-        if (!in_array($status, $validStatuses)) {
-            return response()->json([
-                'message' => "Invalid status. Allowed statuses: " . implode(', ', $validStatuses)
-            ], 422);
+        if (!$provisionDetail) {
+            return response()->json(['message' => "Stock provision detail not found."], 404);
         }
 
-        $stock = DormitoryInventoryItem::where('id', $stockId)
+        $stock = DormitoryInventoryItem::where('id', $provisionDetail->dormitory_inventory_item_id)
             ->lockForUpdate()
             ->first();
 
@@ -1603,13 +1594,33 @@ public function update_stock_status(Request $request) {
             return response()->json(['message' => "Stock not found."], 404);
         }
 
-        $oldStatus        = $stock->status;
-        $stock->status    = $status;
+        if ($stock->status === DormitoryEnum::LOST->value) {
+            return response()->json([
+                'message' => "Stock ID#$stockId cannot be updated. Stock is already marked as LOST."
+            ], 409);
+        }
+
+        $oldStatus          = $stock->status;
+        $oldProvisionStatus = $provisionDetail->status;
+
+        $provisionDetail->status = $status;
+        $provisionDetail->save();
+
+        $stock->status = match($status) {
+            DormitoryEnum::RETURNED->value  => DormitoryEnum::AVAILABLE->value,
+            DormitoryEnum::CANCELLED->value => DormitoryEnum::AVAILABLE->value,
+            DormitoryEnum::RECEIVED->value  => DormitoryEnum::BORROWED->value,
+            DormitoryEnum::APPROVED->value  => DormitoryEnum::RESERVED->value,
+            DormitoryEnum::PENDING->value   => DormitoryEnum::RESERVED->value,
+            DormitoryEnum::DAMAGED->value   => DormitoryEnum::DAMAGED->value,
+            DormitoryEnum::LOST->value      => DormitoryEnum::LOST->value,
+            default                         => DormitoryEnum::UNAVAILABLE->value,
+        };
         $stock->save();
 
         AuditHelper::log(
             $request->user()->id,
-            "Stock ID#$stockId status changed from $oldStatus to $status"
+            "Stock ID#$stockId provision status changed from $oldProvisionStatus to $status"
         );
 
         if (env('USE_EVENT')) {
@@ -1619,10 +1630,12 @@ public function update_stock_status(Request $request) {
         return response()->json([
             'message' => "Stock status updated successfully.",
             'stock'   => [
-                'stock_id'          => $stock->id,
-                'unique_identifier' => $stock->unique_identifier,
-                'old_status'        => $oldStatus,
-                'new_status'        => $stock->status,
+                'stock_id'             => $stock->id,
+                'unique_identifier'    => $stock->unique_identifier,
+                'old_status'           => $oldStatus,
+                'new_status'           => $stock->status,
+                'old_provision_status' => $oldProvisionStatus,
+                'new_provision_status' => $provisionDetail->status,
             ]
         ], 200);
     });
