@@ -18,7 +18,6 @@ class Training extends Model
     {
         return $this->hasMany(EnrolledCourse::class, 'training_id', 'id');
     }
-
     public function module()
     {
         return $this->hasOne(CourseModule::class, 'id', 'course_module_id');
@@ -35,6 +34,7 @@ class Training extends Model
     // }
 
     /** Scopes */
+
 
     public function scopeActive($query)
     {

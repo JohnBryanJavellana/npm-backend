@@ -208,10 +208,12 @@
                 //! ATTENTANCE PART
                 Route::get('trainee', [AttendanceController::class, 'test']);
                 Route::get('trainee_attendance_button', [Attendance::class, 'attendance_button']);
-                // Route::post('/scan-qr', [AttendanceController::class, 'scanQr']);
+                //* Route::post('/scan-qr', [AttendanceController::class, 'scanQr']);
                 Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //! trainee list
-                Route::post('attendance_dropdown', [AttendanceController::class, 'recordAttendance']); //! for dropdown
+                Route::post('attendance_save', [AttendanceController::class, 'recordAttendance']); //! for dropdown
                 Route::post('attendance_record_by_date', [AttendanceController::class, 'recordAttendanceByDate']); //! for folder 
+
+                Route::get('test', [AttendanceController::class, 'test']);
 
                 // //! Import CSV
                 // Route::post('/import_csv', [AttendanceController::class, 'ImportCSV']);
@@ -230,6 +232,8 @@
                 Route::get('counts', [TraineeRecreational::class, 'viewRecRequestCount']);
             });
         });
+
+
 
         //FOR RECREATIONALS
         Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
