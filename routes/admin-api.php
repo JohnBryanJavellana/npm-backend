@@ -39,7 +39,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('lock_requirement', [EnrollmentCtrl::class, 'lock_requirement']);
             Route::get('get_schedules', [EnrollmentCtrl::class, 'get_schedules']);
             Route::post('training/schedules/traineelist', [EnrollmentCtrl::class, 'get_trainees_by_schedule']);
-            Route::post('/move_trainees', [EnrollmentCtrl::class, 'move_trainees']);//edrascoe.
+            Route::post('/move_trainees', [EnrollmentCtrl::class, 'move_trainees']);
             Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
             Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
             Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
@@ -144,8 +144,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock']);
             Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock']);
             Route::post('get_inventories/update_dormitory_inventory_stock', [DormitoryController::class, 'update_dormitory_inventory_stock']);
-            Route::post('provide_stocks', [DormitoryController::class, 'provide_stocks']);//edrascoe provide stocks to dorm request.
-            Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
+            Route::post('provide_stocks_to_boarder', [DormitoryController::class, 'provide_stocks_to_boarder']); //move_stockkies
+            Route::get('get_provided_stocks', [DormitoryController::class, 'get_provided_stocks']);//show reserved stockkies to boarder
+            Route::post('update_stock_status', [DormitoryController::class, 'update_stock_status']);// change stock status not working yet
+             Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
             Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock']);
             Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);
             Route::get('services', [DormitoryController::class, 'services']);
