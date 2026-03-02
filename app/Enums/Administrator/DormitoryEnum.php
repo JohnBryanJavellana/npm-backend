@@ -26,4 +26,5 @@ enum DormitoryEnum : string
     case RETURNED = 'RETURNED';
     case DAMAGED = 'DAMAGED';
     case LOST = 'LOST';
+    case UNAVAILABLE = 'UNAVAILABLE';
 }
