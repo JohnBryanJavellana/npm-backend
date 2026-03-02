@@ -111,6 +111,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_book_reservation/check_for_book_reservation', [LibraryController::class, 'check_for_book_reservation']);
             Route::delete('get_book_info/remove_copy/{copy_id}', [LibraryController::class, 'remove_copy']);
             Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book']);
+
+            Route::post('Summarize_Reservation', [LibraryController::class, 'Summarize_Reservation']); //userkenneth22
         });
 
         Route::prefix('/book_entry/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY', 'throttle:60,1'])->group(function () {

@@ -8,6 +8,7 @@ use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
 use App\Jobs\AutoPrint;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Utils\{
@@ -22,7 +23,8 @@ use App\Http\Requests\Admin\Library\{
     CreateOrUpdateBookRequest,
     CreateOrUpdateGenre,
     UpdateBookRequest,
-    RequestFine
+    RequestFine,
+    SummarizeReservation
 };
 use App\Events\{
     BELibrary,
@@ -794,5 +796,67 @@ class LibraryController extends Controller
             return response()->json(['message' => ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value). " a request fine ID#" . $new_fine->id], 201);
         });
     }
-}
 
+
+    /**
+ * Summary of summarize_reservation
+ * @param SummarizeReservation $request
+ */
+public function Summarize_Reservation(SummarizeReservation $request)
+{
+    return TransactionUtil::transact($request, [], function () use ($request) {
+        $year = $request->year;
+        $month = $request->month;
+
+        $validStatuses = ['APPROVED', 'RETURNED', 'RECEIVED', 'EXTENDED', 'RENEWING'];
+
+        $totalReservationsQuery = DB::table('book_reservations')
+            ->whereIn('status', $validStatuses)
+            ->when($year, fn($query) => $query->whereYear('from_date', $year))
+            ->when($month, fn($query) => $query->whereMonth('from_date', $month));
+
+        $totalReservations = $totalReservationsQuery->count();
+
+        $mostBorrowedQuery = DB::table('book_reservations')
+            ->join('books', 'book_reservations.book_id', '=', 'books.id')
+            ->join('book_catalogs', 'books.book_catalog_id', '=', 'book_catalogs.id')
+            ->whereIn('book_reservations.status', $validStatuses)
+            ->when($year, fn($query) => $query->whereYear('book_reservations.from_date', $year))
+            ->when($month, fn($query) => $query->whereMonth('book_reservations.from_date', $month))
+            ->select(
+                'book_reservations.book_id',
+                'book_catalogs.title',
+                'book_catalogs.author',
+                DB::raw('COUNT(book_reservations.book_id) as borrow_count')
+            );
+
+        $mostBorrowed = $mostBorrowedQuery
+            ->groupBy('book_reservations.book_id', 'book_catalogs.title', 'book_catalogs.author')
+            ->orderByDesc('borrow_count')
+            ->first();
+
+        $statusCounts = DB::table('book_reservations')
+            ->select('status', DB::raw('COUNT(*) as count'))
+            ->when($year, fn($query) => $query->whereYear('from_date', $year))
+            ->when($month, fn($query) => $query->whereMonth('from_date', $month))
+            ->groupBy('status')
+            ->get();
+
+        $typeCounts = DB::table('book_reservations')
+            ->select('type', DB::raw('COUNT(*) as count'))
+            ->when($year, fn($query) => $query->whereYear('from_date', $year))
+            ->when($month, fn($query) => $query->whereMonth('from_date', $month))
+            ->groupBy('type')
+            ->get();
+
+        return response()->json([
+            'year' => $year ?? 'all',
+            'month' => $month ?? 'all',
+            'totalReservations' => $totalReservations,
+            'mostBorrowed' => $mostBorrowed,
+            'statusCounts' => $statusCounts,
+            'typeCounts' => $typeCounts,
+        ], 200);
+    });
+}
+}
