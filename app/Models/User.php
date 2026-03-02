@@ -106,14 +106,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
 
-    public function attendances()
-    {
-        return $this->hasMany(Attendance::class, 'user_id', 'id');
-    }
-    public function attendance_records()
-    {
-        return $this->hasMany(AttendanceRecord::class, 'user_id', 'id');
-    }
+    // public function attendances()
+    // {
+    //     return $this->hasMany(Attendance::class, 'user_id', 'id');
+    // }
+    // public function attendance_records()
+    // {
+    //     return $this->hasMany(AttendanceRecord::class, 'user_id', 'id');
+    // }
 
     public function scopeForUser($query, $user_id)
     {

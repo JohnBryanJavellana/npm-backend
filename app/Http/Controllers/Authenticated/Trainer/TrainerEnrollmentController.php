@@ -47,7 +47,7 @@ class TrainerEnrollmentController extends Controller
         }
     }
 
-    // ! Tigaman
+
     public function getCourseDetails(Request $request)
     {
 
@@ -58,13 +58,12 @@ class TrainerEnrollmentController extends Controller
             "module.trainingFees.category:id,name",
             "module.specific_requirements",
             "module.schedules",
-            // "module.attendances",
-            // "module.attendance_records"
-
+            "module.attendances",
+            "module.attendance_records",
         ])
             ->where('id', $request->trainingId)
             ->get();
-            
+
 
         return response()->json([
             "training" => $record,

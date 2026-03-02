@@ -9,15 +9,9 @@ class AttendanceRecord extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'attendance_id',
-        'user_id',
-        'status',
-        'time_in',
-        'time_out',
-        'created_at',
-        'updated_at'
-    ];
+    protected $guarded = ["id"];
+
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');

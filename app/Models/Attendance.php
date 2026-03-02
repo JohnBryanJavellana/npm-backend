@@ -21,8 +21,8 @@ class Attendance extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function enrolled()
-    {
-        return $this->belongsTo(EnrolledCourse::class, 'enrolled_course_id', 'id');
-    }
+    // public function enrolled()
+    // {
+    //     return $this->belongsTo(EnrolledCourse::class, 'enrolled_course_id', 'id');
+    // }
 }

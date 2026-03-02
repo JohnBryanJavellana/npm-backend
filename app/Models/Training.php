@@ -22,6 +22,15 @@ class Training extends Model
     {
         return $this->hasOne(CourseModule::class, 'id', 'course_module_id');
     }
+    // public function attendances()
+    // {
+    //     return $this->hasMany(Attendance::class, 'user_id', 'id', 'training_id');
+    // }
+    // public function attendance_records()
+    // {
+    //     return $this->hasMany(AttendanceRecord::class, 'user_id', 'id', 'attendance_id');
+    // }
+    
 
     // public function requirements()
     // {

@@ -205,18 +205,14 @@
 
                 Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
 
-                //! ATTENTANCE PART
+                //! ATTENDANCE PART
                 Route::get('trainee', [AttendanceController::class, 'test']);
                 Route::get('trainee_attendance_button', [Attendance::class, 'attendance_button']);
-                //* Route::post('/scan-qr', [AttendanceController::class, 'scanQr']);
                 Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //! trainee list
-                Route::post('attendance_save', [AttendanceController::class, 'recordAttendance']); //! for dropdown
+                Route::post('create_attendance', [AttendanceController::class, 'CreateAttendance']); //! for dropdown
                 Route::post('attendance_record_by_date', [AttendanceController::class, 'recordAttendanceByDate']); //! for folder 
 
                 Route::get('test', [AttendanceController::class, 'test']);
-
-                // //! Import CSV
-                // Route::post('/import_csv', [AttendanceController::class, 'ImportCSV']);
             });
         });
 

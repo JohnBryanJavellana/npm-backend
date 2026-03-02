@@ -52,7 +52,10 @@ class EnrolledCourse extends Model
     {
         return $query->whereIn("enrolled_course_status", $status);
     }
-
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
     public function scopeForTraining(Builder $query, $trainingId)
     {
         return $query->where("training_id", $trainingId);
