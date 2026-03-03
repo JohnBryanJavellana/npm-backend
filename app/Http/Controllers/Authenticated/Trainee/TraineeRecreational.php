@@ -110,11 +110,9 @@ class TraineeRecreational extends Controller
     public function getUserRecRequest(ViewUserRecRecord $request)
     {
         $validated = $request->validated();
-        $validated["userId"] = $request->user()->id ?? 202600001;
+        $validated["userId"] = $request->user()->id;
         try
         {
-            \Log::info("data", [$validated]);
-
             $data = $this->recreationalService->getUserRecRecord($validated);
 
             return response()->json(["data" => $data], 200);
@@ -234,7 +232,7 @@ class TraineeRecreational extends Controller
         {
             $this->recreationalService->storeRecreationalRequests($validated);
 
-            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has sent a recreational request.OK");
+            AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has sent a recreational request.");
             Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has sent a recreational request.');
 
             if(env("USE_EVENT")) {

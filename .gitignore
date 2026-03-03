@@ -18,3 +18,12 @@ yarn-error.log
 /.idea
 /.vscode
 exit
+/public/system-images/*
+/public/user_images/*
+/public/fonts/*
+/public/book-uploaded-files/*
+/public/dormitory/*
+/public/recreational-activity/*
+/public/trainee-files/*
+/public/training_requirement_files/*
+/public/upload_reference/*

@@ -41,7 +41,6 @@ class LibraryInvoice extends Model
      * SCOPES
      */
 
-
     public function scopeForUser($query, $userId)
     {
         return $query->where("user_id", $userId);

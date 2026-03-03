@@ -26,11 +26,10 @@ class LibInvoiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "inv_id" => "required",
-            "inv_trace_number" => "required",
-            "inv_reference_number" => "required",
+            "id" => "required",
+            "trace_number" => "required",
+            "reference_number" => "required",
             "total_amount" => "required",
-            "credit_amount" => "required"
         ];
     }
 
@@ -44,7 +43,7 @@ class LibInvoiceRequest extends FormRequest
             response()->json([
                 "message" => $firstError,
                 "errors" => $errors
-            ])
+            ], 422)
         );
     }
 }

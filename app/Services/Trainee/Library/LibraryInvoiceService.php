@@ -20,38 +20,19 @@ class LibraryInvoiceService {
         protected CreditService $creditService
     )
     {}
-
-    public function updateLibraryInvoice($validated, $userId)
+    
+    public function updateLibraryInvoice($validated)
     {
-       return  DB::transaction(function() use ($validated, $userId) {
-            
+       return DB::transaction(function() use ($validated) {
             $this->libraryInvoiceModel
-            ->byTraceId($validated["inv_trace_number"], $validated["inv_id"])
+            ->byTraceId($validated["trace_number"], $validated["id"])
             ->update([
-                "reference_number" => $validated["inv_reference_number"],
-                "status" => RequestStatus::VERIFICATION,
+                "invoice_reference" => $validated["reference_number"],
+                "invoice_status" => RequestStatus::FOR_VERIFICATION,
                 "payment_type" => "ONLINE",
                 "datePaid" => Carbon::now()
             ]);
         });
-    }
-
-    private function prepareData($validated, $userId){
-        $userRec = $this->userModel->query()
-        ->whereKey($userId)
-        ->lockForUpdate()
-        ->first();
-
-        if(!$userRec) {
-            throw new DomainException("User not found.");
-        }
-
-        if($userRec->credit_amount < $validated["credit_amount"]) {
-            throw new DomainException("Insufficient credit.");
-        }
-
-        //onSuccess from the Paymaya
-        $userRec->decrement("credit_amount", $validated["credit_amount"]);
     }
 
     public function updateTemporarily($validated)

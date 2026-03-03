@@ -292,6 +292,7 @@ class RecreationalService {
                         "The facility '{$facility->name}' is not available for the selected dates."
                     );
                 }
+<<<<<<< HEAD
 
             // $facility = $this->rafacilityModel->query()
             //     ->select('id', 'name', 'condition_status')
@@ -315,6 +316,8 @@ class RecreationalService {
             //         "Selected facility is not available anymore."
             //     );
             // }
+=======
+>>>>>>> a2130a5515ef6c77500d739b2de2b87722e8ed89
 
             return $this->rafacilityRequestModel->create([
                 'r_a_request_info_id' => $record->id,
@@ -345,23 +348,17 @@ class RecreationalService {
         $model = $this->checkPrefix($validated->UIId);
         return $model->query()->where("unique_identifier", $validated->UIId)
         ->when($model instanceof RAEquipmentStock, function($query) {
-            $query->withCount([
-            "siblings as stock_count" => function($q) {
-                $q->available()->okayCondition();
+            $query->whereRelation("equipment", "availability_status", RequestStatus::AVAILABLE->value)
+            ->withCount([
+            "siblings as stock_count" => function($query) {
+                $query->available()
+                ->okayCondition();
             },
-            //for future
-            // "hasData as active_count" => function($query) {
-            //     $query->borrowed();
-            // }
             ]);
         })
-        //for future
-        // ->when($model instanceof RAFacility, function($query) {
-        //     $query->withCount("hasData as occupied_count", fn($q) => $q->occupied());
-        // })
         ->available()
         ->okayCondition()
-        ->firstOr(fn() => throw new DomainException(($model instanceof RAEquipmentStock ? "Equipment" : "Facility") . " not found"));
+        ->firstOr(fn() => throw new DomainException(($model instanceof RAEquipmentStock ? "Equipment" : "Facility") . " not available"));
     }
 
     public function prepareForCancellation($record)
