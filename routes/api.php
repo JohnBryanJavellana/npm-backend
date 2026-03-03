@@ -204,16 +204,18 @@
                 Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']); //*
 
                 Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
+                Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
+                Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
 
                 //! ATTENDANCE PART
-                Route::get('trainee', [AttendanceController::class, 'test']);
-                Route::get('trainee_attendance_button', [Attendance::class, 'attendance_button']);
+
                 Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //! trainee list
-                
-                // Route::post('attendance_record_by_date', [AttendanceController::class, 'recordAttendanceByDate']); //! for folder 
-                Route::post('attendance_record',[AttendanceController::class, 'attendance_record']);
-                Route::post('create_attendance', [AttendanceController::class, 'create_attendance']); //! for dropdown
-                Route::get('test', [AttendanceController::class, 'test']);
+                //! for dropdown
+
+
+                Route::get('running', [AttendanceController::class, 'testtest']);
+
+                Route::post('attendance_time_out', [AttendanceController::class, 'attendance_timeOut']);
             });
         });
 

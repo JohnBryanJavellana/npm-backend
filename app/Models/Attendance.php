@@ -9,7 +9,7 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id', 'training_id', 'user_id', 'training_date', 'created_at', 'updated_at'];
+    protected $guarded = ['id'];
 
     public function attendance_records()
     {
