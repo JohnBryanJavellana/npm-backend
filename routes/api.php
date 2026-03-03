@@ -209,9 +209,10 @@
                 Route::get('trainee', [AttendanceController::class, 'test']);
                 Route::get('trainee_attendance_button', [Attendance::class, 'attendance_button']);
                 Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //! trainee list
-                Route::post('create_attendance', [AttendanceController::class, 'CreateAttendance']); //! for dropdown
-                Route::post('attendance_record_by_date', [AttendanceController::class, 'recordAttendanceByDate']); //! for folder 
-
+                
+                // Route::post('attendance_record_by_date', [AttendanceController::class, 'recordAttendanceByDate']); //! for folder 
+                Route::post('attendance_record',[AttendanceController::class, 'attendance_record']);
+                Route::post('create_attendance', [AttendanceController::class, 'create_attendance']); //! for dropdown
                 Route::get('test', [AttendanceController::class, 'test']);
             });
         });

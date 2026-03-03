@@ -15,7 +15,7 @@ class AttendanceController extends Controller
     //     return Attendance::all();
     // }
 
-    public function CreateAttendance(Request $request)
+    public function create_attendance(Request $request)
     {
         // Validate incoming request
         $validated = $request->validate([
@@ -47,30 +47,58 @@ class AttendanceController extends Controller
     {
 
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
+            'training_id' => 'required|exists:trainings,id',
+            'training_date' => 'required|date',
+            'records' => 'required|array',
+            'records.*.user_id' => 'required|exists:users,id',
+            'records.*.status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
+            'records.*.time_in' => 'nullable|date',
+            'records.*.time_out' => 'nullable|date',
         ]);
 
-        $attendanceRecord = AttendanceRecord::where('attendance_id', $validated['attendance_id'])
-            ->where('user_id', $validated['user_id'])
-            ->whereDate('created_at', $today)
-            ->first();
+        $responseData = [];
 
-        if ($attendanceRecord) {
-            $attendanceRecord->update([
-                'status' => $status,
-                'time_in' => now(),
-            ]);
-        } else {
-            $attendanceRecord = AttendanceRecord::create([
-                'attendance_id' => $validated['attendance_id'],
-                'user_id' => $validated['user_id'],
-                'status' => $status,
-                'time_in' => now(),
-            ]);
+        foreach ($validated['records'] as $record) {
+            $userId = $record['user_id'];
+            $status = $record['status'] ?? 'ABSENT';
+            $timeIn = $record['time_in'] ?? now();
+            $timeOut = $record['time_out'] ?? null;
+
+            $attendance = Attendance::firstOrCreate(
+                [
+                    'training_id' => $validated['training_id'],
+                    'training_date' => $validated['training_date'],
+                ]
+            );
+
+
+            $attendanceRecord = AttendanceRecord::where('attendance_id', $attendance->id)
+                ->where('user_id', $userId)
+                ->whereDate('created_at', now()->toDateString())
+                ->first();
+
+            if ($attendanceRecord) {
+
+                $attendanceRecord->update([
+                    'status' => $status,
+                    'time_in' => $timeIn,
+                    'time_out' => $timeOut,
+                ]);
+            } else {
+
+                $attendanceRecord = AttendanceRecord::create([
+                    'attendance_id' => $attendance->id,
+                    'user_id' => $userId,
+                    'status' => $status,
+                    'time_in' => $timeIn,
+                    'time_out' => $timeOut,
+                ]);
+            }
+
+            $responseData[] = $attendanceRecord;
         }
 
-        return response()->json(['data' => $attendanceRecord], 200);
+        return response()->json(['data' => $responseData], 200);
     }
 
 
