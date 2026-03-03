@@ -10,12 +10,13 @@ use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
-
 class LibraryService {
 
     protected $bookModel;
     protected $bookResModel;
     protected $bookReservationModel;
+    protected const TRAINEE_MAX = 3;
+    protected const TRAINER_MAX = 7;
 
     public function __construct(Book $bookModel , BookRes $bookResModel, BookReservation $bookReservationModel)
     {
@@ -37,26 +38,28 @@ class LibraryService {
 
     public function preparedData($validated)
     {
+        $roleMax = match($validated["role"]) {
+            "TRAINEE" => self::TRAINEE_MAX,
+            "TRAINER" => self::TRAINER_MAX,
+            default => throw new DomainException("Unknown Role, please try again.")
+        };
 
         $book_ids = collect($validated["data"])->pluck("book_id");
-        $statuses = [
-            RequestStatus::PENDING->value,
-            RequestStatus::APPROVED->value,
-            RequestStatus::EXTENDING->value,
-            RequestStatus::EXTENDED->value,
-            RequestStatus::RENEWING->value,
-            RequestStatus::RENEWED->value,
-            RequestStatus::RECEIVED->value
-        ];
 
         $records = $this->bookReservationModel::query()
             ->with([
                 "books.catalog:id,title"
             ])
             ->select("id", "book_id", "to_date", "type")
-            ->whereIn("status",$statuses)
+            ->whereIn("status", RequestStatus::ActiveBookRequest())
             ->forUser($validated["user_id"])
             ->get();
+
+        $bookCountRequested = collect($validated["data"])->pluck("book_id");
+
+        if(($records->count() + $bookCountRequested->count()) > $roleMax) {
+            throw new DomainException("You will exceed with your borrowing limit ({$roleMax} books max). You already have {$records->count()} active book requests.");
+        }
 
         $duplicates = $records->whereIn("book_id", $book_ids);
         if($duplicates->isNotEmpty()){

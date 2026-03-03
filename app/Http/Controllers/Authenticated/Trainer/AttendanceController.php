@@ -17,7 +17,7 @@ class AttendanceController extends Controller
 
     public function create_attendance(Request $request)
     {
-        // Validate incoming request
+
         $validated = $request->validate([
             'training_id' => 'required|exists:trainings,id',
             'user_id' => 'required|exists:users,id',
@@ -42,7 +42,6 @@ class AttendanceController extends Controller
 
         return response()->json(['data' => $attendance], 200);
     }
-
     public function attendance_record(Request $request)
     {
 
@@ -122,7 +121,7 @@ class AttendanceController extends Controller
 
     // public function recordAttendance(Request $request)
     // {
-    //     // dd($request->all());
+
 
 
     //     $validated = $request->validate([

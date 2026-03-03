@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Http\Resources\Trainee\Library;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class LibraryInvoiceResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        // return parent::toArray($request);z
+
+        return [
+        'id' => $this->id,
+            'trace_number' => $this->trace_number,
+            'status' => $this->status,
+            'type' => $this->type,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'requested_books' => $this->borrowedBooks?->map(function($book) {
+                return [
+                    'res_id' => $book->id,
+                    'id' => $book->books?->id,
+                    'name' => $book->books?->catalog?->title,
+                    'entry' => $book->books?->catalog?->genre?->name,
+                    'author' => $book->books?->catalog?->author,
+                    'isbn' => $book->books?->catalog?->isbn,
+                    'editor' => $book->books?->catalog?->editor,
+                    'abstract' => $book->books?->catalog?->abstract,
+                    'publisher' => $book->books?->catalog?->publisher,
+                    'file_location' => $book->books?->catalog?->file_location,
+                    'type' => $book->books?->catalog?->type,
+                    'publication_year' => $book->books?->catalog?->publication_year,
+                    'status' => $book->status,
+                    'call_number' => $book->books?->catalog?->call_number,
+                    'price' => $book->books?->catalog?->price,
+                    'pages' => $book->books?->catalog?->pages,
+                    'photo' => $book->books?->photo,
+                    'pdf' => $book->books?->pdf_copy,
+                    'from' => $book->from_date,
+                    'b_type' => $book->type,
+                    'to' => $book->to_date,
+                    'ui' => $book->book?->unique_identifier,
+                ];
+            }),
+            'csm' => $this->csm,
+            'fines' => $this->fines
+        ];
+    }
+}
