@@ -47,6 +47,7 @@ use App\Models\{
     DormitoryTenantHistory
 };
 use App\Helpers\Administrator\General\CountCollection;
+use App\Helpers\Administrator\General\CheckForDocumentExistence;
 
 class DormitoryController extends Controller
 {
@@ -380,21 +381,44 @@ class DormitoryController extends Controller
      * @param Request $request
      */
     public function create_dormitory_rooms (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            if($request->room_count) {
-                for($i = 0; $i < $request->room_count; $i++) {
-                    $room = new DormitoryRoom;
-                    $room->dormitory_id = $request->dormitoryId;
-                    $room->room_name = "R$request->dormitoryId-" . $i + 1;
-                    $room->room_slot = $request->room_slot;
-                    $room->is_air_conditioned = "NO";
-                    $room->save();
-                }
-            }
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        if($request->room_count) {
+            $existingNumbers = DormitoryRoom::where('dormitory_id', $request->dormitoryId)
+                ->where('room_name', 'LIKE', "R$request->dormitoryId-%")
+                 ->orderByRaw('CAST(SUBSTRING_INDEX(room_name, "-", -0) AS UNSIGNED) ASC')
+                ->get()
+                ->map(fn($room) => (int) Str::afterLast($room->room_name, '-'))
+                ->toArray();
 
-            return $request->insideJob ? true : response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYROOM->value], 201);
-        });
-    }
+            $startFrom = !empty($existingNumbers) ? max($existingNumbers) + 1 : 0;
+
+            for($i = 0; $i < $request->room_count; $i++) {
+                $room_name = "R$request->dormitoryId-" . ($startFrom + $i);
+
+                $exists = CheckForDocumentExistence::exists(
+                    DormitoryRoom::class,
+                    [
+                        'dormitory_id' => $request->dormitoryId,
+                        'room_name'    => $room_name,
+                    ],
+                    false,
+                    null,
+                    'id',
+                    "Room name $room_name already exists in this dormitory."
+                );
+                if ($exists) return $exists;
+
+                $room = new DormitoryRoom;
+                $room->dormitory_id       = $request->dormitoryId;
+                $room->room_name          = $room_name;
+                $room->room_slot          = $request->room_slot;
+                $room->is_air_conditioned = "NO";
+                $room->save();
+            }
+        }
+        return $request->insideJob ? true : response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYROOM->value], 201);
+    });
+}
 
     /**
      * Summary of update_dormitory_room
@@ -403,28 +427,46 @@ class DormitoryController extends Controller
      * @param Request $request
      */
     public function update_dormitory_room (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $this_room = DormitoryRoom::findOrFail($request->documentId);
-            $this_room->is_air_conditioned = $request->is_air_conditioned;
-            $this_room->remarks = $request->remarks === 'null' ? NULL : $request->remarks;
-            $this_room->room_status = $request->status;
-            $this_room->save();
+    return TransactionUtil::transact(null, [], function() use ($request) {
 
-            AuditHelper::log(
-                $request->user()->id,
-                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"
+        if ($request->room_name) {
+            $exists = CheckForDocumentExistence::exists(
+                DormitoryRoom::class,
+                [
+                    'dormitory_id' => $request->dormitoryId,
+                    'room_name'    => $request->room_name,
+                ],
+                true,
+                $request->documentId,
+                'id',
+                "Room name $request->room_name already exists in this dormitory."
             );
 
-            if(env('USE_EVENT')) {
-                event(
-                    new BEDormitory(''),
-                    new BEAuditTrail('')
-                );
-            }
+            if ($exists) return $exists;
+        }
 
-            return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"], 200);
-        });
-    }
+        $this_room = DormitoryRoom::findOrFail($request->documentId);
+        $this_room->is_air_conditioned = $request->is_air_conditioned;
+        $this_room->remarks            = $request->remarks === 'null' ? NULL : $request->remarks;
+        $this_room->room_status        = $request->status;
+        if ($request->room_name) $this_room->room_name = $request->room_name;
+        $this_room->save();
+
+        AuditHelper::log(
+            $request->user()->id,
+            AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"
+        );
+
+        if(env('USE_EVENT')) {
+            event(
+                new BEDormitory(''),
+                new BEAuditTrail('')
+            );
+        }
+
+        return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"], 200);
+    });
+}
 
     /**
      * Summary of remove_room
@@ -1191,28 +1233,66 @@ class DormitoryController extends Controller
      * Summary of get_requested_service
      * @param Request $request
      */
-    public function get_requested_service (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $reqTemp = DormitoryReqService::with([
-                'services'
-            ]);
+    // public function get_requested_service (Request $request) {
+    //     return TransactionUtil::transact(null, [], function() use ($request) {
+    //         $reqTemp = DormitoryReqService::with([
+    //             'services',
+    //             'tenant.boarder'
+    //         ]);
 
-            if($request->userId) {
-                $reqTemp->where('dormitory_tenant_id', $request->userId);
-            }
+    //         if($request->userId) {
+    //             $reqTemp->where('dormitory_tenant_id', $request->userId);
+    //         }
 
-            if($request->status) {
+    //         if($request->status) {
+    //             $reqTemp->where('status', $request->status);
+    //         }
+
+    //         $requestedServices = $reqTemp->get();
+
+    //         return response()->json([
+    //             'requestedServices' => $requestedServices
+    //         ], 200);
+    //     });
+    // }
+/**
+ * Summary of get_requested_service
+ * @param Request $request
+ */
+public function get_requested_service (Request $request) {
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $reqTemp = DormitoryReqService::with([
+            'services',
+            'tenant.boarder'
+        ]);
+
+        if($request->userId) {
+            $reqTemp->where('dormitory_tenant_id', $request->userId);
+        }
+
+        if($request->status) {
+
+            if(is_array($request->status)) {
+                $reqTemp->whereIn('status', $request->status);
+            } else {
                 $reqTemp->where('status', $request->status);
             }
+        }
 
-            $requestedServices = $reqTemp->get();
+        $requestedServices = $reqTemp->get()->map(function($service) {
 
-            return response()->json([
-                'requestedServices' => $requestedServices
-            ], 200);
+            $service->requestor_name = $service->tenant && $service->tenant->boarder
+                ? $service->tenant->boarder->fname . ' ' . $service->tenant->boarder->lname
+                : 'N/A';
+
+            return $service;
         });
-    }
 
+        return response()->json([
+            'requestedServices' => $requestedServices
+        ], 200);
+    });
+}
     /**
      * Summary of update_requested_service
      * @param bool auditActions === TRUE
@@ -1561,13 +1641,13 @@ public function get_provided_stocks(Request $request) {
             'inventory' => [
                 'id'            => $inventory->id,
                 'name'          => $inventory->name,
-                'total_provided' => $provision?->count ?? 0,  // ← total stocks provided
+                'total_provided' => $provision?->count ?? 0,
             ],
             'stocks' => $stocks,
         ], 200);
     });
 }
-// change the status of the provided stocks pending doom
+// change the status of the provided stocks pending chu chu
 
 /**
  * Summary of update_stock_status
