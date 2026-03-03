@@ -24,7 +24,7 @@ use App\Http\Requests\Admin\Library\{
     CreateOrUpdateGenre,
     UpdateBookRequest,
     RequestFine,
-    SummarizeReservation
+    SummarizeReport
 };
 use App\Events\{
     BELibrary,
@@ -797,12 +797,11 @@ class LibraryController extends Controller
         });
     }
 
-
-    /**
- * Summary of summarize_reservation
- * @param SummarizeReservation $request
- */
-public function Summarize_Reservation(SummarizeReservation $request)
+        /**
+     * Summary of summarize_reservation
+     * @param SummarizeReport $request
+     */
+   public function summarize_report(SummarizeReport $request)
 {
     return TransactionUtil::transact($request, [], function () use ($request) {
         $year = $request->year;
@@ -828,12 +827,25 @@ public function Summarize_Reservation(SummarizeReservation $request)
                 'book_catalogs.title',
                 'book_catalogs.author',
                 DB::raw('COUNT(book_reservations.book_id) as borrow_count')
-            );
-
-        $mostBorrowed = $mostBorrowedQuery
+            )
             ->groupBy('book_reservations.book_id', 'book_catalogs.title', 'book_catalogs.author')
-            ->orderByDesc('borrow_count')
-            ->first();
+            ->orderByDesc('borrow_count');
+
+        $mostBorrowed = $mostBorrowedQuery->first();
+
+        $topN = 10; 
+        $mostBorrowedRanking = $mostBorrowedQuery
+            ->limit($topN)
+            ->get()
+            ->map(function ($item, $index) {
+                return [
+                    'rank' => $index + 1,
+                    'book_id' => $item->book_id,
+                    'title' => $item->title,
+                    'author' => $item->author,
+                    'borrow_count' => $item->borrow_count,
+                ];
+            });
 
         $statusCounts = DB::table('book_reservations')
             ->select('status', DB::raw('COUNT(*) as count'))
@@ -853,7 +865,8 @@ public function Summarize_Reservation(SummarizeReservation $request)
             'year' => $year ?? 'all',
             'month' => $month ?? 'all',
             'totalReservations' => $totalReservations,
-            'mostBorrowed' => $mostBorrowed,
+            'mostBorrowed' => $mostBorrowed, 
+            'mostBorrowedRanking' => $mostBorrowedRanking, 
             'statusCounts' => $statusCounts,
             'typeCounts' => $typeCounts,
         ], 200);
