@@ -206,15 +206,14 @@
                 Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
                 Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
                 Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
-
+                
                 //! ATTENDANCE PART
-
                 Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //! trainee list
+
+
+
                 //! for dropdown
-
-
                 Route::post('running', [AttendanceController::class, 'testtest']);
-
                 Route::post('attendance_time_out', [AttendanceController::class, 'attendance_timeOut']);
             });
         });

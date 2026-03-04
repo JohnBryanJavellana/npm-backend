@@ -17,7 +17,7 @@ return new class extends Migration
             $table->engine = "innoDB";
             $table->id();
             $table->foreignIdFor(Training::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class)->constrained();
+            $table->foreignIdFor(User::class)->constrained(); //change to enrolled_course_id
             $table->dateTime('training_date')->nullable();
             $table->timestamps();
         });
@@ -31,4 +31,3 @@ return new class extends Migration
         Schema::dropIfExists('attendances');
     }
 };
- 

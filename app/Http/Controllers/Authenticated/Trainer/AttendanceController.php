@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Authenticated\Trainer;
 
+use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainer\AttendanceRecordResource;
 use App\Models\{User, Attendance, AttendanceRecord, EnrolledCourse, QrReaderLocation};
@@ -12,9 +13,74 @@ use function Symfony\Component\String\u;
 class AttendanceController extends Controller
 {
 
+    // public function attendanceRecord(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'attendance_id' => 'required|exists:attendances,id',
+    //         'records' => 'required|array',
+    //         'records.*.user_id' => 'required|exists:users,id',
+    //         'records.*.status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
+    //         'records.*.time_in' => 'nullable|date',
+    //         'records.*.time_out' => 'nullable|date',
+    //     ]);
+
+    //     $responseData = [
+    //         'attendance_id' => $validated['attendance_id']
+    //     ];
+
+    //     foreach ($validated['records'] as $record) {
+
+    //         $attendanceRecord = AttendanceRecord::firstOrNew([
+    //             'attendance_id' => $validated['attendance_id'],
+    //             'user_id' => $record['user_id'],
+    //         ]);
+
+    //         if (!empty($record['status'])) {
+    //             $attendanceRecord->status = $record['status'];
+    //         }
+
+    //         if (!empty($record['time_in'])) {
+    //             $attendanceRecord->time_in = Carbon::parse($record['time_in']);
+    //         }
+
+    //         if (!empty($record['time_out'])) {
+    //             $attendanceRecord->time_out = Carbon::parse($record['time_out']);
+    //         }
+
+    //         $attendanceRecord->save();
+
+    //         $responseData[] = $attendanceRecord;
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Attendance records updated',
+    //         'data' => $responseData
+    //     ], 200);
+    // }
+
+    // public function createAttendance(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'training_id' => 'required|exists:trainings,id',
+    //         'training_date' => 'required|date',
+    //     ]);
+
+    //     $attendance = Attendance::firstOrCreate([
+    //         'training_id' => $validated['training_id'],
+    //         'training_date' => $validated['training_date'],
+    //         'created_by' => $request->user()->id, // better naming than user_id
+    //     ]);
+
+    //     return response()->json([
+    //         'message' => 'Attendance session ready',
+    //         'data' => $attendance
+    //     ], 200);
+    // }
+    //!--------------------------------------------------------------------------------------------------------------//
     //!Store Data  //TimeIn
     public function attendance_record(Request $request)
     {
+        \Log::info('attendance_record: ', $request->all());
         $validated = $request->validate([
             'training_id' => 'required|exists:trainings,id',
             'training_date' => 'required|date',
@@ -22,7 +88,7 @@ class AttendanceController extends Controller
             'records.*.user_id' => 'required|exists:users,id',
             'records.*.status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
             'records.*.time_in' => 'nullable|date',
-            // 'records.*.time_out' => 'nullable|date', i need this to update
+            'records.*.time_out' => 'nullable|date',
         ]);
 
         $responseData = [];
@@ -39,7 +105,7 @@ class AttendanceController extends Controller
             $userId = $record['user_id'];
             $status = $record['status'] ?? 'ABSENT';
             $timeIn = Carbon::parse($record['time_in']) ?? now();
-            // $timeOut = Carbon::parse($record['time_out']) ?? null;
+            $timeOut = Carbon::parse($record['time_out']) ?? null;
 
             $attendanceRecord = AttendanceRecord::where('attendance_id', $attendance->id)
                 ->where('user_id', $userId)
@@ -51,7 +117,7 @@ class AttendanceController extends Controller
                 $attendanceRecord->update([
                     'status' => $status,
                     'time_in' => $timeIn,
-                    // 'time_out' => $timeOut,
+                    'time_out' => $timeOut,
                 ]);
             } else {
 
@@ -60,7 +126,7 @@ class AttendanceController extends Controller
                     'user_id' => $userId,
                     'status' => $status,
                     'time_in' => $timeIn,
-                    // 'time_out' => $timeOut,
+                    'time_out' => $timeOut,
                 ]);
             }
 
@@ -69,22 +135,37 @@ class AttendanceController extends Controller
 
         return response()->json(['data' => $responseData], 200);
     }
-    //! Time Out function
-    public function attendance_timeOut(Request $request)
+
+    public function TraineeAttendanceRecord(Request $request)
     {
-        $validated = $request->validate([
-            'attendance_id' => 'required|exists:attendances,id',
-            'user_id' => 'required|exists:users,id',
-        ]);
-
-        $record = AttendanceRecord::where($validated)
-            ->whereDate('created_at', now())
-            ->firstOrFail();
-
-        $record->update(['time_out' => now()]);
-
-        return response()->json($record);
+        return EnrolledCourse::with([
+            "trainee",
+            "traineeAttendanceRecord" => function ($query) use ($request) {
+                // $query->whereRelation("attendance", "id", "=", $request->attendance_id);
+                $query->where(["training" => $request->training_id, "training_date" => $request->training_date]);
+            }
+        ])
+            ->status([RequestStatus::ENROLLED->value])
+            ->where("training_id", $request->training_id)
+            ->get();
     }
+
+    //! Time Out function
+    // public function attendance_timeOut(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'attendance_id' => 'required|exists:attendances,id',
+    //         'user_id' => 'required|exists:users,id',
+    //     ]);
+
+    //     $record = AttendanceRecord::where($validated)
+    //         ->whereDate('created_at', now())
+    //         ->firstOrFail();
+
+    //     $record->update(['time_out' => now()]);
+
+    //     return response()->json($record);
+    // }
 
     public function attendanceByGroup(Request $request)
     {
@@ -119,10 +200,9 @@ class AttendanceController extends Controller
 
 
 
+
     public function testtest()
     {
-
-
         $records = AttendanceRecord::with(['attendance', 'user'])->get();
 
         $grouped = $records->groupBy(function ($item) {

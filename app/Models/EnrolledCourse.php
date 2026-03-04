@@ -11,14 +11,10 @@ class EnrolledCourse extends Model
     protected $guarded = ["id"];
 
     /** RELATIONS */
+
     public function enrolled_course_certificate()
     {
         return $this->hasMany(Certificate::class);
-    }
-
-    public function trainee()
-    {
-        return $this->hasOne(User::class, 'id', 'user_id');
     }
 
     public function training()
@@ -26,6 +22,9 @@ class EnrolledCourse extends Model
         return $this->hasOne(Training::class, 'id', 'training_id');
     }
 
+    // public function traineeAttendanceRecord() {
+    //     return $this->hasMany(AttendanceRecord::class);
+    // }
 
     public function trainee_requirement()
     {
@@ -56,8 +55,8 @@ class EnrolledCourse extends Model
     {
         return $this->hasMany(Attendance::class);
     }
-/*************  ✨ Windsurf Command ⭐  *************/
-/*******  5cab501c-730c-4b36-bf5b-2965eb639c1c  *******/
+    /*************  ✨ Windsurf Command ⭐  *************/
+    /*******  5cab501c-730c-4b36-bf5b-2965eb639c1c  *******/
     public function scopeForTraining(Builder $query, $trainingId)
     {
         return $query->where("training_id", $trainingId);

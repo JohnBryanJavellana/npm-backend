@@ -84,6 +84,12 @@ class TrainerEnrollmentController extends Controller
         }
     }
 
+
+    public function getFacilitatorDetails(Request $request)
+    {
+        return AttendanceRecord::whereKey($request->attendance_id)->get();
+    }
+
     // public function recordAttendance(Request $request)
     // {
     //     $validated = $request->validate([
