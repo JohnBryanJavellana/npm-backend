@@ -56,6 +56,8 @@ class EnrolledCourse extends Model
     {
         return $this->hasMany(Attendance::class);
     }
+/*************  ✨ Windsurf Command ⭐  *************/
+/*******  5cab501c-730c-4b36-bf5b-2965eb639c1c  *******/
     public function scopeForTraining(Builder $query, $trainingId)
     {
         return $query->where("training_id", $trainingId);

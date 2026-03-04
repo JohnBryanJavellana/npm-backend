@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Trainer;
 
 use App\Http\Controllers\Controller;
-
+use App\Http\Resources\Trainer\AttendanceRecordResource;
 use App\Models\{User, Attendance, AttendanceRecord, EnrolledCourse, QrReaderLocation};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -22,7 +22,7 @@ class AttendanceController extends Controller
             'records.*.user_id' => 'required|exists:users,id',
             'records.*.status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
             'records.*.time_in' => 'nullable|date',
-            // 'records.*.time_out' => 'nullable|date',
+            // 'records.*.time_out' => 'nullable|date', i need this to update
         ]);
 
         $responseData = [];
@@ -69,7 +69,7 @@ class AttendanceController extends Controller
 
         return response()->json(['data' => $responseData], 200);
     }
-    //! Time Out functipn
+    //! Time Out function
     public function attendance_timeOut(Request $request)
     {
         $validated = $request->validate([
@@ -86,24 +86,66 @@ class AttendanceController extends Controller
         return response()->json($record);
     }
 
-    public function attendanceByGroup()
+    public function attendanceByGroup(Request $request)
     {
-        $records = AttendanceRecord::with('attendance')->get();
+
+        $trainingId = $request->training_id;
+        $trainingAttendaces = Attendance::with([
+            "attendance_records.user"
+        ])->where('training_id', $trainingId)
+            ->get();
+
+        // $records = AttendanceRecord::with(['attendance', 'user'])->get();
+
+        // $grouped = $records->groupBy(function ($item) {
+        //     return $item->attendance->training_date ?? 'No Date';
+        // })->map(function ($items) {
+        //     return $items->map(function ($item) {
+        //         return [
+        //             'training_id'  => $item->attendance->training_id ?? null,
+        //             'id'           => $item->id,
+        //             'user'      => $item->user,
+        //             'user_name'    => $item->user->name ?? null,
+        //             'attendance_id' => $item->attendance_id,
+        //             'status'       => $item->status,
+        //             'time_in'      => $item->time_in,
+        //             'time_out'     => $item->time_out,
+        //         ];
+        //     });
+        // });
+
+        return AttendanceRecordResource::collection($trainingAttendaces);
+    }
+
+
+
+    public function testtest()
+    {
+
+
+        $records = AttendanceRecord::with(['attendance', 'user'])->get();
 
         $grouped = $records->groupBy(function ($item) {
-            return $item->attendance->training_date;
+            return $item->attendance->training_date ?? 'No Date';
         })->map(function ($items) {
             return $items->map(function ($item) {
                 return [
-                    'training_id' => $item->attendance->training_id,
-                    'user_id' => $item->user_id,
-                    'status' => $item->status,
-                    'time_in' => $item->time_in,
-                    'time_out' => $item->time_out,
+                    'training_id'  => $item->attendance->training_id ?? null,
+                    'id'           => $item->id,
+                    'user'      => $item->user,
+                    'module'      => $item->module,
+                    'user_name'    => $item->user->name ?? null,
+                    'attendance_id' => $item->attendance_id,
+                    'status'       => $item->status,
+                    'time_in'      => $item->time_in,
+                    'time_out'     => $item->time_out,
                 ];
             });
         });
-        return response()->json(['groupData' => $grouped], 200);
+
+        return response()->json([
+            'groupData' => $grouped
+        ], 200);
     }
 
 

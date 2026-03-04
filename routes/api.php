@@ -213,7 +213,7 @@
                 //! for dropdown
 
 
-                Route::get('running', [AttendanceController::class, 'testtest']);
+                Route::post('running', [AttendanceController::class, 'testtest']);
 
                 Route::post('attendance_time_out', [AttendanceController::class, 'attendance_timeOut']);
             });
