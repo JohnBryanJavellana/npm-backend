@@ -426,30 +426,32 @@ class DormitoryController extends Controller
      * @param bool returnedMessage === TRUE
      * @param Request $request
      */
-    public function update_dormitory_room (Request $request) {
+public function update_dormitory_room (Request $request) {
     return TransactionUtil::transact(null, [], function() use ($request) {
 
+        $this_room = DormitoryRoom::findOrFail($request->documentId);
+
         if ($request->room_name) {
+            if (empty(trim($request->room_name))) {
+                return response()->json(['message' => "Room name cannot be empty."], 422);
+            }
             $exists = CheckForDocumentExistence::exists(
                 DormitoryRoom::class,
                 [
-                    'dormitory_id' => $request->dormitoryId,
-                    'room_name'    => $request->room_name,
+                    'dormitory_id' => $this_room->dormitory_id,
+                    'room_name'    => trim($request->room_name),
                 ],
                 true,
-                $request->documentId,
+                $this_room->id,
                 'id',
                 "Room name $request->room_name already exists in this dormitory."
             );
-
             if ($exists) return $exists;
         }
-
-        $this_room = DormitoryRoom::findOrFail($request->documentId);
         $this_room->is_air_conditioned = $request->is_air_conditioned;
         $this_room->remarks            = $request->remarks === 'null' ? NULL : $request->remarks;
         $this_room->room_status        = $request->status;
-        if ($request->room_name) $this_room->room_name = $request->room_name;
+        if ($request->room_name) $this_room->room_name = trim($request->room_name);
         $this_room->save();
 
         AuditHelper::log(
@@ -1229,49 +1231,32 @@ class DormitoryController extends Controller
         });
     }
 
-    /**
-     * Summary of get_requested_service
-     * @param Request $request
-     */
-    // public function get_requested_service (Request $request) {
-    //     return TransactionUtil::transact(null, [], function() use ($request) {
-    //         $reqTemp = DormitoryReqService::with([
-    //             'services',
-    //             'tenant.boarder'
-    //         ]);
 
-    //         if($request->userId) {
-    //             $reqTemp->where('dormitory_tenant_id', $request->userId);
-    //         }
-
-    //         if($request->status) {
-    //             $reqTemp->where('status', $request->status);
-    //         }
-
-    //         $requestedServices = $reqTemp->get();
-
-    //         return response()->json([
-    //             'requestedServices' => $requestedServices
-    //         ], 200);
-    //     });
-    // }
 /**
  * Summary of get_requested_service
  * @param Request $request
  */
 public function get_requested_service (Request $request) {
     return TransactionUtil::transact(null, [], function() use ($request) {
+
+        if ($request->serviceId && !DormitoryService::where('id', $request->serviceId)->exists()) {
+            return response()->json(['message' => "Service ID $request->serviceId not found."], 404);
+        }
+
         $reqTemp = DormitoryReqService::with([
             'services',
             'tenant.boarder'
         ]);
 
-        if($request->userId) {
-            $reqTemp->where('dormitory_tenant_id', $request->userId);
+        if($request->tenantId) {
+            $reqTemp->where('dormitory_tenant_id', $request->tenantId);
+        }
+
+        if($request->serviceId) {
+            $reqTemp->where('dormitory_service_id', $request->serviceId);
         }
 
         if($request->status) {
-
             if(is_array($request->status)) {
                 $reqTemp->whereIn('status', $request->status);
             } else {
@@ -1280,16 +1265,20 @@ public function get_requested_service (Request $request) {
         }
 
         $requestedServices = $reqTemp->get()->map(function($service) {
-
-            $service->requestor_name = $service->tenant && $service->tenant->boarder
-                ? $service->tenant->boarder->fname . ' ' . $service->tenant->boarder->lname
-                : 'N/A';
-
-            return $service;
+            return [
+                'tenant_id'      => $service->tenant?->id,
+                'service_name'   => $service->services?->name ?? 'N/A',
+                'requestor_name' => $service->tenant && $service->tenant->boarder
+                    ? $service->tenant->boarder->fname . ' ' . $service->tenant->boarder->lname
+                    : 'N/A',
+                'status'         => $service->status,
+                'created_at'     => $service->created_at,
+            ];
         });
 
         return response()->json([
-            'requestedServices' => $requestedServices
+            'requestedServices' => $requestedServices,
+            'total'             => $requestedServices->count(),
         ], 200);
     });
 }
