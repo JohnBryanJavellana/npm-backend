@@ -8,15 +8,29 @@ class QrReaderService {
         protected CheckInOutLog $checkInOutLogModel
     ) {}
 
-    public function getUserQrRecord($userId, $perPage)
+    public function getUserQrRecord($userId, $perPage, $search)
     {
         return $this->checkInOutLogModel->query()
-        ->select("id","user_id","qr_reader_location_id","check_in","check_out","purpose")
+        ->select("id","user_id","qr_reader_location_id","check_in","check_out","purpose","created_at")
         ->with([
             "initiator:id,fname,lname,mname",
             "qrLocation:id,unit_name,location,type"
         ])
         ->where("user_id", $userId)
-        ->paginate(3);
-    }
+        ->when($search, function ($query) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where("check_in", "like", "%{$search}%")
+                ->orWhere("check_out", "like", "%{$search}%")
+                ->orWhereHas("qrLocation", function ($sub) use ($search) {
+                    $sub->where(function ($qq) use ($search) {
+                        $qq->where("unit_name", "like", "%{$search}%")
+                            ->orWhere("location", "like", "%{$search}%")
+                            ->orWhere("type", "like", "%{$search}%");
+                    });
+                });
+            });
+        })        
+        ->latest("created_at")
+        ->paginate($perPage ?? 10);
+    } 
 }

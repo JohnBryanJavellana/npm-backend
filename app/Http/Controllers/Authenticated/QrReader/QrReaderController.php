@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\QrReader;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\QrReader\PaginationViewRequest;
 use App\Http\Resources\QrReader\QrReaderViewResource;
 use App\Services\QrReader\QrReaderService;
 use Illuminate\Http\Request;
@@ -14,12 +15,17 @@ class QrReaderController extends Controller
     )
     {}
 
-    public function viewUserQrRecord(Request $request, $userId)
+    public function viewUserQrRecord(PaginationViewRequest $request)
     {
-        //create custom perPage
-        $perPage = (int) $request->input("perPage");
-        $records = $this->qrReaderService->getUserQrRecord($userId, $perPage);
-        
+        $validated = $request->validated();
+        $perPage = $validated["per_page"] ?? 10;
+        $search = $validated["search"] ?? null;
+        $records = $this->qrReaderService->getUserQrRecord($request->user()->id, $perPage, $search);  
         return QrReaderViewResource::collection($records);
     }
+    public function storeQrReading(Request $request)
+    {
+        return;
+    }
+
 }
