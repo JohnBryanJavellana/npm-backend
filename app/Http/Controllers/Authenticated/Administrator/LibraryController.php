@@ -861,6 +861,32 @@ class LibraryController extends Controller
             ->groupBy('type')
             ->get();
 
+       $recentActivity = DB::table('book_reservations')
+            ->join('book_res', 'book_reservations.book_res_id', '=', 'book_res.id')
+            ->join('users', 'book_res.user_id', '=', 'users.id')
+            ->join('books', 'book_reservations.book_id', '=', 'books.id')
+            ->join('book_catalogs', 'books.book_catalog_id', '=', 'book_catalogs.id')
+            ->whereIn('book_reservations.status', $validStatuses)
+            ->when($year, fn($query) => $query->whereYear('book_reservations.from_date', $year))
+            ->when($month, fn($query) => $query->whereMonth('book_reservations.from_date', $month))
+            ->select(
+                DB::raw("
+                    TRIM(
+                        CONCAT(
+                            users.fname, ' ',
+                            IFNULL(users.mname, ''), ' ',
+                            users.lname, ' ',
+                            IFNULL(users.suffix, '')
+                        )
+                    ) as user_name
+                "),
+                'book_catalogs.title as book_title',
+                'book_reservations.to_date as due_date'
+            )
+            ->orderByDesc('book_reservations.created_at')
+            ->limit(10)
+            ->get();
+
         return response()->json([
             'year' => $year ?? 'all',
             'month' => $month ?? 'all',
@@ -869,6 +895,7 @@ class LibraryController extends Controller
             'mostBorrowedRanking' => $mostBorrowedRanking, 
             'statusCounts' => $statusCounts,
             'typeCounts' => $typeCounts,
+            'recentActivity' => $recentActivity,
         ], 200);
     });
 }
