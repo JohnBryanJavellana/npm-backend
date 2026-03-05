@@ -17,7 +17,7 @@ return new class extends Migration
             $table->engine = "innoDB";
             $table->id();
             $table->foreignIdFor(Training::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class)->constrained();
+            $table->foreignId("created_by")->constrained("users");
             $table->dateTime('training_date')->nullable();
             $table->timestamps();
         });

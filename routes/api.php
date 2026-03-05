@@ -96,7 +96,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('update_enrollment_request', [TraineeEnrollment::class, 'update_requirements_request']);
             Route::post('update_invoice_trainings', [TraineeEnrollment::class, 'update_invoice_trainings']);
             Route::post('get_all_trainee_invoices_two', [TraineeEnrollment::class, 'get_all_trainee_invoices_two']);
-            Route::post('get_applications/', [TraineeEnrollment::class, 'get_applications']);
+            Route::post('get_applications', [TraineeEnrollment::class, 'get_applications']);
             Route::post('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
@@ -180,13 +180,19 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     });
 
     Route::middleware(['user_role:TRAINER', 'throttle:60,1'])->prefix('/trainer/')->group(function () {
-        Route::prefix('enrollment/')->group(function() {
+        Route::prefix('enrollment/')->group(function () {
             Route::get('training', [TrainerEnrollmentController::class, 'viewAllTrainingsAndFacilitators']);
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
-            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
-            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
+            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']); //*
             Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
-            Route::get('trainee', [AttendanceController::class, 'test']);
+            Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
+            Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
+            //! ATTENDANCE PART
+            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //! trainee list
+            Route::post('running', [AttendanceController::class, 'testtest']);
+            Route::post('attendance_time_out', [AttendanceController::class, 'attendance_timeOut']);
+
+            Route::get("trainees",[AttendanceController::class, "TraineeAttendanceRecord"]);
         });
     });
 
