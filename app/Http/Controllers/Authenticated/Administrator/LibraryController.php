@@ -801,21 +801,24 @@ class LibraryController extends Controller
      * Summary of summarize_reservation
      * @param SummarizeReport $request
      */
-   public function summarize_report(SummarizeReport $request)
+   // Current summarize_report stays as is (using book_reservations)
+public function summarize_report(SummarizeReport $request)
 {
     return TransactionUtil::transact($request, [], function () use ($request) {
+
         $year = $request->year;
         $month = $request->month;
 
         $validStatuses = ['APPROVED', 'RETURNED', 'RECEIVED', 'EXTENDED', 'RENEWING'];
 
-        $totalReservationsQuery = DB::table('book_reservations')
+        // Total Reservations from book_reservations
+        $totalReservations = DB::table('book_reservations')
             ->whereIn('status', $validStatuses)
             ->when($year, fn($query) => $query->whereYear('from_date', $year))
-            ->when($month, fn($query) => $query->whereMonth('from_date', $month));
+            ->when($month, fn($query) => $query->whereMonth('from_date', $month))
+            ->count();
 
-        $totalReservations = $totalReservationsQuery->count();
-
+        // Most Borrowed Book
         $mostBorrowedQuery = DB::table('book_reservations')
             ->join('books', 'book_reservations.book_id', '=', 'books.id')
             ->join('book_catalogs', 'books.book_catalog_id', '=', 'book_catalogs.id')
@@ -833,7 +836,8 @@ class LibraryController extends Controller
 
         $mostBorrowed = $mostBorrowedQuery->first();
 
-        $topN = 10; 
+        // Top 10 ranking
+        $topN = 10;
         $mostBorrowedRanking = $mostBorrowedQuery
             ->limit($topN)
             ->get()
@@ -847,6 +851,7 @@ class LibraryController extends Controller
                 ];
             });
 
+        // Status counts from reservations
         $statusCounts = DB::table('book_reservations')
             ->select('status', DB::raw('COUNT(*) as count'))
             ->when($year, fn($query) => $query->whereYear('from_date', $year))
@@ -854,6 +859,7 @@ class LibraryController extends Controller
             ->groupBy('status')
             ->get();
 
+        // Type counts
         $typeCounts = DB::table('book_reservations')
             ->select('type', DB::raw('COUNT(*) as count'))
             ->when($year, fn($query) => $query->whereYear('from_date', $year))
@@ -861,7 +867,22 @@ class LibraryController extends Controller
             ->groupBy('type')
             ->get();
 
-       $recentActivity = DB::table('book_reservations')
+        // Reservation status counts from book_res
+        $reservationStatuses = DB::table('book_res')
+            ->select('status', DB::raw('COUNT(*) as count'))
+            ->when($year, fn($query) => $query->whereYear('created_at', $year))
+            ->when($month, fn($query) => $query->whereMonth('created_at', $month))
+            ->groupBy('status')
+            ->get();
+
+        // Total requests from book_res (overall request count)
+        $totalBookResRequests = DB::table('book_res')
+            ->when($year, fn($query) => $query->whereYear('created_at', $year))
+            ->when($month, fn($query) => $query->whereMonth('created_at', $month))
+            ->count();
+
+        // Recent Activity
+        $recentActivity = DB::table('book_reservations')
             ->join('book_res', 'book_reservations.book_res_id', '=', 'book_res.id')
             ->join('users', 'book_res.user_id', '=', 'users.id')
             ->join('books', 'book_reservations.book_id', '=', 'books.id')
@@ -870,16 +891,7 @@ class LibraryController extends Controller
             ->when($year, fn($query) => $query->whereYear('book_reservations.from_date', $year))
             ->when($month, fn($query) => $query->whereMonth('book_reservations.from_date', $month))
             ->select(
-                DB::raw("
-                    TRIM(
-                        CONCAT(
-                            users.fname, ' ',
-                            IFNULL(users.mname, ''), ' ',
-                            users.lname, ' ',
-                            IFNULL(users.suffix, '')
-                        )
-                    ) as user_name
-                "),
+                DB::raw("TRIM(CONCAT(users.fname, ' ', IFNULL(users.mname,''), ' ', users.lname, ' ', IFNULL(users.suffix,''))) as user_name"),
                 'book_catalogs.title as book_title',
                 'book_reservations.to_date as due_date'
             )
@@ -887,15 +899,36 @@ class LibraryController extends Controller
             ->limit(10)
             ->get();
 
+        // Inventory Stats (all books by status)
+        $inventoryStats = DB::table('book_copies')
+            ->select('status', DB::raw('COUNT(*) as count'))
+            ->groupBy('status')
+            ->get();
+
+        // Add unavailable books summary for frontend horizontal chart
+        $unavailableBooks = collect(['BORROWED', 'LOST', 'RESERVED', 'DAMAGED'])
+            ->mapWithKeys(function($status) use ($inventoryStats) {
+                $count = $inventoryStats->firstWhere('status', $status)->count ?? 0;
+                return [$status => $count];
+            });
+
         return response()->json([
             'year' => $year ?? 'all',
             'month' => $month ?? 'all',
+
             'totalReservations' => $totalReservations,
-            'mostBorrowed' => $mostBorrowed, 
-            'mostBorrowedRanking' => $mostBorrowedRanking, 
+            'totalBookResRequests' => $totalBookResRequests, // <-- added overall requests
+            'mostBorrowed' => $mostBorrowed,
+            'mostBorrowedRanking' => $mostBorrowedRanking,
+
             'statusCounts' => $statusCounts,
             'typeCounts' => $typeCounts,
+            'reservationStatuses' => $reservationStatuses,
+
             'recentActivity' => $recentActivity,
+            'inventoryStats' => $inventoryStats,
+            
+            'unavailableBooks' => $unavailableBooks,
         ], 200);
     });
 }
