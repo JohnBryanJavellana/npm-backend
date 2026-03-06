@@ -40,6 +40,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
 use App\Http\Controllers\Authenticated\Logout;
 use App\Http\Controllers\Authenticated\QrReader\QrReaderController;
 use App\Http\Controllers\Authenticated\Trainer\AttendanceController;
+use App\Http\Controllers\Authenticated\Trainer\DashboardController;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
 use App\Http\Controllers\QRReaderCheckInOutCtrl;
 
@@ -96,9 +97,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('update_enrollment_request', [TraineeEnrollment::class, 'update_requirements_request']);
             Route::post('update_invoice_trainings', [TraineeEnrollment::class, 'update_invoice_trainings']);
             Route::post('get_all_trainee_invoices_two', [TraineeEnrollment::class, 'get_all_trainee_invoices_two']);
-            //status
-            Route::post('get_applications/', [TraineeEnrollment::class, 'get_applications']);
-            //byId
+            Route::post('get_applications', [TraineeEnrollment::class, 'get_applications']);
             Route::post('get_applications/{course}', [TraineeEnrollment::class, 'get_application']);
             Route::post('change_card_color', [TraineeEnrollment::class, 'change_card_color']);
             Route::post("course_modules", [TraineeEnrollment::class, 'getCourseModule']);
@@ -112,7 +111,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::prefix('/dormitories/')->group(function () {
-            //DORM REQUEST
             Route::post('rooms', [TraineeDormitory::class, 'viewRecommendedRooms']);
             Route::get('counts', [TraineeDormitory::class, 'viewTenantCount']);
             Route::post('applied_dormitories', [TraineeDormitory::class, 'view_room_application']);
@@ -123,31 +121,22 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('request_tenant_room', [TraineeDormitory::class, 'request_tenant_room']);
             Route::post('update_status_dormitory', [TraineeDormitory::class, 'update_status_dormitory']);
             Route::get('dormitory_record', [TraineeDormitory::class, 'dormitory_record']);
-
-            //INCLUSIONS
             Route::get('applied_dormitories/view/{dormitory_id}/inclusions', [TraineeDormitory::class, 'view_inclusion']);
             Route::get('inclusion/requests/{dormitory_id}', [TraineeDormitory::class, 'view_inclusion_request']);
             Route::get('inclusion/view', [TraineeDormitory::class, 'view_available_items']);
             Route::post("inclusion/create", [TraineeDormitory::class, 'request_inclusion']);
             Route::post("inclusion/cancel", [TraineeDormitory::class, 'cancel_request_inclusion']);
-            //SERVICES
             Route::get('services', [TraineeDormitory::class, 'view_service']);
             Route::get('services/{document_id}', [TraineeDormitory::class, 'user_service_request']);
             Route::post('services/{document_id}/create', [TraineeDormitory::class, 'create_service_request'])->whereNumber("document_id");
             Route::post('services/{document_id}/cancel', [TraineeDormitory::class, 'cancel_service_request'])->whereNumber("document_id");
-            //HISTORY
             Route::get('applied_dormitories/view/getAllHistories/{dormitory_id}', [TraineeDormitory::class, 'applied_dormitory_histories']);
-            //PAYMENT?
             Route::post('dormitory_payment_request', [TraineeDormitory::class, 'update_dorm_invoice']);
-            //DORM TRANSFER
             Route::post('dormitory_transfer_request', [TraineeDormitory::class, 'create_transfer_request']);
             Route::post('transfer_request/cancel/{tenant}', [TraineeDormitory::class, 'cancel_transfer_request']);
             Route::get('transfers', [TraineeDormitory::class, 'view_transfer_request']);
-            //DORM EXTENSION
             Route::post('extension_request', [TraineeDormitory::class, 'create_extend_request']);
             Route::post('extension_request/cancel/{tenant}', [TraineeDormitory::class, 'cancel_extend_request']);
-
-            //MISCELLANEOUS
             Route::post('cancel_request/{tenant}', [TraineeDormitory::class, 'cancel_request']);
             Route::post('count_book_reservation', [TraineeDormitory::class, 'count_book_reservation']);
         });
@@ -181,28 +170,31 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_all_invoices', [TraineeInvoices::class, 'get_all_trainee_invoices']);
             Route::get('view/penalties', [TraineeInvoices::class, 'library_penalties']);
             Route::post('update/penalties', [TraineeInvoices::class, 'updateLibInvoice']);
-            // Work-on
             Route::get('view/{tenant}', [TraineeInvoices::class, 'viewDormitoryInvoices']);
             Route::post('billing/update', [TraineeInvoices::class, 'updateDormInvoice']);
             Route::post('enrollment/update', [TraineeInvoices::class, 'updateEnrollmentInvoice']);
         });
 
-        Route::prefix("/qr_reader")->group(function() {
-            Route::get("/view/{user}", [QrReaderController::class, "viewUserQrRecord"]);
+        Route::prefix("/scan_records")->group(function() {
+            Route::get("/view", [QrReaderController::class, "viewUserQrRecord"]);
+            Route::get("/view/types", [QrReaderController::class, "qrTypes"]);
         });
-
     });
 
     Route::middleware(['user_role:TRAINER', 'throttle:60,1'])->prefix('/trainer/')->group(function () {
-        Route::prefix('enrollment/')->group(function() {
+        Route::prefix('enrollment/')->group(function () {
             Route::get('training', [TrainerEnrollmentController::class, 'viewAllTrainingsAndFacilitators']);
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
-            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']);
-            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
+            Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']); //*
             Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
-
-            //ATTENTANCE PART
-            Route::get('trainee', [AttendanceController::class, 'test']);
+            Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
+            Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
+            //! ATTENDANCE PART
+            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
+            Route::post('running', [AttendanceController::class, 'testtest']);
+            Route::post('attendance_time_out', [AttendanceController::class, 'attendance_timeOut']);
+            Route::get("trainees",[AttendanceController::class, "TraineeAttendanceRecord"]);
+            Route::get("dashboard",[DashboardController::class, "getEventAndSchedule"]);
         });
     });
 
@@ -216,7 +208,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'getRecreationalRequest']);
             Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancelUnitsRequest']);
             Route::get('counts', [TraineeRecreational::class, 'viewRecRequestCount']);
-            });
+        });
     });
 
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);

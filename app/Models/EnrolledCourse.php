@@ -41,6 +41,10 @@ class EnrolledCourse extends Model
         return $this->hasOne(EnrollmentInvoice::class, 'enrolled_course_id', 'id');
     }
 
+    public function traineeAttendanceRecord() {
+        return $this->hasMany(AttendanceRecord::class);
+    }
+
     /** SCOPES */
     public function scopeForUser($query, $user_id)
     {

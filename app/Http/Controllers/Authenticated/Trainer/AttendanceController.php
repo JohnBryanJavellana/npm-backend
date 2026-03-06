@@ -2,107 +2,282 @@
 
 namespace App\Http\Controllers\Authenticated\Trainer;
 
+use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
-
-use App\Models\{User, Attendance, TransactionUtil, QrReaderLocation};
+use App\Http\Resources\Trainer\AttendanceRecordResource;
+use App\Models\{User, Attendance, AttendanceRecord, EnrolledCourse, QrReaderLocation};
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Models\QrReaderEnum;
-use App\Models\UserAssignedQrLocation;
-
-use function Symfony\Component\String\u;
 
 class AttendanceController extends Controller
 {
-    public function test()
-    {
-        return Attendance::all();
-    }
 
-    // public function qrReader(Request $request)
+    // public function attendanceRecord(Request $request)
     // {
-    //     return User::transact(null, [], function () {
-    //         $locations = QRReaderLocation::all();
-    //         return response()->json(['locations' => $locations], 200);
-    //     });
-    // }
+    //     $validated = $request->validate([
+    //         'attendance_id' => 'required|exists:attendances,id',
+    //         'records' => 'required|array',
+    //         'records.*.user_id' => 'required|exists:users,id',
+    //         'records.*.status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
+    //         'records.*.time_in' => 'nullable|date',
+    //         'records.*.time_out' => 'nullable|date',
+    //     ]);
 
-    // private function supplyDateTime($dateToday, $checkInOrOut, $model, $column)
-    // {
-    //     if (\in_array($checkInOrOut, [UserAssignedQrLocation::TIME_IN->value, UserAssignedQrLocation::TIME_OUT->value])) {
-    //         return $model->{$column} = $dateToday;
-    //     } else {
-    //         return response()->json(['message' => "We are sorry. It seems that the data provided is not valid."], 409);
-    //     }
-    // }
+    //     $responseData = [
+    //         'attendance_id' => $validated['attendance_id']
+    //     ];
 
+    //     foreach ($validated['records'] as $record) {
 
-    // public function get_log_in_out_records(Request $request)
-    // {
-    //     return TransactionUtil::transact(null, [], function () use ($request) {
-    //         $userRole = $request->user()->role;
+    //         $attendanceRecord = AttendanceRecord::firstOrNew([
+    //             'attendance_id' => $validated['attendance_id'],
+    //             'user_id' => $record['user_id'],
+    //         ]);
 
-    //         if ($userRole !== UserRoleEnum::SUPERADMIN->value && $request->type) {
-    //             $check = UserAssignedQrLocation::where('user_id', $request->user()->id)
-    //                 ->with('qrLocation')
-    //                 ->first();
-
-    //             if ($check->qrLocation->whereNotIn('type', $request->type)) {
-    //                 return response()->json(['message' => "We are sorry. You do not have enough permission to view records for " . implode(', ', $request->type)], 409);
-    //             }
+    //         if (!empty($record['status'])) {
+    //             $attendanceRecord->status = $record['status'];
     //         }
 
-    //         $records_temp = CheckInOutLog::with([
-    //             'initiator',
-    //             'qrLocation'
-    //         ])->orderBy('created_at', 'DESC');
+    //         if (!empty($record['time_in'])) {
+    //             $attendanceRecord->time_in = Carbon::parse($record['time_in']);
+    //         }
 
-    //         $records = $request->type
-    //             ? $records_temp->whereHas('qrLocation', function($query) use($request) {
-    //                 $query->whereIn('type', $request->type);
-    //             })->get()
-    //             : $records_temp->get();
+    //         if (!empty($record['time_out'])) {
+    //             $attendanceRecord->time_out = Carbon::parse($record['time_out']);
+    //         }
 
-    //         return response()->json(['records' => $records], 200);
-    //     });
+    //         $attendanceRecord->save();
+
+    //         $responseData[] = $attendanceRecord;
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Attendance records updated',
+    //         'data' => $responseData
+    //     ], 200);
     // }
 
-    public function trainee_attendance(Request $request)
+    // public function createAttendance(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'training_id' => 'required|exists:trainings,id',
+    //         'training_date' => 'required|date',
+    //     ]);
+
+    //     $attendance = Attendance::firstOrCreate([
+    //         'training_id' => $validated['training_id'],
+    //         'training_date' => $validated['training_date'],
+    //         'created_by' => $request->user()->id, // better naming than user_id
+    //     ]);
+
+    //     return response()->json([
+    //         'message' => 'Attendance session ready',
+    //         'data' => $attendance
+    //     ], 200);
+    // }
+    //!--------------------------------------------------------------------------------------------------------------//
+    //!Store Data  //TimeIn
+    public function attendance_record(Request $request)
     {
+        \Log::info('attendance_record: ', $request->all());
+        $validated = $request->validate([
+            'training_id' => 'required|exists:trainings,id',
+            'training_date' => 'required|date',
+            'records' => 'required|array',
+            'records.*.user_id' => 'required|exists:users,id',
+            'records.*.status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
+            'records.*.time_in' => 'nullable|date',
+            'records.*.time_out' => 'nullable|date',
+        ]);
 
+        $responseData = [];
 
+        $attendance = Attendance::firstOrCreate(
+            [
+                'training_id' => $validated['training_id'],
+                'created_by' => $request->user()->id,
+                'training_date' => $validated['training_date'],
+            ]
+        );
 
-        //     $sessions = Training::all();
+        foreach ($validated['records'] as $record) {
+            $userId = $record['user_id'];
+            $status = $record['status'] ?? 'ABSENT';
+            $timeIn = Carbon::parse($record['time_in']) ?? now();
+            $timeOut = Carbon::parse($record['time_out']) ?? null;
 
-        //     $data = [];
+            $attendanceRecord = AttendanceRecord::where('attendance_id', $attendance->id)
+                ->where('user_id', $userId)
+                ->whereDate('created_at', now()->toDateString())
+                ->first();
 
-        //     foreach ($sessions as $session) {
+            if ($attendanceRecord) {
 
+                $attendanceRecord->update([
+                    'status' => $status,
+                    'time_in' => $timeIn,
+                    'time_out' => $timeOut,
+                ]);
+            } else {
 
-        //         $totalTrainees = User::where('role', 'TRAINEE')
-        //             ->where('training_id', $session->id)
-        //             ->count();
+                $attendanceRecord = AttendanceRecord::create([
+                    'attendance_id' => $attendance->id,
+                    'user_id' => $userId,
+                    'status' => $status,
+                    'time_in' => $timeIn,
+                    'time_out' => $timeOut,
+                ]);
+            }
+            $responseData[] = $attendanceRecord;
+        }
 
-
-        //         $presentCount = EnrolledCourse::where('training_id', $session->id)
-        //             ->whereNotNull('check_in')
-        //             ->count();
-
-        //         $absentCount = $totalTrainees - $presentCount;
-
-        //         $attendanceRate = $totalTrainees > 0
-        //             ? round(($presentCount / $totalTrainees) * 100, 2)
-        //             : 0;
-
-        //         $data[] = [
-        //             "session_id" => $session->id,
-        //             "date" => $session->date,
-        //             "total_trainees" => $totalTrainees,
-        //             "present_count" => $presentCount,
-        //             "absent_count" => $absentCount,
-        //             "attendance_rate" => $attendanceRate,
-        //         ];
-        //     }
-
-        //     return response()->json($data, 200);
+        return response()->json(['data' => $responseData], 200);
     }
+
+    public function TraineeAttendanceRecord(Request $request)
+    {
+        return EnrolledCourse::with([
+            "trainee",
+            "traineeAttendanceRecord" => function ($query) use ($request) {
+                $query->where(["training" => $request->training_id, "training_date" => $request->training_date])
+                ->whereHas("attendance");
+            }
+        ])
+        ->status([RequestStatus::ENROLLED->value])
+        ->where("training_id", $request->training_id)
+        ->get();
+    }
+
+    // public function attendance_timeOut(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'attendance_id' => 'required|exists:attendances,id',
+    //         'user_id' => 'required|exists:users,id',
+    //     ]);
+
+    //     $record = AttendanceRecord::where($validated)
+    //         ->whereDate('created_at', now())
+    //         ->firstOrFail();
+
+    //     $record->update(['time_out' => now()]);
+
+    //     return response()->json($record);
+    // }
+
+    public function attendanceByGroup(Request $request)
+    {
+        $trainingId = $request->training_id;
+        $trainingAttendaces = Attendance::with([
+            "attendance_records.user"
+        ])->where('training_id', $trainingId)
+            ->get();
+
+        // $records = AttendanceRecord::with(['attendance', 'user'])->get();
+
+        // $grouped = $records->groupBy(function ($item) {
+        //     return $item->attendance->training_date ?? 'No Date';
+        // })->map(function ($items) {
+        //     return $items->map(function ($item) {
+        //         return [
+        //             'training_id'  => $item->attendance->training_id ?? null,
+        //             'id'           => $item->id,
+        //             'user'      => $item->user,
+        //             'user_name'    => $item->user->name ?? null,
+        //             'attendance_id' => $item->attendance_id,
+        //             'status'       => $item->status,
+        //             'time_in'      => $item->time_in,
+        //             'time_out'     => $item->time_out,
+        //         ];
+        //     });
+        // });
+
+        return AttendanceRecordResource::collection($trainingAttendaces);
+    }
+
+
+
+
+    public function testtest()
+    {
+        $records = AttendanceRecord::with(['attendance', 'user'])->get();
+
+        $grouped = $records->groupBy(function ($item) {
+            return $item->attendance->training_date ?? 'No Date';
+        })->map(function ($items) {
+            return $items->map(function ($item) {
+                return [
+                    'training_id'  => $item->attendance->training_id ?? null,
+                    'id'           => $item->id,
+                    'user'      => $item->user,
+                    'module'      => $item->module,
+                    'user_name'    => $item->user->name ?? null,
+                    'attendance_id' => $item->attendance_id,
+                    'status'       => $item->status,
+                    'time_in'      => $item->time_in,
+                    'time_out'     => $item->time_out,
+                ];
+            });
+        });
+
+        return response()->json([
+            'groupData' => $grouped
+        ], 200);
+    }
+
+
+
+
+
+    // public function recordAttendance(Request $request)
+    // {
+
+
+
+    //     $validated = $request->validate([
+
+    //         'training_id' => 'required|exists:trainings,id',
+    //         'user_id' => 'required|exists:users,id',
+    //         'status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
+    //     ]);
+
+    //     $status = $validated['status'] ?? 'ABSENT';
+    //     $today = now()->toDateString();
+
+
+    //     $attendance = Attendance::where('training_id', $validated['training_id'])
+    //         ->where('user_id', $validated['user_id'])
+    //         ->whereDate('training_date', $today)
+    //         ->first();
+
+    //     if (!$attendance) {
+    //         $attendance = Attendance::create([
+    //             'training_id' => $validated['training_id'],
+    //             'user_id' => $validated['user_id'],
+    //             'training_date' => $today,
+    //         ]);
+    //     }
+
+
+
+    //     $attendanceRecord = AttendanceRecord::where('attendance_id', $attendance->id)
+    //         ->where('user_id', $validated['user_id'])
+    //         ->whereDate('created_at', $today)
+    //         ->first();
+
+    //     if ($attendanceRecord) {
+    //         $attendanceRecord->update([
+    //             'status' => $status,
+    //             'time_in' => now(),
+    //         ]);
+    //     } else {
+    //         $attendanceRecord = AttendanceRecord::create([
+    //             'attendance_id' => $attendance->id,
+    //             'user_id' => $validated['user_id'],
+    //             'status' => $status,
+    //             'time_in' => now(),
+    //         ]);
+    //     }
+
+    //     return response()->json(['data' => $attendanceRecord], 200);
+    // }
 }

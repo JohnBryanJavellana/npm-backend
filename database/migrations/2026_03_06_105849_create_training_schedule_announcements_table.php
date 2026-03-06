@@ -1,10 +1,12 @@
 <?php
 
-use App\Models\Training;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\{
+    Training,
+    User
+};
 
 return new class extends Migration
 {
@@ -13,12 +15,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('training_schedule_announcements', function (Blueprint $table) {
             $table->engine = "innoDB";
             $table->id();
             $table->foreignIdFor(Training::class)->constrained()->cascadeOnDelete();
-            $table->foreignId("created_by")->constrained("users");
-            $table->dateTime('training_date')->nullable();
+            $table->foreignId("trainer")->constrained("users");
+            $table->string("title", 255);
+            $table->longText("content");
             $table->timestamps();
         });
     }
@@ -28,7 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('training_schedule_announcements');
     }
 };
- 

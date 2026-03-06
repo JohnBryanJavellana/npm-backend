@@ -4,16 +4,9 @@ namespace App\Http\Controllers\Authenticated\Trainer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
-use App\Models\ChargeCategory;
-use App\Models\CourseModule;
-use App\Models\CourseModuleFee;
-use App\Models\EnrolledCourse;
-use App\Models\Training;
-use App\Models\TrainingSchedule;
-use App\Models\User;
+use App\Models\{EnrolledCourse, Training, AttendanceRecord};
 use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules\Can;
 
 class TrainerEnrollmentController extends Controller
 {
@@ -28,11 +21,9 @@ class TrainerEnrollmentController extends Controller
 
     public function viewAllTrainee(Request $request, $training)
     {
-        try
-        {
+        try {
             return $this->trainerEnrollmentService->getTrainees($training);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
         }
     }
@@ -55,27 +46,28 @@ class TrainerEnrollmentController extends Controller
         }
     }
 
-    //! Tigaman
+
     public function getCourseDetails(Request $request)
     {
 
         $record = Training::with([
-            "module:id,module_type_id,name",
+            "module:id,module_type_id,name,compendium,acronym",
             "module.moduleType",
             "module.trainingFees:id,course_module_id,charge_category_id,name,amount",
             "module.trainingFees.category:id,name",
             "module.specific_requirements",
             "module.schedules",
-
+            "module.attendances",
+            "module.attendance_records",
         ])
             ->where('id', $request->trainingId)
             ->get();
+
 
         return response()->json([
             "training" => $record,
         ], 200);
     }
-
 
     public function getTraineeDetails(Request $request)
     {
@@ -90,4 +82,45 @@ class TrainerEnrollmentController extends Controller
             return response()->json(["message" => "Server Error", "error" => $e->getMessage()], 500);
         }
     }
+
+
+    public function getFacilitatorDetails(Request $request)
+    {
+        return AttendanceRecord::whereKey($request->attendance_id)->get();
+    }
+
+    // public function recordAttendance(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'attendance_id' => 'required|exists:attendances,id',
+    //         'user_id' => 'required|exists:users,id',
+    //         'status' => 'required|string|in:PRESENT,ABSENT,LATE',
+    //     ]);
+
+    //     $today = now()->toDateString();
+
+    //     $attendanceRecord = AttendanceRecord::where('attendance_id', $validated['attendance_id'])
+    //         ->where('user_id', $validated['user_id'])
+    //         ->whereDate('created_at', $today)
+    //         ->first();
+
+    //     if ($attendanceRecord) {
+    //         $attendanceRecord->update([
+    //             'status' => $validated['status'],
+    //             'time_in' => now(),
+    //         ]);
+    //     } else {
+    //         $attendanceRecord = AttendanceRecord::create([
+    //             'attendance_id' => $validated['attendance_id'],
+    //             'user_id' => $validated['user_id'],
+    //             'status' => $validated['status'],
+    //             'time_in' => now(),
+    //         ]);
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Attendance recorded successfully',
+    //         'data' => $attendanceRecord
+    //     ], 200);
+    // }
 }
