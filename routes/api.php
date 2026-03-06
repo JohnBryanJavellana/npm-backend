@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Authenticated\Trainer\AnnouncementController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
@@ -205,15 +206,17 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
 
+            Route::post('traineeAttendanceRecord', [AttendanceController::class, 'TraineeAttendanceRecord']);
             //! ATTENDANCE PART
             Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //! trainee list
             //! for dropdown
-            Route::post('running', [AttendanceController::class, 'testtest']);
-            Route::post('attendance_time_out', [AttendanceController::class, 'attendance_timeOut']);
 
-            Route::post('traineeAttendanceRecord', [AttendanceController::class, 'TraineeAttendanceRecord']);
+
+            Route::post('attendance_time_out', [AttendanceController::class, 'attendance_timeOut']);
+            Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
         });
     });
+
 
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->group(function () {
         Route::prefix('recreationals/')->group(function () {

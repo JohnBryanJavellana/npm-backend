@@ -88,10 +88,10 @@ class AttendanceController extends Controller
             'records' => 'required|array',
             'records.*.enrolled_course_id' => 'required|exists:users,id',
             'records.*.status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
-            'records.*.time_in' => 'nullable|date',
-            'records.*.time_out' => 'nullable|date',
-            'records.*.start_time' => 'nullable|time',
-            'records.*.end_time' => 'nullable|time',
+            // 'records.*.time_in' => 'nullable|date',
+            // 'records.*.time_out' => 'nullable|date',
+            // 'records.*.start_time' => 'nullable|time',
+            // 'records.*.end_time' => 'nullable|time',
         ]);
 
         $training = Training::with('module.schedules')->find($validated['training_id']);
@@ -100,7 +100,7 @@ class AttendanceController extends Controller
             return response()->json(['error' => 'Training not found'], 404);
         }
         $schedule = $training->module->schedules
-            ->where('schedule_date', Carbon::parse($validated['training_date'])->toDateString())
+            ->where('schedule_from', Carbon::parse($validated['training_date'])->toDateString())
             ->first();
         if (!$schedule) {
             return response()->json([
@@ -157,8 +157,21 @@ class AttendanceController extends Controller
         ], 200);
     }
 
+    public function getTraineeDetails(Request $request)
+    {
+        try {
+            $list = EnrolledCourse::where('training_id', $request->trainingId)
+                ->with(['trainee',])
+                ->where('enrolled_course_status', 'ENROLLED')
+                ->get();
 
-    //! Waray ini
+            return response()->json(["data" => $list], 200);
+        } catch (\Exception $e) {
+            return response()->json(["message" => "Server Error", "error" => $e->getMessage()], 500);
+        }
+    }
+
+
     public function TraineeAttendanceRecord(Request $request)
     {
         return EnrolledCourse::with([
