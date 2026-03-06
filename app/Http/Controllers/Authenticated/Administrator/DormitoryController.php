@@ -293,45 +293,51 @@ class DormitoryController extends Controller
      * @param Request $request
      */
     public function get_available_supplies (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $availableSupplies = DormitoryInventory::withCount([
-                'stock' => fn($query) => $query->whereIn('status', ['AVAILABLE'])
-            ])->get()->map(function ($self) use ($request) {
-                return (function() use ($self, $request) {
-                    $checkIfReservedTemp = $self->borrowings()
-                        ->where('status', '!=', "DONE")
-                        ->where('dormitory_tenant_id', $request->userId);
-                    $checkIfReserved = $checkIfReservedTemp->exists();
-                    $status = null;
+    return TransactionUtil::transact(null, [], function() use ($request) {
 
-                    if ($checkIfReserved) {
-                        $status = 'ADDED';
-                    } else if ($self->stock()->whereIn('status', ['AVAILABLE'])->exists()) {
-                        $status = 'AVAILABLE';
-                    } else {
-                        $status = 'OUT OF STOCK';
-                    }
+        $tenantId = $request->userId;
 
-                    $self->provided = \count($checkIfReservedTemp->get());
-                    $self->availabilityStatus = $status;
+        $availableSupplies = DormitoryInventory::withCount([
+            'stock' => fn($query) => $query->whereIn('status', ['AVAILABLE'])
+        ])->get()->map(function ($self) use ($request, $tenantId) {
+            return (function() use ($self, $request, $tenantId) {
+                $checkIfReservedTemp = $self->borrowings()
+                    ->where('status', '!=', "DONE")
+                    ->where('dormitory_tenant_id', $tenantId);
+                $checkIfReserved = $checkIfReservedTemp->exists();
+                $status = null;
 
-                    return $self;
-                })();
-            })->sortBy(function ($item) {
-                $order = [
-                    'AVAILABLE' => 2,
-                    'ADDED' => 1,
-                    'OUT OF STOCK' => 3,
-                ];
+                if ($checkIfReserved) {
+                    $status = 'ADDED';
+                } else if ($self->stock()->whereIn('status', ['AVAILABLE'])->exists()) {
+                    $status = 'AVAILABLE';
+                } else {
+                    $status = 'OUT OF STOCK';
+                }
 
-                return $order[$item->availabilityStatus] ?? 99;
-            })->values();
+                $self->provided = DormitoryItemBorrowing::where('dormitory_inventory_id', $self->id)
+                    ->where('dormitory_tenant_id', $tenantId)
+                    ->sum('count');
 
-            return response()->json([
-                'availableSupplies' => $availableSupplies
-            ], 200);
-        });
-    }
+                $self->availabilityStatus = $status;
+
+                return $self;
+            })();
+        })->sortBy(function ($item) {
+            $order = [
+                'AVAILABLE' => 2,
+                'ADDED' => 1,
+                'OUT OF STOCK' => 3,
+            ];
+
+            return $order[$item->availabilityStatus] ?? 99;
+        })->values();
+
+        return response()->json([
+            'availableSupplies' => $availableSupplies
+        ], 200);
+    });
+}
 
     /**
      * Summary of get_and_provide
@@ -652,6 +658,68 @@ public function update_dormitory_room (Request $request) {
             }
         });
     }
+    //tunying
+ /**
+ * Summary of get_stock_reserved_tenant
+ * @param Request $request
+ */
+public function get_stock_reserved_tenant(Request $request) {
+    return TransactionUtil::transact(null, [], function() use ($request) {
+
+        if (!$request->stockId) {
+            return response()->json(['message' => "Stock ID is required."], 422);
+        }
+
+        $stock = DormitoryInventoryItem::where('id', $request->stockId)->first();
+
+        if (!$stock) {
+            return response()->json(['message' => "Stock ID $request->stockId not found."], 404);
+        }
+
+        if ($stock->status !== DormitoryEnum::RESERVED->value) {
+            return response()->json([
+                'message' => "Stock ID $request->stockId is not reserved. Current status is $stock->status."
+            ], 409);
+        }
+        $provision = DormitoryItemBorrowing::with([
+            'tenant.boarder',
+            'tenant.dormitory_room',
+        ])
+        ->whereHas('items', fn($q) =>
+            $q->where('dormitory_inventory_item_id', $stock->id)
+        )
+        ->whereHas('tenant', fn($q) =>
+            $q->whereIn('tenant_status', [
+                DormitoryEnum::APPROVED->value,
+                DormitoryEnum::ACTIVE->value,
+                DormitoryEnum::RESERVED->value,
+            ])
+        )
+        ->first();
+
+        $tenant = $provision?->tenant;
+
+        if (!$tenant) {
+            return response()->json(['message' => "No tenant found for this reserved stock."], 404);
+        }
+
+        return response()->json([
+            'stock' => [
+                'stock_id'          => $stock->id,
+                'unique_identifier' => $stock->unique_identifier,
+                'status'            => $stock->status,
+            ],
+            'reserved_by' => [
+                'tenant_id' => $tenant->id,
+                'name'      => $tenant->boarder->fname . ' ' . $tenant->boarder->lname,
+                'room'      => $tenant->dormitory_room?->room_name ?? 'No room assigned',
+                'status'    => $tenant->tenant_status,
+                'created_at' => $tenant->created_at,
+                'updated_at' => $tenant->updated_at,
+            ],
+        ], 200);
+    });
+}
 
     /**
      * Summary of remove_dorm_inventory_stock
