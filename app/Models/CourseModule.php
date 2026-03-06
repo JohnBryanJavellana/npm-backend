@@ -59,15 +59,15 @@ class CourseModule extends Model
     {
         return $this->hasMany(MainCertificate::class, "course_module_id", "id");
     }
-    public function attendances()
-    {
-        return $this->hasMany(Attendance::class, 'user_id', 'id', 'training_id');
-    }
+    // public function attendances()
+    // {
+    //     return $this->hasMany(Attendance::class, 'user_id', 'id', 'training_id');
+    // }
 
-    public function attendance_records()
-    {
-        return $this->hasMany(AttendanceRecord::class, 'user_id', 'id', 'attendance_id');
-    }
+    // public function attendance_records()
+    // {
+    //     return $this->hasMany(AttendanceRecord::class, 'user_id', 'id', 'attendance_id');
+    // }
 
     /** Scopes */
 

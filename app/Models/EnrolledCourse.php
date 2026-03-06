@@ -22,6 +22,10 @@ class EnrolledCourse extends Model
         return $this->hasOne(Training::class, 'id', 'training_id');
     }
 
+    public function trainee()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
     // public function traineeAttendanceRecord() {
     //     return $this->hasMany(AttendanceRecord::class);
     // }

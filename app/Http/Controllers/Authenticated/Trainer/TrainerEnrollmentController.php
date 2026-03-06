@@ -50,20 +50,20 @@ class TrainerEnrollmentController extends Controller
 
     public function getCourseDetails(Request $request)
     {
-
+        // \Log::info("com", [$request->all()]);
         $record = Training::with([
-            "module:id,module_type_id,name,compendium,acronym",
+            "module",
             "module.moduleType",
             "module.trainingFees:id,course_module_id,charge_category_id,name,amount",
             "module.trainingFees.category:id,name",
             "module.specific_requirements",
-            "module.schedules",
-            "module.attendances",
-            "module.attendance_records",
+            // "module.schedules",
+            // "module.attendances",
+            // "module.attendance_records",
         ])
             ->where('id', $request->trainingId)
             ->get();
-
+        // \Log::info("com", [$record]);
 
         return response()->json([
             "training" => $record,

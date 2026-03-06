@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Authenticated\Trainer;
 use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainer\AttendanceRecordResource;
-use App\Models\{User, Attendance, AttendanceRecord, EnrolledCourse, QrReaderLocation};
+use App\Models\{User, Attendance, AttendanceRecord, EnrolledCourse, Training};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use function Symfony\Component\String\u;
@@ -18,7 +18,7 @@ class AttendanceController extends Controller
     //     $validated = $request->validate([
     //         'attendance_id' => 'required|exists:attendances,id',
     //         'records' => 'required|array',
-    //         'records.*.user_id' => 'required|exists:users,id',
+    //         'records.*.enrolled_course_id' => 'required|exists:users,id',
     //         'records.*.status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
     //         'records.*.time_in' => 'nullable|date',
     //         'records.*.time_out' => 'nullable|date',
@@ -32,7 +32,7 @@ class AttendanceController extends Controller
 
     //         $attendanceRecord = AttendanceRecord::firstOrNew([
     //             'attendance_id' => $validated['attendance_id'],
-    //             'user_id' => $record['user_id'],
+    //             'enrolled_course_id' => $record['user_id'],
     //         ]);
 
     //         if (!empty($record['status'])) {
@@ -76,66 +76,89 @@ class AttendanceController extends Controller
     //         'data' => $attendance
     //     ], 200);
     // }
+
     //!--------------------------------------------------------------------------------------------------------------//
     //!Store Data  //TimeIn
+
     public function attendance_record(Request $request)
     {
-        \Log::info('attendance_record: ', $request->all());
         $validated = $request->validate([
             'training_id' => 'required|exists:trainings,id',
             'training_date' => 'required|date',
             'records' => 'required|array',
-            'records.*.user_id' => 'required|exists:users,id',
+            'records.*.enrolled_course_id' => 'required|exists:users,id',
             'records.*.status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
             'records.*.time_in' => 'nullable|date',
             'records.*.time_out' => 'nullable|date',
+            'records.*.start_time' => 'nullable|time',
+            'records.*.end_time' => 'nullable|time',
+        ]);
+
+        $training = Training::with('module.schedules')->find($validated['training_id']);
+
+        if (!$training) {
+            return response()->json(['error' => 'Training not found'], 404);
+        }
+        $schedule = $training->module->schedules
+            ->where('schedule_date', Carbon::parse($validated['training_date'])->toDateString())
+            ->first();
+        if (!$schedule) {
+            return response()->json([
+                'error' => 'Training date is not valid for this training'
+            ], 422);
+        }
+        $attendance = Attendance::firstOrCreate([
+            'training_id' => $validated['training_id'],
+            'training_date' => $validated['training_date'],
         ]);
 
         $responseData = [];
 
-        $attendance = Attendance::firstOrCreate(
-            [
-                'training_id' => $validated['training_id'],
-                'user_id' => $request->user()->id,
-                'training_date' => $validated['training_date'],
-            ]
-        );
-
         foreach ($validated['records'] as $record) {
-            $userId = $record['user_id'];
-            $status = $record['status'] ?? 'ABSENT';
-            $timeIn = Carbon::parse($record['time_in']) ?? now();
-            $timeOut = Carbon::parse($record['time_out']) ?? null;
+            $userId = $record['enrolled_course_id'];
+            $timeIn = isset($record['time_in']) ? Carbon::parse($record['time_in']) : now();
+            $timeOut = isset($record['time_out']) ? Carbon::parse($record['time_out']) : null;
+            $scheduleStart = Carbon::parse($schedule->start_time);
+            $scheduleEnd = Carbon::parse($schedule->end_time);
 
-            $attendanceRecord = AttendanceRecord::where('attendance_id', $attendance->id)
-                ->where('user_id', $userId)
-                ->whereDate('created_at', now()->toDateString())
-                ->first();
-
-            if ($attendanceRecord) {
-
-                $attendanceRecord->update([
-                    'status' => $status,
-                    'time_in' => $timeIn,
-                    'time_out' => $timeOut,
-                ]);
-            } else {
-
-                $attendanceRecord = AttendanceRecord::create([
-                    'attendance_id' => $attendance->id,
-                    'user_id' => $userId,
-                    'status' => $status,
-                    'time_in' => $timeIn,
-                    'time_out' => $timeOut,
-                ]);
+            //! Validate time_in
+            if ($timeIn->lt($scheduleStart) || $timeIn->gt($scheduleEnd)) {
+                return response()->json([
+                    'error' => 'Time in must be within the training schedule'
+                ], 422);
             }
+
+            //! 15 minute late rule
+            $lateLimit = $scheduleStart->copy()->addMinutes(15);
+
+            if ($timeIn->gt($lateLimit)) {
+                $status = 'LATE';
+            } else {
+                $status = 'PRESENT';
+            }
+
+            $attendanceRecord = AttendanceRecord::updateOrCreate(
+                [
+                    'attendance_id' => $attendance->id,
+                    'enrolled_course_id' => $userId,
+                ],
+                [
+                    'status' => $status,
+                    'time_in' => $timeIn,
+                    'time_out' => $timeOut,
+                ]
+            );
 
             $responseData[] = $attendanceRecord;
         }
 
-        return response()->json(['data' => $responseData], 200);
+        return response()->json([
+            'store_data' => $responseData
+        ], 200);
     }
 
+
+    //! Waray ini
     public function TraineeAttendanceRecord(Request $request)
     {
         return EnrolledCourse::with([
