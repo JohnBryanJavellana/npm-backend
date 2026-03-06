@@ -13,7 +13,7 @@ class PaginationViewRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("PaginationView", [$this->all()]);
+        \Log::info("PaginationView", [$this->all(), $this->user()->id]);
         return $this->user() !== null;
     }
 
@@ -28,6 +28,7 @@ class PaginationViewRequest extends FormRequest
             "per_page" => ['nullable', 'integer', 'min:1', 'max:100'],
             "page" => ['nullable', 'integer', 'min:1'],
             "search" => ['nullable', 'max:255'],
+            "filter" => ['nullable', 'max:255', 'in:DORMITORY,LIBRARY,ENROLLMENT,GUARD_ENTRANCE,GUARD_EXIT'],
         ];
     }
 

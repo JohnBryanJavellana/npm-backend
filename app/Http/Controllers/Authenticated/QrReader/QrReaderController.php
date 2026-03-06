@@ -17,15 +17,22 @@ class QrReaderController extends Controller
 
     public function viewUserQrRecord(PaginationViewRequest $request)
     {
-        $validated = $request->validated();
-        $perPage = $validated["per_page"] ?? 10;
-        $search = $validated["search"] ?? null;
-        $records = $this->qrReaderService->getUserQrRecord($request->user()->id, $perPage, $search);  
-        return QrReaderViewResource::collection($records);
+        try
+        {
+            $types = ["DORMITORY","LIBRARY","ENROLLMENT","GUARD_ENTRANCE","GUARD_EXIT"];
+            $validated = $request->validated();
+            $perPage = $validated["per_page"] ?? 10;
+            $search = $validated["search"] ?? null;
+            $filter = $validated["filter"] ?? null;
+            $records = $this->qrReaderService->getUserQrRecord($request->user()->id, $perPage, $search, $filter);  
+            return QrReaderViewResource::collection($records)->additional(['meta' => [
+                'types' => $types,
+            ]]);
+        }
+        catch (\Exception $e) {
+            \Log::info("viewUserQrRecordError", [$e->getMessage()]);
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+      
     }
-    public function storeQrReading(Request $request)
-    {
-        return;
-    }
-
 }

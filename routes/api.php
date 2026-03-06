@@ -40,6 +40,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
 use App\Http\Controllers\Authenticated\Logout;
 use App\Http\Controllers\Authenticated\QrReader\QrReaderController;
 use App\Http\Controllers\Authenticated\Trainer\AttendanceController;
+use App\Http\Controllers\Authenticated\Trainer\DashboardController;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
 use App\Http\Controllers\QRReaderCheckInOutCtrl;
 
@@ -176,6 +177,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix("/scan_records")->group(function() {
             Route::get("/view", [QrReaderController::class, "viewUserQrRecord"]);
+            Route::get("/view/types", [QrReaderController::class, "qrTypes"]);
         });
     });
 
@@ -188,11 +190,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
             //! ATTENDANCE PART
-            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']); //! trainee list
+            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
             Route::post('running', [AttendanceController::class, 'testtest']);
             Route::post('attendance_time_out', [AttendanceController::class, 'attendance_timeOut']);
-
             Route::get("trainees",[AttendanceController::class, "TraineeAttendanceRecord"]);
+            Route::get("dashboard",[DashboardController::class, "getEventAndSchedule"]);
         });
     });
 
@@ -206,7 +208,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('get_recreational_request/get_requested_equipments', [TraineeRecreational::class, 'getRecreationalRequest']);
             Route::post('get_recreational_request/cancel_requested_units', [TraineeRecreational::class, 'cancelUnitsRequest']);
             Route::get('counts', [TraineeRecreational::class, 'viewRecRequestCount']);
-            });
+        });
     });
 
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);

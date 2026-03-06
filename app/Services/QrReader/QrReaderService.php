@@ -8,7 +8,7 @@ class QrReaderService {
         protected CheckInOutLog $checkInOutLogModel
     ) {}
 
-    public function getUserQrRecord($userId, $perPage, $search)
+    public function getUserQrRecord($userId, $perPage, $search, $filter)
     {
         return $this->checkInOutLogModel->query()
         ->select("id","user_id","qr_reader_location_id","check_in","check_out","purpose","created_at")
@@ -17,15 +17,19 @@ class QrReaderService {
             "qrLocation:id,unit_name,location,type"
         ])
         ->where("user_id", $userId)
+        ->when($filter, function($fil_query) use ($filter) {
+            $fil_query->whereRelation("qrLocation", "type", $filter);
+        })
         ->when($search, function ($query) use ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where("check_in", "like", "%{$search}%")
-                ->orWhere("check_out", "like", "%{$search}%")
-                ->orWhereHas("qrLocation", function ($sub) use ($search) {
-                    $sub->where(function ($qq) use ($search) {
-                        $qq->where("unit_name", "like", "%{$search}%")
-                            ->orWhere("location", "like", "%{$search}%")
-                            ->orWhere("type", "like", "%{$search}%");
+            $q->where("id", "like", "%{$search}%")
+            ->orWhere("check_in", "like", "%{$search}%")
+            ->orWhere("check_out", "like", "%{$search}%")
+            ->orWhereHas("qrLocation", function ($sub) use ($search) {
+                $sub->where(function ($qq) use ($search) {
+                    $qq->where("unit_name", "like", "%{$search}%")
+                        ->orWhere("location", "like", "%{$search}%")
+                        ->orWhere("type", "like", "%{$search}%");
                     });
                 });
             });
