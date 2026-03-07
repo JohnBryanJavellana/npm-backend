@@ -198,4 +198,35 @@ class Account extends Controller
             $user->save();
         });
     }
-}
+    /**
+     * Summary of audit_trail
+     * @param Request $request
+     */
+
+        public function audit_trail_filter(Request $request)
+        {
+            $request->validate([
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date',
+                'date' => 'nullable|date',
+            ]);
+
+            $query = AuditTrail::query();
+
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $query->whereBetween('created_at', [
+                    $request->start_date,
+                    $request->end_date
+                ]);
+            } 
+            elseif ($request->filled('date')) {
+                $query->whereDate('created_at', $request->date);
+            }
+
+            $auditTrails = $query->orderBy('created_at', 'desc')->get();
+
+            return response()->json($auditTrails);
+        }
+        }
+
+

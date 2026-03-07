@@ -263,6 +263,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('update_personal', [Account::class, 'update_personal']);
             Route::post('update_password', [Account::class, 'update_password']);
             Route::get('get_activities', [Account::class, 'get_activities']);
+
+            Route::post('audit_trail_filter', [Account::class, 'audit_trail_filter']);
         });
     });
 });
