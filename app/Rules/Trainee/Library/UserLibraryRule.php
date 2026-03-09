@@ -45,7 +45,7 @@ class UserLibraryRule implements ValidationRule , DataAwareRule
             RequestStatus::PENDING->value,
             RequestStatus::APPROVED->value,
             RequestStatus::EXTENDING->value,
-            RequestStatus::EXTENDED->value, 
+            RequestStatus::EXTENDED->value,
             RequestStatus::RENEWING->value,
             RequestStatus::RENEWED->value,
             RequestStatus::RECEIVED->value
@@ -63,6 +63,7 @@ class UserLibraryRule implements ValidationRule , DataAwareRule
         }
 
         $overDues = BookReservation::query()
+        ->forUser($value)
         ->where('to_date', '<', now())
         ->where("type", "HARD-COPY")
         ->count();

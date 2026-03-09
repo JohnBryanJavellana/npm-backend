@@ -214,30 +214,29 @@ class TraineeLibrary extends Controller
         try {
             $userId = $request->user()->id;
             $traceNum = $request->traceNumber;
-
-           $books = Book::with([
-                "hasData" => function ($query) use($traceNum,  $userId) {
-                    $query->where("status", "RECEIVED")->whereHas("bookRes", function($q) use ($traceNum, $userId) {
-                        $q->where([
-                            "trace_number" => $traceNum,
-                            "user_id" => $userId
-                        ]);
-                    });;
-                },
-                "catalog.genre"
-            ])
-            ->whereHas("hasData",function($query) use ($traceNum, $userId){
-                    $query
-                    ->where("status", "RECEIVED")
-                    ->whereRaw("DATEDIFF(to_date, from_date) < 12")
-                    ->whereHas("bookRes", function($q) use ($traceNum, $userId) {
-                        $q->where([
-                            "trace_number" => $traceNum,
-                            "user_id" => $userId
-                        ]);
-                    });
-                })
-            ->get();
+            $books = Book::with([
+                    "hasData" => function ($query) use($traceNum,  $userId) {
+                        $query->where("status", "RECEIVED")->whereHas("bookRes", function($q) use ($traceNum, $userId) {
+                            $q->where([
+                                "trace_number" => $traceNum,
+                                "user_id" => $userId
+                            ]);
+                        });;
+                    },
+                    "catalog.genre"
+                ])
+                ->whereHas("hasData",function($query) use ($traceNum, $userId){
+                        $query
+                        ->where("status", "RECEIVED")
+                        ->whereRaw("DATEDIFF(to_date, from_date) < 12")
+                        ->whereHas("bookRes", function($q) use ($traceNum, $userId) {
+                            $q->where([
+                                "trace_number" => $traceNum,
+                                "user_id" => $userId
+                            ]);
+                        });
+                    })
+                ->get();
 
             return AvailableBooksResource::collection($books);
         }

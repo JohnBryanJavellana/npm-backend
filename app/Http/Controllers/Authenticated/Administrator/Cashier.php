@@ -446,4 +446,196 @@ class Cashier extends Controller
             }
         });
     }
+ //edrascoe
+ /**
+ * Summary of get_all_paid_payments
+ * @param bool auditActions === FALSE
+ * @param bool returnedMessage === TRUE
+ * @param Request $request
+ */
+public function get_all_paid_payments(Request $request) {
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $services = [
+            NotificationEnum::ENROLLMENT->value,
+            NotificationEnum::DORMITORY->value,
+            NotificationEnum::LIBRARY->value,
+            NotificationEnum::RECREATIONAL->value,
+        ];
+        $allPaidPayments = [];
+        foreach ($services as $service) {
+            $baseRelations = ['payee', 'orNumber'];
+
+            if ($service === NotificationEnum::LIBRARY->value) {
+                $baseRelations = [
+                    ...$baseRelations,
+                    'bookRes',
+                    'selectedBooks',
+                    'selectedBooks.bookReservation',
+                    'selectedBooks.bookReservation.book',
+                    'selectedBooks.bookReservation.books',
+                    'selectedBooks.bookReservation.books.catalog',
+                ];
+            }
+            if ($service === NotificationEnum::ENROLLMENT->value) {
+                $baseRelations = [
+                    ...$baseRelations,
+                    'training',
+                ];
+            }
+            $payments = self::getTable($service, null, [
+                'invoice_status' => [CashierEnum::PAID->value],
+            ])
+                ->with($baseRelations)
+                ->orderBy('datePaid', 'DESC')
+                ->get()
+                ->map(function ($payment) use ($service) {
+                    return [
+                        'service'         => $service,
+                        'payment'         => $payment,
+                    ];
+                });
+
+            $allPaidPayments[$service] = $payments;
+        }
+        return response()->json([
+            'message'  => AdministratorReturnResponse::CASHIERCTRL_ALL_PAID_PAYMENTS->value,
+            'payments' => $allPaidPayments,
+        ], 200);
+    });
+}
+
+/**
+ * Summary of batch_generate_invoices
+ * Batch Processing: Generate individual invoices for all completed
+ * cashier transactions within the specified date range.
+ * @param bool auditActions === TRUE
+ * @param bool returnedMessage === TRUE
+ * @param Request $request
+ * @param string $request->dateFrom  — start of date range (Y-m-d)
+ * @param string $request->dateTo    — end of date range   (Y-m-d)
+ * @param string|null $request->service — optional, filter by specific service
+ */
+public function batch_generate_invoices(Request $request) {
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $dateFrom = Carbon::parse($request->dateFrom)->startOfDay();
+        $dateTo   = Carbon::parse($request->dateTo)->endOfDay();
+
+        if ($dateFrom->gt($dateTo)) {
+            return response()->json([
+                'message' => AdministratorReturnResponse::CASHIERCTRL_ERR_INVALID_DATE_RANGE->value,
+            ], 422);
+        }
+        $services = $request->service
+            ? [$request->service]
+            : [
+                NotificationEnum::ENROLLMENT->value,
+                NotificationEnum::DORMITORY->value,
+                NotificationEnum::LIBRARY->value,
+                NotificationEnum::RECREATIONAL->value,
+            ];
+        $generatedInvoices = [];
+        $skippedInvoices   = [];
+        $totalGenerated    = 0;
+        $totalSkipped      = 0;
+        foreach ($services as $service) {
+            $baseRelations = ['payee', 'orNumber'];
+
+            if ($service === NotificationEnum::LIBRARY->value) {
+                $baseRelations = [
+                    ...$baseRelations,
+                    'bookRes',
+                    'selectedBooks',
+                    'selectedBooks.bookReservation',
+                    'selectedBooks.bookReservation.book',
+                    'selectedBooks.bookReservation.books',
+                    'selectedBooks.bookReservation.books.catalog',
+                ];
+            }
+            if ($service === NotificationEnum::ENROLLMENT->value) {
+                $baseRelations = [
+                    ...$baseRelations,
+                    'training',
+                ];
+            }
+            $transactions = self::getTable($service, null, [
+                'invoice_status' => [CashierEnum::PAID->value],
+            ])
+                ->with($baseRelations)
+                ->whereBetween('datePaid', [$dateFrom, $dateTo])
+                ->orderBy('datePaid', 'ASC')
+                ->get();
+
+            foreach ($transactions as $transaction) {
+                if (is_null($transaction->cashier_o_r_id) || is_null($transaction->received_amount)) {
+                    $skippedInvoices[] = [
+                        'service'        => $service,
+                        'transaction_id' => $transaction->id,
+                        'user_id'        => $transaction->user_id,
+                        'reason'         => match(true) {
+                            is_null($transaction->cashier_o_r_id) && is_null($transaction->received_amount) => 'Missing OR number and received amount.',
+                            is_null($transaction->cashier_o_r_id)                                           => 'Missing OR number.',
+                            is_null($transaction->received_amount)                                           => 'Missing received amount.',
+                            default                                                                          => 'Unknown issue.',
+                        },
+                    ];
+                    $totalSkipped++;
+                    continue;
+                }
+                $generatedInvoices[] = [
+                    'service'         => $service,
+                    'transaction_id'  => $transaction->id,
+                    'user_id'         => $transaction->user_id,
+                    'payee'           => $transaction->payee,
+                    'or_number'       => optional($transaction->orNumber)->name,
+                    'received_amount' => $transaction->received_amount,
+                    'payment_type'    => $transaction->payment_type,
+                    'date_paid'       => $transaction->datePaid,
+                    'invoice_meta'    => [
+                        'generated_at' => Carbon::now()->toDateTimeString(),
+                        'generated_by' => $request->user()->id,
+                        'date_range'   => [
+                            'from' => $dateFrom->toDateString(),
+                            'to'   => $dateTo->toDateString(),
+                        ],
+                    ],
+                ];
+                Notifications::notify(
+                    $request->user()->id,
+                    $transaction->user_id,
+                    $service,
+                    "Your invoice for your " . strtolower($service) . " transaction has been generated."
+                );
+                SendingEmail::dispatch(
+                    User::find($transaction->user_id),
+                    new CashierEmail([
+                        'status'  => CashierEnum::PAID->value,
+                        'service' => strtolower($service),
+                        'message' => "Your invoice for your " . strtolower($service) . " payment has been successfully generated."
+                    ], User::find($transaction->user_id))
+                );
+                $totalGenerated++;
+            }
+        }
+        AuditHelper::log(
+            $request->user()->id,
+            AdministratorAuditActions::CASHIERCTRL_BATCH_GENERATED_INVOICES->value .
+                " | Date Range: {$dateFrom->toDateString()} to {$dateTo->toDateString()}" .
+                " | Generated: $totalGenerated | Skipped: $totalSkipped"
+        );
+        if (env('USE_EVENT')) {
+            event(new BEInvoice(''), new BEAuditTrail(''));
+        }
+        return response()->json([
+            'message'        => AdministratorReturnResponse::CASHIERCTRL_BATCH_GENERATED_INVOICES->value,
+            'date_range'     => [
+                'from' => $dateFrom->toDateString(),
+                'to'   => $dateTo->toDateString(),
+            ],
+            'total_generated' => $totalGenerated,
+            'total_skipped'   => $totalSkipped,
+            'invoices'        => $generatedInvoices,
+            'skipped'         => $skippedInvoices,
+        ], 200);
+    });
+}
 }

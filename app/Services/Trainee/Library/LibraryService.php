@@ -100,7 +100,7 @@ class LibraryService {
 
         return $record;
     }
-    
+
     private function getBooks($columns = "*", $with)
     {
         $query = $this->bookModel->newQuery()->select($columns);
