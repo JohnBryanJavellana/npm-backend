@@ -294,7 +294,7 @@
       array (
         'driver' => 'mysql',
         'url' => NULL,
-        'host' => '5.5.55.176',
+        'host' => '5.5.55.184',
         'port' => '3306',
         'database' => 'nmp-be',
         'username' => 'bryan',
@@ -314,7 +314,7 @@
       array (
         'driver' => 'pgsql',
         'url' => NULL,
-        'host' => '5.5.55.176',
+        'host' => '5.5.55.184',
         'port' => '3306',
         'database' => 'nmp-be',
         'username' => 'bryan',
@@ -329,7 +329,7 @@
       array (
         'driver' => 'sqlsrv',
         'url' => NULL,
-        'host' => '5.5.55.176',
+        'host' => '5.5.55.184',
         'port' => '3306',
         'database' => 'nmp-be',
         'username' => 'bryan',
