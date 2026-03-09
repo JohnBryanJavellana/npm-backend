@@ -73,8 +73,20 @@ class TrainerEnrollmentController extends Controller
     public function getTraineeDetails(Request $request)
     {
         try {
+            \Log::info("testData", [$request->all()]);
             $list = EnrolledCourse::where('training_id', $request->trainingId)
-                ->with(['trainee',])
+                ->with([
+                    'trainee',
+                    'traineeAttendanceRecord' => function ($query) use ($request) {
+                        $query->whereHas("attendance", function ($q) use ($request) {
+                            $q->where([
+                                "training_date" => $request->training_date,
+                                "start_time" => $request->start_time,
+                                "end_time" => $request->end_time
+                            ]);
+                        });
+                    }
+                ])
                 ->where('enrolled_course_status', 'ENROLLED')
                 ->get();
 

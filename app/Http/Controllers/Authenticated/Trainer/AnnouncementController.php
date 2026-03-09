@@ -52,4 +52,32 @@ class AnnouncementController extends Controller
             "data" => $announcements
         ], 200);
     }
+
+    public function AnnouncementDelete(Request $request)
+    {
+        $id = $request->id;
+
+        TrainingScheduleAnnouncement::where('id', $id)->delete();
+
+        return response()->json([
+            // "message" => "Announcement removed successfully",
+            "deleted_id" => $id
+        ], 200);
+    }
+
+
+    public function AnnouncementUpdate(Request $request)
+    {
+        $id = $request->id;
+
+        TrainingScheduleAnnouncement::where('id', $id)->update([
+            "title" => $request->title,
+            "content" => $request->content
+        ]);
+
+        return response()->json([
+            // "message" => "Announcement updated successfully",
+            "update_id" => $id
+        ], 200);
+    }
 }
