@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use App\Jobs\SaveAvatar;
 use App\Jobs\SendingEmail;
 use Illuminate\Http\Request;
@@ -203,30 +204,37 @@ class Account extends Controller
      * @param Request $request
      */
 
-        public function audit_trail_filter(Request $request)
-        {
-            $request->validate([
-                'start_date' => 'nullable|date',
-                'end_date' => 'nullable|date',
-                'date' => 'nullable|date',
-            ]);
+   public function audit_trail_filter(Request $request)
+{
+    $request->validate([
+        'start_date' => 'nullable|date',
+        'end_date' => 'nullable|date',
+        'date' => 'nullable|date',
+    ]);
 
-            $query = AuditTrail::query();
+    try {
+        $query = AuditTrail::query();
 
-            if ($request->filled('start_date') && $request->filled('end_date')) {
-                $query->whereBetween('created_at', [
-                    $request->start_date,
-                    $request->end_date
-                ]);
-            } 
-            elseif ($request->filled('date')) {
-                $query->whereDate('created_at', $request->date);
-            }
-
-            $auditTrails = $query->orderBy('created_at', 'desc')->get();
-
-            return response()->json($auditTrails);
+        if ($request->start_date && $request->end_date) {
+            $start = Carbon::parse($request->start_date)->startOfDay();
+            $end = Carbon::parse($request->end_date)->endOfDay(); // include full day
+            $query->whereBetween('created_at', [$start, $end]);
+        } 
+        elseif ($request->date) {
+            $date = Carbon::parse($request->date);
+            $query->whereDate('created_at', $date);
         }
-        }
+
+        $auditTrails = $query->orderBy('created_at', 'desc')->get();
+
+        return response()->json($auditTrails);
+
+    } catch (Exception $e) {
+        return response()->json([
+            'error' => 'Failed to fetch audit trails. '.$e->getMessage()
+        ], 500);
+    }
+}
+}
 
 

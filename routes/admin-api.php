@@ -222,6 +222,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::match(['GET', 'POST'], 'get_or_numbers', [Cashier::class, 'get_or_numbers']);
             Route::post('create_or_update_or_number', [Cashier::class, 'create_or_update_or_number']);
             Route::delete('remove_or_number/{fee_category_id}', [Cashier::class, 'remove_or_number']);
+
+            Route::post('verify-invoice/{type}/{id}', [Cashier::class, 'verify']);
         });
 
         Route::prefix('/recreational-activity/')->middleware(['user_role:SUPERADMIN,ADMIN-RA', 'throttle:60,1'])->group(function () {
