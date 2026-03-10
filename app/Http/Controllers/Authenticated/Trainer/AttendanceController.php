@@ -247,7 +247,6 @@ class AttendanceController extends Controller
         return AttendanceRecordResource::collection($trainingAttendaces);
     }
 
-
     // public function testtest()
     // {
     //     $records = AttendanceRecord::with(['attendance', 'user'])->get();
