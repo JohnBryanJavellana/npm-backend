@@ -446,4 +446,222 @@ class Cashier extends Controller
             }
         });
     }
+    public function batch_generate_invoices(Request $request) {
+    return TransactionUtil::transact(null, [], function() use ($request) {
+
+        $dateFrom = Carbon::parse($request->dateFrom)->startOfDay();
+        $dateTo   = Carbon::parse($request->dateTo)->endOfDay();
+
+        if ($dateFrom->gt($dateTo)) {
+            return response()->json([
+                'message' => AdministratorReturnResponse::CASHIERCTRL_ERR_INVALID_DATE_RANGE->value,
+            ], 422);
+        }
+
+        $services = $request->service
+            ? [$request->service]
+            : [
+                NotificationEnum::ENROLLMENT->value,
+                NotificationEnum::DORMITORY->value,
+                NotificationEnum::LIBRARY->value,
+                NotificationEnum::RECREATIONAL->value,
+            ];
+
+        $generatedInvoices = [];
+        $skippedInvoices   = [];
+        $totalGenerated    = 0;
+        $totalSkipped      = 0;
+
+        // used for duplicate detection
+        $processedORNumbers = [];
+
+        foreach ($services as $service) {
+
+            $baseRelations = ['payee', 'orNumber'];
+
+            if ($service === NotificationEnum::LIBRARY->value) {
+                $baseRelations = [
+                    ...$baseRelations,
+                    'bookRes',
+                    'selectedBooks',
+                    'selectedBooks.bookReservation',
+                    'selectedBooks.bookReservation.book',
+                    'selectedBooks.bookReservation.books',
+                    'selectedBooks.bookReservation.books.catalog',
+                ];
+            }
+
+            if ($service === NotificationEnum::ENROLLMENT->value) {
+                $baseRelations = [
+                    ...$baseRelations,
+                    'training',
+                ];
+            }
+
+            $transactions = self::getTable($service, null, [
+                'invoice_status' => [CashierEnum::PAID->value],
+            ])
+                ->with($baseRelations)
+                ->whereBetween('datePaid', [$dateFrom, $dateTo])
+                ->orderBy('datePaid', 'ASC')
+                ->get();
+
+            foreach ($transactions as $transaction) {
+
+                // -----------------------------
+                // Missing Transaction Details
+                // -----------------------------
+                if (
+                    is_null($transaction->cashier_o_r_id) ||
+                    is_null($transaction->received_amount) ||
+                    is_null($transaction->user_id)
+                ) {
+
+                    $skippedInvoices[] = [
+                        'service'        => $service,
+                        'transaction_id' => $transaction->id,
+                        'user_id'        => $transaction->user_id,
+                        'reason'         => match(true) {
+                            is_null($transaction->cashier_o_r_id) && is_null($transaction->received_amount)
+                                => 'Missing OR number and received amount.',
+                            is_null($transaction->cashier_o_r_id)
+                                => 'Missing OR number.',
+                            is_null($transaction->received_amount)
+                                => 'Missing received amount.',
+                            is_null($transaction->user_id)
+                                => 'Missing user ID.',
+                            default
+                                => 'Incomplete transaction details.',
+                        },
+                    ];
+
+                    $totalSkipped++;
+                    continue;
+                }
+
+                // -----------------------------
+                // Duplicate Detection
+                // -----------------------------
+                $orNumber = optional($transaction->orNumber)->name;
+                $duplicateKey = $service . '-' . $orNumber;
+
+                if (isset($processedORNumbers[$duplicateKey])) {
+
+                    $skippedInvoices[] = [
+                        'service'        => $service,
+                        'transaction_id' => $transaction->id,
+                        'user_id'        => $transaction->user_id,
+                        'reason'         => 'Duplicate invoice detected for OR number: ' . $orNumber,
+                    ];
+
+                    $totalSkipped++;
+                    continue;
+                }
+
+                $processedORNumbers[$duplicateKey] = true;
+
+                // -----------------------------
+                // Verify Transaction Integrity
+                // -----------------------------
+                $verification = self::verifyTransaction($transaction);
+
+                if ($verification !== true) {
+
+                    $skippedInvoices[] = [
+                        'service'        => $service,
+                        'transaction_id' => $transaction->id,
+                        'user_id'        => $transaction->user_id,
+                        'reason'         => $verification,
+                    ];
+
+                    $totalSkipped++;
+                    continue;
+                }
+
+                // -----------------------------
+                // Generate Invoice
+                // -----------------------------
+                $generatedInvoices[] = [
+                    'service'         => $service,
+                    'transaction_id'  => $transaction->id,
+                    'user_id'         => $transaction->user_id,
+                    'payee'           => $transaction->payee,
+                    'or_number'       => $orNumber,
+                    'received_amount' => $transaction->received_amount,
+                    'payment_type'    => $transaction->payment_type,
+                    'date_paid'       => $transaction->datePaid,
+                    'invoice_meta'    => [
+                        'generated_at' => Carbon::now()->toDateTimeString(),
+                        'generated_by' => $request->user()->id,
+                        'date_range'   => [
+                            'from' => $dateFrom->toDateString(),
+                            'to'   => $dateTo->toDateString(),
+                        ],
+                    ],
+                ];
+
+                Notifications::notify(
+                    $request->user()->id,
+                    $transaction->user_id,
+                    $service,
+                    "Your invoice for your " . strtolower($service) . " transaction has been generated."
+                );
+
+                SendingEmail::dispatch(
+                    User::find($transaction->user_id),
+                    new CashierEmail([
+                        'status'  => CashierEnum::PAID->value,
+                        'service' => strtolower($service),
+                        'message' => "Your invoice for your " . strtolower($service) . " payment has been successfully generated."
+                    ], User::find($transaction->user_id))
+                );
+
+                $totalGenerated++;
+            }
+        }
+
+        AuditHelper::log(
+            $request->user()->id,
+            AdministratorAuditActions::CASHIERCTRL_BATCH_GENERATED_INVOICES->value .
+                " | Date Range: {$dateFrom->toDateString()} to {$dateTo->toDateString()}" .
+                " | Generated: $totalGenerated | Skipped: $totalSkipped"
+        );
+
+        if (env('USE_EVENT')) {
+            event(new BEInvoice(''), new BEAuditTrail(''));
+        }
+
+        return response()->json([
+            'message' => AdministratorReturnResponse::CASHIERCTRL_BATCH_GENERATED_INVOICES->value,
+            'date_range' => [
+                'from' => $dateFrom->toDateString(),
+                'to'   => $dateTo->toDateString(),
+            ],
+            'total_generated' => $totalGenerated,
+            'total_skipped'   => $totalSkipped,
+            'invoices'        => $generatedInvoices,
+            'skipped'         => $skippedInvoices,
+        ], 200);
+    });
+}
+
+
+private static function verifyTransaction($transaction)
+{
+    $salesRecord = SalesRecord::where('transaction_id', $transaction->id)->first();
+
+    if (!$salesRecord) {
+        return 'No matching sales record found.';
+    }
+
+    if ((float)$salesRecord->amount !== (float)$transaction->received_amount) {
+        return 'Mismatch between sales record and received amount.';
+    }
+
+    if ($salesRecord->status !== 'completed') {
+        return 'Sales record not completed.';
+    }
+
+    return true;
+}
 }
