@@ -8,6 +8,7 @@ use App\Http\Resources\Trainer\AttendanceRecordResource;
 use App\Models\{User, Attendance, AttendanceRecord, EnrolledCourse, Training};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Utils\AuditHelper;
 use function Symfony\Component\String\u;
 
 class AttendanceController extends Controller
@@ -186,6 +187,8 @@ class AttendanceController extends Controller
             $responseData[] = $attendanceRecord;
         }
 
+        AuditHelper::log($request->user_id, "User $request->user_id have submitted attendance!");
+
         return response()->json([
             'store_data' => $responseData
         ], 200);
@@ -225,6 +228,7 @@ class AttendanceController extends Controller
                 'status' => $record['status'] ?? null
             ]);
         }
+        AuditHelper::log($request->user_id, "User $request->user_id updated attendance!");
 
         return response()->json([
             'message' => 'Attendance records updated successfully'
@@ -236,61 +240,40 @@ class AttendanceController extends Controller
     {
         $trainingId = $request->training_id;
         $trainingAttendaces = Attendance::with([
-            "attendance_records.user"
+            "attendance_records.enrolled_course.trainee"
         ])->where('training_id', $trainingId)
             ->get();
-
-        // $records = AttendanceRecord::with(['attendance', 'user'])->get();
-
-        // $grouped = $records->groupBy(function ($item) {
-        //     return $item->attendance->training_date ?? 'No Date';
-        // })->map(function ($items) {
-        //     return $items->map(function ($item) {
-        //         return [
-        //             'training_id'  => $item->attendance->training_id ?? null,
-        //             'id'           => $item->id,
-        //             'user'      => $item->user,
-        //             'user_name'    => $item->user->name ?? null,
-        //             'attendance_id' => $item->attendance_id,
-        //             'status'       => $item->status,
-        //             'time_in'      => $item->time_in,
-        //             'time_out'     => $item->time_out,
-        //         ];
-        //     });
-        // });
 
         return AttendanceRecordResource::collection($trainingAttendaces);
     }
 
 
+    // public function testtest()
+    // {
+    //     $records = AttendanceRecord::with(['attendance', 'user'])->get();
 
+    //     $grouped = $records->groupBy(function ($item) {
+    //         return $item->attendance->training_date ?? 'No Date';
+    //     })->map(function ($items) {
+    //         return $items->map(function ($item) {
+    //             return [
+    //                 'training_id'  => $item->attendance->training_id ?? null,
+    //                 'id'           => $item->id,
+    //                 'user'      => $item->user,
+    //                 'module'      => $item->module,
+    //                 'user_name'    => $item->user->name ?? null,
+    //                 'attendance_id' => $item->attendance_id,
+    //                 'status'       => $item->status,
+    //                 'time_in'      => $item->time_in,
+    //                 'time_out'     => $item->time_out,
+    //             ];
+    //         });
+    //     });
 
-    public function testtest()
-    {
-        $records = AttendanceRecord::with(['attendance', 'user'])->get();
-
-        $grouped = $records->groupBy(function ($item) {
-            return $item->attendance->training_date ?? 'No Date';
-        })->map(function ($items) {
-            return $items->map(function ($item) {
-                return [
-                    'training_id'  => $item->attendance->training_id ?? null,
-                    'id'           => $item->id,
-                    'user'      => $item->user,
-                    'module'      => $item->module,
-                    'user_name'    => $item->user->name ?? null,
-                    'attendance_id' => $item->attendance_id,
-                    'status'       => $item->status,
-                    'time_in'      => $item->time_in,
-                    'time_out'     => $item->time_out,
-                ];
-            });
-        });
-
-        return response()->json([
-            'groupData' => $grouped
-        ], 200);
-    }
+    //     return response()->json([
+    //         'groupData' => $grouped
+    //     ], 200);
+    // }
 
 
 

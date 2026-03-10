@@ -196,6 +196,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
+    //!ssss
     Route::middleware(['user_role:TRAINER', 'throttle:60,1'])->prefix('/trainer/')->group(function () {
         Route::prefix('enrollment/')->group(function () {
             Route::get('training', [TrainerEnrollmentController::class, 'viewAllTrainingsAndFacilitators']);
@@ -204,12 +205,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
             Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
 
-            Route::post('traineeAttendanceRecord', [AttendanceController::class, 'TraineeAttendanceRecord']);
+            Route::post('traineeAttendanceRecord', [AttendanceController::class, 'TraineeAttendanceRecord']); //! record
             Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
             Route::post('update_attendance', [AttendanceController::class, 'UpdateRecordAttendance']);
 
-            Route::post('announcement_update', [AnnouncementController::class, 'AnnouncementUpdate']);
+            Route::post('announcement_edit', [AnnouncementController::class, 'AnnouncementEdit']);
             Route::post('announcement_delete', [AnnouncementController::class, 'AnnouncementDelete']);
             Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
         });

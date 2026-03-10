@@ -73,7 +73,7 @@ class TrainerEnrollmentController extends Controller
     public function getTraineeDetails(Request $request)
     {
         try {
-            \Log::info("testData", [$request->all()]);
+            // \Log::info("testData", [$request->all()]);
             $list = EnrolledCourse::where('training_id', $request->trainingId)
                 ->with([
                     'trainee',
