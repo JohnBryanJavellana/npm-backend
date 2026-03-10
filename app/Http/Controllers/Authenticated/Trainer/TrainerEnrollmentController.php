@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
 use App\Models\{EnrolledCourse, Training, AttendanceRecord};
 use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
+use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\DB;
 
 class TrainerEnrollmentController extends Controller
 {
@@ -51,8 +51,12 @@ class TrainerEnrollmentController extends Controller
 
     public function getCourseDetails(Request $request)
     {
-        try {
-            DB::transaction(function () use ($request) {
+        return TransactionUtil::transact(
+            null,
+            [],
+            function () use ($request) {
+
+
                 // \Log::info("com", [$request->all()]);
                 $record = Training::with([
                     "module",
@@ -71,38 +75,41 @@ class TrainerEnrollmentController extends Controller
                 return response()->json([
                     "training" => $record,
                 ], 200);
-            });
-        } catch (\Exception $e) {
-            return response()->json(["message" => $e->getMessage()], 500);
-        }
+            }
+        );
     }
 
     public function getTraineeDetails(Request $request)
     {
-        try {
-            // \Log::info("testData", [$request->all()]);
-            DB::transaction(function () use ($request) {
-                $list = EnrolledCourse::where('training_id', $request->trainingId)
-                    ->with([
-                        'trainee',
-                        'traineeAttendanceRecord' => function ($query) use ($request) {
-                            $query->whereHas("attendance", function ($q) use ($request) {
-                                $q->where([
-                                    "training_date" => $request->training_date,
-                                    "start_time" => $request->start_time,
-                                    "end_time" => $request->end_time
-                                ]);
-                            });
-                        }
-                    ])
-                    ->where('enrolled_course_status', 'ENROLLED')
-                    ->get();
+        return TransactionUtil::transact(
+            null,
+            [],
+            function () use ($request) {
 
-                return response()->json(["data" => $list], 200);
-            });
-        } catch (\Exception $e) {
-            return response()->json(["message" => "Server Error", "error" => $e->getMessage()], 500);
-        }
+                try {
+                    // \Log::info("testData", [$request->all()]);
+                    $list = EnrolledCourse::where('training_id', $request->trainingId)
+                        ->with([
+                            'trainee',
+                            'traineeAttendanceRecord' => function ($query) use ($request) {
+                                $query->whereHas("attendance", function ($q) use ($request) {
+                                    $q->where([
+                                        "training_date" => $request->training_date,
+                                        "start_time" => $request->start_time,
+                                        "end_time" => $request->end_time
+                                    ]);
+                                });
+                            }
+                        ])
+                        ->where('enrolled_course_status', 'ENROLLED')
+                        ->get();
+
+                    return response()->json(["data" => $list], 200);
+                } catch (\Exception $e) {
+                    return response()->json(["message" => "Server Error", "error" => $e->getMessage()], 500);
+                }
+            }
+        );
     }
 
 

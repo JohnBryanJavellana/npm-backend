@@ -7,15 +7,15 @@ use Illuminate\Http\Request;
 use App\Models\TrainingScheduleAnnouncement;
 use App\Utils\AuditHelper;
 use App\Utils\TransactionUtil;
-use Exception;
-use Illuminate\Support\Facades\DB;
 
 class AnnouncementController extends Controller
 {
     public function Announcement(Request $request)
     {
-        try {
-            DB::classic(function () use ($request) {
+        return TransactionUtil::transact(
+            null,
+            [],
+            function () use ($request) {
                 if ($request->has('title') && $request->has('content')) {
                     $request->merge([
                         // 'title' => $request->title,
@@ -49,24 +49,25 @@ class AnnouncementController extends Controller
                 $announcements = TrainingScheduleAnnouncement::where('training_id', $trainingId)
                     ->orderBy('created_at', 'desc')
                     ->get();
-        
+
                 AuditHelper::log($request->user_id, "User $request->user_id has announcement!");
 
                 return response()->json([
                     //! "message" => "Announcements fetched successfully",
                     "data" => $announcements
                 ], 200);
-            });
-        } catch (Exception $e) {
-            return response()->json(["message" => $e->getMessage()], 500);
-        }
+            }
+        );
     }
 
     public function AnnouncementDelete(Request $request)
     {
+        return TransactionUtil::transact(
+            null,
+            [],
+            function () use ($request) {
 
-        try {
-            DB::transaction(function () use ($request) {
+
                 $id = $request->id;
 
                 TrainingScheduleAnnouncement::where('id', $id)->delete();
@@ -78,20 +79,20 @@ class AnnouncementController extends Controller
                     //! "message" => "Announcement removed successfully",
                     "deleted_id" => $id
                 ], 200);
-            });
-        } catch (Exception $e) {
-            return response()->json(["message" => $e->getMessage()], 500);
-        }
+            }
+        );
     }
 
 
     public function AnnouncementEdit(Request $request)
     {
-        try {
-            DB::transaction(function () use ($request) {
+        return TransactionUtil::transact(
+            null,
+            [],
+            function () use ($request) {
                 $request->validate([
                     'id' => 'required|exists:training_schedule_announcements,id',
-                    'title' => 'required|string,max:255',
+                    'title' => 'required|string',
                     'content' => 'required|string'
                 ]);
 
@@ -108,9 +109,7 @@ class AnnouncementController extends Controller
                     //! "message" => "Announcement updated successfully",
                     "update_id" => $id
                 ], 200);
-            });
-        } catch (Exception $e) {
-            return response()->json(["message" => $e->getMessage()], 500);
-        }
+            }
+        );
     }
 }
