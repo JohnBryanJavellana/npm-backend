@@ -94,6 +94,13 @@ class Account extends Controller
         });
     }
 
+    public function getUserActivities(Request $request)
+    {
+        return AuditTrail::query()
+        ->forUser($request->user()->id)
+        ->paginate(5);
+    }
+
     /**
      * Summary of update_personal
      * @param bool auditActions === TRUE

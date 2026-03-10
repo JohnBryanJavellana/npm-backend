@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Http\Resources\Trainee\Dashboard;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class TraineeSchedulesResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return parent::toArray($request);
+
+        return [
+            "id" => $this->id,
+            "title" => $this->training?->module?->name,
+            "type" => $this->training?->module?->name,
+            "title" => $this->training?->module?->name,
+        ];
+    }
+}

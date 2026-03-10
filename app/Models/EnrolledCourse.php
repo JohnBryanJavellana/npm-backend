@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -54,6 +55,11 @@ class EnrolledCourse extends Model
     public function scopeStatus($query, $status)
     {
         return $query->whereIn("enrolled_course_status", $status);
+    }
+
+    public function scopeEnrolled($query)
+    {
+        return $query->where("enrolled_course_status", RequestStatus::ENROLLED->value);
     }
 
     public function scopeForTraining(Builder $query, $trainingId)

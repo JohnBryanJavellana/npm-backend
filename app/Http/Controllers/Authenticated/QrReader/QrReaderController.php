@@ -20,10 +20,12 @@ class QrReaderController extends Controller
         try
         {
             $types = ["DORMITORY","LIBRARY","ENROLLMENT","GUARD_ENTRANCE","GUARD_EXIT"];
+            //best way to handle this variable declarations
             $validated = $request->validated();
             $perPage = $validated["per_page"] ?? 10;
             $search = $validated["search"] ?? null;
             $filter = $validated["filter"] ?? null;
+
             $records = $this->qrReaderService->getUserQrRecord($request->user()->id, $perPage, $search, $filter);  
             return QrReaderViewResource::collection($records)->additional(['meta' => [
                 'types' => $types,
@@ -33,6 +35,5 @@ class QrReaderController extends Controller
             \Log::info("viewUserQrRecordError", [$e->getMessage()]);
             return response()->json(["message" => $e->getMessage()], 500);
         }
-      
     }
 }

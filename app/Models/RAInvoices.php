@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,5 +33,12 @@ class RAInvoices extends Model
 
     public function orNumber(){
         return $this->hasOne(CashierOR::class, 'id', 'cashier_o_r_id');
+    }
+
+    /** Scope */
+
+    public function scopePending(Builder $query)
+    {
+        return $query->where("invoice_status", RequestStatus::PENDING->value);
     }
 }

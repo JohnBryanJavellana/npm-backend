@@ -24,7 +24,8 @@ use App\Http\Controllers\Authenticated\Trainee\{
     TraineeInvoices,
     CsmsController,
     CreditController,
-    TraineeRecreational
+    TraineeRecreational,
+    TraineeDashboardController
 };
 
 /** administrator controllers */
@@ -83,9 +84,15 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('get_trainee_general_info/{user}', [MyAccount::class, 'get_trainee_general_info']);
             Route::post('update_password', [Account::class, 'update_password']);
             Route::get('get_activities', [Account::class, 'get_activities']);
+            Route::get('logs', [Account::class, 'getUserActivities']);
             Route::get('get_all_courses_and_schools', [MyAccount::class, 'get_all_courses_and_schools']);
             Route::get('get_all_requirements', [MyAccount::class, '']);
             Route::get("dropdown_values", [TraineeEnrollment::class, "viewRanksLicenses"]);
+        });
+
+        Route::prefix('/dashboard')->group(function () {
+            Route::get("/schedules", [TraineeDashboardController::class, "viewCalendarSchedules"]);
+            Route::get("/invoices", [TraineeDashboardController::class, "viewAllInvoices"]);
         });
 
         Route::prefix('/enrollment/')->group(function () {
