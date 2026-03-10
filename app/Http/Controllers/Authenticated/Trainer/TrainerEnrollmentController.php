@@ -8,6 +8,7 @@ use App\Models\{EnrolledCourse, Training, AttendanceRecord};
 use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 class TrainerEnrollmentController extends Controller
 {
@@ -50,47 +51,55 @@ class TrainerEnrollmentController extends Controller
 
     public function getCourseDetails(Request $request)
     {
-        // \Log::info("com", [$request->all()]);
-        $record = Training::with([
-            "module",
-            "module.moduleType",
-            "module.trainingFees:id,course_module_id,charge_category_id,name,amount",
-            "module.trainingFees.category:id,name",
-            "module.specific_requirements",
-            // "module.schedules",
-            // "module.attendances",
-            // "module.attendance_records",
-        ])
-            ->where('id', $request->trainingId)
-            ->get();
-        // \Log::info("com", [$record]);
+        try {
+            DB::transaction(function () use ($request) {
+                // \Log::info("com", [$request->all()]);
+                $record = Training::with([
+                    "module",
+                    "module.moduleType",
+                    "module.trainingFees:id,course_module_id,charge_category_id,name,amount",
+                    "module.trainingFees.category:id,name",
+                    "module.specific_requirements",
+                    // "module.schedules",
+                    // "module.attendances",
+                    // "module.attendance_records",
+                ])
+                    ->where('id', $request->trainingId)
+                    ->get();
+                // \Log::info("com", [$record]);
 
-        return response()->json([
-            "training" => $record,
-        ], 200);
+                return response()->json([
+                    "training" => $record,
+                ], 200);
+            });
+        } catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
     }
 
     public function getTraineeDetails(Request $request)
     {
         try {
             // \Log::info("testData", [$request->all()]);
-            $list = EnrolledCourse::where('training_id', $request->trainingId)
-                ->with([
-                    'trainee',
-                    'traineeAttendanceRecord' => function ($query) use ($request) {
-                        $query->whereHas("attendance", function ($q) use ($request) {
-                            $q->where([
-                                "training_date" => $request->training_date,
-                                "start_time" => $request->start_time,
-                                "end_time" => $request->end_time
-                            ]);
-                        });
-                    }
-                ])
-                ->where('enrolled_course_status', 'ENROLLED')
-                ->get();
+            DB::transaction(function () use ($request) {
+                $list = EnrolledCourse::where('training_id', $request->trainingId)
+                    ->with([
+                        'trainee',
+                        'traineeAttendanceRecord' => function ($query) use ($request) {
+                            $query->whereHas("attendance", function ($q) use ($request) {
+                                $q->where([
+                                    "training_date" => $request->training_date,
+                                    "start_time" => $request->start_time,
+                                    "end_time" => $request->end_time
+                                ]);
+                            });
+                        }
+                    ])
+                    ->where('enrolled_course_status', 'ENROLLED')
+                    ->get();
 
-            return response()->json(["data" => $list], 200);
+                return response()->json(["data" => $list], 200);
+            });
         } catch (\Exception $e) {
             return response()->json(["message" => "Server Error", "error" => $e->getMessage()], 500);
         }

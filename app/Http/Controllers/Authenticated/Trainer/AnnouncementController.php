@@ -7,90 +7,110 @@ use Illuminate\Http\Request;
 use App\Models\TrainingScheduleAnnouncement;
 use App\Utils\AuditHelper;
 use App\Utils\TransactionUtil;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class AnnouncementController extends Controller
 {
     public function Announcement(Request $request)
     {
+        try {
+            DB::classic(function () use ($request) {
+                if ($request->has('title') && $request->has('content')) {
+                    $request->merge([
+                        // 'title' => $request->title,
+                        // 'content' => $request->content,
+                        "trainer" => $request->user()->id,
+                        "training_id" => (int) $request->training_id
+                    ]);
 
-        if ($request->has('title') && $request->has('content')) {
-            $request->merge([
-                // 'title' => $request->title,
-                // 'content' => $request->content,
-                "trainer" => $request->user()->id,
-                "training_id" => (int) $request->training_id
-            ]);
 
+                    $validated = $request->validate([
+                        'training_id' => 'required|exists:trainings,id',
+                        'trainer'     => 'required|exists:users,id',
+                        'title'       => 'required|string|max:255',
+                        'content'     => 'required|string'
+                    ]);
 
-            $validated = $request->validate([
-                'training_id' => 'required|exists:trainings,id',
-                'trainer'     => 'required|exists:users,id',
-                'title'       => 'required|string|max:255',
-                'content'     => 'required|string'
-            ]);
+                    $announcement = TrainingScheduleAnnouncement::create([
+                        "training_id" => $validated["training_id"],
+                        "trainer"     => $request["trainer"],
+                        "title"       => $request["title"],
+                        "content"     => $request["content"]
+                    ]);
 
-            $announcement = TrainingScheduleAnnouncement::create([
-                "training_id" => $validated["training_id"],
-                "trainer"     => $request["trainer"],
-                "title"       => $request["title"],
-                "content"     => $request["content"]
-            ]);
+                    return response()->json([
+                        "message" => "Announcement created successfully",
+                        "data" => $announcement
+                    ], 201);
+                }
 
-            return response()->json([
-                "message" => "Announcement created successfully",
-                "data" => $announcement
-            ], 201);
+                $trainingId = $request->training_id;
+                $announcements = TrainingScheduleAnnouncement::where('training_id', $trainingId)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+        
+                AuditHelper::log($request->user_id, "User $request->user_id has announcement!");
+
+                return response()->json([
+                    //! "message" => "Announcements fetched successfully",
+                    "data" => $announcements
+                ], 200);
+            });
+        } catch (Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
         }
-
-        $trainingId = $request->training_id;
-        $announcements = TrainingScheduleAnnouncement::where('training_id', $trainingId)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        AuditHelper::log($request->user_id, "User $request->user_id has announcement!");
-
-        return response()->json([
-            //! "message" => "Announcements fetched successfully",
-            "data" => $announcements
-        ], 200);
     }
 
     public function AnnouncementDelete(Request $request)
     {
-        $id = $request->id;
 
-        TrainingScheduleAnnouncement::where('id', $id)->delete();
+        try {
+            DB::transaction(function () use ($request) {
+                $id = $request->id;
+
+                TrainingScheduleAnnouncement::where('id', $id)->delete();
 
 
-        AuditHelper::log($request->user_id, "User $request->user_id has deleted announcement!");
+                AuditHelper::log($request->user_id, "User $request->user_id has deleted announcement!");
 
-        return response()->json([
-            //! "message" => "Announcement removed successfully",
-            "deleted_id" => $id
-        ], 200);
+                return response()->json([
+                    //! "message" => "Announcement removed successfully",
+                    "deleted_id" => $id
+                ], 200);
+            });
+        } catch (Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
     }
 
 
     public function AnnouncementEdit(Request $request)
     {
-        $request->validate([
-            'id' => 'required|exists:training_schedule_announcements,id',
-            'title' => 'required|string',
-            'content' => 'required|string'
-        ]);
+        try {
+            DB::transaction(function () use ($request) {
+                $request->validate([
+                    'id' => 'required|exists:training_schedule_announcements,id',
+                    'title' => 'required|string,max:255',
+                    'content' => 'required|string'
+                ]);
 
-        $id = $request->id;
+                $id = $request->id;
 
-        TrainingScheduleAnnouncement::where('id', $id)->update([
-            'title' => $request->title,
-            'content' => $request->content
-        ]);
+                TrainingScheduleAnnouncement::where('id', $id)->update([
+                    'title' => $request->title,
+                    'content' => $request->content
+                ]);
 
-        AuditHelper::log($request->user_id, "User $request->user_id has updated announcement!");
+                AuditHelper::log($request->user_id, "User $request->user_id has updated announcement!");
 
-        return response()->json([
-            //! "message" => "Announcement updated successfully",
-            "update_id" => $id
-        ], 200);
+                return response()->json([
+                    //! "message" => "Announcement updated successfully",
+                    "update_id" => $id
+                ], 200);
+            });
+        } catch (Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
     }
 }
