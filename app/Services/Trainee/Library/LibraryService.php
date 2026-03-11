@@ -83,7 +83,6 @@ class LibraryService {
                     "book_id" => $book["book_id"],
                     "type" => $book["copy_type"],
                     "from_date" => Carbon::parse($validated["from"]),
-                    //new
                     "to_date" => match ($validated["role"]) {
                         UserRoleEnum::TRAINEE->value => Carbon::parse($validated["from"])->addDays(6)->setTime(12, 0, 0),
                         UserRoleEnum::TRAINER->value => Carbon::parse($validated["from"])->addDays(14)->setTime(12, 0, 0),

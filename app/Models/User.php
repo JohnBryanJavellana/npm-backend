@@ -53,6 +53,10 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    public function trainee_library()
+    {
+        return $this->hasMany(BookRes::class, "user_id", "id");
+    }
     public function additional_trainee_info()
     {
         return $this->hasOne(AdditionalTraineeInfo::class, 'user_id', 'id');
@@ -78,9 +82,25 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(AuditTrail::class);
     }
 
-    public function creditAmount()
+    public function userRecreationals()
     {
-        return $this->hasMany(Credit::class);
+        return $this->hasMany(RARequestInfo::class);
+    }
+
+    // public function creditAmount () {
+    //     return $this->hasMany(Credit::class);
+    // }
+
+    public function asFacilitator()
+    {
+        return $this->hasMany(TrainingFacilitator::class);
+        /*************  ✨ Windsurf Command ⭐  *************/
+        /**
+         * Returns all attendance records of the user.
+         *
+         * @return \Illuminate\Database\Eloquent\Relations\HasMany
+         */
+        /*******  f7fe3445-6c22-4848-acad-4be691535ab1  *******/
     }
 
     public function attendanceTraining()
@@ -106,22 +126,34 @@ class User extends Authenticatable implements MustVerifyEmail
             DormitoryInvoice::class,
             DormitoryTenant::class,
             'user_id',
-            'user_id',
+            'dormitory_tenant_id',
         );
     }
 
+    public function library_invoices()
+    {
+        return $this->hasMany(LibraryInvoice::class);
+    }
 
-    // public function attendances()
-    // {
-    //     return $this->hasMany(Attendance::class, 'user_id', 'id');
-    // }
-    // public function attendance_records()
-    // {
-    //     return $this->hasMany(AttendanceRecord::class, 'user_id', 'id');
-    // }
+    public function dormitory_invoices()
+    {
+        return $this->hasMany(DormitoryInvoice::class);
+    }
+
+    public function enrollment_invoices()
+    {
+        return $this->hasMany(EnrollmentInvoice::class);
+    }
+
+    public function recreational_invoices()
+    {
+        return $this->hasMany(RAInvoices::class);
+    }
+
+    /** Scopes */
 
     public function scopeForUser($query, $user_id)
     {
-        return $query->where('id', $user_id);
+        return $query->whereKey($user_id);
     }
 }

@@ -17,6 +17,7 @@ class QrReaderViewResource extends JsonResource
         // return parent::toArray($request);
 
         return [
+            "id" => $this->id,
             "first_name" => $this->initiator?->fname,
             "last_name" => $this->initiator?->lname,
             "middle_name" => $this->initiator?->mname,

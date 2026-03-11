@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class DormitoryInvoice extends Model
@@ -40,5 +42,10 @@ class DormitoryInvoice extends Model
     public function scopeForUser($query, $userId)
     {
         return $query->where("user_id", $userId);
+    }
+
+    public function scopePending(Builder $query)
+    {
+        return $query->where("invoice_status", RequestStatus::PENDING->value);
     }
 }

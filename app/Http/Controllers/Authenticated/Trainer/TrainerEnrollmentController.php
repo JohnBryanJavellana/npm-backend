@@ -8,7 +8,6 @@ use App\Models\{EnrolledCourse, Training, AttendanceRecord};
 use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
 use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class TrainerEnrollmentController extends Controller
 {
@@ -56,17 +55,12 @@ class TrainerEnrollmentController extends Controller
             [],
             function () use ($request) {
 
-
-
                 $record = Training::with([
                     "module",
                     "module.moduleType",
                     "module.trainingFees:id,course_module_id,charge_category_id,name,amount",
                     "module.trainingFees.category:id,name",
                     "module.specific_requirements",
-                    // "module.schedules",
-                    // "module.attendances",
-                    // "module.attendance_records",
                 ])
                     ->where('id', $request->trainingId)
                     ->get();
@@ -117,4 +111,45 @@ class TrainerEnrollmentController extends Controller
     {
         return AttendanceRecord::whereKey($request->attendance_id)->get();
     }
+
+
+    public function getFacilitatorDetails(Request $request)
+    {
+        return AttendanceRecord::whereKey($request->attendance_id)->get();
+    }
+
+    // public function recordAttendance(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'attendance_id' => 'required|exists:attendances,id',
+    //         'user_id' => 'required|exists:users,id',
+    //         'status' => 'required|string|in:PRESENT,ABSENT,LATE',
+    //     ]);
+
+    //     $today = now()->toDateString();
+
+    //     $attendanceRecord = AttendanceRecord::where('attendance_id', $validated['attendance_id'])
+    //         ->where('user_id', $validated['user_id'])
+    //         ->whereDate('created_at', $today)
+    //         ->first();
+
+    //     if ($attendanceRecord) {
+    //         $attendanceRecord->update([
+    //             'status' => $validated['status'],
+    //             'time_in' => now(),
+    //         ]);
+    //     } else {
+    //         $attendanceRecord = AttendanceRecord::create([
+    //             'attendance_id' => $validated['attendance_id'],
+    //             'user_id' => $validated['user_id'],
+    //             'status' => $validated['status'],
+    //             'time_in' => now(),
+    //         ]);
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Attendance recorded successfully',
+    //         'data' => $attendanceRecord
+    //     ], 200);
+    // }
 }
