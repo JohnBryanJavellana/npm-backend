@@ -18,19 +18,19 @@ class TrainerEnrollmentService
     public function getAllTrainingsAndFacilitators()
     {
         return $this->trainingModel->query()
-        ->with([
-            "module",
-            "module.facilitator.facilitator"
-        ])
-        ->get();
+            ->with([
+                "module",
+                "module.facilitator.facilitator"
+            ])
+            ->get();
     }
 
     public function getTrainees($trainingId)
     {
         return $this->enrolledCourseModel->query()
-        ->whereIn("enrolled_course_status", RequestStatus::ActiveEnrollmentStatus())
-        ->forTraining($trainingId)
-        ->first();
+            ->whereIn("enrolled_course_status", RequestStatus::ActiveEnrollmentStatus())
+            ->forTraining($trainingId)
+            ->first();
     }
 
     public function getDataFacilitator()
