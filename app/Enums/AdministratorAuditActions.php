@@ -20,6 +20,8 @@ enum AdministratorAuditActions: string {
     case CASHIERCTRL_CREATED_ORNUMBER = "Created an OR Number.";
     case CASHIERCTRL_UPDATED_ORNUMBER = "Updated an OR Number.";
     case CASHIERCTRL_REMOVED_ORNUMBER = "Removed an OR Number.";
+    case CASHIERCTRL_BATCH_GENERATED_INVOICES = 'Batch generated invoices';
+
 
 
     /**

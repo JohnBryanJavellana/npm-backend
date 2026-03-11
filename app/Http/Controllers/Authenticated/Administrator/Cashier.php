@@ -17,7 +17,6 @@ use App\Models\RAInvoices;
 use App\Models\RARequestInfo;
 use App\Models\User;
 use App\Utils\Notifications;
-
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Utils\{
@@ -446,11 +445,14 @@ class Cashier extends Controller
             }
         });
     }
-    public function batch_generate_invoices(Request $request) {
-    return TransactionUtil::transact(null, [], function() use ($request) {
+
+    
+public function batch_generate_invoices(Request $request)
+{
+    return TransactionUtil::transact(null, [], function () use ($request) {
 
         $dateFrom = Carbon::parse($request->dateFrom)->startOfDay();
-        $dateTo   = Carbon::parse($request->dateTo)->endOfDay();
+        $dateTo = Carbon::parse($request->dateTo)->endOfDay();
 
         if ($dateFrom->gt($dateTo)) {
             return response()->json([
@@ -468,12 +470,12 @@ class Cashier extends Controller
             ];
 
         $generatedInvoices = [];
-        $skippedInvoices   = [];
-        $totalGenerated    = 0;
-        $totalSkipped      = 0;
+        $skippedInvoices = [];
+        $totalGenerated = 0;
+        $totalSkipped = 0;
 
-        // used for duplicate detection
         $processedORNumbers = [];
+        $reportData = [];
 
         foreach ($services as $service) {
 
@@ -492,25 +494,70 @@ class Cashier extends Controller
             }
 
             if ($service === NotificationEnum::ENROLLMENT->value) {
-                $baseRelations = [
-                    ...$baseRelations,
-                    'training',
-                ];
+                $baseRelations = [...$baseRelations, 'training'];
             }
 
             $transactions = self::getTable($service, null, [
-                'invoice_status' => [CashierEnum::PAID->value],
+                'invoice_status' => [
+                    'PENDING',
+                    'PAID',
+                    'FOR-VERIFICATION',
+                    'CANCELLED'
+                ]
             ])
                 ->with($baseRelations)
                 ->whereBetween('datePaid', [$dateFrom, $dateTo])
                 ->orderBy('datePaid', 'ASC')
                 ->get();
 
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS COUNTS (FIXED)
+            |--------------------------------------------------------------------------
+            */
+
+            $statusCounts = collect([
+                'PENDING' => 0,
+                'PAID' => 0,
+                'FOR-VERIFICATION' => 0,
+                'CANCELLED' => 0
+            ])->merge(
+                $transactions->groupBy('invoice_status')->map->count()
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | PAYMENT TYPE COUNTS
+            |--------------------------------------------------------------------------
+            */
+
+            $paymentTypeCounts = $transactions
+                ->groupBy('payment_type')
+                ->map->count();
+
+            $reportData[$service] = [
+                'total' => $transactions->count(),
+                'status_counts' => $statusCounts,
+                'payment_type_counts' => $paymentTypeCounts,
+            ];
+
             foreach ($transactions as $transaction) {
 
-                // -----------------------------
-                // Missing Transaction Details
-                // -----------------------------
+                // Only PAID transactions generate invoices
+                if ($transaction->invoice_status !== 'PAID') {
+
+                    $skippedInvoices[] = [
+                        'service' => $service,
+                        'transaction_id' => $transaction->id,
+                        'user_id' => $transaction->user_id,
+                        'reason' => 'Invoice generation allowed only for PAID transactions.',
+                    ];
+
+                    $totalSkipped++;
+                    continue;
+                }
+
+                // Skip invalid transactions
                 if (
                     is_null($transaction->cashier_o_r_id) ||
                     is_null($transaction->received_amount) ||
@@ -518,10 +565,10 @@ class Cashier extends Controller
                 ) {
 
                     $skippedInvoices[] = [
-                        'service'        => $service,
+                        'service' => $service,
                         'transaction_id' => $transaction->id,
-                        'user_id'        => $transaction->user_id,
-                        'reason'         => match(true) {
+                        'user_id' => $transaction->user_id,
+                        'reason' => match (true) {
                             is_null($transaction->cashier_o_r_id) && is_null($transaction->received_amount)
                                 => 'Missing OR number and received amount.',
                             is_null($transaction->cashier_o_r_id)
@@ -530,8 +577,7 @@ class Cashier extends Controller
                                 => 'Missing received amount.',
                             is_null($transaction->user_id)
                                 => 'Missing user ID.',
-                            default
-                                => 'Incomplete transaction details.',
+                            default => 'Incomplete transaction details.',
                         },
                     ];
 
@@ -539,19 +585,17 @@ class Cashier extends Controller
                     continue;
                 }
 
-                // -----------------------------
-                // Duplicate Detection
-                // -----------------------------
                 $orNumber = optional($transaction->orNumber)->name;
                 $duplicateKey = $service . '-' . $orNumber;
 
+                // Prevent duplicate invoices
                 if (isset($processedORNumbers[$duplicateKey])) {
 
                     $skippedInvoices[] = [
-                        'service'        => $service,
+                        'service' => $service,
                         'transaction_id' => $transaction->id,
-                        'user_id'        => $transaction->user_id,
-                        'reason'         => 'Duplicate invoice detected for OR number: ' . $orNumber,
+                        'user_id' => $transaction->user_id,
+                        'reason' => 'Duplicate invoice detected for OR number: ' . $orNumber,
                     ];
 
                     $totalSkipped++;
@@ -560,45 +604,52 @@ class Cashier extends Controller
 
                 $processedORNumbers[$duplicateKey] = true;
 
-                // -----------------------------
-                // Verify Transaction Integrity
-                // -----------------------------
+                // Verify transaction
                 $verification = self::verifyTransaction($transaction);
 
                 if ($verification !== true) {
 
                     $skippedInvoices[] = [
-                        'service'        => $service,
+                        'service' => $service,
                         'transaction_id' => $transaction->id,
-                        'user_id'        => $transaction->user_id,
-                        'reason'         => $verification,
+                        'user_id' => $transaction->user_id,
+                        'reason' => $verification,
                     ];
 
                     $totalSkipped++;
                     continue;
                 }
 
-                // -----------------------------
-                // Generate Invoice
-                // -----------------------------
+                /*
+                |--------------------------------------------------------------------------
+                | GENERATE INVOICE RECORD
+                |--------------------------------------------------------------------------
+                */
+
                 $generatedInvoices[] = [
-                    'service'         => $service,
-                    'transaction_id'  => $transaction->id,
-                    'user_id'         => $transaction->user_id,
-                    'payee'           => $transaction->payee,
-                    'or_number'       => $orNumber,
+                    'service' => $service,
+                    'transaction_id' => $transaction->id,
+                    'user_id' => $transaction->user_id,
+                    'payee' => $transaction->payee,
+                    'or_number' => $orNumber,
                     'received_amount' => $transaction->received_amount,
-                    'payment_type'    => $transaction->payment_type,
-                    'date_paid'       => $transaction->datePaid,
-                    'invoice_meta'    => [
+                    'payment_type' => $transaction->payment_type,
+                    'date_paid' => $transaction->datePaid,
+                    'invoice_meta' => [
                         'generated_at' => Carbon::now()->toDateTimeString(),
                         'generated_by' => $request->user()->id,
-                        'date_range'   => [
+                        'date_range' => [
                             'from' => $dateFrom->toDateString(),
-                            'to'   => $dateTo->toDateString(),
+                            'to' => $dateTo->toDateString(),
                         ],
                     ],
                 ];
+
+                /*
+                |--------------------------------------------------------------------------
+                | USER NOTIFICATION
+                |--------------------------------------------------------------------------
+                */
 
                 Notifications::notify(
                     $request->user()->id,
@@ -607,18 +658,32 @@ class Cashier extends Controller
                     "Your invoice for your " . strtolower($service) . " transaction has been generated."
                 );
 
+                /*
+                |--------------------------------------------------------------------------
+                | EMAIL
+                |--------------------------------------------------------------------------
+                */
+
+                $user = User::find($transaction->user_id);
+
                 SendingEmail::dispatch(
-                    User::find($transaction->user_id),
+                    $user,
                     new CashierEmail([
-                        'status'  => CashierEnum::PAID->value,
+                        'status' => 'PAID',
                         'service' => strtolower($service),
                         'message' => "Your invoice for your " . strtolower($service) . " payment has been successfully generated."
-                    ], User::find($transaction->user_id))
+                    ], $user)
                 );
 
                 $totalGenerated++;
             }
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUDIT LOG
+        |--------------------------------------------------------------------------
+        */
 
         AuditHelper::log(
             $request->user()->id,
@@ -631,35 +696,46 @@ class Cashier extends Controller
             event(new BEInvoice(''), new BEAuditTrail(''));
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE
+        |--------------------------------------------------------------------------
+        */
+
         return response()->json([
             'message' => AdministratorReturnResponse::CASHIERCTRL_BATCH_GENERATED_INVOICES->value,
             'date_range' => [
                 'from' => $dateFrom->toDateString(),
-                'to'   => $dateTo->toDateString(),
+                'to' => $dateTo->toDateString(),
             ],
             'total_generated' => $totalGenerated,
-            'total_skipped'   => $totalSkipped,
-            'invoices'        => $generatedInvoices,
-            'skipped'         => $skippedInvoices,
+            'total_skipped' => $totalSkipped,
+            'invoices' => $generatedInvoices,
+            'skipped' => $skippedInvoices,
+            'report_data' => $reportData,
         ], 200);
     });
 }
 
 
-private static function verifyTransaction($transaction)
+/*
+|--------------------------------------------------------------------------
+| VERIFY TRANSACTION
+|--------------------------------------------------------------------------
+*/
+
+public static function verifyTransaction($transaction)
 {
-    $salesRecord = SalesRecord::where('transaction_id', $transaction->id)->first();
-
-    if (!$salesRecord) {
-        return 'No matching sales record found.';
+    if (!$transaction->cashier_o_r_id) {
+        return 'OR number is missing.';
     }
 
-    if ((float)$salesRecord->amount !== (float)$transaction->received_amount) {
-        return 'Mismatch between sales record and received amount.';
+    if (!$transaction->received_amount || $transaction->received_amount <= 0) {
+        return 'Received amount is invalid.';
     }
 
-    if ($salesRecord->status !== 'completed') {
-        return 'Sales record not completed.';
+    if (!$transaction->user_id) {
+        return 'User ID is missing.';
     }
 
     return true;

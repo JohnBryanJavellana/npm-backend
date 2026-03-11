@@ -224,6 +224,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('remove_or_number/{fee_category_id}', [Cashier::class, 'remove_or_number']);
 
             Route::post('verify-invoice/{type}/{id}', [Cashier::class, 'verify']);
+            Route::post('batch_generate_invoices', [Cashier::class, 'batch_generate_invoices']);
+            Route::post('verifyTransactions', [Cashier::class, 'verifyTransactions']);
+
         });
 
         Route::prefix('/recreational-activity/')->middleware(['user_role:SUPERADMIN,ADMIN-RA', 'throttle:60,1'])->group(function () {

@@ -23,6 +23,8 @@ enum AdministratorReturnResponse: string {
     case CASHIERCTRL_UPDATED_ORNUMBER = "OR Number successfully updated";
     case CASHIERCTRL_REMOVED_ORNUMBER = "You've removed an OR Number.";
     case CASHIERCTRL_ERR_ORNUMBER = "Can't remove OR Number. It already has connected data.";
+    case CASHIERCTRL_BATCH_GENERATED_INVOICES = 'Batch generated invoices';
+
 
     /**
      * Summary of DORMITORYCTRL
