@@ -106,8 +106,10 @@ class AnnouncementController extends Controller
                 AuditHelper::log($request->user_id, "User $request->user_id has updated announcement!");
 
                 return response()->json([
+
                     //! "message" => "Announcement updated successfully",
                     "update_id" => $id
+                    
                 ], 200);
             }
         );

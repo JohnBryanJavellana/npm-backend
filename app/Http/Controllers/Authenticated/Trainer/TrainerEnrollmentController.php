@@ -57,7 +57,7 @@ class TrainerEnrollmentController extends Controller
             function () use ($request) {
 
 
-                // \Log::info("com", [$request->all()]);
+
                 $record = Training::with([
                     "module",
                     "module.moduleType",
@@ -70,7 +70,7 @@ class TrainerEnrollmentController extends Controller
                 ])
                     ->where('id', $request->trainingId)
                     ->get();
-                // \Log::info("com", [$record]);
+
 
                 return response()->json([
                     "training" => $record,
@@ -87,7 +87,7 @@ class TrainerEnrollmentController extends Controller
             function () use ($request) {
 
                 try {
-                    // \Log::info("testData", [$request->all()]);
+
                     $list = EnrolledCourse::where('training_id', $request->trainingId)
                         ->with([
                             'trainee',
@@ -117,39 +117,4 @@ class TrainerEnrollmentController extends Controller
     {
         return AttendanceRecord::whereKey($request->attendance_id)->get();
     }
-
-    // public function recordAttendance(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'attendance_id' => 'required|exists:attendances,id',
-    //         'user_id' => 'required|exists:users,id',
-    //         'status' => 'required|string|in:PRESENT,ABSENT,LATE',
-    //     ]);
-
-    //     $today = now()->toDateString();
-
-    //     $attendanceRecord = AttendanceRecord::where('attendance_id', $validated['attendance_id'])
-    //         ->where('user_id', $validated['user_id'])
-    //         ->whereDate('created_at', $today)
-    //         ->first();
-
-    //     if ($attendanceRecord) {
-    //         $attendanceRecord->update([
-    //             'status' => $validated['status'],
-    //             'time_in' => now(),
-    //         ]);
-    //     } else {
-    //         $attendanceRecord = AttendanceRecord::create([
-    //             'attendance_id' => $validated['attendance_id'],
-    //             'user_id' => $validated['user_id'],
-    //             'status' => $validated['status'],
-    //             'time_in' => now(),
-    //         ]);
-    //     }
-
-    //     return response()->json([
-    //         'message' => 'Attendance recorded successfully',
-    //         'data' => $attendanceRecord
-    //     ], 200);
-    // }
 }

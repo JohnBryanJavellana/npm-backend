@@ -23,6 +23,7 @@ class AttendanceRecordResource extends JsonResource
                 $trainee = $item->enrolled_course->trainee ?? null;
 
                 return [
+                    'id' => $item->user_id ?? $trainee->id,
                     'fname'    => $trainee->fname ?? null,
                     'lname'    => $trainee->lname ?? null,
                     'mname'    => $trainee->mname ?? null,

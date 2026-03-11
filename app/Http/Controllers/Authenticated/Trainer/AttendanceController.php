@@ -14,105 +14,6 @@ use function Symfony\Component\String\u;
 
 class AttendanceController extends Controller
 {
-    // public function attendance_record(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'training_id' => 'required|exists:trainings,id',
-    //         'training_date' => 'required|date',
-    //         'records' => 'required|array',
-    //         'records.*.enrolled_course_id' => 'required|exists:enrolled_courses,id',
-    //         'records.*.status' => 'nullable|string|in:PRESENT,ABSENT,LATE',
-    //         'records.*.time_in' => 'nullable|date',
-    //         'records.*.time_out' => 'nullable|date',
-    //         'records.*.start_time' => 'nullable|date_format:H:i',
-    //         'records.*.end_time' => 'nullable|date_format:H:i',
-    //     ]);
-
-    //     $training = Training::with('module.schedules')->find($validated['training_id']);
-
-    //     if (!$training) {
-    //         return response()->json(['error' => 'Training not found'], 404);
-    //     }
-
-    //     if (!$training->module) {
-    //         return response()->json(['error' => 'Training module not found'], 404);
-    //     }
-
-    //     $trainingDate = Carbon::parse($validated['training_date'])->toDateString();
-
-    //     $schedule = $training->module->schedules
-    //         ->where('schedule_from', $trainingDate)
-    //         ->first();
-
-    //     if (!$schedule) {
-    //         return response()->json([
-    //             'error' => 'Training date is not valid for this training'
-    //         ], 422);
-    //     }
-
-    //     $attendance = Attendance::firstOrCreate(
-    //         [
-    //             'training_id' => $validated['training_id'],
-    //             'training_date' => $validated['training_date'],
-    //         ],
-    //         [
-    //             'created_by' => $request->user()->id
-    //         ]
-    //     );
-
-    //     $responseData = [];
-
-    //     foreach ($validated['records'] as $record) {
-
-    //         $userId = $record['enrolled_course_id'];
-
-    //         $timeIn = isset($record['time_in'])
-    //             ? Carbon::parse($record['time_in'])
-    //             : now();
-
-    //         $timeOut = isset($record['time_out'])
-    //             ? Carbon::parse($record['time_out'])
-    //             : null;
-
-    //         $scheduleStart = Carbon::parse($schedule->start_time);
-    //         $scheduleEnd = Carbon::parse($schedule->end_time);
-
-    //         //! block early in tiraulo tantado
-    //         if ($timeIn->lt($scheduleStart)) {
-    //             return response()->json([
-    //                 'error' => 'Time in cannot be earlier than schedule start'
-    //             ], 422);
-    //         }
-
-    //         //! 15 minute late rule
-    //         $lateLimit = $scheduleStart->copy()->addMinutes(15);
-
-    //         if ($timeIn->gt($lateLimit)) {
-    //             $status = 'LATE';
-    //         } else {
-    //             $status = 'PRESENT';
-    //         }
-
-    //         $attendanceRecord = AttendanceRecord::updateOrCreate(
-    //             [
-    //                 'attendance_id' => $attendance->id,
-    //                 'enrolled_course_id' => $userId,
-    //             ],
-    //             [
-    //                 'status' => $status,
-    //                 'time_in' => $timeIn,
-    //                 'time_out' => $timeOut,
-    //                 'end_time' => $scheduleEnd
-    //             ]
-    //         );
-
-    //         $responseData[] = $attendanceRecord;
-    //     }
-
-    //     return response()->json([
-    //         'store_data' => $responseData
-    //     ], 200);
-    // }
 
     public function attendance_record(Request $request)
     {
@@ -232,6 +133,7 @@ class AttendanceController extends Controller
             null,
             [],
             function () use ($request) {
+
                 $request->validate([
                     'records' => 'required|array',
                     'records.*.id' => 'required|exists:attendance_records,id',
@@ -251,12 +153,14 @@ class AttendanceController extends Controller
                 AuditHelper::log($request->user_id, "User $request->user_id updated attendance!");
 
                 return response()->json([
-                    'message' => 'Attendance records updated successfully'
+                    'message' => 'Attendance records updated successfully',
+                    'prank' => true,
+                    'prank_message' => '⚠️ System error detected... Its a prank 😆'
+
                 ], 200);
             }
         );
     }
-
     //! an folder ini 
     public function attendanceByGroup(Request $request)
     {
