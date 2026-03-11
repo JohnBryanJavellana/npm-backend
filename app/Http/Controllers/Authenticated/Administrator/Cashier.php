@@ -35,7 +35,7 @@ use App\Enums\{
     NotificationEnum
 };
 use App\Http\Requests\Admin\Cashier\{
-    CreateOrUpdateFeeCategory,
+CreateOrUpdateFeeCategory,
     CreateOrUpdateOR
 };
 use App\Models\{
@@ -446,22 +446,33 @@ class Cashier extends Controller
             }
         });
     }
- //edrascoe
- /**
- * Summary of get_all_paid_payments
- * @param bool auditActions === FALSE
- * @param bool returnedMessage === TRUE
- * @param Request $request
- */
-public function get_all_paid_payments(Request $request) {
-    return TransactionUtil::transact(null, [], function() use ($request) {
-        $services = [
+        //edrascoe
+        /**
+         * Get all paid payments across services
+         */
+    public function get_all_paid_payments(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+         $services = [
             NotificationEnum::ENROLLMENT->value,
             NotificationEnum::DORMITORY->value,
             NotificationEnum::LIBRARY->value,
             NotificationEnum::RECREATIONAL->value,
         ];
+
+        $allStatuses = [
+            CashierEnum::PAID->value,
+            CashierEnum::PENDING->value,
+            CashierEnum::FOR_VERIFICATION->value,
+            CashierEnum::DECLINED->value,
+            CashierEnum::CANCELLED->value,
+            CashierEnum::FOR_PAYMENT->value,
+            CashierEnum::UNAVAILABLE->value,
+        ];
         $allPaidPayments = [];
+        $flaggedIssues   = [];
+        $grandTotalPaid  = 0;
+        $paidSummary     = [];
+
         foreach ($services as $service) {
             $baseRelations = ['payee', 'orNumber'];
 
@@ -482,28 +493,125 @@ public function get_all_paid_payments(Request $request) {
                     'training',
                 ];
             }
-            $payments = self::getTable($service, null, [
-                'invoice_status' => [CashierEnum::PAID->value],
-            ])
-                ->with($baseRelations)
-                ->orderBy('datePaid', 'DESC')
-                ->get()
-                ->map(function ($payment) use ($service) {
-                    return [
-                        'service'         => $service,
-                        'payment'         => $payment,
+            $paymentsByStatus = [];
+            foreach ($allStatuses as $status) {
+                $payments = self::getTable($service, null, [
+                    'invoice_status' => [$status],
+                ])
+                    ->with($baseRelations)
+                    ->orderBy('datePaid', 'DESC')
+                    ->get();
+
+                $seenTraceNumbers = [];
+                $totalPerPayee    = [];
+
+                if ($status === CashierEnum::PAID->value) {
+                    foreach ($payments as $payment) {
+                        $payeeId = $payment->payee?->id;
+                        if ($payeeId) {
+                            if (!isset($totalPerPayee[$payeeId])) {
+                                $totalPerPayee[$payeeId] = [
+                                    'payee_id'     => $payeeId,
+                                    'full_name'    => $payment->payee?->name ?? 'Unknown',
+                                    'total_amount' => 0,
+                                ];
+                            }
+                            $totalPerPayee[$payeeId]['total_amount'] += $payment->invoice_amount ?? 0;
+                        }
+                    }
+                }
+
+                $mapped = $payments->map(function ($payment) use ($service, $status, &$flaggedIssues, &$seenTraceNumbers, $totalPerPayee) {
+                    $issues   = [];
+                    $fullName = $payment->payee?->name ?? 'N/A';
+                    if (isset($seenTraceNumbers[$payment->trace_number])) {
+                        $issues[] = "Duplicate trace number: {$payment->trace_number}";
+                    } else {
+                        $seenTraceNumbers[$payment->trace_number] = true;
+                    }
+                    if (empty($payment->trace_number)) {
+                        $issues[] = "Missing trace number.";
+                    }
+                    if (empty($payment->datePaid)) {
+                        $issues[] = "Missing payment date.";
+                    }
+                    if (empty($payment->invoice_amount) || $payment->invoice_amount <= 0) {
+                        $issues[] = "Invalid or missing invoice amount.";
+                    }
+                    if (!$payment->payee) {
+                        $issues[] = "Missing payee information.";
+                    }
+                    if (!$payment->orNumber) {
+                        $issues[] = "Missing OR number.";
+                    }
+                    if ($service === NotificationEnum::ENROLLMENT->value && !$payment->training) {
+                        $issues[] = "Missing training details for enrollment payment.";
+                    }
+                    if ($service === NotificationEnum::LIBRARY->value && $payment->selectedBooks->isEmpty()) {
+                        $issues[] = "Missing selected books for library payment.";
+                    }
+                    if (!empty($issues)) {
+                        $flaggedIssues[] = [
+                            'service'      => $service,
+                            'status'       => $status,
+                            'payment_id'   => $payment->id,
+                            'trace_number' => $payment->trace_number ?? 'N/A',
+                            'full_name'    => $fullName,
+                            'issues'       => $issues,
+                        ];
+                    }
+
+                    $result = [
+                        'service'    => $service,
+                        'status'     => $status,
+                        'payment'    => $payment,
+                        'has_issues' => !empty($issues),
+                        'issues'     => $issues,
                     ];
+
+                    if ($status === CashierEnum::PAID->value && $payment->payee?->id) {
+                        $result['total_paid'] = $totalPerPayee[$payment->payee->id]['total_amount'] ?? 0;
+                    }
+
+                    return $result;
                 });
 
-            $allPaidPayments[$service] = $payments;
+                $paymentsByStatus[$status] = [
+                    'total'    => $mapped->count(),
+                    'payments' => $mapped,
+                ];
+                if ($status === CashierEnum::PAID->value) {
+                    $serviceTotalPaid = $payments->sum('invoice_amount');
+                    $grandTotalPaid  += $serviceTotalPaid;
+
+                    $paymentsByStatus[$status]['service_total_paid'] = $serviceTotalPaid;
+                    $paymentsByStatus[$status]['total_per_payee']    = array_values($totalPerPayee);
+                    $paidSummary[] = [
+                        'service'     => $service,
+                        'total_count' => $mapped->count(),
+                        'total_paid'  => $serviceTotalPaid,
+                    ];
+                }
+            }
+
+            $allPaidPayments[$service] = $paymentsByStatus;
         }
+
         return response()->json([
-            'message'  => AdministratorReturnResponse::CASHIERCTRL_ALL_PAID_PAYMENTS->value,
-            'payments' => $allPaidPayments,
+            'message'          => AdministratorReturnResponse::CASHIERCTRL_ALL_PAID_PAYMENTS->value,
+            'grand_total_paid' => $grandTotalPaid,
+            'paid_summary'     => [
+                'breakdown'    => $paidSummary,
+                'total'        => $grandTotalPaid,
+            ],
+            'payments'         => $allPaidPayments,
+            'flagged_issues'   => [
+                'total'   => count($flaggedIssues),
+                'details' => $flaggedIssues,
+            ],
         ], 200);
     });
 }
-
 /**
  * Summary of batch_generate_invoices
  * Batch Processing: Generate individual invoices for all completed

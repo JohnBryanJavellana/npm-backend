@@ -208,7 +208,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_payments', [Cashier::class, 'get_payments']);
             Route::post('pay-walk-in', [Cashier::class, 'pay_walkin']);
             Route::post('verify_payment', [Cashier::class, 'verify_payment']);
-            Route::post('get_all_paid_payments', [Cashier::class, 'get_all_paid_payments']);//edrascoe chuchu
+            Route::get('get_all_paid_payments', [Cashier::class, 'get_all_paid_payments']);//edrascoe chuchu
             Route::post('batch_generate_invoices', [Cashier::class, 'batch_generate_invoices']);//edrascoe chuchu2
 
             Route::get('get_charges', [Cashier::class, 'get_charges']);

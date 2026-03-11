@@ -23,4 +23,7 @@ enum DormitoryEnum : string
     case COUPLE = 'COUPLE';
     case OFFICERS = 'OFFICERS';
     case RATINGS = 'RATINGS';
+    case LOST = 'LOST';
+    case RETURNED = 'RETURNED';
 }
+
