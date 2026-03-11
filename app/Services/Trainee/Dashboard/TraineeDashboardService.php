@@ -60,7 +60,7 @@ class TraineeDashboardService {
             "userRecreationals"
         ])
         ->first();
-
+        //new
         $borrowedBooks = collect($user->trainee_library)->flatMap(fn($library) => $library->borrowedBooks);
         $merged = collect($user->trainee_enrolled_courses)
         ->merge($user->trainee_dormitory)
