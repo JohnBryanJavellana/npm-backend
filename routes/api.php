@@ -83,8 +83,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('upload_profile_picture', [MyAccount::class, 'upload_profile_picture']);
             Route::get('get_trainee_general_info/{user}', [MyAccount::class, 'get_trainee_general_info']);
             Route::post('update_password', [Account::class, 'update_password']);
-            Route::get('get_activities', [Account::class, 'get_activities']);
-            Route::get('logs', [Account::class, 'getUserActivities']);
+            Route::get('get_activities', [Account::class, 'getUserActivities']);
             Route::get('get_all_courses_and_schools', [MyAccount::class, 'get_all_courses_and_schools']);
             Route::get('get_all_requirements', [MyAccount::class, '']);
             Route::get("dropdown_values", [TraineeEnrollment::class, "viewRanksLicenses"]);
@@ -180,6 +179,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('view/{tenant}', [TraineeInvoices::class, 'viewDormitoryInvoices']);
             Route::post('billing/update', [TraineeInvoices::class, 'updateDormInvoice']);
             Route::post('enrollment/update', [TraineeInvoices::class, 'updateEnrollmentInvoice']);
+            Route::get('view/{user}', [TraineeInvoices::class, 'recreationalInvoices']);
         });
 
         Route::prefix("/scan_records")->group(function() {

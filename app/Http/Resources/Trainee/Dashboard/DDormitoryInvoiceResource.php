@@ -21,7 +21,9 @@ class DDormitoryInvoiceResource extends JsonResource
             "id" => $this->id,
             "type" => ModuleNameEnum::DORMITORY->value,
             "status" => $this->invoice_status,
+            "amount" => $this->invoice_amount,
             "trace_number" => $this->trace_number,
+            "created_at" => $this->created_at,
         ];
     }
 }

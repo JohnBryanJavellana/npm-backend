@@ -19,7 +19,7 @@ class EnrolledCourseResource extends JsonResource
 
         return [
             "id" => $this->id,
-            "title" => $this->training?->id,
+            "title" => $this->training?->module?->name,
             "type" => ModuleNameEnum::ENROLLMENT->value,
             "start" => $this->training?->schedule_from,
             "end" => $this->training?->schedule_to,

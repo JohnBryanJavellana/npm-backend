@@ -41,4 +41,9 @@ class RAInvoices extends Model
     {
         return $query->where("invoice_status", RequestStatus::PENDING->value);
     }
+
+    public function scopeForUser(Builder $query, int $userId)
+    {
+        return $query->where("user_id", $userId);
+    }
 }

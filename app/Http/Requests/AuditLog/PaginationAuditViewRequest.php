@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Http\Requests\QrReader;
+namespace App\Http\Requests\AuditLog;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class PaginationViewRequest extends FormRequest
+class PaginationAuditViewRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        \Log::info("PaginationView", [$this->all(), $this->user()->id]);
         return $this->user() !== null;
     }
 
@@ -28,11 +27,9 @@ class PaginationViewRequest extends FormRequest
             "per_page" => ['nullable', 'integer', 'min:1', 'max:100'],
             "page" => ['nullable', 'integer', 'min:1'],
             "search" => ['nullable', 'max:255'],
-            "filter" => ['nullable', 'max:255', 'in:DORMITORY,LIBRARY,ENROLLMENT,GUARD_ENTRANCE,GUARD_EXIT'],
+            // "filter" => ['nullable', 'max:255', 'in:DORMITORY,LIBRARY,ENROLLMENT,GUARD_ENTRANCE,GUARD_EXIT'],
         ];
     }
-
-    
 
     protected function failedValidation(Validator $validator)
     {
