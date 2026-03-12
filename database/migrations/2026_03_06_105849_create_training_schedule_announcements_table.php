@@ -19,7 +19,7 @@ return new class extends Migration
             $table->engine = "innoDB";
             $table->id();
             $table->foreignIdFor(Training::class)->constrained()->cascadeOnDelete();
-            $table->foreignId("trainer")->constrained("users");
+            $table->foreignId("trainer")->constrained("users")->cascadeOnDelete();
             $table->string("title", 255);
             $table->longText("content");
             $table->timestamps();

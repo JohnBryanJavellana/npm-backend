@@ -24,7 +24,6 @@ use App\Http\Controllers\Authenticated\Trainee\{
     TraineeLibrary,
     TraineeInvoices,
     CsmsController,
-    CreditController,
     TraineeRecreational,
     TraineeDashboardController
 };
@@ -41,14 +40,11 @@ use App\Http\Controllers\Authenticated\Administrator\{
 use App\Http\Controllers\Authenticated\Logout;
 use App\Http\Controllers\Authenticated\QrReader\QrReaderController;
 use App\Http\Controllers\Authenticated\Trainer\AttendanceController;
-use App\Http\Controllers\Authenticated\Trainer\DashboardController;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
 
 /** imported models */
 
 use App\Models\User;
-use App\Services\Trainee\Dormitory\DormitoryTransferService;
-use App\Services\Trainee\Recreational\RecreationalService;
 
 /** guest routes */
 Route::match(['GET', 'POST'], '/login', [LoginController::class, 'login_user']);
