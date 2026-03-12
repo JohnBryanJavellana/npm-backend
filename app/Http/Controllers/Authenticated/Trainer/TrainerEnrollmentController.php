@@ -81,7 +81,6 @@ class TrainerEnrollmentController extends Controller
             function () use ($request) {
 
                 try {
-
                     $list = EnrolledCourse::where('training_id', $request->trainingId)
                         ->with([
                             'trainee',
@@ -105,7 +104,6 @@ class TrainerEnrollmentController extends Controller
             }
         );
     }
-
 
     public function getFacilitatorDetails(Request $request)
     {
