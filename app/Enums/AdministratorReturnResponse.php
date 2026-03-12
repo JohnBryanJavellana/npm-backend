@@ -23,7 +23,11 @@ enum AdministratorReturnResponse: string {
     case CASHIERCTRL_UPDATED_ORNUMBER = "OR Number successfully updated";
     case CASHIERCTRL_REMOVED_ORNUMBER = "You've removed an OR Number.";
     case CASHIERCTRL_ERR_ORNUMBER = "Can't remove OR Number. It already has connected data.";
-    case CASHIERCTRL_BATCH_GENERATED_INVOICES = 'Batch generated invoices';
+
+    case CASHIERCTRL_ALL_PAID_PAYMENTS = 'Successfully retrieved all paid payments across all services.';
+    case CASHIERCTRL_BATCH_GENERATED_INVOICES  = 'Invoices successfully batch generated.';
+    case CASHIERCTRL_ERR_INVALID_DATE_RANGE    = 'Invalid date range. dateFrom must not be later than dateTo.';
+
 
 
     /**

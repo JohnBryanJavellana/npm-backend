@@ -226,7 +226,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('verify-invoice/{type}/{id}', [Cashier::class, 'verify']);
             Route::post('batch_generate_invoices', [Cashier::class, 'batch_generate_invoices']);
             Route::post('verifyTransactions', [Cashier::class, 'verifyTransactions']);
-
+            Route::get('get_all_paid_payments', [Cashier::class, 'get_all_paid_payments']);
         });
 
         Route::prefix('/recreational-activity/')->middleware(['user_role:SUPERADMIN,ADMIN-RA', 'throttle:60,1'])->group(function () {
