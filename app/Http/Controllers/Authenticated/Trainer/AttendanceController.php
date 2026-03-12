@@ -161,6 +161,7 @@ class AttendanceController extends Controller
             }
         );
     }
+
     //! an folder ini 
     public function attendanceByGroup(Request $request)
     {
