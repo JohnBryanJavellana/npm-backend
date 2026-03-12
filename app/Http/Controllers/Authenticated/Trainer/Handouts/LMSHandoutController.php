@@ -9,14 +9,21 @@ use Illuminate\Http\Request;
 class LMSHandoutController extends Controller
 {
     public function __construct(
-        protected LMSHandoutService $lMSHandoutService
+        protected LMSHandoutService $LMSHandoutService
     ) {}
 
-    public function handoutsByCourseModule(Request $request)
+    public function viewByCourseModule(Request $request)
     {
-        return;
+        \Log::info("datadata", [$request->all()]);
+        try
+        {
+            return $this->LMSHandoutService->storeHandouts();
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
     }
-    //new
+
 
 
 }

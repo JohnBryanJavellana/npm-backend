@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text("description");
             $table->enum("type", ["EXAM","QUIZ","ASSIGNMENTS","ACTIVITY"]);
             $table->enum("passed_type", ["questionnaire","file_upload"]);
-            $table->integer("passing_scope")->nullable();
+            $table->integer("passing_score")->nullable();
             $table->dateTime("start_date");
             $table->dateTime("end_date");
             $table->time("time_limit");

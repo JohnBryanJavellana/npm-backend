@@ -39,7 +39,9 @@ use App\Http\Controllers\Authenticated\Administrator\{
 
 use App\Http\Controllers\Authenticated\Logout;
 use App\Http\Controllers\Authenticated\QrReader\QrReaderController;
+use App\Http\Controllers\Authenticated\Trainer\Assessments\LMSAssessmentController;
 use App\Http\Controllers\Authenticated\Trainer\AttendanceController;
+use App\Http\Controllers\Authenticated\Trainer\Handouts\LMSHandoutController;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
 
 /** imported models */
@@ -187,7 +189,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
-    //!ssss
     Route::middleware(['user_role:TRAINER', 'throttle:60,1'])->prefix('/trainer/')->group(function () {
         Route::prefix('enrollment/')->group(function () {
             Route::get('training', [TrainerEnrollmentController::class, 'viewAllTrainingsAndFacilitators']);
@@ -199,13 +200,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
             Route::post('update_attendance', [AttendanceController::class, 'UpdateRecordAttendance']);
-            //announcement
             Route::post('announcement_edit', [AnnouncementController::class, 'AnnouncementEdit']);
             Route::post('announcement_delete', [AnnouncementController::class, 'AnnouncementDelete']);
             Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
         });
     });
-
 
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->group(function () {
         Route::prefix('recreationals/')->group(function () {
@@ -220,6 +219,13 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
+    Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->group(function () {
+        Route::prefix('lms/')->group(function () {
+            Route::post("view_assessment", [LMSAssessmentController::class, "view"]);
+            Route::post("create_assessment", [LMSAssessmentController::class, "create"]);
+            Route::put("update_assessment", [LMSAssessmentController::class, "update"]);
+        });
+    });
 
 
     //FOR RECREATIONALS
