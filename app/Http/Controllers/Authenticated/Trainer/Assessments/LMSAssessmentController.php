@@ -47,7 +47,7 @@ class LMSAssessmentController extends Controller
     {
         try
         {
-            
+            return;
         }
         catch (\Exception $e) {
             return response()->json(["message" => $e], 500);
