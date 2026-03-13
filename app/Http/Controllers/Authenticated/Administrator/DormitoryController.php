@@ -1540,8 +1540,6 @@ public function get_requested_service (Request $request) {
             return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYSTATUS->value. "ID#$request->documentId"], 200);
         });
     }
-
-//edrascoe
 //provide stocks to boarder
 /**
  * Summary of provide_stocks_to_boarder
@@ -1774,6 +1772,92 @@ public function update_stock_status(Request $request) {
                 'old_provision_status' => $oldProvisionStatus,
                 'new_provision_status' => $provisionDetail->status,
             ]
+        ], 200);
+    });
+}
+
+/**
+ * Summary of audit_placement
+ * Identifies over-capacity rooms and active tenants with no assigned room.
+ * @param Request $request
+ */
+public function audit_placement(Request $request) {
+    return TransactionUtil::transact(null, [], function () use ($request) {
+
+        $activeStatuses = [
+            DormitoryEnum::APPROVED->value,
+            DormitoryEnum::ACTIVE->value,
+            DormitoryEnum::RESERVED->value,
+            DormitoryEnum::FOR_PAYMENT->value,
+            DormitoryEnum::PAID->value,
+            DormitoryEnum::PROCESSING_PAYMENT->value,
+        ];
+
+        // 1. Over-capacity rooms: active tenant count exceeds room_slot
+        $overCapacityRooms = DormitoryRoom::with([
+            'dormitory',
+            'hasData' => fn($q) => $q
+                ->whereIn('tenant_status', $activeStatuses)
+                ->with('boarder'),
+        ])
+        ->withCount([
+            'hasData as active_tenant_count' => fn($q) => $q
+                ->whereIn('tenant_status', $activeStatuses),
+        ])
+        ->whereHas('hasData', fn($q) => $q
+            ->whereIn('tenant_status', $activeStatuses)
+        )
+        ->get()
+        ->filter(fn($room) => $room->active_tenant_count > $room->room_slot)
+        ->map(fn($room) => [
+            'room_id'            => $room->id,
+            'room_name'          => $room->room_name,
+            'dormitory'          => $room->dormitory?->room_name ?? 'N/A',
+            'room_slot'          => $room->room_slot,
+            'active_tenant_count'=> $room->active_tenant_count,
+            'over_by'            => $room->active_tenant_count - $room->room_slot,
+            'tenants'            => $room->hasData->map(fn($t) => [
+                'tenant_id'   => $t->id,
+                'name'        => ($t->boarder?->fname ?? '') . ' ' . ($t->boarder?->lname ?? ''),
+                'slot'        => $t->for_slot,
+                'status'      => $t->tenant_status,
+                'from'        => $t->tenant_from_date,
+                'to'          => $t->tenant_to_date,
+            ])->values(),
+        ])
+        ->values();
+
+        // 2. Unassigned tenants: active status but no room assigned
+        $unassignedTenants = DormitoryTenant::with('boarder')
+            ->whereIn('tenant_status', $activeStatuses)
+            ->where(fn($q) => $q
+                ->whereNull('dormitory_room_id')
+                ->orWhereDoesntHave('dormitory_room')
+            )
+            ->get()
+            ->map(fn($t) => [
+                'tenant_id'    => $t->id,
+                'trace_number' => $t->trace_number,
+                'name'         => ($t->boarder?->fname ?? '') . ' ' . ($t->boarder?->lname ?? ''),
+                'status'       => $t->tenant_status,
+                'from'         => $t->tenant_from_date,
+                'to'           => $t->tenant_to_date,
+                'created_at'   => $t->created_at,
+            ]);
+
+        AuditHelper::log(
+            $request->user()->id,
+            "Ran dormitory placement audit. Over-capacity rooms: {$overCapacityRooms->count()}, Unassigned tenants: {$unassignedTenants->count()}."
+        );
+
+        return response()->json([
+            'audit_summary' => [
+                'over_capacity_room_count' => $overCapacityRooms->count(),
+                'unassigned_tenant_count'  => $unassignedTenants->count(),
+                'has_issues'               => $overCapacityRooms->isNotEmpty() || $unassignedTenants->isNotEmpty(),
+            ],
+            'over_capacity_rooms' => $overCapacityRooms,
+            'unassigned_tenants'  => $unassignedTenants,
         ], 200);
     });
 }
