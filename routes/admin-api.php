@@ -90,6 +90,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
             Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
             Route::get('get_book_info/get_copies/{book_id}', [LibraryController::class, 'get_copies']);
+            Route::get('activity', [LibraryController::class, 'get_book_copy_activity']);//edrascoe
             Route::post('get_book_info/get_copies/update_book_copy', [LibraryController::class, 'update_book_copy']);
             Route::post('create_book_copies', [LibraryController::class, 'create_book_copies']);
             Route::get('get_book_total_reservations/{book_id}', [LibraryController::class, 'get_book_total_reservations']);
@@ -146,8 +147,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_inventories/update_dormitory_inventory_stock', [DormitoryController::class, 'update_dormitory_inventory_stock']);
             Route::post('provide_stocks_to_boarder', [DormitoryController::class, 'provide_stocks_to_boarder']); //move_stockkies
             Route::get('get_provided_stocks', [DormitoryController::class, 'get_provided_stocks']);//show reserved stockkies to boarder
+            Route::get('get_stock_reserved_tenant', [DormitoryController::class, 'get_stock_reserved_tenant']);//get tenant info of reserved stockkies
             Route::post('update_stock_status', [DormitoryController::class, 'update_stock_status']);// change stock status not working yet
-             Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
+            Route::get('audit_placements', [DormitoryController::class, 'audit_placement']);
+            Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
             Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock']);
             Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);
             Route::get('services', [DormitoryController::class, 'services']);
@@ -206,6 +209,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_payments', [Cashier::class, 'get_payments']);
             Route::post('pay-walk-in', [Cashier::class, 'pay_walkin']);
             Route::post('verify_payment', [Cashier::class, 'verify_payment']);
+            Route::get('payments', [Cashier::class, 'get_all_paid_payments']);//edrascoe chuchu
+            Route::get('grand_total', [CashierController::class, 'get_total_paid']);
+
+            Route::post('batch_generate_invoices', [Cashier::class, 'batch_generate_invoices']);
 
             Route::get('get_charges', [Cashier::class, 'get_charges']);
             Route::get('get_charges/get_charges_predata', [Cashier::class, 'get_charges_predata']);
