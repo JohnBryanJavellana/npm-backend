@@ -44,8 +44,8 @@ class LMSAssessmentService {
 
     public function updateAssessment($validated)
     {
-        return DB::transaction(function() use ($validated){
-            $record = 
-        });
+        // return DB::transaction(function() use ($validated){
+        //     $record = 
+        // });
     }
 }
