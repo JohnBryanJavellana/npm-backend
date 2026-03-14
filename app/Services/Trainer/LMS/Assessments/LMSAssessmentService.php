@@ -46,6 +46,7 @@ class LMSAssessmentService {
     {
         // return DB::transaction(function() use ($validated){
         //     $record = 
+        //new treaineeRecreational
         // });
     }
 }
