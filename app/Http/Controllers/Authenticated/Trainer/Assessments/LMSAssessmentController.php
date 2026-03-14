@@ -7,6 +7,8 @@ use App\Http\Requests\Trainer\LMS\createAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use Illuminate\Http\Request;
+use DomainException;
+
 
 class LMSAssessmentController extends Controller
 {
@@ -32,6 +34,9 @@ class LMSAssessmentController extends Controller
         {
             $validated = $request->validated();
             return $this->lmsAsssessmentService->storeAssessment($validated, $request->user()->id);
+        }
+        catch (DomainException $e) {
+            throw $e;
         }
         catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);

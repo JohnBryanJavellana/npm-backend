@@ -27,8 +27,16 @@ class createAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "moduleId" => ["sometimes", "required", "exists:course_modules,id"],
-            "id" => ["sometimes", "required", "exists:trainings,id"],
+            "moduleId" => [
+                "nullable",
+                "exists:course_modules,id",
+                "required_without:id",
+            ],
+            "id" => [
+                "nullable",
+                "exists:trainings,id",
+                "required_without:moduleId",
+            ],
             "title" => ["required", "string"],
             "description" => ["required", "string"],
             "passingScore" => ["required","numeric"],
@@ -43,12 +51,12 @@ class createAssessmentRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors();
-        $firstError = $errors;
+        // $errors = $validator->errors();
+        // $firstError = $errors;
         throw new HttpResponseException(
             response()->json([
-                "message" => $firstError,
-                "errors" => $errors,
+                "message" => $validator->errors(),
+                // "errors" => $errors,
             ], 200)
         );
     }

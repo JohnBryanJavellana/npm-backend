@@ -20,6 +20,6 @@ class Assessments extends Model
     }
     public function scopeForModule(Builder $query, int $moduleId)
     {
-        return $query->where("training_id", $moduleId);
+        return $query->where("course_module_id", $moduleId);
     }
 }
