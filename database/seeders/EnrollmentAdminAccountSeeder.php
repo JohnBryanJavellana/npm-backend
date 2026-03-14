@@ -74,7 +74,7 @@ class EnrollmentAdminAccountSeeder extends Seeder
             $enrollment_admin_account->password = $user['password'];
             $enrollment_admin_account->save();
 
-            // $this->registerCtrlInstance->generateAndSendQR($enrollment_admin_account, $user['qr']);
+            $this->registerCtrlInstance->generateAndSendQR($enrollment_admin_account, $user['qr']);
         }
     }
 }

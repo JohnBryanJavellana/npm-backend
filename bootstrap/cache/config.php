@@ -201,8 +201,8 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\framework/cache/data',
-        'lock_path' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\framework/cache/data',
+        'path' => 'C:\\laragon\\www\\nmp-be\\storage\\framework/cache/data',
+        'lock_path' => 'C:\\laragon\\www\\nmp-be\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -376,13 +376,13 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\app',
+        'root' => 'C:\\laragon\\www\\nmp-be\\storage\\app',
         'throw' => false,
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\app/public',
+        'root' => 'C:\\laragon\\www\\nmp-be\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
@@ -402,7 +402,7 @@
     ),
     'links' => 
     array (
-      'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\public\\storage' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\app/public',
+      'C:\\laragon\\www\\nmp-be\\public\\storage' => 'C:\\laragon\\www\\nmp-be\\storage\\app/public',
     ),
   ),
   'hashing' => 
@@ -443,14 +443,14 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\nmp-be\\storage\\logs/laravel.log',
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\nmp-be\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
         'replace_placeholders' => true,
@@ -515,12 +515,12 @@
       ),
       'emergency' => 
       array (
-        'path' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\nmp-be\\storage\\logs/laravel.log',
       ),
       'errormonitor' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\logs/forerror.log',
+        'path' => 'C:\\laragon\\www\\nmp-be\\storage\\logs/forerror.log',
         'level' => 'info',
       ),
     ),
@@ -597,7 +597,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\resources\\views/vendor/mail',
+        0 => 'C:\\laragon\\www\\nmp-be\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -749,7 +749,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\framework/sessions',
+    'files' => 'C:\\laragon\\www\\nmp-be\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -770,9 +770,9 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\resources\\views',
+      0 => 'C:\\laragon\\www\\nmp-be\\resources\\views',
     ),
-    'compiled' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\framework\\views',
+    'compiled' => 'C:\\laragon\\www\\nmp-be\\storage\\framework\\views',
   ),
   'dompdf' => 
   array (
@@ -781,10 +781,10 @@
     'convert_entities' => true,
     'options' => 
     array (
-      'font_dir' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\fonts',
-      'font_cache' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend\\storage\\fonts',
-      'temp_dir' => 'C:\\Users\\ALLEN\\AppData\\Local\\Temp',
-      'chroot' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend',
+      'font_dir' => 'C:\\laragon\\www\\nmp-be\\storage\\fonts',
+      'font_cache' => 'C:\\laragon\\www\\nmp-be\\storage\\fonts',
+      'temp_dir' => 'C:\\Users\\Freqit\\AppData\\Local\\Temp',
+      'chroot' => 'C:\\laragon\\www\\nmp-be',
       'allowed_protocols' => 
       array (
         'data://' => 
@@ -913,7 +913,7 @@
     array (
     ),
     'enable_runnable_solutions' => NULL,
-    'remote_sites_path' => 'C:\\Users\\ALLEN\\Desktop\\new_nmp\\npm-backend',
+    'remote_sites_path' => 'C:\\laragon\\www\\nmp-be',
     'local_sites_path' => '',
     'housekeeping_endpoint_prefix' => '_ignition',
     'settings_file_path' => '',

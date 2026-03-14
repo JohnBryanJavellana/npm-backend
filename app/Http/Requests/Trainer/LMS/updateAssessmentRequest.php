@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests\Trainer\LMS;
 
+use App\Enums\UserRoleEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class viewAssessmentRequest extends FormRequest
+class updateAssessmentRequest extends FormRequest
 {
     protected $stopOnFirstFailure = true;
     /**
@@ -14,8 +15,8 @@ class viewAssessmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("dataView", [$this->all()]);
-        return $this->user() !== null;
+        \Log::info("dataUpdate", [$this->all()]);
+        return $this->user() !== null && \in_array($this->user()?->role, UserRoleEnum::facilitatorRoles());
     }
 
     /**
@@ -26,8 +27,15 @@ class viewAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "training_id" => ["sometimes","required", "exists:trainings,id"],
-            "course_module_id" => ["sometimes","required", "exists:course_modules,id"],
+            "examId" => ["required", "exists:assessments,id"],
+            "title" => ["sometimes","required", "string"],
+            "description" => ["sometimes","required", "string"],
+            "instructions" => ["sometimes","required", "string"],
+            "passed_type" => ["sometimes","required", "string"],
+            "passing_score" => ["sometimes","required","numeric"],
+            "start_date" => ["sometimes","required", "date"],
+            "start_time" => ["sometimes","required"],
+            "time_limit" => ["sometimes","required"],
         ];
     }
 

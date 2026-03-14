@@ -2,20 +2,29 @@
 
 namespace App\Http\Requests\Trainer\LMS;
 
+use App\Enums\UserRoleEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class viewAssessmentRequest extends FormRequest
+class deleteAssessmentRequest extends FormRequest
 {
+
     protected $stopOnFirstFailure = true;
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        \Log::info("dataView", [$this->all()]);
-        return $this->user() !== null;
+        \Log::info("dataDelete", [$this->all()]);
+        return $this->user() !== null && \in_array($this->user()?->role, UserRoleEnum::facilitatorRoles());
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            "user_id" => $this->user()->id
+        ]);
     }
 
     /**
@@ -26,8 +35,9 @@ class viewAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "training_id" => ["sometimes","required", "exists:trainings,id"],
-            "course_module_id" => ["sometimes","required", "exists:course_modules,id"],
+            "user_id" => ["exists:users,id"],
+            "assessment_id" => ["required","exists:assessments,id"]
+            
         ];
     }
 

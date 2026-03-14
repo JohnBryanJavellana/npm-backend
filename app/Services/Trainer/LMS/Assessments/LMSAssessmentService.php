@@ -2,6 +2,7 @@
 
 namespace App\Services\Trainer\LMS\Assessments;
 
+use App\Enums\LMS\AssessmentMessageResponse;
 use App\Models\{
     Assessments
 };
@@ -26,7 +27,7 @@ class LMSAssessmentService {
     }
 
     public function domainRuleValidation($validated) {
-        if (isset($validated['moduleId']) && isset($validated['id'])) {
+        if (isset($validated['course_module_id']) && isset($validated['training_id'])) {
             throw new DomainException('Assessment cannot belong to both module and training.');
         }
     }
@@ -34,29 +35,42 @@ class LMSAssessmentService {
     public function storeAssessment($validated, $userId)
     {
         return DB::transaction(function () use ($validated, $userId){
+            $this->domainRuleValidation($validated);        
 
-        $this->domainRuleValidation($validated);
+            return $this->assessmentsModel->create([
+                ...$validated,
+                "created_by" => $userId
+                ]);
+            });
+    }
 
-        $data = [
-            "course_module_id" => $validated["moduleId"] ?? null,
-            "training_id" => $validated["id"] ?? null,            
-            "title" => $validated["title"],
-            "description" => $validated["description"],
-            "passing_score" => $validated["passingScore"],
-            "start_date" => $validated["startDate"],
-            "end_date" => $validated["dueDate"],
-            "start_time" => $validated["startTime"],
-            "end_time" => $validated["dueTime"],
-            "time_limit" => $validated["timeLimit"],
-            "created_by" => $userId
-            ];
-            
-        return $this->assessmentsModel->create($data);
+    public function updateAssessment($validated, $user_id)
+    {
+        return DB::transaction(function() use ($validated, $user_id){
+              return $this->assessmentsModel->whereKey($validated["examId"])->update([
+                ...collect($validated)->only([
+                    'title',
+                    'description',
+                    'instructions',
+                    'passed_type',
+                    'passing_score',
+                    'start_date',
+                    'start_time',
+                    'time_limit'
+                ])->toArray(),
+                "updated_by" => $user_id
+            ]);
         });
     }
 
-    public function updateAssessment($validated)
+    public function deleteAssessmentById($validated)
     {
-        return;
+        $record = $this->assessmentsModel->find($validated["assessment_id"]);
+
+        if($record->created_by !== $validated["user_id"]) {
+            throw new DomainException(AssessmentMessageResponse::UNAUTHORIZED->value);
+        }
+
+        return $record->delete();
     }
 }

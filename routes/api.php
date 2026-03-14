@@ -40,6 +40,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
 use App\Http\Controllers\Authenticated\Logout;
 use App\Http\Controllers\Authenticated\QrReader\QrReaderController;
 use App\Http\Controllers\Authenticated\Trainer\Assessments\LMSAssessmentController;
+use App\Http\Controllers\Authenticated\Trainer\Assessments\LMSAssessmentSectionController;
 use App\Http\Controllers\Authenticated\Trainer\AttendanceController;
 use App\Http\Controllers\Authenticated\Trainer\Handouts\LMSHandoutController;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
@@ -221,9 +222,16 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->group(function () {
         Route::prefix('lms/')->group(function () {
-            Route::post("view_assessment", [LMSAssessmentController::class, "view"]);
-            Route::post("create_assessment", [LMSAssessmentController::class, "create"]);
-            Route::put("update_assessment", [LMSAssessmentController::class, "update"]);
+            Route::post("view_assessments", [LMSAssessmentController::class, "view"]);
+            Route::post("create_assessments", [LMSAssessmentController::class, "create"]);
+            Route::post("update_assessments", [LMSAssessmentController::class, "update"]);
+            Route::post("delete_assessments", [LMSAssessmentController::class, "delete"]);
+        });
+        Route::prefix('sections/')->group(function () {
+            Route::get("view_sections/{assessment}", [LMSAssessmentSectionController::class, "view"]);
+            Route::post("create_sections", [LMSAssessmentSectionController::class, "create"]);
+            Route::post("update_sections", [LMSAssessmentSectionController::class, "update"]);
+            Route::delete("delete_sections", [LMSAssessmentSectionController::class, "delete"]);
         });
     });
 

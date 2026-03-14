@@ -6,15 +6,14 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class viewAssessmentRequest extends FormRequest
+class createAssSectionRequest extends FormRequest
 {
-    protected $stopOnFirstFailure = true;
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        \Log::info("dataView", [$this->all()]);
+        \Log::info("createSection", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -26,9 +25,17 @@ class viewAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "training_id" => ["sometimes","required", "exists:trainings,id"],
-            "course_module_id" => ["sometimes","required", "exists:course_modules,id"],
+            "assessments_id" => ["required", "exists:assessments,id"],
+            "title" => ["required", "string", "max:255"],
+            "instruction" => ["required", "string"],
         ];
+    }
+
+    public function messages()
+    {
+        return[
+            "assessments_id.required" => "The parent assessment was not found."
+        ];  
     }
 
     protected function failedValidation(Validator $validator)
