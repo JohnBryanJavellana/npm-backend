@@ -14,7 +14,6 @@ use function Symfony\Component\String\u;
 
 class AttendanceController extends Controller
 {
-
     public function attendance_record(Request $request)
     {
         return TransactionUtil::transact(
@@ -82,35 +81,42 @@ class AttendanceController extends Controller
                     );
                 }
 
-                // foreach ($validated['records'] as $record) {
-                //     $userId = $record['enrolled_course_id'];
+                // === LATE DETECTION (15 minutes) + update records from input ===
+                // Schedule start/end for comparison
+                $scheduleStart = Carbon::parse($validated['training_date'] . ' ' . ($validated['start_time'] ?? $schedule->start_time));
+                $scheduleEnd   = Carbon::parse($validated['training_date'] . ' ' . ($validated['end_time'] ?? $schedule->end_time));
 
-                //     $timeIn = isset($record['time_in']) ? Carbon::parse($record['time_in']) : now();
-                //     $timeOut = isset($record['time_out']) ? Carbon::parse($record['time_out']) : null;
+                $lateLimit = $scheduleStart->copy()->addMinutes(15);
 
-                //     //! Compare time_in with schedule start_time to detect late/present 
-                //     $scheduleStart = Carbon::parse($schedule->start_time);
-                //     $scheduleEnd = Carbon::parse($schedule->end_time);
+                foreach ($validated['records'] as $record) {
+                    $enrolledCourseId = $record['enrolled_course_id'];
 
-                //     $lateLimit = $scheduleStart->copy()->addMinutes(15);
-                //     $status = $timeIn->gt($lateLimit) ? 'LATE' : 'PRESENT';
+                    $timeIn  = isset($record['time_in']) ? Carbon::parse($record['time_in']) : null;
+                    $timeOut = isset($record['time_out']) ? Carbon::parse($record['time_out']) : null;
 
-                //     $attendanceRecord = AttendanceRecord::updateOrCreate(
-                //         [
-                //             'attendance_id' => $attendance->id,
-                //             'enrolled_course_id' => $userId,
-                //         ],
-                //         [
-                //             'status' => $status,
-                //             'time_in' => $timeIn,
-                //             'time_out' => $timeOut,
-                //             'start_time' => $record['start_time'] ?? $scheduleStart,
-                //             'end_time' => $record['end_time'] ?? $scheduleEnd,
-                //         ]
-                //     );
+                    // If they have a time_in, mark PRESENT or LATE; otherwise keep ABSENT
+                    if ($timeIn) {
+                        $status = $timeIn->gt($lateLimit) ? 'LATE' : 'PRESENT';
+                    } else {
+                        $status = 'ABSENT';
+                    }
 
-                //     $responseData[] = $attendanceRecord;
-                // }
+                    $attendanceRecord = AttendanceRecord::updateOrCreate(
+                        [
+                            'attendance_id' => $attendance->id,
+                            'enrolled_course_id' => $enrolledCourseId,
+                        ],
+                        [
+                            'status' => $status,
+                            'time_in' => $timeIn,
+                            'time_out' => $timeOut,
+                            'start_time' => $scheduleStart->format('H:i:s'),
+                            'end_time' => $scheduleEnd->format('H:i:s'),
+                        ]
+                    );
+
+                    $responseData[] = $attendanceRecord;
+                }
 
                 AuditHelper::log($request->user_id, "User $request->user_id have submitted attendance!");
 
@@ -121,340 +127,155 @@ class AttendanceController extends Controller
 
         );
     }
-
-    public function attendance_record_update(Request $request)
-    {
-        \Log::info("Attendance record update request: ", $request->all());
-        $validated = $request->validate([
-            'id' => ['required', 'integer', 'exists:attendance_records,id'],
-            'attendance_id' => ['required', 'integer', 'exists:attendances,id'],
-            'start_time' => ['required', 'date_format:H:i'],
-
-        ]);
-
-        return TransactionUtil::transact(null, [], function () use ($validated) {
-            $record = AttendanceRecord::with(['enrolledCourse.trainee'])
-                ->findOrFail($validated['id']);
-
-            $record->update([
-                'attendance_id' => $validated['attendance_id'],
-                'start_time' => $validated['start_time'],
-
-            ]);
-
-            return $record->fresh(['enrolledCourse.trainee']);
-        });
-    }
-
+    //! OLD CODE
     // public function attendance_record(Request $request)
     // {
     //     return TransactionUtil::transact(
     //         null,
     //         [],
     //         function () use ($request) {
+    //             \Log::info("Attendance record request: ", $request->all());
     //             $validated = $request->validate([
-    //                 'training_id'              => 'required|exists:trainings,id',
-    //                 'training_date'            => 'required|date',
-    //                 'start_time'               => 'nullable|date_format:H:i',
-    //                 'end_time'                 => 'nullable|date_format:H:i',
-    //                 'records'                  => 'required|array|min:1',
+    //                 'training_id' => 'required|exists:trainings,id',
+    //                 'training_date' => 'required',
+    //                 'start_time' => 'nullable',
+    //                 'end_time' => 'nullable',
+    //                 'records' => 'required|array',
     //                 'records.*.enrolled_course_id' => 'required|exists:enrolled_courses,id',
-    //                 'records.*.time_in'        => 'nullable|date',
-    //                 'records.*.time_out'       => 'nullable|date',
-    //                 'records.*.start_time'     => 'nullable|date',
-    //                 'records.*.end_time'       => 'nullable|date',
+    //                 'records.*.time_in' => 'nullable|date',
+    //                 'records.*.time_out' => 'nullable|date',
+
     //             ]);
 
     //             $training = Training::with('module.schedules')->find($validated['training_id']);
+
     //             if (!$training || !$training->module) {
-    //                 return response()->json([
-    //                     'message' => 'Training or module not found',
-    //                     'data'    => null,
-    //                 ], 404);
+    //                 return response()->json(['error' => 'Training or module not found'], 404);
     //             }
 
     //             $trainingDate = Carbon::parse($validated['training_date'])->toDateString();
-    //             $schedule = $training->module->schedules
-    //                 ->where('schedule_from', $trainingDate)
+
+    //             $schedule = $training->module->schedules()
+    //                 ->whereDate('schedule_from', '<=', $trainingDate)
+    //                 ->whereDate('schedule_to', '>=', $trainingDate)
     //                 ->first();
 
-    //             if (!$schedule) {
+    //             if (! $schedule) {
     //                 return response()->json([
-    //                     'message' => 'Training date is not valid for this training',
-    //                     'data'    => null,
+    //                     'error' => 'Training date is not valid for this training',
     //                 ], 422);
     //             }
 
     //             $attendance = Attendance::firstOrCreate(
     //                 [
-    //                     'training_id'   => $validated['training_id'],
-    //                     'training_date' => $trainingDate,
+    //                     'training_id' => $validated['training_id'],
+    //                     'training_date' => $validated['training_date'],
     //                     'created_by' => $request->user()->id,
-    //                     'start_time' => $validated['start_time'] ?? $schedule->start_time,
-    //                     'end_time'   => $validated['end_time'] ?? $schedule->end_time,
-    //                 ]
+    //                     'start_time' => $request->start_time,
+    //                     'end_time' => $request->end_time,
+    //                 ],
     //             );
+    //             $enrolled = EnrolledCourse::where('training_id', $validated['training_id'])
+    //                 ->where('enrolled_course_status', 'ENROLLED')->get();
 
-    //             $records = [];
-    //             $scheduleStart = Carbon::parse($schedule->start_time);
-    //             $scheduleEnd   = Carbon::parse($schedule->end_time);
-    //             $lateLimit     = $scheduleStart->copy()->addMinutes(15);
 
-    //             foreach ($validated['records'] as $record) {
-    //                 $timeIn  = !empty($record['time_in'])  ? Carbon::parse($record['time_in'])  : null;
-    //                 $timeOut = !empty($record['time_out']) ? Carbon::parse($record['time_out']) : null;
+    //             $responseData = [];
 
-    //                 $status = $timeIn
-    //                     ? ($timeIn->gt($lateLimit) ? 'LATE' : 'PRESENT')
-    //                     : 'ABSENT';
-
-    //                 $attendanceRecord = AttendanceRecord::updateOrCreate(
+    //             foreach ($enrolled as $enrolledCourse) {
+    //                 AttendanceRecord::create(
     //                     [
-    //                         'attendance_id'       => $attendance->id,
-    //                         'enrolled_course_id'  => $record['enrolled_course_id'],
-    //                     ],
-    //                     [
-    //                         'status'     => $status,
-    //                         'time_in'    => $timeIn,
-    //                         'time_out'   => $timeOut,
-    //                         'start_time' => $record['start_time'] ?? $scheduleStart,
-    //                         'end_time'   => $record['end_time'] ?? $scheduleEnd,
+    //                         "attendance_id" => $attendance->id,
+    //                         'status' => 'ABSENT',
+    //                         "enrolled_course_id" => $enrolledCourse->id,
+    //                         'time_in' => null,
+    //                         'time_out' => null,
+    //                         'start_time' => $validated['start_time'] ?? $schedule->start_time,
+    //                         'end_time' => $validated['end_time'] ?? $schedule->end_time,
     //                     ]
     //                 );
-
-    //                 $records[] = $attendanceRecord;
     //             }
 
-    //             AuditHelper::log($request->user()->id, "User {$request->user()->id} submitted attendance.");
+    //             // foreach ($validated['records'] as $record) {
+    //             //     $userId = $record['enrolled_course_id'];
+
+    //             //     $timeIn = isset($record['time_in']) ? Carbon::parse($record['time_in']) : now();
+    //             //     $timeOut = isset($record['time_out']) ? Carbon::parse($record['time_out']) : null;
+
+    //             //     //! Compare time_in with schedule start_time to detect late/present 
+    //             //     $scheduleStart = Carbon::parse($schedule->start_time);
+    //             //     $scheduleEnd = Carbon::parse($schedule->end_time);
+
+    //             //     $lateLimit = $scheduleStart->copy()->addMinutes(15);
+    //             //     $status = $timeIn->gt($lateLimit) ? 'LATE' : 'PRESENT';
+
+    //             //     $attendanceRecord = AttendanceRecord::updateOrCreate(
+    //             //         [
+    //             //             'attendance_id' => $attendance->id,
+    //             //             'enrolled_course_id' => $userId,
+    //             //         ],
+    //             //         [
+    //             //             'status' => $status,
+    //             //             'time_in' => $timeIn,
+    //             //             'time_out' => $timeOut,
+    //             //             'start_time' => $record['start_time'] ?? $scheduleStart,
+    //             //             'end_time' => $record['end_time'] ?? $scheduleEnd,
+    //             //         ]
+    //             //     );
+
+    //             //     $responseData[] = $attendanceRecord;
+    //             // }
+
+    //             AuditHelper::log($request->user_id, "User $request->user_id have submitted attendance!");
 
     //             return response()->json([
-    //                 'message' => 'Attendance saved successfully',
-    //                 'meta'    => [
-    //                     'training_id'   => $validated['training_id'],
-    //                     'training_date' => $trainingDate,
-    //                     'attendance_id' => $attendance->id,
-    //                     'updated_count' => count($records),
-    //                 ],
-    //                 'data'    => $records,
+    //                 'store_data' => $responseData
     //             ], 200);
     //         }
+
     //     );
     // }
 
-    // public function attendance_record(Request $request)
-    // {
-    //     return TransactionUtil::transact(
-    //         null,
-    //         [],
-    //         function () use ($request) {
-    //             //! Regex for time: accepts H:i or H:i:s ( 09:00 or 09:00:00)
-    //             $timeRegex = '/^([01]\d|2[0-3]):([0-5]\d)(:([0-5]\d))?$/';
+    public function update_record(Request $request)
+    {
+        return TransactionUtil::transact(
+            null,
+            [],
+            function () use ($request) {
+                $request->validate([
+                    'id' => 'required|exists:attendance_records,id',
+                    'attendance' => 'required|exists:attendances,id',
+                    'status' => 'required|string|in:PRESENT,LATE,ABSENT',
+                    'start_time' => 'required|date',
+                    'time_in' => 'nullable',
+                    'time_out' => 'nullable',
 
-    //             $validated = $request->validate([
-    //                 'training_id'                  => 'required|integer|exists:trainings,id',
-    //                 'training_date'                => 'required|date',
-    //                 'start_time'                   => ['nullable', 'regex:' . $timeRegex],
-    //                 'end_time'                     => ['nullable', 'regex:' . $timeRegex],
-    //                 'records'                      => 'required|array|min:1',
-    //                 'records.*.enrolled_course_id' => 'required|integer|exists:enrolled_courses,id',
-    //                 'records.*.time_in'            => 'nullable|date',
-    //                 'records.*.time_out'           => 'nullable|date',
-    //                 'records.*.start_time'         => ['nullable', 'regex:' . $timeRegex],
-    //                 'records.*.end_time'           => ['nullable', 'regex:' . $timeRegex],
-    //             ]);
-
-    //             $training = Training::with('module.schedules')->find($validated['training_id']);
-    //             if (!$training || !$training->module) {
-    //                 return response()->json([
-    //                     'message' => 'Training or module not found',
-    //                     'data'    => null,
-    //                 ], 404);
-    //             }
-
-    //             $trainingDate = Carbon::parse($validated['training_date'])->toDateString();
-    //             //! Filter the loaded schedules Collection by date
-    //             $schedule = $training->module->schedules->first(function ($s) use ($trainingDate) {
-    //                 return Carbon::parse($s->schedule_from)->toDateString() === $trainingDate;
-    //             });
-
-    //             //! If no schedule for the date, use default times from the module (or skip strict check)
-    //             $defaultStart = $training->module->start_time ?? '09:00:00';
-    //             $defaultEnd   = $training->module->end_time ?? '17:00:00';
-
-    //             $attendance = Attendance::firstOrCreate(
-    //                 [
-    //                     'training_id'   => $validated['training_id'],
-    //                     'training_date' => $trainingDate,
-    //                 ],
-    //                 [
-    //                     'created_by' => $request->user()->id,
-    //                     'start_time' => $validated['start_time'] ?? ($schedule->start_time ?? $defaultStart),
-    //                     'end_time'   => $validated['end_time'] ?? ($schedule->end_time ?? $defaultEnd),
-    //                 ]
-    //             );
-
-    //             $records = [];
-    //             $scheduleStart = $schedule ? Carbon::parse($schedule->start_time) : Carbon::parse($defaultStart);
-    //             $scheduleEnd   = $schedule ? Carbon::parse($schedule->end_time) : Carbon::parse($defaultEnd);
-    //             $lateLimit     = $scheduleStart->copy()->addMinutes(15);
-
-    //             foreach ($validated['records'] as $record) {
-    //                 $timeIn  = !empty($record['time_in'])  ? Carbon::parse($record['time_in'])  : null;
-    //                 $timeOut = !empty($record['time_out']) ? Carbon::parse($record['time_out']) : null;
-
-    //                 $status = $timeIn
-    //                     ? ($timeIn->gt($lateLimit) ? 'LATE' : 'PRESENT')
-    //                     : 'ABSENT';
-
-    //                 $attendanceRecord = AttendanceRecord::updateOrCreate(
-    //                     [
-    //                         'attendance_id'      => $attendance->id,
-    //                         'enrolled_course_id' => $record['enrolled_course_id'],
-    //                     ],
-    //                     [
-    //                         'status'     => $status,
-    //                         'time_in'    => $timeIn,
-    //                         'time_out'   => $timeOut,
-    //                         'start_time' => $record['start_time'] ?? ($validated['start_time'] ?? $scheduleStart),
-    //                         'end_time'   => $record['end_time']   ?? ($validated['end_time']   ?? $scheduleEnd),
-    //                     ]
-    //                 );
-
-    //                 $records[] = $attendanceRecord;
-    //             }
-
-    //             AuditHelper::log($request->user()->id, "User {$request->user()->id} submitted attendance.");
-
-    //             return response()->json([
-    //                 'message' => 'Attendance saved successfully',
-    //                 'meta'    => [
-    //                     'training_id'   => $validated['training_id'],
-    //                     'training_date' => $trainingDate,
-    //                     'attendance_id' => $attendance->id,
-    //                     'updated_count' => count($records),
-    //                 ],
-    //                 'data'    => $records,
-    //             ], 200);
-    //         }
-    //     );
-    // }
+                ]);
 
 
-    // public function attendance_record(Request $request)
-    // {
-    //     return TransactionUtil::transact(
-    //         null,
-    //         [],
-    //         function () use ($request) {
-    //             //! Regex for time: accepts H:i or H:i:s ( 09:00 or 09:00:00)
-    //             $timeRegex = '/^([01]\d|2[0-3]):([0-5]\d)(:([0-5]\d))?$/';
+                AttendanceRecord::where('id', $id = $request->id)
+                    ->where('attendance_id', $request->attendance)
+                    ->where('start_time', $request->start_time)
+                    ->update([
 
-    //             $validated = $request->validate([
-    //                 'training_id'                  => 'required|integer|exists:trainings,id',
-    //                 'training_date'                => 'required|date',
-    //                 'start_time'                   => ['nullable', 'regex:' . $timeRegex],
-    //                 'end_time'                     => ['nullable', 'regex:' . $timeRegex],
-    //                 'records'                      => 'required|array|min:1',
-    //                 'records.*.enrolled_course_id' => 'required|integer|exists:enrolled_courses,id',
-    //                 'records.*.time_in'            => 'nullable|date',
-    //                 'records.*.time_out'           => 'nullable|date',
-    //                 'records.*.start_time'         => ['nullable', 'regex:' . $timeRegex],
-    //                 'records.*.end_time'           => ['nullable', 'regex:' . $timeRegex],
-    //             ]);
+                        'status' => $request->status,
+                        'start_time' => $request->start_time,
+                        'time_in' => $request->time_in ?? null,
+                        'time_out' => $request->time_out ?? null,
 
-    //             $training = Training::with('module.schedules')->find($validated['training_id']);
-    //             if (!$training || !$training->module) {
-    //                 return response()->json([
-    //                     'message' => 'Training or module not found',
-    //                     'data'    => null,
-    //                 ], 404);
-    //             }
+                    ]);
 
-    //             $trainingDate = Carbon::parse($validated['training_date'])->toDateString();
+                AuditHelper::log($request->user_id, "User $request->user_id has updated attendance record!");
 
-    //             //! Filter the loaded schedules Collection by date
-    //             $schedule = $training->module->schedules->first(function ($s) use ($trainingDate) {
-    //                 return Carbon::parse($s->schedule_from)->toDateString() === $trainingDate;
-    //             });
+                return response()->json([
 
-    //             //! If no schedule for the date, use default times from the module (or skip strict check)
-    //             $defaultStart = $training->module->start_time ?? '09:00:00';
-    //             $defaultEnd   = $training->module->end_time ?? '17:00:00';
+                    //! "message" => "Announcement updated successfully",
+                    "update_id" => $id
 
-    //             $attendance = Attendance::firstOrCreate(
-    //                 [
-    //                     'training_id'   => $validated['training_id'],
-    //                     'training_date' => $trainingDate,
-    //                 ],
-    //                 [
-    //                     'created_by' => $request->user()->id,
-    //                     'start_time' => $validated['start_time'] ?? ($schedule->start_time ?? $defaultStart),
-    //                     'end_time'   => $validated['end_time'] ?? ($schedule->end_time ?? $defaultEnd),
-    //                 ]
-    //             );
+                ], 200);
+            }
+        );
+    }
 
-    //             $records       = [];
-    //             $scheduleStart = $schedule ? Carbon::parse($schedule->start_time) : Carbon::parse($defaultStart);
-    //             $scheduleEnd   = $schedule ? Carbon::parse($schedule->end_time)   : Carbon::parse($defaultEnd);
-    //             $lateLimit     = $scheduleStart->copy()->addMinutes(15);
-
-    //             foreach ($validated['records'] as $record) {
-
-    //                 $attendanceRecord = AttendanceRecord::where('attendance_id', $attendance->id)
-    //                     ->where('enrolled_course_id', $record['enrolled_course_id'])
-    //                     ->first();
-
-    //                 if (!$attendanceRecord) {
-    //                     continue;
-    //                 }
-
-
-    //                 $timeIn = !empty($record['time_in'])
-    //                     ? Carbon::parse($record['time_in'])
-    //                     : ($attendanceRecord->time_in ? Carbon::parse($attendanceRecord->time_in) : null);
-
-    //                 $timeOut = !empty($record['time_out'])
-    //                     ? Carbon::parse($record['time_out'])
-    //                     : ($attendanceRecord->time_out ? Carbon::parse($attendanceRecord->time_out) : null);
-
-
-    //                 $status = $timeIn
-    //                     ? ($timeIn->gt($lateLimit) ? 'LATE' : 'PRESENT')
-    //                     : 'ABSENT';
-
-    //                 $attendanceRecord->update([
-    //                     'status'     => $status,
-    //                     'time_in'    => $timeIn,
-    //                     'time_out'   => $timeOut,
-
-    //                     'start_time' => $record['start_time']
-    //                         ?? ($validated['start_time']
-    //                             ?? $attendanceRecord->start_time
-    //                             ?? $scheduleStart),
-    //                     'end_time'   => $record['end_time']
-    //                         ?? ($validated['end_time']
-    //                             ?? $attendanceRecord->end_time
-    //                             ?? $scheduleEnd),
-    //                 ]);
-
-    //                 $records[] = $attendanceRecord;
-    //             }
-
-    //             AuditHelper::log($request->user()->id, "User {$request->user()->id} submitted attendance.");
-
-    //             return response()->json([
-    //                 'message' => 'Attendance saved successfully',
-    //                 'meta'    => [
-    //                     'training_id'   => $validated['training_id'],
-    //                     'training_date' => $trainingDate,
-    //                     'attendance_id' => $attendance->id,
-    //                     'updated_count' => count($records),
-    //                 ],
-    //                 'data'    => $records,
-    //             ], 200);
-    //         }
-    //     );
-    // }
 
 
 
