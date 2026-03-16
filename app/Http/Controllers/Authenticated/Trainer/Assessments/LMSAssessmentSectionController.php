@@ -42,6 +42,7 @@ class LMSAssessmentSectionController extends Controller
             return response()->json(["message" => AssessmentSectionResponseMessage::UPDATED->value], 202);
         }
         catch (\Exception $e) {
+            \Log::error("updateSecError", [$e->getMessage()]);
             return response()->json(["message" => $e->getMessage()], 500);
             return response()->json(["message" => AssessmentSectionResponseMessage::SERVER_ERROR->value], 500);
         }

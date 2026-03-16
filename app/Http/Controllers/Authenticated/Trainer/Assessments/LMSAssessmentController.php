@@ -9,7 +9,6 @@ use App\Http\Requests\Trainer\LMS\deleteAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\updateAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
-use Illuminate\Http\Request;
 use DomainException;
 
 
@@ -35,7 +34,6 @@ class LMSAssessmentController extends Controller
 
     public function create(createAssessmentRequest $request)
     {
-        // return response()->json(["message" => "yeps"], 200);
         try
         {
             $validated = $request->validated();

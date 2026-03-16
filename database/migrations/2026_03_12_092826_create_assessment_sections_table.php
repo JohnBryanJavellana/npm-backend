@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('assessment_sections', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->foreignIdFor(Assessments::class);
+            $table->foreignIdFor(Assessments::class)->constrained()->cascadeOnDelete();
             $table->string("title");
             $table->text("instruction");
             $table->enum("status", ["ACTIVE","INACTIVE"])->default("ACTIVE");

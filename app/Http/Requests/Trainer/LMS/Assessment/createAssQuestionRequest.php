@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Trainer\LMS;
+namespace App\Http\Requests\Trainer\LMS\Assessment;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class updateAssSectionRequest extends FormRequest
+class createAssQuestionRequest extends FormRequest
 {
     protected $stopOnFirstFailure = true;
     /**
@@ -14,8 +14,8 @@ class updateAssSectionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("updateSection", [$this->all()]);
-        return $this->user() !== null;    
+        \Log::info("AssQCreateData", [$this->all()]);
+        return $this->user() !== null;
     }
 
     /**
@@ -26,21 +26,15 @@ class updateAssSectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "assessments_id" => ["required", "exists:assessments,id"],
-            "title" => ["sometimes", "required", "string", "max:255"],
-            "instruction" => ["sometimes", "required", "string"],
-            "status" => ["sometimes", "required", "in:ACTIVE,INACTIVE"],
+            "assessment_section_id" => ["required", "exists:assessment_sections,id"],
+            "question" => ["required", "string"],
+            "type" => ["required", "in:MCQ,TRUE_FALSE,ESSAY"],
+            "score" => ["required"],
+            "choices" => ["sometimes", "required", "array"],
+            "choices.*.option_text" => ["required", "string", "max:255"],
+            "choices.*.answer" => ["required"],
         ];
     }
-
-    public function messages()
-    {
-        return[
-            "assessments_id.required" => "The parent assessment was not found."
-        ];  
-    }
-
-
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(

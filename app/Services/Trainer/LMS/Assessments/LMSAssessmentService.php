@@ -40,28 +40,44 @@ class LMSAssessmentService {
             return $this->assessmentsModel->create([
                 ...$validated,
                 "created_by" => $userId
-                ]);
-            });
-    }
-
-    public function updateAssessment($validated, $user_id)
-    {
-        return DB::transaction(function() use ($validated, $user_id){
-              return $this->assessmentsModel->whereKey($validated["examId"])->update([
-                ...collect($validated)->only([
-                    'title',
-                    'description',
-                    'instructions',
-                    'passed_type',
-                    'passing_score',
-                    'start_date',
-                    'start_time',
-                    'time_limit'
-                ])->toArray(),
-                "updated_by" => $user_id
             ]);
         });
     }
+
+public function updateAssessment($validated, $user_id)
+{
+    return DB::transaction(function () use ($validated, $user_id) {
+        $this->domainRuleValidation($validated);        
+
+        $data = collect($validated)->only([
+            'training_id',
+            'course_module_id',
+            'title',
+            'description',
+            'instructions',
+            'passed_type',
+            'passing_score',
+            'start_date',
+            'start_time',
+            'time_limit'
+        ])->toArray();
+
+        // enforce rule: only one display scope
+        if (!empty($data['training_id'])) {
+            $data['course_module_id'] = null;
+        }
+
+        if (!empty($data['course_module_id'])) {
+            $data['training_id'] = null;
+        }
+
+        $data['updated_by'] = $user_id;
+
+        return $this->assessmentsModel
+            ->whereKey($validated["examId"])
+            ->update($data);
+    });
+}
 
     public function deleteAssessmentById($validated)
     {

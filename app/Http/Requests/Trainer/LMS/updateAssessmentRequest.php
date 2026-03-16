@@ -28,6 +28,8 @@ class updateAssessmentRequest extends FormRequest
     {
         return [
             "examId" => ["required", "exists:assessments,id"],
+            "training_id" => ["sometimes","required", "exists:trainings,id","required_without:training_id"],
+            "course_module_id" => ["sometimes","required", "exists:course_modules,id","required_without:course_module_id"],
             "title" => ["sometimes","required", "string"],
             "description" => ["sometimes","required", "string"],
             "instructions" => ["sometimes","required", "string"],
