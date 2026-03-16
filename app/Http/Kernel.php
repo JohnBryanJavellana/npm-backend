@@ -75,4 +75,11 @@ class Kernel extends HttpKernel
         'trainee' => \App\Http\Middleware\Trainee::class,
         'admin-dormitory' => \App\Http\Middleware\DormitoryAdmin::class,
     ];
+
+   protected function schedule(Schedule $schedule)
+{
+    $schedule->call(function () {
+        app(\App\Http\Controllers\Administrator/LibraryController::class)->sendReturnReminders(new \Illuminate\Http\Request());
+    })->dailyAt('08:00');
+}
 }

@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers\Authenticated\Administrator;
 
+use App\Mail\BookReturnReminderMail;
+use App\Jobs\SendReturnReminderJob;
+use App\Models\Notification;
+use Illuminate\Support\Facades\Mail;
+
 use App\Http\Controllers\Authenticated\Trainee\TraineeLibrary;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
@@ -921,4 +926,56 @@ public function summarize_report(SummarizeReport $request)
         ], 200);
     });
 }
+
+   public function sendReturnReminders(Request $request)
+    {
+        // Validate inputs
+        $request->validate([
+            'target_date' => 'nullable|date', // specific due date to send reminders for
+            'test_today'  => 'nullable|date'  // optional simulated "today"
+        ]);
+
+        // Determine "today" (real or simulated)
+        $today = $request->input('test_today')
+            ? Carbon::parse($request->input('test_today'))->startOfDay()
+            : Carbon::now()->startOfDay();
+
+        // Determine reminder date (specific or 2 days from today)
+        $reminderDate = $request->filled('target_date')
+            ? Carbon::parse($request->input('target_date'))->startOfDay()
+            : $today->copy()->addDays(2);
+
+        // Fetch reservations due on the reminder date
+        $reservations = BookReservation::with(['bookRes.user', 'bookCopy.book'])
+            ->where('status', 'APPROVED')
+            ->whereDate('to_date', $reminderDate)
+            ->get();
+
+        $queuedCount = 0;
+
+        foreach ($reservations as $reservation) {
+            $user = $reservation->bookRes->user ?? null;
+            $bookTitle = $reservation->bookCopy->book->title ?? 'Your reserved book';
+
+            if ($user && $user->email) {
+                // Queue the job with proper Carbon formatting
+                $dueDate = $reservation->to_date instanceof Carbon
+                    ? $reservation->to_date->format('F j, Y')
+                    : Carbon::parse($reservation->to_date)->format('F j, Y');
+
+                // Dispatch the reminder job
+                SendReturnReminderJob::dispatch($user, $bookTitle, $dueDate);
+
+                $queuedCount++;
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Return reminders queued successfully',
+            'count' => $queuedCount,
+            'simulated_today' => $today->toDateString(),
+            'reminder_date' => $reminderDate->toDateString()
+        ]);
+    }
 }

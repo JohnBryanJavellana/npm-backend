@@ -113,7 +113,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book']);
 
             Route::post('summarize_report', [LibraryController::class, 'summarize_report']); //userkenneth22
-
+            Route::post('send_book_reminders', [LibraryController::class, 'sendReturnReminders']); //userkenneth22
         });
 
         Route::prefix('/book_entry/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY', 'throttle:60,1'])->group(function () {
