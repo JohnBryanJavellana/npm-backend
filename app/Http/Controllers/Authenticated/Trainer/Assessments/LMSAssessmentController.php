@@ -28,7 +28,6 @@ class LMSAssessmentController extends Controller
         catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
-
         }
     }
 

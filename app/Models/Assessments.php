@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,5 +22,15 @@ class Assessments extends Model
     public function scopeForModule(Builder $query, int $moduleId)
     {
         return $query->where("course_module_id", $moduleId);
+    }
+
+    public function scopeActive(Builder $query)
+    {
+        return $query->where("status", RequestStatus::ACTIVE->value);       
+    }
+
+    public function scopeType(Builder $query, $type)
+    {
+        return $query->where("type", $type);
     }
 }

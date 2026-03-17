@@ -132,7 +132,7 @@ class LMSAssQuestionService {
         $record = $this->assessmentQuestionModel->query()
         ->find($questionId);
 
-        abort_if($record, 404, "No Record Found.");
+        abort_if(!$record, 404, "No Record Found.");
 
         $record->delete();
     }

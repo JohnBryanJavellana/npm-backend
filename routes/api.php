@@ -239,7 +239,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get("view_questions/{section}", [LMSAssessmentQuestionController::class, "view"]);
             Route::post("create_questions", [LMSAssessmentQuestionController::class, "create"]);
             Route::post("update_questions", [LMSAssessmentQuestionController::class, "update"]);
-            Route::delete("delete_questions", [LMSAssessmentQuestionController::class, "deleteNow"]);
+            Route::delete("delete_questions", [LMSAssessmentQuestionController::class, "delete"]);
         });
     });
 

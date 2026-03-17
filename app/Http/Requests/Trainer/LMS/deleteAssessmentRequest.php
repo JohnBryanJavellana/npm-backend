@@ -37,7 +37,6 @@ class deleteAssessmentRequest extends FormRequest
         return [
             "user_id" => ["exists:users,id"],
             "assessment_id" => ["required","exists:assessments,id"]
-            
         ];
     }
 

@@ -19,10 +19,15 @@ class LMSAssessmentService {
     {
         $courseId = $validated["course_module_id"] ?? null;
         $trainingId = $validated["training_id"] ?? null;
+        $type = $validated["type"] ?? null;
         
         return $this->assessmentsModel->query()
+        ->when($type, function($query) use ($type) { 
+            $query->type($type);
+        })
         ->where("training_id", $trainingId)
         ->orWhere("course_module_id", $courseId)
+        ->active()
         ->get();
     }
 

@@ -30,11 +30,15 @@ class LMSAssessmentQuestionController extends Controller
         return $this->lMSAssQuestionService->updateAssessmentQuestions($request->validated());
     }
 
-    public function deleteNow(Request $request)
+    public function delete(Request $request)
     {
-        \Log::info("deletye");
-        // return response()->json(["huwaws"], 200);
-        $this->lMSAssQuestionService->deleteAssessmentQuestions($request->question);
-        return response()->json(["message" => "Successfully Deleted"], 204);
+        try
+        {            
+            $this->lMSAssQuestionService->deleteAssessmentQuestions($request->id);
+            return response()->json(["message" => "Successfully Deleted"], 204);
+        }
+        catch (\Exception $e) {
+            return response()->json([$e->getMessage()], 500);
+        }
     }
 }
