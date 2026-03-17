@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Trainer\Assessments;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainer\LMS\Assessment\createAssQuestionRequest;
+use App\Http\Requests\Trainer\LMS\Assessment\updateAssQuestionRequest;
 use App\Services\Trainer\LMS\Assessments\LMSAssQuestionService;
 use Illuminate\Http\Request;
 
@@ -24,13 +25,16 @@ class LMSAssessmentQuestionController extends Controller
         return $this->lMSAssQuestionService->storeAssessmentQuestions($request->validated());
     }
 
-    public function update(Request $request)
+    public function update(updateAssQuestionRequest $request)
     {
-        return;
+        return $this->lMSAssQuestionService->updateAssessmentQuestions($request->validated());
     }
 
-    public function delete(Request $request, $question)
+    public function deleteNow(Request $request)
     {
-        return $this->lMSAssQuestionService->deleteAssessmentQuestions($question);
+        \Log::info("deletye");
+        // return response()->json(["huwaws"], 200);
+        $this->lMSAssQuestionService->deleteAssessmentQuestions($request->question);
+        return response()->json(["message" => "Successfully Deleted"], 204);
     }
 }

@@ -31,8 +31,8 @@ class createAssQuestionRequest extends FormRequest
             "type" => ["required", "in:MCQ,TRUE_FALSE,ESSAY"],
             "score" => ["required"],
             "choices" => ["sometimes", "required", "array"],
-            "choices.*.option_text" => ["required", "string", "max:255"],
-            "choices.*.answer" => ["required"],
+            "choices.*.option_text" => ["sometimes", "required", "string", "max:255"],
+            "choices.*.is_correct" => ["sometimes", "required"],
         ];
     }
     protected function failedValidation(Validator $validator)

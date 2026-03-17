@@ -62,7 +62,6 @@ public function updateAssessment($validated, $user_id)
             'time_limit'
         ])->toArray();
 
-        // enforce rule: only one display scope
         if (!empty($data['training_id'])) {
             $data['course_module_id'] = null;
         }

@@ -19,6 +19,11 @@ class AssessmentQuestion extends Model
         return $this->hasMany(AssessmentOption::class);
     }
 
+    public function sections()
+    {
+        return $this->belongsTo(AssessmentSection::class);
+    }
+
     /** Scopes */
 
     public function scopeSection(Builder $query, $sectionId)
