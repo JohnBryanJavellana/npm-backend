@@ -20,6 +20,7 @@ class BookReservation extends Model
     ];
 
     protected $notInUseStatus = ["CANCELLED", "RETURNED", "REJECTED", "LOST", "DAMAGED"];
+    
 
     /**
      * RELATIONS
@@ -35,6 +36,7 @@ class BookReservation extends Model
     public function book() {
         return $this->belongsTo(Book::class, 'book_id', 'id');
     }
+    
 
     /**
      * SCOPES
@@ -53,5 +55,12 @@ class BookReservation extends Model
 
     public function scopeForNotInUse($query) {
         return $query->whereNotIn('status', $this->notInUseStatus);
+    }
+
+    public function getBookTitleAttribute()
+    {
+        return $this->bookCopy?->book?->catalog?->title
+            ?? $this->book?->catalog?->title
+            ?? 'Your reserved book';
     }
 }
