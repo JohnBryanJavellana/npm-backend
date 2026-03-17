@@ -20,7 +20,7 @@ class AttendanceController extends Controller
             null,
             [],
             function () use ($request) {
-                \Log::info("Attendance record request: ", $request->all());
+                // \Log::info("Attendance record request: ", $request->all());
                 $validated = $request->validate([
                     'training_id' => 'required|exists:trainings,id',
                     'training_date' => 'required',
@@ -81,8 +81,7 @@ class AttendanceController extends Controller
                     );
                 }
 
-                // === LATE DETECTION (15 minutes) + update records from input ===
-                // Schedule start/end for comparison
+                //! === LATE DETECTION (15 minutes) + update records from input ===
                 $scheduleStart = Carbon::parse($validated['training_date'] . ' ' . ($validated['start_time'] ?? $schedule->start_time));
                 $scheduleEnd   = Carbon::parse($validated['training_date'] . ' ' . ($validated['end_time'] ?? $schedule->end_time));
 
@@ -94,7 +93,7 @@ class AttendanceController extends Controller
                     $timeIn  = isset($record['time_in']) ? Carbon::parse($record['time_in']) : null;
                     $timeOut = isset($record['time_out']) ? Carbon::parse($record['time_out']) : null;
 
-                    // If they have a time_in, mark PRESENT or LATE; otherwise keep ABSENT
+                    //! If they have a time_in, mark PRESENT or LATE; otherwise keep ABSENT
                     if ($timeIn) {
                         $status = $timeIn->gt($lateLimit) ? 'LATE' : 'PRESENT';
                     } else {
@@ -235,7 +234,7 @@ class AttendanceController extends Controller
     //     );
     // }
 
-    public function update_record(Request $request)
+    public function update_attendance_record(Request $request)
     {
         return TransactionUtil::transact(
             null,
@@ -243,9 +242,8 @@ class AttendanceController extends Controller
             function () use ($request) {
                 $request->validate([
                     'id' => 'required|exists:attendance_records,id',
-                    'attendance' => 'required|exists:attendances,id',
                     'status' => 'required|string|in:PRESENT,LATE,ABSENT',
-                    'start_time' => 'required|date',
+                    'enrolled_course_id' => 'required',
                     'time_in' => 'nullable',
                     'time_out' => 'nullable',
 
@@ -253,12 +251,11 @@ class AttendanceController extends Controller
 
 
                 AttendanceRecord::where('id', $id = $request->id)
-                    ->where('attendance_id', $request->attendance)
-                    ->where('start_time', $request->start_time)
+                    // ->with('attendance_id')
+                    // ->where('attendance_id', $request->attendance)
                     ->update([
 
                         'status' => $request->status,
-                        'start_time' => $request->start_time,
                         'time_in' => $request->time_in ?? null,
                         'time_out' => $request->time_out ?? null,
 
@@ -267,8 +264,6 @@ class AttendanceController extends Controller
                 AuditHelper::log($request->user_id, "User $request->user_id has updated attendance record!");
 
                 return response()->json([
-
-                    //! "message" => "Announcement updated successfully",
                     "update_id" => $id
 
                 ], 200);
@@ -301,39 +296,39 @@ class AttendanceController extends Controller
     }
 
     //! UpdateFunction
-    public function UpdateRecordAttendance(Request $request)
-    {
+    // public function UpdateRecordAttendance(Request $request)
+    // {
 
-        return TransactionUtil::transact(
-            null,
-            [],
-            function () use ($request) {
+    //     return TransactionUtil::transact(
+    //         null,
+    //         [],
+    //         function () use ($request) {
 
-                $request->validate([
-                    'records' => 'required|array',
-                    'records.*.id' => 'required|exists:attendance_records,id',
-                    'records.*.time_in' => 'nullable',
-                    'records.*.time_out' => 'nullable',
-                    'records.*.status' => 'nullable|string|accepted:PRESENT,LATE,ABSENT',
-                ]);
+    //             $request->validate([
+    //                 'records' => 'required|array',
+    //                 'records.*.id' => 'required|exists:attendance_records,id',
+    //                 'records.*.time_in' => 'nullable',
+    //                 'records.*.time_out' => 'nullable',
+    //                 'records.*.status' => 'nullable|string|accepted:PRESENT,LATE,ABSENT',
+    //             ]);
 
-                foreach ($request->records as $record) {
+    //             foreach ($request->records as $record) {
 
-                    AttendanceRecord::where('id', $record['id'])->update([
-                        'time_in' => $record['time_in'] ?? null,
-                        'time_out' => $record['time_out'] ?? null,
-                        'status' => $record['status'] ?? null
-                    ]);
-                }
-                AuditHelper::log($request->user_id, "User $request->user_id updated attendance!");
+    //                 AttendanceRecord::where('id', $record['id'])->update([
+    //                     'time_in' => $record['time_in'] ?? null,
+    //                     'time_out' => $record['time_out'] ?? null,
+    //                     'status' => $record['status'] ?? null
+    //                 ]);
+    //             }
+    //             AuditHelper::log($request->user_id, "User $request->user_id updated attendance!");
 
-                return response()->json([
-                    'message' => 'Attendance records updated successfully',
+    //             return response()->json([
+    //                 'message' => 'Attendance records updated successfully',
 
-                ], 200);
-            }
-        );
-    }
+    //             ], 200);
+    //         }
+    //     );
+    // }
 
     //! an folder ini 
     public function attendanceByGroup(Request $request)

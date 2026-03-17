@@ -197,9 +197,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('traineeAttendanceRecord', [AttendanceController::class, 'TraineeAttendanceRecord']);
             Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
+            Route::post('update_record', [AttendanceController::class, 'update_attendance_record']);
 
-            Route::post('update_record', [AttendanceController::class, 'update_record']);
             //! announcement
+
             Route::post('announcement_edit', [AnnouncementController::class, 'AnnouncementEdit']);
             Route::post('announcement_delete', [AnnouncementController::class, 'AnnouncementDelete']);
             Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
