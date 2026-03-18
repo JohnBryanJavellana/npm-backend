@@ -23,7 +23,7 @@ class AttendanceController extends Controller
             function () use ($request) {
 
                 \Log::info("Attendance update request: ", $request->all());
-                
+
                 $validated = $request->validate([
                     'training_id' => 'required|exists:trainings,id',
                     'training_date' => 'required',
@@ -248,6 +248,7 @@ class AttendanceController extends Controller
             $validated = $request->validate([
                 'array' => ['required', 'array', 'min:1'],
                 'array.*.id' => ['required', 'integer', 'exists:attendance_records,id'],
+                'attendance_id' => ['required', 'integer', 'exists:attendances,id'],
                 'array.*.status' => ['required', 'string', Rule::in(['PRESENT', 'LATE', 'ABSENT'])],
                 'array.*.enrolled_course_id' => ['nullable', 'integer'],
                 'array.*.time_in' => ['nullable'],
@@ -329,4 +330,5 @@ class AttendanceController extends Controller
     //         'data' => AttendanceRecordResource::collection($attendanceRecord),
     //     ], 200);
     // }
+
 }
