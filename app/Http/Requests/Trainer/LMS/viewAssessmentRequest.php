@@ -28,10 +28,7 @@ class viewAssessmentRequest extends FormRequest
         return [
             "training_id" => ["sometimes","required", "exists:trainings,id"],
             "course_module_id" => ["sometimes","required", "exists:course_modules,id"],
-<<<<<<< HEAD
-=======
             "type" => ["sometimes", "required", "in:EXAM,QUIZ,ASSIGNMENT,ACTIVITY"]
->>>>>>> 4b0cf694bc16ed53c5b26640fbd1cecb1793231b
         ];
     }
 

@@ -29,8 +29,6 @@ class Assessments extends Model
     public function scopeForModule(Builder $query, int $moduleId)
     {
         return $query->where("course_module_id", $moduleId);
-<<<<<<< HEAD
-=======
     }
 
     public function scopeActive(Builder $query)
@@ -51,6 +49,5 @@ class Assessments extends Model
     public function scopeViewAsTrainer(Builder $query)
     {
         return $query->where("status", RequestStatus::ACTIVE->value);
->>>>>>> 4b0cf694bc16ed53c5b26640fbd1cecb1793231b
     }
 }

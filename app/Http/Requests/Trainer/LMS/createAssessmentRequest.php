@@ -27,17 +27,6 @@ class createAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-<<<<<<< HEAD
-            "moduleId" => [
-                "nullable",
-                "exists:course_modules,id",
-                "required_without:id",
-            ],
-            "id" => [
-                "nullable",
-                "exists:trainings,id",
-                "required_without:moduleId",
-=======
             "course_module_id" => [
                 "nullable",
                 "exists:course_modules,id",
@@ -47,7 +36,6 @@ class createAssessmentRequest extends FormRequest
                 "nullable",
                 "exists:trainings,id",
                 "required_without:course_module_id",
->>>>>>> 4b0cf694bc16ed53c5b26640fbd1cecb1793231b
             ],
             "title" => ["required", "string"],
             "description" => ["required", "string"],
@@ -72,11 +60,7 @@ class createAssessmentRequest extends FormRequest
             response()->json([
                 "message" => $validator->errors(),
                 // "errors" => $errors,
-<<<<<<< HEAD
-            ], 200)
-=======
             ], 422)
->>>>>>> 4b0cf694bc16ed53c5b26640fbd1cecb1793231b
         );
     }
 }
