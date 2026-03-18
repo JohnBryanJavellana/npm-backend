@@ -7,14 +7,14 @@ use App\Http\Requests\Admin\LoginRequest;
 use App\Utils\AuditHelper;
 use Illuminate\Support\Facades\Auth;
 use App\Utils\TransactionUtil;
-
 use App\Enums\GuestAuditActions;
 
 class LoginController extends Controller
 {
-    public function login_user(LoginRequest $request) {
+    public function login_user(LoginRequest $request)
+    {
         return TransactionUtil::transact($request, [], function () use ($request) {
-            if(Auth::attempt($request->only('email', 'password'))){
+            if (Auth::attempt($request->only('email', 'password'))) {
                 $user = Auth::user();
 
                 if ($user->email_verified_at === null) {

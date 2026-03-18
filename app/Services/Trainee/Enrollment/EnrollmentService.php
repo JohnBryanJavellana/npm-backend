@@ -66,7 +66,8 @@ class EnrollmentService {
 
             "training.module.facilitator:id,course_module_id,user_id,role",
             "training.module.facilitator.facilitator:id,fname,mname,lname,email",
-            "invoice"
+            "invoice",
+            "enrolled_course_certificate.enrolled_course_certificates",
         ])
         ->whereKey($validated["courseId"])
         ->where("user_id", $validated["user_id"])

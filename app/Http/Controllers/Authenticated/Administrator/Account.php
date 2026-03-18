@@ -8,7 +8,6 @@ use App\Jobs\SendingEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Utils\TransactionUtil;
-use Illuminate\Support\Facades\Cache;
 use App\Mail\UpdatePasswordMail;
 use App\Enums\Administrator\{
     UserDetailsEnum,
@@ -28,12 +27,9 @@ use App\Events\{
 use App\Models\{
     AuditTrail,
     User,
-    CSM,
-    BookRes
 };
 use App\Utils\{
     AuditHelper,
-    ConvertToBase64,
 };
 use Illuminate\Support\Facades\{
     DB,
@@ -44,6 +40,7 @@ use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
 };
+use Carbon\Carbon;
 
 class Account extends Controller
 {
@@ -92,6 +89,46 @@ class Account extends Controller
 
             return response()->json(['activities' => $activities->get()], 200);
         });
+    }
+
+    public function getUserActivities(PaginationAuditViewRequest $request)
+    {
+        $validated = $request->validated();
+        $perPage = $validated["per_page"] ?? 10;
+        $search = $validated["search"] ?? null;
+        // $filter = $validated["filter"] ?? null;
+        $logs = AuditTrail::query()
+            ->select("id","actions", "created_at")
+            ->forUser($request->user()->id)
+            // ->with("user:id,fname,lname,mname")
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where("actions", "like", "%{$search}%")
+                    ->orWhereDate("created_at","like", "{$search}");
+                    //   ->orWhere("user_id", "like", "%{$search}%")
+                    //   ->orWhereHas("user", function ($sub) use ($search) {
+                    //         $sub->where("fname", "like", "%{$search}%")
+                    //             ->orWhere("lname", "like", "%{$search}%")
+                    //             ->orWhere("mname", "like", "%{$search}%");
+                });
+            })
+
+            // ->when($dateFrom && $dateTo, function ($query) use ($dateFrom, $dateTo) {
+            //     $query->whereBetween("created_at", [$dateFrom, $dateTo]);
+            // })
+
+            // ->when($dateFrom && !$dateTo, function ($query) use ($dateFrom) {
+            //     $query->whereDate("created_at", ">=", $dateFrom);
+            // })
+
+            // ->when(!$dateFrom && $dateTo, function ($query) use ($dateTo) {
+            //     $query->whereDate("created_at", "<=", $dateTo);
+            // })
+
+            ->latest("created_at")
+            ->paginate($perPage ?? 10);
+
+            return AuditLogResource::collection($logs);
     }
 
     /**
@@ -198,4 +235,73 @@ class Account extends Controller
             $user->save();
         });
     }
-}
+    /**
+     * Summary of audit_trail
+     * @param Request $request
+     */
+       public function audit_trail_filter(Request $request)
+        {
+            $request->validate([
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date',
+                'date' => 'nullable|date',
+                'year' => 'nullable|integer',
+                'month' => 'nullable|integer|min:1|max:12',
+                'quarter' => 'nullable|integer|min:1|max:4',
+            ]);
+
+            try {
+                $query = AuditTrail::query();
+
+                if ($request->date) {
+                    $date = Carbon::parse($request->date);
+                    $query->whereDate('created_at', $date);
+                }
+
+                elseif ($request->start_date && $request->end_date) {
+                    $start = Carbon::parse($request->start_date)->startOfDay();
+                    $end = Carbon::parse($request->end_date)->endOfDay();
+                    $query->whereBetween('created_at', [$start, $end]);
+                }
+
+                elseif ($request->year && $request->month) {
+                    $start = Carbon::parse("{$request->year}-{$request->month}-01")->startOfDay();
+                    $end = Carbon::parse("{$request->year}-{$request->month}-01")->endOfMonth()->endOfDay();
+                    $query->whereBetween('created_at', [$start, $end]);
+                }
+
+                elseif ($request->year && $request->quarter) {
+                    $quarterMonths = [
+                        1 => [1, 3],   // Q1: Jan - Mar
+                        2 => [4, 6],   // Q2: Apr - Jun
+                        3 => [7, 9],   // Q3: Jul - Sep
+                        4 => [10, 12], // Q4: Oct - Dec
+                    ];
+
+                    [$startMonth, $endMonth] = $quarterMonths[$request->quarter];
+
+                    $start = Carbon::parse("{$request->year}-{$startMonth}-01")->startOfDay();
+                    $end = Carbon::parse("{$request->year}-{$endMonth}-01")->endOfMonth()->endOfDay();
+
+                    $query->whereBetween('created_at', [$start, $end]);
+                }
+
+                elseif ($request->year) {
+                    $start = Carbon::parse("{$request->year}-01-01")->startOfDay();
+                    $end = Carbon::parse("{$request->year}-12-31")->endOfDay();
+                    $query->whereBetween('created_at', [$start, $end]);
+                }
+
+                $auditTrails = $query->orderBy('created_at', 'desc')->get();
+
+                return response()->json($auditTrails);
+
+            } catch (\Exception $e) {
+                return response()->json([
+                    'error' => 'Failed to fetch audit trails. ' . $e->getMessage()
+                ], 500);
+            }
+        }
+    }
+
+

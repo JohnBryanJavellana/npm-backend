@@ -75,4 +75,9 @@ class DormitoryTenant extends Model {
     {
         return $query->whereIn("tenant_status", RequestStatus::ActiveDomitoryRequests());
     }
+
+    public function scopeApprovedActive(Builder $query)
+    {
+        return $query->where("tenant_status", [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value]);
+    }
 }

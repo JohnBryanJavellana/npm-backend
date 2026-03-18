@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\{Attendance,User};
+use App\Models\{Attendance, EnrolledCourse, User};
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +16,7 @@ return new class extends Migration
             $table->engine = "innoDB";
             $table->id();
             $table->foreignIdFor(Attendance::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(EnrolledCourse::class)->constrained()->cascadeOnDelete();
             $table->enum("status", ["PRESENT","ABSENT","LATE"])->nullable();
             $table->dateTime('time_in')->nullable();
             $table->dateTime('time_out')->nullable();

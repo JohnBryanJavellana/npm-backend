@@ -14,6 +14,9 @@ class TraineeSingleRecResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
+        // return parent::toArray($request);
+
         return [
             "enrolled_course_id" => $this->id,
             "bgColor" => $this->bgColor,
@@ -57,6 +60,18 @@ class TraineeSingleRecResource extends JsonResource
             "trace_number" => $this->invoice?->trace_number,
             "verification_date" => $this->invoice?->verification_date,
             "invoice_created_at" => $this->invoice?->created_at,
+
+            "certificates" => $this->enrolled_course_certificate?->map(function($cert){
+                return [
+                    "id" => $cert->id,
+                    "cert_received_date" => $cert->cert_date_received,
+                    "name" => $cert->enrolled_course_certificates?->name,
+                    "header" => $cert->enrolled_course_certificates?->header,
+                    "header_1" => $cert->enrolled_course_certificates?->header_1,
+                    "header_2" => $cert->enrolled_course_certificates?->header_2,
+                    "body" => $cert->enrolled_course_certificates?->body,
+                ];
+            })
         ];
     }
 }

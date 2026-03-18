@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class EnrollmentInvoice extends Model
@@ -12,6 +14,7 @@ class EnrollmentInvoice extends Model
     public function training () {
         return $this->belongsTo(EnrolledCourse::class, 'enrolled_course_id', 'id');
     }
+
 
     public function payee() {
         return $this->hasOne(User::class, 'id', 'user_id');
@@ -25,5 +28,10 @@ class EnrollmentInvoice extends Model
     public function scopeForUser($query, $userId)
     {
         return $query->where("user_id", $userId);
+    }
+
+    public function scopePending(Builder $query)
+    {
+        return $query->where("invoice_status", RequestStatus::PENDING->value);
     }
 }

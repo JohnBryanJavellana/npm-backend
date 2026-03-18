@@ -16,6 +16,7 @@ use App\Models\{User,EnrolledCourse,DormitoryTenant, LibraryInvoice, BookRes};
 use App\Services\Trainee\Dormitory\DormitoryInvoiceService;
 use App\Services\Trainee\Enrollment\EnrollmentInvoiceService;
 use App\Services\Trainee\Library\LibraryInvoiceService;
+use App\Services\Trainee\Recreational\RecreationalInvoiceService;
 use DomainException;
 
 class TraineeInvoices extends Controller
@@ -24,7 +25,8 @@ class TraineeInvoices extends Controller
     public function __construct(
         protected DormitoryInvoiceService $dormitoryInvoiceService,
         protected LibraryInvoiceService $libraryInvoiceService,
-        protected EnrollmentInvoiceService $enrollmentInvoiceService
+        protected EnrollmentInvoiceService $enrollmentInvoiceService,
+        protected RecreationalInvoiceService $recreationalInvoiceService
     )
     {}
     public function get_all_trainee_invoices(Request $request) {
@@ -62,8 +64,6 @@ class TraineeInvoices extends Controller
     {
         try
         {
-        // $penaltiedStatuses = [RequestStatus::PENDING->value, RequestStatus::FOR_VERIFICATION->value];
-
         $records = BookRes::with([
             "borrowedBooks",
             "borrowedBooks.books.catalog.genre",
@@ -132,6 +132,18 @@ class TraineeInvoices extends Controller
         catch (\Exception $e) {
             \Log::info("error_view_dormitory_invoices", [$e]);
             return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
+        }
+    }
+
+    public function recreationalInvoices(Request $request)
+    {
+        try
+        {   
+            return $this->recreationalInvoiceService->getUserInvoice($request->user()->id);
+        }
+        catch (\Exception $e) {
+            \Log::error("recreationalInvoicesError");
+            return response()->json([$e->getMessage()], 500);
         }
     }
 }

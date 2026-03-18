@@ -39,9 +39,30 @@ class UserLibraryRule implements ValidationRule , DataAwareRule
         if($exists) {
             $fail("You still have a request with a “FOR CSM” status. Please fill it out before submitting a new request.");
         }
-        
+
+        $statuses = [
+            RequestStatus::PENDING->value,
+            RequestStatus::APPROVED->value,
+            RequestStatus::EXTENDING->value,
+            RequestStatus::EXTENDED->value,
+            RequestStatus::RENEWING->value,
+            RequestStatus::RENEWED->value,
+            RequestStatus::RECEIVED->value
+        ];
+
+        $bookCounts = BookReservation::query()
+        ->forUser($value)
+        ->whereIn("status", $statuses)
+        ->count();
+
+        $bookCountRequested = collect($this->data["data"])->pluck("book_id");
+
+        if(($bookCounts + $bookCountRequested->count()) > 3) {
+            $fail("You will exceed with your borrowing limit (3 books max). You already have {$bookCounts} active book requests.");
+        }
+
         $overDues = BookReservation::query()
-        ->where("status", RequestStatus::RECEIVED->value)
+        ->forUser($value)
         ->where('to_date', '<', now())
         ->where("type", "HARD-COPY")
         ->count();

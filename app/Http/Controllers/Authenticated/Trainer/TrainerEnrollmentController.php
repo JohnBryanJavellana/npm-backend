@@ -4,16 +4,10 @@ namespace App\Http\Controllers\Authenticated\Trainer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
-use App\Models\ChargeCategory;
-use App\Models\CourseModule;
-use App\Models\CourseModuleFee;
-use App\Models\EnrolledCourse;
-use App\Models\Training;
-use App\Models\TrainingSchedule;
-use App\Models\User;
+use App\Models\{EnrolledCourse, Training, AttendanceRecord};
 use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
+use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules\Can;
 
 class TrainerEnrollmentController extends Controller
 {
@@ -28,11 +22,9 @@ class TrainerEnrollmentController extends Controller
 
     public function viewAllTrainee(Request $request, $training)
     {
-        try
-        {
+        try {
             return $this->trainerEnrollmentService->getTrainees($training);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
         }
     }
@@ -55,39 +47,66 @@ class TrainerEnrollmentController extends Controller
         }
     }
 
-    //! Tigaman
+
     public function getCourseDetails(Request $request)
     {
+        return TransactionUtil::transact(
+            null,
+            [],
+            function () use ($request) {
 
-        $record = Training::with([
-            "module:id,module_type_id,name",
-            "module.moduleType",
-            "module.trainingFees:id,course_module_id,charge_category_id,name,amount",
-            "module.trainingFees.category:id,name",
-            "module.specific_requirements",
-            "module.schedules",
+                $record = Training::with([
+                    "module",
+                    "module.moduleType",
+                    "module.trainingFees:id,course_module_id,charge_category_id,name,amount",
+                    "module.trainingFees.category:id,name",
+                    "module.specific_requirements",
+                ])
+                    ->where('id', $request->trainingId)
+                    ->get();
 
-        ])
-            ->where('id', $request->trainingId)
-            ->get();
 
-        return response()->json([
-            "training" => $record,
-        ], 200);
+                return response()->json([
+                    "training" => $record,
+                ], 200);
+            }
+        );
     }
-
 
     public function getTraineeDetails(Request $request)
     {
-        try {
-            $list = EnrolledCourse::where('training_id', $request->trainingId)
-                ->with(['trainee',])
-                ->where('enrolled_course_status', 'ENROLLED')
-                ->get();
+        return TransactionUtil::transact(
+            null,
+            [],
+            function () use ($request) {
 
-            return response()->json(["data" => $list], 200);
-        } catch (\Exception $e) {
-            return response()->json(["message" => "Server Error", "error" => $e->getMessage()], 500);
-        }
+                try {
+                    $list = EnrolledCourse::where('training_id', $request->trainingId)
+                        ->with([
+                            'trainee',
+                            'traineeAttendanceRecord' => function ($query) use ($request) {
+                                $query->whereHas("attendance", function ($q) use ($request) {
+                                    $q->where([
+                                        "training_date" => $request->training_date,
+                                        "start_time" => $request->start_time,
+                                        "end_time" => $request->end_time
+                                    ]);
+                                });
+                            }
+                        ])
+                        ->where('enrolled_course_status', 'ENROLLED')
+                        ->get();
+
+                    return response()->json(["data" => $list], 200);
+                } catch (\Exception $e) {
+                    return response()->json(["message" => "Server Error", "error" => $e->getMessage()], 500);
+                }
+            }
+        );
+    }
+
+    public function getFacilitatorDetails(Request $request)
+    {
+        return AttendanceRecord::whereKey($request->attendance_id)->get();
     }
 }
