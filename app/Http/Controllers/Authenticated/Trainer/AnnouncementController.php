@@ -109,7 +109,7 @@ class AnnouncementController extends Controller
 
                     //! "message" => "Announcement updated successfully",
                     "update_id" => $id
-                    
+
                 ], 200);
             }
         );
