@@ -387,44 +387,44 @@ class DormitoryController extends Controller
      * @param Request $request
      */
     public function create_dormitory_rooms (Request $request) {
-    return TransactionUtil::transact(null, [], function() use ($request) {
-        if($request->room_count) {
-            $existingNumbers = DormitoryRoom::where('dormitory_id', $request->dormitoryId)
-                ->where('room_name', 'LIKE', "R$request->dormitoryId-%")
-                 ->orderByRaw('CAST(SUBSTRING_INDEX(room_name, "-", -0) AS UNSIGNED) ASC')
-                ->get()
-                ->map(fn($room) => (int) Str::afterLast($room->room_name, '-'))
-                ->toArray();
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            if($request->room_count) {
+                $existingNumbers = DormitoryRoom::where('dormitory_id', $request->dormitoryId)
+                    ->where('room_name', 'LIKE', "R$request->dormitoryId-%")
+                    ->orderByRaw('CAST(SUBSTRING_INDEX(room_name, "-", -0) AS UNSIGNED) ASC')
+                    ->get()
+                    ->map(fn($room) => (int) Str::afterLast($room->room_name, '-'))
+                    ->toArray();
 
-            $startFrom = !empty($existingNumbers) ? max($existingNumbers) + 1 : 0;
+                $startFrom = !empty($existingNumbers) ? max($existingNumbers) + 1 : 0;
 
-            for($i = 0; $i < $request->room_count; $i++) {
-                $room_name = "R$request->dormitoryId-" . ($startFrom + $i);
+                for($i = 0; $i < $request->room_count; $i++) {
+                    $room_name = "R$request->dormitoryId-" . ($startFrom + $i);
 
-                $exists = CheckForDocumentExistence::exists(
-                    DormitoryRoom::class,
-                    [
-                        'dormitory_id' => $request->dormitoryId,
-                        'room_name'    => $room_name,
-                    ],
-                    false,
-                    null,
-                    'id',
-                    "Room name $room_name already exists in this dormitory."
-                );
-                if ($exists) return $exists;
+                    $exists = CheckForDocumentExistence::exists(
+                        DormitoryRoom::class,
+                        [
+                            'dormitory_id' => $request->dormitoryId,
+                            'room_name'    => $room_name,
+                        ],
+                        false,
+                        null,
+                        'id',
+                        "Room name $room_name already exists in this dormitory."
+                    );
+                    if ($exists) return $exists;
 
-                $room = new DormitoryRoom;
-                $room->dormitory_id       = $request->dormitoryId;
-                $room->room_name          = $room_name;
-                $room->room_slot          = $request->room_slot;
-                $room->is_air_conditioned = "NO";
-                $room->save();
+                    $room = new DormitoryRoom;
+                    $room->dormitory_id       = $request->dormitoryId;
+                    $room->room_name          = $room_name;
+                    $room->room_slot          = $request->room_slot;
+                    $room->is_air_conditioned = "NO";
+                    $room->save();
+                }
             }
-        }
-        return $request->insideJob ? true : response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYROOM->value], 201);
-    });
-}
+            return $request->insideJob ? true : response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYROOM->value], 201);
+        });
+    }
 
     /**
      * Summary of update_dormitory_room
@@ -432,49 +432,49 @@ class DormitoryController extends Controller
      * @param bool returnedMessage === TRUE
      * @param Request $request
      */
-public function update_dormitory_room (Request $request) {
-    return TransactionUtil::transact(null, [], function() use ($request) {
+    public function update_dormitory_room (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
 
-        $this_room = DormitoryRoom::findOrFail($request->documentId);
+            $this_room = DormitoryRoom::findOrFail($request->documentId);
 
-        if ($request->room_name) {
-            if (empty(trim($request->room_name))) {
-                return response()->json(['message' => "Room name cannot be empty."], 422);
+            if ($request->room_name) {
+                if (empty(trim($request->room_name))) {
+                    return response()->json(['message' => "Room name cannot be empty."], 422);
+                }
+                $exists = CheckForDocumentExistence::exists(
+                    DormitoryRoom::class,
+                    [
+                        'dormitory_id' => $this_room->dormitory_id,
+                        'room_name'    => trim($request->room_name),
+                    ],
+                    true,
+                    $this_room->id,
+                    'id',
+                    "Room name $request->room_name already exists in this dormitory."
+                );
+                if ($exists) return $exists;
             }
-            $exists = CheckForDocumentExistence::exists(
-                DormitoryRoom::class,
-                [
-                    'dormitory_id' => $this_room->dormitory_id,
-                    'room_name'    => trim($request->room_name),
-                ],
-                true,
-                $this_room->id,
-                'id',
-                "Room name $request->room_name already exists in this dormitory."
+            $this_room->is_air_conditioned = $request->is_air_conditioned;
+            $this_room->remarks            = $request->remarks === 'null' ? NULL : $request->remarks;
+            $this_room->room_status        = $request->status;
+            if ($request->room_name) $this_room->room_name = trim($request->room_name);
+            $this_room->save();
+
+            AuditHelper::log(
+                $request->user()->id,
+                AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"
             );
-            if ($exists) return $exists;
-        }
-        $this_room->is_air_conditioned = $request->is_air_conditioned;
-        $this_room->remarks            = $request->remarks === 'null' ? NULL : $request->remarks;
-        $this_room->room_status        = $request->status;
-        if ($request->room_name) $this_room->room_name = trim($request->room_name);
-        $this_room->save();
 
-        AuditHelper::log(
-            $request->user()->id,
-            AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"
-        );
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
 
-        if(env('USE_EVENT')) {
-            event(
-                new BEDormitory(''),
-                new BEAuditTrail('')
-            );
-        }
-
-        return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"], 200);
-    });
-}
+            return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"], 200);
+        });
+    }
 
     /**
      * Summary of remove_room
