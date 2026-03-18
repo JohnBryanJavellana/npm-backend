@@ -14,6 +14,13 @@ class Assessments extends Model
     protected $guarded = ["id"];
 
 
+    public function sections()
+    {
+        return $this->hasMany(AssessmentSection::class);
+    }
+
+
+
     /** Scope */
     public function scopeForTraining(Builder $query, int $trainingId)
     {
@@ -32,5 +39,15 @@ class Assessments extends Model
     public function scopeType(Builder $query, $type)
     {
         return $query->where("type", $type);
+    }
+
+    public function scopeViewAsTrainee(Builder $query)
+    {
+        return $query->where(["status" => RequestStatus::ACTIVE->value, "is_hidden" => false]);
+    }
+
+    public function scopeViewAsTrainer(Builder $query)
+    {
+        return $query->where("status", RequestStatus::ACTIVE->value);
     }
 }

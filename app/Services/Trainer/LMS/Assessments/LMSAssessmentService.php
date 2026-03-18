@@ -3,6 +3,7 @@
 namespace App\Services\Trainer\LMS\Assessments;
 
 use App\Enums\LMS\AssessmentMessageResponse;
+use App\Enums\UserRoleEnum;
 use App\Models\{
     Assessments
 };
@@ -15,7 +16,7 @@ class LMSAssessmentService {
         protected Assessments $assessmentsModel
     ){}
 
-    public function getAssessments($validated)
+    public function getAssessments($validated, $userRole)
     {
         $courseId = $validated["course_module_id"] ?? null;
         $trainingId = $validated["training_id"] ?? null;
@@ -27,7 +28,8 @@ class LMSAssessmentService {
         })
         ->where("training_id", $trainingId)
         ->orWhere("course_module_id", $courseId)
-        ->active()
+        ->when($userRole === UserRoleEnum::TRAINER, fn($query) => $query->viewAsTrainer())
+        ->when($userRole === UserRoleEnum::TRAINEE, fn($query) => $query->viewAsTrainee())
         ->get();
     }
 
@@ -44,7 +46,7 @@ class LMSAssessmentService {
 
             return $this->assessmentsModel->create([
                 ...$validated,
-                "created_by" => $userId
+                "created_by" => $userId 
             ]);
         });
     }
@@ -52,7 +54,9 @@ class LMSAssessmentService {
 public function updateAssessment($validated, $user_id)
 {
     return DB::transaction(function () use ($validated, $user_id) {
-        $this->domainRuleValidation($validated);        
+        $this->domainRuleValidation($validated);      
+        
+
 
         $data = collect($validated)->only([
             'training_id',
@@ -73,6 +77,11 @@ public function updateAssessment($validated, $user_id)
 
         if (!empty($data['course_module_id'])) {
             $data['training_id'] = null;
+        }
+
+        $isHidden = filter_var($validated['is_hidden'], FILTER_VALIDATE_BOOLEAN);
+        if(\array_key_exists("is_hidden", $validated)) {
+            $data["is_hidden"] = $isHidden;    
         }
 
         $data['updated_by'] = $user_id;

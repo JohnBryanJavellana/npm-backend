@@ -15,15 +15,16 @@ use DomainException;
 class LMSAssessmentController extends Controller
 {
     public function __construct(
-        protected LMSAssessmentService $lmsAsssessmentService
+        protected LMSAssessmentService $lmsAssessmentService
     ){}
 
     public function view(viewAssessmentRequest $request)
     {
         try
         {
-            $validated = $request->validated();            
-            return $this->lmsAsssessmentService->getAssessments($validated);
+            $validated = $request->validated();
+            $userRole = $request->user()->role;
+            return $this->lmsAssessmentService->getAssessments($validated, $userRole);
         }
         catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
@@ -36,7 +37,7 @@ class LMSAssessmentController extends Controller
         try
         {
             $validated = $request->validated();
-            $this->lmsAsssessmentService->storeAssessment($validated, $request->user()->id);
+            $this->lmsAssessmentService->storeAssessment($validated, $request->user()->id);
             return response()->json(["message" => AssessmentMessageResponse::CREATED->value], 200);
         }
         catch (DomainException $e) {
@@ -52,7 +53,7 @@ class LMSAssessmentController extends Controller
     {
         try
         {   
-            $this->lmsAsssessmentService->updateAssessment($request->validated(), $request->user()->id);
+            $this->lmsAssessmentService->updateAssessment($request->validated(), $request->user()->id);
             return response()->json(["message" => AssessmentMessageResponse::UPDATED->value ], 200);
         }
         catch (\Exception $e) {
@@ -66,7 +67,7 @@ class LMSAssessmentController extends Controller
     {
         try
         {
-            $this->lmsAsssessmentService->deleteAssessmentById($request->validated());
+            $this->lmsAssessmentService->deleteAssessmentById($request->validated());
             return response()->json(["message" => "Assessment has been deleted successfully."], 200);
         }
         catch(DomainException $e) {

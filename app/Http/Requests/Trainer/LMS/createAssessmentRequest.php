@@ -42,8 +42,12 @@ class createAssessmentRequest extends FormRequest
             "instructions" => ["required", "string"],
             "passed_type" => ["required", "string"],
             "passing_score" => ["required","numeric"],
-            "start_date" => ["required", "date"],
-            "start_time" => ["required"],
+            "is_hidden" => ["sometimes","required", "boolean"],
+            "type" => ["required","in:EXAM,QUIZ,ACTIVITY,ASSSIGNMENT"],
+            "end_date" => ["sometimes","required", "date"],
+            "end_time" => ["sometimes","required"],
+            // "start_date" => ["required", "date"],
+            // "start_time" => ["required"],
             "time_limit" => ["required"],
         ];
     }

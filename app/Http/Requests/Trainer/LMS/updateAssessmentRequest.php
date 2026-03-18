@@ -18,7 +18,6 @@ class updateAssessmentRequest extends FormRequest
         \Log::info("dataUpdate", [$this->all()]);
         return $this->user() !== null && \in_array($this->user()?->role, UserRoleEnum::facilitatorRoles());
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -31,10 +30,12 @@ class updateAssessmentRequest extends FormRequest
             "training_id" => ["sometimes","required", "exists:trainings,id","required_without:training_id"],
             "course_module_id" => ["sometimes","required", "exists:course_modules,id","required_without:course_module_id"],
             "title" => ["sometimes","required", "string"],
+            "type" => ["sometimes","required", "in:EXAM,QUIZ,ASSIGNMENT,ACTIVITY"],
             "description" => ["sometimes","required", "string"],
             "instructions" => ["sometimes","required", "string"],
             "passed_type" => ["sometimes","required", "string"],
             "passing_score" => ["sometimes","required","numeric"],
+            "is_hidden" => ["sometimes","required", "boolean"],
             "start_date" => ["sometimes","required", "date"],
             "start_time" => ["sometimes","required"],
             "time_limit" => ["sometimes","required"],
