@@ -28,7 +28,9 @@ class LMSAssessmentService {
         })
         ->where("training_id", $trainingId)
         ->orWhere("course_module_id", $courseId)
-        ->when($userRole === UserRoleEnum::TRAINER, fn($query) => $query->viewAsTrainer())
+        ->when($userRole === UserRoleEnum::TRAINER, fn($query) => $query->with([
+            "sections"
+        ])->viewAsTrainer())
         ->when($userRole === UserRoleEnum::TRAINEE, fn($query) => $query->viewAsTrainee())
         ->get();
     }
