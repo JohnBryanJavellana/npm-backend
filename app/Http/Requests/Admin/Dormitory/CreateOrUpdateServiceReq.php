@@ -23,11 +23,9 @@ class CreateOrUpdateServiceReq extends FormRequest
     public function rules(): array
     {
         return [
-            'userId' => ['required'],
             'roomId' => ['required'],
             'tenantId' => ['required'],
             'service_id' => ['required'],
-            'charge' => ['required'],
             'httpMethod' => ['required'],
             'remarks' => [ Rule::when($this->status === "DECLINED", ['required'], ['nullable']) ],
             'documentId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ]
