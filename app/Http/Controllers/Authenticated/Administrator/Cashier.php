@@ -158,18 +158,15 @@ class Cashier extends Controller
     public function pay_walkin (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_payment = self::getTable($request->service, $request->documentId, null)->first();
+            $this_main_table = self::getTable($request->service, null, null, false, false)->first();
 
-            if($request->isInitial === true) {
-                $this_main_table = self::getTable($request->service, null, null, false, true)->first();
-
-                if($request->service === NotificationEnum::DORMITORY->value) {
-                    $this_main_table->tenant_status = CashierEnum::PAID;
-                } else if($request->service ===  NotificationEnum::ENROLLMENT->value) {
-                    $this_main_table->enrolled_course_status = CashierEnum::PAID;
-                }
-
-                $this_main_table->save();
+            if($request->service === NotificationEnum::DORMITORY->value) {
+                $this_main_table->tenant_status = CashierEnum::PAID;
+            } else if($request->service ===  NotificationEnum::ENROLLMENT->value) {
+                $this_main_table->enrolled_course_status = CashierEnum::PAID;
             }
+
+            $this_main_table->save();
 
             $this_payment->invoice_status = CashierEnum::PAID;
             $this_payment->received_amount = $request->receivedAmount;
@@ -309,11 +306,13 @@ class Cashier extends Controller
                 $this_fee->invoice_status = $request->verificationStatus;
                 $this_fee->save();
 
-                $this_main_table = self::getTable($request->service, null, null, false, true)->first();
+                $this_main_table = self::getTable($request->service, null, null, false, false)->first();
 
-                if($request->service === NotificationEnum::DORMITORY->value) {
+                \Log::info($this_main_table);
+
+                if($request->service === "DORMITORY") {
                     $this_main_table->tenant_status = CashierEnum::PAID;
-                } else if($request->service ===  NotificationEnum::ENROLLMENT->value) {
+                } else if($request->service === "ENROLLMENT") {
                     $this_main_table->enrolled_course_status = CashierEnum::PAID;
                 }
 
