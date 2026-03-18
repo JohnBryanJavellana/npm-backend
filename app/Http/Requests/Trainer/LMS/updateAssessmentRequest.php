@@ -35,7 +35,7 @@ class updateAssessmentRequest extends FormRequest
             "instructions" => ["sometimes","required", "string"],
             "passed_type" => ["sometimes","required", "string"],
             "passing_score" => ["sometimes","required","numeric"],
-            "is_hidden" => ["sometimes","required", "boolean"],
+            "is_hidden" => ["sometimes","required"],
             "start_date" => ["sometimes","required", "date"],
             "start_time" => ["sometimes","required"],
             "time_limit" => ["sometimes","required"],

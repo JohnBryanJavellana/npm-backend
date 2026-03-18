@@ -224,6 +224,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->prefix('lms/')->group(function () {
         Route::prefix("assessments/")->group(function () {
             Route::post("view_assessments", [LMSAssessmentController::class, "view"]);
+            Route::post("view_assessments/assessment", [LMSAssessmentController::class, "viewAssessmentContent"]);
             Route::post("create_assessments", [LMSAssessmentController::class, "create"]);
             Route::post("update_assessments", [LMSAssessmentController::class, "update"]);
             Route::post("delete_assessments", [LMSAssessmentController::class, "delete"]);

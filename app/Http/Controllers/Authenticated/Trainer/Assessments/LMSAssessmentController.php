@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Authenticated\Trainer\Assessments;
 
 use App\Enums\LMS\AssessmentMessageResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Trainer\LMS\Assessment\viewSpecificAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\createAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\deleteAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\updateAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
+use App\Http\Resources\Trainer\LMS\ViewAssessmentContentResource;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use DomainException;
 
@@ -30,6 +32,11 @@ class LMSAssessmentController extends Controller
             return response()->json([$e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
+    }
+
+    public function viewAssessmentContent(viewSpecificAssessmentRequest $request)
+    {
+        return new ViewAssessmentContentResource($this->lmsAssessmentService->getAssessmentContentById($request->validated()));
     }
 
     public function create(createAssessmentRequest $request)

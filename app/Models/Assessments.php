@@ -19,8 +19,6 @@ class Assessments extends Model
         return $this->hasMany(AssessmentSection::class);
     }
 
-
-
     /** Scope */
     public function scopeForTraining(Builder $query, int $trainingId)
     {

@@ -17,6 +17,11 @@ class AssessmentSection extends Model
         return $this->belongsTo(Assessments::class, "assessments_id", "id");
     }
 
+    public function questions()
+    {
+        return $this->hasMany(AssessmentQuestion::class);
+    }
+
         /** Scope */
     public function scopeForAssessment(Builder $query, $assessmentId)
     {

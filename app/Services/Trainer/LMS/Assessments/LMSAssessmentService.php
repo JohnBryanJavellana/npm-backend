@@ -21,18 +21,28 @@ class LMSAssessmentService {
         $courseId = $validated["course_module_id"] ?? null;
         $trainingId = $validated["training_id"] ?? null;
         $type = $validated["type"] ?? null;
-        
+    
         return $this->assessmentsModel->query()
         ->when($type, function($query) use ($type) { 
             $query->type($type);
         })
         ->where("training_id", $trainingId)
         ->orWhere("course_module_id", $courseId)
-        ->when($userRole === UserRoleEnum::TRAINER, fn($query) => $query->with([
-            "sections"
-        ])->viewAsTrainer())
-        ->when($userRole === UserRoleEnum::TRAINEE, fn($query) => $query->viewAsTrainee())
+        ->when($userRole === UserRoleEnum::TRAINEE->value, fn($query) => $query->viewAsTrainee())
+        ->when($userRole === UserRoleEnum::TRAINER->value, fn($query) => $query->viewAsTrainer())
         ->get();
+    }
+
+    public function getAssessmentContentById($validated)
+    {
+        return $this->assessmentsModel->query()
+        ->whereKey($validated["assessment_id"])
+        ->with([
+            "sections:id,assessments_id,title,instruction",
+            "sections.questions:id,assessment_section_id,question,type,score",
+            "sections.questions.options:id,assessment_question_id,option_text"
+        ])
+        ->first();
     }
 
     public function domainRuleValidation($validated) {
@@ -57,8 +67,6 @@ public function updateAssessment($validated, $user_id)
 {
     return DB::transaction(function () use ($validated, $user_id) {
         $this->domainRuleValidation($validated);      
-        
-
 
         $data = collect($validated)->only([
             'training_id',
@@ -81,8 +89,8 @@ public function updateAssessment($validated, $user_id)
             $data['training_id'] = null;
         }
 
-        $isHidden = filter_var($validated['is_hidden'], FILTER_VALIDATE_BOOLEAN);
         if(\array_key_exists("is_hidden", $validated)) {
+            $isHidden = filter_var($validated['is_hidden'], FILTER_VALIDATE_BOOLEAN);
             $data["is_hidden"] = $isHidden;    
         }
 
