@@ -158,7 +158,7 @@ class Cashier extends Controller
     public function pay_walkin (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_payment = self::getTable($request->service, $request->documentId, null)->first();
-            $this_main_table = self::getTable($request->service, null, null, false, false)->first();
+            $this_main_table = self::getTable($request->service, $this_payment->enrolled_course_id, null, true, false)->first();
 
             if($request->service === NotificationEnum::DORMITORY->value) {
                 $this_main_table->tenant_status = CashierEnum::PAID;
