@@ -37,6 +37,7 @@ class TrainerEnrollmentService
     {
         $userId = Auth::id();
         return $this->courseModuleModel->query()
+            ->with(["facilitator"])
             ->whereRelation("facilitator", "user_id", $userId)
             ->get();
     }

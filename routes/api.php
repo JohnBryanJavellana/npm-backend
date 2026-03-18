@@ -198,10 +198,13 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']); //*
             Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
             Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
-            Route::post('traineeAttendanceRecord', [AttendanceController::class, 'TraineeAttendanceRecord']); //! record
+            Route::post('traineeAttendanceRecord', [AttendanceController::class, 'TraineeAttendanceRecord']);
             Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
-            Route::post('update_attendance', [AttendanceController::class, 'UpdateRecordAttendance']);
+            Route::post('update_record', [AttendanceController::class, 'update_attendance_record']);
+
+            //! announcement
+
             Route::post('announcement_edit', [AnnouncementController::class, 'AnnouncementEdit']);
             Route::post('announcement_delete', [AnnouncementController::class, 'AnnouncementDelete']);
             Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
@@ -245,7 +248,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     });
 
 
-    //FOR RECREATIONALS
+    //!FOR RECREATIONALS
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
     Route::post('update_notification', [NotificationCtrl::class, 'update_notification']);
     Route::post('get_notifications', [NotificationCtrl::class, 'get_notifications']);

@@ -18,7 +18,7 @@ use App\Http\Requests\Trainee\Enrollment\ViewTraineeRecRequest;
 use App\Http\Resources\Trainee\Enrollment\ViewTraineeRecResource;
 use Illuminate\Http\Request;
 use App\Utils\{AuditHelper, GenerateUniqueFilename, SaveFile, Notifications};
-use App\Http\Resources\{TrainingListResource,AvailableTrainingsResource, SelectedTrainingResource};
+use App\Http\Resources\{TrainingListResource, AvailableTrainingsResource, SelectedTrainingResource};
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
 use App\Http\Resources\Trainee\Enrollment\RequirementListResource;
 use App\Http\Resources\Trainee\Enrollment\TraineeSingleRecResource;
@@ -38,6 +38,7 @@ use App\Services\Trainee\Enrollment\EnrollmentService;
 use App\Services\Trainee\Invoice\TraineeInvoiceService;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Validator;
 
 class TraineeEnrollment extends Controller
 {
@@ -54,8 +55,7 @@ class TraineeEnrollment extends Controller
     public function __construct(
         protected EnrollmentService $enrollmentService,
         // protected TraineeInvoiceService $traineeInvoiceService
-    )
-    {}
+    ) {}
 
     public function viewEnrolledCount(Request $request)
     {
@@ -72,10 +72,10 @@ class TraineeEnrollment extends Controller
                 ->with([
                     'trainee_file' => function ($q) use ($userId) {
                         $q->whereRelation('additional_info', 'user_id', '=', $userId)
-                        ->latest();
+                            ->latest();
                     },
                 ])
-                ->where(function($query) use ($module) {
+                ->where(function ($query) use ($module) {
                     $query->whereRelation('forModules', 'course_module_id', '=', $module)
                         ->orWhere("isBasic", "YES");
                 })
@@ -90,7 +90,8 @@ class TraineeEnrollment extends Controller
     }
 
     /** VIEW/GET AVAILABLE TRAINING SCHEDULES */
-    public function get_available_trainings (Request $request)   {
+    public function get_available_trainings(Request $request)
+    {
         try {
             $userId = $request->has("userId") && !is_null($request->userId) ? $request->userId : $request->user()->id ?? auth()->id();
 
@@ -99,13 +100,13 @@ class TraineeEnrollment extends Controller
                 "module.charge.chargeCategory",
                 "module.facilitator.facilitator"
             ])
-            ->whereDoesntHave('hasData', function($q) use($userId){
-                $q->where('user_id', $userId)
-                ->whereIn('enrolled_course_status', $this->restrictedStatuses);
-            })
-            ->where('status', Training::STATUS_ACTIVE);
+                ->whereDoesntHave('hasData', function ($q) use ($userId) {
+                    $q->where('user_id', $userId)
+                        ->whereIn('enrolled_course_status', $this->restrictedStatuses);
+                })
+                ->where('status', Training::STATUS_ACTIVE);
 
-            if($request->has("course_module_id")) {
+            if ($request->has("course_module_id")) {
                 $trainings->where("course_module_id", $request->course_module_id);
             }
 
@@ -127,20 +128,21 @@ class TraineeEnrollment extends Controller
         $courses = CourseModule::with([
             "trainingFees" => function ($query) {
                 $query->latest();
-                },
+            },
             "moduleType"
-            ])
-        ->whereHas("schedules")
-        ->whereDoesntHave("schedules.hasData", function($query) use ($userId){
-            $query->forUser($userId)->whereNotIn("enrolled_course_status", RequestStatus::notAllowedStatuses());
-        })
-        ->get();
+        ])
+            ->whereHas("schedules")
+            ->whereDoesntHave("schedules.hasData", function ($query) use ($userId) {
+                $query->forUser($userId)->whereNotIn("enrolled_course_status", RequestStatus::notAllowedStatuses());
+            })
+            ->get();
 
         \Log::info("getCourseModuleResponse", [$courses]);
         return CourseModuleResource::collection($courses);
     }
 
-    public function send_enrollment_request(EnrollmentRequest $request) {
+    public function send_enrollment_request(EnrollmentRequest $request)
+    {
         try {
             DB::beginTransaction();
             $validated = $request->validated();
@@ -150,16 +152,16 @@ class TraineeEnrollment extends Controller
             $addtional_info_id = AdditionalTraineeInfo::where('user_id', $user_id)->value('id');
 
             $training = Training::query()
-            ->whereKey($validated["training_id"])
-            ->active()
-            ->lockForUpdate()
-            ->firstOrFail(["id", "schedule_slot", "course_module_id"]);
+                ->whereKey($validated["training_id"])
+                ->active()
+                ->lockForUpdate()
+                ->firstOrFail(["id", "schedule_slot", "course_module_id"]);
 
             // $this->enrollmentService->validateTraining($training, $validated, $addtional_info_id);
             // \Log::info("vakudated", [$files]);
             // return response()->json(["data" => $request->all()], 422);
 
-            if ( !$addtional_info_id ) {
+            if (!$addtional_info_id) {
                 return response()->json(['message' => 'To get started, open My Account and enter some of your information.'], 422);
             }
 
@@ -171,7 +173,7 @@ class TraineeEnrollment extends Controller
             $selected_training->save();
 
             //SEPARATE CONCERN
-            foreach($validated["file_upload"] as $up_file) {
+            foreach ($validated["file_upload"] as $up_file) {
                 if ($up_file['is_basic'] == 'YES') {
                     $trainee_upload = TrainingRegFile::where([
                         'requirement_id' => $up_file['req_id'],
@@ -196,13 +198,13 @@ class TraineeEnrollment extends Controller
             AuditHelper::log($user_id, "User " . $user_id . " sent an enrollment request.OK");
             Notifications::notify(
                 $request->has("userId") && !is_null($request->userId) ? $request->user()->id : $user_id,
-                 $request->has("userId") && !is_null($request->userId) ? $user_id : null,
+                $request->has("userId") && !is_null($request->userId) ? $user_id : null,
                 "ENROLLMENT",
                 $request->has("userId") && !is_null($request->userId) ? "has created your enrollment request." : "has sent an enrollment request."
-                );
+            );
 
-            if(env("USE_EVENT")) {
-                event (
+            if (env("USE_EVENT")) {
+                event(
                     new BETraineeApplication(''),
                     new BEAuditTrail(''),
                     new BEAccount(''),
@@ -213,14 +215,11 @@ class TraineeEnrollment extends Controller
             DB::commit();
             AuditHelper::log($user_id, "User " . $user_id . " sent enrolment request.");
             return response()->json(['message' => 'Enrollment request sent successfully'], 201);
-        }
-        catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Training record not available."], 404);
-        }
-        catch (DomainException $e) {
+        } catch (DomainException $e) {
             throw $e;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("error send_enrollment_request", [$e]);
             return response()->json(['message' => "Something went wrong, Please try again!"], 400);
@@ -228,25 +227,24 @@ class TraineeEnrollment extends Controller
     }
 
     /** CANCELLING ENROLLMENT REQUESTS */
-    public function remove_training_request (CancelEnrollmentRequest $request) {
+    public function remove_training_request(CancelEnrollmentRequest $request)
+    {
         try {
             $validated = $request->validated();
             $this->enrollmentService->cancelEnrollmentRequest($validated);
 
             // //TRAINING ID PASS   
-            Training::where("id", $validated["training_id"])->increment('schedule_slot',1);
+            Training::where("id", $validated["training_id"])->increment('schedule_slot', 1);
             AuditHelper::log($validated["user_id"], "User " . $validated["user_id"] . " has cancelled training request. {$validated["training_id"]}");
 
-            if(env("USE_EVENT")) {
+            if (env("USE_EVENT")) {
                 event(new BETraineeApplication(''));
             }
             // AuditHelper::log($user_id, "User " . $user_id . " cancelled training request.");
             return response()->json(['message' => "You've successully cancelled a training request."], 200);
-        }
-        catch (DomainException $e) {
+        } catch (DomainException $e) {
             throw $e;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             // DB::rollback();
             \Log::error("error_remove_training_request", [$e]);
             return response()->json(['message' => "Something went wrong, Please try again"], 500);
@@ -254,20 +252,21 @@ class TraineeEnrollment extends Controller
     }
 
     /** UPDATING ENROLLMENT REQUESTS **/
-    public function update_requirements_request(UpdateRequirementRequest $request) {
+    public function update_requirements_request(UpdateRequirementRequest $request)
+    {
         $validated = $request->validated();
         $storedFiles = [];
 
         try {
-            DB::transaction(function() use ($validated, &$storedFiles) {
+            DB::transaction(function () use ($validated, &$storedFiles) {
                 $additional_id = AdditionalTraineeInfo::forUser($validated["user_id"])->value("id");
                 $files = $validated["file_upload"];
-                foreach($files as $file) {
+                foreach ($files as $file) {
                     if (strtoupper($file['is_basic']) === 'YES') {
-                        $filename = SaveFile::save($file['file'],'trainee-files');
+                        $filename = SaveFile::save($file['file'], 'trainee-files');
                         $storedFiles[] = ["trainee-files" => $filename];
 
-                            TrainingRegFile::updateOrCreate(
+                        TrainingRegFile::updateOrCreate(
                             [
                                 "requirement_id" => $file["requirement_id"],
                                 "additional_trainee_info_id" => $additional_id,
@@ -275,7 +274,7 @@ class TraineeEnrollment extends Controller
                             ["filename" => $filename]
                         );
                     } else {
-                        $filename = SaveFile::save($file['file'],'training_requirement_files');
+                        $filename = SaveFile::save($file['file'], 'training_requirement_files');
                         $storedFiles[] = ["training_requirement_files" => $filename];
                         TraineeRequirement::updateOrCreate(
                             [
@@ -290,17 +289,19 @@ class TraineeEnrollment extends Controller
 
             AuditHelper::log(
                 $validated["user_id"],
-                 in_array($request->user()->role, UserRoleEnum::enrollmentRoles())
+                in_array($request->user()->role, UserRoleEnum::enrollmentRoles())
                     ? "Admin " . $request->user()->id . " updated the enrollment request of trainee. " . $validated["user_id"] . "."
-                    : "User " . $request->user()->id . " updated an enrollment request.");
+                    : "User " . $request->user()->id . " updated an enrollment request."
+            );
 
             Notifications::notify(
                 $request->user()->id,
-                 in_array($request->user()->role, UserRoleEnum::enrollmentRoles()) ? $validated["user_id"] : null,
-                  "ENROLLMENT",
-                in_array($request->user()->role, UserRoleEnum::enrollmentRoles()) ? : "has updated their enrollement request");
+                in_array($request->user()->role, UserRoleEnum::enrollmentRoles()) ? $validated["user_id"] : null,
+                "ENROLLMENT",
+                in_array($request->user()->role, UserRoleEnum::enrollmentRoles()) ?: "has updated their enrollement request"
+            );
 
-            if(env("USE_EVENT")) {
+            if (env("USE_EVENT")) {
                 event(new BETraineeApplication(''), new BENotification(''));
             }
 
@@ -315,7 +316,8 @@ class TraineeEnrollment extends Controller
     }
 
     //for testing only
-    public function update_invoice_trainings (Request $request) {
+    public function update_invoice_trainings(Request $request)
+    {
         \Log::info('update_invoice_trainings: ', $request->all());
         return response()->json([$request->all()], 200);
         try {
@@ -342,29 +344,26 @@ class TraineeEnrollment extends Controller
                 AuditHelper::log($request->user()->id, "User " . $request->user()->id . " has proceed training/s for verification.");
             }
 
-            if(env("USE_EVENT")) {
+            if (env("USE_EVENT")) {
                 event(new BETraineeApplication(''));
             }
 
             DB::commit();
-            return response()->json(['message'=> 'Successfully updated'], 200);
+            return response()->json(['message' => 'Successfully updated'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error("error update_invoice_trainings", [$e->getMessage()]);
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
-
     }
     public function get_applications(ViewTraineeRecRequest $request)
     {
-        try
-        {
+        try {
             $validated = $request->validated();
             $record = $this->enrollmentService->getUserTrainings($validated);
 
             return ViewTraineeRecResource::collection($record);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("view_trainee_records", [$e]);
             return response()->json(["message" => "Something went wrong, Please try again"], 500);
         }
@@ -376,11 +375,9 @@ class TraineeEnrollment extends Controller
             $record = $this->enrollmentService->getUserTrainingById($validated);
 
             return new TraineeSingleRecResource($record);
-        }
-        catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Training record not available."], 404);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("get_application", [$e]);
             return response()->json([], 500);
         }
@@ -390,13 +387,14 @@ class TraineeEnrollment extends Controller
     {
         try {
             return response()->json(["data" => $this->enrollmentService->getRankLicense()], 200);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("viewRanksLicenses", [$e]);
         }
     }
 
-    public function change_card_color (Request $request) {
+    public function change_card_color(Request $request)
+    {
+
         $validations = [
             'documentId' => 'required',
             'bgColor' => 'required',
@@ -404,9 +402,9 @@ class TraineeEnrollment extends Controller
 
         $validator = \Validator::make($request->all(), $validations);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             $errors = $validator->errors()->messages();
-            return response()->json(['message' => implode(', ', $errors)],400);
+            return response()->json(['message' => implode(', ', $errors)], 400);
         } else {
             try {
                 DB::beginTransaction();
