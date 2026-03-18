@@ -65,7 +65,7 @@ class SendReturnReminders extends Command
 
                 //SAVE CUSTOM NOTIFICATION
                 Notification::create([
-                    'user_id' => 1,
+                    'user_id' => $user->id,
                     'to_user' => $user->id,
                     'type' => 'LIBRARY',
                     'message' => 'Reminder: Your borrowed book "' . $bookTitle . '" is due on ' . $dueDate,
