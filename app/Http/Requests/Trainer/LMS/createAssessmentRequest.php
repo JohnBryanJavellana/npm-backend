@@ -15,7 +15,7 @@ class createAssessmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("datadata", [$this->all()]);
+        \Log::info("datacreate", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -27,6 +27,7 @@ class createAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
+<<<<<<< HEAD
             "moduleId" => [
                 "nullable",
                 "exists:course_modules,id",
@@ -36,18 +37,32 @@ class createAssessmentRequest extends FormRequest
                 "nullable",
                 "exists:trainings,id",
                 "required_without:moduleId",
+=======
+            "course_module_id" => [
+                "nullable",
+                "exists:course_modules,id",
+                "required_without:training_id",
+            ],
+            "training_id" => [
+                "nullable",
+                "exists:trainings,id",
+                "required_without:course_module_id",
+>>>>>>> 4b0cf694bc16ed53c5b26640fbd1cecb1793231b
             ],
             "title" => ["required", "string"],
             "description" => ["required", "string"],
-            "passingScore" => ["required","numeric"],
-            "startDate" => ["required", "date"],
-            "dueDate" => ["required", "date"],
-            "startTime" => ["required"],
-            "dueTime" => ["required"],
-            "timeLimit" => ["required"],
+            "instructions" => ["required", "string"],
+            "passed_type" => ["required", "string"],
+            "passing_score" => ["required","numeric"],
+            "is_hidden" => ["sometimes","required", "boolean"],
+            "type" => ["required","in:EXAM,QUIZ,ACTIVITY,ASSSIGNMENT"],
+            "end_date" => ["sometimes","required", "date"],
+            "end_time" => ["sometimes","required"],
+            // "start_date" => ["required", "date"],
+            // "start_time" => ["required"],
+            "time_limit" => ["required"],
         ];
     }
-
 
     protected function failedValidation(Validator $validator)
     {
@@ -57,7 +72,11 @@ class createAssessmentRequest extends FormRequest
             response()->json([
                 "message" => $validator->errors(),
                 // "errors" => $errors,
+<<<<<<< HEAD
             ], 200)
+=======
+            ], 422)
+>>>>>>> 4b0cf694bc16ed53c5b26640fbd1cecb1793231b
         );
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class viewAssessmentRequest extends FormRequest
+class updateAssSectionRequest extends FormRequest
 {
     protected $stopOnFirstFailure = true;
     /**
@@ -14,8 +14,8 @@ class viewAssessmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("dataView", [$this->all()]);
-        return $this->user() !== null;
+        \Log::info("updateSection", [$this->all()]);
+        return $this->user() !== null;    
     }
 
     /**
@@ -26,14 +26,20 @@ class viewAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "training_id" => ["sometimes","required", "exists:trainings,id"],
-            "course_module_id" => ["sometimes","required", "exists:course_modules,id"],
-<<<<<<< HEAD
-=======
-            "type" => ["sometimes", "required", "in:EXAM,QUIZ,ASSIGNMENT,ACTIVITY"]
->>>>>>> 4b0cf694bc16ed53c5b26640fbd1cecb1793231b
+            "assessments_id" => ["required", "exists:assessments,id"],
+            "title" => ["sometimes", "required", "string", "max:255"],
+            "instruction" => ["sometimes", "required", "string"],
+            "status" => ["sometimes", "required", "in:ACTIVE,INACTIVE"],
         ];
     }
+
+    public function messages()
+    {
+        return[
+            "assessments_id.required" => "The parent assessment was not found."
+        ];  
+    }
+
 
     protected function failedValidation(Validator $validator)
     {

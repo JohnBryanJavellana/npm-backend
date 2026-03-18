@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Trainer\LMS;
+namespace App\Http\Requests\Trainer\LMS\Assessment;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class viewAssessmentRequest extends FormRequest
+class createAssQuestionRequest extends FormRequest
 {
     protected $stopOnFirstFailure = true;
     /**
@@ -14,7 +14,7 @@ class viewAssessmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        \Log::info("dataView", [$this->all()]);
+        \Log::info("AssQCreateData", [$this->all()]);
         return $this->user() !== null;
     }
 
@@ -26,15 +26,15 @@ class viewAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "training_id" => ["sometimes","required", "exists:trainings,id"],
-            "course_module_id" => ["sometimes","required", "exists:course_modules,id"],
-<<<<<<< HEAD
-=======
-            "type" => ["sometimes", "required", "in:EXAM,QUIZ,ASSIGNMENT,ACTIVITY"]
->>>>>>> 4b0cf694bc16ed53c5b26640fbd1cecb1793231b
+            "assessment_section_id" => ["required", "exists:assessment_sections,id"],
+            "question" => ["required", "string"],
+            "type" => ["required", "in:MCQ,TRUE_FALSE,ESSAY"],
+            "score" => ["required"],
+            "choices" => ["sometimes", "required", "array"],
+            "choices.*.option_text" => ["sometimes", "required", "string", "max:255"],
+            "choices.*.is_correct" => ["sometimes", "required"],
         ];
     }
-
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(

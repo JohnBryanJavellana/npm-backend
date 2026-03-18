@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignIdFor(CourseModule::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string("title");
             $table->text("description");
+            $table->longText("instructions");
             $table->enum("type", ["EXAM","QUIZ","ASSIGNMENTS","ACTIVITY"]);
             $table->enum("passed_type", ["questionnaire","file_upload"]);
             $table->integer("passing_score")->nullable();
