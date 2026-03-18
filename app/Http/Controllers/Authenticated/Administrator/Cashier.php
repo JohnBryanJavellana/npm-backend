@@ -306,9 +306,7 @@ class Cashier extends Controller
                 $this_fee->invoice_status = $request->verificationStatus;
                 $this_fee->save();
 
-                $this_main_table = self::getTable($request->service, null, null, false, false)->first();
-
-                \Log::info($this_main_table);
+                $this_main_table = self::getTable($request->service, $this_fee->dormitory_room_id, null, true, false)->first();
 
                 if($request->service === "DORMITORY") {
                     $this_main_table->tenant_status = CashierEnum::PAID;
