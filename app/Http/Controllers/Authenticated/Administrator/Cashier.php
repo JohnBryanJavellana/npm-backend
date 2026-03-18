@@ -162,16 +162,10 @@ class Cashier extends Controller
             if($request->isInitial === true) {
                 $this_main_table = self::getTable($request->service, $request->mainTable, null, true, true)->first();
 
-                switch($request->service) {
-                    case NotificationEnum::DORMITORY->value:
-                        $this_main_table->tenant_status = CashierEnum::PAID;
-                        break;
-
-                    case NotificationEnum::ENROLLMENT->value:
-                        $this_main_table->enrolled_course_status = CashierEnum::PAID;
-                        break;
-
-                    default: break;
+                if($request->service === NotificationEnum::DORMITORY->value) {
+                    $this_main_table->tenant_status = CashierEnum::PAID;
+                } else if($request->service ===  NotificationEnum::ENROLLMENT->value) {
+                    $this_main_table->enrolled_course_status = CashierEnum::PAID;
                 }
 
                 $this_main_table->save();
