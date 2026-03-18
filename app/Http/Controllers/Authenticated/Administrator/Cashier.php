@@ -316,7 +316,7 @@ class Cashier extends Controller
                 $this_fee->save();
 
                 if($request->isInitial) {
-                    $this_main_table = self::getTable($request->service, $request->mainTable, null, true, true)->first();
+                    $this_main_table = self::getTable($request->service, null, null, true, true)->first();
 
                     switch($request->service) {
                         case NotificationEnum::DORMITORY->value:
