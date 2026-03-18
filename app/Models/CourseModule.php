@@ -9,7 +9,8 @@ class CourseModule extends Model
 {
     use HasFactory;
 
-    public function hasData() {
+    public function hasData()
+    {
         return $this->hasMany(RequirementSpecificModule::class);
     }
 
@@ -23,7 +24,8 @@ class CourseModule extends Model
         );
     }
 
-    public function schedules() {
+    public function schedules()
+    {
         return $this->hasMany(Training::class, 'course_module_id', 'id');
     }
 
@@ -32,15 +34,18 @@ class CourseModule extends Model
      * Summary of charge
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function charge(){
+    public function charge()
+    {
         return $this->hasOne(Charge::class, 'id', 'charge_id');
     }
 
-    public function trainingFees() {
+    public function trainingFees()
+    {
         return $this->hasMany(CourseModuleFee::class, 'course_module_id', 'id');
     }
 
-    public function moduleType() {
+    public function moduleType()
+    {
         return $this->hasOne(ModuleType::class, 'id', 'module_type_id');
     }
 
@@ -50,11 +55,19 @@ class CourseModule extends Model
         return $this->hasMany(TrainingFacilitator::class, "course_module_id", "id");
     }
 
-
     public function certificates()
     {
         return $this->hasMany(MainCertificate::class, "course_module_id", "id");
     }
+    // public function attendances()
+    // {
+    //     return $this->hasMany(Attendance::class, 'user_id', 'id', 'training_id');
+    // }
+
+    // public function attendance_records()
+    // {
+    //     return $this->hasMany(AttendanceRecord::class, 'user_id', 'id', 'attendance_id');
+    // }
 
     /** Scopes */
 

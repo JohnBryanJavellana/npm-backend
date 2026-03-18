@@ -14,23 +14,25 @@ class AttendanceRecordResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // return parent::toArray($request);
-
         return [
-            'training_id'  => $this->training_id ?? null,
+            'training_id'   => $this->training_id ?? null,
             'attendance_id' => $this->id,
-            'date' => $this->training_date,
-            'created_at' => $this->created_at,
-            'trainees' => $this->attendance_records->map(function ($item) {
+            'date'          => $this->training_date,
+            'created_at'    => $this->created_at,
+            'trainees'      => $this->attendance_records->map(function ($item) {
+                $trainee = $item->enrolled_course->trainee ?? null;
+
                 return [
-                    'fname'    => $item->user->fname ?? null,
-                    'lname'    => $item->user->lname ?? null,
-                    'mname'    => $item->user->mname ?? null,
-                    'status'       => $item->status,
-                    'time_in'      => $item->time_in,
-                    'time_out'     => $item->time_out,
+                    'id' => $item->user_id ?? $trainee->id,
+                    'fname'    => $trainee->fname ?? null,
+                    'lname'    => $trainee->lname ?? null,
+                    'mname'    => $trainee->mname ?? null,
+                    'suffix'    => $trainee->suffix ?? null,
+                    'status'   => $item->status,
+                    'time_in'  => $item->time_in,
+                    'time_out' => $item->time_out,
                 ];
-            })
+            }),
         ];
     }
 }

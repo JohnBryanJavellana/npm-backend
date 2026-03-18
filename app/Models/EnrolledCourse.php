@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -11,19 +12,24 @@ class EnrolledCourse extends Model
     protected $guarded = ["id"];
 
     /** RELATIONS */
+
     public function enrolled_course_certificate()
     {
         return $this->hasMany(Certificate::class);
     }
 
-    public function trainee()
-    {
-        return $this->hasOne(User::class, 'id', 'user_id');
-    }
-
     public function training()
     {
         return $this->hasOne(Training::class, 'id', 'training_id');
+    }
+
+    public function trainee()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+    public function traineeAttendanceRecord()
+    {
+        return $this->hasMany(AttendanceRecord::class);
     }
 
     public function trainee_requirement()
@@ -41,10 +47,6 @@ class EnrolledCourse extends Model
         return $this->hasOne(EnrollmentInvoice::class, 'enrolled_course_id', 'id');
     }
 
-    public function traineeAttendanceRecord() {
-        return $this->hasMany(AttendanceRecord::class);
-    }
-
     /** SCOPES */
     public function scopeForUser($query, $user_id)
     {
@@ -54,6 +56,15 @@ class EnrolledCourse extends Model
     public function scopeStatus($query, $status)
     {
         return $query->whereIn("enrolled_course_status", $status);
+    }
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function scopeEnrolled($query)
+    {
+        return $query->where("enrolled_course_status", RequestStatus::ENROLLED->value);
     }
 
     public function scopeForTraining(Builder $query, $trainingId)

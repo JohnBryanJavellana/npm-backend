@@ -17,7 +17,8 @@ class ViewUserRecRecord extends FormRequest
     {
         //temporary
         \Log::info("tempt_data", $this->all());
-        return true;
+        return $this->user() !== null;
+        // return true;
     }
 
     /**

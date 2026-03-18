@@ -32,6 +32,8 @@ class PaginationViewRequest extends FormRequest
         ];
     }
 
+    
+
     protected function failedValidation(Validator $validator)
     {
         $errors = $validator->errors();

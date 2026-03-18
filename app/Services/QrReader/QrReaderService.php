@@ -12,11 +12,11 @@ class QrReaderService {
     {
         return $this->checkInOutLogModel->query()
         ->select("id","user_id","qr_reader_location_id","check_in","check_out","purpose","created_at")
+        ->where("user_id", $userId)
         ->with([
             "initiator:id,fname,lname,mname",
             "qrLocation:id,unit_name,location,type"
         ])
-        ->where("user_id", $userId)
         ->when($filter, function($fil_query) use ($filter) {
             $fil_query->whereRelation("qrLocation", "type", $filter);
         })

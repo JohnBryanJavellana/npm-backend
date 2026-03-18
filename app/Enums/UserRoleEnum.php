@@ -29,4 +29,13 @@ enum UserRoleEnum: string
             self::SUPERADMIN->value,
         ];
     }
+
+    public static function facilitatorRoles(): array
+    {
+        return [
+            self::SUPERADMIN->value,
+            self::ADMIN_ENROLLMENT->value,
+            self::TRAINER->value,
+        ];
+    }
 }

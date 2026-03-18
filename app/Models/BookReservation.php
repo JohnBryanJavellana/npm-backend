@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -65,5 +67,10 @@ class BookReservation extends Model
     public function scopeForNotInUse($query)
     {
         return $query->whereNotIn('status', $this->notInUseStatus);
+    }
+
+    public function scopeActiveReservation(Builder $query)
+    {
+        return $query->whereIn("status", RequestStatus::ActiveLibDashBoard());
     }
 }

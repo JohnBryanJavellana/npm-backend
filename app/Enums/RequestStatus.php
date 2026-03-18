@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use Symfony\Component\HttpFoundation\Request;
+
 enum RequestStatus: string {
 
     case ENROLLED = "ENROLLED";
@@ -120,6 +122,16 @@ enum RequestStatus: string {
             RequestStatus::PAID->value,
             RequestStatus::PROCESSING_PAYMENT->value,
             RequestStatus::RESERVED->value,
+        ];
+    }
+
+    public static function ActiveLibDashBoard(): array {
+        return [
+            self::APPROVED->value,
+            self::RECEIVED->value,
+            self::EXTENDING->value,
+            self::EXTENDED->value,
+            self::RENEWING->value,
         ];
     }
 }
