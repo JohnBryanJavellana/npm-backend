@@ -180,7 +180,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('view/penalties', [TraineeInvoices::class, 'library_penalties']);
             Route::post('update/penalties', [TraineeInvoices::class, 'updateLibInvoice']);
             Route::get('view/{tenant}', [TraineeInvoices::class, 'viewDormitoryInvoices']);
-            Route::post('billing/update', [TraineeInvoices::class, 'updatefDormInvoice']);
+            Route::post('billing/update', [TraineeInvoices::class, 'updateDormInvoice']);
             Route::post('enrollment/update', [TraineeInvoices::class, 'updateEnrollmentInvoice']);
             Route::get('view/{user}', [TraineeInvoices::class, 'recreationalInvoices']);
         });
@@ -225,6 +225,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     });
 
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->prefix('lms/')->group(function () {
+        Route::prefix("handouts/")->group(function () {
+            Route::post("view_handouts", [LMSHandoutController::class, "view"]);
+            Route::post("create_handouts", [LMSHandoutController::class, "store"]);
+        });
+
         Route::prefix("assessments/")->group(function () {
             Route::post("view_assessments", [LMSAssessmentController::class, "view"]);
             Route::post("view_assessments/assessment", [LMSAssessmentController::class, "viewAssessmentContent"]);

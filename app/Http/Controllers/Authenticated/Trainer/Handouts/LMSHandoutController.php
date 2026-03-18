@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Trainer\Handouts;
 
 use App\Services\Trainer\LMS\TrainerHandout\LMSHandoutService;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Trainer\LMS\Handout\storeHandoutsRequest;
 use Illuminate\Http\Request;
 
 class LMSHandoutController extends Controller
@@ -14,13 +15,18 @@ class LMSHandoutController extends Controller
 
     public function viewByCourseModule(Request $request)
     {
-        \Log::info("datadata", [$request->all()]);
         try
         {
-            return $this->LMSHandoutService->storeHandouts();
+            // return $this->LMSHandoutService->storeHandouts();
         }
         catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
+    }
+
+    public function store(storeHandoutsRequest $request)
+    {
+        $this->LMSHandoutService->storeHandouts($request->validated());
+        return;
     }
 }
