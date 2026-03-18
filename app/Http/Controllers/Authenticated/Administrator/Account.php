@@ -40,8 +40,7 @@ use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
 };
-use App\Http\Requests\AuditLog\PaginationAuditViewRequest;
-use App\Http\Resources\AuditLog\AuditLogResource;
+use Carbon\Carbon;
 
 class Account extends Controller
 {
@@ -236,4 +235,73 @@ class Account extends Controller
             $user->save();
         });
     }
-}
+    /**
+     * Summary of audit_trail
+     * @param Request $request
+     */
+       public function audit_trail_filter(Request $request)
+        {
+            $request->validate([
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date',
+                'date' => 'nullable|date',
+                'year' => 'nullable|integer',
+                'month' => 'nullable|integer|min:1|max:12',
+                'quarter' => 'nullable|integer|min:1|max:4',
+            ]);
+
+            try {
+                $query = AuditTrail::query();
+
+                if ($request->date) {
+                    $date = Carbon::parse($request->date);
+                    $query->whereDate('created_at', $date);
+                }
+
+                elseif ($request->start_date && $request->end_date) {
+                    $start = Carbon::parse($request->start_date)->startOfDay();
+                    $end = Carbon::parse($request->end_date)->endOfDay();
+                    $query->whereBetween('created_at', [$start, $end]);
+                }
+
+                elseif ($request->year && $request->month) {
+                    $start = Carbon::parse("{$request->year}-{$request->month}-01")->startOfDay();
+                    $end = Carbon::parse("{$request->year}-{$request->month}-01")->endOfMonth()->endOfDay();
+                    $query->whereBetween('created_at', [$start, $end]);
+                }
+
+                elseif ($request->year && $request->quarter) {
+                    $quarterMonths = [
+                        1 => [1, 3],   // Q1: Jan - Mar
+                        2 => [4, 6],   // Q2: Apr - Jun
+                        3 => [7, 9],   // Q3: Jul - Sep
+                        4 => [10, 12], // Q4: Oct - Dec
+                    ];
+
+                    [$startMonth, $endMonth] = $quarterMonths[$request->quarter];
+
+                    $start = Carbon::parse("{$request->year}-{$startMonth}-01")->startOfDay();
+                    $end = Carbon::parse("{$request->year}-{$endMonth}-01")->endOfMonth()->endOfDay();
+
+                    $query->whereBetween('created_at', [$start, $end]);
+                }
+
+                elseif ($request->year) {
+                    $start = Carbon::parse("{$request->year}-01-01")->startOfDay();
+                    $end = Carbon::parse("{$request->year}-12-31")->endOfDay();
+                    $query->whereBetween('created_at', [$start, $end]);
+                }
+
+                $auditTrails = $query->orderBy('created_at', 'desc')->get();
+
+                return response()->json($auditTrails);
+
+            } catch (\Exception $e) {
+                return response()->json([
+                    'error' => 'Failed to fetch audit trails. ' . $e->getMessage()
+                ], 500);
+            }
+        }
+    }
+
+
