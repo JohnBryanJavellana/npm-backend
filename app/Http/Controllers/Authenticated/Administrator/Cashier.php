@@ -160,7 +160,7 @@ class Cashier extends Controller
             $this_payment = self::getTable($request->service, $request->documentId, null)->first();
 
             if($request->isInitial === true) {
-                $this_main_table = self::getTable($request->service, $request->mainTable, null, true, true)->first();
+                $this_main_table = self::getTable($request->service, null, null, false, true)->first();
 
                 if($request->service === NotificationEnum::DORMITORY->value) {
                     $this_main_table->tenant_status = CashierEnum::PAID;
@@ -309,7 +309,7 @@ class Cashier extends Controller
                 $this_fee->invoice_status = $request->verificationStatus;
                 $this_fee->save();
 
-                $this_main_table = self::getTable($request->service, null, null, true, true)->first();
+                $this_main_table = self::getTable($request->service, null, null, false, true)->first();
 
                 if($request->service === NotificationEnum::DORMITORY->value) {
                     $this_main_table->tenant_status = CashierEnum::PAID;
