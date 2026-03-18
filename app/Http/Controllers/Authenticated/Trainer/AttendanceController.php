@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Utils\AuditHelper;
 use App\Utils\TransactionUtil;
 use function Symfony\Component\String\u;
+use Illuminate\Validation\Rule;
 
 class AttendanceController extends Controller
 {
@@ -20,7 +21,9 @@ class AttendanceController extends Controller
             null,
             [],
             function () use ($request) {
-                // \Log::info("Attendance record request: ", $request->all());
+
+                \Log::info("Attendance update request: ", $request->all());
+                
                 $validated = $request->validate([
                     'training_id' => 'required|exists:trainings,id',
                     'training_date' => 'required',
@@ -126,6 +129,7 @@ class AttendanceController extends Controller
 
         );
     }
+
     //! OLD CODE
     // public function attendance_record(Request $request)
     // {
@@ -234,45 +238,49 @@ class AttendanceController extends Controller
     //     );
     // }
 
+
     public function update_attendance_record(Request $request)
     {
-        return TransactionUtil::transact(
-            null,
-            [],
-            function () use ($request) {
-                $request->validate([
-                    'id' => 'required|exists:attendance_records,id',
-                    'status' => 'required|string|in:PRESENT,LATE,ABSENT',
-                    'enrolled_course_id' => 'required',
-                    'time_in' => 'nullable',
-                    'time_out' => 'nullable',
+        return TransactionUtil::transact(null, [], function () use ($request) {
 
-                ]);
+            Log::info('Attendance update request:', $request->all());
 
+            $validated = $request->validate([
+                'array' => ['required', 'array', 'min:1'],
+                'array.*.id' => ['required', 'integer', 'exists:attendance_records,id'],
+                'array.*.status' => ['required', 'string', Rule::in(['PRESENT', 'LATE', 'ABSENT'])],
+                'array.*.enrolled_course_id' => ['nullable', 'integer'],
+                'array.*.time_in' => ['nullable'],
+                'array.*.time_out' => ['nullable'],
+            ]);
 
-                AttendanceRecord::where('id', $id = $request->id)
-                    // ->with('attendance_id')
-                    // ->where('attendance_id', $request->attendance)
+            $updatedIds = [];
+
+            foreach ($validated['array'] as $row) {
+                $updated = AttendanceRecord::query()
+                    ->whereIn('id', $row['id'])
                     ->update([
-
-                        'status' => $request->status,
-                        'time_in' => $request->time_in ?? null,
-                        'time_out' => $request->time_out ?? null,
-
+                        'status' => $row['status'],
+                        'time_in' => $row['time_in'] ?? null,
+                        'time_out' => $row['time_out'] ?? null,
                     ]);
 
-                AuditHelper::log($request->user_id, "User $request->user_id has updated attendance record!");
-
-                return response()->json([
-                    "update_id" => $id
-
-                ], 200);
+                if ($updated) {
+                    $updatedIds[] = $row['id'];
+                }
             }
-        );
+
+            $actorId = optional($request->user())->id;
+            if ($actorId) {
+                AuditHelper::log($actorId, "User {$actorId} updated attendance record IDs: " . implode(',', $updatedIds));
+            }
+
+            return response()->json([
+                'updated_count' => count($updatedIds),
+                'updated_ids' => $updatedIds,
+            ], 200);
+        });
     }
-
-
-
 
 
     public function TraineeAttendanceRecord(Request $request)
@@ -295,40 +303,6 @@ class AttendanceController extends Controller
         );
     }
 
-    //! UpdateFunction
-    // public function UpdateRecordAttendance(Request $request)
-    // {
-
-    //     return TransactionUtil::transact(
-    //         null,
-    //         [],
-    //         function () use ($request) {
-
-    //             $request->validate([
-    //                 'records' => 'required|array',
-    //                 'records.*.id' => 'required|exists:attendance_records,id',
-    //                 'records.*.time_in' => 'nullable',
-    //                 'records.*.time_out' => 'nullable',
-    //                 'records.*.status' => 'nullable|string|accepted:PRESENT,LATE,ABSENT',
-    //             ]);
-
-    //             foreach ($request->records as $record) {
-
-    //                 AttendanceRecord::where('id', $record['id'])->update([
-    //                     'time_in' => $record['time_in'] ?? null,
-    //                     'time_out' => $record['time_out'] ?? null,
-    //                     'status' => $record['status'] ?? null
-    //                 ]);
-    //             }
-    //             AuditHelper::log($request->user_id, "User $request->user_id updated attendance!");
-
-    //             return response()->json([
-    //                 'message' => 'Attendance records updated successfully',
-
-    //             ], 200);
-    //         }
-    //     );
-    // }
 
     //! an folder ini 
     public function attendanceByGroup(Request $request)
@@ -336,9 +310,23 @@ class AttendanceController extends Controller
         $trainingId = $request->training_id;
         $trainingAttendaces = Attendance::with([
             "attendance_records.enrolled_course.trainee"
-        ])->where('training_id', $trainingId)
+        ])
+            ->where('training_id', $trainingId)
             ->get();
 
         return AttendanceRecordResource::collection($trainingAttendaces);
     }
+
+    // public function getAttendanceRecord(Request $request)
+    // {
+    //     $attendanceId = $request->attendance_id;
+
+    //     $attendanceRecord = AttendanceRecord::where('attendance_id', $attendanceId)
+    //         ->with('enrolled_course.trainee')
+    //         ->get();
+
+    //     return response()->json([
+    //         'data' => AttendanceRecordResource::collection($attendanceRecord),
+    //     ], 200);
+    // }
 }

@@ -15,7 +15,7 @@ class AttendanceRecordResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'training_id'   => $this->training_id ?? null,
+            'training_id'   => $this->training_id,
             'attendance_id' => $this->id,
             'date'          => $this->training_date,
             'created_at'    => $this->created_at,
@@ -23,6 +23,7 @@ class AttendanceRecordResource extends JsonResource
                 $trainee = $item->enrolled_course->trainee ?? null;
 
                 return [
+                    'attendance_record_id' => $item->id,
                     'id' => $item->user_id ?? $trainee->id,
                     'fname'    => $trainee->fname ?? null,
                     'lname'    => $trainee->lname ?? null,
