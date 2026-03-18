@@ -39,7 +39,11 @@ use App\Http\Controllers\Authenticated\Administrator\{
 
 use App\Http\Controllers\Authenticated\Logout;
 use App\Http\Controllers\Authenticated\QrReader\QrReaderController;
+use App\Http\Controllers\Authenticated\Trainer\Assessments\LMSAssessmentController;
+use App\Http\Controllers\Authenticated\Trainer\Assessments\LMSAssessmentQuestionController;
+use App\Http\Controllers\Authenticated\Trainer\Assessments\LMSAssessmentSectionController;
 use App\Http\Controllers\Authenticated\Trainer\AttendanceController;
+use App\Http\Controllers\Authenticated\Trainer\Handouts\LMSHandoutController;
 use App\Http\Controllers\Authenticated\Trainer\TrainerEnrollmentController;
 
 /** imported models */
@@ -207,7 +211,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
-
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->group(function () {
         Route::prefix('recreationals/')->group(function () {
             Route::post("qr_checker", [TraineeRecreational::class, "checkUniqueIdentifier"]);
@@ -221,6 +224,28 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
+    Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->prefix('lms/')->group(function () {
+        Route::prefix("assessments/")->group(function () {
+            Route::post("view_assessments", [LMSAssessmentController::class, "view"]);
+            Route::post("view_assessments/assessment", [LMSAssessmentController::class, "viewAssessmentContent"]);
+            Route::post("create_assessments", [LMSAssessmentController::class, "create"]);
+            Route::post("update_assessments", [LMSAssessmentController::class, "update"]);
+            Route::post("delete_assessments", [LMSAssessmentController::class, "delete"]);
+        });
+        Route::prefix('sections/')->group(function () {
+            Route::get("view_sections/{assessment}", [LMSAssessmentSectionController::class, "view"]);
+            Route::post("create_sections", [LMSAssessmentSectionController::class, "create"]);
+            Route::post("update_sections", [LMSAssessmentSectionController::class, "update"]);
+            Route::delete("delete_sections", [LMSAssessmentSectionController::class, "delete"]);
+        });
+
+        Route::prefix('questions/')->group(function () {
+            Route::get("view_questions/{section}", [LMSAssessmentQuestionController::class, "view"]);
+            Route::post("create_questions", [LMSAssessmentQuestionController::class, "create"]);
+            Route::post("update_questions", [LMSAssessmentQuestionController::class, "update"]);
+            Route::delete("delete_questions", [LMSAssessmentQuestionController::class, "delete"]);
+        });
+    });
 
 
     //!FOR RECREATIONALS

@@ -28,3 +28,4 @@ enum DormitoryEnum : string
     case LOST = 'LOST';
     case UNAVAILABLE = 'UNAVAILABLE';
 }
+

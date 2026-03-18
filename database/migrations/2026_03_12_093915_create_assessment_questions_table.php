@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Assessments;
+use App\Models\AssessmentSection;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,7 +16,8 @@ return new class extends Migration
         Schema::create('assessment_questions', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->foreignId("updated_by")->constrained("users");
+            $table->foreignIdFor(AssessmentSection::class)->constrained()->cascadeOnDelete();
+            $table->foreignId("updated_by")->nullable()->constrained("users");
             $table->longText("question");
             $table->enum("type", ["MCQ","TRUE_FALSE","ESSAY"]);
             $table->decimal("score",65);
