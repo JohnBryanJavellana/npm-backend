@@ -19,6 +19,21 @@ class Assessments extends Model
         return $this->hasMany(AssessmentSection::class);
     }
 
+    public function course()
+    {
+        return $this->belongsTo(CourseModule::class);
+    }
+
+    public function created_by()
+    {
+        return $this->belongsTo(User::class, "created_by", "id");
+    }
+    public function updated_by()
+    {
+        return $this->belongsTo(User::class, "updated_by", "id");
+    }
+
+
     /** Scope */
     public function scopeForTraining(Builder $query, int $trainingId)
     {

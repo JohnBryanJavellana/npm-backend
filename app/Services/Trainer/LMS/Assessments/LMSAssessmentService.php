@@ -5,7 +5,8 @@ namespace App\Services\Trainer\LMS\Assessments;
 use App\Enums\LMS\AssessmentMessageResponse;
 use App\Enums\UserRoleEnum;
 use App\Models\{
-    Assessments
+    Assessments,
+    CourseModuleHandouts
 };
 use Illuminate\Support\Facades\DB;
 use DomainException;
@@ -13,7 +14,8 @@ use DomainException;
 
 class LMSAssessmentService {
     public function __construct(
-        protected Assessments $assessmentsModel
+        protected Assessments $assessmentsModel,
+        protected CourseModuleHandouts $courseModuleHandouts
     ){}
 
     public function getAssessments($validated, $userRole)
@@ -22,7 +24,11 @@ class LMSAssessmentService {
         $trainingId = $validated["training_id"] ?? null;
         $type = $validated["type"] ?? null;
     
-        return $this->assessmentsModel->query()
+        $assessments =  $this->assessmentsModel->query()
+        ->with([
+            "created_by:id,fname,mname,lname",
+            "updated_by:id,fname,mname,lname"
+        ])
         ->when($type, function($query) use ($type) { 
             $query->type($type);
         })
@@ -31,6 +37,20 @@ class LMSAssessmentService {
         ->when($userRole === UserRoleEnum::TRAINEE->value, fn($query) => $query->viewAsTrainee())
         ->when($userRole === UserRoleEnum::TRAINER->value, fn($query) => $query->viewAsTrainer())
         ->get();
+
+        $handouts = $this->courseModuleHandouts->query()
+        ->with([
+            "uploaded_by:id,fname,mname,lname",
+            "updated_by:id,fname,mname,lname",
+            "upload"
+        ])
+        ->courseModule($courseId)
+        ->get();
+
+        return [
+            "assessments" => $assessments->toArray(), 
+            "materials" => $handouts->toArray()
+        ];
     }
 
     public function getAssessmentContentById($validated)

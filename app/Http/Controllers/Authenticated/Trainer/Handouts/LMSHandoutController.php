@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Authenticated\Trainer\Handouts;
 
+use App\Enums\LMS\AssessmentHandoutResponseMessage;
 use App\Services\Trainer\LMS\TrainerHandout\LMSHandoutService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Trainer\LMS\Handout\storeHandoutsRequest;
@@ -26,7 +27,15 @@ class LMSHandoutController extends Controller
 
     public function store(storeHandoutsRequest $request)
     {
-        $this->LMSHandoutService->storeHandouts($request->validated());
-        return;
+        try
+        {
+            $userId = $request->user()->id;
+            $this->LMSHandoutService->storeHandouts($request->validated(),$userId);
+            return response()->json(["message" => "Handout uploaded successfully."], 200);
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+
     }
 }
