@@ -261,7 +261,7 @@ class AttendanceController extends Controller
 
             foreach ($validated['records'] as $row) {
                 $updated = AttendanceRecord::query()
-                    ->where('id', $row['attendance_record_id']) // FIX: was whereIn()
+                    ->where('id', $row['attendance_record_id'])
                     ->update([
                         'status' => $row['status'],
                         'time_in' => $row['time_in'] ?? null,
