@@ -66,12 +66,12 @@ class DormitoryInclusionService {
          DB::transaction(function () use ($validated, $userId) {
 
             //prepareData
-            $invoice =$this->dormitoryInvoiceModel->create([
-                "user_id" => $userId,
-                "dormitory_tenant_id" => $validated["request_id"],
-                "type" => RequestStatus::INCLUSION,
-                "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
-            ]);
+            // $invoice =$this->dormitoryInvoiceModel->create([
+            //     "user_id" => $userId,
+            //     "dormitory_tenant_id" => $validated["request_id"],
+            //     "type" => RequestStatus::INCLUSION,
+            //     "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
+            // ]);
 
             $this->dormitoryInclusionRequest->create([
                 "dormitory_inventory_id" => $validated["inclusion_id"],

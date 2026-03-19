@@ -37,9 +37,6 @@ class LMSHandoutService {
             
                 foreach ($validated["files"] as $file) {
 
-                    \Log::info("file", [$file]);
-
-
                     $path = SaveFile::save($file, "course-module-handouts");
 
                     $uploads[] = [
