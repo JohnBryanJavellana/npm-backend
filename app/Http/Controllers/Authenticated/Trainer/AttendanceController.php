@@ -5,14 +5,14 @@ namespace App\Http\Controllers\Authenticated\Trainer;
 use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainer\AttendanceRecordResource;
-use App\Models\{User, Attendance, AttendanceRecord, EnrolledCourse, Training};
+use App\Models\{User, Attendance, AttendanceRecord, EnrolledCourse, Training, TrainingFacilitator};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Utils\AuditHelper;
 use App\Utils\TransactionUtil;
 use function Symfony\Component\String\u;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Support\Facades\DB;
 class AttendanceController extends Controller
 {
     public function attendance_record(Request $request)
@@ -329,4 +329,42 @@ class AttendanceController extends Controller
     //         'data' => AttendanceRecordResource::collection($attendanceRecord),
     //     ], 200);
     // }
+    public function color_background(Request $request)
+{
+
+    \Log::info('Attendance update request:', $request->all());
+
+
+    $validator = \Validator::make($request->all(), [
+        'id' => 'required',
+        'course_module_id' => 'required',
+        'user_id' => 'required',
+        'bgColor' => 'required',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 400);
+    }
+
+    try {
+        DB::beginTransaction();
+
+        $training = Training::find($request->id);
+
+        if (!$training) {
+            return response()->json(['message' => 'Training not found'], 404);
+        }
+
+        $training->bgColor = $request->bgColor;
+        $training->save();
+
+        DB::commit();
+
+        return response()->json(['message' => "Success!"], 200);
+
+    } catch (\Exception $e) {
+        DB::rollback();
+        return response()->json(['message' => $e->getMessage()], 500);
+    }
+}
 }

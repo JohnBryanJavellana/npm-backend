@@ -199,6 +199,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
             Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
             Route::post('traineeAttendanceRecord', [AttendanceController::class, 'TraineeAttendanceRecord']);
+            Route::post('color_bg',[AttendanceController::class,'color_background']);
             Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
             Route::post('update_record', [AttendanceController::class, 'update_attendance_record']);
