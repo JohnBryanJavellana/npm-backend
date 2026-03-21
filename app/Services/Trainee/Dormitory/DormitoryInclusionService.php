@@ -76,7 +76,7 @@ class DormitoryInclusionService {
             $this->dormitoryInclusionRequest->create([
                 "dormitory_inventory_id" => $validated["inclusion_id"],
                 "dormitory_tenant_id" => $validated["request_id"],
-                "dormitory_invoice_id" => $invoice->id,
+                // "dormitory_invoice_id" => $invoice->id,
                 "quantity" => $validated["quantity"]
             ]);
         });
