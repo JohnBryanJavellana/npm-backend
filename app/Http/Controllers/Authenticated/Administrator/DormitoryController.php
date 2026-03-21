@@ -8,6 +8,7 @@ use App\Enums\{
     AdministratorReturnResponse
 };
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Dormitory\CreateOrUpdateDormitoryRoom;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
 use App\Models\DormitoryItemBI;
@@ -37,7 +38,6 @@ use App\Utils\{
 use App\Events\{BEDormitory, BEAuditTrail};
 use App\Jobs\SaveAvatar;
 use App\Models\{
-    Dormitory,
     DormitoryRoom,
     DormitoryTenant,
     DormitoryRoomImage,
@@ -71,94 +71,92 @@ class DormitoryController extends Controller
         </div>";
     }
 
-    /**
-     * Summary of dormitories
-     * @param Request $request
-     */
-    public function dormitories (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $dormitories = Dormitory::withCount([
-                'rooms' => function ($query) {
-                    $query->where("room_status", DormitoryEnum::AVAILABLE->value);
-                }
-            ])->withCount([
-                'rooms'
-            ])->get();
-
-            return response()->json(['dormitories' => $dormitories], 200);
-        });
-    }
-
+    // GOOOOOOOOODSSS -->>>>>>>>>>>>>>>
     /**
      * Summary of get_dormitory_rooms
      * @param Request $request
-     * @param int $room_id
      */
-    public function get_dormitory_rooms (Request $request, int $room_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $room_id) {
-            $rooms = DormitoryRoom::withCount('hasData')
-                ->where('dormitory_id', $room_id)
-                ->get();
+    public function get_dormitory_rooms(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $room_managements = DormitoryRoom::withCount(['hasData'])
+                ->orderBy('wing')
+                ->orderBy('floor')
+                ->get()
+                ->groupBy(fn($item) => "Wing $item->wing - Floor $item->floor");
 
-            return response()->json(['rooms' => $rooms], 200);
+            return response()->json([
+                'room_managements' => $room_managements
+            ], 200);
         });
     }
 
     /**
-     * Summary of create_or_update_dormitory
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === TRUE
-     * @param CreateOrUpdateDormitory $request
+     * Summary of create_or_update_room
+     * @param Request $request
      */
-    public function create_or_update_dormitory (CreateOrUpdateDormitory $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
+    public function create_or_update_room(CreateOrUpdateDormitoryRoom $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
+            $room_name = $request->room_name;
+            $room_slot = $request->room_slot;
+            $dormitory = $request->dormitory;
+            $room_type = $request->room_type;
+            $guest_gender = $request->guest_gender;
+            $wing = $request->wing;
+            $floor = $request->floor;
+            $room_cost = $request->room_cost;
+            $guest_cost = $request->guest_cost;
+            $remarks = $request->remarks;
+            $data_room_image = $request->data_room_image;
+            $room_image = $request->room_image;
 
-            $this_dormitory = $isPost ? new Dormitory() : Dormitory::findOrFail($request->documentId);
-            $this_dormitory->room_name = $request->room_name;
-            $this_dormitory->room_description = $request->room_description;
-            $this_dormitory->room_cost = $request->room_cost;
-            $this_dormitory->guest_cost = $request->room_guest_cost;
-            $this_dormitory->room_fee_type = $request->room_fee_type;
-            $this_dormitory->save();
+            $this_room = $isPost ? new DormitoryRoom() : DormitoryRoom::where([
+                'id' =>  $documentId
+            ])->lockForUpdate()->firstOrFail();
 
-            if($isPost){
-                $fixedRequest = $request->merge([
-                    'insideJob' => true,
-                    'dormitoryId' => $this_dormitory->id
-                ]);
-                $this->create_dormitory_rooms($fixedRequest);
-            }
+            $this_room->room_name = $room_name;
+            $this_room->room_slot = $room_slot;
+            $this_room->dormitory = $dormitory;
+            $this_room->room_type = $room_type;
+            $this_room->guest_gender = $guest_gender;
+            $this_room->wing = $wing;
+            $this_room->floor = $floor;
+            $this_room->room_cost = $room_cost;
+            $this_room->guest_cost = $guest_cost;
+            $this_room->remarks = $remarks;
+            $this_room->save();
 
-            if($request->data_room_image) {
+            if($data_room_image) {
                 $room_images = DormitoryRoomImage::whereNotIn('id', $request->data_room_image)
-                    ->where('dormitory_id', $request->documentId)
+                    ->where('dormitory_room_id', $documentId)
                     ->get();
 
                 foreach($room_images as $item) {
-                    if(file_exists(public_path('room-images/' . $item->filename))) {
-                        unlink(public_path('room-images/' . $item->filename));
+                    if(file_exists(public_path("room-images/$item->filename"))) {
+                        unlink(public_path("room-images/$item->filename"));
                     }
 
                     $item->delete();
                 }
             }
 
-            if($request->room_image) {
+            if($room_image) {
                 foreach($request->room_image as $image) {
                     $room_image = new DormitoryRoomImage();
-                    $room_image->dormitory_id = $this_dormitory->id;
+                    $room_image->dormitory_room_id = $this_room->id;
 
                     $image_name = Str::uuid() . '-room-.png';
-                    ConvertToBase64::generate($image, 'image', "room-images/$image_name");
                     $room_image->filename = $image_name;
                     $room_image->save();
+
+                    SaveAvatar::dispatch($image, $image_name, "room-images", false, true, '');
                 }
             }
 
             AuditHelper::log(
                 $request->user()->id,
-                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORY->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORY->value . " ID#$this_dormitory->id"
+                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORY->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORY->value . " ID#$this_room->id"
             );
 
             if(env('USE_EVENT')) {
@@ -168,9 +166,120 @@ class DormitoryController extends Controller
                 );
             }
 
-            return response()->json(['message' => $isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORY->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORY->value . " ID#$this_dormitory->id"], 201);
+            return response()->json(['message' => $isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORY->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORY->value . " ID#$this_room->id"], 201);
         });
     }
+
+    /**
+     * Summary of remove_room
+     * @param Request $request
+     * @param int $roomId
+     */
+    public function remove_room (Request $request, int $roomId) {
+        return TransactionUtil::transact(null, [], function() use ($request, $roomId) {
+            $this_dorm = DormitoryRoom::withCount(['hasData'])->where('id', $roomId)->first();
+
+            if($this_dorm->has_data_count > 0) {
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYROOM->value], 200);
+            } else {
+                $this_dorm->delete();
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYROOM->value . " ID#$roomId"
+                );
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEDormitory(''),
+                        new BEAuditTrail('')
+                    );
+                }
+
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYROOM->value], 200);
+            }
+        });
+    }
+
+    /**
+     * Summary of services
+     * @param Request $request
+     */
+    public function services (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $services = DormitoryService::withCount('requestedService')->get();
+            return response()->json(['services' => $services], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_service
+     * @param CreateOrUpdateService $request
+     */
+    public function create_or_update_service (CreateOrUpdateService $request) {
+        return TransactionUtil::transact($request, ["dormitory:services:all"], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+
+            if($isPost) {
+                $this_service = new DormitoryService();
+            } else {
+                $this_service = DormitoryService::where('id', $request->documentId)->lockForUpdate()->firstOrFail();
+                $this_service->status = $request->status;
+            }
+
+            $this_service->name = $request->name;
+            $this_service->description = $request->description;
+            $this_service->charge = $request->charge;
+            $this_service->save();
+
+            AuditHelper::log(
+                $request->user()->id,
+                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value . " ID#$this_service->id"
+            );
+
+            if(env('USE_EVENT')) {
+                event(
+                    new BEDormitory(''),
+                    new BEAuditTrail('')
+                );
+            }
+
+            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value) . "ID# " . $this_service->id], 201);
+        });
+    }
+
+    /**
+     * Summary of remove_service
+     * @param Request $request
+     * @param int $service_id
+     */
+    public function remove_service (Request $request, int $service_id) {
+        return TransactionUtil::transact(null, [], function() use ($request, $service_id) {
+            $this_service = DormitoryService::withCount(['requestedService'])->where('id', $service_id)->first();
+
+            if($this_service->requested_service_count > 0) {
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value], 200);
+            } else {
+                $this_service->delete();
+
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYSERVICE->value . " ID#$service_id"
+                );
+
+                if(env('USE_EVENT')) {
+                    event(
+                        new BEDormitory(''),
+                        new BEAuditTrail('')
+                    );
+                }
+
+                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value], 200);
+            }
+        });
+    }
+
+    // END OF GOOOOOOOOODSSS -->>>>>>>>>>>>>>>
 
     /**
      * Summary of get_available_dorms
@@ -474,39 +583,6 @@ class DormitoryController extends Controller
             }
 
             return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYROOM->value . " ID#$this_room->id"], 200);
-        });
-    }
-
-    /**
-     * Summary of remove_room
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $room_id
-     */
-    public function remove_room (Request $request, int $room_id) {
-        return TransactionUtil::transact($request, [], function() use ($request, $room_id) {
-            $this_dorm = DormitoryRoom::withCount(['hasData'])->where('id', $room_id)->first();
-
-            if($this_dorm->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYROOM->value], 200);
-            } else {
-                $this_dorm->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYROOM->value . " ID#$room_id"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEDormitory(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYROOM->value], 200);
-            }
         });
     }
 
@@ -1051,83 +1127,6 @@ public function get_stock_reserved_tenant(Request $request) {
                 }
 
                 return response()->json(['message' => AdministratorAuditActions::DORMITORYCTRL_CANCELLED_DORMITORYREQ->value. "ID#$dormReqId"], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of services
-     * @param Request $request
-     */
-    public function services (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $services = DormitoryService::withCount('requestedService')->get();
-            return response()->json(['services' => $services], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_service
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateService $request
-     */
-    public function create_or_update_service (CreateOrUpdateService $request) {
-        return TransactionUtil::transact($request, ["dormitory:services:all"], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
-
-            $this_service = $isPost ? new DormitoryService() : DormitoryService::findOrFail($request->documentId);
-            $this_service->name = $request->name;
-            $this_service->description = $request->description;
-            $this_service->charge = $request->charge;
-            if($request->status) $this_service->status = $request->status;
-            $this_service->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value . " ID#$this_service->id"
-            );
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BEDormitory(''),
-                    new BEAuditTrail('')
-                );
-            }
-
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value) . "ID# " . $this_service->id], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_service
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $service_id
-     */
-    public function remove_service (Request $request, int $service_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $service_id) {
-            $this_service = DormitoryService::withCount(['requestedService'])->where('id', $service_id)->first();
-
-            if($this_service->requested_service_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value], 200);
-            } else {
-                $this_service->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYSERVICE->value . " ID#$service_id"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEDormitory(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value], 200);
             }
         });
     }
