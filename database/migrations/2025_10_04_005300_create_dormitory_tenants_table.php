@@ -20,7 +20,8 @@ return new class extends Migration
         'REJECTED',
         'PAID',
         "PROCESSING PAYMENT",
-        "RESERVED"
+        "RESERVED",
+        "FOR CSM"
     ];
 
     public const STATUS_OF_OCCUPANCY = [
@@ -42,7 +43,8 @@ return new class extends Migration
 
     public const ACCOMMODATION = [
         "SINGLE",
-        "SHARED"
+        "SHARED",
+        "COUPLE"
     ];
 
     /**
@@ -58,9 +60,9 @@ return new class extends Migration
             $table->string('trace_number', 255);
             $table->enum('transfer_type', ['ROOM', 'CLASS'])->nullable();
             $table->longText("purpose")->nullable();
-            $table->date('check_in_date');
-            $table->date('check_out_date');
-            $table->date('actual_check_out_date')->nullable();
+            $table->dateTime('check_in_datetime');
+            $table->dateTime('check_out_datetime');
+            $table->dateTime('offset_check_out_date')->nullable();
             $table->string('remarks')->nullable();
             $table->enum('accommodation', self::ACCOMMODATION)->default(self::ACCOMMODATION[1]);
             $table->enum('status_of_occupancy', self::STATUS_OF_OCCUPANCY)->default(self::STATUS_OF_OCCUPANCY[0]);
