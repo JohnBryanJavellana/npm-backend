@@ -7,6 +7,21 @@ use App\Models\Dormitory;
 
 return new class extends Migration
 {
+    public const ROOM_TYPE = [
+        'AIRCON',
+        'NON-AIRCON'
+    ];
+
+    public const FOR_GENDER = [
+        'MALE',
+        'FEMALE'
+    ];
+
+    public const FEE_TYPE = [
+        'OFFICERS',
+        'RATINGS'
+    ];
+
     /**
      * Run the migrations.
      */
@@ -19,7 +34,9 @@ return new class extends Migration
             $table->string('room_name', 255);
             $table->integer('room_slot');
             $table->enum('room_status', ['AVAILABLE', 'OCCUPIED', 'RESERVED', 'UNAVAILABLE'])->default('AVAILABLE');
-            $table->enum('is_air_conditioned',["YES", "NO"]);
+            $table->enum('room_type', self::ROOM_TYPE)->default(self::ROOM_TYPE[1]);
+            $table->enum('for_gender', self::FOR_GENDER);
+            $table->enum('fee_type', self::FEE_TYPE);
             $table->longText('remarks')->nullable();
             $table->timestamps();
         });
