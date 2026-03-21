@@ -239,132 +239,52 @@ class AttendanceController extends Controller
     // }
 
 
-    public function update_attendance_record(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request) {
-
-            Log::info('Attendance update request:', $request->all());
-
-            $validated = $request->validate([
-                'array' => ['required', 'array', 'min:1'],
-                'array.*.id' => ['required', 'integer', 'exists:attendance_records,id'],
-                'array.*.status' => ['required', 'string', Rule::in(['PRESENT', 'LATE', 'ABSENT'])],
-                'array.*.enrolled_course_id' => ['nullable', 'integer'],
-                'array.*.time_in' => ['nullable'],
-                'array.*.time_out' => ['nullable'],
-            ]);
-
-            $updatedIds = [];
-
-            foreach ($validated['array'] as $row) {
-                $updated = AttendanceRecord::query()
-                    ->whereIn('id', $row['id'])
-                    ->update([
-                        'status' => $row['status'],
-                        'time_in' => $row['time_in'] ?? null,
-                        'time_out' => $row['time_out'] ?? null,
-                    ]);
-
-                if ($updated) {
-                    $updatedIds[] = $row['id'];
-                }
-            }
-
-            $actorId = optional($request->user())->id;
-            if ($actorId) {
-                AuditHelper::log($actorId, "User {$actorId} updated attendance record IDs: " . implode(',', $updatedIds));
-            }
-
-            return response()->json([
-                'updated_count' => count($updatedIds),
-                'updated_ids' => $updatedIds,
-            ], 200);
-        });
-    }
-
-
-    public function TraineeAttendanceRecord(Request $request)
-    {
-        return TransactionUtil::transact(
-            null,
-            [],
-            function () use ($request) {
-                return EnrolledCourse::with([
-                    "trainee",
-                    "traineeAttendanceRecord" => function ($query) use ($request) {
-                        //! $query->whereRelation("attendance", "id", "=", $request->attendance_id);
-                        $query->where(["training" => $request->training_id, "training_date" => $request->training_date]);
-                    }
-                ])
-                    ->status([RequestStatus::ENROLLED->value])
-                    ->where("training_id", $request->training_id)
-                    ->get();
-            }
-        );
-    }
-
-
-    //! an folder ini 
-    public function attendanceByGroup(Request $request)
-    {
-        $trainingId = $request->training_id;
-        $trainingAttendaces = Attendance::with([
-            "attendance_records.enrolled_course.trainee"
-        ])
-            ->where('training_id', $trainingId)
-            ->get();
-
-        return AttendanceRecordResource::collection($trainingAttendaces);
-    }
-
-    // public function getAttendanceRecord(Request $request)
-    // {
-    //     $attendanceId = $request->attendance_id;
-
-    //     $attendanceRecord = AttendanceRecord::where('attendance_id', $attendanceId)
-    //         ->with('enrolled_course.trainee')
-    //         ->get();
-
-    //     return response()->json([
-    //         'data' => AttendanceRecordResource::collection($attendanceRecord),
-    //     ], 200);
-    // }
     public function color_background(Request $request)
 {
-
-    \Log::info('Attendance update request:', $request->all());
-
+    \Log::info('Color update request:', $request->all());
 
     $validator = \Validator::make($request->all(), [
-        'id' => 'required',
         'course_module_id' => 'required',
-        'user_id' => 'required',
-        'bgColor' => 'required',
+        'bgColor' => 'required|string',
+        'user' => 'required',
     ]);
 
     if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 400);
+        return response()->json(['errors' => $validator->errors()], 422);
     }
 
     try {
         DB::beginTransaction();
 
-        $training = Training::find($request->id);
+        $facilitator = TrainingFacilitator::where('course_module_id', $request->course_module_id)
+            ->where('user_id', $request->user()->id)
+            ->first();
 
-        if (!$training) {
-            return response()->json(['message' => 'Training not found'], 404);
+        if (!$facilitator) {
+            \Log::warning('Facilitator not found', ['course_module_id' => $request->course_module_id, 'user_id' => $request->user()->id]);
+            return response()->json([
+                'message' => 'Facilitator record not found'
+            ], 404);
         }
 
-        $training->bgColor = $request->bgColor;
-        $training->save();
+        $facilitator->bgColor = $request->bgColor;
+        $facilitator->save();
 
         DB::commit();
 
-        return response()->json(['message' => "Success!"], 200);
+        return response()->json([
+            'message' => 'Color updated successfully!',
+            'data' => $facilitator
+        ], 200);
 
     } catch (\Exception $e) {
         DB::rollback();
-        return response()->json(['message' => $e->getMessage()], 500);
+        \Log::error('Color update failed:', ['error' => $e->getMessage()]);
+
+        return response()->json([
+            'message' => 'Something went wrong.',
+            'error' => $e->getMessage()
+        ], 500);
     }
 }
 }
