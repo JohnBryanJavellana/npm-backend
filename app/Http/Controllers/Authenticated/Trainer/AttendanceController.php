@@ -241,13 +241,12 @@ class AttendanceController extends Controller
 
     public function color_background(Request $request)
 {
-    \Log::info('Color update request:', $request->all());
+    \Log::info('REQUEST DATA', $request->all());
 
-    $validator = \Validator::make($request->all(), [
-        'course_module_id' => 'required',
-        'bgColor' => 'required|string',
-        'user' => 'required',
-    ]);
+   $validator = \Validator::make($request->all(), [
+    'course_module_id' => 'required|exists:course_modules,id',
+    'bgColor' => 'required|string',
+]);
 
     if ($validator->fails()) {
         return response()->json(['errors' => $validator->errors()], 422);
