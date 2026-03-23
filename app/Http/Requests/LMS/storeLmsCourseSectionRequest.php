@@ -26,9 +26,13 @@ class storeLmsCourseSectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "day_number" => ["required"],
+            "day_number" => ["required", "integer"],
+            "title" => ["required"],
+            "description" => ["required"],
             "label" => ["required"],
             "course_module_id" => ["required", "exists:course_modules,id"],
+            "files" => ["required", "array"],
+            "files.*" => ["required", "file", "mimes:pdf,doc,docx,ppt,pptx,jpg,jpeg,png,mp4,mp3","max:10240"],
         ];
     }
 

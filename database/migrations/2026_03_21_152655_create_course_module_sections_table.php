@@ -18,6 +18,7 @@ return new class extends Migration
             $table->tinyInteger("day_number");
             $table->string("label", 255)->nullable();
             $table->enum("status", ["ACTIVE","INACTIVE"])->default("ACTIVE");
+            $table->foreignId("updated_by")->nullable()->constrained("users");
             $table->timestamps();
         });
     }

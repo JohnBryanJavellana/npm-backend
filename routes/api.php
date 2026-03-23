@@ -251,7 +251,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
        Route::prefix('courses/')->group(function () {
-            Route::get("view_courses/{section}", [LMSController::class, "view"]);
+            Route::post("view_courses", [LMSController::class, "view"]);
             Route::post("create_courses", [LMSController::class, "create"]);
             Route::post("update_courses", [LMSController::class, "update"]);
             Route::delete("delete_courses", [LMSController::class, "delete"]);

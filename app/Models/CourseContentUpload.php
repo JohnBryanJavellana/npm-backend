@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class CourseContentUpload extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        "course_content_id",
+        "original_filename",
+        "filepath",
+        "status",
+    ];
 }
