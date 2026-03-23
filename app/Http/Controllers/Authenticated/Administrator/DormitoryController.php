@@ -1241,48 +1241,20 @@ public function get_stock_reserved_tenant(Request $request) {
         });
     }
 
+    /**
+     * Summary of request_service
+     * @param CreateOrUpdateServiceReq $request
+     */
     public function request_service (CreateOrUpdateServiceReq $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $this_service = $request->httpMethod === "POST"
                 ? new DormitoryReqService()
                 : DormitoryReqService::where('id', $request->documentId)->lockForUpdate()->first();
 
-            $descriptionHtml = $this->addDescription(
-        "<div style='display: flex; align-items: center; justify-content: space-between;'>
-                    <div style='font-weight: bold; color: #6c757d;'>Service Charge</div>
-                    <div>₱" . number_format((float) $request->charge) . "</div>
-                </div>"
-            );
-
-            $invoiceId = $request->httpMethod === "POST"
-                ? new DormitoryInvoice()
-                : DormitoryInvoice::findOrFail($this_service->dormitory_invoices_id);
-
-            $invoiceId->user_id = $request->userId;
-            $invoiceId->dormitory_tenant_id = $request->tenantId;
-            $invoiceId->charge_id = $request->chargeId;
-
-            if($request->httpMethod === "POST") {
-                $invoiceId->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRINV-');
-                $invoiceId->isInitial = "N";
-            }
-
-            $invoiceId->description = $descriptionHtml;
-            if($request->charge <= 0 && !\in_array($request->status, ["CANCELLED", "DECLINED"])) $invoiceId->invoice_status = "PAID";
-            if($request->status === "CANCELLED") {;
-                $invoiceId->invoice_status = "CANCELLED";
-            }
-
-            $invoiceId->total_amount = $request->charge;
-            $invoiceId->remarks = $request->remarks;
-            $invoiceId->save();
-
             $this_service->dormitory_tenant_id = $request->tenantId;
             $this_service->dormitory_service_id = $request->service_id;
-            $this_service->charge = $request->charge;
             $this_service->remarks = $request->remarks;
             $this_service->status = $request->httpMethod === "POST" ? "APPROVED" : $request->status;
-            $this_service->dormitory_invoices_id = $invoiceId->id;
             $this_service->save();
 
             Notifications::notify($request->user()->id, $request->userId, "DORMITORY", "We have ". ($request->httpMethod === "POST" ? 'created' : 'updated') . " a dormitory service request for you.");
@@ -1299,57 +1271,46 @@ public function get_stock_reserved_tenant(Request $request) {
         });
     }
 
-
-/**
- * Summary of get_requested_service
- * @param Request $request
- */
-public function get_requested_service (Request $request) {
-    return TransactionUtil::transact(null, [], function() use ($request) {
-
-        if ($request->serviceId && !DormitoryService::where('id', $request->serviceId)->exists()) {
-            return response()->json(['message' => "Service ID $request->serviceId not found."], 404);
-        }
-
-        $reqTemp = DormitoryReqService::with([
-            'services',
-            'tenant.boarder'
-        ]);
-
-        if($request->tenantId) {
-            $reqTemp->where('dormitory_tenant_id', $request->tenantId);
-        }
-
-        if($request->serviceId) {
-            $reqTemp->where('dormitory_service_id', $request->serviceId);
-        }
-
-        if($request->status) {
-            if(is_array($request->status)) {
-                $reqTemp->whereIn('status', $request->status);
-            } else {
-                $reqTemp->where('status', $request->status);
+    /**
+     * Summary of get_requested_service
+     * @param Request $request
+     */
+    public function get_requested_service (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            if ($request->serviceId && !DormitoryService::where('id', $request->serviceId)->exists()) {
+                return response()->json(['message' => "Service ID $request->serviceId not found."], 404);
             }
-        }
 
-        $requestedServices = $reqTemp->get()->map(function($service) {
-            return [
-                'tenant_id'      => $service->tenant?->id,
-                'service_name'   => $service->services?->name ?? 'N/A',
-                'requestor_name' => $service->tenant && $service->tenant->boarder
-                    ? $service->tenant->boarder->fname . ' ' . $service->tenant->boarder->lname
-                    : 'N/A',
-                'status'         => $service->status,
-                'created_at'     => $service->created_at,
-            ];
+            $reqTemp = DormitoryReqService::with([
+                'services',
+                'tenant.boarder'
+            ]);
+
+            if($request->tenantId) {
+                $reqTemp->where('dormitory_tenant_id', $request->tenantId);
+            }
+
+            if($request->serviceId) {
+                $reqTemp->where('dormitory_service_id', $request->serviceId);
+            }
+
+            if($request->status) {
+                if(\is_array($request->status)) {
+                    $reqTemp->whereIn('status', $request->status);
+                } else {
+                    $reqTemp->where('status', $request->status);
+                }
+            }
+
+            $requestedServices = $reqTemp->orderBy('created_at', 'DESC')->get();
+
+            return response()->json([
+                'requestedServices' => $requestedServices,
+                'total'             => $requestedServices->count(),
+            ], 200);
         });
+    }
 
-        return response()->json([
-            'requestedServices' => $requestedServices,
-            'total'             => $requestedServices->count(),
-        ], 200);
-    });
-}
     /**
      * Summary of update_requested_service
      * @param bool auditActions === TRUE

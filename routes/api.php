@@ -32,6 +32,7 @@ use App\Http\Controllers\Authenticated\Trainee\{
 
 use App\Http\Controllers\Authenticated\Administrator\{
     Account,
+    LMSController,
     NotificationCtrl,
 };
 
@@ -180,7 +181,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('view/penalties', [TraineeInvoices::class, 'library_penalties']);
             Route::post('update/penalties', [TraineeInvoices::class, 'updateLibInvoice']);
             Route::get('view/{tenant}', [TraineeInvoices::class, 'viewDormitoryInvoices']);
-            Route::post('billing/update', [TraineeInvoices::class, 'updatefDormInvoice']);
+            Route::post('billing/update', [TraineeInvoices::class, 'updateDormInvoice']);
             Route::post('enrollment/update', [TraineeInvoices::class, 'updateEnrollmentInvoice']);
             Route::get('view/{user}', [TraineeInvoices::class, 'recreationalInvoices']);
         });
@@ -202,9 +203,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
             Route::post('update_record', [AttendanceController::class, 'update_attendance_record']);
-
             //! announcement
-
             Route::post('announcement_edit', [AnnouncementController::class, 'AnnouncementEdit']);
             Route::post('announcement_delete', [AnnouncementController::class, 'AnnouncementDelete']);
             Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
@@ -227,6 +226,11 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     });
 
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->prefix('lms/')->group(function () {
+        Route::prefix("handouts/")->group(function () {
+            Route::post("view_handouts", [LMSHandoutController::class, "view"]);
+            Route::post("create_handouts", [LMSHandoutController::class, "store"]);
+        });
+
         Route::prefix("assessments/")->group(function () {
             Route::post("view_assessments", [LMSAssessmentController::class, "view"]);
             Route::post("view_assessments/assessment", [LMSAssessmentController::class, "viewAssessmentContent"]);
@@ -247,8 +251,14 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("update_questions", [LMSAssessmentQuestionController::class, "update"]);
             Route::delete("delete_questions", [LMSAssessmentQuestionController::class, "delete"]);
         });
-    });
 
+       Route::prefix('courses/')->group(function () {
+            Route::post("view_courses", [LMSController::class, "view"]);
+            Route::post("create_courses", [LMSController::class, "create"]);
+            Route::post("update_courses", [LMSController::class, "update"]);
+            Route::delete("delete_courses", [LMSController::class, "delete"]);
+        });    
+    });
 
     //!FOR RECREATIONALS
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);

@@ -26,6 +26,7 @@ class CreateInclusionRequest extends FormRequest
             "request_id" => "required|exists:dormitory_tenants,id",
             "inclusion_id" => "required|exists:dormitory_inventories,id",
             "quantity" => "required|integer",
+            "amount" => "nullable"
         ];
     }
 }
