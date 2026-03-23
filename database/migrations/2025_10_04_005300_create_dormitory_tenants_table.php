@@ -57,6 +57,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(DormitoryRoom::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class, 'updated_by')->nullable()->constrained('users')->cascadeOnDelete();
             $table->string('trace_number', 255);
             $table->enum('transfer_type', ['ROOM', 'CLASS'])->nullable();
             $table->longText("purpose")->nullable();

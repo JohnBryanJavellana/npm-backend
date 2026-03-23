@@ -9,6 +9,7 @@ use App\Enums\{
 };
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Dormitory\CreateOrUpdateDormitoryRoom;
+use App\Http\Requests\Admin\Dormitory\GetMatchRooms;
 use App\Http\Requests\Admin\Dormitory\NewRoomReservation;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
@@ -404,6 +405,31 @@ class DormitoryController extends Controller
             }
 
             return response()->json(['message' => "New Reservation has been saved."], 200);
+        });
+    }
+
+    /**
+     * Summary of get_match_rooms
+     * @param GetMatchRooms $request
+     */
+    public function get_match_rooms(GetMatchRooms $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $accommodation = $request->accommodation;
+            $dormitory = $request->dormitory;
+            $room_type = $request->room_type;
+
+            $room_managements = DormitoryRoom::where([
+                'accommodation' => $accommodation,
+                'dormitory' => $dormitory,
+                'room_type' => $room_type
+            ])->orderBy('wing')
+            ->orderBy('floor')
+            ->get()
+            ->groupBy(fn($item) => "Wing $item->wing - Floor $item->floor");
+
+            return response()->json([
+                'room_managements' => $room_managements
+            ], 200);
         });
     }
 
