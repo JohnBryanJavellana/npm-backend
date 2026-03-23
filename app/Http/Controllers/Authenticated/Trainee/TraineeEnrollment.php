@@ -236,7 +236,7 @@ class TraineeEnrollment extends Controller
             // //TRAINING ID PASS   
             Training::where("id", $validated["training_id"])->increment('schedule_slot', 1);
             AuditHelper::log($validated["user_id"], "User " . $validated["user_id"] . " has cancelled training request. {$validated["training_id"]}");
-
+            
             if (env("USE_EVENT")) {
                 event(new BETraineeApplication(''));
             }
