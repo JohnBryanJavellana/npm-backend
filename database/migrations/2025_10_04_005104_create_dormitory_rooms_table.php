@@ -28,6 +28,12 @@ return new class extends Migration
         'FEMALE'
     ];
 
+    public const ACCOMMODATION = [
+        "SINGLE",
+        "SHARED",
+        "COUPLE"
+    ];
+
     /**
      * Run the migrations.
      */
@@ -43,6 +49,7 @@ return new class extends Migration
             $table->enum('guest_gender', self::GUEST_GENDER);
             $table->enum('wing', self::WING);
             $table->integer('floor');
+            $table->enum('accommodation', self::ACCOMMODATION)->default(self::ACCOMMODATION[1]);
             $table->double('room_cost', 65, 2);
             $table->double('guest_cost', 65, 2);
             $table->longText('remarks')->nullable();

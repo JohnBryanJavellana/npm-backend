@@ -133,6 +133,7 @@ class DormitoryController extends Controller
             $floor = $request->floor;
             $room_cost = $request->room_cost;
             $guest_cost = $request->guest_cost;
+            $accommodation = $request->accommodation;
             $remarks = $request->remarks;
             $data_room_image = $request->data_room_image;
             $room_image = $request->room_image;
@@ -149,6 +150,7 @@ class DormitoryController extends Controller
             $this_room->wing = $wing;
             $this_room->floor = $floor;
             $this_room->room_cost = $room_cost;
+            $this_room->accommodation = $accommodation;
             $this_room->guest_cost = $guest_cost;
             $this_room->remarks = $remarks;
             $this_room->save();

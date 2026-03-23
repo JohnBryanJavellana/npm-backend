@@ -34,6 +34,7 @@ class CreateOrUpdateDormitoryRoom extends FormRequest
             'guest_cost' => ['required', 'numeric'],
             'data_room_image' => ['sometimes', 'array'],
             'room_image' => ['sometimes', 'array'],
+            'accommodation' => ['required', 'in:SINGLE,SHARED,COUPLE'],
 
             'httpMethod' => ['required', 'in:POST,UPDATE'],
             'documentId' => [Rule::when($this->httpMethod === "UPDATE", ['required', 'exists:dormitory_rooms,id'], ['nullable'])],
