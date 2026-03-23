@@ -207,8 +207,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('announcement_edit', [AnnouncementController::class, 'AnnouncementEdit']);
             Route::post('announcement_delete', [AnnouncementController::class, 'AnnouncementDelete']);
             Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
-
-            Route::post('handouts/create', [AttendanceController::class, 'practice']);
         });
     });
 
@@ -252,12 +250,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete("delete_questions", [LMSAssessmentQuestionController::class, "delete"]);
         });
 
-       Route::prefix('courses/')->group(function () {
+        Route::prefix('courses/')->group(function () {
             Route::post("view_courses", [LMSController::class, "view"]);
             Route::post("create_courses", [LMSController::class, "create"]);
             Route::post("update_courses", [LMSController::class, "update"]);
             Route::delete("delete_courses", [LMSController::class, "delete"]);
-        });    
+        });
     });
 
     //!FOR RECREATIONALS

@@ -20,13 +20,14 @@ class AttendanceController extends Controller
     public function attendance_record(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-
+            \Log::info("Attendance record request: ", $request->all());
             $validated = $request->validate([
                 'training_id' => 'required|exists:trainings,id',
                 'training_date' => 'required|date',
                 'start_time' => 'nullable',
                 'end_time' => 'nullable',
                 'records' => 'required|array',
+                'records.*.profile_picture' => 'required|string',
                 'records.*.enrolled_course_id' => 'required|exists:enrolled_courses,id',
                 'records.*.time_in' => 'nullable|date',
                 'records.*.time_out' => 'nullable|date',

@@ -24,27 +24,37 @@ class LMSController extends Controller
      */
     public function __construct(
         protected LMSCourseService $lmsCourseService
-    ){}
+    ) {}
 
     public function view(Request $request)
     {
-        try
-        {
-            return $this->lmsCourseService->getCourseModules($request->course_module_id, $request->section_id);            
-        }
-        catch (\Exception $e) {
-
+        try {
+            return $this->lmsCourseService->getCourseModules($request->course_module_id, $request->section_id);
+        } catch (\Exception $e) {
         }
     }
 
     public function create(storeLmsCourseSectionRequest $request)
     {
-        try
-        {
-            return $this->lmsCourseService->storeCourseSections($request->validated());        
-        }
-        catch (\Exception $e) {
+        try {
+            return $this->lmsCourseService->storeCourseSections($request->validated());
+        } catch (\Exception $e) {
             \Log::error("sectionStore", [$e->getMessage()]);
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+    }
+
+    
+
+    public function update(Request $request)
+    {
+        try {
+            return $this->lmsCourseService->updateCourseSections($request->all());
+        } catch (\Exception $e) {
+           
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error("sectionUpdate", [$e->getMessage()]);
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
