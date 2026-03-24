@@ -610,7 +610,6 @@ class LibraryController extends Controller
      */
     public function update_reservation(UpdateBookRequest $request){
         return TransactionUtil::transact($request, ["book_reservations_cache"], function() use ($request) {
-            \Log::info("Received request to update reservation status", ['request' => $request->all()]);
             $reservation = BookReservation::findOrFail($request->documentId);
             $reservation->status = $request->status;
 
@@ -636,7 +635,7 @@ class LibraryController extends Controller
             }
 
             $hasActiveItems = BookReservation::where('book_res_id', $reservation->book_res_id)
-                ->whereNotIn('status', ['PENDING', 'RECEIVED'])
+                ->whereIn('status', ['PENDING', 'RECEIVED', 'EXTENDING', 'EXTENDED', 'RENEWING'])
                 ->exists();
 
             if (!$hasActiveItems) {
