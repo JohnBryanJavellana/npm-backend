@@ -253,7 +253,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
        Route::prefix('courses/')->group(function () {
             Route::post("view_courses", [LMSController::class, "view"]);
             Route::post("create_courses", [LMSController::class, "create"]);
-            Route::post("update_courses", [LMSController::class, "update"]);
+            Route::post("update_course_sections", [LMSController::class, "updateForContentParent"]);
+            Route::post("update_course_contents", [LMSController::class, "updateForContent"]);
             Route::delete("delete_courses", [LMSController::class, "delete"]);
         });    
     });

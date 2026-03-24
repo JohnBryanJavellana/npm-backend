@@ -7,7 +7,6 @@ use App\Models\CourseContent;
 use App\Models\CourseContentUpload;
 use App\Models\CourseModuleSection;
 use App\Utils\AuditHelper;
-use App\Utils\GenerateUniqueFilename;
 use App\Utils\SaveFile;
 use Illuminate\Support\Facades\DB;
 
@@ -22,14 +21,14 @@ class LMSCourseService {
     {
         $builder = $this->courseModuleSectionModel->query()
         ->active()
-        ->forCourseModule($courseModuleId)
-        ->with([
-            "contents",
-            "contents.uploads"
-        ]);
+        ->forCourseModule($courseModuleId);
 
         return $builder->when($section_id, function ($query) {
-            return $query->first();
+        return $query->with([
+                "contents",
+                "contents.uploads",
+                "updator:id,fname,mname,lname"
+            ])->first();
         }, function ($query) {
             return $query->get();
         });
@@ -89,7 +88,7 @@ class LMSCourseService {
     {
         DB::transaction(function () use ($validated, $userId){
             $data = collect($validated);
-            $this->courseModuleSectionModel->update([
+            $this->courseModuleSectionModel->whereKey($validated["id"])->update([
                 ...$data->only([
                     "day_number",
                     "label",

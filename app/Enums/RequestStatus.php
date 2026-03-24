@@ -134,4 +134,14 @@ enum RequestStatus: string {
             self::RENEWING->value,
         ];
     }
+
+    public static function CompleteBookRequest(): array 
+    {
+        return [
+            self::REJECTED->value,
+            self::CANCELLED->value,
+            self::LOST->value,
+            self::DAMAGED->value,
+        ];
+    }
 }

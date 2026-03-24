@@ -26,6 +26,7 @@ class updateLmsContentParentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            "id" => ["required", "exists:course_module_sections,id"],
             "day_number" => ["sometimes", "required", "integer"],
             "label" => ["sometimes", "required", "string"],
             "status" => ["sometimes", "required", "in:ACTIVE,INACTIVE"],

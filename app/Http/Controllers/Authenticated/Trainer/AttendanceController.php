@@ -321,6 +321,7 @@ class AttendanceController extends Controller
 
         return AttendanceRecordResource::collection($trainingAttendaces);
     }
+
     // public function getAttendanceRecord(Request $request)
     // {
     // $attendanceId = $request->attendance_id;
@@ -333,5 +334,4 @@ class AttendanceController extends Controller
     // 'data' => AttendanceRecordResource::collection($attendanceRecord),
     // ], 200);
     // }
-
 }
