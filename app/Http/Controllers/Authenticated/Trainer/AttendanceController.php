@@ -243,7 +243,7 @@ class AttendanceController extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
 
-            Log::info('Attendance update request:', $request->all());
+            \Log::info('Attendance update request:', $request->all());
 
             $validated = $request->validate([
                 'array' => ['required', 'array', 'min:1'],
@@ -281,7 +281,6 @@ class AttendanceController extends Controller
             ], 200);
         });
     }
-
 
     public function TraineeAttendanceRecord(Request $request)
     {
