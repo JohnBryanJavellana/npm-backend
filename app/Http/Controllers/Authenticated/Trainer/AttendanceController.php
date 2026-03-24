@@ -288,7 +288,6 @@ class AttendanceController extends Controller
         });
     }
 
-
     public function TraineeAttendanceRecord(Request $request)
     {
         return TransactionUtil::transact(

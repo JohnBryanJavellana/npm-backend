@@ -16,6 +16,7 @@ class CourseModuleSection extends Model
         "day_number",
         "label",
         "status",
+        "updated_by",
     ];
 
     /** Related */

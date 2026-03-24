@@ -6,6 +6,7 @@ use App\Enums\RequestStatus;
 use App\Models\CourseContent;
 use App\Models\CourseContentUpload;
 use App\Models\CourseModuleSection;
+use App\Utils\AuditHelper;
 use App\Utils\GenerateUniqueFilename;
 use App\Utils\SaveFile;
 use Illuminate\Support\Facades\DB;
@@ -34,9 +35,9 @@ class LMSCourseService {
         });
     }
 
-    public function storeCourseSections($validated)
+    public function storeCourseSections($validated, $userId)
     {
-        return DB::transaction(function() use($validated){
+        return DB::transaction(function() use($validated, $userId){
             $data = collect($validated);
 
             $mainRecord = $this->courseModuleSectionModel->create(
@@ -54,6 +55,7 @@ class LMSCourseService {
                 "files" => $data->get("files")
             ]);
 
+            AuditHelper::log($userId, "has created a course content.");
             return $mainRecord;
         });
     }
@@ -64,7 +66,6 @@ class LMSCourseService {
         $record = $this->courseContentModel->create($data);
 
         if(\array_key_exists("files", $data)) {
-
             $uploadFiles = [];
             foreach($data["files"] as $file) {
                 $filename = SaveFile::save($file,"course-modules-uploads");
@@ -77,5 +78,42 @@ class LMSCourseService {
             }
             $this->courseContentUploadModel->insert($uploadFiles);
         }
+    }
+
+    public function updateCourseContent($validated)
+    {
+        return;
+    }
+
+    public function updateCourseContentParent($validated, $userId)
+    {
+        DB::transaction(function () use ($validated, $userId){
+            $data = collect($validated);
+            $this->courseModuleSectionModel->update([
+                ...$data->only([
+                    "day_number",
+                    "label",
+                    "status",
+                ])->toArray(),
+                "updated_by" => $userId
+            ]);
+
+            AuditHelper::log($userId, "has updated a course content.");
+        });
+    }
+
+    public function deleteCourseContent($validated)
+    {
+        $model = match($validated["type"]) {
+            "COURSE_SECTION" => $this->courseModuleSectionModel,
+            "COURSE_CONTENT" => $this->courseContentModel,
+            "COURSE_CONTENT_UPLOAD" => $this->courseContentUploadModel,
+        };
+
+        $record = $model->whereKey($validated["id"])->first();
+
+        abort_if(!$record, 404, "No record found.");
+
+        $record->delete();
     }
 }
