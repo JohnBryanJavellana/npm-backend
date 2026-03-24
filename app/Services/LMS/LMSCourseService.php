@@ -8,6 +8,7 @@ use App\Models\CourseContentUpload;
 use App\Models\CourseModuleSection;
 use App\Utils\AuditHelper;
 use App\Utils\SaveFile;
+use DomainException;
 use Illuminate\Support\Facades\DB;
 
 class LMSCourseService {
@@ -19,19 +20,18 @@ class LMSCourseService {
 
     public function getCourseModules($courseModuleId, $section_id = null)
     {
-        $builder = $this->courseModuleSectionModel->query()
-        ->active()
-        ->forCourseModule($courseModuleId);
-
-        return $builder->when($section_id, function ($query) {
-        return $query->with([
-                "contents",
-                "contents.uploads",
-                "updator:id,fname,mname,lname"
-            ])->first();
-        }, function ($query) {
-            return $query->get();
-        });
+        $builder = $this->courseModuleSectionModel->query();
+        return $builder->when($section_id, function ($query) use ($section_id){
+            //not the exact data
+            return $query->with([
+                    "contents",
+                    "contents.uploads",
+                    "updated_by:id,fname,mname,lname"
+                ])->first();
+            }, function ($query) use ($courseModuleId){
+                return $query->forCourseModule($courseModuleId)->get();
+            }
+        );
     }
 
     public function storeCourseSections($validated, $userId)
@@ -58,11 +58,16 @@ class LMSCourseService {
             return $mainRecord;
         });
     }
-    
 
     public function storeCourseContent($data)
     {
-        $record = $this->courseContentModel->create($data);
+        $record = $this->courseContentModel->create([
+            collect($data)->only(
+            "course_module_section_id",
+            "title",
+            "description"
+            )->toArray()
+        ]);
 
         if(\array_key_exists("files", $data)) {
             $uploadFiles = [];

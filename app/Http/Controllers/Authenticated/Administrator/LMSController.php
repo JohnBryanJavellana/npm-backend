@@ -33,7 +33,9 @@ class LMSController extends Controller
     {
         try
         {
-            return $this->lmsCourseService->getCourseModules($request->course_module_id, $request->section_id);            
+            $courseId = $request->course_module_id ?? null;
+            $sectionId = $request->section_id ?? null;
+            return $this->lmsCourseService->getCourseModules($courseId, $sectionId);            
         }
         catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
@@ -45,12 +47,18 @@ class LMSController extends Controller
         try
         {
             $this->lmsCourseService->storeCourseSections($request->validated(), $request->user()->id);
-            return response()->json(["message" => "Course content created successfully."], 201);
+            return response()->json(["message" => "Course section created successfully."], 201);
         }
         catch (\Exception $e) {
             \Log::error("sectionStore", [$e->getMessage()]);
             return response()->json(["message" => $e->getMessage()], 500);
         }
+    }
+
+    public function createSectionContents(Request $request)
+    {
+        $this->lmsCourseService->storeCourseContent($request->validated());
+        return response()->json(["Course content created successfully."], 200);
     }
 
     public function updateForContentParent(updateLmsContentParentRequest $request)

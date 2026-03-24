@@ -26,7 +26,7 @@ class CourseModuleSection extends Model
         return $this->hasMany(CourseContent::class, "course_module_section_id", "id");
     }
 
-    public function updator()
+    public function updated_by()
     {
         return $this->belongsTo(User::class, "updated_by", "id");
     }
