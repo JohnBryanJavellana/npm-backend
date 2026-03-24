@@ -46,7 +46,7 @@ class LMSController extends Controller
 
     
 
-    public function update(Request $request)
+    public function updateCouseSections(Request $request)
     {
         try {
             return $this->lmsCourseService->updateCourseSections($request->all());
@@ -55,6 +55,16 @@ class LMSController extends Controller
             throw $e;
         } catch (\Exception $e) {
             \Log::error("sectionUpdate", [$e->getMessage()]);
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+    }
+
+    public function updateCourseSectionContent(Request $request)
+    {
+        try {
+            return $this->lmsCourseService->updateCourseSectionContent($request->all());
+        } catch (\Exception $e) {
+            \Log::error("sectionContentUpdate", [$e->getMessage()]);
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }

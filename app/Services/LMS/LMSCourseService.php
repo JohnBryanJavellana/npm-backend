@@ -89,29 +89,34 @@ class LMSCourseService
                 "day_number" => $data["day_number"],
                 "label" => $data["label"],
             ]);
+            return $record;
+        });
+    }
 
-            $contentRecord = $this->courseContentModel->where("course_module_section_id", $record->id)->first();
+    public function updateCourseSectionContent($data)
+    {
+        return DB::transaction(function () use ($data) {
+            $record = $this->courseContentModel->findOrFail($data["id"]);
 
-            if ($contentRecord) {
-                $contentRecord->update([
-                    "title" => $data["title"],
-                    "description" => $data["description"]
-                ]);
+            $record->update([
+                "title" => $data["title"],
+                "description" => $data["description"],
+            ]);
 
-                if (array_key_exists("files", $data)) {
-                    $uploadFiles = [];
-                    foreach ($data["files"] as $file) {
-                        $filename = SaveFile::save($file, "course-modules-uploads");
-
-                        $uploadFiles[] = [
-                            "course_content_id" => $contentRecord->id,
-                            "original_filename" => $file->getClientOriginalName(),
-                            "filepath" => $filename,
-                        ];
-                    }
-                    $this->courseContentUploadModel->insert($uploadFiles);
+            if (\array_key_exists("files", $data) && is_array($data["files"])) {
+                $uploadFiles = [];
+                foreach ($data["files"] as $file) {
+                    $filename = SaveFile::save($file, "course-modules-uploads");
+                    $uploadFiles[] = [
+                        "course_content_id" => $record->id,
+                        "original_filename" => $file->getClientOriginalName(),
+                        "filepath" => $filename,
+                    ];
                 }
+                $this->courseContentUploadModel->insert($uploadFiles);
             }
+
+            return $record;
         });
     }
 }

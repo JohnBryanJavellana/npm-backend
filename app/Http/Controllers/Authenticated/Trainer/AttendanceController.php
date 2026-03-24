@@ -27,7 +27,7 @@ class AttendanceController extends Controller
                 'start_time' => 'nullable',
                 'end_time' => 'nullable',
                 'records' => 'required|array',
-                'records.*.profile_picture' => 'required|string',
+                // 'records.*.profile_picture' => 'required|string',
                 'records.*.enrolled_course_id' => 'required|exists:enrolled_courses,id',
                 'records.*.time_in' => 'nullable|date',
                 'records.*.time_out' => 'nullable|date',
