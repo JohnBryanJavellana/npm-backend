@@ -622,7 +622,7 @@ class LibraryController extends Controller
             $reservation->save();
 
             if ($reservation->book_copy_id) {
-                $copy = BookCopy::find($reservation->book_copy_id);
+                $copy = BookCopy::where('id', $reservation->book_copy_id)->lockForUpdate()->firstOrFail();
 
                 $copy->status = match(true) {
                     \in_array($request->status, ["RETURNED", "REJECTED", "CANCELLED"]) => "AVAILABLE",
