@@ -8,7 +8,11 @@ use App\Models\CourseContentUpload;
 use App\Models\CourseModuleSection;
 use App\Utils\GenerateUniqueFilename;
 use App\Utils\SaveFile;
+// use App\Helpers\AuditHelper;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
+use App\Utils\AuditHelper;
 
 class LMSCourseService
 {
@@ -80,43 +84,67 @@ class LMSCourseService
         }
     }
     //! an update adi ni sir allen nga pinahimo 
-    public function updateCourseSections($data)
+    public function updateCourseSections($data, $userId)
     {
-        return DB::transaction(function () use ($data) {
+
+        return DB::transaction(function () use ($data, $userId) {
             $record = $this->courseModuleSectionModel->findOrFail($data["id"]);
 
             $record->update([
                 "day_number" => $data["day_number"],
                 "label" => $data["label"],
+                "status" => $data["status"] ?? $record->status,
+
+                AuditHelper::log($userId, "User {$userId} has updated a course section!")
+
             ]);
             return $record;
         });
     }
 
-    public function updateCourseSectionContent($data)
+    public function updateCourseSectionContent($data, $userId)
     {
-        return DB::transaction(function () use ($data) {
-            $record = $this->courseContentModel->findOrFail($data["id"]);
+
+        return DB::transaction(function () use ($data, $userId) {
+            $record = $this->courseContentModel->lockForUpdate()->findOrFail($data["id"]);
 
             $record->update([
                 "title" => $data["title"],
                 "description" => $data["description"],
+                "status" => $data["status"],
             ]);
 
-            if (\array_key_exists("files", $data) && is_array($data["files"])) {
-                $uploadFiles = [];
-                foreach ($data["files"] as $file) {
-                    $filename = SaveFile::save($file, "course-modules-uploads");
-                    $uploadFiles[] = [
-                        "course_content_id" => $record->id,
-                        "original_filename" => $file->getClientOriginalName(),
-                        "filepath" => $filename,
-                    ];
-                }
-                $this->courseContentUploadModel->insert($uploadFiles);
-            }
+            AuditHelper::log($userId, "User {$userId} has updated a course content!");
 
             return $record;
+        });
+        // if (\array_key_exists("files", $data) && is_array($data["files"])) {
+        //     $uploadFiles = [];
+        //     foreach ($data["files"] as $file) {
+        //         $filename = SaveFile::save($file, "course-modules-uploads");
+        //         $uploadFiles[] = [
+        //             "course_content_id" => $record->id,
+        //             "original_filename" => $file->getClientOriginalName(),
+        //             "filepath" => $filename,
+        //         ];
+        //     }
+        //     $this->courseContentUploadModel->insert($uploadFiles);
+        // }
+    }
+
+    public function deleteCourseContentUploads($data, $userId)
+    {
+        \Log::info("deleteCourseContentUploads", [$data]);
+
+        return DB::transaction(function () use ($data, $userId) {
+
+            $record = $this->courseContentUploadModel->findOrFail($data["id"]);
+
+            $record->delete();
+
+            AuditHelper::log($userId, "User {$userId} has deleted a course content upload!");
+
+            return response()->json(["message" => "Course content upload deleted successfully"], 200);
         });
     }
 }

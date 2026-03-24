@@ -44,17 +44,26 @@ class LMSController extends Controller
         }
     }
 
-    
 
-    public function updateCouseSections(Request $request)
+
+    public function updateCourseSections(Request $request)
     {
+        \Log::info("updateCourseSections", [$request->input()]);
+
         try {
-            return $this->lmsCourseService->updateCourseSections($request->all());
+            $validated = validator($request->input(), [
+                "id" => "required|exists:course_module_sections,id",
+                "day_number" => "required|integer",
+                "label" => "required|string",
+            ])->validate();
+
+            if ($validated) {
+                return $this->lmsCourseService->updateCourseSections($validated, $request->user()->id);
+            }
         } catch (\Exception $e) {
-           
-            throw $e;
-        } catch (\Exception $e) {
+
             \Log::error("sectionUpdate", [$e->getMessage()]);
+
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
@@ -62,9 +71,35 @@ class LMSController extends Controller
     public function updateCourseSectionContent(Request $request)
     {
         try {
-            return $this->lmsCourseService->updateCourseSectionContent($request->all());
+            $validated = validator($request->input(), [
+                "id" => "required|exists:course_contents,id",
+                "title" => "required|string",
+                "description" => "required|string",
+                "status" => "required|in:ACTIVE,INACTIVE"
+            ])->validate();
+            if ($validated) {
+                return $this->lmsCourseService->updateCourseSectionContent($request, $validated, $request->user()->id);
+            }
         } catch (\Exception $e) {
+
             \Log::error("sectionContentUpdate", [$e->getMessage()]);
+
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+    }
+    public function deleteCourseContentUploads(Request $request)
+    {
+        try {
+            $validated = validator($request->input(), [
+                "id" => "required|exists:uploads,id",
+                "course_content_id" => "required|exists:course_contents,id",
+                "filepath" => "required|string"
+            ])->validate();
+            if ($validated) {
+                return $this->lmsCourseService->deleteCourseContentUploads($request, $validated, $request->user()->id);
+            }
+        } catch (\Exception $e) {
+            \Log::error("uploadDelete", [$e->getMessage()]);
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
