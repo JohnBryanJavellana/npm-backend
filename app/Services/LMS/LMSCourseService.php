@@ -23,7 +23,7 @@ class LMSCourseService {
         $builder = $this->courseModuleSectionModel->query();
         return $builder->when($section_id, function ($query) use ($section_id){
             //not the exact data
-            return $query->with([
+            return $query->whereKey($section_id)->with([
                     "contents",
                     "contents.uploads",
                     "updated_by:id,fname,mname,lname"
