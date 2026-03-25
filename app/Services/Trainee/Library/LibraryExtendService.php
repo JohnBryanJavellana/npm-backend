@@ -4,13 +4,14 @@ namespace App\Services\Trainee\Library;
 
 use App\Enums\RequestStatus;
 use App\Models\BookExtensionRequest;
-use App\Models\BookReservation;
+use App\Models\{BookReservation,BookRes};
 use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
 class LibraryExtendService {
     public function __construct(
+        protected BookRes $bookResModel,
         protected BookReservation $bookReservationModel,
         protected LibraryExtraService $libraryExtraService,
     ) {}
@@ -37,6 +38,8 @@ class LibraryExtendService {
             ->lockForUpdate()
             ->get();
 
+            $bookRes = $this->bookResModel->where("id", $validated["book_res_id"])->firstOrFail();
+
             $this->prepareData($records, $book_ids);
 
             $this->libraryExtraService->storeExtraService($validated, $validated["user_id"], "EXTEND");
@@ -45,6 +48,8 @@ class LibraryExtendService {
                 $record->status = RequestStatus::EXTENDING->value;
                 $record->save();
             }
+            $bookRes->status = RequestStatus::EXTENDING->value;
+            $bookRes->save();
         });
     }
 
