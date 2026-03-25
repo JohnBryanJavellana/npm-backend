@@ -26,11 +26,11 @@ class storeCourseContentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "course_module_section_id" => ["request", "exists:course_module_sections,id"],
+            "course_module_section_id" => ["required", "exists:course_module_sections,id"],
             "title" => ["required"],
             "description" => ["required"],
             "files" => ["required", "array"],
-            "files.*" => ["required", "file", "mimes:pdf,doc,docx,ppt,pptx,jpg,jpeg,png,mp4,mp3","max:10240"],
+            "files.*" => ["required", "file", "mimes:pdf,doc,docx,ppt,pptx,jpg,jpeg,png,mp4,mp3","max:51200"],
         ];
     }
 

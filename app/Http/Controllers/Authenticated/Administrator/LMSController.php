@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LMS\removeLmsCourseSectionRequest;
+use App\Http\Requests\LMS\storeCourseContentRequest;
 use App\Http\Requests\LMS\storeLmsCourseSectionRequest;
 use App\Http\Requests\LMS\updateLmsContentParentRequest;
 use App\Http\Requests\LMS\updateLmsCourseContentRequest;
-use App\Http\Resources\Trainer\LMS\ViewCoursesResource;
 use App\Services\LMS\LMSCourseService;
 use Illuminate\Http\Request;
 
@@ -55,7 +55,7 @@ class LMSController extends Controller
         }
     }
 
-    public function createSectionContents(Request $request)
+    public function createSectionContents(storeCourseContentRequest $request)
     {
         $this->lmsCourseService->storeCourseContent($request->validated());
         return response()->json(["Course content created successfully."], 200);
@@ -77,7 +77,7 @@ class LMSController extends Controller
     {
         try
         {
-            $this->updateForContent($request->validated());
+            $this->lmsCourseService->updateCourseContent($request->validated());
             return response()->json(["message" => "Course content updated successfully."], 200);
         }
         catch (\Exception $e) {
@@ -85,11 +85,23 @@ class LMSController extends Controller
         }
     }
 
+    public function deleteUpload(Request $request)
+    {
+        try
+        {
+            $fileId = $request->input("file_id");
+            $this->lmsCourseService->deteleContentUpload($fileId);     
+            return response()->json(["message" => "Course file deleted successfully."], 204);   
+        }
+        catch (\Exception $e) {
+        }
+    }
+
     public function delete(removeLmsCourseSectionRequest $request)
     {
         try
         {
-            $this->lmsCourseService->deleteCourseContent($request->validated());            
+            $this->lmsCourseService->deleteCourseSections($request->validated());            
             return response()->json(["message" => "Course content deleted successfully."], 204);
         }
         catch (\Exception $e) {
