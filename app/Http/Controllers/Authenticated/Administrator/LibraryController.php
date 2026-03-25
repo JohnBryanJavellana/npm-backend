@@ -635,7 +635,7 @@ class LibraryController extends Controller
             }
 
             $hasActiveItems = BookReservation::where('book_res_id', $reservation->book_res_id)
-                ->whereIn('status', ['PENDING', 'RECEIVED', 'EXTENDING', 'EXTENDED', 'RENEWING'])
+                ->whereIn('status', ['PENDING', 'APPROVED', 'RECEIVED', 'EXTENDING', 'EXTENDED', 'RENEWING'])
                 ->exists();
 
             if (!$hasActiveItems) {
