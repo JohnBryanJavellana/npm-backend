@@ -85,7 +85,15 @@ class LMSCourseService {
 
     public function updateCourseContent($validated)
     {
-        return;
+        DB::transaction(function() use ($validated) {
+            $this->courseContentModel->whereKey($validated["course_content_id"])->update(
+                collect($validated)->only(
+                    "title",
+                    "description",
+                    "status",
+                )->toArray()
+            );
+        });
     }
 
     public function updateCourseContentParent($validated, $userId)
@@ -126,14 +134,17 @@ class LMSCourseService {
 
         abort_if(!$record, 404, "File not found.");
 
-        $filepath = "course-modules-uploads" + $record->filepath;   
+        $filepath = "course-modules-uploads/" . $record->filepath;   
         $path = public_path($filepath);
-
         if (file_exists($path)) {
-        \Log::info("deteleContentUpload", [$path]);
-            // unlink($path);
+            try
+            {
+                unlink($path);                
+            }
+            catch (\Exception $e) {
+            }
         }
 
-        // return $record->delete();
+        return $record->delete();
     }
 }
