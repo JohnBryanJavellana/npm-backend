@@ -22,8 +22,7 @@ class LMSCourseService {
     {
         $builder = $this->courseModuleSectionModel->query();
         return $builder->when($section_id, function ($query) use ($section_id){
-            //not the exact data
-            return $query->with([
+            return $query->whereKey($section_id)->with([
                     "contents",
                     "contents.uploads",
                     "updated_by:id,fname,mname,lname"
@@ -38,7 +37,6 @@ class LMSCourseService {
     {
         return DB::transaction(function() use($validated, $userId){
             $data = collect($validated);
-
             $mainRecord = $this->courseModuleSectionModel->create(
                 $data->only([
                     "day_number",
@@ -61,13 +59,14 @@ class LMSCourseService {
 
     public function storeCourseContent($data)
     {
-        $record = $this->courseContentModel->create([
+        \Log::info("datadata", $data);
+        $record = $this->courseContentModel->create(
             collect($data)->only(
-            "course_module_section_id",
-            "title",
-            "description"
+                "course_module_section_id",
+                "title",
+                "description"
             )->toArray()
-        ]);
+        );
 
         if(\array_key_exists("files", $data)) {
             $uploadFiles = [];
@@ -106,7 +105,7 @@ class LMSCourseService {
         });
     }
 
-    public function deleteCourseContent($validated)
+    public function deleteCourseSections($validated)
     {
         $model = match($validated["type"]) {
             "COURSE_SECTION" => $this->courseModuleSectionModel,
@@ -119,5 +118,22 @@ class LMSCourseService {
         abort_if(!$record, 404, "No record found.");
 
         $record->delete();
+    }
+
+    public function deteleContentUpload($validated)
+    {
+        $record = $this->courseContentUploadModel->find($validated);
+
+        abort_if(!$record, 404, "File not found.");
+
+        $filepath = "course-modules-uploads" + $record->filepath;   
+        $path = public_path($filepath);
+
+        if (file_exists($path)) {
+        \Log::info("deteleContentUpload", [$path]);
+            // unlink($path);
+        }
+
+        // return $record->delete();
     }
 }
