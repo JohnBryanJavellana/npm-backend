@@ -10,6 +10,7 @@ use App\Enums\{
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Dormitory\CreateOrUpdateDormitoryRoom;
 use App\Http\Requests\Admin\Dormitory\GetMatchRooms;
+use App\Http\Requests\Admin\Dormitory\NewReservation;
 use App\Http\Requests\Admin\Dormitory\NewRoomReservation;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
@@ -347,13 +348,15 @@ class DormitoryController extends Controller
             $documentId = $request->documentId;
             $status = $request->status;
             $remarks = $request->remarks;
+            $pricingBreakdown = $request->pricingBreakdown;
+            $paymentRemarks = $request->paymentRemarks;
 
             $checkForNewTransaction = DormitoryTenant::where('user_id', $guest)
                 ->whereNotIn('tenant_status', [
                     DormitoryEnum::TERMINATED,
                     DormitoryEnum::CANCELLED,
                     DormitoryEnum::REJECTED
-                ])->lockForUpdate()->first();
+                ])->first();
 
             if($checkForNewTransaction) {
                 return response()->json(['message' => "Guest has existing $checkForNewTransaction->tenant_status reservation."], 409);
@@ -361,7 +364,7 @@ class DormitoryController extends Controller
 
             if($isPost) {
                 $this_reservation = new DormitoryTenant();
-                $this_reservation->trace_number = GenerateTrace::createTraceNumber(DormitoryTenant::class, 'trace_number');
+                $this_reservation->trace_number = GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DR-');
             } else {
                 $this_reservation = DormitoryTenant::where([ 'id' => $documentId ])
                     ->lockForUpdate()
@@ -376,7 +379,7 @@ class DormitoryController extends Controller
             } else {
                 $this_reservation->check_in_datetime = $check_in_datetime;
                 $this_reservation->check_out_datetime = $check_out_datetime;
-                $this_reservation->occupancy = $occupancy;
+                $this_reservation->status_of_occupancy = $occupancy;
                 $this_reservation->user_id = $guest;
                 $this_reservation->dormitory_room_id = $room;
                 $this_reservation->purpose = $purpose;
@@ -401,6 +404,22 @@ class DormitoryController extends Controller
 
                         SaveAvatar::dispatch($sd, $image_name, "dormitory/supporting-document", false, true, '');
                     }
+                }
+
+                $pricingBreakdownTemp = json_decode($pricingBreakdown);
+                if(\in_array($occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $pricingBreakdownTemp) {
+                    $new_invoice = new DormitoryInvoice();
+                    $new_invoice->dormitory_tenant_id = $this_reservation->id;
+                    $new_invoice->user_id = $guest;
+                    $new_invoice->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-INV-');
+                    $new_invoice->paying_as_trainee_days = $pricingBreakdownTemp?->traineeDays;
+                    $new_invoice->paying_as_trainee_amount = $pricingBreakdownTemp?->traineeTotal;
+                    $new_invoice->paying_as_guest_days = $pricingBreakdownTemp?->guestDays;
+                    $new_invoice->paying_as_guest_amount = $pricingBreakdownTemp?->guestTotal;
+                    $new_invoice->invoice_amount = $pricingBreakdownTemp?->grandTotal;
+                    $new_invoice->type = DormitoryEnum::DORMITORY;
+                    $new_invoice->remarks = $paymentRemarks;
+                    $new_invoice->save();
                 }
             }
 

@@ -4,6 +4,7 @@ namespace App\Enums\Administrator;
 
 enum DormitoryEnum : string
 {
+    case DORMITORY = "DORMITORY";
     case PENDING = "PENDING";
     case PAID = "PAID";
     case PROCESSING_PAYMENT = "PROCESSING PAYMENT";
