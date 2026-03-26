@@ -27,7 +27,7 @@ class LMSController extends Controller
      */
     public function __construct(
         protected LMSCourseService $lmsCourseService
-    ){}
+    ) {}
 
     public function view(Request $request)
     {

@@ -3,12 +3,13 @@
 namespace App\Utils;
 
 use Illuminate\Support\Facades\File;
+
 class SaveFile
 {
     public static function save($file, $path)
     {
         try {
-            if($file){
+            if ($file) {
                 $destination = public_path($path);
                 $file_requested = $file;
 
@@ -20,7 +21,7 @@ class SaveFile
                 $file_requested->move($destination, $filename_requested);
                 return $file_requested ? $filename_requested : null;
             }
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             throw $e;
             return response()->json(['message' => "Something went wrong! Please try again"], 422);
         }

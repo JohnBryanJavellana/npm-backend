@@ -250,19 +250,20 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::delete("delete_questions", [LMSAssessmentQuestionController::class, "delete"]);
         });
 
-       Route::prefix('courses/')->group(function () {
+        Route::prefix('courses/')->group(function () {
             Route::post("view_courses", [LMSController::class, "view"]);
             Route::post("create_courses", [LMSController::class, "create"]);
             Route::post("create_course_contents", [LMSController::class, "createSectionContents"]);
             Route::post("update_course_contents", [LMSController::class, "updateForContent"]);
             Route::post("update_course_sections", [LMSController::class, "updateForContentParent"]);
             Route::delete("delete_courses", [LMSController::class, "delete"]);
-        });    
+            Route::delete("delete_course_content_uploads", [LMSController::class, "deleteCourseContentUploads"]);
+        });
     });
 
     //!FOR RECREATIONALS
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
-    Route::post('update_notification', [NotificationCtrl::class, 'update_notification']);
+    Route::post('update_notification',[NotificationCtrl::class, 'update_notification']);
     Route::post('get_notifications', [NotificationCtrl::class, 'get_notifications']);
     Route::post('change-theme', [Account::class, 'change_theme']);
     Route::post('logout', [Logout::class, 'logout_user']);

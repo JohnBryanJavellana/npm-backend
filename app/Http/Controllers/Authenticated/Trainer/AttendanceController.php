@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Authenticated\Trainer;
 use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainer\AttendanceRecordResource;
-use App\Models\{User, Attendance, AttendanceRecord, EnrolledCourse, Training};
+use App\Models\{User, Attendance, AttendanceRecord, CourseModule, EnrolledCourse, Training};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Utils\AuditHelper;
 use App\Utils\TransactionUtil;
+use Illuminate\Auth\Events\Validated;
+
 use function Symfony\Component\String\u;
 use Illuminate\Validation\Rule;
 
@@ -18,13 +20,14 @@ class AttendanceController extends Controller
     public function attendance_record(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-
+            \Log::info("Attendance record request: ", $request->all());
             $validated = $request->validate([
                 'training_id' => 'required|exists:trainings,id',
                 'training_date' => 'required|date',
                 'start_time' => 'nullable',
                 'end_time' => 'nullable',
                 'records' => 'required|array',
+                // 'records.*.profile_picture' => 'required|string',
                 'records.*.enrolled_course_id' => 'required|exists:enrolled_courses,id',
                 'records.*.time_in' => 'nullable|date',
                 'records.*.time_out' => 'nullable|date',
@@ -248,6 +251,7 @@ class AttendanceController extends Controller
             \Log::info('Attendance update request:', $request->all());
 
             $validated = $request->validate([
+
                 'records' => ['required', 'array', 'min:1'],
                 'records.*.attendance_record_id' => ['required', 'integer', 'exists:attendance_records,id'],
                 'attendance_id' => ['required', 'integer', 'exists:attendances,id'],

@@ -10,13 +10,16 @@ use App\Utils\AuditHelper;
 use App\Utils\SaveFile;
 use DomainException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
 
-class LMSCourseService {
+class LMSCourseService
+{
     public function __construct(
         protected CourseModuleSection $courseModuleSectionModel,
         protected CourseContent $courseContentModel,
         protected CourseContentUpload $courseContentUploadModel,
-    ){}
+    ) {}
 
     public function getCourseModules($courseModuleId, $section_id = null)
     {
@@ -70,8 +73,8 @@ class LMSCourseService {
 
         if(\array_key_exists("files", $data)) {
             $uploadFiles = [];
-            foreach($data["files"] as $file) {
-                $filename = SaveFile::save($file,"course-modules-uploads");
+            foreach ($data["files"] as $file) {
+                $filename = SaveFile::save($file, "course-modules-uploads");
 
                 $uploadFiles[] = [
                     "course_content_id" => $record->id,
