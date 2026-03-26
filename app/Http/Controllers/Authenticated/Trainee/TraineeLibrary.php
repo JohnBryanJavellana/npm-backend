@@ -214,30 +214,29 @@ class TraineeLibrary extends Controller
         try {
             $userId = $request->user()->id;
             $traceNum = $request->traceNumber;
-
-           $books = Book::with([
-                "hasData" => function ($query) use($traceNum,  $userId) {
-                    $query->where("status", "RECEIVED")->whereHas("bookRes", function($q) use ($traceNum, $userId) {
-                        $q->where([
-                            "trace_number" => $traceNum,
-                            "user_id" => $userId
-                        ]);
-                    });;
-                },
-                "catalog.genre"
-            ])
-            ->whereHas("hasData",function($query) use ($traceNum, $userId){
-                    $query
-                    ->where("status", "RECEIVED")
-                    ->whereRaw("DATEDIFF(to_date, from_date) < 12")
-                    ->whereHas("bookRes", function($q) use ($traceNum, $userId) {
-                        $q->where([
-                            "trace_number" => $traceNum,
-                            "user_id" => $userId
-                        ]);
-                    });
-                })
-            ->get();
+            $books = Book::with([
+                    "hasData" => function ($query) use($traceNum,  $userId) {
+                        $query->where("status", "RECEIVED")->whereHas("bookRes", function($q) use ($traceNum, $userId) {
+                            $q->where([
+                                "trace_number" => $traceNum,
+                                "user_id" => $userId
+                            ]);
+                        });;
+                    },
+                    "catalog.genre"
+                ])
+                ->whereHas("hasData",function($query) use ($traceNum, $userId){
+                        $query
+                        ->where("status", "RECEIVED")
+                        ->whereRaw("DATEDIFF(to_date, from_date) < 12")
+                        ->whereHas("bookRes", function($q) use ($traceNum, $userId) {
+                            $q->where([
+                                "trace_number" => $traceNum,
+                                "user_id" => $userId
+                            ]);
+                        });
+                    })
+                ->get();
 
             return AvailableBooksResource::collection($books);
         }
@@ -255,7 +254,6 @@ class TraineeLibrary extends Controller
             $user = User::findOrFail($validated["user_id"]);
             $validated["role"] = $user->role;
             $userId = $user->id;
-            // return response()->json(["wow"], 200);
             $this->library_service->storeRequest($validated);
 
             if(env("USE_EVENT")) {
@@ -264,7 +262,6 @@ class TraineeLibrary extends Controller
 
             $this->forgetCache($userId);
 
-            //EMAIL ABOUT SENDING A BORROWING A BOOK
             //CHANGE THE imbed images TO BASE-64 FOR EMAIL??
             SendingEmail::dispatch($user, new BookReservationStatus(['status' => "PENDING"], $user));
             AuditHelper::log($userId, "User {$userId} sent a book request.");
@@ -302,19 +299,6 @@ class TraineeLibrary extends Controller
             ->lockForUpdate()
             ->get();
 
-            //get all cancelled use to filter flatten and pluck the names of the books and implode?
-            //pluck name of already                 cancelled.
-            //flatten after plucking.
-            //concert the collection into array.
-            //and return using implode ', '
-
-            // $cancellables = $books->filter(fn($book) => !$book->status === RequestStatus::CANCELLED)
-            // ->pluck('id')
-            // ->toArray();
-
-            //cancel remaining
-
-            //remove looping
             foreach($books as $book) {
                 if (!in_array($book->status, ["CANCELLED", "RECEIVED", "LOST", "RETURNED", "REJECTED"])) {
 
@@ -423,10 +407,10 @@ class TraineeLibrary extends Controller
             $validated = $request->validated();
             $this->libraryRenewService->cancelRenewRequest($validated);
             // AuditHelper::log($user_id, "User {$user_id} renewed a book.");
-            return response()->json(["You've successfully cancelled a book renewal request.OK"], 200);
+            return response()->json(["You've successfully cancelled a book renewal request."], 200);
         }
         catch (ModelNotFoundException) {
-            return response()->json(["wow not found"], 404);
+            return response()->json(["Renewal request not found"], 404);
         }
         catch (\Exception $e) {
             \Log::error("cancelRenew", [$e]);

@@ -9,7 +9,6 @@ use App\Jobs\SendingEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Utils\TransactionUtil;
-use Illuminate\Support\Facades\Cache;
 use App\Mail\UpdatePasswordMail;
 use App\Enums\Administrator\{
     UserDetailsEnum,
@@ -29,12 +28,9 @@ use App\Events\{
 use App\Models\{
     AuditTrail,
     User,
-    CSM,
-    BookRes
 };
 use App\Utils\{
     AuditHelper,
-    ConvertToBase64,
 };
 use Illuminate\Support\Facades\{
     DB,
@@ -45,6 +41,7 @@ use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
 };
+use Carbon\Carbon;
 
 class Account extends Controller
 {

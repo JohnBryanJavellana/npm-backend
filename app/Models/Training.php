@@ -18,11 +18,19 @@ class Training extends Model
     {
         return $this->hasMany(EnrolledCourse::class, 'training_id', 'id');
     }
-
     public function module()
     {
         return $this->hasOne(CourseModule::class, 'id', 'course_module_id');
     }
+    // public function attendances()
+    // {
+    //     return $this->hasMany(Attendance::class, 'user_id', 'id', 'training_id');
+    // }
+    // public function attendance_records()
+    // {
+    //     return $this->hasMany(AttendanceRecord::class, 'user_id', 'id', 'attendance_id');
+    // }
+    
 
     // public function requirements()
     // {
@@ -35,6 +43,7 @@ class Training extends Model
     // }
 
     /** Scopes */
+
 
     public function scopeActive($query)
     {

@@ -9,17 +9,16 @@ use Illuminate\Database\Eloquent\Model;
 class DormitoryTenant extends Model {
 
     protected $guarded = ['id'];
-
     public const MALE = "MALE";
     public const FEMALE = "FEMALE";
     public const COUPLE = "COUPLE";
+
     public function trainee() {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
 
-    // use this instead
     public function boarder() {
-        return $this->hasOne(User::class, 'id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function dormitory_room() {
@@ -74,5 +73,10 @@ class DormitoryTenant extends Model {
     public function scopeActive(Builder $query)
     {
         return $query->whereIn("tenant_status", RequestStatus::ActiveDomitoryRequests());
+    }
+
+    public function scopeApprovedActive(Builder $query)
+    {
+        return $query->where("tenant_status", [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value]);
     }
 }

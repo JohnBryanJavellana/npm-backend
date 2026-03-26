@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
@@ -57,10 +59,8 @@ class BookReservation extends Model
         return $query->whereNotIn('status', $this->notInUseStatus);
     }
 
-    public function getBookTitleAttribute()
+    public function scopeActiveReservation(Builder $query)
     {
-        return $this->bookCopy?->book?->catalog?->title
-            ?? $this->book?->catalog?->title
-            ?? 'Your reserved book';
+        return $query->whereIn("status", RequestStatus::ActiveLibDashBoard());
     }
 }

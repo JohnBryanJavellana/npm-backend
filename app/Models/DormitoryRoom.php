@@ -11,13 +11,11 @@ class DormitoryRoom extends Model
 
     protected $guarded = ['id'];
 
+    protected $appends = ['room_images'];
+
     public function hasData()
     {
         return $this->hasMany(DormitoryTenant::class);
-    }
-    public function dormitory()
-    {
-        return $this->belongsTo(Dormitory::class);
     }
 
     // public function dormitory()
@@ -31,6 +29,14 @@ class DormitoryRoom extends Model
     public function scopeAvailable(Builder $query)
     {
         return $query->where("room_status", RequestStatus::AVAILABLE->value);
+    }
+
+    public function getRoomImagesAttribute() {
+        return $this->roomImages()->get();
+    }
+
+    public function roomImages() {
+        return $this->hasMany(DormitoryRoomImage::class, 'dormitory_room_id', 'id');
     }
 
 }

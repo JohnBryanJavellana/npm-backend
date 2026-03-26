@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,7 +43,6 @@ class LibraryInvoice extends Model
      * SCOPES
      */
 
-
     public function scopeForUser($query, $userId)
     {
         return $query->where("user_id", $userId);
@@ -50,5 +51,10 @@ class LibraryInvoice extends Model
     public function scopeByTraceId($query, $traceNum, $inv_id)
     {
         return $query->whereKey($inv_id)->where("trace_number", $traceNum);
+    }
+
+    public function scopePending(Builder $query)
+    {
+        return $query->where("invoice_status", RequestStatus::PENDING->value);
     }
 }

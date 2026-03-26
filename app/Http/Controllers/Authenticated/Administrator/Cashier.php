@@ -34,7 +34,7 @@ use App\Enums\{
     NotificationEnum
 };
 use App\Http\Requests\Admin\Cashier\{
-    CreateOrUpdateFeeCategory,
+CreateOrUpdateFeeCategory,
     CreateOrUpdateOR
 };
 use App\Models\{
@@ -157,24 +157,15 @@ class Cashier extends Controller
     public function pay_walkin (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_payment = self::getTable($request->service, $request->documentId, null)->first();
+            $this_main_table = self::getTable($request->service, $this_payment->enrolled_course_id, null, true, false)->first();
 
-            if($request->isInitial === true) {
-                $this_main_table = self::getTable($request->service, $request->mainTable, null, true, true)->first();
-
-                switch($request->service) {
-                    case NotificationEnum::DORMITORY->value:
-                        $this_main_table->tenant_status = CashierEnum::PAID;
-                        break;
-
-                    case NotificationEnum::ENROLLMENT->value:
-                        $this_main_table->enrolled_course_status = CashierEnum::PAID;
-                        break;
-
-                    default: break;
-                }
-
-                $this_main_table->save();
+            if($request->service === NotificationEnum::DORMITORY->value) {
+                $this_main_table->tenant_status = CashierEnum::PAID;
+            } else if($request->service ===  NotificationEnum::ENROLLMENT->value) {
+                $this_main_table->enrolled_course_status = CashierEnum::PAID;
             }
+
+            $this_main_table->save();
 
             $this_payment->invoice_status = CashierEnum::PAID;
             $this_payment->received_amount = $request->receivedAmount;
@@ -314,23 +305,16 @@ class Cashier extends Controller
                 $this_fee->invoice_status = $request->verificationStatus;
                 $this_fee->save();
 
-                if($request->isInitial) {
-                    $this_main_table = self::getTable($request->service, $request->mainTable, null, true, true)->first();
-
-                    switch($request->service) {
-                        case NotificationEnum::DORMITORY->value:
-                            $this_main_table->tenant_status = CashierEnum::PAID;
-                            break;
-
-                        case NotificationEnum::ENROLLMENT->value:
-                            $this_main_table->enrolled_course_status = CashierEnum::PAID;
-                            break;
-
-                        default: break;
-                    }
-
-                    $this_main_table->save();
+                $this_main_table = null;
+                if($request->service === "DORMITORY") {
+                    $this_main_table = self::getTable($request->service, $this_fee->dormitory_tenant_id, null, true, false)->first();
+                    $this_main_table->tenant_status = CashierEnum::PAID;
+                } else if($request->service === "ENROLLMENT") {
+                    $this_main_table = self::getTable($request->service, $this_fee->enrolled_course_id, null, true, false)->first();
+                    $this_main_table->enrolled_course_status = CashierEnum::PAID;
                 }
+
+                $this_main_table->save();
 
                 SendingEmail::dispatch(User::find($this_fee->user_id), new CashierEmail([
                     'status' => $request->verificationStatus,
@@ -445,307 +429,11 @@ class Cashier extends Controller
             }
         });
     }
-
-    
-public function batch_generate_invoices(Request $request)
-{
-    return TransactionUtil::transact(null, [], function () use ($request) {
-
-        $dateFrom = Carbon::parse($request->dateFrom)->startOfDay();
-        $dateTo = Carbon::parse($request->dateTo)->endOfDay();
-
-        if ($dateFrom->gt($dateTo)) {
-            return response()->json([
-                'message' => AdministratorReturnResponse::CASHIERCTRL_ERR_INVALID_DATE_RANGE->value,
-            ], 422);
-        }
-
-        $services = $request->service
-            ? [$request->service]
-            : [
-                NotificationEnum::ENROLLMENT->value,
-                NotificationEnum::DORMITORY->value,
-                NotificationEnum::LIBRARY->value,
-                NotificationEnum::RECREATIONAL->value,
-            ];
-
-        $generatedInvoices = [];
-        $skippedInvoices = [];
-        $totalGenerated = 0;
-        $totalSkipped = 0;
-
-        $processedORNumbers = [];
-        $reportData = [];
-
-        foreach ($services as $service) {
-
-            $baseRelations = ['payee', 'orNumber'];
-
-            if ($service === NotificationEnum::LIBRARY->value) {
-                $baseRelations = [
-                    ...$baseRelations,
-                    'bookRes',
-                    'selectedBooks',
-                    'selectedBooks.bookReservation',
-                    'selectedBooks.bookReservation.book',
-                    'selectedBooks.bookReservation.books',
-                    'selectedBooks.bookReservation.books.catalog',
-                ];
-            }
-
-            if ($service === NotificationEnum::ENROLLMENT->value) {
-                $baseRelations = [...$baseRelations, 'training'];
-            }
-
-            $transactions = self::getTable($service, null, [
-                'invoice_status' => [
-                    'PENDING',
-                    'PAID',
-                    'FOR-VERIFICATION',
-                    'CANCELLED'
-                ]
-            ])
-                ->with($baseRelations)
-                ->whereBetween('datePaid', [$dateFrom, $dateTo])
-                ->orderBy('datePaid', 'ASC')
-                ->get();
-
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS COUNTS (FIXED)
-            |--------------------------------------------------------------------------
-            */
-
-            $statusCounts = collect([
-                'PENDING' => 0,
-                'PAID' => 0,
-                'FOR-VERIFICATION' => 0,
-                'CANCELLED' => 0
-            ])->merge(
-                $transactions->groupBy('invoice_status')->map->count()
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | PAYMENT TYPE COUNTS
-            |--------------------------------------------------------------------------
-            */
-
-            $paymentTypeCounts = $transactions
-                ->groupBy('payment_type')
-                ->map->count();
-
-            $reportData[$service] = [
-                'total' => $transactions->count(),
-                'status_counts' => $statusCounts,
-                'payment_type_counts' => $paymentTypeCounts,
-            ];
-
-            foreach ($transactions as $transaction) {
-
-                // Only PAID transactions generate invoices
-                if ($transaction->invoice_status !== 'PAID') {
-
-                    $skippedInvoices[] = [
-                        'service' => $service,
-                        'transaction_id' => $transaction->id,
-                        'user_id' => $transaction->user_id,
-                        'reason' => 'Invoice generation allowed only for PAID transactions.',
-                    ];
-
-                    $totalSkipped++;
-                    continue;
-                }
-
-                // Skip invalid transactions
-                if (
-                    is_null($transaction->cashier_o_r_id) ||
-                    is_null($transaction->received_amount) ||
-                    is_null($transaction->user_id)
-                ) {
-
-                    $skippedInvoices[] = [
-                        'service' => $service,
-                        'transaction_id' => $transaction->id,
-                        'user_id' => $transaction->user_id,
-                        'reason' => match (true) {
-                            is_null($transaction->cashier_o_r_id) && is_null($transaction->received_amount)
-                                => 'Missing OR number and received amount.',
-                            is_null($transaction->cashier_o_r_id)
-                                => 'Missing OR number.',
-                            is_null($transaction->received_amount)
-                                => 'Missing received amount.',
-                            is_null($transaction->user_id)
-                                => 'Missing user ID.',
-                            default => 'Incomplete transaction details.',
-                        },
-                    ];
-
-                    $totalSkipped++;
-                    continue;
-                }
-
-                $orNumber = optional($transaction->orNumber)->name;
-                $duplicateKey = $service . '-' . $orNumber;
-
-                // Prevent duplicate invoices
-                if (isset($processedORNumbers[$duplicateKey])) {
-
-                    $skippedInvoices[] = [
-                        'service' => $service,
-                        'transaction_id' => $transaction->id,
-                        'user_id' => $transaction->user_id,
-                        'reason' => 'Duplicate invoice detected for OR number: ' . $orNumber,
-                    ];
-
-                    $totalSkipped++;
-                    continue;
-                }
-
-                $processedORNumbers[$duplicateKey] = true;
-
-                // Verify transaction
-                $verification = self::verifyTransaction($transaction);
-
-                if ($verification !== true) {
-
-                    $skippedInvoices[] = [
-                        'service' => $service,
-                        'transaction_id' => $transaction->id,
-                        'user_id' => $transaction->user_id,
-                        'reason' => $verification,
-                    ];
-
-                    $totalSkipped++;
-                    continue;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | GENERATE INVOICE RECORD
-                |--------------------------------------------------------------------------
-                */
-
-                $generatedInvoices[] = [
-                    'service' => $service,
-                    'transaction_id' => $transaction->id,
-                    'user_id' => $transaction->user_id,
-                    'payee' => $transaction->payee,
-                    'or_number' => $orNumber,
-                    'received_amount' => $transaction->received_amount,
-                    'payment_type' => $transaction->payment_type,
-                    'date_paid' => $transaction->datePaid,
-                    'invoice_meta' => [
-                        'generated_at' => Carbon::now()->toDateTimeString(),
-                        'generated_by' => $request->user()->id,
-                        'date_range' => [
-                            'from' => $dateFrom->toDateString(),
-                            'to' => $dateTo->toDateString(),
-                        ],
-                    ],
-                ];
-
-                /*
-                |--------------------------------------------------------------------------
-                | USER NOTIFICATION
-                |--------------------------------------------------------------------------
-                */
-
-                Notifications::notify(
-                    $request->user()->id,
-                    $transaction->user_id,
-                    $service,
-                    "Your invoice for your " . strtolower($service) . " transaction has been generated."
-                );
-
-                /*
-                |--------------------------------------------------------------------------
-                | EMAIL
-                |--------------------------------------------------------------------------
-                */
-
-                $user = User::find($transaction->user_id);
-
-                SendingEmail::dispatch(
-                    $user,
-                    new CashierEmail([
-                        'status' => 'PAID',
-                        'service' => strtolower($service),
-                        'message' => "Your invoice for your " . strtolower($service) . " payment has been successfully generated."
-                    ], $user)
-                );
-
-                $totalGenerated++;
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | AUDIT LOG
-        |--------------------------------------------------------------------------
-        */
-
-        AuditHelper::log(
-            $request->user()->id,
-            AdministratorAuditActions::CASHIERCTRL_BATCH_GENERATED_INVOICES->value .
-                " | Date Range: {$dateFrom->toDateString()} to {$dateTo->toDateString()}" .
-                " | Generated: $totalGenerated | Skipped: $totalSkipped"
-        );
-
-        if (env('USE_EVENT')) {
-            event(new BEInvoice(''), new BEAuditTrail(''));
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESPONSE
-        |--------------------------------------------------------------------------
-        */
-
-        return response()->json([
-            'message' => AdministratorReturnResponse::CASHIERCTRL_BATCH_GENERATED_INVOICES->value,
-            'date_range' => [
-                'from' => $dateFrom->toDateString(),
-                'to' => $dateTo->toDateString(),
-            ],
-
-            'total_generated' => $totalGenerated,
-            'total_skipped' => $totalSkipped,
-            'invoices' => $generatedInvoices,
-            'skipped' => $skippedInvoices,
-            'report_data' => $reportData,
-        ], 200);
-    });
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| VERIFY TRANSACTION
-|--------------------------------------------------------------------------
-*/
-
-public static function verifyTransaction($transaction)
-{
-    if (!$transaction->cashier_o_r_id) {
-        return 'OR number is missing.';
-    }
-
-    if (!$transaction->received_amount || $transaction->received_amount <= 0) {
-        return 'Received amount is invalid.';
-    }
-
-    if (!$transaction->user_id) {
-        return 'User ID is missing.';
-    }
-
-    return true;
-}
-
-/**
- * Summary of get_all_paid_payments
- * @param Request $request
- */
+        //edrascoe
+ /**
+  * Summary of get_all_paid_payments
+  * @param Request $request
+  */
 public function get_all_paid_payments(Request $request) {
     return TransactionUtil::transact(null, [], function() use ($request) {
 
@@ -770,8 +458,6 @@ public function get_all_paid_payments(Request $request) {
         $flaggedIssues   = [];
         $grandTotalPaid  = 0;
         $paidSummary     = [];
-
-        /** REPORT VARIABLES FOR GRAPHS */
         $invoiceStatusReport = [];
         $paymentTypeReport = [];
         $serviceStatusReport = [];
@@ -813,8 +499,6 @@ public function get_all_paid_payments(Request $request) {
 
                 $seenTraceNumbers = [];
                 $totalPerPayee    = [];
-
-                /** REPORT: STATUS TOTALS */
                 $statusCount = $payments->count();
 
                 if (!isset($invoiceStatusReport[$status])) {
@@ -828,40 +512,26 @@ public function get_all_paid_payments(Request $request) {
                 }
 
                 $serviceStatusReport[$service][$status] = $statusCount;
-
-                /** REPORT: PAYMENT TYPE */
                 $paymentTypes = $payments->groupBy('payment_type');
 
                 foreach ($paymentTypes as $type => $items) {
-
-                    $type = $type ?? 'UNKNOWN';
-
+                    if (empty($type)) continue;
                     if (!isset($paymentTypeReport[$type])) {
                         $paymentTypeReport[$type] = 0;
                     }
-
                     $paymentTypeReport[$type] += $items->count();
-
                     if (!isset($servicePaymentTypeReport[$service])) {
                         $servicePaymentTypeReport[$service] = [];
                     }
-
                     if (!isset($servicePaymentTypeReport[$service][$type])) {
                         $servicePaymentTypeReport[$service][$type] = 0;
                     }
-
                     $servicePaymentTypeReport[$service][$type] += $items->count();
                 }
-
-                /** PAID COMPUTATIONS */
                 if ($status === CashierEnum::PAID->value) {
-
                     foreach ($payments as $payment) {
-
                         $payeeId = $payment->payee?->id;
-
                         if ($payeeId) {
-
                             if (!isset($totalPerPayee[$payeeId])) {
                                 $totalPerPayee[$payeeId] = [
                                     'payee_id'     => $payeeId,
@@ -869,23 +539,17 @@ public function get_all_paid_payments(Request $request) {
                                     'total_amount' => 0,
                                 ];
                             }
-
                             $totalPerPayee[$payeeId]['total_amount'] += $payment->invoice_amount ?? 0;
                         }
                     }
-
                     $serviceTotalPaid = $payments->sum('invoice_amount');
-
                     $grandTotalPaid += $serviceTotalPaid;
-
                     $paidSummary[] = [
                         'service'     => $service,
                         'total_count' => $payments->count(),
                         'total_paid'  => $serviceTotalPaid,
                     ];
                 }
-
-                /** PAYMENT MAPPING */
                 $mapped = $payments->map(function ($payment) use ($service, $status, &$flaggedIssues, &$seenTraceNumbers, $totalPerPayee) {
 
                     $issues   = [];
@@ -896,7 +560,6 @@ public function get_all_paid_payments(Request $request) {
                     } else {
                         $seenTraceNumbers[$payment->trace_number] = true;
                     }
-
                     if (empty($payment->trace_number))
                         $issues[] = "Missing trace number.";
 
@@ -905,33 +568,25 @@ public function get_all_paid_payments(Request $request) {
 
                     if (empty($payment->invoice_amount) || $payment->invoice_amount <= 0)
                         $issues[] = "Invalid or missing invoice amount.";
-
                     if (!$payment->payee)
                         $issues[] = "Missing payee information.";
-
                     if (!$payment->orNumber)
                         $issues[] = "Missing OR number.";
-
                     if ($service === NotificationEnum::ENROLLMENT->value && !$payment->training) {
                         $issues[] = "Missing training details for enrollment payment.";
                     }
-
                     if ($service === NotificationEnum::LIBRARY->value && $payment->selectedBooks->isEmpty()) {
                         $issues[] = "Missing selected books for library payment.";
                     }
-
                     if (!empty($issues)) {
-
                         $flaggedIssues[] = [
                             'service'      => $service,
                             'status'       => $status,
                             'payment_id'   => $payment->id,
                             'trace_number' => $payment->trace_number ?? 'N/A',
-                            'full_name'    => $fullName,
                             'issues'       => $issues,
                         ];
                     }
-
                     $result = [
                         'service'    => $service,
                         'status'     => $status,
@@ -939,63 +594,43 @@ public function get_all_paid_payments(Request $request) {
                         'has_issues' => !empty($issues),
                         'issues'     => $issues,
                     ];
-
                     if ($status === CashierEnum::PAID->value && $payment->payee?->id) {
-
                         $result['total_paid'] =
                             $totalPerPayee[$payment->payee->id]['total_amount'] ?? 0;
                     }
-
                     return $result;
                 });
-
                 $paymentsByStatus[$status] = [
                     'total'    => $mapped->count(),
                     'payments' => $mapped,
                 ];
-
                 if ($status === CashierEnum::PAID->value) {
-
                     $paymentsByStatus[$status]['service_total_paid']
                         = $payments->sum('invoice_amount');
-
                     $paymentsByStatus[$status]['total_per_payee']
                         = array_values($totalPerPayee);
                 }
             }
-
             $allPaidPayments[$service] = $paymentsByStatus;
         }
-
         return response()->json([
             'message' => AdministratorReturnResponse::CASHIERCTRL_ALL_PAID_PAYMENTS->value,
-
             'paid_summary' => [
                 'breakdown' => $paidSummary,
                 'total'     => $grandTotalPaid,
             ],
-
             'payments' => $allPaidPayments,
-
             'flagged_issues' => [
                 'total'   => count($flaggedIssues),
                 'details' => $flaggedIssues,
             ],
-
-            /** GRAPH REPORT DATA */
             'reports' => [
-
                 'invoice_status_totals' => $invoiceStatusReport,
-
                 'payment_type_totals' => $paymentTypeReport,
-
                 'service_status_breakdown' => $serviceStatusReport,
-
                 'service_payment_type_breakdown' => $servicePaymentTypeReport,
             ],
-
         ], 200);
-
     });
 }
 }

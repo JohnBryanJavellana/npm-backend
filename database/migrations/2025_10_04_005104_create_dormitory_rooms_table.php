@@ -3,10 +3,37 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Dormitory;
 
 return new class extends Migration
 {
+    public const DORMITORY = [
+        'OFFICERS',
+        'RATINGS'
+    ];
+
+    public const ROOM_TYPE = [
+        'AIRCON',
+        'NON-AIRCON'
+    ];
+
+    public const WING = [
+        'A',
+        'B',
+        'C',
+        'D'
+    ];
+
+    public const GUEST_GENDER = [
+        'MALE',
+        'FEMALE'
+    ];
+
+    public const ACCOMMODATION = [
+        "SINGLE",
+        "SHARED",
+        "COUPLE"
+    ];
+
     /**
      * Run the migrations.
      */
@@ -15,12 +42,16 @@ return new class extends Migration
         Schema::create('dormitory_rooms', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->id();
-            $table->foreignIdFor(Dormitory::class)->constrained()->cascadeOnDelete();
             $table->string('room_name', 255);
             $table->integer('room_slot');
-            $table->integer('room_available_slot');
-            $table->enum('room_status', ['AVAILABLE', 'OCCUPIED', 'RESERVED', 'UNAVAILABLE'])->default('AVAILABLE');
-            $table->enum('is_air_conditioned',["YES", "NO"]);
+            $table->enum('dormitory', self::DORMITORY);
+            $table->enum('room_type', self::ROOM_TYPE)->default(self::ROOM_TYPE[1]);
+            $table->enum('guest_gender', self::GUEST_GENDER);
+            $table->enum('wing', self::WING);
+            $table->integer('floor');
+            $table->enum('accommodation', self::ACCOMMODATION)->default(self::ACCOMMODATION[1]);
+            $table->double('room_cost', 65, 2);
+            $table->double('guest_cost', 65, 2);
             $table->longText('remarks')->nullable();
             $table->timestamps();
         });

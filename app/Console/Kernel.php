@@ -10,10 +10,7 @@ class Kernel extends ConsoleKernel
     
         protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('books:send-return-reminders')
-                ->dailyAt('08:00') // runs every day at 8 AM
-                ->withoutOverlapping()
-                ->runInBackground();
+        $schedule->command('library-book-borrow-reminder')->daily();
     }
 
    

@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
 use App\Enums\Administrator\{
-    EnrollmentEnum,
     LibraryEnum,
     DormitoryEnum,
     RAEnum,

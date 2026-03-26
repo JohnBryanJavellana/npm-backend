@@ -187,5 +187,10 @@ enum AdministratorAuditActions: string {
     case TRAINEERECREATIONALCTRL_CANCEL_TRAINEERECREATIONALUNITREQ = "User has cancelled a recreational request.";
     case TRAINEERECREATIONALCTRL_SEND_TRAINEERECREATIONALREQEQUIPMENT = "User has sent a recreational request";
 
+     /**
+    * Summary of CASHIERCTRL
+    */
+    case CASHIERCTRL_BATCH_GENERATED_INVOICES = 'Batch generated invoices for completed transactions';
+
 
 }
