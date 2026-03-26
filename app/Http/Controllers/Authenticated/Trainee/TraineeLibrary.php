@@ -340,7 +340,7 @@ class TraineeLibrary extends Controller
             $user_id = $validated["user_id"];
 
             $this->libraryExtendService->storeExtendRequest($validated);
-            AuditHelper::log($user_id, "User {$user_id} sent a book extension request.");
+            AuditHelper::log($user_id, "User {$user_id} sent a book extension request."); 
             Notifications::notify($user_id, null, 'LIBRARY', 'has sent a book extension request.');
 
             $this->forgetCache($user_id);
@@ -385,7 +385,7 @@ class TraineeLibrary extends Controller
         } catch (DomainException $e) {
             throw $e;
         } catch (\Exception $e) {
-            \Log::error("renew", [$e]);
+            \Log::error("renew", [$e->getMessage()]);
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
     }

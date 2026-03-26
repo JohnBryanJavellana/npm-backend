@@ -4,44 +4,56 @@ namespace App\Services\Trainee\Library;
 
 use App\Enums\RequestStatus;
 use App\Models\BookExtensionRequest;
+use App\Models\BookRes;
 use App\Models\BookReservation;
 use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
-class LibraryExtendService {
+class LibraryExtendService
+{
     public function __construct(
         protected BookReservation $bookReservationModel,
         protected LibraryExtraService $libraryExtraService,
+        protected BookRes $bookResModel
     ) {}
 
-    private function prepareData($records, $book_reservation_ids){
-            if($records->count() !== count($book_reservation_ids)) {
-                throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be renewed.");
-            }
+    private function prepareData($records, $book_reservation_ids)
+    {
+        if ($records->count() !== count($book_reservation_ids)) {
+            throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be renewed.");
+        }
 
-            //validate DATE
+        //validate DATE
     }
-    
+
     public function storeExtendRequest($validated)
     {
-        DB::transaction(function()use ($validated) {
+        DB::transaction(function () use ($validated) {
 
             $book_ids = collect($validated["data"])->pluck("book_res_id");
-            
+
             $records = $this->bookReservationModel->query()
-            ->select("id", "status")
-            ->forStatus(RequestStatus::renewableStatuses())
-            ->whereRelation("bookRes", "user_id", "=", $validated["user_id"])
-            ->whereIn("id",$book_ids)
-            ->lockForUpdate()
-            ->get();
+                ->select("id", "status")
+                ->forStatus(RequestStatus::renewableStatuses())
+                ->whereRelation("bookRes", "user_id", "=", $validated["user_id"])
+                ->whereIn("id", $book_ids)
+                ->lockForUpdate()
+                ->get();
+
+            $this->bookResModel->query()
+                ->whereIn("id", $book_ids)
+                ->update(["status" => RequestStatus::EXTENDING->value]);
 
             $this->prepareData($records, $book_ids);
 
-            $this->libraryExtraService->storeExtraService($validated, $validated["user_id"], "EXTEND");
-            
-            foreach($records as $record) {
+            $this->libraryExtraService->storeExtraService(
+                $validated,
+                $validated["user_id"],
+                "EXTEND"
+            );
+
+            foreach ($records as $record) {
                 $record->status = RequestStatus::EXTENDING->value;
                 $record->save();
             }
@@ -50,11 +62,11 @@ class LibraryExtendService {
 
     public function cancelExtendRequest($validated)
     {
-        DB::transaction(function()use ($validated) {
+        DB::transaction(function () use ($validated) {
             $record = $this->bookReservationModel->query()
-            ->whereKey($validated["book_res_id"])
-            ->where("book_res_id", $validated["request_id"])
-            ->firstOrFail();
+                ->whereKey($validated["book_res_id"])
+                ->where("book_res_id", $validated["request_id"])
+                ->firstOrFail();
 
             //validate record
             $date = Carbon::parse($record->to_date);
@@ -64,11 +76,11 @@ class LibraryExtendService {
             ]);
 
             $record->services()
-            ->status(RequestStatus::PENDING->value)
-            ->service("EXTEND")
-            ->update([
-                "status" => RequestStatus::CANCELLED->value
-            ]); 
+                ->status(RequestStatus::PENDING->value)
+                ->service("EXTEND")
+                ->update([
+                    "status" => RequestStatus::CANCELLED->value
+                ]);
         });
-    }    
+    }
 }
