@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\ {
-    CourseModule,
+    CourseModuleSection,
     Training
 };
 
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->engine = "InnoDB";
             $table->id();
             $table->foreignIdFor(Training::class)->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(CourseModule::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(CourseModuleSection::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string("title");
             $table->text("description");
             $table->longText("instructions");
