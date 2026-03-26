@@ -231,6 +231,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix("assessments/")->group(function () {
             Route::post("view_assessments", [LMSAssessmentController::class, "view"]);
+            Route::post("view_topics", [LMSAssessmentController::class, "viewAssessment"]);
+            Route::post("view_topics/assessment", [LMSAssessmentController::class, "viewTopic"]);
             Route::post("view_assessments/assessment", [LMSAssessmentController::class, "viewAssessmentContent"]);
             Route::post("create_assessments", [LMSAssessmentController::class, "create"]);
             Route::post("update_assessments", [LMSAssessmentController::class, "update"]);

@@ -27,25 +27,25 @@ class createAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "course_module_id" => [
+            "course_content_id" => [
                 "nullable",
-                "exists:course_modules,id",
-                "required_without:training_id",
+                "exists:course_contents,id",
+                // "required_without:training_id",
             ],
-            "training_id" => [
-                "nullable",
-                "exists:trainings,id",
-                "required_without:course_module_id",
-            ],
+            // "training_id" => [
+            //     "nullable",
+            //     "exists:trainings,id",
+            //     "required_without:course_content_id",
+            // ],
             "title" => ["required", "string"],
             "description" => ["required", "string"],
             "instructions" => ["required", "string"],
             "passed_type" => ["required", "string"],
             "passing_score" => ["required","numeric"],
             "is_hidden" => ["sometimes","required", "boolean"],
-            "type" => ["required","in:EXAM,QUIZ,ACTIVITY,ASSSIGNMENT"],
-            "end_date" => ["sometimes","required", "date"],
-            "end_time" => ["sometimes","required"],
+            "type" => ["required","in:EXAM,QUIZ,ACTIVITY,ASSIGNMENTS"],
+            // "end_date" => ["sometimes","required", "date"],
+            // "end_time" => ["sometimes","required"],
             // "start_date" => ["required", "date"],
             // "start_time" => ["required"],
             "time_limit" => ["required"],
@@ -54,12 +54,12 @@ class createAssessmentRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
-        // $errors = $validator->errors();
-        // $firstError = $errors;
+        $errors = $validator->errors();
+        $firstError = $errors;
         throw new HttpResponseException(
             response()->json([
-                "message" => $validator->errors(),
-                // "errors" => $errors,
+                "message" => $firstError,
+                "errors" => $errors,
             ], 422)
         );
     }

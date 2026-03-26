@@ -22,6 +22,10 @@ class CourseContent extends Model
         return $this->hasMany(CourseContentUpload::class);
     }
 
+    public function assessment()
+    {
+        return $this->hasMany(Assessments::class);
+    }
     /** Scope */
 
     

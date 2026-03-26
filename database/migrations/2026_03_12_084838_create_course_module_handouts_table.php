@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CourseContent;
 use App\Models\CourseModule;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,9 +16,8 @@ return new class extends Migration
         Schema::create('course_module_handouts', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->foreignIdFor(CourseModule::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(CourseContent::class)->constrained()->cascadeOnDelete();
             $table->string("title", 255);
-            $table->string("file_path", 255);
             $table->foreignId("uploaded_by")->constrained("users");
             $table->foreignId("updated_by")->constrained("users");
             $table->enum("status", ["ACTIVE","INACTIVE"])->default("ACTIVE");

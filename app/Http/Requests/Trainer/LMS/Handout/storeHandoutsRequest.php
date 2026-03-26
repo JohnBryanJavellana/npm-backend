@@ -25,7 +25,7 @@ class storeHandoutsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "course_module_id" => ["required", "exists:course_modules,id"],
+            "course_content_id" => ["required", "exists:course_contents,id"],
             "title" => ["required", "string", "max:255"],
             "files" => ["required", "array"],
             "files.*" => ["required", "file", "mimes:pdf,doc,docx,ppt,pptx,jpg,jpeg,png,mp4,mp3","max:10240"],
