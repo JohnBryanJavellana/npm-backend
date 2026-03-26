@@ -32,28 +32,31 @@ class LibraryRenewService
     public function storeRenewRequest($validated)
     {
         DB::transaction(function () use ($validated) {
-            $userId = $validated["user_id"];
-            $book_ids = collect($validated["data"])->pluck("book_res_id");
+            $userId = $validated['user_id'];
+            $bookIds = collect($validated['data'])->pluck('book_res_id')->values();
 
             $records = $this->bookReservationModel->query()
-                ->select("id", "status")
                 ->forStatus(RequestStatus::renewableStatuses())
-                ->whereRelation("bookRes", "user_id", "=", $userId)
-                ->whereIn("id", $book_ids)
+                ->whereRelation('bookRes', 'user_id', $userId)
+                ->whereIn('id', $bookIds)
                 ->lockForUpdate()
                 ->get();
 
             $this->bookResModel->query()
-                ->whereIn("id", $book_ids)
-                ->update(["status" => RequestStatus::RENEWING->value]);
+                ->where('id', $validated['reference_id'])
+                ->update(['status' => RequestStatus::RENEWING->value]);
 
-            $this->prepareData($records, $book_ids);
+            $this->prepareData($records, $bookIds);
 
-            $this->libraryExtraService->storeExtraService($validated, $userId, "RENEW");
+            $this->libraryExtraService->storeExtraService($validated, $userId, 'RENEW');
 
             foreach ($records as $record) {
                 $record->status = RequestStatus::RENEWING->value;
                 $record->save();
+
+                $record->bookRes()->update([
+                    'status' => RequestStatus::RENEWING->value,
+                ]);
             }
         });
     }

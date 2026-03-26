@@ -42,7 +42,7 @@ class LibraryExtendService
                 ->get();
 
             $this->bookResModel->query()
-                ->whereIn("id", $book_ids)
+                ->where("id", $validated["reference_id"])
                 ->update(["status" => RequestStatus::EXTENDING->value]);
 
             $this->prepareData($records, $book_ids);
