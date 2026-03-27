@@ -68,7 +68,6 @@ class LibraryExtendService
                 ->where("book_res_id", $validated["request_id"])
                 ->firstOrFail();
 
-            //validate record
             $date = Carbon::parse($record->to_date);
 
             $record->update([

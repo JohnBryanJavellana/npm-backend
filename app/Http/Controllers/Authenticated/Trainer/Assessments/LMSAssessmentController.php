@@ -31,7 +31,7 @@ class LMSAssessmentController extends Controller
         try
         {
             // return la tanan without condition
-         return CourseContent::with(['assessment'])
+        return CourseContent::with(['assessment'])
         ->get();
         }
         catch (\Exception $e) {
@@ -39,10 +39,8 @@ class LMSAssessmentController extends Controller
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
     }
+    
 
-
-    // Made by isack 
-    // para accordion just like what is in netacad
     public function viewAssessment(Request $request)
     {
         try 
@@ -66,10 +64,10 @@ class LMSAssessmentController extends Controller
     public function viewTopic(Request $request)
     {
         try {
-            return Assessments::whereKey($request->contentId)
+            return Assessments::whereKey($request->assessment_id)
             ->with([
                 'sections.questions.options'
-                ])
+            ])
             ->first();
             
         } catch (\Exception $e) {
@@ -78,13 +76,15 @@ class LMSAssessmentController extends Controller
         }
     }
 
-
-
-
-
     public function viewAssessmentContent(viewSpecificAssessmentRequest $request)
     {
-        return new ViewAssessmentContentResource($this->lmsAssessmentService->getAssessmentContentById($request->validated()));
+        try
+        {
+            return new ViewAssessmentContentResource($this->lmsAssessmentService->getAssessmentContentById($request->validated()));   
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
     }
 
     public function create(createAssessmentRequest $request)
