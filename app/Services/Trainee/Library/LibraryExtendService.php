@@ -47,13 +47,13 @@ class LibraryExtendService
 
     public function checkerActiveBooks($records, $book_reservation_ids)
     {
-        $activeReservationIDs = $records->book_reservation_ids;
-
+        $activeReservationIDs = $records->pluck('id')->toArray();
         $reservationIDsToCheck = array_intersect($activeReservationIDs, $book_reservation_ids);
 
+        $statuses = ['APPROVED', 'RECEIVED', 'EXTENDING', 'EXTENDED', 'RENEWING'];
 
-        $activeBooks = \App\Models\BookReservation::whereIn('id', $reservationIDsToCheck)
-            ->where('status', 'active')
+        $activeBooks = $this->bookReservationModel::whereIn('id', $reservationIDsToCheck)
+            ->whereIn('status', $statuses)
             ->get()
             ->groupBy('book_res_id')
             ->map(function ($reservations) {
@@ -82,7 +82,7 @@ class LibraryExtendService
                 ->update(["status" => RequestStatus::EXTENDING->value]);
 
             $this->prepareData($records, $book_ids);
-            $this->checkerActiveBooks($records, $book_ids);
+            $this->checkerActiveBooks($records, $book_ids->toArray());
 
             $this->libraryExtraService->storeExtraService(
                 $validated,

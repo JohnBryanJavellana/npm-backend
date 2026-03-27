@@ -29,11 +29,14 @@ class LibraryRenewService
 
     }
 
+
+
+
     public function storeRenewRequest($validated)
     {
         DB::transaction(function () use ($validated) {
             $userId = $validated['user_id'];
-            $bookIds = collect($validated['data'])->pluck('book_res_id')->values();
+            $bookIds = collect($validated['data'])->pluck('book_res_id')->values()->toArray();
 
             $records = $this->bookReservationModel->query()
                 ->forStatus(RequestStatus::renewableStatuses())
@@ -42,9 +45,9 @@ class LibraryRenewService
                 ->lockForUpdate()
                 ->get();
 
-            $this->bookResModel->query()
-                ->where('id', $validated['reference_id'])
-                ->update(['status' => RequestStatus::RENEWING->value]);
+            // $this->bookResModel->query()
+            //     ->where('id', $validated['reference_id'])
+            //     ->update(['status' => RequestStatus::RENEWING->value]);
 
             $this->prepareData($records, $bookIds);
 
@@ -83,6 +86,10 @@ class LibraryRenewService
                 ->update([
                     "status" => RequestStatus::CANCELLED->value
                 ]);
+
+            $record->bookRes()->update([
+                "status" => RequestStatus::ACTIVE->value
+            ]);
         });
     }
 }
