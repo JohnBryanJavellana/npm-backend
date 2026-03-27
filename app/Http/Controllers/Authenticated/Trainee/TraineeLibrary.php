@@ -328,7 +328,7 @@ class TraineeLibrary extends Controller
             return response()->json(['message' => "You're request has been cancelled successfully."], 200);
         } catch (\Exception $e) {
             \Log::error('error_cancel_book', [$e]);
-            return response()->json(["message" => "Something went wrong, Please try again"], 500);
+            return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
