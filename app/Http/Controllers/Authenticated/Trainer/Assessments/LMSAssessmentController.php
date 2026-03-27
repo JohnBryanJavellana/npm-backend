@@ -51,11 +51,10 @@ class LMSAssessmentController extends Controller
             ->select("id","course_module_id","label","status","day_number")
             ->with([
                 'contents' => function($query) use($request){
-                    $query
-                    ->select("id","course_module_section_id","title","status")
-                    ->whereKey($request->content_id);
+                    $query->select("id","course_module_section_id","title","status")->whereKey($request->content_id);
             },
-                'contents.assessment:id,training_id,course_content_id,title,type,passed_type'])
+                'contents.assessment:id,training_id,course_content_id,title,type,passed_type'
+            ])
             ->get();
         } 
         catch (\Exception $e) {
@@ -64,16 +63,14 @@ class LMSAssessmentController extends Controller
         }
     }
 
-    // para pag view hit activity ha assessment after ma narrow down hit view
     public function viewTopic(Request $request)
     {
-        \Log::info("THiis me");
         try {
-            $record = Assessments::whereKey($request->contentId)
-            ->with(['sections.questions.options'])
+            return Assessments::whereKey($request->contentId)
+            ->with([
+                'sections.questions.options'
+                ])
             ->first();
-
-        return $record;
             
         } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
