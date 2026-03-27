@@ -21,13 +21,30 @@ class LMSAssessmentQuestionController extends Controller
 
     public function create(createAssQuestionRequest $request)
     {
-        // return "wow";
-        return $this->lMSAssQuestionService->storeAssessmentQuestions($request->validated());
+        try
+        {
+        $this->lMSAssQuestionService->storeAssessmentQuestions($request->validated());
+            
+        return response()->json(["Assessment question created successfully."], 200);    
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+            return response()->json(["message" => 'Something went wrong. Please try again later.'], 500);
+        }
     }
 
     public function update(updateAssQuestionRequest $request)
     {
-        return $this->lMSAssQuestionService->updateAssessmentQuestions($request->validated());
+        try
+        {
+        $this->lMSAssQuestionService->updateAssessmentQuestions($request->validated());
+            
+        return response()->json(["message" => "Assessment question updated successfully."], 200);
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+            return response()->json(["message" => 'Something went wrong. Please try again later.'], 500);
+        }
     }
 
     public function delete(Request $request)

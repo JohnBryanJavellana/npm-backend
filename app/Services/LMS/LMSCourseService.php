@@ -89,7 +89,9 @@ class LMSCourseService
 
     public function updateCourseContent($validated)
     {
-        return;
+        return $this->courseContentModel->whereKey($validated["course_content_id"])->update([
+
+        ]);
     }
 
     public function updateCourseContentParent($validated, $userId)

@@ -259,7 +259,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("update_course_contents", [LMSController::class, "updateForContent"]);
             Route::post("update_course_sections", [LMSController::class, "updateForContentParent"]);
             Route::delete("delete_courses", [LMSController::class, "delete"]);
-            Route::delete("delete_course_content_uploads", [LMSController::class, "deleteCourseContentUploads"]);
+            Route::delete("content_uploads", [LMSController::class, "deleteCourseContentUploads"]);
         });
     });
 

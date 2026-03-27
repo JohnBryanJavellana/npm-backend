@@ -26,9 +26,9 @@ class updateLmsCourseContentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "title",
-            "description",
-            "status"
+            "title" => ["sometimes", "required", "string"],
+            "description"=> ["sometimes", "required", "string"],,
+            "status" => ["sometimes", "required", "in:ACTIVE,INACTIVE"],
         ];
     }
 

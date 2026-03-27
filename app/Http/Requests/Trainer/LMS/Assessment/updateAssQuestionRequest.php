@@ -33,7 +33,7 @@ class updateAssQuestionRequest extends FormRequest
             "score" => ["sometimes", "required"],
             "deleted_choice_ids" => ["sometimes", "required"],
             "choices" => ["sometimes", "required", "array"],
-            "choices.*.option_text" => ["sometimes", "required", "string", "max:255"],
+            "choices.*.option_text" => ["sometimes", "required", "string"],
             "choices.*.is_correct" => ["sometimes", "required"],
             "choices.*.id" => ["sometimes", "nullable"],
         ];
@@ -43,7 +43,7 @@ class updateAssQuestionRequest extends FormRequest
     {
         throw new HttpResponseException(
             response()->json([
-                "message" => $validator->errors()
+                "message" => $validator->errors()->first()
             ], 422)
         );
     }
