@@ -257,9 +257,9 @@ enum AdministratorReturnResponse: string {
     /**
     * Summary of CASHIERCTRL
     */
-    case CASHIERCTRL_ALL_PAID_PAYMENTS = 'Successfully retrieved all paid payments across all services.';
-    case CASHIERCTRL_BATCH_GENERATED_INVOICES  = 'Invoices successfully batch generated.';
-    case CASHIERCTRL_ERR_INVALID_DATE_RANGE    = 'Invalid date range. dateFrom must not be later than dateTo.';
+    // case CASHIERCTRL_ALL_PAID_PAYMENTS = 'Successfully retrieved all paid payments across all services.';
+    // case CASHIERCTRL_BATCH_GENERATED_INVOICES  = 'Invoices successfully batch generated.';
+    // case CASHIERCTRL_ERR_INVALID_DATE_RANGE    = 'Invalid date range. dateFrom must not be later than dateTo.';
 
 
 

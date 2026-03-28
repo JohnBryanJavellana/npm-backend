@@ -190,7 +190,7 @@ enum AdministratorAuditActions: string {
      /**
     * Summary of CASHIERCTRL
     */
-    case CASHIERCTRL_BATCH_GENERATED_INVOICES = 'Batch generated invoices for completed transactions';
+    // case CASHIERCTRL_BATCH_GENERATED_INVOICES = 'Batch generated invoices for completed transactions';
 
 
 }
