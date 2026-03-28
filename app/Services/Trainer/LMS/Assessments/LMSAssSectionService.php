@@ -31,7 +31,7 @@ class LMSAssSectionService {
     {
         return DB::transaction(function() use ($validated){
             return $this->assessmentSectionModel->query()
-            ->forAssessment($validated["assessments_id"])
+            ->whereKey($validated["section_id"])
             ->update([
                 ...collect($validated)->only([
                     'title',

@@ -27,7 +27,7 @@ class LMSAssessmentSectionController extends Controller
         try
         {
             $this->lMSAssSectionService->storeAssessmentSection($request->validated());
-            return response()->json(["message" => AssessmentSectionResponseMessage::CREATED->value], 201);
+            return response()->json(["message" => AssessmentSectionResponseMessage::CREATED->value], 200);
         }
         catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
@@ -39,7 +39,7 @@ class LMSAssessmentSectionController extends Controller
         try
         {            
             $this->lMSAssSectionService->updateAssessmentSection($request->validated());
-            return response()->json(["message" => AssessmentSectionResponseMessage::UPDATED->value], 202);
+            return response()->json(["message" => AssessmentSectionResponseMessage::UPDATED->value], 200);
         }
         catch (\Exception $e) {
             \Log::error("updateSecError", [$e->getMessage()]);
@@ -52,7 +52,7 @@ class LMSAssessmentSectionController extends Controller
     {
         try
         {
-            $this->lMSAssSectionService->deleteAssessmentSection($request->section);
+            $this->lMSAssSectionService->deleteAssessmentSection($request->section_id);
             return response()->json(["message" => AssessmentSectionResponseMessage::DELETED->value], 200);
         }
         catch (DomainException $e) {

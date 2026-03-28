@@ -26,8 +26,9 @@ class updateLmsCourseContentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            "course_content_id" => ["required", "exists:course_contents,id"],
             "title" => ["sometimes", "required", "string"],
-            "description"=> ["sometimes", "required", "string"],,
+            "description"=> ["sometimes", "required", "string"],
             "status" => ["sometimes", "required", "in:ACTIVE,INACTIVE"],
         ];
     }
@@ -36,7 +37,7 @@ class updateLmsCourseContentRequest extends FormRequest
     {
         throw new HttpResponseException(
             response()->json([
-                "message" => $validator->errors()
+                "message" => $validator->errors()->first()
             ], 422)
         );
     }

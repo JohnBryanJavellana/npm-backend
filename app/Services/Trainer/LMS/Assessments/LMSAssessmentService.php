@@ -82,8 +82,6 @@ class LMSAssessmentService {
                 $data["is_hidden"] = $isHidden;    
             }
 
-            $data['updated_by'] = $user_id;
-
             return $this->assessmentsModel
                 ->whereKey($validated["examId"])
                 ->update($data);

@@ -87,14 +87,23 @@ class LMSCourseService
         }
     }
 
-    public function updateCourseContent($validated)
+    public function updateCourseContent($validated, $userId)
     {
-        return $this->courseContentModel->whereKey($validated["course_content_id"])->update([
+        DB::transaction(function () use ($validated, $userId){
+            $data = collect($validated);
+            $this->courseContentModel->whereKey($validated["course_content_id"])->update([
+                ...$data->only(
+                    "title",
+                    "description",
+                    "status",
+                )->toArray()
+            ]);
 
-        ]);
+            AuditHelper::log($userId, "has updated a course content.");
+        });
     }
 
-    public function updateCourseContentParent($validated, $userId)
+    public function updateCourseSection($validated, $userId)
     {
         DB::transaction(function () use ($validated, $userId){
             $data = collect($validated);
@@ -136,10 +145,9 @@ class LMSCourseService
         $path = public_path($filepath);
 
         if (file_exists($path)) {
-        \Log::info("deteleContentUpload", [$path]);
-            // unlink($path);
+            unlink($path);
         }
 
-        // return $record->delete();
+        return $record->delete();
     }
 }

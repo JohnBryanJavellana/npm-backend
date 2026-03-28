@@ -30,7 +30,6 @@ class LMSAssessmentController extends Controller
     {
         try
         {
-            // return la tanan without condition
         return CourseContent::with(['assessment'])
         ->get();
         }

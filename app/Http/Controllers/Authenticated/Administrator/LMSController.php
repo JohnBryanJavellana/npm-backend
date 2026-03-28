@@ -65,7 +65,7 @@ class LMSController extends Controller
     {
         try
         {
-            $this->lmsCourseService->updateCourseContentParent($request->validated(), $request->user()->id);            
+            $this->lmsCourseService->updateCourseSection($request->validated(), $request->user()->id);            
             return response()->json(["mesgsage" => "Course content updated successfully."], 200);
         }
         catch (\Exception $e) {
@@ -77,7 +77,8 @@ class LMSController extends Controller
     {
         try
         {
-            $this->lmsCourseService->updateCourseContent($request->validated());
+            // return response()->json(["wow"], 200);
+            $this->lmsCourseService->updateCourseContent($request->validated(), $request->user()->id);
             return response()->json(["message" => "Course content updated successfully."], 200);
         }
         catch (\Exception $e) {

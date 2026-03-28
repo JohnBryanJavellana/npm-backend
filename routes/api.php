@@ -96,6 +96,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         Route::prefix('/dashboard')->group(function () {
             Route::get("/schedules", [TraineeDashboardController::class, "viewCalendarSchedules"]);
             Route::get("/invoices", [TraineeDashboardController::class, "viewAllInvoices"]);
+            Route::get("/users", [TraineeDashboardController::class, "users"]);
         });
 
         Route::prefix('/enrollment/')->group(function () {
@@ -236,7 +237,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("view_assessments/assessment", [LMSAssessmentController::class, "viewAssessmentContent"]);
             Route::post("create_assessments", [LMSAssessmentController::class, "create"]);
             Route::post("update_assessments", [LMSAssessmentController::class, "update"]);
-            Route::post("delete_assessments", [LMSAssessmentController::class, "delete"]);
+            Route::delete("delete_assessments", [LMSAssessmentController::class, "delete"]);
         });
         Route::prefix('sections/')->group(function () {
             Route::get("view_sections/{assessment}", [LMSAssessmentSectionController::class, "view"]);
@@ -259,7 +260,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("update_course_contents", [LMSController::class, "updateForContent"]);
             Route::post("update_course_sections", [LMSController::class, "updateForContentParent"]);
             Route::delete("delete_courses", [LMSController::class, "delete"]);
-            Route::delete("content_uploads", [LMSController::class, "deleteCourseContentUploads"]);
+            Route::delete("delete_content_uploads", [LMSController::class, "deleteUpload"]);
         });
     });
 

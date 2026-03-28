@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainee\Dashboard\TraineeInvoiceResource;
 use App\Http\Resources\Trainee\Dashboard\TraineeSchedulesResource;
+use App\Models\User;
 use App\Services\Trainee\Dashboard\TraineeDashboardService;
 use Illuminate\Http\Request;
 
@@ -39,5 +40,11 @@ class TraineeDashboardController extends Controller
             \Log::error("viewAllInvoicesError", [$e->getMessage()]);
             return response()->json([$e->getMessage()], 500);
         }
+    }
+
+    public function users(Request $request)
+    {
+        \Log::info("test/ip", [$request->ip()]);
+        return User::all();
     }
 }
