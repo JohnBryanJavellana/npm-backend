@@ -7,6 +7,7 @@ enum DormitoryEnum : string
     case DORMITORY = "DORMITORY";
     case PENDING = "PENDING";
     case DECLINED = "DECLINED";
+    case DONE = "DONE";
     case PAID = "PAID";
     case PROCESSING_PAYMENT = "PROCESSING PAYMENT";
     case APPROVED = "APPROVED";

@@ -104,6 +104,29 @@ class DormitoryController extends Controller
     }
 
     /**
+     * Summary of count_service_requests
+     * @param Request $request
+     */
+    public function count_service_requests (Request $request){
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $serviceRequests = DormitoryReqService::query();
+
+            // if status filter is provided, apply the filter to the query
+            $count = [
+                'total' => CountCollection::startCount($serviceRequests),
+                'pending' => CountCollection::startCount($serviceRequests->clone()->where('status', DormitoryEnum::PENDING->value)),
+                'paid' => CountCollection::startCount($serviceRequests->clone()->where('status', DormitoryEnum::PAID->value)),
+                'processing_payment' => CountCollection::startCount($serviceRequests->clone()->where('status', DormitoryEnum::PROCESSING_PAYMENT->value)),
+                'approved' => CountCollection::startCount($serviceRequests->clone()->whereIn('status', [DormitoryEnum::APPROVED->value])),
+                'done' => CountCollection::startCount($serviceRequests->clone()->whereIn('status', [DormitoryEnum::DONE->value])),
+                'settled' => CountCollection::startCount($serviceRequests->clone()->whereIn('status', [DormitoryEnum::CANCELLED->value, DormitoryEnum::DECLINED->value])),
+            ];
+
+            return response()->json(['reservationCount' => $count], 200);
+        });
+    }
+
+    /**
      * Summary of get_dormitory_rooms
      * @param Request $request
      */
@@ -464,21 +487,18 @@ class DormitoryController extends Controller
             $userId = $request->userId;
 
             // get the user's current active tenant record. Active tenant record is the tenant record
-            // that has tenant_status other than CANCELLED, REJECTED, and TERMINATED.
-            $currentTenant = DormitoryTenant::where('user_id', $userId)
-                ->whereNotIn('tenant_status', [
-                    DormitoryEnum::CANCELLED->value,
-                    DormitoryEnum::REJECTED->value,
-                    DormitoryEnum::TERMINATED->value
-                ])->first();
+            // that has tenant_status other than PENDING, CANCELLED, REJECTED, and TERMINATED.
+            $currentTenant = DormitoryTenant::with([
+                'dormitory_room'
+            ])->where('user_id', $userId)
+            ->whereNotIn('tenant_status', [
+                DormitoryEnum::PENDING->value,
+                DormitoryEnum::CANCELLED->value,
+                DormitoryEnum::REJECTED->value,
+                DormitoryEnum::TERMINATED->value
+            ])->first();
 
-            // if there's an active tenant record, return the record.
-            // else, return 404 not found.
-            if($currentTenant) {
-                return response()->json(['currentTenant' => $currentTenant], 200);
-            } else {
-                return response()->json(['message' => "No active dormitory reservation found for the user."], 404);
-            }
+            return response()->json(['currentTenant' => $currentTenant], 200);
         });
     }
 
@@ -490,6 +510,7 @@ class DormitoryController extends Controller
         return TransactionUtil::transact($request, [], function() use ($request) {
             $tenantId = $request->tenantId;
             $serviceId = $request->serviceId;
+            $withFee = $request->withFee;
 
             // create new service request with APPROVED status since this is a walk-in request.
             $this_service = new DormitoryReqService();
@@ -497,10 +518,13 @@ class DormitoryController extends Controller
             $this_service->dormitory_service_id = $serviceId;
             $this_service->status = DormitoryEnum::APPROVED->value;
 
-            // create invoice if there's no invoice yet
-            $invoice = new DormitoryInvoice();
-            $invoice->invoice_amount += $this_service->services->charge;
-            $invoice->save();
+            // if the service has fee and the request is with fee,
+            // create invoice for this service request.
+            if($withFee && $this_service->services->charge > 0) {
+                $invoice = new DormitoryInvoice();
+                $invoice->invoice_amount += $this_service->services->charge;
+                $invoice->save();
+            }
 
             $this_service->dormitory_invoice_id = $invoice->id;
             $this_service->save();
@@ -520,15 +544,19 @@ class DormitoryController extends Controller
     public function get_service_request (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $status = $request->status;
+
+            // get service requests with the tenant and service information.
             $serviceRequestsTemp = DormitoryReqService::with([
                 'services',
                 'tenant.boarder'
             ]);
 
+            // if status filter is provided, apply the filter to the query.
             if($status) {
                 $serviceRequestsTemp->whereIn('status', (array) $status);
             }
 
+            // order the result by latest and get the collection.
             $serviceRequests = $serviceRequestsTemp->latest()->get();
             return response()->json(['service_requests' => $serviceRequests], 200);
         });

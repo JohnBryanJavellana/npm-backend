@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignIdFor(DormitoryInvoice::class)->nullable()->constrained()->cascadeOnDelete();
             $table->double('charge', 65, 2)->default(0);
             $table->longText('remarks')->nullable();
-            $table->enum("status", ["PENDING", "APPROVED", "DECLINED", "DONE", "FOR PAYMENT" , "CANCELLED", "PAID"])->default('PENDING');
+            $table->enum("status", ["PENDING", "APPROVED", "DECLINED", "DONE", "FOR PAYMENT" , "CANCELLED", "PAID", "PROCESSING PAYMENT"])->default('PENDING');
             $table->timestamps();
         });
     }

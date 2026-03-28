@@ -123,6 +123,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('/dormitory/')->middleware(['user_role:SUPERADMIN,ADMIN-DORMITORY', 'throttle:60,1'])->group(function () {
             Route::post('count_dorm_reservation', [DormitoryController::class, 'count_dorm_reservation']);
+            Route::post('count_service_requests', [DormitoryController::class, 'count_service_requests']);
 
             Route::get('get_dormitory_rooms', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::post('create_or_update_room', [DormitoryController::class, 'create_or_update_room']);

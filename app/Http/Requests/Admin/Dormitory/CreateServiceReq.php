@@ -22,6 +22,7 @@ class CreateServiceReq extends FormRequest
     public function rules(): array
     {
         return [
+            'withFee' => ['required', 'boolean'],
             'tenantId' => ['required', 'exists:dormitory_tenants,id'],
             'serviceId' => ['required', 'exists:dormitory_services,id']
         ];
