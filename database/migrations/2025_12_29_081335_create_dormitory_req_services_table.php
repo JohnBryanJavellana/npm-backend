@@ -19,7 +19,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryService::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(DormitoryInvoice::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(DormitoryInvoice::class)->nullable()->constrained()->cascadeOnDelete();
             $table->double('charge', 65, 2)->default(0);
             $table->longText('remarks')->nullable();
             $table->enum("status", ["PENDING", "APPROVED", "DECLINED", "DONE", "FOR PAYMENT" , "CANCELLED", "PAID"])->default('PENDING');
