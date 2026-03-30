@@ -22,9 +22,15 @@ class CreateServiceReq extends FormRequest
     public function rules(): array
     {
         return [
-            'withFee' => ['required', 'boolean'],
+            'status' => ['required', 'in:APPROVED,DECLINED,DONE,FOR PAYMENT,CANCELLED,PAID'],
+            'feeType' => ['required', 'in:UNSET,APPROVED_WITH_FEE,APPROVED_NO_FEE'],
+            'userId' => ['required', 'exists:users,id'],
             'tenantId' => ['required', 'exists:dormitory_tenants,id'],
-            'serviceId' => ['required', 'exists:dormitory_services,id']
+            'serviceId' => ['required', 'exists:dormitory_services,id'],
+            'remarks' => ['required_if:httpMethod,UPDATE', 'string', 'required_if:status,CANCELLED,DECLINED'],
+
+            'httpMethod' => ['required', 'in:POST,UPDATE'],
+            'documentId' => ['required_if:httpMethod,UPDATE', 'exists:dormitory_req_services,id']
         ];
     }
 }

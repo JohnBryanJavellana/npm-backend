@@ -8,4 +8,6 @@ enum LibraryEnum : string {
     case FOR_CSM = "FOR CSM";
     case EXTENDING = "EXTENDING";
     case COMPLETED = "COMPLETED";
+    case PAID = "PAID";
+    case PROCESSING_PAYMENT = "PROCESSING PAYMENT";
 }

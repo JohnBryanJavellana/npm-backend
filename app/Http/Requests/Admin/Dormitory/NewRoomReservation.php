@@ -35,6 +35,7 @@ class NewRoomReservation extends FormRequest
             'status' => ['required_if:httpMethod,UPDATE', 'in:APPROVED,REJECTED'],
             'remarks' => ['required_if:status,REJECTED'],
             'pricingBreakdown' => ['required_if:occupancy,TRAINEE'],
+            'withFee' => ['required', 'boolean'],
 
             'httpMethod' => ['required', 'in:POST,UPDATE'],
             'documentId' => [Rule::when($this->httpMethod === "UPDATE", ['required', 'exists:dormitory_tenants,id'], ['nullable'])],

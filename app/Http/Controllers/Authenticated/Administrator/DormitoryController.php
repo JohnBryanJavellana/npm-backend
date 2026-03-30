@@ -13,6 +13,8 @@ use App\Http\Requests\Admin\Dormitory\GetCurrentTenantInfo;
 use App\Http\Requests\Admin\Dormitory\GetMatchRooms;
 use App\Http\Requests\Admin\Dormitory\NewReservation;
 use App\Http\Requests\Admin\Dormitory\NewRoomReservation;
+use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
+use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsDone;
 use App\Http\Requests\Admin\Dormitory\UpdateServiceReq;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
@@ -116,10 +118,11 @@ class DormitoryController extends Controller
                 'total' => CountCollection::startCount($serviceRequests),
                 'pending' => CountCollection::startCount($serviceRequests->clone()->where('status', DormitoryEnum::PENDING->value)),
                 'paid' => CountCollection::startCount($serviceRequests->clone()->where('status', DormitoryEnum::PAID->value)),
+                'for_payment' => CountCollection::startCount($serviceRequests->clone()->where('status', DormitoryEnum::FOR_PAYMENT->value)),
                 'processing_payment' => CountCollection::startCount($serviceRequests->clone()->where('status', DormitoryEnum::PROCESSING_PAYMENT->value)),
                 'approved' => CountCollection::startCount($serviceRequests->clone()->whereIn('status', [DormitoryEnum::APPROVED->value])),
                 'done' => CountCollection::startCount($serviceRequests->clone()->whereIn('status', [DormitoryEnum::DONE->value])),
-                'settled' => CountCollection::startCount($serviceRequests->clone()->whereIn('status', [DormitoryEnum::CANCELLED->value, DormitoryEnum::DECLINED->value])),
+                'declined' => CountCollection::startCount($serviceRequests->clone()->whereIn('status', [DormitoryEnum::CANCELLED->value, DormitoryEnum::DECLINED->value])),
             ];
 
             return response()->json(['reservationCount' => $count], 200);
@@ -369,6 +372,7 @@ class DormitoryController extends Controller
             $remarks = $request->remarks;
             $pricingBreakdown = $request->pricingBreakdown;
             $paymentRemarks = $request->paymentRemarks;
+            $withFee = $request->withFee;
 
             // check if the guest has existing active reservation
             $checkForNewTransaction = DormitoryTenant::where('user_id', $guest)
@@ -431,9 +435,10 @@ class DormitoryController extends Controller
                     }
                 }
 
-                // if the reservation is being approved and the pricing breakdown is provided, create invoice.
+                // if the reservation is with fee and the occupancy is TRAINEE or PAYING GUEST/VISITOR,
+                // create invoice for this reservation.
                 $pricingBreakdownTemp = json_decode($pricingBreakdown);
-                if(\in_array($occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $pricingBreakdownTemp) {
+                if($withFee && \in_array($occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $pricingBreakdownTemp) {
                     $new_invoice = new DormitoryInvoice();
                     $new_invoice->dormitory_tenant_id = $this_reservation->id;
                     $new_invoice->user_id = $guest;
@@ -503,30 +508,55 @@ class DormitoryController extends Controller
     }
 
     /**
-     * Summary of walk_in_service_request
+     * Summary of create_or_update_service_request
      * @param CreateServiceReq $request
      */
-    public function walk_in_service_request (CreateServiceReq $request) {
+    public function create_or_update_service_request (CreateServiceReq $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
             $tenantId = $request->tenantId;
+            $userId = $request->userId;
             $serviceId = $request->serviceId;
-            $withFee = $request->withFee;
+            $feeType = $request->feeType;
+            $paymentRemarks = $request->paymentRemarks;
+            $status = $request->status;
+            $remarks = $request->remarks;
 
-            // create new service request with APPROVED status since this is a walk-in request.
-            $this_service = new DormitoryReqService();
+            // if POST, create new service request.
+            // if UPDATE, update the existing service request with lockForUpdate
+            $this_service = $isPost ? new DormitoryReqService() : DormitoryReqService::where('id', $request->documentId)->lockForUpdate()->firstOrFail();
             $this_service->dormitory_tenant_id = $tenantId;
             $this_service->dormitory_service_id = $serviceId;
-            $this_service->status = DormitoryEnum::APPROVED->value;
+            $this_service->status = $status;
+            $this_service->fee_type = $feeType;
 
-            // if the service has fee and the request is with fee,
+            // if the service request is with fee and the status is FOR_PAYMENT,
             // create invoice for this service request.
-            if($withFee && $this_service->services->charge > 0) {
-                $invoice = new DormitoryInvoice();
-                $invoice->invoice_amount += $this_service->services->charge;
-                $invoice->save();
+            if($status === DormitoryEnum::FOR_PAYMENT->value && $feeType === DormitoryEnum::APPROVED_WITH_FEE->value && $this_service->services->charge > 0) {
+                $new_invoice = new DormitoryInvoice();
+                $new_invoice->dormitory_tenant_id = $tenantId;
+                $new_invoice->user_id = $userId;
+                $new_invoice->trace_number = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-INV-');
+                $new_invoice->invoice_amount = $this_service->services->charge;
+                $new_invoice->description = "Room Service Request: " . $this_service->services->name;
+                $new_invoice->type = DormitoryEnum::SERVICE;
+                $new_invoice->remarks = $paymentRemarks;
+                $new_invoice->save();
+
+                $this_service->dormitory_invoice_id = $new_invoice->id;
+                $this_service->status = DormitoryEnum::FOR_PAYMENT->value;
             }
 
-            $this_service->dormitory_invoice_id = $invoice->id;
+            // if the request is being cancelled or declined, cancel the invoice
+            if(\in_array($status, [DormitoryEnum::CANCELLED->value, DormitoryEnum::DECLINED->value]) && $this_service->dormitory_invoice_id) {
+                $invoice = DormitoryInvoice::where('id', $this_service->dormitory_invoice_id)->lockForUpdate()->first();
+                $invoice->invoice_status = DormitoryEnum::CANCELLED->value;
+                $invoice->remarks = $paymentRemarks;
+                $invoice->save();
+
+                $this_service->remarks = $remarks;
+            }
+
             $this_service->save();
 
             // notify the tenant about the new service request and
@@ -548,6 +578,7 @@ class DormitoryController extends Controller
             // get service requests with the tenant and service information.
             $serviceRequestsTemp = DormitoryReqService::with([
                 'services',
+                'invoice',
                 'tenant.boarder'
             ]);
 
@@ -563,43 +594,35 @@ class DormitoryController extends Controller
     }
 
     /**
-     * Summary of update_requested_service
-     * @param Request $request
+     * Summary of set_service_request_as_action
+     * @param SetServiceRequestAsAction $request
      */
-    public function update_requested_service (UpdateServiceReq $request) {
+    public function set_service_request_as_action (SetServiceRequestAsAction $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $documentId = $request->documentId;
-            $remarks = $request->remarks;
-            $status = $request->status;
+            $serviceRequestId = $request->serviceRequestId;
+            $action = $request->action;
 
-            // lock the dormitory service request record for update to prevent race conditions
-            // when multiple administrators are trying to update the same service request.
-            $reqTemp = DormitoryReqService::where('id', $documentId)->lockForUpdate()->first();
-            $reqTemp->status = $status;
+            $this_service_request = DormitoryReqService::where('id', $serviceRequestId)->lockForUpdate()->firstOrFail();
 
-            // if the request is being approved and there's no invoice yet, create invoice.
-            if($status === DormitoryEnum::APPROVED->value && !$reqTemp->dormitory_invoice_id) {
-                $invoice = new DormitoryInvoice();
-                $invoice->invoice_amount += $reqTemp->services->charge;
-                $invoice->save();
-
-                $reqTemp->dormitory_invoice_id = $invoice->id;
+            // if the action is DONE, only allow if the current status is APPROVED or FOR_PAYMENT. Otherwise, return error response.
+            if($action === "DONE" && \in_array($this_service_request->status, [DormitoryEnum::CANCELLED->value, DormitoryEnum::DECLINED->value])) {
+                return response()->json(['message' => "Only service requests with status Approved or Paid can be set as DONE."], 400);
             }
 
-            // if the request is being cancelled or declined, cancel the invoice
-            if(\in_array($status, [DormitoryEnum::CANCELLED->value, DormitoryEnum::DECLINED->value])) {
-                $invoice = DormitoryInvoice::where('id', $reqTemp->invoice()->id)->lockForUpdate()->first();
-                $invoice->invoice_status = DormitoryEnum::CANCELLED->value;
-                $invoice->save();
+            // if the action is CANCELLED, only allow if the current status is not DONE. Otherwise, return error response.
+            if($action === "CANCELLED" && $this_service_request->dormitory_invoice_id) {
+                $invoice = DormitoryInvoice::where('id', $this_service_request->dormitory_invoice_id)->lockForUpdate()->first();
 
-                $reqTemp->remarks = $remarks;
+                if($invoice->invoice_status !== DormitoryEnum::PAID->value) {
+                    $invoice->invoice_status = DormitoryEnum::CANCELLED->value;
+                    $invoice->save();
+                }
             }
 
-            $reqTemp->save();
+            $this_service_request->status = $action;
+            $this_service_request->save();
 
-            // log the activity in the audit trail
-            AuditHelper::log($request->user()->id, AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYREQUESTEDSERV->value. " ID#$request->documentId");
-            return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYREQUESTEDSERVICE->value ], 200);
+            return response()->json(['message' => "Service request has been marked as $action."], 200);
         });
     }
 
