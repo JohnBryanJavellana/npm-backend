@@ -10,4 +10,5 @@ enum LibraryEnum : string {
     case COMPLETED = "COMPLETED";
     case PAID = "PAID";
     case PROCESSING_PAYMENT = "PROCESSING PAYMENT";
+    case FOR_PAYMENT = "FOR PAYMENT";
 }

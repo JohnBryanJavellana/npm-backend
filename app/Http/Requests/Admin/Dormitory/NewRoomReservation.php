@@ -15,6 +15,13 @@ class NewRoomReservation extends FormRequest
         return $this->user() !== null && \in_array($this->user()->role, ['SUPERADMIN', 'ADMIN-DORMITORY']);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'withFee' => $this->has('withFee') ? filter_var($this->input('withFee'), FILTER_VALIDATE_BOOLEAN) : null,
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -32,7 +39,7 @@ class NewRoomReservation extends FormRequest
             'accommodation' => ['required', 'in:SINGLE,SHARED,COUPLE'],
             'room_type' => ['required', 'in:AIRCON,NON-AIRCON'],
             'supporting_documents' => ['required_if:accommodation,COUPLE', 'array'],
-            'status' => ['required_if:httpMethod,UPDATE', 'in:APPROVED,REJECTED'],
+            'status' => ['required_if:httpMethod,UPDATE', 'in:APPROVED,REJECTED,FOR PAYMENT'],
             'remarks' => ['required_if:status,REJECTED'],
             'pricingBreakdown' => ['required_if:occupancy,TRAINEE'],
             'withFee' => ['required', 'boolean'],

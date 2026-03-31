@@ -374,18 +374,6 @@ class DormitoryController extends Controller
             $paymentRemarks = $request->paymentRemarks;
             $withFee = $request->withFee;
 
-            // check if the guest has existing active reservation
-            $checkForNewTransaction = DormitoryTenant::where('user_id', $guest)
-                ->whereNotIn('tenant_status', [
-                    DormitoryEnum::TERMINATED,
-                    DormitoryEnum::CANCELLED,
-                    DormitoryEnum::REJECTED
-                ])->first();
-
-            if($checkForNewTransaction) {
-                return response()->json(['message' => "Guest has existing $checkForNewTransaction->tenant_status reservation."], 409);
-            }
-
             // if POST, create new reservation.
             // if UPDATE, update the existing reservation with lockForUpdate
             if($isPost) {
@@ -413,7 +401,7 @@ class DormitoryController extends Controller
                 $this_reservation->purpose = $purpose;
                 $this_reservation->accommodation = $accommodation;
                 $this_reservation->room_type = $room_type;
-                $this_reservation->tenant_status = DormitoryEnum::FOR_PAYMENT;
+                $this_reservation->tenant_status =  $status === DormitoryEnum::FOR_PAYMENT->value ? DormitoryEnum::FOR_PAYMENT : DormitoryEnum::APPROVED;
                 $this_reservation->save();
 
                 // if there are supporting documents, save them in the dormitory_tenant_sup_docs table and save the files in the storage
@@ -438,7 +426,7 @@ class DormitoryController extends Controller
                 // if the reservation is with fee and the occupancy is TRAINEE or PAYING GUEST/VISITOR,
                 // create invoice for this reservation.
                 $pricingBreakdownTemp = json_decode($pricingBreakdown);
-                if($withFee && \in_array($occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $pricingBreakdownTemp) {
+                if($withFee && \in_array($occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $pricingBreakdownTemp && $status === DormitoryEnum::FOR_PAYMENT->value) {
                     $new_invoice = new DormitoryInvoice();
                     $new_invoice->dormitory_tenant_id = $this_reservation->id;
                     $new_invoice->user_id = $guest;

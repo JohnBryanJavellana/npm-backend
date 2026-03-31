@@ -189,20 +189,29 @@ class Cashier extends Controller
                 $this_main_table->save();
             }
 
-            if($request->service === "LIBRARY-PAYMENT") {
+            if($request->service === "LIBRARY") {
                 $this_main_table = self::getTable("LIBRARY-MAIN-TABLE", $this_payment->book_res_id, null)->lockForUpdate()->first();
 
-                if($this_main_table->status === LibraryEnum::PROCESSING_PAYMENT->value) {
+                if(\in_array($this_main_table->status, [LibraryEnum::PROCESSING_PAYMENT->value, LibraryEnum::FOR_PAYMENT->value])) {
                     $this_main_table->status = LibraryEnum::PAID;
                     $this_main_table->save();
                 }
             }
 
-            if($request->service === "ENROLLMENT-PAYMENT") {
+            if($request->service === "ENROLLMENT") {
                 $this_main_table = self::getTable("ENROLLMENT-MAIN-TABLE", $this_payment->enrolled_course_id, null)->lockForUpdate()->first();
 
-                if($this_main_table->enrolled_course_status === EnrollmentEnum::PROCESSING_PAYMENT->value) {
+                if(\in_array($this_main_table->enrolled_course_status, [EnrollmentEnum::PROCESSING_PAYMENT->value, EnrollmentEnum::FOR_PAYMENT->value])) {
                     $this_main_table->enrolled_course_status = EnrollmentEnum::PAID;
+                    $this_main_table->save();
+                }
+            }
+
+            if($request->service === "DORMITORY") {
+                $this_main_table = self::getTable("DORMITORY-MAIN-TABLE", $this_payment->dormitory_tenant_id, null)->lockForUpdate()->first();
+
+                if(\in_array($this_main_table->tenant_status, [DormitoryEnum::PROCESSING_PAYMENT->value, DormitoryEnum::FOR_PAYMENT->value])) {
+                    $this_main_table->tenant_status = DormitoryEnum::PAID;
                     $this_main_table->save();
                 }
             }
