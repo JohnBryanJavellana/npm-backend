@@ -37,6 +37,29 @@ class LMSCourseService
         );
     }
 
+    public function getCourseById($moduleId)
+    {
+        return $this->courseModuleSectionModel->query()
+        ->forCourseModule($moduleId)
+        ->with([
+            "contents:id,course_module_section_id,title,status",
+            "contents.assessment:id,course_content_id,title,status",
+            "updated_by:id,fname,mname,lname",
+        ])
+        ->get();
+    }
+
+    public function getContentById($contentId)
+    {
+        return $this->courseContentModel->query()
+        ->whereKey($contentId)
+        ->with([
+            "uploads",
+            "assessment",
+        ])
+        ->first();
+    }
+
     public function storeCourseSections($validated, $userId)
     {
         return DB::transaction(function() use($validated, $userId){

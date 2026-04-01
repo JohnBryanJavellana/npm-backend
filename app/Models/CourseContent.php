@@ -27,6 +27,4 @@ class CourseContent extends Model
         return $this->hasMany(Assessments::class);
     }
     /** Scope */
-
-    
 }

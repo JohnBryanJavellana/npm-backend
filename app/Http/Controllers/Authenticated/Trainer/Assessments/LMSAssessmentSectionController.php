@@ -19,7 +19,13 @@ class LMSAssessmentSectionController extends Controller
 
     public function view(Request $request, $assessmentId)
     {
-        return $this->lMSAssSectionService->getAssessmentSectionsById($assessmentId);
+        try
+        {
+            return $this->lMSAssSectionService->getAssessmentSectionsById($assessmentId);
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
     }
 
     public function create(createAssSectionRequest $request)

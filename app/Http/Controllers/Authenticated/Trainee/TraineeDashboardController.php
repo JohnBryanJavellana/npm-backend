@@ -41,10 +41,4 @@ class TraineeDashboardController extends Controller
             return response()->json([$e->getMessage()], 500);
         }
     }
-
-    public function users(Request $request)
-    {
-        \Log::info("test/ip", [$request->ip()]);
-        return User::all();
-    }
 }

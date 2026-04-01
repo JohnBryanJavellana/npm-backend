@@ -10,6 +10,7 @@ use App\Http\Requests\Trainer\LMS\createAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\deleteAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\updateAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
+use App\Http\Resources\Trainer\LMS\Assessment\AssessmentResource;
 use App\Http\Resources\Trainer\LMS\ViewAssessmentContentResource;
 use App\Models\Assessments;
 use App\Models\CourseContent;
@@ -48,7 +49,8 @@ class LMSAssessmentController extends Controller
             ->select("id","course_module_id","label","status","day_number")
             ->with([
                 'contents' => function($query) use($request){
-                    $query->select("id","course_module_section_id","title","status")->whereKey($request->content_id);
+                    $query->select("id","course_module_section_id","title","status")
+                    ->whereKey($request->content_id);
             },
                 'contents.assessment:id,training_id,course_content_id,title,type,passed_type'
             ])
@@ -63,12 +65,14 @@ class LMSAssessmentController extends Controller
     public function viewTopic(Request $request)
     {
         try {
-            return Assessments::whereKey($request->assessment_id)
+            \Log::info(("viewTip"), [$request->input()]);
+            $record = Assessments::whereKey($request->assessment_id)
             ->with([
                 'sections.questions.options'
             ])
             ->first();
             
+            return new AssessmentResource ($record);
         } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
