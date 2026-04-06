@@ -224,6 +224,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     });
 
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->prefix('lms/')->group(function () {
+
+        Route::prefix("overview/")->group(function () {
+            Route::post("trainings", [LMSHandoutController::class, "overview"]);
+        });
+
+
         Route::prefix("handouts/")->group(function () {
             Route::post("view_handouts", [LMSHandoutController::class, "view"]);
             Route::post("create_handouts", [LMSHandoutController::class, "store"]);
@@ -254,6 +260,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::prefix('courses/')->group(function () {
+            Route::post("view_module", [LMSController::class, "overview"]);
             Route::post("view_courses", [LMSController::class, "view"]);
             Route::post("view", [LMSController::class, "viewModule"]);
             Route::post("content", [LMSController::class, "viewContentById"]);
@@ -267,7 +274,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     });
 
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
-    Route::post('update_notification',[NotificationCtrl::class, 'update_notification']);
+    Route::post('update_notification', [NotificationCtrl::class, 'update_notification']);
     Route::post('get_notifications', [NotificationCtrl::class, 'get_notifications']);
     Route::post('change-theme', [Account::class, 'change_theme']);
     Route::post('logout', [Logout::class, 'logout_user']);

@@ -14,6 +14,7 @@ use App\Http\Resources\Trainer\LMS\Assessment\AssessmentResource;
 use App\Http\Resources\Trainer\LMS\ViewAssessmentContentResource;
 use App\Models\Assessments;
 use App\Models\CourseContent;
+use App\Models\CourseModule;
 use App\Models\CourseModuleSection;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use DomainException;
@@ -25,38 +26,34 @@ class LMSAssessmentController extends Controller
 {
     public function __construct(
         protected LMSAssessmentService $lmsAssessmentService
-    ){}
+    ) {}
 
     public function view(viewAssessmentRequest $request)
     {
-        try
-        {
-        return CourseContent::with(['assessment'])
-        ->get();
-        }
-        catch (\Exception $e) {
+        try {
+            return CourseContent::with(['assessment'])
+                ->get();
+        } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
     }
-    
+
 
     public function viewAssessment(Request $request)
     {
-        try 
-        {
-            return CourseModuleSection::where("course_module_id",$request->course_module_id)
-            ->select("id","course_module_id","label","status","day_number")
-            ->with([
-                'contents' => function($query) use($request){
-                    $query->select("id","course_module_section_id","title","status")
-                    ->whereKey($request->content_id);
-            },
-                'contents.assessment:id,training_id,course_content_id,title,type,passed_type'
-            ])
-            ->get();
-        } 
-        catch (\Exception $e) {
+        try {
+            return CourseModuleSection::where("course_module_id", $request->course_module_id)
+                ->select("id", "course_module_id", "label", "status", "day_number")
+                ->with([
+                    'contents' => function ($query) use ($request) {
+                        $query->select("id", "course_module_section_id", "title", "status")
+                            ->whereKey($request->content_id);
+                    },
+                    'contents.assessment:id,training_id,course_content_id,title,type,passed_type'
+                ])
+                ->get();
+        } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
@@ -65,14 +62,13 @@ class LMSAssessmentController extends Controller
     public function viewTopic(Request $request)
     {
         try {
-            \Log::info(("viewTip"), [$request->input()]);
             $record = Assessments::whereKey($request->assessment_id)
-            ->with([
-                'sections.questions.options'
-            ])
-            ->first();
-            
-            return new AssessmentResource ($record);
+                ->with([
+                    'sections.questions.options'
+                ])
+                ->first();
+
+            return new AssessmentResource($record);
         } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
@@ -81,27 +77,22 @@ class LMSAssessmentController extends Controller
 
     public function viewAssessmentContent(viewSpecificAssessmentRequest $request)
     {
-        try
-        {
-            return new ViewAssessmentContentResource($this->lmsAssessmentService->getAssessmentContentById($request->validated()));   
-        }
-        catch (\Exception $e) {
+        try {
+            return new ViewAssessmentContentResource($this->lmsAssessmentService->getAssessmentContentById($request->validated()));
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
     public function create(createAssessmentRequest $request)
     {
-        try
-        {
+        try {
             $validated = $request->validated();
             $this->lmsAssessmentService->storeAssessment($validated, $request->user()->id);
             return response()->json(["message" => AssessmentMessageResponse::CREATED->value], 200);
-        }
-        catch (DomainException $e) {
+        } catch (DomainException $e) {
             throw $e;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([$e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
@@ -109,13 +100,11 @@ class LMSAssessmentController extends Controller
 
     public function update(updateAssessmentRequest $request)
     {
-        try
-        {   
+        try {
             $this->lmsAssessmentService->updateAssessment($request->validated(), $request->user()->id);
-            return response()->json(["message" => AssessmentMessageResponse::UPDATED->value ], 200);
-        }
-        catch (\Exception $e) {
-            \Log::error("updateError", [$e->getMessage()]);
+            return response()->json(["message" => AssessmentMessageResponse::UPDATED->value], 200);
+        } catch (\Exception $e) {
+            // \Log::error("updateError", [$e->getMessage()]);
             return response()->json(["message" => $e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
@@ -123,15 +112,12 @@ class LMSAssessmentController extends Controller
 
     public function delete(deleteAssessmentRequest $request)
     {
-        try
-        {
+        try {
             $this->lmsAssessmentService->deleteAssessmentById($request->validated());
             return response()->json(["message" => "Assessment has been deleted successfully."], 200);
-        }
-        catch(DomainException $e) {
+        } catch (DomainException $e) {
             throw $e;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
