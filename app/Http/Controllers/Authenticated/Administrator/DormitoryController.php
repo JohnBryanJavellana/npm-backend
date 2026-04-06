@@ -385,7 +385,7 @@ class DormitoryController extends Controller
             $this_reservation->remarks = $remarks;
 
             // if the reservation is being rejected, update tenant_status to REJECTED.
-            // else, update or create reservation with FOR_PAYMENT status.
+            // if the reservation is being approved or set for payment, update the reservation details and tenant_status accordingly.
             if($status === DormitoryEnum::REJECTED->value) {
                 $this_reservation->tenant_status = DormitoryEnum::REJECTED;
                 $this_reservation->save();
@@ -403,11 +403,6 @@ class DormitoryController extends Controller
 
                 // if there are supporting documents, save them in the dormitory_tenant_sup_docs table and save the files in the storage
                 if($supporting_documents) {
-                    $path = public_path('dormitory/supporting-document');
-                    if (!File::isDirectory($path)) {
-                        File::makeDirectory($path, 0777, true, true);
-                    }
-
                     foreach($supporting_documents as $sd) {
                         $room_image = new DormitoryTenantSupDoc();
                         $room_image->dormitory_tenant_id = $this_reservation->id;
