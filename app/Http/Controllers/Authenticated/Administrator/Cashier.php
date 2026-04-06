@@ -235,6 +235,80 @@ class Cashier extends Controller
     }
 
     /**
+     * Summary of verify_payment
+     * @param Request $request
+     */
+    public function verify_payment (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $this_payment = self::getTable($request->service, $request->documentId, null)->lockForUpdate()->first();
+
+            // if the payment is already paid or cancelled, return error response
+            if(\in_array($this_payment->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
+                return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_ERR_PAYMENT->value], 200);
+            } else {
+                $this_payment->invoice_status = $request->verificationStatus;
+                $this_payment->save();
+
+                // if the payment is for dormitory or library or enrollment, update the main table status to PAID
+                if(\in_array($request->service, ["DORMITORY-SERVICE", "DORMITORY-INCLUSION"])) {
+                    $this_reference_table = $request->service === "DORMITORY-SERVICE"
+                        ? DormitoryReqService::where('dormitory_invoice_id', $this_payment->id)->lockForUpdate()->first()
+                        : DormitoryInclusionRequest::where('dormitory_invoice_id', $this_payment->id)->lockForUpdate()->first();
+
+                    $this_main_table = self::getTable("$request->service-MAIN-TABLE", $this_reference_table->id, null)->lockForUpdate()->first();
+                    $this_main_table->status = DormitoryEnum::PAID;
+                    $this_main_table->save();
+                }
+
+                // if the payment is for dormitory service, update the service request status to PAID
+                if($request->service === "LIBRARY") {
+                    $this_main_table = self::getTable("LIBRARY-MAIN-TABLE", $this_payment->book_res_id, null)->lockForUpdate()->first();
+
+                    if(\in_array($this_main_table->status, [LibraryEnum::PROCESSING_PAYMENT->value, LibraryEnum::FOR_PAYMENT->value])) {
+                        $this_main_table->status = LibraryEnum::PAID;
+                        $this_main_table->save();
+                    }
+                }
+
+                // if the payment is for dormitory or library or enrollment, update the main table status to PAID
+                if($request->service === "ENROLLMENT") {
+                    $this_main_table = self::getTable("ENROLLMENT-MAIN-TABLE", $this_payment->enrolled_course_id, null)->lockForUpdate()->first();
+
+                    if(\in_array($this_main_table->enrolled_course_status, [EnrollmentEnum::PROCESSING_PAYMENT->value, EnrollmentEnum::FOR_PAYMENT->value])) {
+                        $this_main_table->enrolled_course_status = EnrollmentEnum::PAID;
+                        $this_main_table->save();
+                    }
+                }
+
+                // if the payment is for dormitory or library or enrollment, update the main table status to PAID
+                if($request->service === "DORMITORY") {
+                    $this_main_table = self::getTable("DORMITORY-MAIN-TABLE", $this_payment->dormitory_tenant_id, null)->lockForUpdate()->first();
+
+                    if(\in_array($this_main_table->tenant_status, [DormitoryEnum::PROCESSING_PAYMENT->value, DormitoryEnum::FOR_PAYMENT->value])) {
+                        $this_main_table->tenant_status = DormitoryEnum::PAID;
+                        $this_main_table->save();
+                    }
+                }
+
+                // if the payment is for dormitory service, update the service request status to PAID
+                SendingEmail::dispatch(User::find($this_payment->user_id), new CashierEmail([
+                    'status' => $request->verificationStatus,
+                    'service' => strtolower($request->service),
+                    'message' => "We've updated your " . strtolower($request->service) . " invoice status to $request->verificationStatus"
+                ], User::find($this_payment->user_id)));
+
+                Notifications::notify($request->user()->id, $this_payment->user_id, $request->service, "updated your " . strtolower($request->service) . " invoice status.");
+                AuditHelper::log(
+                    $request->user()->id,
+                    AdministratorAuditActions::CASHIERCTRL_UPDATED_PAYMENT->value. " ID#$this_payment->id"
+                );
+
+                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_UPDATED_PAYMENT->value . "ID#$this_payment->id"], 200);
+            }
+        });
+    }
+
+    /**
      * Summary of get_charges_category
      * @param Request $request
      */
@@ -314,58 +388,6 @@ class Cashier extends Controller
                     );
                 }
                 return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_REMOVED_CHARGECATEGORY->value . "ID#$fee_category_id"], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of verify_payment
-     * @param bool notifications === FALSE
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === TRUE
-     * @param Request $request
-     */
-    public function verify_payment (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $this_payment = self::getTable($request->service, $request->documentId, null);
-            $this_fee = $this_payment->lockForUpdate()->first();
-
-            if(\in_array($this_fee->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
-                return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_ERR_PAYMENT->value], 200);
-            } else {
-                $this_fee->invoice_status = $request->verificationStatus;
-                $this_fee->save();
-
-                $this_main_table = null;
-                if($request->service === "DORMITORY") {
-                    $this_main_table = self::getTable($request->service, $this_fee->dormitory_tenant_id, null, true, false)->first();
-                    $this_main_table->tenant_status = CashierEnum::PAID;
-                } else if($request->service === "ENROLLMENT") {
-                    $this_main_table = self::getTable($request->service, $this_fee->enrolled_course_id, null, true, false)->first();
-                    $this_main_table->enrolled_course_status = CashierEnum::PAID;
-                }
-
-                $this_main_table->save();
-
-                SendingEmail::dispatch(User::find($this_fee->user_id), new CashierEmail([
-                    'status' => $request->verificationStatus,
-                    'service' => strtolower($request->service),
-                    'message' => "We've updated your " . strtolower($request->service) . " invoice status to $request->verificationStatus"
-                ], User::find($this_fee->user_id)));
-
-                Notifications::notify($request->user()->id, $this_fee->user_id, $request->service, "updated your " . strtolower($request->service) . " invoice status.");
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::CASHIERCTRL_UPDATED_PAYMENT->value. " ID#$this_fee->id"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEInvoice(''),
-                        new BEAuditTrail('')
-                    );
-                }
-                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_UPDATED_PAYMENT->value . "ID#$this_fee->id"], 200);
             }
         });
     }
