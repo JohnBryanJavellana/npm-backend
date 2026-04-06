@@ -25,6 +25,7 @@ class BookResource extends JsonResource
             'pdf' => $this->pdf_copy,
             'title' => $this->catalog?->title,
             'author' => $this->catalog?->author,
+            'abstract' => $this->catalog?->abstract,
             'language' => $this->catalog?->language,
             'isbn' => $this->catalog?->isbn,
             'editor' => $this->catalog?->editor,
@@ -38,8 +39,8 @@ class BookResource extends JsonResource
             'entry' => $this->catalog?->genre?->name,
             'count' => $this->copies_count,
             "borrrow_count" =>  $this->has_data_count,
-            'flag' => ($this->carts_count > 0||$this->has_data_count > 0) ? true : false,
-            'recommendation' => $this->related->map(function($course) {
+            'flag' => ($this->carts_count > 0 || $this->has_data_count > 0) ? true : false,
+            'recommendation' => $this->related->map(function ($course) {
                 return $course->training?->module?->name;
             }),
             "book_copies" => $this->copies->map(fn($copy) => $copy)

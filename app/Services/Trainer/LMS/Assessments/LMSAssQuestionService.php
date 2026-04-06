@@ -5,10 +5,12 @@ namespace App\Services\Trainer\LMS\Assessments;
 use App\Models\AssessmentAnswer;
 use App\Models\AssessmentOption;
 use App\Models\AssessmentQuestion;
+use App\Models\AssessmentSection;
 use Illuminate\Support\Facades\DB;
 
 class LMSAssQuestionService {
     public function __construct(
+       protected AssessmentSection $assessmentSectionModel,
        protected AssessmentQuestion $assessmentQuestionModel,
        protected AssessmentAnswer $assessmentAnswerModel,
        protected AssessmentOption $assessmentOptionModel
@@ -16,12 +18,19 @@ class LMSAssQuestionService {
 
     public function getQuestionsBySections($sectionId)
     {
-        return $this->assessmentQuestionModel->query()
-        ->section($sectionId)
+        // return $this->assessmentQuestionModel->query()
+        // ->section($sectionId)
+        // ->with([
+        //     "options",
+        // ])
+        // ->get();
+
+        return $this->assessmentSectionModel->query()
+        ->whereKey($sectionId)
         ->with([
-            "options"
+            "questions.options"
         ])
-        ->get();
+        ->first();
     }
 
     private function storeQuestionChoices($question, $choices)

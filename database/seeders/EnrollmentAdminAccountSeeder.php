@@ -36,8 +36,8 @@ class EnrollmentAdminAccountSeeder extends Seeder
             ],
               [
                 'fname' => "Isaac",
-                'mname' => "Rita",
-                'lname' => "BayotGud",
+                'mname' => "Lingwa",
+                'lname' => "Mangyud",
                 'email' => "isaacrita02@gmail.com",
                 'email_verified_at' => Carbon::now(),
                 'birthdate' => Carbon::parse('07-11-2002'),
@@ -47,9 +47,9 @@ class EnrollmentAdminAccountSeeder extends Seeder
                 'password' => bcrypt("123456")
             ],
               [
-                'fname' => "Bayot Isaac",
-                'mname' => "Rita",
-                'lname' => "Ritayow",
+                'fname' => "Rita",
+                'mname' => "Kwapor",
+                'lname' => "Ebidigo",
                 'email' => "isaacrita47@gmail.com",
                 'email_verified_at' => Carbon::now(),
                 'birthdate' => Carbon::parse('07-11-2002'),
