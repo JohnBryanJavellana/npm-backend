@@ -446,6 +446,111 @@ class DormitoryController extends Controller
         });
     }
 
+    //ed started here
+    /**
+ * Manual price adjustment for dormitory invoice
+ * @param Request $request
+ */
+public function manual_price_adjustment(Request $request)
+{
+    return TransactionUtil::transact($request, [], function() use ($request) {
+        $request->validate([
+            'invoice_id' => 'required|exists:dormitory_invoices,id',
+            'adjustment_amount' => 'required|numeric',
+            'adjustment_reason' => 'required|string|min:3',
+            'remarks' => 'nullable|string'
+        ]);
+
+        $invoiceId = $request->invoice_id;
+        $adjustmentAmount = (float) $request->adjustment_amount;
+        $adjustmentReason = $request->adjustment_reason;
+        $additionalRemarks = $request->remarks;
+
+        $invoice = DormitoryInvoice::with(['tenant', 'tenant.boarder'])
+            ->where('id', $invoiceId)
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        $adjustableStatuses = ['PENDING', 'FOR PAYMENT', 'PROCESSING PAYMENT'];
+        if (!in_array($invoice->invoice_status, $adjustableStatuses)) {
+            return response()->json([
+                'message' => "Cannot adjust invoice. Current status: {$invoice->invoice_status}. Only pending or for payment invoices can be adjusted."
+            ], 409);
+        }
+
+        $originalAmount = $invoice->invoice_amount;
+
+        $newAmount = $originalAmount + $adjustmentAmount;
+
+        if ($newAmount < 0) {
+            return response()->json([
+                'message' => "Adjustment would result in negative amount. Current: ₱" . number_format($originalAmount, 2) . ", Adjustment: ₱" . number_format($adjustmentAmount, 2)
+            ], 422);
+        }
+
+        $adjustmentHistory = [
+            'previous_amount' => $originalAmount,
+            'adjustment_amount' => $adjustmentAmount,
+            'new_amount' => $newAmount,
+            'adjustment_reason' => $adjustmentReason,
+            'adjusted_by' => $request->user()->id,
+            'adjusted_by_name' => $request->user()->fname . ' ' . $request->user()->lname,
+            'adjusted_at' => now()->toDateTimeString()
+        ];
+
+        $invoice->invoice_amount = $newAmount;
+
+        $existingRemarks = $invoice->remarks ?? '';
+        $adjustmentLog = "\n\n--- MANUAL PRICE ADJUSTMENT ---\n";
+        $adjustmentLog .= "Date: " . now()->format('Y-m-d H:i:s') . "\n";
+        $adjustmentLog .= "Adjusted by: " . $adjustmentHistory['adjusted_by_name'] . "\n";
+        $adjustmentLog .= "Previous Amount: ₱" . number_format($originalAmount, 2) . "\n";
+        $adjustmentLog .= "Adjustment: ₱" . number_format($adjustmentAmount, 2) . "\n";
+        $adjustmentLog .= "New Amount: ₱" . number_format($newAmount, 2) . "\n";
+        $adjustmentLog .= "Reason: " . $adjustmentReason . "\n";
+        if ($additionalRemarks) {
+            $adjustmentLog .= "Additional Notes: " . $additionalRemarks . "\n";
+        }
+        $adjustmentLog .= "--- END OF ADJUSTMENT ---\n";
+
+        $invoice->remarks = $existingRemarks . $adjustmentLog;
+        $invoice->save();
+
+        AuditHelper::log(
+            $request->user()->id,
+            AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value .
+            " — Manual price adjustment for Invoice ID#{$invoice->id}. " .
+            "₱" . number_format($originalAmount, 2) . " → ₱" . number_format($newAmount, 2) .
+            ". Reason: {$adjustmentReason}"
+        );
+        if ($invoice->tenant && $invoice->tenant->user_id) {
+            Notifications::notify(
+                $request->user()->id,
+                $invoice->tenant->user_id,
+                "DORMITORY",
+                "Your dormitory invoice #{$invoice->trace_number} has been updated. New amount: ₱" . number_format($newAmount, 2)
+            );
+        }
+        if (env('USE_EVENT')) {
+            event(new BEDormitory(''), new BEAuditTrail(''));
+        }
+        return response()->json([
+            'message' => "Invoice price adjusted successfully.",
+            'invoice' => [
+                'id' => $invoice->id,
+                'trace_number' => $invoice->trace_number,
+                'previous_amount' => $originalAmount,
+                'adjustment_amount' => $adjustmentAmount,
+                'new_amount' => $newAmount,
+                'adjustment_reason' => $adjustmentReason,
+                'invoice_status' => $invoice->invoice_status,
+                'remarks' => $invoice->remarks
+            ]
+        ], 200);
+    });
+}
+    //ed ended here
+
     /**
      * Summary of get_match_rooms
      * @param GetMatchRooms $request
@@ -1919,133 +2024,6 @@ class DormitoryController extends Controller
             ], 200);
         });
     }
-
-    /**
-     * Summary of update_stock_status
-     * @param Request $request (stockId required, status required)
-     */
-    // public function update_stock_status(Request $request) {
-    //     return TransactionUtil::transact(null, [], function() use ($request) {
-    //             $stockId = $request->stockId;
-    //             $status  = $request->status;
-
-    //             $provisionDetail = DormitoryItemBI::where('dormitory_inventory_item_id', $stockId)
-    //                 ->lockForUpdate()
-    //                 ->first();
-
-    //             if (!$provisionDetail) {
-    //                 return response()->json(['message' => "Stock provision detail not found."], 404);
-    //             }
-
-    //             $stock = DormitoryInventoryItem::where('id', $provisionDetail->dormitory_inventory_item_id)
-    //                 ->lockForUpdate()
-    //                 ->first();
-
-    //             if (!$stock) {
-    //                 return response()->json(['message' => "Stock not found."], 404);
-    //             }
-
-    //             if ($stock->status === DormitoryEnum::LOST->value) {
-    //                 return response()->json([
-    //                     'message' => "Stock ID#$stockId cannot be updated. Stock is already marked as LOST."
-    //                 ], 409);
-    //             }
-
-    //             $oldStatus          = $stock->status;
-    //             $oldProvisionStatus = $provisionDetail->status;
-
-    //             $provisionDetail->status = $status;
-    //             $provisionDetail->save();
-
-    //             $stock->status = match($status) {
-    //                 DormitoryEnum::RETURNED->value  => DormitoryEnum::AVAILABLE->value,
-    //                 DormitoryEnum::CANCELLED->value => DormitoryEnum::AVAILABLE->value,
-    //                 DormitoryEnum::RECEIVED->value  => DormitoryEnum::BORROWED->value,
-    //                 DormitoryEnum::APPROVED->value  => DormitoryEnum::RESERVED->value,
-    //                 DormitoryEnum::PENDING->value   => DormitoryEnum::RESERVED->value,
-    //                 DormitoryEnum::DAMAGED->value   => DormitoryEnum::DAMAGED->value,
-    //                 DormitoryEnum::LOST->value      => DormitoryEnum::LOST->value,
-    //                 default                         => DormitoryEnum::UNAVAILABLE->value,
-    //             };
-    //             $stock->save();
-
-    //             AuditHelper::log(
-    //                 $request->user()->id,
-    //                 "Stock ID#$stockId provision status changed from $oldProvisionStatus to $status"
-    //             );
-
-    //             if (env('USE_EVENT')) {
-    //                 event(new BEDormitory(''), new BEAuditTrail(''));
-    //             }
-    //             return response()->json([
-    //         'message' => "Stocks successfully provided to Tenant: {$tenantRequest->boarder->fname} {$tenantRequest->boarder->lname}.",
-    //             'boarder'     => [
-    //                 'id'        => $tenantRequest->boarder->id,
-    //                 'name' => ($tenantRequest->boarder->fname ?? '') . ' ' . ($tenantRequest->boarder->lname ?? ''),
-    //                 'room'      => $tenantRequest->dormitory_room->room_name,
-    //                 'dormitory' => $tenantRequest->dormitory_room->dormitory->room_name,
-    //                 'status'    => $tenantRequest->tenant_status,
-    //             ],
-    //             'inventory'   => [
-    //                 'id'   => $inventory->id,
-    //                 'name' => $inventory->name,
-    //             ],
-    //             'provision'   => $provision,
-    //             'provided'    => collect($provided)->map(fn($s) => [
-    //                 'id'                => $s->id,
-    //                 'unique_identifier' => $s->unique_identifier,
-    //                 'status'            => $s->status,
-    //             ]),
-    //             'unavailable' => $unavailable,
-    //         ], 201);
-    //     });
-    // }
-
-    //  show reserved stocks for boarder(?)
-    // public function get_provided_stocks(Request $request) {
-    //     return TransactionUtil::transact(null, [], function() use ($request) {
-    //         $dormitoryTenantId = $request->dormitoryTenantId;
-    //         $inventoryId       = $request->inventoryId;
-
-    //         $tenantRequest = DormitoryTenant::with([
-    //             'boarder',
-    //             'dormitory_room',
-    //             'dormitory_room.dormitory',
-    //         ])->findOrFail($dormitoryTenantId);
-
-    //         $inventory = DormitoryInventory::findOrFail($inventoryId);
-
-    //         $provision = DormitoryItemBorrowing::with(['items.item'])
-    //             ->where('dormitory_tenant_id', $dormitoryTenantId)
-    //             ->where('dormitory_inventory_id', $inventoryId)
-    //             ->first();
-
-    //         $stocks = $provision
-    //             ?->items->map(fn($detail) => [
-    //                 'stock_id'          => $detail->item->id,
-    //                 'unique_identifier' => $detail->item->unique_identifier,
-    //                 'status'            => $detail->item->status,
-    //                 'provision_status'  => $detail->status,
-    //                 'provided_at'       => $detail->created_at,
-    //             ])->values() ?? collect([]);
-
-    //         return response()->json([
-    //             'boarder' => [
-    //                 'id'        => $tenantRequest->boarder->id,
-    //                 'name'      => "{$tenantRequest->boarder->fname} {$tenantRequest->boarder->lname}",
-    //                 'room'      => $tenantRequest->dormitory_room?->room_name ?? 'No room assigned',
-    //                 'dormitory' => $tenantRequest->dormitory_room?->dormitory?->room_name ?? 'No dormitory assigned',
-    //                 'status'    => $tenantRequest->tenant_status,
-    //             ],
-    //             'inventory' => [
-    //                 'id'             => $inventory->id,
-    //                 'name'           => $inventory->name,
-    //                 'total_provided' => $provision?->count ?? 0,
-    //             ],
-    //             'stocks' => $stocks,
-    //         ], 200);
-    //     });
-    // }
 
     /**
      * Summary of update_stock_status
