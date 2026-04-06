@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('acronym');
             $table->longText('compendium');
+            $table->integer('number_of_days');
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->timestamps();
         });

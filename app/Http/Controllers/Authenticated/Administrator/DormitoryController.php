@@ -401,7 +401,7 @@ class DormitoryController extends Controller
                 $this_reservation->purpose = $purpose;
                 $this_reservation->accommodation = $accommodation;
                 $this_reservation->room_type = $room_type;
-                $this_reservation->tenant_status =  $status === DormitoryEnum::FOR_PAYMENT->value ? DormitoryEnum::FOR_PAYMENT : DormitoryEnum::APPROVED;
+                $this_reservation->tenant_status = $status === DormitoryEnum::FOR_PAYMENT->value ? DormitoryEnum::FOR_PAYMENT : DormitoryEnum::APPROVED;
                 $this_reservation->save();
 
                 // if there are supporting documents, save them in the dormitory_tenant_sup_docs table and save the files in the storage
