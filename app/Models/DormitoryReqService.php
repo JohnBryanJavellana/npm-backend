@@ -23,7 +23,7 @@ class DormitoryReqService extends Model
 
     public function invoice()
     {
-        return $this->hasOne(DormitoryInvoice::class, 'id', 'dormitory_invoices_id');
+        return $this->hasOne(DormitoryInvoice::class, 'id', 'dormitory_invoice_id');
     }
 
     /** Scopes */
