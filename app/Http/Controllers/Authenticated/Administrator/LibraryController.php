@@ -616,7 +616,6 @@ class LibraryController extends Controller
     public function update_reservation(UpdateBookRequest $request){
         return TransactionUtil::transact($request, ["book_reservations_cache"], function() use ($request) {
             $reservation = BookReservation::where('id', $request->documentId)->lockForUpdate()->firstOrFail();
-            $reservation = BookReservation::findOrFail($request->documentId);
             $reservation->status = $request->status;
 
             if ($reservation->type === "HARD-COPY" && $reservation->book_copy_id === null) {
@@ -642,7 +641,6 @@ class LibraryController extends Controller
 
             $hasActiveItems = BookReservation::where('book_res_id', $reservation->book_res_id)
                 ->whereIn('status', ['PENDING', 'APPROVED', 'RECEIVED', 'EXTENDING', 'EXTENDED', 'RENEWING'])
-                ->whereIn('status', ['PENDING', 'RECEIVED'])
                 ->exists();
 
             if (!$hasActiveItems) {
