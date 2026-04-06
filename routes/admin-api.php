@@ -125,6 +125,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('/dormitory/')->middleware(['user_role:SUPERADMIN,ADMIN-DORMITORY', 'throttle:60,1'])->group(function () {
             Route::post('count_dorm_reservation', [DormitoryController::class, 'count_dorm_reservation']);
+            Route::post('count_service_requests', [DormitoryController::class, 'count_service_requests']);
 
             Route::get('get_dormitory_rooms', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::post('create_or_update_room', [DormitoryController::class, 'create_or_update_room']);
@@ -138,8 +139,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('new_room_reservation', [DormitoryController::class, 'new_room_reservation']);
             Route::post('get_match_rooms', [DormitoryController::class, 'get_match_rooms']);
 
-            Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
-            Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
+            Route::post('get_current_tenant_info', [DormitoryController::class, 'get_current_tenant_info']);
+            Route::post('create_or_update_service_request', [DormitoryController::class, 'create_or_update_service_request']);
+            Route::post('get_service_request', [DormitoryController::class, 'get_service_request']);
+            Route::post('set_service_request_as_action', [DormitoryController::class, 'set_service_request_as_action']);
+
+            // Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
+            // Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
 
             Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms']);
             Route::post('update_dormitory_room', [DormitoryController::class, 'update_dormitory_room']);
