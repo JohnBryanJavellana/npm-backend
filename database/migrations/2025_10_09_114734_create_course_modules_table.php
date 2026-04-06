@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignIdFor(ModuleType::class)->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('acronym');
+            $table->integer('number_of_days');
             $table->longText('compendium');
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->timestamps();
