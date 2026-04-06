@@ -12,16 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('course_module_handouts', function (Blueprint $table) {
-            $table->engine = "InnoDB";
+        Schema::create('course_module_sections', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(CourseModule::class)->constrained()->cascadeOnDelete();
-            $table->string("title", 255);
-            $table->string("file_path", 255);
-            $table->foreignId("uploaded_by")->constrained("users");
-            $table->foreignId("updated_by")->constrained("users");
+            $table->tinyInteger("day_number");
+            $table->string("label", 255)->nullable();
             $table->enum("status", ["ACTIVE","INACTIVE"])->default("ACTIVE");
-
+            $table->foreignId("updated_by")->nullable()->constrained("users");
             $table->timestamps();
         });
     }
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('course_module_handouts');
+        Schema::dropIfExists('course_module_sections');
     }
 };

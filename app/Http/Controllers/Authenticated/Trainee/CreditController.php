@@ -10,8 +10,7 @@ class CreditController extends Controller
 {
     public function __construct(
         public CreditService $creditService,
-    )
-    {}
+    ) {}
 
     public function show(Request $request)
     {
@@ -22,8 +21,7 @@ class CreditController extends Controller
     {
         try {
             $this->creditService->storeUserAudit($validated, $userId);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("storeUserAudit", [$e]);
         }
     }

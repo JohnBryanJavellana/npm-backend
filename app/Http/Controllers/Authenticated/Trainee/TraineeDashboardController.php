@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainee\Dashboard\TraineeInvoiceResource;
 use App\Http\Resources\Trainee\Dashboard\TraineeSchedulesResource;
+use App\Models\User;
 use App\Services\Trainee\Dashboard\TraineeDashboardService;
 use Illuminate\Http\Request;
 

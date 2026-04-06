@@ -28,6 +28,7 @@ class CreateOrUpdateModule extends FormRequest
             'short_name' => ['required', 'string'],
             'compendium' => ['required', 'string'],
             'httpMethod' => ['required'],
+            'days' => ["numeric"],
             'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
             'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
         ];
