@@ -19,6 +19,8 @@ use App\Models\DormitoryItemBI;
 use App\Models\DormitoryItemBorrowing;
 use App\Models\DormitoryReqService;
 use App\Models\DormitoryTenantSupDoc;
+use App\Services\Administrator\Dormitory\DormitoryRoomManager;
+use App\Services\Administrator\Dormitory\DormitoryServiceManager;
 use File;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -57,11 +59,11 @@ use App\Helpers\Administrator\General\CheckForDocumentExistence;
 
 class DormitoryController extends Controller
 {
-    protected $cashierCtrl;
-
-    public function __construct(Cashier $cashier) {
-        $this->cashierCtrl = $cashier;
-    }
+    public function __construct(
+        public Cashier $cashierCtrl,
+        public DormitoryServiceManager $dormitoryServiceManager,
+        public DormitoryRoomManager $dormitoryRoomManager
+    ) {}
 
     /**
      * Summary of addDescription
@@ -149,82 +151,14 @@ class DormitoryController extends Controller
      * @param Request $request
      */
     public function create_or_update_room(CreateOrUpdateDormitoryRoom $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-            $room_name = $request->room_name;
-            $room_slot = $request->room_slot;
-            $dormitory = $request->dormitory;
-            $room_type = $request->room_type;
-            $guest_gender = $request->guest_gender;
-            $wing = $request->wing;
-            $floor = $request->floor;
-            $room_cost = $request->room_cost;
-            $guest_cost = $request->guest_cost;
-            $accommodation = $request->accommodation;
-            $remarks = $request->remarks;
-            $data_room_image = $request->data_room_image;
-            $room_image = $request->room_image;
+        $isPost = $request->httpMethod === "POST";
+        $result = $this->dormitoryRoomManager->createOrUpdate($request, $isPost);
 
-            // if POST, create new room.
-            $this_room = $isPost ? new DormitoryRoom() : DormitoryRoom::where([
-                'id' =>  $documentId
-            ])->lockForUpdate()->firstOrFail();
-
-            $this_room->room_name = $room_name;
-            $this_room->room_slot = $room_slot;
-            $this_room->dormitory = $dormitory;
-            $this_room->room_type = $room_type;
-            $this_room->guest_gender = $guest_gender;
-            $this_room->wing = $wing;
-            $this_room->floor = $floor;
-            $this_room->room_cost = $room_cost;
-            $this_room->accommodation = $accommodation;
-            $this_room->guest_cost = $guest_cost;
-            $this_room->remarks = $remarks;
-            $this_room->save();
-
-            // if there are existing images and the request doesn't contain those images, delete them from storage and database
-            if($data_room_image) {
-                $room_images = DormitoryRoomImage::whereNotIn('id', $request->data_room_image)
-                    ->where('dormitory_room_id', $documentId)
-                    ->get();
-
-                foreach($room_images as $item) {
-                    if(file_exists(public_path("room-images/$item->filename"))) {
-                        unlink(public_path("room-images/$item->filename"));
-                    }
-
-                    $item->delete();
-                }
-            }
-
-            // if there are new images, save them in storage and database
-            if($room_image) {
-                $path = public_path('room-images');
-                if (!File::isDirectory($path)) {
-                    File::makeDirectory($path, 0777, true, true);
-                }
-
-                foreach($request->room_image as $image) {
-                    $room_image = new DormitoryRoomImage();
-                    $room_image->dormitory_room_id = $this_room->id;
-
-                    $image_name = Str::uuid() . '-room-.png';
-                    $room_image->filename = $image_name;
-                    $room_image->save();
-
-                    SaveAvatar::dispatch($image, $image_name, "room-images", false, true, '');
-                }
-            }
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORY->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORY->value . " ID#$this_room->id"
-            );
-
-            return response()->json(['message' => $isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORY->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORY->value . " ID#$this_room->id"], 201);
-        });
+        return response()->json([
+            'message' => $isPost
+                ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORY->value
+                : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORY->value . " ID#$result->id"
+        ], 201);
     }
 
     /**
@@ -233,30 +167,8 @@ class DormitoryController extends Controller
      * @param int $roomId
      */
     public function remove_room (Request $request, int $roomId) {
-        return TransactionUtil::transact(null, [], function() use ($request, $roomId) {
-            $this_dorm = DormitoryRoom::withCount(['hasData'])->where('id', $roomId)->first();
-
-            // if the dormitory room has active reservations, don't allow deletion
-            if($this_dorm->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYROOM->value], 200);
-            } else {
-                $this_dorm->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYROOM->value . " ID#$roomId"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEDormitory(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYROOM->value], 200);
-            }
-        });
+        $result = $this->dormitoryRoomManager->removeRoom($request->user()->id, $roomId);
+        return response()->json(['message' => $result['message']], $result['status']);
     }
 
     /**
@@ -275,30 +187,14 @@ class DormitoryController extends Controller
      * @param CreateOrUpdateService $request
      */
     public function create_or_update_service (CreateOrUpdateService $request) {
-        return TransactionUtil::transact($request, ["dormitory:services:all"], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
+        $isPost = $request->httpMethod === "POST";
+        $this_service = $this->dormitoryServiceManager->createOrUpdate($request, $isPost);
 
-            // if POST, create new service.
-            // if UPDATE, update the existing service with lockForUpdate
-            if($isPost) {
-                $this_service = new DormitoryService();
-            } else {
-                $this_service = DormitoryService::where('id', $request->documentId)->lockForUpdate()->firstOrFail();
-                $this_service->status = $request->status;
-            }
-
-            $this_service->name = $request->name;
-            $this_service->description = $request->description;
-            $this_service->charge = $request->charge;
-            $this_service->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value . " ID#$this_service->id"
-            );
-
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value) . "ID# " . $this_service->id], 201);
-        });
+        return response()->json(['message' => (
+            $isPost
+                ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value
+                : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value) . "ID# " . $this_service->id
+        ], 201);
     }
 
     /**
@@ -307,30 +203,8 @@ class DormitoryController extends Controller
      * @param int $service_id
      */
     public function remove_service (Request $request, int $service_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $service_id) {
-            $this_service = DormitoryService::withCount(['requestedService'])->where('id', $service_id)->first();
-
-            // if the service has pending or approved requests, don't allow deletion
-            if($this_service->requested_service_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value], 200);
-            } else {
-                $this_service->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYSERVICE->value . " ID#$service_id"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEDormitory(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value], 200);
-            }
-        });
+        $result = $this->dormitoryServiceManager->removeService($request->user()->id, $service_id);
+        return response()->json(['message' => $result['message']], $result['status']);
     }
 
     /**
