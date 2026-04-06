@@ -2118,47 +2118,36 @@ class DormitoryController extends Controller
             ], 200);
         });
     }
-   public function re_assign_room_payments(Request $request)
+public function getRoomsForSelection(Request $request)
 {
-    return TransactionUtil::transact(null, [], function () use ($request) {
-
-        // Validate request
-        $request->validate([
-            'trace_number' => 'required|string|exists:dormitory_tenants,trace_number',
-            'new_room_id' => 'required|exists:dormitory_rooms,id',
-        ]);
-
-        // Fetch tenant
-        $tenant = DormitoryTenant::where('trace_number', $request->trace_number)->firstOrFail();
-
-        // Fetch new room
-        $newRoom = DormitoryRoom::findOrFail($request->new_room_id);
-
-        // Determine if tenant is paying
-        $isPayingTenant = $tenant->status_of_occupancy !== 'NON-PAYING GUEST/VISITOR';
-
-        // Calculate required payment
-        $requiredPayment = $isPayingTenant ? ($newRoom->room_cost + $newRoom->guest_cost) : 0;
-
-        // Update tenant_status based on payment requirement
-        $tenant->dormitory_room_id = $newRoom->id;
-        $tenant->tenant_status = $requiredPayment > 0 ? 'FOR PAYMENT' : 'PAID';
-        $tenant->updated_by = $request->user()->id;
-        $tenant->save();
-
-        // Optional: log the reassignment for audit
-        AuditHelper::log(
-            $request->user()->id,
-            'DORMITORY_REASSIGN_ROOM',
-            "Reassigned room for tenant {$tenant->trace_number}. Payment required: $requiredPayment"
-        );
-
+    $isPost = $request->httpMethod === "POST";
+    if (!$isPost) {
         return response()->json([
-            'message' => 'Room reassigned successfully.',
-            'payment_required' => $requiredPayment > 0,
-            'required_payment' => $requiredPayment,
-            'tenant_status' => $tenant->tenant_status
-        ], 200);
+            'message' => 'Method not allowed. Use POST.'
+        ], 405);
+    }
+
+    $roomTypeFilter = $request->room_type ?? null;
+
+    $query = DormitoryRoom::query();
+
+    if ($roomTypeFilter) {
+        $query->where('room_type', $roomTypeFilter);
+    }
+
+    $rooms = $query->get();
+
+    $roomsFormatted = $rooms->map(function ($room) {
+        return [
+            'id' => $room->id,
+            'room_name' => $room->room_name,
+            'room_cost' => $room->room_cost,
+            'guest_cost' => $room->guest_cost,
+            'building_name' => $room->building_name ?? 'Main Dorm',
+            'is_air_conditioned' => $room->room_type === 'AIRCON' ? 'YES' : 'NO',
+        ];
     });
+
+    return response()->json(['rooms' => $roomsFormatted]);
 }
 }

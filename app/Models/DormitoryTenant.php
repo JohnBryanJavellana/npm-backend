@@ -79,4 +79,9 @@ class DormitoryTenant extends Model {
     {
         return $query->where("tenant_status", [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value]);
     }
+
+    public function rooms()
+    {
+        return $this->hasMany(DormitoryRoom::class, 'dormitory_id', 'id');
+    }
 }

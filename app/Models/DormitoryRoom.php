@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class DormitoryRoom extends Model
 {
+      protected $fillable = [
+        'name',         // or whatever fields you have
+        'room_type',    // AIRCON or NON-AIRCON
+        'capacity',     // max slots
+        // add other fields as needed
+    ];
 
     protected $guarded = ['id'];
 
@@ -15,7 +21,7 @@ class DormitoryRoom extends Model
 
     public function hasData()
     {
-        return $this->hasMany(DormitoryTenant::class);
+        return $this->hasMany(DormitoryTenant::class, 'dormitory_room_id', 'id');
     }
 
     // public function dormitory()
@@ -38,5 +44,9 @@ class DormitoryRoom extends Model
     public function roomImages() {
         return $this->hasMany(DormitoryRoomImage::class, 'dormitory_room_id', 'id');
     }
-
+    
+    public function tenants()
+        {
+            return $this->hasMany(DormitoryTenant::class, 'dormitory_room_id', 'id');
+        }
 }
