@@ -28,7 +28,7 @@ class updateAssessmentRequest extends FormRequest
         return [
             "examId" => ["required", "exists:assessments,id"],
             "training_id" => ["sometimes","required", "exists:trainings,id","required_without:training_id"],
-            "course_module_id" => ["sometimes","required", "exists:course_modules,id","required_without:course_module_id"],
+            "course_content_id" => ["sometimes","required", "exists:course_contents,id","required_without:course_module_id"],
             "title" => ["sometimes","required", "string"],
             "type" => ["sometimes","required", "in:EXAM,QUIZ,ASSIGNMENT,ACTIVITY"],
             "description" => ["sometimes","required", "string"],

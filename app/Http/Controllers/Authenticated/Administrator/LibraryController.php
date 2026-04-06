@@ -56,7 +56,8 @@ use App\Models\{
 };
 use App\Enums\{
     AdministratorAuditActions,
-    AdministratorReturnResponse
+    AdministratorReturnResponse,
+    RequestStatus
 };
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
 use App\Helpers\Administrator\General\CountCollection;
@@ -614,7 +615,7 @@ class LibraryController extends Controller
      */
     public function update_reservation(UpdateBookRequest $request){
         return TransactionUtil::transact($request, ["book_reservations_cache"], function() use ($request) {
-            $reservation = BookReservation::findOrFail($request->documentId);
+            $reservation = BookReservation::where('id', $request->documentId)->lockForUpdate()->firstOrFail();
             $reservation->status = $request->status;
 
             if ($reservation->type === "HARD-COPY" && $reservation->book_copy_id === null) {
@@ -626,7 +627,7 @@ class LibraryController extends Controller
             $reservation->save();
 
             if ($reservation->book_copy_id) {
-                $copy = BookCopy::find($reservation->book_copy_id);
+                $copy = BookCopy::where('id', $reservation->book_copy_id)->lockForUpdate()->firstOrFail();
 
                 $copy->status = match(true) {
                     \in_array($request->status, ["RETURNED", "REJECTED", "CANCELLED"]) => "AVAILABLE",
@@ -639,7 +640,7 @@ class LibraryController extends Controller
             }
 
             $hasActiveItems = BookReservation::where('book_res_id', $reservation->book_res_id)
-                ->whereIn('status', ['PENDING', 'RECEIVED'])
+                ->whereIn('status', ['PENDING', 'APPROVED', 'RECEIVED', 'EXTENDING', 'EXTENDED', 'RENEWING'])
                 ->exists();
 
             if (!$hasActiveItems) {

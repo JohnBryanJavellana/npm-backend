@@ -62,6 +62,7 @@ class UserLibraryRule implements ValidationRule , DataAwareRule
         }
 
         $overDues = BookReservation::query()
+        ->whereNotIn("status", RequestStatus::CompleteBookRequest())
         ->forUser($value)
         ->where('to_date', '<', now())
         ->where("type", "HARD-COPY")

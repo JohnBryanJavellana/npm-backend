@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\DB;
 use DomainException;
 
 
-class DormitoryRequestService {
+class DormitoryRequestService
+{
 
     private const LONG_TTL = 600;
     private const SHORT_TTL = 30;
@@ -43,30 +44,30 @@ class DormitoryRequestService {
         $capacity = 2;
 
         return $this->roomModel->query()
-        ->select()
-        ->with([
-            "dormitory:id,room_name,room_description,room_fee_type,room_cost,guest_cost",
-            "dormitory.room_images:id,dormitory_id,filename"
-        ])
-        ->whereHas('dormitory', fn($query) => $query->where("room_fee_type", $validated["forType"]))
-        ->where('is_air_conditioned', $validated["roomType"])
-        ->withCount([
-            'hasData as overlapping_tenants_count' => function ($q) use ($start, $end) {
-                $q->where('tenant_from_date', '<', $end)
-                    ->where('tenant_to_date', '>', $start)
-                    ->whereIn('tenant_status', [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value]);
-            }
-        ])
-        ->available()
-        ->havingRaw("overlapping_tenants_count + ? <= ?", [$requiredSlots, $capacity])
-        ->orderBy('overlapping_tenants_count', 'asc')
-        ->get();
+            ->select()
+            ->with([
+                "dormitory:id,room_name,room_description,room_fee_type,room_cost,guest_cost",
+                "dormitory.room_images:id,dormitory_id,filename"
+            ])
+            ->whereHas('dormitory', fn($query) => $query->where("room_fee_type", $validated["forType"]))
+            ->where('is_air_conditioned', $validated["roomType"])
+            ->withCount([
+                'hasData as overlapping_tenants_count' => function ($q) use ($start, $end) {
+                    $q->where('tenant_from_date', '<', $end)
+                        ->where('tenant_to_date', '>', $start)
+                        ->whereIn('tenant_status', [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value]);
+                }
+            ])
+            ->available()
+            ->havingRaw("overlapping_tenants_count + ? <= ?", [$requiredSlots, $capacity])
+            ->orderBy('overlapping_tenants_count', 'asc')
+            ->get();
     }
 
 
     public function createRequest($validated, $userId)
     {
-        DB::transaction(function() use ($validated, $userId) {
+        DB::transaction(function () use ($validated, $userId) {
 
             $this->validateData($userId);
 
@@ -81,7 +82,7 @@ class DormitoryRequestService {
                 "purpose" => $validated["purpose"],
             ];
 
-            if(isset($validated["file"])) {
+            if (isset($validated["file"])) {
                 $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document') ?? null;
             }
 
@@ -93,35 +94,34 @@ class DormitoryRequestService {
                 "sent",
                 "You’ve sent a dormitory request."
             );
-
         });
     }
 
     public function cancelRequest($request, $dormitory_id)
     {
-        DB::transaction(function() use ($request, $dormitory_id) {
+        DB::transaction(function () use ($request, $dormitory_id) {
             $record = $this->tenantModel
-            ->whereKey($dormitory_id)
-            ->lockForUpdate()
-            ->firstOrFail();
+                ->whereKey($dormitory_id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-            if($record->tenant_status === RequestStatus::CANCELLED) {
+            if ($record->tenant_status === RequestStatus::CANCELLED) {
                 throw new DomainException(
                     "This dormitory request has already been cancelled."
                 );
             }
 
-            if(!in_array($record->tenant_status, [
+            if (!in_array($record->tenant_status, [
                 RequestStatus::PENDING->value,
                 RequestStatus::FOR_PAYMENT->value,
             ])) {
                 throw new DomainException("Dormitory request cancellation is not permitted.");
             }
 
-            if(!is_null($record->dormitory_room_id)) {
+            if (!is_null($record->dormitory_room_id)) {
                 $dorm = $this->roomModel
-                ->find($record->dormitory_room_id)
-                ->lockForUpdate();
+                    ->find($record->dormitory_room_id)
+                    ->lockForUpdate();
 
                 $dorm->update([
                     "room_slot" =>  $record->room_for_type === "COUPLE"
@@ -150,18 +150,20 @@ class DormitoryRequestService {
         });
     }
 
-    private function validateData($userId) {
+    private function validateData($userId)
+    {
         $existing_request = $this->tenantModel->query()
-        ->forUser($userId)
-        ->active()
-        ->exists();
+            ->forUser($userId)
+            ->active()
+            ->exists();
 
         if ($existing_request) {
             throw new DomainException("A request is already existing!");
         }
     }
-    
-    private function loggingDetails($record, $userId, $action, $reason) {
+
+    private function loggingDetails($record, $userId, $action, $reason)
+    {
 
         AuditHelper::log($userId, "User $userId has $action a dorm room request.");
 
@@ -173,10 +175,10 @@ class DormitoryRequestService {
 
     public function getDormRequestCount($userId)
     {
-    return $this->tenantModel->query()
-        ->select(DB::raw("count(*) as status_count"), "tenant_status")
-        ->forUser($userId)
-        ->groupBy("tenant_status")
-        ->pluck("status_count", "tenant_status");
+        return $this->tenantModel->query()
+            ->select(DB::raw("count(*) as status_count"), "tenant_status")
+            ->forUser($userId)
+            ->groupBy("tenant_status")
+            ->pluck("status_count", "tenant_status");
     }
 }

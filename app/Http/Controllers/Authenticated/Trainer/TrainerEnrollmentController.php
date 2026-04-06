@@ -61,10 +61,11 @@ class TrainerEnrollmentController extends Controller
                     "module.trainingFees:id,course_module_id,charge_category_id,name,amount",
                     "module.trainingFees.category:id,name",
                     "module.specific_requirements",
+                    "module.facilitator",
+                    "module.facilitator.facilitator:id,fname,mname,lname"
                 ])
-                    ->where('id', $request->trainingId)
-                    ->get();
-
+                ->whereKey($request->trainingId)
+                ->first();
 
                 return response()->json([
                     "training" => $record,
