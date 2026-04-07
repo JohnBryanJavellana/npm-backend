@@ -74,4 +74,20 @@ class DormitoryRoomReservationManager
 
         return $res;
     }
+
+    /**
+     * Summary of setAsReserved
+     * @param int $roomReservationId
+     * @return array{message: string, status: int}
+     */
+    public function setAsReserved(int $roomReservationId) {
+        $thisReservation = DormitoryTenant::lockForUpdate()->findOrFail($roomReservationId);
+
+        if(!\in_array($thisReservation->tenant_status, ["PAID", "APPROVED"])) {
+            return [ 'message' => "Room Request is already $thisReservation->tenant_status. Can't set to Reserved.", 'status' => 409 ];
+        }
+
+        $thisReservation->update([ 'tenant_status' => DormitoryEnum::RESERVED ]);
+        return ['message' => "Room reservation set to reserved.", 'status' => 200];
+    }
 }

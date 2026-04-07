@@ -12,6 +12,7 @@ use App\Http\Requests\Admin\Dormitory\CreateOrUpdateDormitoryRoom;
 use App\Http\Requests\Admin\Dormitory\GetCurrentTenantInfo;
 use App\Http\Requests\Admin\Dormitory\GetMatchRooms;
 use App\Http\Requests\Admin\Dormitory\NewRoomReservation;
+use App\Http\Requests\Admin\Dormitory\SetRoomReservationAsReserved;
 use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
@@ -231,6 +232,17 @@ class DormitoryController extends Controller
                 ->get();
 
             return response()->json(['room_reservations' => $room_reservations], 200);
+        });
+    }
+
+    /**
+     * Summary of set_as_reserved
+     * @param SetRoomReservationAsReserved $request
+     */
+    public function set_as_reserved(SetRoomReservationAsReserved $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $result = $this->dormitoryRoomReservationManager->setAsReserved($request->roomReservationId);
+            return response()->json(['message' => $result['message']], $result['status']);
         });
     }
 

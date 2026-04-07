@@ -134,6 +134,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('remove_service/{service_id}', [DormitoryController::class, 'remove_service']);
 
             Route::post('room_reservations', [DormitoryController::class, 'room_reservations']);
+            Route::post('room_reservations/set_as_reserved', [DormitoryController::class, 'set_as_reserved']);
             Route::post('new_room_reservation', [DormitoryController::class, 'new_room_reservation']);
             Route::post('get_match_rooms', [DormitoryController::class, 'get_match_rooms']);
 
