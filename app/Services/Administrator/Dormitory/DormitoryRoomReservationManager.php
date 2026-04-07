@@ -83,7 +83,7 @@ class DormitoryRoomReservationManager
     public function setAsReserved(int $roomReservationId) {
         $thisReservation = DormitoryTenant::lockForUpdate()->findOrFail($roomReservationId);
 
-        if(!\in_array($thisReservation->tenant_status, ["PAID", "APPROVED"])) {
+        if(!\in_array($thisReservation->tenant_status, [DormitoryEnum::PAID->value, DormitoryEnum::APPROVED->value])) {
             return [ 'message' => "Room Request is already $thisReservation->tenant_status. Can't set to Reserved.", 'status' => 409 ];
         }
 
