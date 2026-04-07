@@ -263,7 +263,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     //!FOR RECREATIONALS
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
-    Route::post('update_notification',[NotificationCtrl::class, 'update_notification']);
+    Route::post('update_notification', [NotificationCtrl::class, 'update_notification']);
     Route::post('get_notifications', [NotificationCtrl::class, 'get_notifications']);
     Route::post('change-theme', [Account::class, 'change_theme']);
     Route::post('logout', [Logout::class, 'logout_user']);

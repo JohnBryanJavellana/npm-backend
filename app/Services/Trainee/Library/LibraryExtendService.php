@@ -23,44 +23,6 @@ class LibraryExtendService
         if ($records->count() !== count($book_reservation_ids)) {
             throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be renewed.");
         }
-
-        // $now = Carbon::now();
-
-        // if ($now->hour >= 13) {
-        //     throw new DomainException("You can't extend book after 1pm");
-        // }
-
-        // foreach ($records as $record) {
-        //     $fromDate = Carbon::parse($record->from_date);
-        //     $toDate = Carbon::parse($record->to_date);
-
-        //     $schedule = $record->schedules()
-        //         ->whereDate('from_date', '<=', $fromDate)
-        //         ->whereDate('to_date', '>=', $toDate)
-        //         ->first();
-
-        //     if (!$schedule) {
-        //         throw new DomainException("No valid schedule found for reservation ID {$record->id}.");
-        //     }
-        // }
-    }
-
-    public function checkerActiveBooks($records, $book_reservation_ids)
-    {
-        $activeReservationIDs = $records->pluck('id')->toArray();
-        $reservationIDsToCheck = array_intersect($activeReservationIDs, $book_reservation_ids);
-
-        $statuses = ['APPROVED', 'RECEIVED', 'EXTENDING', 'EXTENDED', 'RENEWING'];
-
-        $activeBooks = $this->bookReservationModel::whereIn('id', $reservationIDsToCheck)
-            ->whereIn('status', $statuses)
-            ->get()
-            ->groupBy('book_res_id')
-            ->map(function ($reservations) {
-                return $reservations->count();
-            });
-
-        return $activeBooks;
     }
 
     public function storeExtendRequest($validated)
@@ -70,30 +32,39 @@ class LibraryExtendService
             $book_ids = collect($validated["data"])->pluck("book_res_id");
 
             $records = $this->bookReservationModel->query()
-                ->select("id", "status")
+                ->select("id", "status", "to_date")
                 ->forStatus(RequestStatus::renewableStatuses())
                 ->whereRelation("bookRes", "user_id", "=", $validated["user_id"])
                 ->whereIn("id", $book_ids)
                 ->lockForUpdate()
                 ->get();
 
-            $this->bookResModel->query()
-                ->where("id", $validated["reference_id"])
-                ->update(["status" => RequestStatus::EXTENDING->value]);
+            foreach ($records as $record) {
+                $status = null;
+
+                if ($record->to_date && now()->greaterThan(Carbon::parse($record->to_date))) {
+                    $status = RequestStatus::EXPIRED->value;
+                } else {
+                    $status = RequestStatus::EXTENDING->value;
+                }
+
+
+                $record->status = $status;
+                $record->save();
+
+
+                $this->bookResModel->query()
+                    ->where("id", $validated["reference_id"])
+                    ->update(['status' => $status]);
+            }
 
             $this->prepareData($records, $book_ids);
-            $this->checkerActiveBooks($records, $book_ids->toArray());
 
             $this->libraryExtraService->storeExtraService(
                 $validated,
                 $validated["user_id"],
                 "EXTEND"
             );
-
-            foreach ($records as $record) {
-                $record->status = RequestStatus::EXTENDING->value;
-                $record->save();
-            }
         });
     }
     //!KAN SIR ALLEN ADI CODE gn comment kula kay d asya 
