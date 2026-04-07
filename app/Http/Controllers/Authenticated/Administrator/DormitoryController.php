@@ -11,11 +11,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Dormitory\CreateOrUpdateDormitoryRoom;
 use App\Http\Requests\Admin\Dormitory\GetCurrentTenantInfo;
 use App\Http\Requests\Admin\Dormitory\GetMatchRooms;
-use App\Http\Requests\Admin\Dormitory\NewReservation;
 use App\Http\Requests\Admin\Dormitory\NewRoomReservation;
 use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
-use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsDone;
-use App\Http\Requests\Admin\Dormitory\UpdateServiceReq;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
 use App\Models\DormitoryItemBI;
@@ -388,7 +385,7 @@ class DormitoryController extends Controller
             $this_reservation->remarks = $remarks;
 
             // if the reservation is being rejected, update tenant_status to REJECTED.
-            // else, update or create reservation with FOR_PAYMENT status.
+            // if the reservation is being approved or set for payment, update the reservation details and tenant_status accordingly.
             if($status === DormitoryEnum::REJECTED->value) {
                 $this_reservation->tenant_status = DormitoryEnum::REJECTED;
                 $this_reservation->save();
@@ -401,16 +398,11 @@ class DormitoryController extends Controller
                 $this_reservation->purpose = $purpose;
                 $this_reservation->accommodation = $accommodation;
                 $this_reservation->room_type = $room_type;
-                $this_reservation->tenant_status =  $status === DormitoryEnum::FOR_PAYMENT->value ? DormitoryEnum::FOR_PAYMENT : DormitoryEnum::APPROVED;
+                $this_reservation->tenant_status = $status === DormitoryEnum::FOR_PAYMENT->value ? DormitoryEnum::FOR_PAYMENT : DormitoryEnum::APPROVED;
                 $this_reservation->save();
 
                 // if there are supporting documents, save them in the dormitory_tenant_sup_docs table and save the files in the storage
                 if($supporting_documents) {
-                    $path = public_path('dormitory/supporting-document');
-                    if (!File::isDirectory($path)) {
-                        File::makeDirectory($path, 0777, true, true);
-                    }
-
                     foreach($supporting_documents as $sd) {
                         $room_image = new DormitoryTenantSupDoc();
                         $room_image->dormitory_tenant_id = $this_reservation->id;

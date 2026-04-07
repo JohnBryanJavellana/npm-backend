@@ -21,7 +21,6 @@ return new class extends Migration
             $table->longText("description");
             $table->longText("filename")->nullable();
             $table->double("charge", 65, 2);
-            // $table->foreignIdFor(Charge::class);
             $table->timestamps();
         });
     }
