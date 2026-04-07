@@ -64,8 +64,8 @@ class TrainerEnrollmentController extends Controller
                     "module.facilitator",
                     "module.facilitator.facilitator:id,fname,mname,lname"
                 ])
-                ->whereKey($request->trainingId)
-                ->first();
+                    ->whereKey($request->trainingId)
+                    ->first();
 
                 return response()->json([
                     "training" => $record,

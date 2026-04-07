@@ -9,16 +9,27 @@ class AssessmentResource extends JsonResource
 {
     public function toArray($request)
     {
-        // return parent::toArray($request);   
+        // return parent::toArray($request); 
 
         $isTrainee = $request->user()->role === 'TRAINEE';
 
         return [
-            'id' => $this->id,
+            'id' => $this?->id,
+            'course_content_id' => $this->course_content_id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'status' => $this->status,
+            'type' => $this->type,
+            'instructions' => $this->instructions,
+            'passed_type' => $this->passed_type,
+            'time_limit' => $this->time_limit,
+            'created_by' => $this->created_by,
+            'created_at' => $this->created_at,
+            'passing_score' => $this->passing_score,
             'sections' => $this->sections->map(function ($section) use ($isTrainee) {
                 return [
                     'id' => $section->id,
-                    'title' => $section->title, 
+                    'title' => $section->title,
                     'instruction' => $section->instruction,
                     'status' => $section->status,
                     'questions' => $section->questions->map(function ($question) use ($isTrainee) {

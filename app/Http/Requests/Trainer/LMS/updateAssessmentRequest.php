@@ -27,18 +27,18 @@ class updateAssessmentRequest extends FormRequest
     {
         return [
             "examId" => ["required", "exists:assessments,id"],
-            "training_id" => ["sometimes","required", "exists:trainings,id","required_without:training_id"],
-            "course_content_id" => ["sometimes","required", "exists:course_contents,id","required_without:course_module_id"],
-            "title" => ["sometimes","required", "string"],
-            "type" => ["sometimes","required", "in:EXAM,QUIZ,ASSIGNMENT,ACTIVITY"],
-            "description" => ["sometimes","required", "string"],
-            "instructions" => ["sometimes","required", "string"],
-            "passed_type" => ["sometimes","required", "string"],
-            "passing_score" => ["sometimes","required","numeric"],
-            "is_hidden" => ["sometimes","required"],
-            "start_date" => ["sometimes","required", "date"],
-            "start_time" => ["sometimes","required"],
-            "time_limit" => ["sometimes","required"],
+            // "training_id" => ["sometimes", "required", "exists:trainings,id", "required_without:training_id"],
+            "course_content_id" => ["sometimes", "required", "exists:course_contents,id", "required_without:course_module_id"],
+            "title" => ["sometimes", "required", "string"],
+            "type" => ["sometimes", "required", "in:EXAM,QUIZ,ASSIGNMENT,ACTIVITY"],
+            "description" => ["sometimes", "required", "string"],
+            "instructions" => ["sometimes", "required", "string"],
+            "passed_type" => ["sometimes", "required", "string"],
+            "passing_score" => ["sometimes", "required", "numeric"],
+            "is_hidden" => ["sometimes", "required"],
+            "start_date" => ["sometimes", "required", "date"],
+            "start_time" => ["sometimes", "required"],
+            "time_limit" => ["sometimes", "required"],
         ];
     }
 

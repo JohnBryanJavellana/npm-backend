@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\ {
+use App\Models\{
     CourseContent,
     Training
 };
@@ -22,14 +22,14 @@ return new class extends Migration
             $table->string("title");
             $table->text("description");
             $table->longText("instructions");
-            $table->enum("type", ["EXAM","QUIZ","ASSIGNMENTS","ACTIVITY"]);
-            $table->enum("passed_type", ["questionnaire","file_upload"]);
+            $table->enum("type", ["EXAM", "QUIZ", "ASSIGNMENTS", "ACTIVITY"]);
+            $table->enum("passed_type", ["questionnaire", "file_upload"]);
             $table->integer("passing_score")->nullable();
             // $table->dateTime("start_date");
             // $table->dateTime("end_date");
-            $table->time("time_limit");
+            $table->bigInteger("time_limit");
             $table->foreignId("created_by")->constrained("users");
-            $table->enum("status", ["ACTIVE","INACTIVE"])->default("ACTIVE");
+            $table->enum("status", ["ACTIVE", "INACTIVE"])->default("ACTIVE");
             $table->timestamps();
         });
     }

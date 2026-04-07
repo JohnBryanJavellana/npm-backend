@@ -8,6 +8,7 @@ use App\Http\Requests\LMS\storeCourseContentRequest;
 use App\Http\Requests\LMS\storeLmsCourseSectionRequest;
 use App\Http\Requests\LMS\updateLmsContentParentRequest;
 use App\Http\Requests\LMS\updateLmsCourseContentRequest;
+use App\Models\CourseModule;
 use App\Services\LMS\LMSCourseService;
 use Illuminate\Http\Request;
 
@@ -29,53 +30,65 @@ class LMSController extends Controller
         protected LMSCourseService $lmsCourseService
     ) {}
 
-    public function view(Request $request)
+    public function overview(Request $request)
     {
-        try
-        {
-            \Log::info("courseModuleId", [$request->input("course_module_id")]);
-            $courseId = $request->course_module_id ?? null;
-            $sectionId = $request->section_id ?? null;
-            return $this->lmsCourseService->getCourseModules($courseId, $sectionId);            
-        }
-        catch (\Exception $e) {
+        try {
+            return CourseModule::whereKey($request->id)
+                ->with([
+                    'schedules',
+                    'moduleType' => function ($query) {
+                        $query->select('id', 'name');
+                    },
+                    'facilitator.facilitator' => function ($query) {
+                        $query->select('id', 'fname', 'lname', 'mname', 'suffix', 'email');
+                    }
+                ])->get();
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
+
+    public function view(Request $request)
+    {
+        try {
+            // \Log::info("courseModuleId", [$request->input("course_module_id")]);
+            $courseId = $request->course_module_id ?? null;
+            $sectionId = $request->section_id ?? null;
+            return $this->lmsCourseService->getCourseModules($courseId, $sectionId);
+        } catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+    }
+
 
     public function viewModule(Request $request)
     {
-        try
-        {
+        try {
             $moduleId = $request->input("course_module_id");
             return $this->lmsCourseService->getCourseById($moduleId);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
+
     public function viewContentById(Request $request)
     {
-        try
-        {
+        try {
             $contentId = $request->input("content_id");
             return $this->lmsCourseService->getContentById($contentId);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
     public function create(storeLmsCourseSectionRequest $request)
     {
-        try
-        {
+        try {
             $this->lmsCourseService->storeCourseSections($request->validated(), $request->user()->id);
             return response()->json(["message" => "Course section created successfully."], 201);
-        }
-        catch (\Exception $e) {
-            \Log::error("sectionStore", [$e->getMessage()]);
+        } catch (\Exception $e) {
+            // \Log::error("sectionStore", [$e->getMessage()]);
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
@@ -88,49 +101,41 @@ class LMSController extends Controller
 
     public function updateForContentParent(updateLmsContentParentRequest $request)
     {
-        try
-        {
-            $this->lmsCourseService->updateCourseSection($request->validated(), $request->user()->id);            
+        try {
+            $this->lmsCourseService->updateCourseSection($request->validated(), $request->user()->id);
             return response()->json(["mesgsage" => "Course content updated successfully."], 200);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
     public function updateForContent(updateLmsCourseContentRequest $request)
     {
-        try
-        {
+        try {
             // return response()->json(["wow"], 200);
             $this->lmsCourseService->updateCourseContent($request->validated(), $request->user()->id);
             return response()->json(["message" => "Course content updated successfully."], 200);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
     public function deleteUpload(Request $request)
     {
-        try
-        {
+        try {
             $fileId = $request->input("file_id");
-            $this->lmsCourseService->deteleContentUpload($fileId);     
-            return response()->json(["message" => "Course file deleted successfully."], 204);   
-        }
-        catch (\Exception $e) {
+            $this->lmsCourseService->deteleContentUpload($fileId);
+            return response()->json(["message" => "Course file deleted successfully."], 204);
+        } catch (\Exception $e) {
         }
     }
 
     public function delete(removeLmsCourseSectionRequest $request)
     {
-        try
-        {
-            $this->lmsCourseService->deleteCourseSections($request->validated());            
+        try {
+            $this->lmsCourseService->deleteCourseSections($request->validated());
             return response()->json(["message" => "Course content deleted successfully."], 204);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }

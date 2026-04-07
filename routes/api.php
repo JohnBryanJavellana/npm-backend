@@ -204,7 +204,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
             Route::post('update_record', [AttendanceController::class, 'update_attendance_record']);
             //! announcement
-            
+
             Route::post('announcement_edit', [AnnouncementController::class, 'AnnouncementEdit']);
             Route::post('announcement_delete', [AnnouncementController::class, 'AnnouncementDelete']);
             Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
@@ -225,6 +225,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     });
 
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->prefix('lms/')->group(function () {
+
+        Route::prefix("overview/")->group(function () {
+            Route::post("trainings", [LMSHandoutController::class, "overview"]);
+        });
+
+
         Route::prefix("handouts/")->group(function () {
             Route::post("view_handouts", [LMSHandoutController::class, "view"]);
             Route::post("create_handouts", [LMSHandoutController::class, "store"]);
@@ -238,6 +244,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("create_assessments", [LMSAssessmentController::class, "create"]);
             Route::post("update_assessments", [LMSAssessmentController::class, "update"]);
             Route::delete("delete_assessments", [LMSAssessmentController::class, "delete"]);
+
+            //! Paolo Code Start 
+
+            Route::post('store_assessment/attempts', [LMSAssessmentController::class, 'saveAnswersAssessment_attempts']);
+            Route::post('assessments_details', [LMSAssessmentController::class, 'pagpasaHinDetalye']);
+            Route::post('assessments_details_studyante', [LMSAssessmentController::class, 'detalyeHanStudyante']);
         });
 
         Route::prefix('sections/')->group(function () {
@@ -255,6 +267,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::prefix('courses/')->group(function () {
+            Route::post("view_module", [LMSController::class, "overview"]);
             Route::post("view_courses", [LMSController::class, "view"]);
             Route::post("view", [LMSController::class, "viewModule"]);
             Route::post("content", [LMSController::class, "viewContentById"]);
