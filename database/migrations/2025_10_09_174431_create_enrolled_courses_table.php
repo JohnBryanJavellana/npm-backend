@@ -22,7 +22,6 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Training::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(TermsAndCondition::class)->constrained()->cascadeOnDelete();
             $table->string('bgColor')->nullable();
             $table->enum('enrolled_course_status', [
                 'PENDING',
