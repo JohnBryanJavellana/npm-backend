@@ -223,7 +223,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
-    Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->prefix('lms/')->group(function () {
+    Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS', 'throttle:60,1'])->prefix('lms/')->group(function () {
 
         Route::prefix("overview/")->group(function () {
             Route::post("trainings", [LMSHandoutController::class, "overview"]);
