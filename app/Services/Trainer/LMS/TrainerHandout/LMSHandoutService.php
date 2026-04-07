@@ -22,9 +22,10 @@ class LMSHandoutService {
     public function storeHandouts($validated, $userId)
     {
         DB::transaction(function () use ($validated, $userId) {
-
+            \Log::info("storeHandouts11111111", [$validated]);
+            
             $handout = $this->courseModuleHandoutModel->create([
-                "course_module_id" => $validated["course_module_id"],
+                "course_content_id" => $validated["course_content_id"],
                 "title" => $validated["title"],
                 "uploaded_by" => $userId,
                 "updated_by" => $userId
@@ -38,7 +39,7 @@ class LMSHandoutService {
                 foreach ($validated["files"] as $file) {
 
                     $path = SaveFile::save($file, "course-module-handouts");
-
+                    \Log::info("storeHandouts", [$path]);
                     $uploads[] = [
                         "course_module_handouts_id" => $handout->id,
                         "file_path" => $path,

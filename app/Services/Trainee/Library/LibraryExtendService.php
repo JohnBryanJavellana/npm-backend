@@ -100,6 +100,10 @@ class LibraryExtendService
                 ->whereKey($validated["book_res_id"])
                 ->where("book_res_id", $validated["request_id"])
                 ->firstOrFail();
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee8617a4719ed9644339a462cd606687a60bc0bf
             $date = Carbon::parse($record->to_date);
 
             $reservationStatus = $date?->isPast() ? RequestStatus::EXPIRED->value : RequestStatus::RECEIVED->value;

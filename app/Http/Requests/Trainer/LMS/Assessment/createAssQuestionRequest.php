@@ -31,7 +31,7 @@ class createAssQuestionRequest extends FormRequest
             "type" => ["required", "in:MCQ,TRUE_FALSE,ESSAY"],
             "score" => ["required"],
             "choices" => ["sometimes", "required", "array"],
-            "choices.*.option_text" => ["sometimes", "required", "string", "max:255"],
+            "choices.*.option_text" => ["sometimes", "required", "string"],
             "choices.*.is_correct" => ["sometimes", "required"],
         ];
     }

@@ -38,7 +38,7 @@ class storeCourseContentRequest extends FormRequest
     {
         throw new HttpResponseException(
             response()->json([
-                "message" => $validator->errors()
+                "message" => $validator->errors()->first()
             ], 422)
         );
     }

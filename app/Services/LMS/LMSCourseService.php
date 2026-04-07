@@ -28,12 +28,36 @@ class LMSCourseService
             return $query->whereKey($section_id)->with([
                     "contents",
                     "contents.uploads",
+                    "contents.assessment:id,course_content_id,title,type,status",
                     "updated_by:id,fname,mname,lname"
                 ])->first();
             }, function ($query) use ($courseModuleId){
                 return $query->forCourseModule($courseModuleId)->get();
             }
         );
+    }
+
+    public function getCourseById($moduleId)
+    {
+        return $this->courseModuleSectionModel->query()
+        ->forCourseModule($moduleId)
+        ->with([
+            "contents:id,course_module_section_id,title,status",
+            "contents.assessment:id,course_content_id,title,status",
+            "updated_by:id,fname,mname,lname",
+        ])
+        ->get();
+    }
+
+    public function getContentById($contentId)
+    {
+        return $this->courseContentModel->query()
+        ->whereKey($contentId)
+        ->with([
+            "uploads",
+            "assessment",
+        ])
+        ->first();
     }
 
     public function storeCourseSections($validated, $userId)
@@ -86,12 +110,23 @@ class LMSCourseService
         }
     }
 
-    public function updateCourseContent($validated)
+    public function updateCourseContent($validated, $userId)
     {
-        return;
+        DB::transaction(function () use ($validated, $userId){
+            $data = collect($validated);
+            $this->courseContentModel->whereKey($validated["course_content_id"])->update([
+                ...$data->only(
+                    "title",
+                    "description",
+                    "status",
+                )->toArray()
+            ]);
+
+            AuditHelper::log($userId, "has updated a course content.");
+        });
     }
 
-    public function updateCourseContentParent($validated, $userId)
+    public function updateCourseSection($validated, $userId)
     {
         DB::transaction(function () use ($validated, $userId){
             $data = collect($validated);
@@ -133,10 +168,9 @@ class LMSCourseService
         $path = public_path($filepath);
 
         if (file_exists($path)) {
-        \Log::info("deteleContentUpload", [$path]);
-            // unlink($path);
+            unlink($path);
         }
 
-        // return $record->delete();
+        return $record->delete();
     }
 }

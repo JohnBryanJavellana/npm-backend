@@ -204,6 +204,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
             Route::post('update_record', [AttendanceController::class, 'update_attendance_record']);
             //! announcement
+            
             Route::post('announcement_edit', [AnnouncementController::class, 'AnnouncementEdit']);
             Route::post('announcement_delete', [AnnouncementController::class, 'AnnouncementDelete']);
             Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
@@ -231,11 +232,14 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix("assessments/")->group(function () {
             Route::post("view_assessments", [LMSAssessmentController::class, "view"]);
+            Route::post("view_topics", [LMSAssessmentController::class, "viewAssessment"]);
+            Route::post("questionnaire", [LMSAssessmentController::class, "viewTopic"]);
             Route::post("view_assessments/assessment", [LMSAssessmentController::class, "viewAssessmentContent"]);
             Route::post("create_assessments", [LMSAssessmentController::class, "create"]);
             Route::post("update_assessments", [LMSAssessmentController::class, "update"]);
-            Route::post("delete_assessments", [LMSAssessmentController::class, "delete"]);
+            Route::delete("delete_assessments", [LMSAssessmentController::class, "delete"]);
         });
+
         Route::prefix('sections/')->group(function () {
             Route::get("view_sections/{assessment}", [LMSAssessmentSectionController::class, "view"]);
             Route::post("create_sections", [LMSAssessmentSectionController::class, "create"]);
@@ -252,16 +256,17 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
         Route::prefix('courses/')->group(function () {
             Route::post("view_courses", [LMSController::class, "view"]);
+            Route::post("view", [LMSController::class, "viewModule"]);
+            Route::post("content", [LMSController::class, "viewContentById"]);
             Route::post("create_courses", [LMSController::class, "create"]);
             Route::post("create_course_contents", [LMSController::class, "createSectionContents"]);
             Route::post("update_course_contents", [LMSController::class, "updateForContent"]);
             Route::post("update_course_sections", [LMSController::class, "updateForContentParent"]);
             Route::delete("delete_courses", [LMSController::class, "delete"]);
-            Route::delete("delete_course_content_uploads", [LMSController::class, "deleteCourseContentUploads"]);
+            Route::delete("delete_content_uploads", [LMSController::class, "deleteUpload"]);
         });
     });
 
-    //!FOR RECREATIONALS
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);
     Route::post('update_notification', [NotificationCtrl::class, 'update_notification']);
     Route::post('get_notifications', [NotificationCtrl::class, 'get_notifications']);

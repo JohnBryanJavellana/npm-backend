@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\ {
-    CourseModuleSection,
+    CourseContent,
     Training
 };
 
@@ -18,16 +18,15 @@ return new class extends Migration
         Schema::create('assessments', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->foreignIdFor(Training::class)->nullable()->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(CourseModuleSection::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(CourseContent::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string("title");
             $table->text("description");
             $table->longText("instructions");
             $table->enum("type", ["EXAM","QUIZ","ASSIGNMENTS","ACTIVITY"]);
             $table->enum("passed_type", ["questionnaire","file_upload"]);
             $table->integer("passing_score")->nullable();
-            $table->dateTime("start_date");
-            $table->dateTime("end_date");
+            // $table->dateTime("start_date");
+            // $table->dateTime("end_date");
             $table->time("time_limit");
             $table->foreignId("created_by")->constrained("users");
             $table->enum("status", ["ACTIVE","INACTIVE"])->default("ACTIVE");

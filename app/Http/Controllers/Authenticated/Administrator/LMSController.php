@@ -33,9 +33,34 @@ class LMSController extends Controller
     {
         try
         {
+            \Log::info("courseModuleId", [$request->input("course_module_id")]);
             $courseId = $request->course_module_id ?? null;
             $sectionId = $request->section_id ?? null;
             return $this->lmsCourseService->getCourseModules($courseId, $sectionId);            
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+    }
+
+    public function viewModule(Request $request)
+    {
+        try
+        {
+            $moduleId = $request->input("course_module_id");
+            return $this->lmsCourseService->getCourseById($moduleId);
+        }
+        catch (\Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 500);
+        }
+    }
+
+    public function viewContentById(Request $request)
+    {
+        try
+        {
+            $contentId = $request->input("content_id");
+            return $this->lmsCourseService->getContentById($contentId);
         }
         catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
@@ -65,7 +90,7 @@ class LMSController extends Controller
     {
         try
         {
-            $this->lmsCourseService->updateCourseContentParent($request->validated(), $request->user()->id);            
+            $this->lmsCourseService->updateCourseSection($request->validated(), $request->user()->id);            
             return response()->json(["mesgsage" => "Course content updated successfully."], 200);
         }
         catch (\Exception $e) {
@@ -77,7 +102,8 @@ class LMSController extends Controller
     {
         try
         {
-            $this->lmsCourseService->updateCourseContent($request->validated());
+            // return response()->json(["wow"], 200);
+            $this->lmsCourseService->updateCourseContent($request->validated(), $request->user()->id);
             return response()->json(["message" => "Course content updated successfully."], 200);
         }
         catch (\Exception $e) {

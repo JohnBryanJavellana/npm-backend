@@ -308,8 +308,8 @@ class TraineeLibrary extends Controller
             $book_res = BookReservation::whereHas('bookRes', function ($q) use ($res_id) {
                 $q->where('id', $res_id);
             })
-                ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
-                ->exists();
+            ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
+            ->exists();
 
             if (!$book_res) {
                 BookRes::where(['id' => $res_id, 'user_id' => $user_id])->update(['status' => RequestStatus::FOR_CSM]);
