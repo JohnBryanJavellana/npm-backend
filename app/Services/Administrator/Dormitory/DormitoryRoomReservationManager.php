@@ -19,7 +19,7 @@ class DormitoryRoomReservationManager
         // For creation, generate a new trace number. For update,
         // lock the record for update and find by ID.
         $res = $isPost ? new DormitoryTenant(['trace_number' => GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DR-')])
-                        : DormitoryTenant::lockForUpdate()->findOrFail($payload->documentId);
+                       : DormitoryTenant::lockForUpdate()->findOrFail($payload->documentId);
 
         // Fill the common fields for both creation and update.
         // For update, the status is determined by the payload.
@@ -48,11 +48,13 @@ class DormitoryRoomReservationManager
         // If the status is not REJECTED, handle the supporting documents and invoice generation.
         // This allows for reservation requests to be created with a REJECTED status without requiring the additional fields.
         if ($payload->status !== DormitoryEnum::REJECTED->value) {
-            foreach ($payload->supporting_documents as $sd) {
-                $name = Str::uuid() . '-room-.png';
+            if(!empty($payload->supporting_documents)) {
+                foreach ($payload->supporting_documents as $sd) {
+                    $name = Str::uuid() . '-room-.png';
 
-                DormitoryTenantSupDoc::create(['dormitory_tenant_id' => $res->id, 'filename' => $name ]);
-                SaveAvatar::dispatch($sd, $name, "dormitory/supporting-document", false, true, '');
+                    DormitoryTenantSupDoc::create(['dormitory_tenant_id' => $res->id, 'filename' => $name ]);
+                    SaveAvatar::dispatch($sd, $name, "dormitory/supporting-document", false, true, '');
+                }
             }
 
             // For simplicity, the invoice generation logic is included here.

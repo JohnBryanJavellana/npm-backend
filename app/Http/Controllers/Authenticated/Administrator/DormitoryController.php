@@ -245,8 +245,8 @@ class DormitoryController extends Controller
 
             return response()->json([
                 'message' => $isPost
-                    ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORY->value
-                    : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORY->value . " ID#$result->id"
+                    ? AdministratorReturnResponse::DORMITORYCTRL_CREATED_DORMITORYREQ->value
+                    : AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYREQ->value . " ID#$result->id"
             ], 201);
         });
     }
