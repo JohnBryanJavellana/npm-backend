@@ -439,104 +439,54 @@ class DormitoryController extends Controller
     }
 
     //ed started here
-    /**
- * Manual price adjustment for dormitory invoice
+/**
+ * Change tenant status from PAID to RESERVED
  * @param Request $request
  */
-public function manual_price_adjustment(Request $request)
+public function set_tenant_as_reserved(Request $request)
 {
-    return TransactionUtil::transact($request, [], function() use ($request) {
-        $request->validate([
-            'invoice_id' => 'required|exists:dormitory_invoices,id',
-            'adjustment_amount' => 'required|numeric',
-            'adjustment_reason' => 'required|string|min:3',
-            'remarks' => 'nullable|string'
-        ]);
+    $request->validate([
+        'trace_number' => 'required|string|exists:dormitory_tenants,trace_number',
+    ]);
 
-        $invoiceId = $request->invoice_id;
-        $adjustmentAmount = (float) $request->adjustment_amount;
-        $adjustmentReason = $request->adjustment_reason;
-        $additionalRemarks = $request->remarks;
-
-        $invoice = DormitoryInvoice::with(['tenant', 'tenant.boarder'])
-            ->where('id', $invoiceId)
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $tenant = DormitoryTenant::with(['boarder', 'dormitory_room'])
+            ->where('trace_number', $request->trace_number)
             ->lockForUpdate()
             ->firstOrFail();
 
-        $adjustableStatuses = ['PENDING', 'FOR PAYMENT', 'PROCESSING PAYMENT'];
-        if (!in_array($invoice->invoice_status, $adjustableStatuses)) {
+        if ($tenant->tenant_status !== DormitoryEnum::PAID->value) {
             return response()->json([
-                'message' => "Cannot adjust invoice. Current status: {$invoice->invoice_status}. Only pending or for payment invoices can be adjusted."
+                'message' => "Cannot change status. Current status is {$tenant->tenant_status}. Only PAID status can be changed to RESERVED."
             ], 409);
         }
 
-        $originalAmount = $invoice->invoice_amount;
+        $invoice = DormitoryInvoice::where('dormitory_tenant_id', $tenant->id)
+            ->where('invoice_status', DormitoryEnum::PAID->value)
+            ->first();
 
-        $newAmount = $originalAmount + $adjustmentAmount;
-
-        if ($newAmount < 0) {
+        if (!$invoice) {
             return response()->json([
-                'message' => "Adjustment would result in negative amount. Current: ₱" . number_format($originalAmount, 2) . ", Adjustment: ₱" . number_format($adjustmentAmount, 2)
-            ], 422);
+                'message' => "Cannot change status. No paid invoice found for this reservation."
+            ], 409);
         }
 
-        $adjustmentHistory = [
-            'previous_amount' => $originalAmount,
-            'adjustment_amount' => $adjustmentAmount,
-            'new_amount' => $newAmount,
-            'adjustment_reason' => $adjustmentReason,
-            'adjusted_by' => $request->user()->id,
-            'adjusted_by_name' => $request->user()->fname . ' ' . $request->user()->lname,
-            'adjusted_at' => now()->toDateTimeString()
-        ];
+        $oldStatus = $tenant->tenant_status;
 
-        $invoice->invoice_amount = $newAmount;
+        $tenant->tenant_status = DormitoryEnum::RESERVED->value;
+        $tenant->save();
 
-        $existingRemarks = $invoice->remarks ?? '';
-        $adjustmentLog = "\n\n--- MANUAL PRICE ADJUSTMENT ---\n";
-        $adjustmentLog .= "Date: " . now()->format('Y-m-d H:i:s') . "\n";
-        $adjustmentLog .= "Adjusted by: " . $adjustmentHistory['adjusted_by_name'] . "\n";
-        $adjustmentLog .= "Previous Amount: ₱" . number_format($originalAmount, 2) . "\n";
-        $adjustmentLog .= "Adjustment: ₱" . number_format($adjustmentAmount, 2) . "\n";
-        $adjustmentLog .= "New Amount: ₱" . number_format($newAmount, 2) . "\n";
-        $adjustmentLog .= "Reason: " . $adjustmentReason . "\n";
-        if ($additionalRemarks) {
-            $adjustmentLog .= "Additional Notes: " . $additionalRemarks . "\n";
-        }
-        $adjustmentLog .= "--- END OF ADJUSTMENT ---\n";
-
-        $invoice->remarks = $existingRemarks . $adjustmentLog;
-        $invoice->save();
-
-        AuditHelper::log(
-            $request->user()->id,
-            AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYCHARGE->value .
-            " — Manual price adjustment for Invoice ID#{$invoice->id}. " .
-            "₱" . number_format($originalAmount, 2) . " → ₱" . number_format($newAmount, 2) .
-            ". Reason: {$adjustmentReason}"
-        );
-        if ($invoice->tenant && $invoice->tenant->user_id) {
-            Notifications::notify(
-                $request->user()->id,
-                $invoice->tenant->user_id,
-                "DORMITORY",
-                "Your dormitory invoice #{$invoice->trace_number} has been updated. New amount: ₱" . number_format($newAmount, 2)
-            );
-        }
-        if (env('USE_EVENT')) {
-            event(new BEDormitory(''), new BEAuditTrail(''));
-        }
         return response()->json([
-            'message' => "Invoice price adjusted successfully.",
-            'invoice' => [
-                'id' => $invoice->id,
-                'trace_number' => $invoice->trace_number,
-                'previous_amount' => $originalAmount,
-                'adjustment_amount' => $adjustmentAmount,
-                'new_amount' => $newAmount,
-                'adjustment_reason' => $adjustmentReason,
-                'invoice_status' => $invoice->invoice_status,
-                'remarks' => $invoice->remarks
+            'message' => "Tenant status has been changed to RESERVED successfully.",
+            'tenant' => [
+                'id' => $tenant->id,
+                'trace_number' => $tenant->trace_number,
+                'old_status' => $oldStatus,
+                'new_status' => $tenant->tenant_status,
+                'boarder_name' => $tenant->boarder->fname . ' ' . $tenant->boarder->lname,
+                'room' => $tenant->dormitory_room->room_name,
+                'check_in' => $tenant->check_in_datetime,
+                'check_out' => $tenant->check_out_datetime
             ]
         ], 200);
     });
