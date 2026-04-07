@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class AssessmentAttemptAction extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'assessment_id',
+        'user_id',
+        'action'
+    ];
 }

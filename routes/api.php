@@ -204,6 +204,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
             Route::post('update_record', [AttendanceController::class, 'update_attendance_record']);
             //! announcement
+
             Route::post('announcement_edit', [AnnouncementController::class, 'AnnouncementEdit']);
             Route::post('announcement_delete', [AnnouncementController::class, 'AnnouncementDelete']);
             Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
@@ -243,6 +244,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("create_assessments", [LMSAssessmentController::class, "create"]);
             Route::post("update_assessments", [LMSAssessmentController::class, "update"]);
             Route::delete("delete_assessments", [LMSAssessmentController::class, "delete"]);
+
+            //! Paolo Code Start 
+
+            Route::post('store_assessment/attempts', [LMSAssessmentController::class, 'saveAnswersAssessment_attempts']);
+            Route::post('assessments_details', [LMSAssessmentController::class, 'pagpasaHinDetalye']);
+            Route::post('assessments_details_studyante', [LMSAssessmentController::class, 'detalyeHanStudyante']);
         });
 
         Route::prefix('sections/')->group(function () {

@@ -21,6 +21,7 @@ class AttendanceController extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             \Log::info("Attendance record request: ", $request->all());
+            
             $validated = $request->validate([
                 'training_id' => 'required|exists:trainings,id',
                 'training_date' => 'required|date',

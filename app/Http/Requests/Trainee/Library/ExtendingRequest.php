@@ -20,6 +20,7 @@ class ExtendingRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        \Log::info("werty", $this->all());
         return $this->user() !== null;
     }
 
@@ -28,7 +29,7 @@ class ExtendingRequest extends FormRequest
         $this->merge([
             "user_id" => in_array($this->user()->role, [
                 UserRoleEnum::SUPERADMIN->value,
-                UserRoleEnum::ADMIN_LIBRARY->value       
+                UserRoleEnum::ADMIN_LIBRARY->value
             ])
                 ? $this->input("userId")
                 : $this->user()->id
@@ -39,7 +40,7 @@ class ExtendingRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    
+
     public function rules(): array
     {
         return [
@@ -49,15 +50,15 @@ class ExtendingRequest extends FormRequest
             "data.*.to" => "required|date",
             "reference_id" => "required|exists:book_res,id",
         ];
-
     }
-    public function withValidation($validator) {
-        $validator->after(function($validator) {
+    public function withValidation($validator)
+    {
+        $validator->after(function ($validator) {
             $user = $this->user();
 
             $hasData = BookRes::where(["user_id" => $user->id, "status" => "EXTENDING"])->exists();
 
-            if($hasData) {
+            if ($hasData) {
                 $validator->errors()->add(
                     "You already have a pending book extension request. Please wait for it to be processed first."
                 );
@@ -69,7 +70,7 @@ class ExtendingRequest extends FormRequest
     {
         $errors = $validator->errors();
         $firstError = $errors->first();
-        
+
         throw new HttpResponseException(
             response()->json([
                 "message" => $firstError,

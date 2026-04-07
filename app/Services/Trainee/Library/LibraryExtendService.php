@@ -23,8 +23,6 @@ class LibraryExtendService
         if ($records->count() !== count($book_reservation_ids)) {
             throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be renewed.");
         }
-
-        //validate DATE
     }
 
     public function storeExtendRequest($validated)
@@ -34,16 +32,31 @@ class LibraryExtendService
             $book_ids = collect($validated["data"])->pluck("book_res_id");
 
             $records = $this->bookReservationModel->query()
-                ->select("id", "status")
+                ->select("id", "status", "to_date")
                 ->forStatus(RequestStatus::renewableStatuses())
                 ->whereRelation("bookRes", "user_id", "=", $validated["user_id"])
                 ->whereIn("id", $book_ids)
                 ->lockForUpdate()
                 ->get();
 
-            $this->bookResModel->query()
-                ->whereIn("id", $book_ids)
-                ->update(["status" => RequestStatus::EXTENDING->value]);
+            foreach ($records as $record) {
+                $status = null;
+
+                if ($record->to_date && now()->greaterThan(Carbon::parse($record->to_date))) {
+                    $status = RequestStatus::EXPIRED->value;
+                } else {
+                    $status = RequestStatus::EXTENDING->value;
+                }
+
+
+                $record->status = $status;
+                $record->save();
+
+
+                $this->bookResModel->query()
+                    ->where("id", $validated["reference_id"])
+                    ->update(['status' => $status]);
+            }
 
             $this->prepareData($records, $book_ids);
 
@@ -52,14 +65,34 @@ class LibraryExtendService
                 $validated["user_id"],
                 "EXTEND"
             );
-
-            foreach ($records as $record) {
-                $record->status = RequestStatus::EXTENDING->value;
-                $record->save();
-            }
         });
     }
+    //!KAN SIR ALLEN ADI CODE gn comment kula kay d asya 
+    // public function cancelExtendRequest($validated)
+    // {
+    //     DB::transaction(function () use ($validated) {
+    //         $record = $this->bookReservationModel->query()
+    //             ->whereKey($validated["book_res_id"])
+    //             ->where("book_res_id", $validated["request_id"])
+    //             ->firstOrFail();
 
+    //         //validate record
+    //         $date = Carbon::parse($record->to_date);
+
+    //         $record->update([
+    //             "status" => $date?->isPast() ? RequestStatus::EXPIRED->value : RequestStatus::RECEIVED->value
+    //         ]);
+
+    //         $record->services()
+    //             ->status(RequestStatus::PENDING->value)
+    //             ->service("EXTEND")
+    //             ->update([
+    //                 "status" => RequestStatus::CANCELLED->value
+    //             ]);
+    //     });
+    // }
+
+    //!Working na adi na Code pagkuha nala bossing 
     public function cancelExtendRequest($validated)
     {
         DB::transaction(function () use ($validated) {
@@ -67,18 +100,23 @@ class LibraryExtendService
                 ->whereKey($validated["book_res_id"])
                 ->where("book_res_id", $validated["request_id"])
                 ->firstOrFail();
-
             $date = Carbon::parse($record->to_date);
 
+            $reservationStatus = $date?->isPast() ? RequestStatus::EXPIRED->value : RequestStatus::RECEIVED->value;
+
             $record->update([
-                "status" => $date?->isPast() ? RequestStatus::EXPIRED->value : RequestStatus::RECEIVED->value
+                'status' => $reservationStatus,
+            ]);
+
+            $record->bookRes()->update([
+                'status' => RequestStatus::ACTIVE->value,
             ]);
 
             $record->services()
                 ->status(RequestStatus::PENDING->value)
-                ->service("EXTEND")
+                ->service('EXTEND')
                 ->update([
-                    "status" => RequestStatus::CANCELLED->value
+                    'status' => RequestStatus::CANCELLED->value,
                 ]);
         });
     }

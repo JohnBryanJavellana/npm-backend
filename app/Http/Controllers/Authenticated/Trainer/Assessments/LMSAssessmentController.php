@@ -12,13 +12,16 @@ use App\Http\Requests\Trainer\LMS\updateAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
 use App\Http\Resources\Trainer\LMS\Assessment\AssessmentResource;
 use App\Http\Resources\Trainer\LMS\ViewAssessmentContentResource;
+use App\Models\AssessmentAnswer;
+use App\Models\AssessmentAttemptAction;
 use App\Models\Assessments;
 use App\Models\CourseContent;
-use App\Models\CourseModule;
 use App\Models\CourseModuleSection;
+use App\Models\EnrolledCourse;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use DomainException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use function Laravel\Prompts\select;
 
@@ -66,11 +69,16 @@ class LMSAssessmentController extends Controller
                 ->with([
                     'sections.questions.options'
                 ])
-                ->first();
+                ->first(); ///! <<-- Error ini pakiayos 
 
+            //         if (!$record) {
+            //     return response()->json([
+            //         "message" => "Assessment not found"
+            //     ], 404);
+            // }
             return new AssessmentResource($record);
         } catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+            return response()->json(["message" => $e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
     }
@@ -120,6 +128,79 @@ class LMSAssessmentController extends Controller
         } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
+        }
+    }
+
+    // public function pagpasaHinDetalye(Request $request)
+    // {
+    //     try {
+    //         $Detalye = Assessments::whereKey($request->assessment_id)
+    //             ->with([
+    //                 'sections.questions.options'
+    //             ])
+    //             ->first();
+
+    //         return new AssessmentResource($Detalye);
+    //     } catch (\Exception $e) {
+    //         return response()->json(["message" => $e->getMessage()], 500);
+    //         return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
+    //     }
+    // }
+
+    public function saveAnswersAssessment_attempts(Request $request)
+    {
+        try {
+            if (!$request->user()) {
+                return response()->json(["message" => "Unauthorized"], 401);
+            }
+
+            $validated = $request->validate([
+                "assessment_attempt_id" => "required|integer|exists:assessment_attempts,id",
+                "answers" => "required|array",
+                "answers.*.question_id" => "required|integer|exists:assessment_questions,id",
+                "answers.*.option_id" => "required|integer|exists:assessment_options,id"
+            ]);
+
+            DB::beginTransaction();
+
+            try {
+                $attempt = AssessmentAttemptAction::create([
+                    "assessment_attempt_id" => $validated["assessment_attempt_id"],
+                    "user_id" => $request->user()->id,
+                    "action" => "SUBMITTED"
+                ]);
+
+
+                foreach ($validated["answers"] as $answer) {
+                    AssessmentAnswer::create([
+                        "assessment_attempt_id" => $attempt->id,
+                        "assessment_question_id" => $answer["question_id"],
+                        "assessment_option_id" => $answer["option_id"]
+                    ]);
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    "message" => "Answers submitted successfully",
+                    "attempt_id" => $attempt->id,
+                    "count" => count($validated["answers"])
+                ], 200);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        } catch (\Exception $e) {
+            \Log::error('Assessment Submission Error: ' . $e->getMessage(), [
+                'assessment_id' => $request->assessment_id ?? null,
+                'user_id' => $request->user()?->id ?? null,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                "message" => "An unexpected server error occurred",
+                "error" => config('app.debug') ? $e->getMessage() : null
+            ], 500);
         }
     }
 }
