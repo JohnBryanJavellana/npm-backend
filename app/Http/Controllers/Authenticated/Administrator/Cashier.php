@@ -6,6 +6,8 @@ use App\Enums\Administrator\DormitoryEnum;
 use App\Enums\Administrator\EnrollmentEnum;
 use App\Enums\Administrator\LibraryEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Cashier\RemoveChargeCategory;
+use App\Http\Requests\Admin\Cashier\RemoveORNumber;
 use App\Jobs\AutoPrint;
 use App\Jobs\SendingEmail;
 use App\Mail\CashierEmail;
@@ -21,6 +23,8 @@ use App\Models\LibraryInvoice;
 use App\Models\RAInvoices;
 use App\Models\RARequestInfo;
 use App\Models\User;
+use App\Services\Administrator\Cashier\CashierChargeCategoryManager;
+use App\Services\Administrator\Cashier\CashierORManager;
 use App\Utils\Notifications;
 
 use Illuminate\Http\Request;
@@ -55,6 +59,11 @@ use App\Enums\{
 
 class Cashier extends Controller
 {
+    public function __construct(
+        public CashierORManager $cashierORManager,
+        public CashierChargeCategoryManager $cashierChargeCategoryManager
+    ) {}
+
     /**
      * Summary of getTable
      * @param string $service
@@ -309,181 +318,6 @@ class Cashier extends Controller
     }
 
     /**
-     * Summary of get_charges_category
-     * @param Request $request
-     */
-    public function get_charges_category (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request)  {
-            $categories = ChargeCategory::withCount(['hasData'])->get();
-            return response()->json(['categories' => $categories], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_charge_category
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === TRUE
-     * @param CreateOrUpdateFeeCategory $request
-     */
-    public function create_or_update_charge_category (CreateOrUpdateFeeCategory $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-
-            $check = CheckForDocumentExistence::exists(
-                ChargeCategory::class,
-                ['name' => $request->name],
-                !$isPost,
-                $documentId,
-                'id',
-                "Charge Category already exist."
-            );
-
-            if($check) return $check;
-
-            $fee_category = $isPost ? new ChargeCategory() : ChargeCategory::find($request->documentId);
-            $fee_category->name = $request->name;
-            $fee_category->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $request->httpMethod === "POST" ? AdministratorAuditActions::CASHIERCTRL_CREATED_CHARGECATEGORY->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_CHARGECATEGORY->value . " ID#$fee_category->id"
-            );
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BEInvoice(''),
-                    new BEAuditTrail('')
-                );
-            }
-
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::CASHIERCTRL_CREATED_CHARGECATEGORY->value : AdministratorReturnResponse::CASHIERCTRL_UPDATED_CHARGECATEGORY->value) . " ID#$fee_category->id"], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_charge_category
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === TRUE
-     * @param Request $request
-     * @param int $fee_category_id
-     */
-    public function remove_charge_category (Request $request, int $fee_category_id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $fee_category_id) {
-            $this_fee = ChargeCategory::withCount(['hasData'])->where('id', $fee_category_id)->first();
-
-            if($this_fee->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_ERR_CHARGECATEGORY->value], 409);
-            } else {
-                $this_fee->delete();
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::CASHIERCTRL_REMOVED_CHARGECATEGORY->value . " ID#$fee_category_id"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEInvoice(''),
-                        new BEAuditTrail('')
-                    );
-                }
-                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_REMOVED_CHARGECATEGORY->value . "ID#$fee_category_id"], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of get_or_numbers
-     * @param Request $request
-     */
-    public function get_or_numbers (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $orNumbersTemp = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment']);
-
-            if($request->service) {
-                $orNumbersTemp->where([
-                    "service_type" => $request->service,
-                    'status' => CashierEnum::AVAILABLE
-                ]);
-            }
-
-            $orNumbers = $orNumbersTemp->get();
-            return response()->json(['orNumbers' => $orNumbers], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_or_number
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === TRUE
-     * @param CreateOrUpdateOR $request
-     */
-    public function create_or_update_or_number (CreateOrUpdateOR $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-
-            $check = CheckForDocumentExistence::exists(
-                CashierOR::class,
-                ['name' => $request->name, 'service_type' => $request->service],
-                !$isPost,
-                $documentId,
-                'id',
-                "The OR Number '{$request->name}' is already assigned to this service type."
-            );
-
-            if($check) return $check;
-
-            $this_or = $isPost ? new CashierOR() : CashierOR::findOrFail($documentId);
-            $this_or->name = $request->name;
-            $this_or->service_type = $request->service;
-            $this_or->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::CASHIERCTRL_CREATED_ORNUMBER->value : AdministratorAuditActions::CASHIERCTRL_UPDATED_ORNUMBER->value . " ID#$this_or->id"
-            );
-
-            if (env('USE_EVENT')) {
-                event(new BEInvoice(''), new BEAuditTrail(''));
-            }
-
-            return response()->json(['success' => true, 'message' => ($isPost ? AdministratorReturnResponse::CASHIERCTRL_CREATED_ORNUMBER->value : AdministratorReturnResponse::CASHIERCTRL_UPDATED_ORNUMBER->value) . "ID#$this_or->id"], 200);
-        });
-    }
-
-    /**
-     * Summary of remove_or_number
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === TRUE
-     * @param Request $request
-     * @param int $orNumber
-     */
-    public function remove_or_number (Request $request, int $orNumber) {
-        return TransactionUtil::transact(null, [], function() use ($request, $orNumber) {
-            $this_or = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment'])->where('id', $orNumber)->first();
-
-            if($this_or->connection_in_library_count > 0 || $this_or->connection_in_dormitory_count > 0 || $this_or->connection_in_enrollment_count > 0 || $this_or->status === "UNAVAILABLE") {
-                return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_ERR_ORNUMBER->value], 409);
-            } else {
-                $this_or->delete();
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::CASHIERCTRL_REMOVED_ORNUMBER->value . " ID#$orNumber"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEInvoice(''),
-                        new BEAuditTrail('')
-                    );
-                }
-                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_REMOVED_ORNUMBER->value . "ID#$orNumber"], 200);
-            }
-        });
-    }
-        //edrascoe
-    /**
      * Summary of get_all_paid_payments
     * @param Request $request
     */
@@ -684,6 +518,91 @@ class Cashier extends Controller
                     'service_payment_type_breakdown' => $servicePaymentTypeReport,
                 ],
             ], 200);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_or_numbers
+     * @param Request $request
+     */
+    public function get_or_numbers (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $orNumbersTemp = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment']);
+
+            if($request->service) {
+                $orNumbersTemp->where([
+                    "service_type" => $request->service,
+                    'status' => CashierEnum::AVAILABLE
+                ]);
+            }
+
+            $orNumbers = $orNumbersTemp->get();
+            return response()->json(['orNumbers' => $orNumbers], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_or_number
+     * @param CreateOrUpdateOR $request
+     */
+    public function create_or_update_or_number (CreateOrUpdateOR $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
+
+            $result = $this->cashierORManager->createOrUpdate($request, $isPost, $documentId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_or_number
+     * @param RemoveORNumber $request
+     * @param int $orNumber
+     */
+    public function remove_or_number (RemoveORNumber $request, int $orNumber) {
+        return TransactionUtil::transact($request, [], function() use ($request, $orNumber) {
+            $result = $this->cashierORManager->removeOR($orNumber);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_charges_category
+     * @param Request $request
+     */
+    public function get_charges_category (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request)  {
+            $categories = ChargeCategory::withCount(['hasData'])->get();
+            return response()->json(['categories' => $categories], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_charge_category
+     * @param CreateOrUpdateFeeCategory $request
+     */
+    public function create_or_update_charge_category (CreateOrUpdateFeeCategory $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
+
+            $result = $this->cashierChargeCategoryManager->createOrUpdate($request, $isPost, $documentId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_charge_category
+     * @param RemoveChargeCategory $request
+     * @param int $chargeCategoryId
+     */
+    public function remove_charge_category (RemoveChargeCategory $request, int $chargeCategoryId) {
+        return TransactionUtil::transact($request, [], function() use ($request, $chargeCategoryId) {
+            $result = $this->cashierChargeCategoryManager->removeChargeCategory($chargeCategoryId);
+            return response()->json(['message' => $result['message']], $result['status']);
         });
     }
 }
