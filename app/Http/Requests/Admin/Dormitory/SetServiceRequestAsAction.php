@@ -2,17 +2,16 @@
 
 namespace App\Http\Requests\Admin\Dormitory;
 
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateServiceReq extends FormRequest
+class SetServiceRequestAsAction extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, ['SUPERADMIN', 'ADMIN-DORMITORY']);
     }
 
     /**
@@ -23,12 +22,8 @@ class CreateOrUpdateServiceReq extends FormRequest
     public function rules(): array
     {
         return [
-            'roomId' => ['required'],
-            'tenantId' => ['required'],
-            'service_id' => ['required'],
-            'httpMethod' => ['required'],
-            'remarks' => [ Rule::when($this->status === "DECLINED", ['required'], ['nullable']) ],
-            'documentId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ]
+            'serviceRequestId' => ['required', 'exists:dormitory_req_services,id'],
+            'action' => ['required', 'in:DONE,CANCELLED']
         ];
     }
 }

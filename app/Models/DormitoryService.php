@@ -9,6 +9,8 @@ class DormitoryService extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function requestedService () {
         return $this->hasMany(DormitoryReqService::class);
     }

@@ -5,9 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DormitoryRoomImage extends Model
+class DormitoryTenantSupDoc extends Model
 {
     use HasFactory;
-
-    protected $guarded = ['id'];
 }

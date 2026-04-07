@@ -2,17 +2,16 @@
 
 namespace App\Http\Requests\Admin\Dormitory;
 
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateService extends FormRequest
+class GetMatchRooms extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, ['SUPERADMIN', 'ADMIN-DORMITORY']);
     }
 
     /**
@@ -23,11 +22,9 @@ class CreateOrUpdateService extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required'],
-            'charge' => ['required'],
-            'httpMethod' => ['required'],
-            'status' => ['required', 'in:AVAILABLE,UNAVAILABLE'],
-            'documentId' => ['required_if:httpMethod,UPDATE', 'exists:dormitory_services,id'],
+            'dormitory' => ['required', 'string', 'in:OFFICERS,RATINGS'],
+            'accommodation' => ['required', 'in:SINGLE,SHARED,COUPLE'],
+            'room_type' => ['required', 'string', 'in:AIRCON,NON-AIRCON'],
         ];
     }
 }

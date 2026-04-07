@@ -102,7 +102,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::fGE0IvLmV5jZ6o24',
+            '_route' => 'generated::vXMQ2CAChP7niEmG',
           ),
           1 => NULL,
           2 => 
@@ -123,7 +123,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Qv7klSpUaCXHCWw6',
+            '_route' => 'generated::KNY5RNUupvbf0WUA',
           ),
           1 => NULL,
           2 => 
@@ -144,7 +144,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::9beS2FqQRBUbwXnH',
+            '_route' => 'generated::Vh8rMtVx4XGbg9QG',
           ),
           1 => NULL,
           2 => 
@@ -183,7 +183,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::yZ2OXqQN6QuwZ1du',
+            '_route' => 'generated::ZJrSG775GhlaOCtk',
           ),
           1 => NULL,
           2 => 
@@ -202,7 +202,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Z2pW6prPq7IcoNSy',
+            '_route' => 'generated::8OiwaujJeB0Vd85z',
           ),
           1 => NULL,
           2 => 
@@ -221,7 +221,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::bxMU6M8HBRXF3Tni',
+            '_route' => 'generated::jKh2EuDNUf8KHjVN',
           ),
           1 => NULL,
           2 => 
@@ -240,7 +240,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::nQYUDYQ6gMqgTlzY',
+            '_route' => 'generated::LLUgVSGDF5RJrIMy',
           ),
           1 => NULL,
           2 => 
@@ -259,7 +259,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::0l1QIU4uhaASqral',
+            '_route' => 'generated::VReQb12CT2yokQXK',
           ),
           1 => NULL,
           2 => 
@@ -278,7 +278,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::jDnerpR4wpIJ3WLI',
+            '_route' => 'generated::88jDZbPswMizwl9y',
           ),
           1 => NULL,
           2 => 
@@ -297,7 +297,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::z8aY8VKfroULG754',
+            '_route' => 'generated::pEOBC3Dbj4Pxr9hS',
           ),
           1 => NULL,
           2 => 
@@ -316,7 +316,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::cejmjQHCJwZ2z8Yu',
+            '_route' => 'generated::GLLRsZeSVggd6CyT',
           ),
           1 => NULL,
           2 => 
@@ -336,7 +336,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::57yMvbCYKbVPIWph',
+            '_route' => 'generated::RsCveDXlKfwpllHH',
           ),
           1 => NULL,
           2 => 
@@ -356,7 +356,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::OhoPj53RDIREI5yH',
+            '_route' => 'generated::cywhD3mYZCk5FMqK',
           ),
           1 => NULL,
           2 => 
@@ -376,7 +376,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::POl436iORVX47fKw',
+            '_route' => 'generated::gwqAAtaRG9GhoNXQ',
           ),
           1 => NULL,
           2 => 
@@ -396,7 +396,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::fQyTbPEWqYfzxfFj',
+            '_route' => 'generated::gFftH5euLKLmVpzb',
           ),
           1 => NULL,
           2 => 
@@ -416,7 +416,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::wjrvDOdFtrcPbAym',
+            '_route' => 'generated::lasHutb91KQBFV97',
           ),
           1 => NULL,
           2 => 
@@ -436,7 +436,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::T6Dn8iuSMPgbm80u',
+            '_route' => 'generated::PqlNzQqpfVGIuuxo',
           ),
           1 => NULL,
           2 => 
@@ -457,7 +457,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::ZSuSAEsug6JJ54fP',
+            '_route' => 'generated::hG3EsujHT1nB9mks',
           ),
           1 => NULL,
           2 => 
@@ -476,7 +476,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::nTq7aiKiklfn8Tav',
+            '_route' => 'generated::tNdzF2mg3cH5b7Ob',
           ),
           1 => NULL,
           2 => 
@@ -495,7 +495,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::VOB4Lng8I0PzGeiU',
+            '_route' => 'generated::oqrbAhycKXfRfoQC',
           ),
           1 => NULL,
           2 => 
@@ -514,7 +514,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::bBTSOLarAEHS3NmQ',
+            '_route' => 'generated::0wJBQPbiW3EAKrUA',
           ),
           1 => NULL,
           2 => 
@@ -533,7 +533,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::aLwpO8P93fl6IFME',
+            '_route' => 'generated::nK3t8L8ZHiR45AQn',
           ),
           1 => NULL,
           2 => 
@@ -552,7 +552,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::U8jCk8lIk1YANZEp',
+            '_route' => 'generated::rvkUJfdvJkIx0xQj',
           ),
           1 => NULL,
           2 => 
@@ -571,7 +571,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::kT7eZUzfF29xKrJS',
+            '_route' => 'generated::aqUEZ8kv0WazE856',
           ),
           1 => NULL,
           2 => 
@@ -590,7 +590,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::cndZ6BYKmI5OniLq',
+            '_route' => 'generated::XaGvHLMIBDM85SmA',
           ),
           1 => NULL,
           2 => 
@@ -609,7 +609,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::DlPx2EiFNrr4yl1X',
+            '_route' => 'generated::5SBOplml2Fcyfb7T',
           ),
           1 => NULL,
           2 => 
@@ -629,7 +629,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Kw6BRA9JbAFq29m7',
+            '_route' => 'generated::P7KtqaThTj7iAqkO',
           ),
           1 => NULL,
           2 => 
@@ -649,7 +649,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::xpecPvDpK9s5iJl2',
+            '_route' => 'generated::fPwQviVn6XM1eDE1',
           ),
           1 => NULL,
           2 => 
@@ -669,7 +669,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::iuKi2SPPr4mK31do',
+            '_route' => 'generated::w6iAztNMzUeLVgbM',
           ),
           1 => NULL,
           2 => 
@@ -688,7 +688,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::wpUeZuNXKXYfloI1',
+            '_route' => 'generated::g1nRyhg70QvMhlKB',
           ),
           1 => NULL,
           2 => 
@@ -708,7 +708,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::f9r8GeWrxweEer57',
+            '_route' => 'generated::TePpLg2PRVr80fp5',
           ),
           1 => NULL,
           2 => 
@@ -727,7 +727,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::N3b1SYuZOwQwxnyn',
+            '_route' => 'generated::l8R2l3f6XGWdU2r9',
           ),
           1 => NULL,
           2 => 
@@ -747,7 +747,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::uScN7Fq0Dq9ptwIV',
+            '_route' => 'generated::EQNtKyqty4rsqpTO',
           ),
           1 => NULL,
           2 => 
@@ -767,7 +767,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::n26T4DNhWPJWZouo',
+            '_route' => 'generated::qRBK1MZFzKaLZoVX',
           ),
           1 => NULL,
           2 => 
@@ -786,7 +786,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::zL9BHG9tHNXZtudm',
+            '_route' => 'generated::dnANHV7X4BBzlOFQ',
           ),
           1 => NULL,
           2 => 
@@ -805,7 +805,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::1Qe3a08JHhWjRqz0',
+            '_route' => 'generated::arjC4owgn5TSNnoF',
           ),
           1 => NULL,
           2 => 
@@ -825,7 +825,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::2OYVTzVuJD6A76fB',
+            '_route' => 'generated::vqJhRXbsXyEdI4WS',
           ),
           1 => NULL,
           2 => 
@@ -845,7 +845,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Yc0LUrZNWrTNjZjc',
+            '_route' => 'generated::EriqEGRxsLJq1g5l',
           ),
           1 => NULL,
           2 => 
@@ -864,7 +864,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::iUR1OlCx4xRazU1T',
+            '_route' => 'generated::iD14gl5FUy2TeEG4',
           ),
           1 => NULL,
           2 => 
@@ -883,7 +883,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::JxYvpSa6O1Krx0Es',
+            '_route' => 'generated::X2Lkx4Iu9RtJ4HB7',
           ),
           1 => NULL,
           2 => 
@@ -903,7 +903,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::rdppsI87msuMGLg1',
+            '_route' => 'generated::X5QdtTG3B2UTYvrW',
           ),
           1 => NULL,
           2 => 
@@ -922,7 +922,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::fB9lN5nBJU5rxi78',
+            '_route' => 'generated::xon7x1ENr9LIKqz3',
           ),
           1 => NULL,
           2 => 
@@ -941,7 +941,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::N8Qvc56XvAkzfY8D',
+            '_route' => 'generated::QcxfJ6xEfeCYCGBp',
           ),
           1 => NULL,
           2 => 
@@ -961,7 +961,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::QPm1ccgb0i3ixOtV',
+            '_route' => 'generated::uQmkuWqGCOXrtPCK',
           ),
           1 => NULL,
           2 => 
@@ -980,7 +980,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::3VFttU8tcVAMqypB',
+            '_route' => 'generated::gdKh8YliR6MohIWc',
           ),
           1 => NULL,
           2 => 
@@ -999,7 +999,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::60GN18YTOyY3iRa6',
+            '_route' => 'generated::fhKGIqELK2etKZ0H',
           ),
           1 => NULL,
           2 => 
@@ -1018,7 +1018,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::N42XZYFQTOQ0pmLe',
+            '_route' => 'generated::O1wfhdf0QsqMtPMu',
           ),
           1 => NULL,
           2 => 
@@ -1037,7 +1037,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::3R7XL4XDYelG4LJy',
+            '_route' => 'generated::P47gX3CXlF8LRdO9',
           ),
           1 => NULL,
           2 => 
@@ -1057,7 +1057,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::9CXYcFdkGGD6bXDA',
+            '_route' => 'generated::8EV6F4PYnyzhvg9Y',
           ),
           1 => NULL,
           2 => 
@@ -1076,7 +1076,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::e3ic3HwcLElIQBPg',
+            '_route' => 'generated::tvkpwK9hEhxmWlW0',
           ),
           1 => NULL,
           2 => 
@@ -1096,7 +1096,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::P6LRN9qaNqFuAi6i',
+            '_route' => 'generated::a1nHDjXljF0sBYPu',
           ),
           1 => NULL,
           2 => 
@@ -1115,7 +1115,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::zJdBMv9XVIgHFody',
+            '_route' => 'generated::DjfTwMVFyaLYZH5g',
           ),
           1 => NULL,
           2 => 
@@ -1134,7 +1134,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::zKlSVwynb3on1GHH',
+            '_route' => 'generated::gYsa7si9ol2WiX6F',
           ),
           1 => NULL,
           2 => 
@@ -1155,7 +1155,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::iJqMMHlLeCm6NCdj',
+            '_route' => 'generated::SCDxhRjriztz4ND9',
           ),
           1 => NULL,
           2 => 
@@ -1174,7 +1174,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::I3pLH9LV0kH4Qs90',
+            '_route' => 'generated::ID8UTPXkI9fProui',
           ),
           1 => NULL,
           2 => 
@@ -1193,7 +1193,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::14uRE2vfbywobGWd',
+            '_route' => 'generated::zRHKhn0FuCX3OtfL',
           ),
           1 => NULL,
           2 => 
@@ -1212,7 +1212,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::52hvLlMpzdrm4fJh',
+            '_route' => 'generated::ZiPQZN3QJJItQeC8',
           ),
           1 => NULL,
           2 => 
@@ -1231,7 +1231,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::tV7Akrz8AQFeOlc3',
+            '_route' => 'generated::oJJolhIbgJmWWDnv',
           ),
           1 => NULL,
           2 => 
@@ -1250,7 +1250,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::QIj2RjV3gZlqSGpX',
+            '_route' => 'generated::0zgqKSRKmc3CrNk0',
           ),
           1 => NULL,
           2 => 
@@ -1269,7 +1269,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::FShPJf5ThXij1PgD',
+            '_route' => 'generated::LZfoOtuQhkRZAYGT',
           ),
           1 => NULL,
           2 => 
@@ -1289,7 +1289,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::UJAZ3YO6dqUlLb2F',
+            '_route' => 'generated::hd7uMNVVnqTMWKhn',
           ),
           1 => NULL,
           2 => 
@@ -1309,7 +1309,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::cxa89TiUO1nvFkSX',
+            '_route' => 'generated::F5pVtZffvTVYAQYU',
           ),
           1 => NULL,
           2 => 
@@ -1328,7 +1328,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::XX1kAHoy5RDTaHGE',
+            '_route' => 'generated::pmUmbRaER7QS0HUe',
           ),
           1 => NULL,
           2 => 
@@ -1348,7 +1348,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Yl9kczmZNtuPklPo',
+            '_route' => 'generated::I1iluq0Tvn6piFwZ',
           ),
           1 => NULL,
           2 => 
@@ -1368,7 +1368,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::OKWrJVo0gXPaGNtr',
+            '_route' => 'generated::rlFzVHYYUSjXzL3m',
           ),
           1 => NULL,
           2 => 
@@ -1387,7 +1387,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::cTqy2A141LpbvNgU',
+            '_route' => 'generated::KNuHO2POqq1d4k4s',
           ),
           1 => NULL,
           2 => 
@@ -1406,7 +1406,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::QK7dT847iqw6CsEP',
+            '_route' => 'generated::vCfYjMxZd7TwusX2',
           ),
           1 => NULL,
           2 => 
@@ -1425,7 +1425,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::wL5f7r7EZNRNBahp',
+            '_route' => 'generated::M2I9FxlfKRjaGJlU',
           ),
           1 => NULL,
           2 => 
@@ -1445,7 +1445,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::dS13BfNRr6z4z9g8',
+            '_route' => 'generated::n1YkGWWL19pQG2Tv',
           ),
           1 => NULL,
           2 => 
@@ -1465,7 +1465,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Y1VDQGdr1W3N4fjy',
+            '_route' => 'generated::Ai2dJtkzgfw5NgwP',
           ),
           1 => NULL,
           2 => 
@@ -1485,7 +1485,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::1S3c8oZIvmKDkd41',
+            '_route' => 'generated::XoKtOfKg0qbRZ3I3',
           ),
           1 => NULL,
           2 => 
@@ -1505,7 +1505,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::b5wuzoXuvmf6192Z',
+            '_route' => 'generated::9eU8E8VJWOrs8C1K',
           ),
           1 => NULL,
           2 => 
@@ -1524,7 +1524,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::uyQ3TFDio4yjeT6c',
+            '_route' => 'generated::RcnvaUXaKDZgIiaM',
           ),
           1 => NULL,
           2 => 
@@ -1543,7 +1543,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::JfyTeDTvKZ9gcYsz',
+            '_route' => 'generated::Ahkg8QH7tPN6QQPe',
           ),
           1 => NULL,
           2 => 
@@ -1562,7 +1562,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::4W1SO4ecOWqE2w3K',
+            '_route' => 'generated::5L51O9S627OvK2pp',
           ),
           1 => NULL,
           2 => 
@@ -1581,7 +1581,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::c8wNwMVvPaE1dMqn',
+            '_route' => 'generated::KfQUYedm0QwVGcTR',
           ),
           1 => NULL,
           2 => 
@@ -1600,7 +1600,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::4jB9dS8Ve0ECgTvs',
+            '_route' => 'generated::PJer8qGas6CAVTAi',
           ),
           1 => NULL,
           2 => 
@@ -1619,7 +1619,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::rgFSAW9QRwNzp8wg',
+            '_route' => 'generated::1BRlXGq40RssJzCL',
           ),
           1 => NULL,
           2 => 
@@ -1638,7 +1638,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::r3BwVBVFtuIut8L9',
+            '_route' => 'generated::7RCFfaxyeFh2IGmz',
           ),
           1 => NULL,
           2 => 
@@ -1657,7 +1657,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::5Ecj1Z48QfCCmofn',
+            '_route' => 'generated::NL4zeff6fcnsLyBa',
           ),
           1 => NULL,
           2 => 
@@ -1676,7 +1676,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::tFhWqS4w1O2F2tRC',
+            '_route' => 'generated::zB05VJtJPvPHtBso',
           ),
           1 => NULL,
           2 => 
@@ -1695,7 +1695,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::eMzOlTWDpGXYlsKy',
+            '_route' => 'generated::nEdYYYz3xKueHbSP',
           ),
           1 => NULL,
           2 => 
@@ -1715,7 +1715,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::SzQFfYaZtSWUiBDq',
+            '_route' => 'generated::kOUczRCMAlp4aH2s',
           ),
           1 => NULL,
           2 => 
@@ -1735,7 +1735,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::WaxAauU0HziMqK8a',
+            '_route' => 'generated::8HwyGp27AymUrGZ1',
           ),
           1 => NULL,
           2 => 
@@ -1754,7 +1754,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::iHePdszgbIFsZcp1',
+            '_route' => 'generated::FtmA1tVmzunuBmns',
           ),
           1 => NULL,
           2 => 
@@ -1773,7 +1773,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::KYVGbh5LqoTBEK00',
+            '_route' => 'generated::VPOCjFzFqV5sVtDl',
           ),
           1 => NULL,
           2 => 
@@ -1792,7 +1792,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::vT6mYCE6EYVN0V1g',
+            '_route' => 'generated::bzXpwU7Aqg1s1iLL',
           ),
           1 => NULL,
           2 => 
@@ -1811,7 +1811,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::viLNAj6RZA8Vc3nr',
+            '_route' => 'generated::A78KIxMM3topnnuu',
           ),
           1 => NULL,
           2 => 
@@ -1831,7 +1831,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::ud9kT5wjmAUx9vLx',
+            '_route' => 'generated::QA1d65gs0hHmrUpu',
           ),
           1 => NULL,
           2 => 
@@ -1850,7 +1850,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::CCyXUK5TD8RNwdDE',
+            '_route' => 'generated::QlQzVyDMfSxWSVDg',
           ),
           1 => NULL,
           2 => 
@@ -1869,7 +1869,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::ST3LCDyVAHM9xFIP',
+            '_route' => 'generated::HlnXCSGhQHC42lra',
           ),
           1 => NULL,
           2 => 
@@ -1888,7 +1888,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::2jNf4t9bgILfyC9C',
+            '_route' => 'generated::rPbs1dO9o9O75VJc',
           ),
           1 => NULL,
           2 => 
@@ -1907,7 +1907,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::95novzMldrSRMs3R',
+            '_route' => 'generated::nCXaFoLhfQKRHu7E',
           ),
           1 => NULL,
           2 => 
@@ -1926,7 +1926,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::TgN1EMdAq7Vb2zlz',
+            '_route' => 'generated::LpthAvGgNaTJrQzi',
           ),
           1 => NULL,
           2 => 
@@ -1945,7 +1945,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::DeSDm7S6yDLshRSy',
+            '_route' => 'generated::DMK6S6QSyjT0IUGH',
           ),
           1 => NULL,
           2 => 
@@ -1964,7 +1964,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::VrnGn2Aew5EzhbEl',
+            '_route' => 'generated::llHcgKtuHphxtsF0',
           ),
           1 => NULL,
           2 => 
@@ -1983,7 +1983,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::xo9rTm9lbGT8urmJ',
+            '_route' => 'generated::joD66vY7YyLkQh5T',
           ),
           1 => NULL,
           2 => 
@@ -2002,7 +2002,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::pE8lu8RUdB3c5f52',
+            '_route' => 'generated::SZxLNT7HZG2oNB9q',
           ),
           1 => NULL,
           2 => 
@@ -2021,7 +2021,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::BHxf8hycK0B6Nd0g',
+            '_route' => 'generated::IKROpZlStcLjve5w',
           ),
           1 => NULL,
           2 => 
@@ -2040,7 +2040,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::AKP9TGBz165WWgzt',
+            '_route' => 'generated::2EHS5FlQIu8mmPsW',
           ),
           1 => NULL,
           2 => 
@@ -2059,7 +2059,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::lBfTfJgATYylzesr',
+            '_route' => 'generated::iyqkYzIyvzCs2glL',
           ),
           1 => NULL,
           2 => 
@@ -2078,7 +2078,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Y3PxPrHp7JVadK8Y',
+            '_route' => 'generated::SDrEbIZRDzm6ewMz',
           ),
           1 => NULL,
           2 => 
@@ -2097,7 +2097,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::RqBP2B841L9xBS3q',
+            '_route' => 'generated::cDTRFoWIMwREZhsA',
           ),
           1 => NULL,
           2 => 
@@ -2116,7 +2116,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::miRNpM6zdUYuPHup',
+            '_route' => 'generated::SHFww16jGmMhCuUr',
           ),
           1 => NULL,
           2 => 
@@ -2135,7 +2135,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::MZsIjqTUo0Yxourr',
+            '_route' => 'generated::QdQJEupxjKONfeEm',
           ),
           1 => NULL,
           2 => 
@@ -2154,7 +2154,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::0XYNn6zjft4f7wq3',
+            '_route' => 'generated::xTbEeNDGnZya7SbM',
           ),
           1 => NULL,
           2 => 
@@ -2173,7 +2173,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Y2WA9hbyPOCyn4QM',
+            '_route' => 'generated::cXezXrHIPmyzFB5r',
           ),
           1 => NULL,
           2 => 
@@ -2192,7 +2192,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::lRDhY1prjsJfMLcf',
+            '_route' => 'generated::KkPOpgdx1lTtoufK',
           ),
           1 => NULL,
           2 => 
@@ -2211,7 +2211,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::s6riLPvMuHDVBZHV',
+            '_route' => 'generated::8uCTbazA5j4E541t',
           ),
           1 => NULL,
           2 => 
@@ -2230,7 +2230,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::tonAPOxfaJMLpsrQ',
+            '_route' => 'generated::PGCgDoik8M2C0rBm',
           ),
           1 => NULL,
           2 => 
@@ -2249,7 +2249,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::ZeVMFujSG7o1Dlk8',
+            '_route' => 'generated::8tiy6niuM0im1tLT',
           ),
           1 => NULL,
           2 => 
@@ -2268,7 +2268,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Ak78ThECADO4DDeI',
+            '_route' => 'generated::4cd1yK28Vf2Ku3GM',
           ),
           1 => NULL,
           2 => 
@@ -2287,7 +2287,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::QElMOpt9ZXDlhzii',
+            '_route' => 'generated::vaYle35fvwQdOitR',
           ),
           1 => NULL,
           2 => 
@@ -2306,7 +2306,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::lEOStCo8miIEYk3P',
+            '_route' => 'generated::xnDqL0UuTxjxvkgT',
           ),
           1 => NULL,
           2 => 
@@ -2325,7 +2325,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::kdkzejCWE14fT0HN',
+            '_route' => 'generated::8sf9pm1kfW6vkl3S',
           ),
           1 => NULL,
           2 => 
@@ -2344,7 +2344,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::EKCec9sywtVd8P5c',
+            '_route' => 'generated::Nuzyctg6cKidiDS4',
           ),
           1 => NULL,
           2 => 
@@ -2363,7 +2363,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::ApdaOtlOMoJYMCGW',
+            '_route' => 'generated::4gjnRzeSWHHktuuJ',
           ),
           1 => NULL,
           2 => 
@@ -2382,7 +2382,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::4P55BPAxK5NxAhL6',
+            '_route' => 'generated::FjqQtkBzcTwVSmd5',
           ),
           1 => NULL,
           2 => 
@@ -2401,7 +2401,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::hKhKYi0EwBIUQ3fi',
+            '_route' => 'generated::nRMjjiUvfj693Bea',
           ),
           1 => NULL,
           2 => 
@@ -2420,7 +2420,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Lf0qMRlTx9C9dyhM',
+            '_route' => 'generated::oJ2KItpJ0pwvSBR3',
           ),
           1 => NULL,
           2 => 
@@ -2439,7 +2439,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::TwAErC3QmILNT5YQ',
+            '_route' => 'generated::cWJHWaU29xPvSPQl',
           ),
           1 => NULL,
           2 => 
@@ -2458,7 +2458,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::7hSRKK1n4VccHAKR',
+            '_route' => 'generated::42ImqOpJ98Ww0VOB',
           ),
           1 => NULL,
           2 => 
@@ -2478,7 +2478,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::dxfb7GhgMAUbIvZp',
+            '_route' => 'generated::blB9eSP9tY95HrTe',
           ),
           1 => NULL,
           2 => 
@@ -2498,7 +2498,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Dn0WocCetwRQrJ9W',
+            '_route' => 'generated::EmmgUTCinZUvz6Mi',
           ),
           1 => NULL,
           2 => 
@@ -2517,7 +2517,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::uC5Lz2SYvOgGNcih',
+            '_route' => 'generated::kvRaWtEKhiJmrVZc',
           ),
           1 => NULL,
           2 => 
@@ -2536,7 +2536,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::vcug9BVFZIXHJ7bm',
+            '_route' => 'generated::b2v3x6uGHz8vIere',
           ),
           1 => NULL,
           2 => 
@@ -2555,7 +2555,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::QFpCXDEmH3pOkTj3',
+            '_route' => 'generated::VlU4A0j4tOWgUVw0',
           ),
           1 => NULL,
           2 => 
@@ -2574,7 +2574,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::52aiOlzbptC8s7TQ',
+            '_route' => 'generated::My9HrXzx2q84N7JX',
           ),
           1 => NULL,
           2 => 
@@ -2594,7 +2594,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::aCyYw5Dgn4WFMmGN',
+            '_route' => 'generated::V3whyjXcVFz40QJV',
           ),
           1 => NULL,
           2 => 
@@ -2614,7 +2614,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::vyXUJ7ZbBKvw2gKN',
+            '_route' => 'generated::RZhIHbMxRVmwI5Ca',
           ),
           1 => NULL,
           2 => 
@@ -2633,7 +2633,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::OqDbG8Ll150Lu8Xl',
+            '_route' => 'generated::5I8XRlYlBmsVsBmI',
           ),
           1 => NULL,
           2 => 
@@ -2653,7 +2653,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::3MzxA68uvzpEgYJZ',
+            '_route' => 'generated::ffMnG6LpJpzrXriv',
           ),
           1 => NULL,
           2 => 
@@ -2672,7 +2672,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::RhPjf2NVWJhfqHeQ',
+            '_route' => 'generated::dCJ78GNUQnKiS2G7',
           ),
           1 => NULL,
           2 => 
@@ -2691,7 +2691,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::IJXKxrjffyqIUlDm',
+            '_route' => 'generated::y4edQY8YF8ZLkzyM',
           ),
           1 => NULL,
           2 => 
@@ -2710,7 +2710,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::GJZqe3omb5cE1GUK',
+            '_route' => 'generated::SNoTfymn0nAWtQtG',
           ),
           1 => NULL,
           2 => 
@@ -2730,7 +2730,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::3h65s7ttdy3TpFjd',
+            '_route' => 'generated::pUiD9WJINKmdqOU7',
           ),
           1 => NULL,
           2 => 
@@ -2749,7 +2749,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::dCrZfQvgaSwTYgmj',
+            '_route' => 'generated::Flgtjmq76fUe8fvq',
           ),
           1 => NULL,
           2 => 
@@ -2769,7 +2769,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::7BJ1SyvVkefy9DgH',
+            '_route' => 'generated::GZIadq7JHEzrOYKJ',
           ),
           1 => NULL,
           2 => 
@@ -2788,7 +2788,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Lzb7iWUwEqGxcRll',
+            '_route' => 'generated::emArgJTt2jTfXSgJ',
           ),
           1 => NULL,
           2 => 
@@ -2808,7 +2808,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::iCI8LbBLatsX8EAu',
+            '_route' => 'generated::b1jdFhmbMwIwoXdB',
           ),
           1 => NULL,
           2 => 
@@ -2827,7 +2827,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::0CaHiFlNvz0YLlH1',
+            '_route' => 'generated::eG1TWPLcLWCesI3w',
           ),
           1 => NULL,
           2 => 
@@ -2847,7 +2847,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::ApoYuWapTCtY7Oh8',
+            '_route' => 'generated::teO8UBSHG8IaD3bZ',
           ),
           1 => NULL,
           2 => 
@@ -2866,7 +2866,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::0EG2mRGH6Rs7geKY',
+            '_route' => 'generated::v7hucSJ7FbAdA2V8',
           ),
           1 => NULL,
           2 => 
@@ -2886,7 +2886,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::nKTznnjrJqdCod4n',
+            '_route' => 'generated::0emJtHSFqPWTeaj7',
           ),
           1 => NULL,
           2 => 
@@ -2905,7 +2905,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::zuOHihLu2O8EkrFE',
+            '_route' => 'generated::6vsIlGTQLks4Mige',
           ),
           1 => NULL,
           2 => 
@@ -2925,7 +2925,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::ZANnE5lOXTcdtZSM',
+            '_route' => 'generated::C80NFRfp4MbSU884',
           ),
           1 => NULL,
           2 => 
@@ -2944,7 +2944,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::QxIuZ0pJHc3z9BmG',
+            '_route' => 'generated::4mvvkYotsoVQrESN',
           ),
           1 => NULL,
           2 => 
@@ -2964,7 +2964,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::XZyOQtyWQXMroQKw',
+            '_route' => 'generated::ICEHzVsI7OXkwp1g',
           ),
           1 => NULL,
           2 => 
@@ -2983,7 +2983,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::FRxlJjj9ajDJYLoj',
+            '_route' => 'generated::pFmBUiCZVGlRJA2e',
           ),
           1 => NULL,
           2 => 
@@ -3003,7 +3003,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::oijpTJpKfYuHKoku',
+            '_route' => 'generated::U0fIUaDE5tAOx2JL',
           ),
           1 => NULL,
           2 => 
@@ -3022,7 +3022,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::S6ruRi4z3zAXrbiX',
+            '_route' => 'generated::UePIPqBD0SU3EFYE',
           ),
           1 => NULL,
           2 => 
@@ -3042,7 +3042,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::9enHAuCRnVyCBDDr',
+            '_route' => 'generated::nOk7smmXUseRTzIx',
           ),
           1 => NULL,
           2 => 
@@ -3061,7 +3061,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::9jJQqQ7vQPpg1xdL',
+            '_route' => 'generated::08gWBMKZlX2gV1Go',
           ),
           1 => NULL,
           2 => 
@@ -3081,7 +3081,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::E8Q1W3pbgfgL4JMc',
+            '_route' => 'generated::mK3Qc061uIpylN2H',
           ),
           1 => NULL,
           2 => 
@@ -3100,7 +3100,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::UjYpUNWT2zKT7p9P',
+            '_route' => 'generated::ZaHTc9rhLsCHEJVk',
           ),
           1 => NULL,
           2 => 
@@ -3120,7 +3120,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Qeb0dSgIYbBlVAu0',
+            '_route' => 'generated::CgJ3leLzTlaGzd9N',
           ),
           1 => NULL,
           2 => 
@@ -3139,7 +3139,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::fymLgK93O4WIcGu8',
+            '_route' => 'generated::bIJNe1zlOrakt1i2',
           ),
           1 => NULL,
           2 => 
@@ -3159,7 +3159,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::WSN27sfovp11TTIM',
+            '_route' => 'generated::Qkc7ANWSyGGZwc9e',
           ),
           1 => NULL,
           2 => 
@@ -3179,7 +3179,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::TA4msErkPyUwloNx',
+            '_route' => 'generated::AJi274993o5bZu0F',
           ),
           1 => NULL,
           2 => 
@@ -3198,7 +3198,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::b5lKMOHkrpslswji',
+            '_route' => 'generated::ePBFR50vUM3t9XGw',
           ),
           1 => NULL,
           2 => 
@@ -3217,7 +3217,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::uZerj9Jcxjb4Bfwd',
+            '_route' => 'generated::UIN5oTFAYWye145t',
           ),
           1 => NULL,
           2 => 
@@ -3236,7 +3236,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::WuaZXhfmI9wBDvy2',
+            '_route' => 'generated::znz5tpvHbBTXObh1',
           ),
           1 => NULL,
           2 => 
@@ -3256,7 +3256,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::580QxRjykFmj4lYh',
+            '_route' => 'generated::5oLqnpJe6tuvkYVl',
           ),
           1 => NULL,
           2 => 
@@ -3276,7 +3276,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Mzugr9BDbEe9DA2D',
+            '_route' => 'generated::7svtJrc4PQV4FKwW',
           ),
           1 => NULL,
           2 => 
@@ -3296,7 +3296,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::HCP9DdZcD9Qr7elq',
+            '_route' => 'generated::oiijpKSyvdQVdetg',
           ),
           1 => NULL,
           2 => 
@@ -3315,7 +3315,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::43NYspj1gfS6H6zt',
+            '_route' => 'generated::RiUs12L4O3YJ2Xcc',
           ),
           1 => NULL,
           2 => 
@@ -3334,7 +3334,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::UszvitqP9pi67G74',
+            '_route' => 'generated::LtrreZoSrS5XRHt3',
           ),
           1 => NULL,
           2 => 
@@ -3353,7 +3353,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::WFWyDuQTDvRXWjNd',
+            '_route' => 'generated::A1XwJ2DYw0DRuAQZ',
           ),
           1 => NULL,
           2 => 
@@ -3372,7 +3372,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::K9iVlnBrYC2EAy5y',
+            '_route' => 'generated::9UUhspWQexv17Iwj',
           ),
           1 => NULL,
           2 => 
@@ -3391,7 +3391,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Kv4PjnIkub3RsTzj',
+            '_route' => 'generated::tcOnyBXGBsZkxEzI',
           ),
           1 => NULL,
           2 => 
@@ -3412,7 +3412,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::0IJwr2DlzQ4aA8HV',
+            '_route' => 'generated::xGBN4ZQwEifxOOLV',
           ),
           1 => NULL,
           2 => 
@@ -3431,7 +3431,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::tC8mReZL5X7NHKBq',
+            '_route' => 'generated::BtvL5DhO98Sjq8eO',
           ),
           1 => NULL,
           2 => 
@@ -3450,7 +3450,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::8AqR1kBWyg6z1Fh8',
+            '_route' => 'generated::hgrtzN0pzvg4Nyna',
           ),
           1 => NULL,
           2 => 
@@ -3469,7 +3469,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::rkrc2QVhHW5vj63k',
+            '_route' => 'generated::lYSIwDUyRf545pMf',
           ),
           1 => NULL,
           2 => 
@@ -3488,7 +3488,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::znnzDRGgChp7fiKP',
+            '_route' => 'generated::1ZxJ0pDivzKBG1hI',
           ),
           1 => NULL,
           2 => 
@@ -3507,7 +3507,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::3ThmSBI5nheCjXC6',
+            '_route' => 'generated::XiAheZklX7T5f7Tc',
           ),
           1 => NULL,
           2 => 
@@ -3526,7 +3526,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::aIzrpAWNPh9nl4PJ',
+            '_route' => 'generated::EKc1605R6Q5fzLxV',
           ),
           1 => NULL,
           2 => 
@@ -3545,7 +3545,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::O1nwfTHZ4OtqbTVn',
+            '_route' => 'generated::73XTtrvdjeiK9W0Z',
           ),
           1 => NULL,
           2 => 
@@ -3564,7 +3564,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::yaigKPs5yeHLONOu',
+            '_route' => 'generated::bN900dRTZltQl7n3',
           ),
           1 => NULL,
           2 => 
@@ -3583,7 +3583,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::1uIkbD89IjtolyDc',
+            '_route' => 'generated::boJ8w8g9aVGmLxOY',
           ),
           1 => NULL,
           2 => 
@@ -3602,7 +3602,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::z5MumFq6KrNcGSqV',
+            '_route' => 'generated::mnRzJ0l0NOdwe9sV',
           ),
           1 => NULL,
           2 => 
@@ -3622,7 +3622,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::NAvXjL3x8Ud3k6JK',
+            '_route' => 'generated::ujEYz8LxrEMieojC',
           ),
           1 => NULL,
           2 => 
@@ -3642,7 +3642,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::YN0jSwbwgnaeDNHH',
+            '_route' => 'generated::grwIsU5zBIbjlhSJ',
           ),
           1 => NULL,
           2 => 
@@ -3655,13 +3655,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/get_terms_and_condition' => 
+      '/api/admin/dormitory/count_dorm_reservation' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::2Agw52mrDycJX9fA',
+            '_route' => 'generated::elhYU3MH8bm4virn',
           ),
           1 => NULL,
           2 => 
@@ -3674,13 +3674,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/create_or_update_term_and_condition' => 
+      '/api/admin/dormitory/count_service_requests' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::q3csTYF0rFOmlacU',
+            '_route' => 'generated::sSu5ZvQtYx9SQACL',
           ),
           1 => NULL,
           2 => 
@@ -3693,13 +3693,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/get' => 
+      '/api/admin/dormitory/get_dormitory_rooms' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::ppC5pDn13Ee2S4XU',
+            '_route' => 'generated::9JpCKRJVIz295uLw',
           ),
           1 => NULL,
           2 => 
@@ -3713,341 +3713,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/create_or_update_dormitory' => 
+      '/api/admin/dormitory/create_or_update_room' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::VTrgLMptGagKbkye',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/create_dormitory_rooms' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::3Dq4YMxgLTNZt92U',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/update_dormitory_room' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::Mja3ZTKHSgHk4oI8',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/create-walk-in-request/get_available_dorms' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::pNbHLs5oFFhoraxW',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/create-walk-in-request/get_available_rooms' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::LwkYszaT9wvRU2N2',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/requests/get_available_supplies' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::3jFH1xDvQwRQIt6J',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/requests/update_dormitory_room_request' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::1nEA5Sjbipymg9M3',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/get_all_requests' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::g5xKphQdPgV2zeQI',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/get_inventories' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::K8G3w9OfpseFJ8UE',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'POST' => 1,
-            'HEAD' => 2,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/get_inventories/create_dormitory_inventory_stock' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::TUODkv8J9w06mE4L',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/get_inventories/get_dormitory_inventory_stock' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::GtdZeCXggS3MDSwx',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/get_inventories/update_dormitory_inventory_stock' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::eriIYfPhHRTClufM',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/provide_stocks_to_boarder' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::4NQ5tsZ85XsknTnO',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/get_provided_stocks' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::YNMwtrRvYuBtM3fW',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/get_stock_reserved_tenant' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::z5useiJFVo7q3tlp',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/update_stock_status' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::zzSS19TB9zfs4Rvo',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/audit_placements' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::DYKJsmfX4QVLveBk',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/create_or_update_dormitory_inventory' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::scyRJNIASc8TF2Hj',
+            '_route' => 'generated::i7hEFR1vPZBY1mx7',
           ),
           1 => NULL,
           2 => 
@@ -4066,7 +3738,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::fEDKE5tMydUT8qYh',
+            '_route' => 'generated::dWfNffXLeDs3fmuw',
           ),
           1 => NULL,
           2 => 
@@ -4086,7 +3758,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::lWzk0pWH7yEBc2BB',
+            '_route' => 'generated::47Tlqu5gbVPIbJjJ',
           ),
           1 => NULL,
           2 => 
@@ -4099,13 +3771,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/update_provided_stock_status' => 
+      '/api/admin/dormitory/room_reservations' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::Bo2ct4lKinaQimIG',
+            '_route' => 'generated::ZiPK76o6c4Y5pALx',
           ),
           1 => NULL,
           2 => 
@@ -4118,13 +3790,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/update_provided_stock_list' => 
+      '/api/admin/dormitory/new_room_reservation' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::MRdqK50n9tc0WdEt',
+            '_route' => 'generated::PgtBNBA8TuHkxt8Y',
           ),
           1 => NULL,
           2 => 
@@ -4137,13 +3809,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/count_dorm_reservation' => 
+      '/api/admin/dormitory/get_match_rooms' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::hd4LX3cdZPOsz34a',
+            '_route' => 'generated::0fljPnCyiar4rIug',
           ),
           1 => NULL,
           2 => 
@@ -4156,13 +3828,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/get_requested_service' => 
+      '/api/admin/dormitory/get_current_tenant_info' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::OPwspkXnsSUUerSO',
+            '_route' => 'generated::vBZGl7g0n6OKPHZz',
           ),
           1 => NULL,
           2 => 
@@ -4175,13 +3847,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/request_service' => 
+      '/api/admin/dormitory/create_or_update_service_request' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::HzuGg487yfwE83Xy',
+            '_route' => 'generated::NoctTJgbUx4IPQ7L',
           ),
           1 => NULL,
           2 => 
@@ -4194,13 +3866,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/update_requested_service' => 
+      '/api/admin/dormitory/get_service_request' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::ewUmlADOGRKiDRXr',
+            '_route' => 'generated::AJ43dAy0kaKcgb4R',
           ),
           1 => NULL,
           2 => 
@@ -4213,51 +3885,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/api/admin/dormitory/set_status' => 
+      '/api/admin/dormitory/set_service_request_as_action' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::2LujXWjmJm40jfti',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/get_dormitory_charges' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::rcLkqrd4hBj9Cn4X',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/api/admin/dormitory/created_or_update_dormitory_charge' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::JCj9T2oJkiNz8Ibl',
+            '_route' => 'generated::uTElSxScDajVqDyQ',
           ),
           1 => NULL,
           2 => 
@@ -4276,7 +3910,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::sdLr0SEPm9DC8Wi2',
+            '_route' => 'generated::FKf8cCRgUQzta4ik',
           ),
           1 => NULL,
           2 => 
@@ -4297,7 +3931,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::axsHUcHqgaZYGOrl',
+            '_route' => 'generated::LXWNm0mavdBoBjcy',
           ),
           1 => NULL,
           2 => 
@@ -4316,7 +3950,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::5chafNLvQrTKHNH4',
+            '_route' => 'generated::go9E3He8g9Xww2Wb',
           ),
           1 => NULL,
           2 => 
@@ -4335,7 +3969,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::TJQFvNCM1iXC39f2',
+            '_route' => 'generated::rZjCNRzq6FA9okbX',
           ),
           1 => NULL,
           2 => 
@@ -4355,7 +3989,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::7aJNfYHP0zAZPCXV',
+            '_route' => 'generated::UU5wgE00qEZmulfX',
           ),
           1 => NULL,
           2 => 
@@ -4374,7 +4008,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::EcyQWa0cmB1y0Flg',
+            '_route' => 'generated::r0MprOyJK3AohrP6',
           ),
           1 => NULL,
           2 => 
@@ -4394,7 +4028,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::8ENIoTerK9Cj3Z6K',
+            '_route' => 'generated::ko40eM2IyIbp2IeE',
           ),
           1 => NULL,
           2 => 
@@ -4413,7 +4047,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::CXDpzObyteGjlNEz',
+            '_route' => 'generated::DM8QvOa6oabaDa1E',
           ),
           1 => NULL,
           2 => 
@@ -4432,7 +4066,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::EEzFMZ02lvhF6bRK',
+            '_route' => 'generated::7B2BmO4ROGaizQXO',
           ),
           1 => NULL,
           2 => 
@@ -4451,7 +4085,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::IuOzPgyVBQw6GsVu',
+            '_route' => 'generated::HndcPFkHSEcAYcQ9',
           ),
           1 => NULL,
           2 => 
@@ -4470,7 +4104,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::QwfSoMh2xV4yVuy7',
+            '_route' => 'generated::HcMJieUiZTMPd1nW',
           ),
           1 => NULL,
           2 => 
@@ -4489,7 +4123,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::XzFNjud57sNlYUFo',
+            '_route' => 'generated::BnWPmBzqkbUZXEmi',
           ),
           1 => NULL,
           2 => 
@@ -4508,7 +4142,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Ym67R4LzldllmAIE',
+            '_route' => 'generated::ZRMlUuo8WKM99yrm',
           ),
           1 => NULL,
           2 => 
@@ -4527,7 +4161,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::3CP6swgk0fmAxsam',
+            '_route' => 'generated::xddrQXnJXjb4KMJK',
           ),
           1 => NULL,
           2 => 
@@ -4546,7 +4180,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::PfQV0aMtgRULqDYQ',
+            '_route' => 'generated::eVBI5v2jsdhMolYd',
           ),
           1 => NULL,
           2 => 
@@ -4565,7 +4199,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::gYOGVKyxB8XooabM',
+            '_route' => 'generated::A47pEeWrDgZWRUq3',
           ),
           1 => NULL,
           2 => 
@@ -4585,7 +4219,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::QxXcPaZtn3UvPdEe',
+            '_route' => 'generated::iRNnZJ6nadEgsxYD',
           ),
           1 => NULL,
           2 => 
@@ -4605,7 +4239,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::WvjfiXBjO3wISuvH',
+            '_route' => 'generated::fcc4Qbfn7MUE52B1',
           ),
           1 => NULL,
           2 => 
@@ -4625,7 +4259,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::2RZoDdaRXkfwa3nU',
+            '_route' => 'generated::EhNKbDHpGQEjvsvF',
           ),
           1 => NULL,
           2 => 
@@ -4644,7 +4278,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::pRtLKvhX7DdBmXN0',
+            '_route' => 'generated::TNUG9AZrp1NqmA6B',
           ),
           1 => NULL,
           2 => 
@@ -4664,7 +4298,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::q9nmgboG5gUdyl2j',
+            '_route' => 'generated::uyc0Bz9zHgxzFVOx',
           ),
           1 => NULL,
           2 => 
@@ -4683,7 +4317,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::j9LLumHC1z2kBMhe',
+            '_route' => 'generated::chns2LeMFIRngfeh',
           ),
           1 => NULL,
           2 => 
@@ -4704,7 +4338,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::HyuLulMyFV597izq',
+            '_route' => 'generated::TBBfpT1fS1RjM4sp',
           ),
           1 => NULL,
           2 => 
@@ -4723,7 +4357,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::RxxwR4xhvI9azTTF',
+            '_route' => 'generated::eEOZSYuUh3h2CLLr',
           ),
           1 => NULL,
           2 => 
@@ -4742,7 +4376,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::LoZraOYodLKetSAW',
+            '_route' => 'generated::SHjipSRmtOr3lJNh',
           ),
           1 => NULL,
           2 => 
@@ -4761,7 +4395,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::6yyleLEAEFWVWVis',
+            '_route' => 'generated::3zSiTvKIBDBWMOjm',
           ),
           1 => NULL,
           2 => 
@@ -4781,7 +4415,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::1QxZMZGNYM82wjIs',
+            '_route' => 'generated::GFtbssmaF4DPfXqJ',
           ),
           1 => NULL,
           2 => 
@@ -4800,7 +4434,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::eO3lU42oR5KUQbWw',
+            '_route' => 'generated::XRQng7biO1HOw4NK',
           ),
           1 => NULL,
           2 => 
@@ -4819,7 +4453,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::dSuPquQOGnAINKx5',
+            '_route' => 'generated::WR9U9ySWdg0XrjXb',
           ),
           1 => NULL,
           2 => 
@@ -4838,7 +4472,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::KABWbr1RRtxRtRkj',
+            '_route' => 'generated::gQHq3dNMDsWg48PF',
           ),
           1 => NULL,
           2 => 
@@ -4857,7 +4491,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::wNWUbUYy6ZzcUPQJ',
+            '_route' => 'generated::kV7rVfWPGlm49LHF',
           ),
           1 => NULL,
           2 => 
@@ -4876,7 +4510,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::IbLMVIfwcnFAGjjG',
+            '_route' => 'generated::gmyzZ4GCixdvncf6',
           ),
           1 => NULL,
           2 => 
@@ -4895,7 +4529,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::3W7V7OPf96vLyT6t',
+            '_route' => 'generated::ZeHlcijoS7H8ufyv',
           ),
           1 => NULL,
           2 => 
@@ -4914,7 +4548,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::LwhJQ3lR3JPdJVGa',
+            '_route' => 'generated::TBBT8G2UBTw8qWfk',
           ),
           1 => NULL,
           2 => 
@@ -4933,7 +4567,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::hufhohHI35uofPU0',
+            '_route' => 'generated::keASoYGKPucvJCPP',
           ),
           1 => NULL,
           2 => 
@@ -4952,7 +4586,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::QhI8VM3e2x2Tywe1',
+            '_route' => 'generated::suDfl7xbX7jx9MMJ',
           ),
           1 => NULL,
           2 => 
@@ -4971,7 +4605,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::G4Jrh7Xu9gxNL9jf',
+            '_route' => 'generated::LgkkiX9Ts2gdA35k',
           ),
           1 => NULL,
           2 => 
@@ -4990,7 +4624,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::0foCoC5ehkqDjF58',
+            '_route' => 'generated::TTXK7MyqBiDaDiIE',
           ),
           1 => NULL,
           2 => 
@@ -5009,7 +4643,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::tWJLHddisKsYxVaP',
+            '_route' => 'generated::puwgtIJRnRSs7L2i',
           ),
           1 => NULL,
           2 => 
@@ -5028,7 +4662,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Zp3nTqzUszkJGlc4',
+            '_route' => 'generated::rW5pYMvNNVknXaiv',
           ),
           1 => NULL,
           2 => 
@@ -5047,7 +4681,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::y4voMhzyamhtxAHL',
+            '_route' => 'generated::LlvGFCkX5H1rr1iA',
           ),
           1 => NULL,
           2 => 
@@ -5066,7 +4700,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::EEsl1rgzemaxSrqI',
+            '_route' => 'generated::fBkk7Q2hMWLAF0Cd',
           ),
           1 => NULL,
           2 => 
@@ -5086,7 +4720,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::4Bexl2Riic770YQg',
+            '_route' => 'generated::4pRMlUcBksEWXAd9',
           ),
           1 => NULL,
           2 => 
@@ -5105,7 +4739,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::PhsavENEQqbCelhZ',
+            '_route' => 'generated::o9wYTRRUJC2eIq8g',
           ),
           1 => NULL,
           2 => 
@@ -5124,7 +4758,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::VQPCukOMmDttITql',
+            '_route' => 'generated::Vf0nYMCakEjugfgL',
           ),
           1 => NULL,
           2 => 
@@ -5143,7 +4777,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::kAV2MHqzFPZiahym',
+            '_route' => 'generated::Ur6dxdn7ukfan6ik',
           ),
           1 => NULL,
           2 => 
@@ -5162,7 +4796,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::WDdihHPCWO8GlQ5S',
+            '_route' => 'generated::M6sn16ZQVN1kjCXF',
           ),
           1 => NULL,
           2 => 
@@ -5181,7 +4815,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::3MEO9X6MglLnom63',
+            '_route' => 'generated::DecLPle7bjQOUCVo',
           ),
           1 => NULL,
           2 => 
@@ -5200,7 +4834,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::XyCTlB9vrscCBNzk',
+            '_route' => 'generated::Nkewd4420fUVqv4x',
           ),
           1 => NULL,
           2 => 
@@ -5219,7 +4853,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::rjMwiwrjT4yfecP8',
+            '_route' => 'generated::fT7C9tmQDZLlWlra',
           ),
           1 => NULL,
           2 => 
@@ -5239,7 +4873,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::i8LcHvpmBSU2Ixo7',
+            '_route' => 'generated::KG4C653uPZXkEYOp',
           ),
           1 => NULL,
           2 => 
@@ -5258,7 +4892,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::qY8NgrwR1cPshHY3',
+            '_route' => 'generated::9aUQaQ9MOVjrYem5',
           ),
           1 => NULL,
           2 => 
@@ -5275,7 +4909,7 @@ app('router')->setCompiledRoutes(
     ),
     2 => 
     array (
-      0 => '{^(?|/api/(?|my\\-account/get_trainee_general_info/([^/]++)(*:60)|enrollment/(?|get_(?|requirements/([^/]++)(*:109)|applications/([^/]++)(*:138))|remove_training_request/([^/]++)(*:179))|dormitories/(?|applied_dormitories/view/(?|([^/]++)(?|(*:242)|/inclusions(*:261))|getAllHistories/([^/]++)(*:294))|remove_applied_dormitories/([^/]++)(*:338)|inclusion/requests/([^/]++)(*:373)|services/(?|([^/]++)(*:401)|([0-9]+)/create(*:424)|([0-9]+)/cancel(*:447))|transfer_request/cancel/([^/]++)(*:488)|extension_request/cancel/([^/]++)(*:529)|cancel_request/([^/]++)(*:560))|l(?|ibraries/book_info/([^/]++)(*:600)|ms/(?|sections/view_sections/([^/]++)(*:645)|questions/view_questions/([^/]++)(*:686)))|client_satisfaction/surveys/delete/([^/]++)(*:739)|invoices/view/([^/]++)(?|(*:772)|(*:780))|traine(?|r/enrollment/courses/([^/]++)(*:827)|e\\-info/([^/]++)(*:851))|admin/(?|enrollment/(?|remove_(?|terms_and_condition/([^/]++)(*:921)|s(?|ch(?|edule/([^/]++)(*:952)|ool/([^/]++)(*:972))|ponsor/([^/]++)(*:996))|module(?|/([^/]++)(*:1023)|_type/([^/]++)(*:1046))|c(?|ertificate/([^/]++)(*:1079)|ourse(?|/([^/]++)(*:1105)|_fee/([^/]++)(*:1127)))|voucher/([^/]++)(*:1154)|license/([^/]++)(*:1179)|rank/([^/]++)(*:1201)|facilitator/([^/]++)(*:1230))|get_applications/remove_training_request/([^/]++)(*:1289)|training\\-requirements/remove_trequirement/([^/]++)(*:1349))|book(?|s/(?|remove_(?|terms_and_condition/([^/]++)(*:1409)|book/([^/]++)(*:1431))|get_book_(?|info/(?|([^/]++)(*:1469)|get_copies/(?|([^/]++)(*:1500)|update_book_copy(*:1525))|remove_copy/([^/]++)(*:1555))|total_reservations/([^/]++)(*:1592)|reservation/remove_fine/([^/]++)(*:1633)))|_entry/remove_entry/([^/]++)(*:1672))|dormitory/(?|remove_(?|terms_and_condition/([^/]++)(*:1733)|room/([^/]++)(*:1755)|dorm_inventory/([^/]++)(*:1787)|service/([^/]++)(*:1812))|get_(?|dormitory_(?|rooms/([^/]++)(*:1856)|info/([^/]++)(*:1878))|inventories/remove_dorm_inventory_stock/([^/]++)(*:1936))|cancel_(?|dorm_request/([^/]++)(*:1977)|charge/([^/]++)(*:2001)))|masterlist/(?|user/(?|get_user_(?|basic_info/([^/]++)(*:2065)|activities/([^/]++)(*:2093)|qr_reader_assignments/([^/]++)(*:2132))|remove_(?|qr_reader_assignment/([^/]++)(*:2181)|user/([^/]++)(*:2203)))|employer/remove_employer/([^/]++)(*:2247)|position/remove_position/([^/]++)(*:2289)|qr\\-reader/remove_qr_reader/([^/]++)(*:2334))|cashier/remove_(?|terms_and_condition/([^/]++)(*:2390)|charge(?|/([^/]++)(*:2417)|_category/([^/]++)(*:2444))|or_number/([^/]++)(*:2472))|recreational\\-activity/r(?|emove_terms_and_condition/([^/]++)(*:2543)|a_remove_(?|equipment(?|/([^/]++)(*:2585)|_stock/([^/]++)(*:2609))|facility/([^/]++)(*:2636))))))/?$}sDu',
+      0 => '{^(?|/api/(?|my\\-account/get_trainee_general_info/([^/]++)(*:60)|enrollment/(?|get_(?|requirements/([^/]++)(*:109)|applications/([^/]++)(*:138))|remove_training_request/([^/]++)(*:179))|dormitories/(?|applied_dormitories/view/(?|([^/]++)(?|(*:242)|/inclusions(*:261))|getAllHistories/([^/]++)(*:294))|remove_applied_dormitories/([^/]++)(*:338)|inclusion/requests/([^/]++)(*:373)|services/(?|([^/]++)(*:401)|([0-9]+)/create(*:424)|([0-9]+)/cancel(*:447))|transfer_request/cancel/([^/]++)(*:488)|extension_request/cancel/([^/]++)(*:529)|cancel_request/([^/]++)(*:560))|l(?|ibraries/book_info/([^/]++)(*:600)|ms/(?|sections/view_sections/([^/]++)(*:645)|questions/view_questions/([^/]++)(*:686)))|client_satisfaction/surveys/delete/([^/]++)(*:739)|invoices/view/([^/]++)(?|(*:772)|(*:780))|traine(?|r/enrollment/courses/([^/]++)(*:827)|e\\-info/([^/]++)(*:851))|admin/(?|enrollment/(?|remove_(?|terms_and_condition/([^/]++)(*:921)|s(?|ch(?|edule/([^/]++)(*:952)|ool/([^/]++)(*:972))|ponsor/([^/]++)(*:996))|module(?|/([^/]++)(*:1023)|_type/([^/]++)(*:1046))|c(?|ertificate/([^/]++)(*:1079)|ourse(?|/([^/]++)(*:1105)|_fee/([^/]++)(*:1127)))|voucher/([^/]++)(*:1154)|license/([^/]++)(*:1179)|rank/([^/]++)(*:1201)|facilitator/([^/]++)(*:1230))|get_applications/remove_training_request/([^/]++)(*:1289)|training\\-requirements/remove_trequirement/([^/]++)(*:1349))|book(?|s/(?|remove_(?|terms_and_condition/([^/]++)(*:1409)|book/([^/]++)(*:1431))|get_book_(?|info/(?|([^/]++)(*:1469)|get_copies/(?|([^/]++)(*:1500)|update_book_copy(*:1525))|remove_copy/([^/]++)(*:1555))|total_reservations/([^/]++)(*:1592)|reservation/remove_fine/([^/]++)(*:1633)))|_entry/remove_entry/([^/]++)(*:1672))|dormitory/remove_(?|room/([^/]++)(*:1715)|service/([^/]++)(*:1740))|masterlist/(?|user/(?|get_user_(?|basic_info/([^/]++)(*:1803)|activities/([^/]++)(*:1831)|qr_reader_assignments/([^/]++)(*:1870))|remove_(?|qr_reader_assignment/([^/]++)(*:1919)|user/([^/]++)(*:1941)))|employer/remove_employer/([^/]++)(*:1985)|position/remove_position/([^/]++)(*:2027)|qr\\-reader/remove_qr_reader/([^/]++)(*:2072))|cashier/remove_(?|terms_and_condition/([^/]++)(*:2128)|charge(?|/([^/]++)(*:2155)|_category/([^/]++)(*:2182))|or_number/([^/]++)(*:2210))|recreational\\-activity/r(?|emove_terms_and_condition/([^/]++)(*:2281)|a_remove_(?|equipment(?|/([^/]++)(*:2323)|_stock/([^/]++)(*:2347))|facility/([^/]++)(*:2374))))))/?$}sDu',
     ),
     3 => 
     array (
@@ -5285,7 +4919,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::rn3bSUi3vKSTktam',
+            '_route' => 'generated::WsomysScHdEgSm8X',
           ),
           1 => 
           array (
@@ -5308,7 +4942,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::HRjs3xQR4810uBE8',
+            '_route' => 'generated::UQHOJnIHl9OolOWo',
           ),
           1 => 
           array (
@@ -5332,7 +4966,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Ku5V3YWvmmDX9Uao',
+            '_route' => 'generated::zBQKR6ZBiDav14lU',
           ),
           1 => 
           array (
@@ -5354,7 +4988,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::xmJbDeFDihu3AUvf',
+            '_route' => 'generated::VYf2WJ7TnuLOPKAb',
           ),
           1 => 
           array (
@@ -5376,7 +5010,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::ylMUMMwcW77QU5mf',
+            '_route' => 'generated::SL2pEBCCmmYNnHNP',
           ),
           1 => 
           array (
@@ -5399,7 +5033,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::aM6v9fdT0AMM0zWO',
+            '_route' => 'generated::Km1MtYrzzEWfiZiP',
           ),
           1 => 
           array (
@@ -5422,7 +5056,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::olq9aQtoIpDvcCXY',
+            '_route' => 'generated::RfglWt98bVFaJxDx',
           ),
           1 => 
           array (
@@ -5445,7 +5079,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::KUixWCxVsZI2uW4o',
+            '_route' => 'generated::SX74O8FpoGLDLmg7',
           ),
           1 => 
           array (
@@ -5468,7 +5102,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::KCmihk9GgK7lmIrj',
+            '_route' => 'generated::YBMH95ZGXUiO8EKl',
           ),
           1 => 
           array (
@@ -5491,7 +5125,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::2gmtJ2iiLgmZFMXf',
+            '_route' => 'generated::WmaMzPTiK7cFaVEf',
           ),
           1 => 
           array (
@@ -5514,7 +5148,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::KMND5H71R5ri6xnu',
+            '_route' => 'generated::GnYyOYKqqlsAfMWo',
           ),
           1 => 
           array (
@@ -5536,7 +5170,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::sbNjc1h8fvMitKTR',
+            '_route' => 'generated::AIMjVSqmvmIOsB6x',
           ),
           1 => 
           array (
@@ -5558,7 +5192,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::Wni1kpQAdPA89m6H',
+            '_route' => 'generated::pCBUwmPLG7zxWHMf',
           ),
           1 => 
           array (
@@ -5580,7 +5214,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::rjG2qa6vESsTOm8a',
+            '_route' => 'generated::R73Vfz6x8bU42w10',
           ),
           1 => 
           array (
@@ -5602,7 +5236,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::iI8TKcp2Gz4lY4dX',
+            '_route' => 'generated::rWSFvN9XngSSXU2b',
           ),
           1 => 
           array (
@@ -5624,7 +5258,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::zEmzBIRJM9bLolIK',
+            '_route' => 'generated::bQ6yqghvlnJdCMRz',
           ),
           1 => 
           array (
@@ -5648,7 +5282,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::t0IUm0opw2TW5ntb',
+            '_route' => 'generated::NJmGLtYQIjBPzJ8V',
           ),
           1 => 
           array (
@@ -5671,7 +5305,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::3olNwvYtcdAQc8uQ',
+            '_route' => 'generated::lpxjsxxqRQ6FGUr1',
           ),
           1 => 
           array (
@@ -5694,7 +5328,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::bURBvzHxw874dhWY',
+            '_route' => 'generated::Blc7Sg6qHPrjBmFb',
           ),
           1 => 
           array (
@@ -5716,7 +5350,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::TRpvUMgjmzrw5cvz',
+            '_route' => 'generated::bNjsrHsH8Bfg5ohB',
           ),
           1 => 
           array (
@@ -5739,7 +5373,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::iBxvr840b8kPNjiw',
+            '_route' => 'generated::4tj37VVzTrdx6HZW',
           ),
           1 => 
           array (
@@ -5762,7 +5396,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::zKdwHKdcXKXwN3w5',
+            '_route' => 'generated::OHOjuYAnfxDVzUCk',
           ),
           1 => 
           array (
@@ -5785,7 +5419,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::v4wCT0aFfmHb07ts',
+            '_route' => 'generated::PaJONBgHsB9NKFPi',
           ),
           1 => 
           array (
@@ -5808,7 +5442,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::OLGkATdBKxNwWwIE',
+            '_route' => 'generated::CJdY5pwazDpXYuX7',
           ),
           1 => 
           array (
@@ -5830,7 +5464,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::jmzShBHRw78cEhjd',
+            '_route' => 'generated::eQd1TaYSOLhRwdiL',
           ),
           1 => 
           array (
@@ -5852,7 +5486,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::0oF62Fx9lZjSjAAR',
+            '_route' => 'generated::C7DyCT1PKWZRqMAK',
           ),
           1 => 
           array (
@@ -5874,7 +5508,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::reGk6gVUzGNXU8QH',
+            '_route' => 'generated::I5ewQTFUzUO9Lq0D',
           ),
           1 => 
           array (
@@ -5896,7 +5530,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::PoyOFAY8tkPiJoT4',
+            '_route' => 'generated::W8TOF3nUXBEaoDK2',
           ),
           1 => 
           array (
@@ -5918,7 +5552,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::ZVbSTSW9JUDy20Am',
+            '_route' => 'generated::jNpEo6og9N9RNTQE',
           ),
           1 => 
           array (
@@ -5940,7 +5574,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::K73C8gynpdvzoRzc',
+            '_route' => 'generated::WarytV9b7eokMGjw',
           ),
           1 => 
           array (
@@ -5962,7 +5596,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::lGgsSGA1hBYc76Nb',
+            '_route' => 'generated::pWDlIEqXXtJdnNOh',
           ),
           1 => 
           array (
@@ -5984,7 +5618,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::4JPoltuMp1EhDDhf',
+            '_route' => 'generated::7Rs6WdORV7N6OemQ',
           ),
           1 => 
           array (
@@ -6006,7 +5640,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::IUzxwRtU2foegm9l',
+            '_route' => 'generated::MUZnvDyoI2AOstWJ',
           ),
           1 => 
           array (
@@ -6028,7 +5662,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::wb5I7lU2tZXGauvH',
+            '_route' => 'generated::CbzlorfVWsj8CRIn',
           ),
           1 => 
           array (
@@ -6050,7 +5684,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::dQ8YMCUTuqqIcrRm',
+            '_route' => 'generated::DKfRdUxpIn3iz2bV',
           ),
           1 => 
           array (
@@ -6072,7 +5706,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::ZjeDQp3F0WdvscJu',
+            '_route' => 'generated::NqaxZ9wGrnyuftlI',
           ),
           1 => 
           array (
@@ -6094,7 +5728,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::4EPLq1ceBMWGcEoS',
+            '_route' => 'generated::Ux0mHRS9hPFC6f4K',
           ),
           1 => 
           array (
@@ -6117,7 +5751,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::pGgEE93siH5ePHfo',
+            '_route' => 'generated::k9VVi4851SNbsl2F',
           ),
           1 => 
           array (
@@ -6139,7 +5773,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::fP1SFyjRbeHbjyYR',
+            '_route' => 'generated::boYl0S0oPdGBDUQD',
           ),
           1 => 
           array (
@@ -6161,7 +5795,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::XPnmCUQbAZ8yq2kI',
+            '_route' => 'generated::hFFBEvDwzoZpbv43',
           ),
           1 => 
           array (
@@ -6183,7 +5817,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::tjjuAy2CYVb2rSe3',
+            '_route' => 'generated::K8rs1OtBfeMZHCBM',
           ),
           1 => 
           array (
@@ -6207,7 +5841,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::yLXpog2Htfm5mo8H',
+            '_route' => 'generated::N3leK6Id0H9uZW20',
           ),
           1 => 
           array (
@@ -6230,7 +5864,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::haWhJiKpWskMnEIB',
+            '_route' => 'generated::4bcP4xCR4fRKoVqu',
           ),
           1 => 
           array (
@@ -6251,7 +5885,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::XMQlKRdHV2u6l4Dy',
+            '_route' => 'generated::9Aze998bPRr5aQ9G',
           ),
           1 => 
           array (
@@ -6273,7 +5907,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::kf54nQbURgRpaVWH',
+            '_route' => 'generated::p9ZcVticxwgSKwDV',
           ),
           1 => 
           array (
@@ -6296,7 +5930,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::0kG8wMdiR4aWixaj',
+            '_route' => 'generated::aQeioXOFYTX9Mw1b',
           ),
           1 => 
           array (
@@ -6318,7 +5952,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::m1AjjnIDCTQnbA5x',
+            '_route' => 'generated::p9D4wJkLrbQ2h0CZ',
           ),
           1 => 
           array (
@@ -6334,17 +5968,17 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      1733 => 
+      1715 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::EvsD7jMzgZZOWKqh',
+            '_route' => 'generated::D6boJ6RwPQLVy3eh',
           ),
           1 => 
           array (
-            0 => 'termsAndConditionId',
+            0 => 'roomId',
           ),
           2 => 
           array (
@@ -6356,57 +5990,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      1755 => 
+      1740 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::5WNTeBdD7dGirTmf',
-          ),
-          1 => 
-          array (
-            0 => 'room_id',
-          ),
-          2 => 
-          array (
-            'DELETE' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      1787 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::gBmm7EAXE7vHBqLy',
-          ),
-          1 => 
-          array (
-            0 => 'inv_id',
-          ),
-          2 => 
-          array (
-            'DELETE' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      1812 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::hAO6L3lxmKYG3k0m',
+            '_route' => 'generated::QPE4TzrGeGo7sIkz',
           ),
           1 => 
           array (
@@ -6422,125 +6012,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      1856 => 
+      1803 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::AJHRPSlnioUx8Ddg',
-          ),
-          1 => 
-          array (
-            0 => 'dormitory_id',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      1878 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::FGjyM4YP9owAoFYb',
-          ),
-          1 => 
-          array (
-            0 => 'dormitory_id',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      1936 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::EdkD7yIqQKsjKIl1',
-          ),
-          1 => 
-          array (
-            0 => 'stock_id',
-          ),
-          2 => 
-          array (
-            'DELETE' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      1977 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::z67BS2oeXkh5QLvM',
-          ),
-          1 => 
-          array (
-            0 => 'dormReqId',
-          ),
-          2 => 
-          array (
-            'DELETE' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      2001 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::ljYr49l4NdH8eMcO',
-          ),
-          1 => 
-          array (
-            0 => 'chargeId',
-          ),
-          2 => 
-          array (
-            'DELETE' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      2065 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'generated::LcbMIPMVwIuGpHjf',
+            '_route' => 'generated::eVJqIvVQ3lXltGDj',
           ),
           1 => 
           array (
@@ -6557,13 +6035,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2093 => 
+      1831 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::JhXxWu1Vg77uZF9Z',
+            '_route' => 'generated::ZabOLxod1JYrMRU8',
           ),
           1 => 
           array (
@@ -6580,13 +6058,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2132 => 
+      1870 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::788QFwBDVMXtwL2r',
+            '_route' => 'generated::mOadTC5Q4QKYnHoq',
           ),
           1 => 
           array (
@@ -6603,13 +6081,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2181 => 
+      1919 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::3o978VBL8gzazsDY',
+            '_route' => 'generated::ldVg0GrzQJ9gFgOK',
           ),
           1 => 
           array (
@@ -6625,13 +6103,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2203 => 
+      1941 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::UGAI3hG6nKrxmVBA',
+            '_route' => 'generated::ITmj9icQ8cPhP2d3',
           ),
           1 => 
           array (
@@ -6647,13 +6125,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2247 => 
+      1985 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::PAgn3m7DWTKMlBnJ',
+            '_route' => 'generated::sowXIjztZlUsXo8v',
           ),
           1 => 
           array (
@@ -6669,13 +6147,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2289 => 
+      2027 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::as7lAVS1TZjsTD3g',
+            '_route' => 'generated::lzFBYTIAfGiT3lRw',
           ),
           1 => 
           array (
@@ -6691,13 +6169,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2334 => 
+      2072 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::ubxAKcn6g9H1W1QE',
+            '_route' => 'generated::xyP8dcKIYDF3UlEH',
           ),
           1 => 
           array (
@@ -6713,13 +6191,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2390 => 
+      2128 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::spDl8zwL8AXPTJpK',
+            '_route' => 'generated::uKSc5XWl07QldnKi',
           ),
           1 => 
           array (
@@ -6735,13 +6213,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2417 => 
+      2155 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::zYenxwVnbYbdXtFR',
+            '_route' => 'generated::JoRr4lW0145jMyPx',
           ),
           1 => 
           array (
@@ -6757,13 +6235,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2444 => 
+      2182 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::yzJFSCTDuCFKQX0S',
+            '_route' => 'generated::Jlf3K0rMOsjF2vSk',
           ),
           1 => 
           array (
@@ -6779,13 +6257,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2472 => 
+      2210 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::RgoDSGqdM38IbQs8',
+            '_route' => 'generated::A1Fsy7JrhasP5oRn',
           ),
           1 => 
           array (
@@ -6801,13 +6279,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2543 => 
+      2281 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::sH9isGS3wsJSNovx',
+            '_route' => 'generated::JKVvsheUltmf8MIa',
           ),
           1 => 
           array (
@@ -6823,13 +6301,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2585 => 
+      2323 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::5GI4EMaiEwS6OUOv',
+            '_route' => 'generated::yFLt1a9fsMwKqaxR',
           ),
           1 => 
           array (
@@ -6845,13 +6323,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2609 => 
+      2347 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::NvMwwM7mylmQmTNe',
+            '_route' => 'generated::88gUVuLxnL4JJdjB',
           ),
           1 => 
           array (
@@ -6867,13 +6345,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2636 => 
+      2374 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::M4y2Sz2esYPXbsyJ',
+            '_route' => 'generated::JxkYnvgQ8EFcGDmo',
           ),
           1 => 
           array (
@@ -7050,7 +6528,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::fGE0IvLmV5jZ6o24' => 
+    'generated::vXMQ2CAChP7niEmG' => 
     array (
       'methods' => 
       array (
@@ -7076,7 +6554,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken',
         ),
-        'as' => 'generated::fGE0IvLmV5jZ6o24',
+        'as' => 'generated::vXMQ2CAChP7niEmG',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7092,7 +6570,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Qv7klSpUaCXHCWw6' => 
+    'generated::KNY5RNUupvbf0WUA' => 
     array (
       'methods' => 
       array (
@@ -7114,7 +6592,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Qv7klSpUaCXHCWw6',
+        'as' => 'generated::KNY5RNUupvbf0WUA',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7130,7 +6608,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::9beS2FqQRBUbwXnH' => 
+    'generated::Vh8rMtVx4XGbg9QG' => 
     array (
       'methods' => 
       array (
@@ -7150,7 +6628,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::9beS2FqQRBUbwXnH',
+        'as' => 'generated::Vh8rMtVx4XGbg9QG',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7205,7 +6683,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::yZ2OXqQN6QuwZ1du' => 
+    'generated::ZJrSG775GhlaOCtk' => 
     array (
       'methods' => 
       array (
@@ -7225,7 +6703,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::yZ2OXqQN6QuwZ1du',
+        'as' => 'generated::ZJrSG775GhlaOCtk',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7241,7 +6719,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Z2pW6prPq7IcoNSy' => 
+    'generated::8OiwaujJeB0Vd85z' => 
     array (
       'methods' => 
       array (
@@ -7261,7 +6739,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Z2pW6prPq7IcoNSy',
+        'as' => 'generated::8OiwaujJeB0Vd85z',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7277,7 +6755,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::bxMU6M8HBRXF3Tni' => 
+    'generated::jKh2EuDNUf8KHjVN' => 
     array (
       'methods' => 
       array (
@@ -7300,7 +6778,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::bxMU6M8HBRXF3Tni',
+        'as' => 'generated::jKh2EuDNUf8KHjVN',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7316,7 +6794,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::nQYUDYQ6gMqgTlzY' => 
+    'generated::LLUgVSGDF5RJrIMy' => 
     array (
       'methods' => 
       array (
@@ -7351,7 +6829,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::nQYUDYQ6gMqgTlzY',
+        'as' => 'generated::LLUgVSGDF5RJrIMy',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7367,7 +6845,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::0l1QIU4uhaASqral' => 
+    'generated::VReQb12CT2yokQXK' => 
     array (
       'methods' => 
       array (
@@ -7390,7 +6868,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::0l1QIU4uhaASqral',
+        'as' => 'generated::VReQb12CT2yokQXK',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7406,7 +6884,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::jDnerpR4wpIJ3WLI' => 
+    'generated::88jDZbPswMizwl9y' => 
     array (
       'methods' => 
       array (
@@ -7429,7 +6907,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::jDnerpR4wpIJ3WLI',
+        'as' => 'generated::88jDZbPswMizwl9y',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7445,7 +6923,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::rn3bSUi3vKSTktam' => 
+    'generated::WsomysScHdEgSm8X' => 
     array (
       'methods' => 
       array (
@@ -7469,7 +6947,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::rn3bSUi3vKSTktam',
+        'as' => 'generated::WsomysScHdEgSm8X',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7485,7 +6963,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::z8aY8VKfroULG754' => 
+    'generated::pEOBC3Dbj4Pxr9hS' => 
     array (
       'methods' => 
       array (
@@ -7508,7 +6986,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::z8aY8VKfroULG754',
+        'as' => 'generated::pEOBC3Dbj4Pxr9hS',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7524,7 +7002,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::cejmjQHCJwZ2z8Yu' => 
+    'generated::GLLRsZeSVggd6CyT' => 
     array (
       'methods' => 
       array (
@@ -7548,7 +7026,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::cejmjQHCJwZ2z8Yu',
+        'as' => 'generated::GLLRsZeSVggd6CyT',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7564,7 +7042,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::57yMvbCYKbVPIWph' => 
+    'generated::RsCveDXlKfwpllHH' => 
     array (
       'methods' => 
       array (
@@ -7588,7 +7066,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::57yMvbCYKbVPIWph',
+        'as' => 'generated::RsCveDXlKfwpllHH',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7604,7 +7082,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::OhoPj53RDIREI5yH' => 
+    'generated::cywhD3mYZCk5FMqK' => 
     array (
       'methods' => 
       array (
@@ -7628,7 +7106,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::OhoPj53RDIREI5yH',
+        'as' => 'generated::cywhD3mYZCk5FMqK',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7644,7 +7122,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::POl436iORVX47fKw' => 
+    'generated::gwqAAtaRG9GhoNXQ' => 
     array (
       'methods' => 
       array (
@@ -7668,7 +7146,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::POl436iORVX47fKw',
+        'as' => 'generated::gwqAAtaRG9GhoNXQ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7684,7 +7162,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::fQyTbPEWqYfzxfFj' => 
+    'generated::gFftH5euLKLmVpzb' => 
     array (
       'methods' => 
       array (
@@ -7708,7 +7186,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::fQyTbPEWqYfzxfFj',
+        'as' => 'generated::gFftH5euLKLmVpzb',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7724,7 +7202,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::wjrvDOdFtrcPbAym' => 
+    'generated::lasHutb91KQBFV97' => 
     array (
       'methods' => 
       array (
@@ -7748,7 +7226,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::wjrvDOdFtrcPbAym',
+        'as' => 'generated::lasHutb91KQBFV97',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7764,7 +7242,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::HRjs3xQR4810uBE8' => 
+    'generated::UQHOJnIHl9OolOWo' => 
     array (
       'methods' => 
       array (
@@ -7789,7 +7267,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::HRjs3xQR4810uBE8',
+        'as' => 'generated::UQHOJnIHl9OolOWo',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7805,7 +7283,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::xmJbDeFDihu3AUvf' => 
+    'generated::VYf2WJ7TnuLOPKAb' => 
     array (
       'methods' => 
       array (
@@ -7828,7 +7306,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::xmJbDeFDihu3AUvf',
+        'as' => 'generated::VYf2WJ7TnuLOPKAb',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7844,7 +7322,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::T6Dn8iuSMPgbm80u' => 
+    'generated::PqlNzQqpfVGIuuxo' => 
     array (
       'methods' => 
       array (
@@ -7869,7 +7347,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::T6Dn8iuSMPgbm80u',
+        'as' => 'generated::PqlNzQqpfVGIuuxo',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7885,7 +7363,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ZSuSAEsug6JJ54fP' => 
+    'generated::hG3EsujHT1nB9mks' => 
     array (
       'methods' => 
       array (
@@ -7908,7 +7386,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ZSuSAEsug6JJ54fP',
+        'as' => 'generated::hG3EsujHT1nB9mks',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7924,7 +7402,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::nTq7aiKiklfn8Tav' => 
+    'generated::tNdzF2mg3cH5b7Ob' => 
     array (
       'methods' => 
       array (
@@ -7947,7 +7425,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::nTq7aiKiklfn8Tav',
+        'as' => 'generated::tNdzF2mg3cH5b7Ob',
       ),
       'fallback' => false,
       'defaults' => 
@@ -7963,7 +7441,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::VOB4Lng8I0PzGeiU' => 
+    'generated::oqrbAhycKXfRfoQC' => 
     array (
       'methods' => 
       array (
@@ -7986,7 +7464,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::VOB4Lng8I0PzGeiU',
+        'as' => 'generated::oqrbAhycKXfRfoQC',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8002,7 +7480,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::bBTSOLarAEHS3NmQ' => 
+    'generated::0wJBQPbiW3EAKrUA' => 
     array (
       'methods' => 
       array (
@@ -8025,7 +7503,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::bBTSOLarAEHS3NmQ',
+        'as' => 'generated::0wJBQPbiW3EAKrUA',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8041,7 +7519,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::aLwpO8P93fl6IFME' => 
+    'generated::nK3t8L8ZHiR45AQn' => 
     array (
       'methods' => 
       array (
@@ -8064,7 +7542,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::aLwpO8P93fl6IFME',
+        'as' => 'generated::nK3t8L8ZHiR45AQn',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8080,7 +7558,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::U8jCk8lIk1YANZEp' => 
+    'generated::rvkUJfdvJkIx0xQj' => 
     array (
       'methods' => 
       array (
@@ -8103,7 +7581,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::U8jCk8lIk1YANZEp',
+        'as' => 'generated::rvkUJfdvJkIx0xQj',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8119,7 +7597,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Ku5V3YWvmmDX9Uao' => 
+    'generated::zBQKR6ZBiDav14lU' => 
     array (
       'methods' => 
       array (
@@ -8142,7 +7620,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Ku5V3YWvmmDX9Uao',
+        'as' => 'generated::zBQKR6ZBiDav14lU',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8158,7 +7636,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::kT7eZUzfF29xKrJS' => 
+    'generated::aqUEZ8kv0WazE856' => 
     array (
       'methods' => 
       array (
@@ -8181,7 +7659,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::kT7eZUzfF29xKrJS',
+        'as' => 'generated::aqUEZ8kv0WazE856',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8197,7 +7675,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::cndZ6BYKmI5OniLq' => 
+    'generated::XaGvHLMIBDM85SmA' => 
     array (
       'methods' => 
       array (
@@ -8220,7 +7698,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::cndZ6BYKmI5OniLq',
+        'as' => 'generated::XaGvHLMIBDM85SmA',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8236,7 +7714,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::DlPx2EiFNrr4yl1X' => 
+    'generated::5SBOplml2Fcyfb7T' => 
     array (
       'methods' => 
       array (
@@ -8260,7 +7738,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::DlPx2EiFNrr4yl1X',
+        'as' => 'generated::5SBOplml2Fcyfb7T',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8276,7 +7754,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Kw6BRA9JbAFq29m7' => 
+    'generated::P7KtqaThTj7iAqkO' => 
     array (
       'methods' => 
       array (
@@ -8300,7 +7778,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Kw6BRA9JbAFq29m7',
+        'as' => 'generated::P7KtqaThTj7iAqkO',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8316,7 +7794,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::xpecPvDpK9s5iJl2' => 
+    'generated::fPwQviVn6XM1eDE1' => 
     array (
       'methods' => 
       array (
@@ -8340,7 +7818,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::xpecPvDpK9s5iJl2',
+        'as' => 'generated::fPwQviVn6XM1eDE1',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8356,7 +7834,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::iuKi2SPPr4mK31do' => 
+    'generated::w6iAztNMzUeLVgbM' => 
     array (
       'methods' => 
       array (
@@ -8379,7 +7857,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::iuKi2SPPr4mK31do',
+        'as' => 'generated::w6iAztNMzUeLVgbM',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8395,7 +7873,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::wpUeZuNXKXYfloI1' => 
+    'generated::g1nRyhg70QvMhlKB' => 
     array (
       'methods' => 
       array (
@@ -8419,7 +7897,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::wpUeZuNXKXYfloI1',
+        'as' => 'generated::g1nRyhg70QvMhlKB',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8435,7 +7913,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::f9r8GeWrxweEer57' => 
+    'generated::TePpLg2PRVr80fp5' => 
     array (
       'methods' => 
       array (
@@ -8458,7 +7936,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::f9r8GeWrxweEer57',
+        'as' => 'generated::TePpLg2PRVr80fp5',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8474,7 +7952,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ylMUMMwcW77QU5mf' => 
+    'generated::SL2pEBCCmmYNnHNP' => 
     array (
       'methods' => 
       array (
@@ -8498,7 +7976,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ylMUMMwcW77QU5mf',
+        'as' => 'generated::SL2pEBCCmmYNnHNP',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8514,7 +7992,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::KUixWCxVsZI2uW4o' => 
+    'generated::SX74O8FpoGLDLmg7' => 
     array (
       'methods' => 
       array (
@@ -8538,7 +8016,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::KUixWCxVsZI2uW4o',
+        'as' => 'generated::SX74O8FpoGLDLmg7',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8554,7 +8032,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::N3b1SYuZOwQwxnyn' => 
+    'generated::l8R2l3f6XGWdU2r9' => 
     array (
       'methods' => 
       array (
@@ -8578,7 +8056,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::N3b1SYuZOwQwxnyn',
+        'as' => 'generated::l8R2l3f6XGWdU2r9',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8594,7 +8072,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::uScN7Fq0Dq9ptwIV' => 
+    'generated::EQNtKyqty4rsqpTO' => 
     array (
       'methods' => 
       array (
@@ -8618,7 +8096,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::uScN7Fq0Dq9ptwIV',
+        'as' => 'generated::EQNtKyqty4rsqpTO',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8634,7 +8112,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::n26T4DNhWPJWZouo' => 
+    'generated::qRBK1MZFzKaLZoVX' => 
     array (
       'methods' => 
       array (
@@ -8657,7 +8135,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::n26T4DNhWPJWZouo',
+        'as' => 'generated::qRBK1MZFzKaLZoVX',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8673,7 +8151,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::zL9BHG9tHNXZtudm' => 
+    'generated::dnANHV7X4BBzlOFQ' => 
     array (
       'methods' => 
       array (
@@ -8696,7 +8174,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::zL9BHG9tHNXZtudm',
+        'as' => 'generated::dnANHV7X4BBzlOFQ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8712,7 +8190,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::1Qe3a08JHhWjRqz0' => 
+    'generated::arjC4owgn5TSNnoF' => 
     array (
       'methods' => 
       array (
@@ -8736,7 +8214,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::1Qe3a08JHhWjRqz0',
+        'as' => 'generated::arjC4owgn5TSNnoF',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8752,7 +8230,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::aM6v9fdT0AMM0zWO' => 
+    'generated::Km1MtYrzzEWfiZiP' => 
     array (
       'methods' => 
       array (
@@ -8776,7 +8254,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::aM6v9fdT0AMM0zWO',
+        'as' => 'generated::Km1MtYrzzEWfiZiP',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8792,7 +8270,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::KCmihk9GgK7lmIrj' => 
+    'generated::YBMH95ZGXUiO8EKl' => 
     array (
       'methods' => 
       array (
@@ -8816,7 +8294,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::KCmihk9GgK7lmIrj',
+        'as' => 'generated::YBMH95ZGXUiO8EKl',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8832,7 +8310,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::2OYVTzVuJD6A76fB' => 
+    'generated::vqJhRXbsXyEdI4WS' => 
     array (
       'methods' => 
       array (
@@ -8856,7 +8334,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::2OYVTzVuJD6A76fB',
+        'as' => 'generated::vqJhRXbsXyEdI4WS',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8872,7 +8350,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Yc0LUrZNWrTNjZjc' => 
+    'generated::EriqEGRxsLJq1g5l' => 
     array (
       'methods' => 
       array (
@@ -8895,7 +8373,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Yc0LUrZNWrTNjZjc',
+        'as' => 'generated::EriqEGRxsLJq1g5l',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8911,7 +8389,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::iUR1OlCx4xRazU1T' => 
+    'generated::iD14gl5FUy2TeEG4' => 
     array (
       'methods' => 
       array (
@@ -8934,7 +8412,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::iUR1OlCx4xRazU1T',
+        'as' => 'generated::iD14gl5FUy2TeEG4',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8950,7 +8428,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::JxYvpSa6O1Krx0Es' => 
+    'generated::X2Lkx4Iu9RtJ4HB7' => 
     array (
       'methods' => 
       array (
@@ -8974,7 +8452,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::JxYvpSa6O1Krx0Es',
+        'as' => 'generated::X2Lkx4Iu9RtJ4HB7',
       ),
       'fallback' => false,
       'defaults' => 
@@ -8990,7 +8468,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::2gmtJ2iiLgmZFMXf' => 
+    'generated::WmaMzPTiK7cFaVEf' => 
     array (
       'methods' => 
       array (
@@ -9014,7 +8492,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::2gmtJ2iiLgmZFMXf',
+        'as' => 'generated::WmaMzPTiK7cFaVEf',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9030,7 +8508,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::KMND5H71R5ri6xnu' => 
+    'generated::GnYyOYKqqlsAfMWo' => 
     array (
       'methods' => 
       array (
@@ -9053,7 +8531,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::KMND5H71R5ri6xnu',
+        'as' => 'generated::GnYyOYKqqlsAfMWo',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9070,7 +8548,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::sbNjc1h8fvMitKTR' => 
+    'generated::AIMjVSqmvmIOsB6x' => 
     array (
       'methods' => 
       array (
@@ -9093,7 +8571,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::sbNjc1h8fvMitKTR',
+        'as' => 'generated::AIMjVSqmvmIOsB6x',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9110,7 +8588,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::olq9aQtoIpDvcCXY' => 
+    'generated::RfglWt98bVFaJxDx' => 
     array (
       'methods' => 
       array (
@@ -9134,7 +8612,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::olq9aQtoIpDvcCXY',
+        'as' => 'generated::RfglWt98bVFaJxDx',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9150,7 +8628,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::rdppsI87msuMGLg1' => 
+    'generated::X5QdtTG3B2UTYvrW' => 
     array (
       'methods' => 
       array (
@@ -9173,7 +8651,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::rdppsI87msuMGLg1',
+        'as' => 'generated::X5QdtTG3B2UTYvrW',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9189,7 +8667,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::fB9lN5nBJU5rxi78' => 
+    'generated::xon7x1ENr9LIKqz3' => 
     array (
       'methods' => 
       array (
@@ -9212,7 +8690,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::fB9lN5nBJU5rxi78',
+        'as' => 'generated::xon7x1ENr9LIKqz3',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9228,7 +8706,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Wni1kpQAdPA89m6H' => 
+    'generated::pCBUwmPLG7zxWHMf' => 
     array (
       'methods' => 
       array (
@@ -9251,7 +8729,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Wni1kpQAdPA89m6H',
+        'as' => 'generated::pCBUwmPLG7zxWHMf',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9267,7 +8745,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::N8Qvc56XvAkzfY8D' => 
+    'generated::QcxfJ6xEfeCYCGBp' => 
     array (
       'methods' => 
       array (
@@ -9291,7 +8769,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::N8Qvc56XvAkzfY8D',
+        'as' => 'generated::QcxfJ6xEfeCYCGBp',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9307,7 +8785,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::QPm1ccgb0i3ixOtV' => 
+    'generated::uQmkuWqGCOXrtPCK' => 
     array (
       'methods' => 
       array (
@@ -9330,7 +8808,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::QPm1ccgb0i3ixOtV',
+        'as' => 'generated::uQmkuWqGCOXrtPCK',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9346,7 +8824,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::rjG2qa6vESsTOm8a' => 
+    'generated::R73Vfz6x8bU42w10' => 
     array (
       'methods' => 
       array (
@@ -9369,7 +8847,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::rjG2qa6vESsTOm8a',
+        'as' => 'generated::R73Vfz6x8bU42w10',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9385,7 +8863,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::iI8TKcp2Gz4lY4dX' => 
+    'generated::rWSFvN9XngSSXU2b' => 
     array (
       'methods' => 
       array (
@@ -9408,7 +8886,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::iI8TKcp2Gz4lY4dX',
+        'as' => 'generated::rWSFvN9XngSSXU2b',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9424,7 +8902,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3VFttU8tcVAMqypB' => 
+    'generated::gdKh8YliR6MohIWc' => 
     array (
       'methods' => 
       array (
@@ -9447,7 +8925,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::3VFttU8tcVAMqypB',
+        'as' => 'generated::gdKh8YliR6MohIWc',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9463,7 +8941,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::60GN18YTOyY3iRa6' => 
+    'generated::fhKGIqELK2etKZ0H' => 
     array (
       'methods' => 
       array (
@@ -9486,7 +8964,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::60GN18YTOyY3iRa6',
+        'as' => 'generated::fhKGIqELK2etKZ0H',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9502,7 +8980,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::N42XZYFQTOQ0pmLe' => 
+    'generated::O1wfhdf0QsqMtPMu' => 
     array (
       'methods' => 
       array (
@@ -9525,7 +9003,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::N42XZYFQTOQ0pmLe',
+        'as' => 'generated::O1wfhdf0QsqMtPMu',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9541,7 +9019,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3R7XL4XDYelG4LJy' => 
+    'generated::P47gX3CXlF8LRdO9' => 
     array (
       'methods' => 
       array (
@@ -9565,7 +9043,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::3R7XL4XDYelG4LJy',
+        'as' => 'generated::P47gX3CXlF8LRdO9',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9581,7 +9059,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::9CXYcFdkGGD6bXDA' => 
+    'generated::8EV6F4PYnyzhvg9Y' => 
     array (
       'methods' => 
       array (
@@ -9604,7 +9082,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::9CXYcFdkGGD6bXDA',
+        'as' => 'generated::8EV6F4PYnyzhvg9Y',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9620,7 +9098,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::e3ic3HwcLElIQBPg' => 
+    'generated::tvkpwK9hEhxmWlW0' => 
     array (
       'methods' => 
       array (
@@ -9644,7 +9122,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::e3ic3HwcLElIQBPg',
+        'as' => 'generated::tvkpwK9hEhxmWlW0',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9660,7 +9138,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::zEmzBIRJM9bLolIK' => 
+    'generated::bQ6yqghvlnJdCMRz' => 
     array (
       'methods' => 
       array (
@@ -9685,7 +9163,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::zEmzBIRJM9bLolIK',
+        'as' => 'generated::bQ6yqghvlnJdCMRz',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9701,7 +9179,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::P6LRN9qaNqFuAi6i' => 
+    'generated::a1nHDjXljF0sBYPu' => 
     array (
       'methods' => 
       array (
@@ -9724,7 +9202,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::P6LRN9qaNqFuAi6i',
+        'as' => 'generated::a1nHDjXljF0sBYPu',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9740,7 +9218,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::zJdBMv9XVIgHFody' => 
+    'generated::DjfTwMVFyaLYZH5g' => 
     array (
       'methods' => 
       array (
@@ -9763,7 +9241,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::zJdBMv9XVIgHFody',
+        'as' => 'generated::DjfTwMVFyaLYZH5g',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9779,7 +9257,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::zKlSVwynb3on1GHH' => 
+    'generated::gYsa7si9ol2WiX6F' => 
     array (
       'methods' => 
       array (
@@ -9804,7 +9282,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::zKlSVwynb3on1GHH',
+        'as' => 'generated::gYsa7si9ol2WiX6F',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9820,7 +9298,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::iJqMMHlLeCm6NCdj' => 
+    'generated::SCDxhRjriztz4ND9' => 
     array (
       'methods' => 
       array (
@@ -9843,7 +9321,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::iJqMMHlLeCm6NCdj',
+        'as' => 'generated::SCDxhRjriztz4ND9',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9859,7 +9337,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::I3pLH9LV0kH4Qs90' => 
+    'generated::ID8UTPXkI9fProui' => 
     array (
       'methods' => 
       array (
@@ -9882,7 +9360,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::I3pLH9LV0kH4Qs90',
+        'as' => 'generated::ID8UTPXkI9fProui',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9898,7 +9376,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::14uRE2vfbywobGWd' => 
+    'generated::zRHKhn0FuCX3OtfL' => 
     array (
       'methods' => 
       array (
@@ -9921,7 +9399,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::14uRE2vfbywobGWd',
+        'as' => 'generated::zRHKhn0FuCX3OtfL',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9937,7 +9415,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::52hvLlMpzdrm4fJh' => 
+    'generated::ZiPQZN3QJJItQeC8' => 
     array (
       'methods' => 
       array (
@@ -9960,7 +9438,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::52hvLlMpzdrm4fJh',
+        'as' => 'generated::ZiPQZN3QJJItQeC8',
       ),
       'fallback' => false,
       'defaults' => 
@@ -9976,7 +9454,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::tV7Akrz8AQFeOlc3' => 
+    'generated::oJJolhIbgJmWWDnv' => 
     array (
       'methods' => 
       array (
@@ -9999,7 +9477,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::tV7Akrz8AQFeOlc3',
+        'as' => 'generated::oJJolhIbgJmWWDnv',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10015,7 +9493,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::QIj2RjV3gZlqSGpX' => 
+    'generated::0zgqKSRKmc3CrNk0' => 
     array (
       'methods' => 
       array (
@@ -10038,7 +9516,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::QIj2RjV3gZlqSGpX',
+        'as' => 'generated::0zgqKSRKmc3CrNk0',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10054,7 +9532,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::FShPJf5ThXij1PgD' => 
+    'generated::LZfoOtuQhkRZAYGT' => 
     array (
       'methods' => 
       array (
@@ -10078,7 +9556,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::FShPJf5ThXij1PgD',
+        'as' => 'generated::LZfoOtuQhkRZAYGT',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10094,7 +9572,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::UJAZ3YO6dqUlLb2F' => 
+    'generated::hd7uMNVVnqTMWKhn' => 
     array (
       'methods' => 
       array (
@@ -10118,7 +9596,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::UJAZ3YO6dqUlLb2F',
+        'as' => 'generated::hd7uMNVVnqTMWKhn',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10134,7 +9612,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::cxa89TiUO1nvFkSX' => 
+    'generated::F5pVtZffvTVYAQYU' => 
     array (
       'methods' => 
       array (
@@ -10157,7 +9635,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::cxa89TiUO1nvFkSX',
+        'as' => 'generated::F5pVtZffvTVYAQYU',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10173,7 +9651,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::bURBvzHxw874dhWY' => 
+    'generated::Blc7Sg6qHPrjBmFb' => 
     array (
       'methods' => 
       array (
@@ -10196,7 +9674,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::bURBvzHxw874dhWY',
+        'as' => 'generated::Blc7Sg6qHPrjBmFb',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10212,7 +9690,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::XX1kAHoy5RDTaHGE' => 
+    'generated::pmUmbRaER7QS0HUe' => 
     array (
       'methods' => 
       array (
@@ -10236,7 +9714,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::XX1kAHoy5RDTaHGE',
+        'as' => 'generated::pmUmbRaER7QS0HUe',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10252,7 +9730,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Yl9kczmZNtuPklPo' => 
+    'generated::I1iluq0Tvn6piFwZ' => 
     array (
       'methods' => 
       array (
@@ -10276,7 +9754,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Yl9kczmZNtuPklPo',
+        'as' => 'generated::I1iluq0Tvn6piFwZ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10292,7 +9770,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::OKWrJVo0gXPaGNtr' => 
+    'generated::rlFzVHYYUSjXzL3m' => 
     array (
       'methods' => 
       array (
@@ -10315,7 +9793,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::OKWrJVo0gXPaGNtr',
+        'as' => 'generated::rlFzVHYYUSjXzL3m',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10331,7 +9809,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::TRpvUMgjmzrw5cvz' => 
+    'generated::bNjsrHsH8Bfg5ohB' => 
     array (
       'methods' => 
       array (
@@ -10355,7 +9833,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::TRpvUMgjmzrw5cvz',
+        'as' => 'generated::bNjsrHsH8Bfg5ohB',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10371,7 +9849,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::cTqy2A141LpbvNgU' => 
+    'generated::KNuHO2POqq1d4k4s' => 
     array (
       'methods' => 
       array (
@@ -10394,7 +9872,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::cTqy2A141LpbvNgU',
+        'as' => 'generated::KNuHO2POqq1d4k4s',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10410,7 +9888,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::QK7dT847iqw6CsEP' => 
+    'generated::vCfYjMxZd7TwusX2' => 
     array (
       'methods' => 
       array (
@@ -10433,7 +9911,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::QK7dT847iqw6CsEP',
+        'as' => 'generated::vCfYjMxZd7TwusX2',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10449,7 +9927,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::iBxvr840b8kPNjiw' => 
+    'generated::4tj37VVzTrdx6HZW' => 
     array (
       'methods' => 
       array (
@@ -10473,7 +9951,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::iBxvr840b8kPNjiw',
+        'as' => 'generated::4tj37VVzTrdx6HZW',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10489,7 +9967,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::wL5f7r7EZNRNBahp' => 
+    'generated::M2I9FxlfKRjaGJlU' => 
     array (
       'methods' => 
       array (
@@ -10513,7 +9991,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::wL5f7r7EZNRNBahp',
+        'as' => 'generated::M2I9FxlfKRjaGJlU',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10529,7 +10007,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::dS13BfNRr6z4z9g8' => 
+    'generated::n1YkGWWL19pQG2Tv' => 
     array (
       'methods' => 
       array (
@@ -10553,7 +10031,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::dS13BfNRr6z4z9g8',
+        'as' => 'generated::n1YkGWWL19pQG2Tv',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10569,7 +10047,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Y1VDQGdr1W3N4fjy' => 
+    'generated::Ai2dJtkzgfw5NgwP' => 
     array (
       'methods' => 
       array (
@@ -10594,7 +10072,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Y1VDQGdr1W3N4fjy',
+        'as' => 'generated::Ai2dJtkzgfw5NgwP',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10610,7 +10088,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::1S3c8oZIvmKDkd41' => 
+    'generated::XoKtOfKg0qbRZ3I3' => 
     array (
       'methods' => 
       array (
@@ -10635,7 +10113,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::1S3c8oZIvmKDkd41',
+        'as' => 'generated::XoKtOfKg0qbRZ3I3',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10651,7 +10129,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::zKdwHKdcXKXwN3w5' => 
+    'generated::OHOjuYAnfxDVzUCk' => 
     array (
       'methods' => 
       array (
@@ -10676,7 +10154,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::zKdwHKdcXKXwN3w5',
+        'as' => 'generated::OHOjuYAnfxDVzUCk',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10692,7 +10170,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::b5wuzoXuvmf6192Z' => 
+    'generated::9eU8E8VJWOrs8C1K' => 
     array (
       'methods' => 
       array (
@@ -10716,7 +10194,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::b5wuzoXuvmf6192Z',
+        'as' => 'generated::9eU8E8VJWOrs8C1K',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10732,7 +10210,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::uyQ3TFDio4yjeT6c' => 
+    'generated::RcnvaUXaKDZgIiaM' => 
     array (
       'methods' => 
       array (
@@ -10756,7 +10234,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::uyQ3TFDio4yjeT6c',
+        'as' => 'generated::RcnvaUXaKDZgIiaM',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10772,7 +10250,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::JfyTeDTvKZ9gcYsz' => 
+    'generated::Ahkg8QH7tPN6QQPe' => 
     array (
       'methods' => 
       array (
@@ -10796,7 +10274,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::JfyTeDTvKZ9gcYsz',
+        'as' => 'generated::Ahkg8QH7tPN6QQPe',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10812,7 +10290,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::4W1SO4ecOWqE2w3K' => 
+    'generated::5L51O9S627OvK2pp' => 
     array (
       'methods' => 
       array (
@@ -10836,7 +10314,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::4W1SO4ecOWqE2w3K',
+        'as' => 'generated::5L51O9S627OvK2pp',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10852,7 +10330,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::c8wNwMVvPaE1dMqn' => 
+    'generated::KfQUYedm0QwVGcTR' => 
     array (
       'methods' => 
       array (
@@ -10876,7 +10354,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::c8wNwMVvPaE1dMqn',
+        'as' => 'generated::KfQUYedm0QwVGcTR',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10892,7 +10370,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::4jB9dS8Ve0ECgTvs' => 
+    'generated::PJer8qGas6CAVTAi' => 
     array (
       'methods' => 
       array (
@@ -10916,7 +10394,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::4jB9dS8Ve0ECgTvs',
+        'as' => 'generated::PJer8qGas6CAVTAi',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10932,7 +10410,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::rgFSAW9QRwNzp8wg' => 
+    'generated::1BRlXGq40RssJzCL' => 
     array (
       'methods' => 
       array (
@@ -10956,7 +10434,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::rgFSAW9QRwNzp8wg',
+        'as' => 'generated::1BRlXGq40RssJzCL',
       ),
       'fallback' => false,
       'defaults' => 
@@ -10972,7 +10450,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::r3BwVBVFtuIut8L9' => 
+    'generated::7RCFfaxyeFh2IGmz' => 
     array (
       'methods' => 
       array (
@@ -10996,7 +10474,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::r3BwVBVFtuIut8L9',
+        'as' => 'generated::7RCFfaxyeFh2IGmz',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11012,7 +10490,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::5Ecj1Z48QfCCmofn' => 
+    'generated::NL4zeff6fcnsLyBa' => 
     array (
       'methods' => 
       array (
@@ -11036,7 +10514,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::5Ecj1Z48QfCCmofn',
+        'as' => 'generated::NL4zeff6fcnsLyBa',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11052,7 +10530,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::tFhWqS4w1O2F2tRC' => 
+    'generated::zB05VJtJPvPHtBso' => 
     array (
       'methods' => 
       array (
@@ -11076,7 +10554,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::tFhWqS4w1O2F2tRC',
+        'as' => 'generated::zB05VJtJPvPHtBso',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11092,7 +10570,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::eMzOlTWDpGXYlsKy' => 
+    'generated::nEdYYYz3xKueHbSP' => 
     array (
       'methods' => 
       array (
@@ -11117,7 +10595,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::eMzOlTWDpGXYlsKy',
+        'as' => 'generated::nEdYYYz3xKueHbSP',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11133,7 +10611,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::SzQFfYaZtSWUiBDq' => 
+    'generated::kOUczRCMAlp4aH2s' => 
     array (
       'methods' => 
       array (
@@ -11158,7 +10636,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::SzQFfYaZtSWUiBDq',
+        'as' => 'generated::kOUczRCMAlp4aH2s',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11174,7 +10652,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::WaxAauU0HziMqK8a' => 
+    'generated::8HwyGp27AymUrGZ1' => 
     array (
       'methods' => 
       array (
@@ -11198,7 +10676,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::WaxAauU0HziMqK8a',
+        'as' => 'generated::8HwyGp27AymUrGZ1',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11214,7 +10692,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::iHePdszgbIFsZcp1' => 
+    'generated::FtmA1tVmzunuBmns' => 
     array (
       'methods' => 
       array (
@@ -11238,7 +10716,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::iHePdszgbIFsZcp1',
+        'as' => 'generated::FtmA1tVmzunuBmns',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11254,7 +10732,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::KYVGbh5LqoTBEK00' => 
+    'generated::VPOCjFzFqV5sVtDl' => 
     array (
       'methods' => 
       array (
@@ -11278,7 +10756,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::KYVGbh5LqoTBEK00',
+        'as' => 'generated::VPOCjFzFqV5sVtDl',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11294,7 +10772,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::vT6mYCE6EYVN0V1g' => 
+    'generated::bzXpwU7Aqg1s1iLL' => 
     array (
       'methods' => 
       array (
@@ -11318,7 +10796,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::vT6mYCE6EYVN0V1g',
+        'as' => 'generated::bzXpwU7Aqg1s1iLL',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11334,7 +10812,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::viLNAj6RZA8Vc3nr' => 
+    'generated::A78KIxMM3topnnuu' => 
     array (
       'methods' => 
       array (
@@ -11359,7 +10837,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::viLNAj6RZA8Vc3nr',
+        'as' => 'generated::A78KIxMM3topnnuu',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11375,7 +10853,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ud9kT5wjmAUx9vLx' => 
+    'generated::QA1d65gs0hHmrUpu' => 
     array (
       'methods' => 
       array (
@@ -11389,7 +10867,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Handouts\\LMSHandoutController@overview',
@@ -11399,7 +10877,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ud9kT5wjmAUx9vLx',
+        'as' => 'generated::QA1d65gs0hHmrUpu',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11415,7 +10893,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::CCyXUK5TD8RNwdDE' => 
+    'generated::QlQzVyDMfSxWSVDg' => 
     array (
       'methods' => 
       array (
@@ -11429,7 +10907,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Handouts\\LMSHandoutController@view',
@@ -11439,7 +10917,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::CCyXUK5TD8RNwdDE',
+        'as' => 'generated::QlQzVyDMfSxWSVDg',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11455,7 +10933,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ST3LCDyVAHM9xFIP' => 
+    'generated::HlnXCSGhQHC42lra' => 
     array (
       'methods' => 
       array (
@@ -11469,7 +10947,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Handouts\\LMSHandoutController@store',
@@ -11479,7 +10957,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ST3LCDyVAHM9xFIP',
+        'as' => 'generated::HlnXCSGhQHC42lra',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11495,7 +10973,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::2jNf4t9bgILfyC9C' => 
+    'generated::rPbs1dO9o9O75VJc' => 
     array (
       'methods' => 
       array (
@@ -11509,7 +10987,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentController@view',
@@ -11519,7 +10997,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::2jNf4t9bgILfyC9C',
+        'as' => 'generated::rPbs1dO9o9O75VJc',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11535,7 +11013,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::95novzMldrSRMs3R' => 
+    'generated::nCXaFoLhfQKRHu7E' => 
     array (
       'methods' => 
       array (
@@ -11549,7 +11027,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentController@viewAssessment',
@@ -11559,7 +11037,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::95novzMldrSRMs3R',
+        'as' => 'generated::nCXaFoLhfQKRHu7E',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11575,7 +11053,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::TgN1EMdAq7Vb2zlz' => 
+    'generated::LpthAvGgNaTJrQzi' => 
     array (
       'methods' => 
       array (
@@ -11589,7 +11067,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentController@viewTopic',
@@ -11599,7 +11077,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::TgN1EMdAq7Vb2zlz',
+        'as' => 'generated::LpthAvGgNaTJrQzi',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11615,7 +11093,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::DeSDm7S6yDLshRSy' => 
+    'generated::DMK6S6QSyjT0IUGH' => 
     array (
       'methods' => 
       array (
@@ -11629,7 +11107,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentController@viewAssessmentContent',
@@ -11639,7 +11117,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::DeSDm7S6yDLshRSy',
+        'as' => 'generated::DMK6S6QSyjT0IUGH',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11655,7 +11133,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::VrnGn2Aew5EzhbEl' => 
+    'generated::llHcgKtuHphxtsF0' => 
     array (
       'methods' => 
       array (
@@ -11669,7 +11147,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentController@create',
@@ -11679,7 +11157,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::VrnGn2Aew5EzhbEl',
+        'as' => 'generated::llHcgKtuHphxtsF0',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11695,7 +11173,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::xo9rTm9lbGT8urmJ' => 
+    'generated::joD66vY7YyLkQh5T' => 
     array (
       'methods' => 
       array (
@@ -11709,7 +11187,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentController@update',
@@ -11719,7 +11197,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::xo9rTm9lbGT8urmJ',
+        'as' => 'generated::joD66vY7YyLkQh5T',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11735,7 +11213,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::pE8lu8RUdB3c5f52' => 
+    'generated::SZxLNT7HZG2oNB9q' => 
     array (
       'methods' => 
       array (
@@ -11749,7 +11227,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentController@delete',
@@ -11759,7 +11237,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::pE8lu8RUdB3c5f52',
+        'as' => 'generated::SZxLNT7HZG2oNB9q',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11775,7 +11253,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::t0IUm0opw2TW5ntb' => 
+    'generated::NJmGLtYQIjBPzJ8V' => 
     array (
       'methods' => 
       array (
@@ -11790,7 +11268,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentSectionController@view',
@@ -11800,7 +11278,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::t0IUm0opw2TW5ntb',
+        'as' => 'generated::NJmGLtYQIjBPzJ8V',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11816,7 +11294,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::BHxf8hycK0B6Nd0g' => 
+    'generated::IKROpZlStcLjve5w' => 
     array (
       'methods' => 
       array (
@@ -11830,7 +11308,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentSectionController@create',
@@ -11840,7 +11318,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::BHxf8hycK0B6Nd0g',
+        'as' => 'generated::IKROpZlStcLjve5w',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11856,7 +11334,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::AKP9TGBz165WWgzt' => 
+    'generated::2EHS5FlQIu8mmPsW' => 
     array (
       'methods' => 
       array (
@@ -11870,7 +11348,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentSectionController@update',
@@ -11880,7 +11358,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::AKP9TGBz165WWgzt',
+        'as' => 'generated::2EHS5FlQIu8mmPsW',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11896,7 +11374,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::lBfTfJgATYylzesr' => 
+    'generated::iyqkYzIyvzCs2glL' => 
     array (
       'methods' => 
       array (
@@ -11910,7 +11388,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentSectionController@delete',
@@ -11920,7 +11398,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::lBfTfJgATYylzesr',
+        'as' => 'generated::iyqkYzIyvzCs2glL',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11936,7 +11414,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3olNwvYtcdAQc8uQ' => 
+    'generated::lpxjsxxqRQ6FGUr1' => 
     array (
       'methods' => 
       array (
@@ -11951,7 +11429,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentQuestionController@view',
@@ -11961,7 +11439,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::3olNwvYtcdAQc8uQ',
+        'as' => 'generated::lpxjsxxqRQ6FGUr1',
       ),
       'fallback' => false,
       'defaults' => 
@@ -11977,7 +11455,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Y3PxPrHp7JVadK8Y' => 
+    'generated::SDrEbIZRDzm6ewMz' => 
     array (
       'methods' => 
       array (
@@ -11991,7 +11469,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentQuestionController@create',
@@ -12001,7 +11479,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Y3PxPrHp7JVadK8Y',
+        'as' => 'generated::SDrEbIZRDzm6ewMz',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12017,7 +11495,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::RqBP2B841L9xBS3q' => 
+    'generated::cDTRFoWIMwREZhsA' => 
     array (
       'methods' => 
       array (
@@ -12031,7 +11509,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentQuestionController@update',
@@ -12041,7 +11519,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::RqBP2B841L9xBS3q',
+        'as' => 'generated::cDTRFoWIMwREZhsA',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12057,7 +11535,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::miRNpM6zdUYuPHup' => 
+    'generated::SHFww16jGmMhCuUr' => 
     array (
       'methods' => 
       array (
@@ -12071,7 +11549,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Trainer\\Assessments\\LMSAssessmentQuestionController@delete',
@@ -12081,7 +11559,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::miRNpM6zdUYuPHup',
+        'as' => 'generated::SHFww16jGmMhCuUr',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12097,7 +11575,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::MZsIjqTUo0Yxourr' => 
+    'generated::QdQJEupxjKONfeEm' => 
     array (
       'methods' => 
       array (
@@ -12111,7 +11589,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\LMSController@overview',
@@ -12121,7 +11599,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::MZsIjqTUo0Yxourr',
+        'as' => 'generated::QdQJEupxjKONfeEm',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12137,7 +11615,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::0XYNn6zjft4f7wq3' => 
+    'generated::xTbEeNDGnZya7SbM' => 
     array (
       'methods' => 
       array (
@@ -12151,7 +11629,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\LMSController@view',
@@ -12161,7 +11639,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::0XYNn6zjft4f7wq3',
+        'as' => 'generated::xTbEeNDGnZya7SbM',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12177,7 +11655,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Y2WA9hbyPOCyn4QM' => 
+    'generated::cXezXrHIPmyzFB5r' => 
     array (
       'methods' => 
       array (
@@ -12191,7 +11669,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\LMSController@viewModule',
@@ -12201,7 +11679,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Y2WA9hbyPOCyn4QM',
+        'as' => 'generated::cXezXrHIPmyzFB5r',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12217,7 +11695,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::lRDhY1prjsJfMLcf' => 
+    'generated::KkPOpgdx1lTtoufK' => 
     array (
       'methods' => 
       array (
@@ -12231,7 +11709,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\LMSController@viewContentById',
@@ -12241,7 +11719,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::lRDhY1prjsJfMLcf',
+        'as' => 'generated::KkPOpgdx1lTtoufK',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12257,7 +11735,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::s6riLPvMuHDVBZHV' => 
+    'generated::8uCTbazA5j4E541t' => 
     array (
       'methods' => 
       array (
@@ -12271,7 +11749,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\LMSController@create',
@@ -12281,7 +11759,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::s6riLPvMuHDVBZHV',
+        'as' => 'generated::8uCTbazA5j4E541t',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12297,7 +11775,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::tonAPOxfaJMLpsrQ' => 
+    'generated::PGCgDoik8M2C0rBm' => 
     array (
       'methods' => 
       array (
@@ -12311,7 +11789,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\LMSController@createSectionContents',
@@ -12321,7 +11799,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::tonAPOxfaJMLpsrQ',
+        'as' => 'generated::PGCgDoik8M2C0rBm',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12337,7 +11815,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ZeVMFujSG7o1Dlk8' => 
+    'generated::8tiy6niuM0im1tLT' => 
     array (
       'methods' => 
       array (
@@ -12351,7 +11829,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\LMSController@updateForContent',
@@ -12361,7 +11839,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ZeVMFujSG7o1Dlk8',
+        'as' => 'generated::8tiy6niuM0im1tLT',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12377,7 +11855,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Ak78ThECADO4DDeI' => 
+    'generated::4cd1yK28Vf2Ku3GM' => 
     array (
       'methods' => 
       array (
@@ -12391,7 +11869,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\LMSController@updateForContentParent',
@@ -12401,7 +11879,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Ak78ThECADO4DDeI',
+        'as' => 'generated::4cd1yK28Vf2Ku3GM',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12417,7 +11895,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::QElMOpt9ZXDlhzii' => 
+    'generated::vaYle35fvwQdOitR' => 
     array (
       'methods' => 
       array (
@@ -12431,7 +11909,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\LMSController@delete',
@@ -12441,7 +11919,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::QElMOpt9ZXDlhzii',
+        'as' => 'generated::vaYle35fvwQdOitR',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12457,7 +11935,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::lEOStCo8miIEYk3P' => 
+    'generated::xnDqL0UuTxjxvkgT' => 
     array (
       'methods' => 
       array (
@@ -12471,7 +11949,7 @@ app('router')->setCompiledRoutes(
           0 => 'api',
           1 => 'auth:sanctum',
           2 => 'throttle:60,1',
-          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN',
+          3 => 'user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\LMSController@deleteUpload',
@@ -12481,7 +11959,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::lEOStCo8miIEYk3P',
+        'as' => 'generated::xnDqL0UuTxjxvkgT',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12497,7 +11975,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::v4wCT0aFfmHb07ts' => 
+    'generated::PaJONBgHsB9NKFPi' => 
     array (
       'methods' => 
       array (
@@ -12520,7 +11998,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::v4wCT0aFfmHb07ts',
+        'as' => 'generated::PaJONBgHsB9NKFPi',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12536,7 +12014,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::kdkzejCWE14fT0HN' => 
+    'generated::8sf9pm1kfW6vkl3S' => 
     array (
       'methods' => 
       array (
@@ -12558,7 +12036,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::kdkzejCWE14fT0HN',
+        'as' => 'generated::8sf9pm1kfW6vkl3S',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12574,7 +12052,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::EKCec9sywtVd8P5c' => 
+    'generated::Nuzyctg6cKidiDS4' => 
     array (
       'methods' => 
       array (
@@ -12596,7 +12074,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::EKCec9sywtVd8P5c',
+        'as' => 'generated::Nuzyctg6cKidiDS4',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12612,7 +12090,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ApdaOtlOMoJYMCGW' => 
+    'generated::4gjnRzeSWHHktuuJ' => 
     array (
       'methods' => 
       array (
@@ -12634,7 +12112,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ApdaOtlOMoJYMCGW',
+        'as' => 'generated::4gjnRzeSWHHktuuJ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12650,7 +12128,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::4P55BPAxK5NxAhL6' => 
+    'generated::FjqQtkBzcTwVSmd5' => 
     array (
       'methods' => 
       array (
@@ -12672,7 +12150,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::4P55BPAxK5NxAhL6',
+        'as' => 'generated::FjqQtkBzcTwVSmd5',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12688,7 +12166,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::hKhKYi0EwBIUQ3fi' => 
+    'generated::nRMjjiUvfj693Bea' => 
     array (
       'methods' => 
       array (
@@ -12701,7 +12179,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DashboardCtrl@dashboard_data',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DashboardCtrl@dashboard_data',
@@ -12710,7 +12188,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::hKhKYi0EwBIUQ3fi',
+        'as' => 'generated::nRMjjiUvfj693Bea',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12726,7 +12204,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Lf0qMRlTx9C9dyhM' => 
+    'generated::oJ2KItpJ0pwvSBR3' => 
     array (
       'methods' => 
       array (
@@ -12739,8 +12217,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\TermsAndConditionCtrl@get_terms_and_condition',
@@ -12750,7 +12228,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Lf0qMRlTx9C9dyhM',
+        'as' => 'generated::oJ2KItpJ0pwvSBR3',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12766,7 +12244,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::TwAErC3QmILNT5YQ' => 
+    'generated::cWJHWaU29xPvSPQl' => 
     array (
       'methods' => 
       array (
@@ -12779,8 +12257,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\TermsAndConditionCtrl@create_or_update_term_and_condition',
@@ -12790,7 +12268,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::TwAErC3QmILNT5YQ',
+        'as' => 'generated::cWJHWaU29xPvSPQl',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12806,7 +12284,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::OLGkATdBKxNwWwIE' => 
+    'generated::CJdY5pwazDpXYuX7' => 
     array (
       'methods' => 
       array (
@@ -12819,8 +12297,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\TermsAndConditionCtrl@remove_terms_and_condition',
@@ -12830,7 +12308,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::OLGkATdBKxNwWwIE',
+        'as' => 'generated::CJdY5pwazDpXYuX7',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12846,7 +12324,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::7hSRKK1n4VccHAKR' => 
+    'generated::42ImqOpJ98Ww0VOB' => 
     array (
       'methods' => 
       array (
@@ -12860,8 +12338,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_remarks_count',
@@ -12871,7 +12349,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::7hSRKK1n4VccHAKR',
+        'as' => 'generated::42ImqOpJ98Ww0VOB',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12887,7 +12365,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::dxfb7GhgMAUbIvZp' => 
+    'generated::blB9eSP9tY95HrTe' => 
     array (
       'methods' => 
       array (
@@ -12901,8 +12379,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_enrollment_count',
@@ -12912,7 +12390,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::dxfb7GhgMAUbIvZp',
+        'as' => 'generated::blB9eSP9tY95HrTe',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12928,7 +12406,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Dn0WocCetwRQrJ9W' => 
+    'generated::EmmgUTCinZUvz6Mi' => 
     array (
       'methods' => 
       array (
@@ -12941,8 +12419,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_applications',
@@ -12952,7 +12430,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Dn0WocCetwRQrJ9W',
+        'as' => 'generated::EmmgUTCinZUvz6Mi',
       ),
       'fallback' => false,
       'defaults' => 
@@ -12968,7 +12446,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::uC5Lz2SYvOgGNcih' => 
+    'generated::kvRaWtEKhiJmrVZc' => 
     array (
       'methods' => 
       array (
@@ -12981,8 +12459,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@requirement_remark',
@@ -12992,7 +12470,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::uC5Lz2SYvOgGNcih',
+        'as' => 'generated::kvRaWtEKhiJmrVZc',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13008,7 +12486,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::vcug9BVFZIXHJ7bm' => 
+    'generated::b2v3x6uGHz8vIere' => 
     array (
       'methods' => 
       array (
@@ -13021,8 +12499,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@set_training_status',
@@ -13032,7 +12510,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::vcug9BVFZIXHJ7bm',
+        'as' => 'generated::b2v3x6uGHz8vIere',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13048,7 +12526,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::QFpCXDEmH3pOkTj3' => 
+    'generated::VlU4A0j4tOWgUVw0' => 
     array (
       'methods' => 
       array (
@@ -13061,8 +12539,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@set_expired_status',
@@ -13072,7 +12550,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::QFpCXDEmH3pOkTj3',
+        'as' => 'generated::VlU4A0j4tOWgUVw0',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13088,7 +12566,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::4EPLq1ceBMWGcEoS' => 
+    'generated::Ux0mHRS9hPFC6f4K' => 
     array (
       'methods' => 
       array (
@@ -13102,8 +12580,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_training_request',
@@ -13113,7 +12591,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::4EPLq1ceBMWGcEoS',
+        'as' => 'generated::Ux0mHRS9hPFC6f4K',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13129,7 +12607,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::52aiOlzbptC8s7TQ' => 
+    'generated::My9HrXzx2q84N7JX' => 
     array (
       'methods' => 
       array (
@@ -13143,8 +12621,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_enrolled',
@@ -13154,7 +12632,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::52aiOlzbptC8s7TQ',
+        'as' => 'generated::My9HrXzx2q84N7JX',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13170,7 +12648,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::aCyYw5Dgn4WFMmGN' => 
+    'generated::V3whyjXcVFz40QJV' => 
     array (
       'methods' => 
       array (
@@ -13184,8 +12662,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_finished',
@@ -13195,7 +12673,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::aCyYw5Dgn4WFMmGN',
+        'as' => 'generated::V3whyjXcVFz40QJV',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13211,7 +12689,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::vyXUJ7ZbBKvw2gKN' => 
+    'generated::RZhIHbMxRVmwI5Ca' => 
     array (
       'methods' => 
       array (
@@ -13224,8 +12702,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@lock_requirement',
@@ -13235,7 +12713,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::vyXUJ7ZbBKvw2gKN',
+        'as' => 'generated::RZhIHbMxRVmwI5Ca',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13251,7 +12729,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::OqDbG8Ll150Lu8Xl' => 
+    'generated::5I8XRlYlBmsVsBmI' => 
     array (
       'methods' => 
       array (
@@ -13265,8 +12743,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_schedules',
@@ -13276,7 +12754,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::OqDbG8Ll150Lu8Xl',
+        'as' => 'generated::5I8XRlYlBmsVsBmI',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13292,7 +12770,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3MzxA68uvzpEgYJZ' => 
+    'generated::ffMnG6LpJpzrXriv' => 
     array (
       'methods' => 
       array (
@@ -13305,8 +12783,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_trainees_by_schedule',
@@ -13316,7 +12794,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::3MzxA68uvzpEgYJZ',
+        'as' => 'generated::ffMnG6LpJpzrXriv',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13332,7 +12810,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::RhPjf2NVWJhfqHeQ' => 
+    'generated::dCJ78GNUQnKiS2G7' => 
     array (
       'methods' => 
       array (
@@ -13345,8 +12823,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@move_trainees',
@@ -13356,7 +12834,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::RhPjf2NVWJhfqHeQ',
+        'as' => 'generated::dCJ78GNUQnKiS2G7',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13372,7 +12850,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::IJXKxrjffyqIUlDm' => 
+    'generated::y4edQY8YF8ZLkzyM' => 
     array (
       'methods' => 
       array (
@@ -13385,8 +12863,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_schedule',
@@ -13396,7 +12874,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::IJXKxrjffyqIUlDm',
+        'as' => 'generated::y4edQY8YF8ZLkzyM',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13412,7 +12890,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::jmzShBHRw78cEhjd' => 
+    'generated::eQd1TaYSOLhRwdiL' => 
     array (
       'methods' => 
       array (
@@ -13425,8 +12903,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_schedule',
@@ -13436,7 +12914,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::jmzShBHRw78cEhjd',
+        'as' => 'generated::eQd1TaYSOLhRwdiL',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13452,7 +12930,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::GJZqe3omb5cE1GUK' => 
+    'generated::SNoTfymn0nAWtQtG' => 
     array (
       'methods' => 
       array (
@@ -13466,8 +12944,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_modules',
@@ -13477,7 +12955,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::GJZqe3omb5cE1GUK',
+        'as' => 'generated::SNoTfymn0nAWtQtG',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13493,7 +12971,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3h65s7ttdy3TpFjd' => 
+    'generated::pUiD9WJINKmdqOU7' => 
     array (
       'methods' => 
       array (
@@ -13506,8 +12984,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_module',
@@ -13517,7 +12995,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::3h65s7ttdy3TpFjd',
+        'as' => 'generated::pUiD9WJINKmdqOU7',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13533,7 +13011,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::PoyOFAY8tkPiJoT4' => 
+    'generated::W8TOF3nUXBEaoDK2' => 
     array (
       'methods' => 
       array (
@@ -13546,8 +13024,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_module',
@@ -13557,7 +13035,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::PoyOFAY8tkPiJoT4',
+        'as' => 'generated::W8TOF3nUXBEaoDK2',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13573,7 +13051,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::dCrZfQvgaSwTYgmj' => 
+    'generated::Flgtjmq76fUe8fvq' => 
     array (
       'methods' => 
       array (
@@ -13587,8 +13065,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_module_types',
@@ -13598,7 +13076,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::dCrZfQvgaSwTYgmj',
+        'as' => 'generated::Flgtjmq76fUe8fvq',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13614,7 +13092,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::7BJ1SyvVkefy9DgH' => 
+    'generated::GZIadq7JHEzrOYKJ' => 
     array (
       'methods' => 
       array (
@@ -13627,8 +13105,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_module_type',
@@ -13638,7 +13116,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::7BJ1SyvVkefy9DgH',
+        'as' => 'generated::GZIadq7JHEzrOYKJ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13654,7 +13132,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ZVbSTSW9JUDy20Am' => 
+    'generated::jNpEo6og9N9RNTQE' => 
     array (
       'methods' => 
       array (
@@ -13667,8 +13145,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_module_type',
@@ -13678,7 +13156,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ZVbSTSW9JUDy20Am',
+        'as' => 'generated::jNpEo6og9N9RNTQE',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13694,7 +13172,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Lzb7iWUwEqGxcRll' => 
+    'generated::emArgJTt2jTfXSgJ' => 
     array (
       'methods' => 
       array (
@@ -13708,8 +13186,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_certificates',
@@ -13719,7 +13197,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Lzb7iWUwEqGxcRll',
+        'as' => 'generated::emArgJTt2jTfXSgJ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13735,7 +13213,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::iCI8LbBLatsX8EAu' => 
+    'generated::b1jdFhmbMwIwoXdB' => 
     array (
       'methods' => 
       array (
@@ -13748,8 +13226,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_certificate',
@@ -13759,7 +13237,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::iCI8LbBLatsX8EAu',
+        'as' => 'generated::b1jdFhmbMwIwoXdB',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13775,7 +13253,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::K73C8gynpdvzoRzc' => 
+    'generated::WarytV9b7eokMGjw' => 
     array (
       'methods' => 
       array (
@@ -13788,8 +13266,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_certificate',
@@ -13799,7 +13277,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::K73C8gynpdvzoRzc',
+        'as' => 'generated::WarytV9b7eokMGjw',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13815,7 +13293,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::0CaHiFlNvz0YLlH1' => 
+    'generated::eG1TWPLcLWCesI3w' => 
     array (
       'methods' => 
       array (
@@ -13829,8 +13307,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_requirements',
@@ -13840,7 +13318,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::0CaHiFlNvz0YLlH1',
+        'as' => 'generated::eG1TWPLcLWCesI3w',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13856,7 +13334,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ApoYuWapTCtY7Oh8' => 
+    'generated::teO8UBSHG8IaD3bZ' => 
     array (
       'methods' => 
       array (
@@ -13869,8 +13347,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_requirement',
@@ -13880,7 +13358,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ApoYuWapTCtY7Oh8',
+        'as' => 'generated::teO8UBSHG8IaD3bZ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13896,7 +13374,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::pGgEE93siH5ePHfo' => 
+    'generated::k9VVi4851SNbsl2F' => 
     array (
       'methods' => 
       array (
@@ -13909,8 +13387,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_requirement',
@@ -13920,7 +13398,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::pGgEE93siH5ePHfo',
+        'as' => 'generated::k9VVi4851SNbsl2F',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13936,7 +13414,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::0EG2mRGH6Rs7geKY' => 
+    'generated::v7hucSJ7FbAdA2V8' => 
     array (
       'methods' => 
       array (
@@ -13950,8 +13428,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_schools',
@@ -13961,7 +13439,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::0EG2mRGH6Rs7geKY',
+        'as' => 'generated::v7hucSJ7FbAdA2V8',
       ),
       'fallback' => false,
       'defaults' => 
@@ -13977,7 +13455,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::nKTznnjrJqdCod4n' => 
+    'generated::0emJtHSFqPWTeaj7' => 
     array (
       'methods' => 
       array (
@@ -13990,8 +13468,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_school',
@@ -14001,7 +13479,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::nKTznnjrJqdCod4n',
+        'as' => 'generated::0emJtHSFqPWTeaj7',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14017,7 +13495,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::0oF62Fx9lZjSjAAR' => 
+    'generated::C7DyCT1PKWZRqMAK' => 
     array (
       'methods' => 
       array (
@@ -14030,8 +13508,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_school',
@@ -14041,7 +13519,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::0oF62Fx9lZjSjAAR',
+        'as' => 'generated::C7DyCT1PKWZRqMAK',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14057,7 +13535,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::zuOHihLu2O8EkrFE' => 
+    'generated::6vsIlGTQLks4Mige' => 
     array (
       'methods' => 
       array (
@@ -14071,8 +13549,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_courses',
@@ -14082,7 +13560,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::zuOHihLu2O8EkrFE',
+        'as' => 'generated::6vsIlGTQLks4Mige',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14098,7 +13576,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ZANnE5lOXTcdtZSM' => 
+    'generated::C80NFRfp4MbSU884' => 
     array (
       'methods' => 
       array (
@@ -14111,8 +13589,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_course',
@@ -14122,7 +13600,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ZANnE5lOXTcdtZSM',
+        'as' => 'generated::C80NFRfp4MbSU884',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14138,7 +13616,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::lGgsSGA1hBYc76Nb' => 
+    'generated::pWDlIEqXXtJdnNOh' => 
     array (
       'methods' => 
       array (
@@ -14151,8 +13629,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_course',
@@ -14162,7 +13640,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::lGgsSGA1hBYc76Nb',
+        'as' => 'generated::pWDlIEqXXtJdnNOh',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14178,7 +13656,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::QxIuZ0pJHc3z9BmG' => 
+    'generated::4mvvkYotsoVQrESN' => 
     array (
       'methods' => 
       array (
@@ -14192,8 +13670,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_vouchers',
@@ -14203,7 +13681,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::QxIuZ0pJHc3z9BmG',
+        'as' => 'generated::4mvvkYotsoVQrESN',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14219,7 +13697,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::XZyOQtyWQXMroQKw' => 
+    'generated::ICEHzVsI7OXkwp1g' => 
     array (
       'methods' => 
       array (
@@ -14232,8 +13710,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_voucher',
@@ -14243,7 +13721,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::XZyOQtyWQXMroQKw',
+        'as' => 'generated::ICEHzVsI7OXkwp1g',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14259,7 +13737,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::IUzxwRtU2foegm9l' => 
+    'generated::MUZnvDyoI2AOstWJ' => 
     array (
       'methods' => 
       array (
@@ -14272,8 +13750,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_voucher',
@@ -14283,7 +13761,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::IUzxwRtU2foegm9l',
+        'as' => 'generated::MUZnvDyoI2AOstWJ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14299,7 +13777,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::FRxlJjj9ajDJYLoj' => 
+    'generated::pFmBUiCZVGlRJA2e' => 
     array (
       'methods' => 
       array (
@@ -14313,8 +13791,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_sponsors',
@@ -14324,7 +13802,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::FRxlJjj9ajDJYLoj',
+        'as' => 'generated::pFmBUiCZVGlRJA2e',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14340,7 +13818,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::oijpTJpKfYuHKoku' => 
+    'generated::U0fIUaDE5tAOx2JL' => 
     array (
       'methods' => 
       array (
@@ -14353,8 +13831,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_sponsor',
@@ -14364,7 +13842,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::oijpTJpKfYuHKoku',
+        'as' => 'generated::U0fIUaDE5tAOx2JL',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14380,7 +13858,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::reGk6gVUzGNXU8QH' => 
+    'generated::I5ewQTFUzUO9Lq0D' => 
     array (
       'methods' => 
       array (
@@ -14393,8 +13871,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_sponsor',
@@ -14404,7 +13882,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::reGk6gVUzGNXU8QH',
+        'as' => 'generated::I5ewQTFUzUO9Lq0D',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14420,7 +13898,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::S6ruRi4z3zAXrbiX' => 
+    'generated::UePIPqBD0SU3EFYE' => 
     array (
       'methods' => 
       array (
@@ -14434,8 +13912,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_licenses',
@@ -14445,7 +13923,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::S6ruRi4z3zAXrbiX',
+        'as' => 'generated::UePIPqBD0SU3EFYE',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14461,7 +13939,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::9enHAuCRnVyCBDDr' => 
+    'generated::nOk7smmXUseRTzIx' => 
     array (
       'methods' => 
       array (
@@ -14474,8 +13952,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_license',
@@ -14485,7 +13963,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::9enHAuCRnVyCBDDr',
+        'as' => 'generated::nOk7smmXUseRTzIx',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14501,7 +13979,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::wb5I7lU2tZXGauvH' => 
+    'generated::CbzlorfVWsj8CRIn' => 
     array (
       'methods' => 
       array (
@@ -14514,8 +13992,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_license',
@@ -14525,7 +14003,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::wb5I7lU2tZXGauvH',
+        'as' => 'generated::CbzlorfVWsj8CRIn',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14541,7 +14019,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::9jJQqQ7vQPpg1xdL' => 
+    'generated::08gWBMKZlX2gV1Go' => 
     array (
       'methods' => 
       array (
@@ -14555,8 +14033,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_ranks',
@@ -14566,7 +14044,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::9jJQqQ7vQPpg1xdL',
+        'as' => 'generated::08gWBMKZlX2gV1Go',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14582,7 +14060,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::E8Q1W3pbgfgL4JMc' => 
+    'generated::mK3Qc061uIpylN2H' => 
     array (
       'methods' => 
       array (
@@ -14595,8 +14073,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_rank',
@@ -14606,7 +14084,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::E8Q1W3pbgfgL4JMc',
+        'as' => 'generated::mK3Qc061uIpylN2H',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14622,7 +14100,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::dQ8YMCUTuqqIcrRm' => 
+    'generated::DKfRdUxpIn3iz2bV' => 
     array (
       'methods' => 
       array (
@@ -14635,8 +14113,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_rank',
@@ -14646,7 +14124,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::dQ8YMCUTuqqIcrRm',
+        'as' => 'generated::DKfRdUxpIn3iz2bV',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14662,7 +14140,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::UjYpUNWT2zKT7p9P' => 
+    'generated::ZaHTc9rhLsCHEJVk' => 
     array (
       'methods' => 
       array (
@@ -14676,8 +14154,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_facilitators',
@@ -14687,7 +14165,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::UjYpUNWT2zKT7p9P',
+        'as' => 'generated::ZaHTc9rhLsCHEJVk',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14703,7 +14181,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Qeb0dSgIYbBlVAu0' => 
+    'generated::CgJ3leLzTlaGzd9N' => 
     array (
       'methods' => 
       array (
@@ -14716,8 +14194,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_facilitator',
@@ -14727,7 +14205,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Qeb0dSgIYbBlVAu0',
+        'as' => 'generated::CgJ3leLzTlaGzd9N',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14743,7 +14221,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ZjeDQp3F0WdvscJu' => 
+    'generated::NqaxZ9wGrnyuftlI' => 
     array (
       'methods' => 
       array (
@@ -14756,8 +14234,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_facilitator',
@@ -14767,7 +14245,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ZjeDQp3F0WdvscJu',
+        'as' => 'generated::NqaxZ9wGrnyuftlI',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14783,7 +14261,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::fymLgK93O4WIcGu8' => 
+    'generated::bIJNe1zlOrakt1i2' => 
     array (
       'methods' => 
       array (
@@ -14797,8 +14275,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_training_fees_predata',
@@ -14808,7 +14286,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::fymLgK93O4WIcGu8',
+        'as' => 'generated::bIJNe1zlOrakt1i2',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14824,7 +14302,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::WSN27sfovp11TTIM' => 
+    'generated::Qkc7ANWSyGGZwc9e' => 
     array (
       'methods' => 
       array (
@@ -14838,8 +14316,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@get_course_module_fees',
@@ -14849,7 +14327,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::WSN27sfovp11TTIM',
+        'as' => 'generated::Qkc7ANWSyGGZwc9e',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14865,7 +14343,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::TA4msErkPyUwloNx' => 
+    'generated::AJi274993o5bZu0F' => 
     array (
       'methods' => 
       array (
@@ -14878,8 +14356,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@create_or_update_course_fee',
@@ -14889,7 +14367,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::TA4msErkPyUwloNx',
+        'as' => 'generated::AJi274993o5bZu0F',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14905,7 +14383,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::4JPoltuMp1EhDDhf' => 
+    'generated::7Rs6WdORV7N6OemQ' => 
     array (
       'methods' => 
       array (
@@ -14918,8 +14396,8 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
+          3 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS',
           4 => 'throttle:60,1',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\EnrollmentCtrl@remove_course_fee',
@@ -14929,7 +14407,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::4JPoltuMp1EhDDhf',
+        'as' => 'generated::7Rs6WdORV7N6OemQ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14945,7 +14423,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::b5lKMOHkrpslswji' => 
+    'generated::ePBFR50vUM3t9XGw' => 
     array (
       'methods' => 
       array (
@@ -14958,7 +14436,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -14969,7 +14447,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::b5lKMOHkrpslswji',
+        'as' => 'generated::ePBFR50vUM3t9XGw',
       ),
       'fallback' => false,
       'defaults' => 
@@ -14985,7 +14463,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::uZerj9Jcxjb4Bfwd' => 
+    'generated::UIN5oTFAYWye145t' => 
     array (
       'methods' => 
       array (
@@ -14998,7 +14476,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15009,7 +14487,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::uZerj9Jcxjb4Bfwd',
+        'as' => 'generated::UIN5oTFAYWye145t',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15025,7 +14503,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::fP1SFyjRbeHbjyYR' => 
+    'generated::boYl0S0oPdGBDUQD' => 
     array (
       'methods' => 
       array (
@@ -15038,7 +14516,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15049,7 +14527,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::fP1SFyjRbeHbjyYR',
+        'as' => 'generated::boYl0S0oPdGBDUQD',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15065,7 +14543,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::WuaZXhfmI9wBDvy2' => 
+    'generated::znz5tpvHbBTXObh1' => 
     array (
       'methods' => 
       array (
@@ -15079,7 +14557,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15090,7 +14568,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::WuaZXhfmI9wBDvy2',
+        'as' => 'generated::znz5tpvHbBTXObh1',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15106,7 +14584,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::580QxRjykFmj4lYh' => 
+    'generated::5oLqnpJe6tuvkYVl' => 
     array (
       'methods' => 
       array (
@@ -15120,7 +14598,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15131,7 +14609,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::580QxRjykFmj4lYh',
+        'as' => 'generated::5oLqnpJe6tuvkYVl',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15147,7 +14625,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::tjjuAy2CYVb2rSe3' => 
+    'generated::K8rs1OtBfeMZHCBM' => 
     array (
       'methods' => 
       array (
@@ -15162,7 +14640,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15173,7 +14651,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::tjjuAy2CYVb2rSe3',
+        'as' => 'generated::K8rs1OtBfeMZHCBM',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15189,7 +14667,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::yLXpog2Htfm5mo8H' => 
+    'generated::N3leK6Id0H9uZW20' => 
     array (
       'methods' => 
       array (
@@ -15203,7 +14681,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15214,7 +14692,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::yLXpog2Htfm5mo8H',
+        'as' => 'generated::N3leK6Id0H9uZW20',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15230,7 +14708,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Mzugr9BDbEe9DA2D' => 
+    'generated::7svtJrc4PQV4FKwW' => 
     array (
       'methods' => 
       array (
@@ -15244,7 +14722,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15255,7 +14733,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Mzugr9BDbEe9DA2D',
+        'as' => 'generated::7svtJrc4PQV4FKwW',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15271,7 +14749,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::haWhJiKpWskMnEIB' => 
+    'generated::4bcP4xCR4fRKoVqu' => 
     array (
       'methods' => 
       array (
@@ -15284,7 +14762,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15295,7 +14773,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::haWhJiKpWskMnEIB',
+        'as' => 'generated::4bcP4xCR4fRKoVqu',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15311,7 +14789,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::HCP9DdZcD9Qr7elq' => 
+    'generated::oiijpKSyvdQVdetg' => 
     array (
       'methods' => 
       array (
@@ -15324,7 +14802,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15335,7 +14813,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::HCP9DdZcD9Qr7elq',
+        'as' => 'generated::oiijpKSyvdQVdetg',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15351,7 +14829,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::kf54nQbURgRpaVWH' => 
+    'generated::p9ZcVticxwgSKwDV' => 
     array (
       'methods' => 
       array (
@@ -15365,7 +14843,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15376,7 +14854,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::kf54nQbURgRpaVWH',
+        'as' => 'generated::p9ZcVticxwgSKwDV',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15392,7 +14870,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::43NYspj1gfS6H6zt' => 
+    'generated::RiUs12L4O3YJ2Xcc' => 
     array (
       'methods' => 
       array (
@@ -15405,7 +14883,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15416,7 +14894,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::43NYspj1gfS6H6zt',
+        'as' => 'generated::RiUs12L4O3YJ2Xcc',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15432,7 +14910,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::UszvitqP9pi67G74' => 
+    'generated::LtrreZoSrS5XRHt3' => 
     array (
       'methods' => 
       array (
@@ -15445,7 +14923,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15456,7 +14934,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::UszvitqP9pi67G74',
+        'as' => 'generated::LtrreZoSrS5XRHt3',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15472,7 +14950,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::WFWyDuQTDvRXWjNd' => 
+    'generated::A1XwJ2DYw0DRuAQZ' => 
     array (
       'methods' => 
       array (
@@ -15485,7 +14963,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15496,7 +14974,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::WFWyDuQTDvRXWjNd',
+        'as' => 'generated::A1XwJ2DYw0DRuAQZ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15512,7 +14990,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::K9iVlnBrYC2EAy5y' => 
+    'generated::9UUhspWQexv17Iwj' => 
     array (
       'methods' => 
       array (
@@ -15525,7 +15003,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15536,7 +15014,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::K9iVlnBrYC2EAy5y',
+        'as' => 'generated::9UUhspWQexv17Iwj',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15552,7 +15030,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Kv4PjnIkub3RsTzj' => 
+    'generated::tcOnyBXGBsZkxEzI' => 
     array (
       'methods' => 
       array (
@@ -15567,7 +15045,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15578,7 +15056,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Kv4PjnIkub3RsTzj',
+        'as' => 'generated::tcOnyBXGBsZkxEzI',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15594,7 +15072,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::0IJwr2DlzQ4aA8HV' => 
+    'generated::xGBN4ZQwEifxOOLV' => 
     array (
       'methods' => 
       array (
@@ -15607,7 +15085,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15618,7 +15096,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::0IJwr2DlzQ4aA8HV',
+        'as' => 'generated::xGBN4ZQwEifxOOLV',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15634,7 +15112,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::tC8mReZL5X7NHKBq' => 
+    'generated::BtvL5DhO98Sjq8eO' => 
     array (
       'methods' => 
       array (
@@ -15647,7 +15125,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15658,7 +15136,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::tC8mReZL5X7NHKBq',
+        'as' => 'generated::BtvL5DhO98Sjq8eO',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15674,7 +15152,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::0kG8wMdiR4aWixaj' => 
+    'generated::aQeioXOFYTX9Mw1b' => 
     array (
       'methods' => 
       array (
@@ -15687,7 +15165,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15698,7 +15176,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::0kG8wMdiR4aWixaj',
+        'as' => 'generated::aQeioXOFYTX9Mw1b',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15714,7 +15192,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::8AqR1kBWyg6z1Fh8' => 
+    'generated::hgrtzN0pzvg4Nyna' => 
     array (
       'methods' => 
       array (
@@ -15727,7 +15205,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15738,7 +15216,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::8AqR1kBWyg6z1Fh8',
+        'as' => 'generated::hgrtzN0pzvg4Nyna',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15754,7 +15232,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::rkrc2QVhHW5vj63k' => 
+    'generated::lYSIwDUyRf545pMf' => 
     array (
       'methods' => 
       array (
@@ -15767,7 +15245,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15778,7 +15256,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::rkrc2QVhHW5vj63k',
+        'as' => 'generated::lYSIwDUyRf545pMf',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15794,7 +15272,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::znnzDRGgChp7fiKP' => 
+    'generated::1ZxJ0pDivzKBG1hI' => 
     array (
       'methods' => 
       array (
@@ -15807,7 +15285,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15818,7 +15296,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::znnzDRGgChp7fiKP',
+        'as' => 'generated::1ZxJ0pDivzKBG1hI',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15834,7 +15312,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3ThmSBI5nheCjXC6' => 
+    'generated::XiAheZklX7T5f7Tc' => 
     array (
       'methods' => 
       array (
@@ -15847,7 +15325,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15858,7 +15336,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::3ThmSBI5nheCjXC6',
+        'as' => 'generated::XiAheZklX7T5f7Tc',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15874,7 +15352,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::aIzrpAWNPh9nl4PJ' => 
+    'generated::EKc1605R6Q5fzLxV' => 
     array (
       'methods' => 
       array (
@@ -15887,7 +15365,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15898,7 +15376,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::aIzrpAWNPh9nl4PJ',
+        'as' => 'generated::EKc1605R6Q5fzLxV',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15914,7 +15392,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::O1nwfTHZ4OtqbTVn' => 
+    'generated::73XTtrvdjeiK9W0Z' => 
     array (
       'methods' => 
       array (
@@ -15927,7 +15405,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15938,7 +15416,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::O1nwfTHZ4OtqbTVn',
+        'as' => 'generated::73XTtrvdjeiK9W0Z',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15954,7 +15432,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::yaigKPs5yeHLONOu' => 
+    'generated::bN900dRTZltQl7n3' => 
     array (
       'methods' => 
       array (
@@ -15967,7 +15445,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -15978,7 +15456,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::yaigKPs5yeHLONOu',
+        'as' => 'generated::bN900dRTZltQl7n3',
       ),
       'fallback' => false,
       'defaults' => 
@@ -15994,7 +15472,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::1uIkbD89IjtolyDc' => 
+    'generated::boJ8w8g9aVGmLxOY' => 
     array (
       'methods' => 
       array (
@@ -16007,7 +15485,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -16018,7 +15496,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::1uIkbD89IjtolyDc',
+        'as' => 'generated::boJ8w8g9aVGmLxOY',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16034,7 +15512,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::XMQlKRdHV2u6l4Dy' => 
+    'generated::9Aze998bPRr5aQ9G' => 
     array (
       'methods' => 
       array (
@@ -16047,7 +15525,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -16058,7 +15536,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::XMQlKRdHV2u6l4Dy',
+        'as' => 'generated::9Aze998bPRr5aQ9G',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16074,7 +15552,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::XPnmCUQbAZ8yq2kI' => 
+    'generated::hFFBEvDwzoZpbv43' => 
     array (
       'methods' => 
       array (
@@ -16087,7 +15565,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -16098,7 +15576,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::XPnmCUQbAZ8yq2kI',
+        'as' => 'generated::hFFBEvDwzoZpbv43',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16114,7 +15592,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::z5MumFq6KrNcGSqV' => 
+    'generated::mnRzJ0l0NOdwe9sV' => 
     array (
       'methods' => 
       array (
@@ -16128,7 +15606,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -16139,7 +15617,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::z5MumFq6KrNcGSqV',
+        'as' => 'generated::mnRzJ0l0NOdwe9sV',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16155,7 +15633,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::NAvXjL3x8Ud3k6JK' => 
+    'generated::ujEYz8LxrEMieojC' => 
     array (
       'methods' => 
       array (
@@ -16169,7 +15647,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -16180,7 +15658,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::NAvXjL3x8Ud3k6JK',
+        'as' => 'generated::ujEYz8LxrEMieojC',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16196,7 +15674,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::YN0jSwbwgnaeDNHH' => 
+    'generated::grwIsU5zBIbjlhSJ' => 
     array (
       'methods' => 
       array (
@@ -16209,7 +15687,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -16220,7 +15698,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::YN0jSwbwgnaeDNHH',
+        'as' => 'generated::grwIsU5zBIbjlhSJ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16236,7 +15714,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::m1AjjnIDCTQnbA5x' => 
+    'generated::p9D4wJkLrbQ2h0CZ' => 
     array (
       'methods' => 
       array (
@@ -16249,7 +15727,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-LIBRARY',
           4 => 'throttle:60,1',
         ),
@@ -16260,7 +15738,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::m1AjjnIDCTQnbA5x',
+        'as' => 'generated::p9D4wJkLrbQ2h0CZ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16276,31 +15754,31 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::2Agw52mrDycJX9fA' => 
+    'generated::elhYU3MH8bm4virn' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'api/admin/dormitory/get_terms_and_condition',
+      'uri' => 'api/admin/dormitory/count_dorm_reservation',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\TermsAndConditionCtrl@get_terms_and_condition',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\TermsAndConditionCtrl@get_terms_and_condition',
+        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@count_dorm_reservation',
+        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@count_dorm_reservation',
         'namespace' => NULL,
         'prefix' => 'api/admin/dormitory',
         'where' => 
         array (
         ),
-        'as' => 'generated::2Agw52mrDycJX9fA',
+        'as' => 'generated::elhYU3MH8bm4virn',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16316,31 +15794,31 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::q3csTYF0rFOmlacU' => 
+    'generated::sSu5ZvQtYx9SQACL' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'api/admin/dormitory/create_or_update_term_and_condition',
+      'uri' => 'api/admin/dormitory/count_service_requests',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\TermsAndConditionCtrl@create_or_update_term_and_condition',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\TermsAndConditionCtrl@create_or_update_term_and_condition',
+        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@count_service_requests',
+        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@count_service_requests',
         'namespace' => NULL,
         'prefix' => 'api/admin/dormitory',
         'where' => 
         array (
         ),
-        'as' => 'generated::q3csTYF0rFOmlacU',
+        'as' => 'generated::sSu5ZvQtYx9SQACL',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16356,102 +15834,21 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::EvsD7jMzgZZOWKqh' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'DELETE',
-      ),
-      'uri' => 'api/admin/dormitory/remove_terms_and_condition/{termsAndConditionId}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\TermsAndConditionCtrl@remove_terms_and_condition',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\TermsAndConditionCtrl@remove_terms_and_condition',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::EvsD7jMzgZZOWKqh',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::ppC5pDn13Ee2S4XU' => 
+    'generated::9JpCKRJVIz295uLw' => 
     array (
       'methods' => 
       array (
         0 => 'GET',
         1 => 'HEAD',
       ),
-      'uri' => 'api/admin/dormitory/get',
+      'uri' => 'api/admin/dormitory/get_dormitory_rooms',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@dormitories',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@dormitories',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::ppC5pDn13Ee2S4XU',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::AJHRPSlnioUx8Ddg' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'api/admin/dormitory/get_dormitory_rooms/{dormitory_id}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
@@ -16462,7 +15859,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::AJHRPSlnioUx8Ddg',
+        'as' => 'generated::9JpCKRJVIz295uLw',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16478,72 +15875,31 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::FGjyM4YP9owAoFYb' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'api/admin/dormitory/get_dormitory_info/{dormitory_id}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_dormitory_info',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_dormitory_info',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::FGjyM4YP9owAoFYb',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::VTrgLMptGagKbkye' => 
+    'generated::i7hEFR1vPZBY1mx7' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'api/admin/dormitory/create_or_update_dormitory',
+      'uri' => 'api/admin/dormitory/create_or_update_room',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_or_update_dormitory',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_or_update_dormitory',
+        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_or_update_room',
+        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_or_update_room',
         'namespace' => NULL,
         'prefix' => 'api/admin/dormitory',
         'where' => 
         array (
         ),
-        'as' => 'generated::VTrgLMptGagKbkye',
+        'as' => 'generated::i7hEFR1vPZBY1mx7',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16559,340 +15915,20 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3Dq4YMxgLTNZt92U' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/create_dormitory_rooms',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_dormitory_rooms',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_dormitory_rooms',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::3Dq4YMxgLTNZt92U',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::Mja3ZTKHSgHk4oI8' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/update_dormitory_room',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_dormitory_room',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_dormitory_room',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::Mja3ZTKHSgHk4oI8',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::pNbHLs5oFFhoraxW' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/create-walk-in-request/get_available_dorms',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_available_dorms',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_available_dorms',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::pNbHLs5oFFhoraxW',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::LwkYszaT9wvRU2N2' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/create-walk-in-request/get_available_rooms',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_available_rooms',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_available_rooms',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::LwkYszaT9wvRU2N2',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::3jFH1xDvQwRQIt6J' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/requests/get_available_supplies',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_available_supplies',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_available_supplies',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::3jFH1xDvQwRQIt6J',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::1nEA5Sjbipymg9M3' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/requests/update_dormitory_room_request',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_dormitory_room_request',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_dormitory_room_request',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::1nEA5Sjbipymg9M3',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::g5xKphQdPgV2zeQI' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/get_all_requests',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_all_requests',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_all_requests',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::g5xKphQdPgV2zeQI',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::z67BS2oeXkh5QLvM' => 
+    'generated::D6boJ6RwPQLVy3eh' => 
     array (
       'methods' => 
       array (
         0 => 'DELETE',
       ),
-      'uri' => 'api/admin/dormitory/cancel_dorm_request/{dormReqId}',
+      'uri' => 'api/admin/dormitory/remove_room/{roomId}',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@cancel_dorm_request',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@cancel_dorm_request',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::z67BS2oeXkh5QLvM',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::5WNTeBdD7dGirTmf' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'DELETE',
-      ),
-      'uri' => 'api/admin/dormitory/remove_room/{room_id}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
@@ -16903,7 +15939,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::5WNTeBdD7dGirTmf',
+        'as' => 'generated::D6boJ6RwPQLVy3eh',
       ),
       'fallback' => false,
       'defaults' => 
@@ -16919,492 +15955,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::K8G3w9OfpseFJ8UE' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'POST',
-        2 => 'HEAD',
-      ),
-      'uri' => 'api/admin/dormitory/get_inventories',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_dorm_inventories',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_dorm_inventories',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::K8G3w9OfpseFJ8UE',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::TUODkv8J9w06mE4L' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/get_inventories/create_dormitory_inventory_stock',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_dormitory_inventory_stock',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_dormitory_inventory_stock',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::TUODkv8J9w06mE4L',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::GtdZeCXggS3MDSwx' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/get_inventories/get_dormitory_inventory_stock',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_dormitory_inventory_stock',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_dormitory_inventory_stock',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::GtdZeCXggS3MDSwx',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::eriIYfPhHRTClufM' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/get_inventories/update_dormitory_inventory_stock',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_dormitory_inventory_stock',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_dormitory_inventory_stock',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::eriIYfPhHRTClufM',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::4NQ5tsZ85XsknTnO' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/provide_stocks_to_boarder',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@provide_stocks_to_boarder',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@provide_stocks_to_boarder',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::4NQ5tsZ85XsknTnO',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::YNMwtrRvYuBtM3fW' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'api/admin/dormitory/get_provided_stocks',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_provided_stocks',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_provided_stocks',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::YNMwtrRvYuBtM3fW',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::z5useiJFVo7q3tlp' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'api/admin/dormitory/get_stock_reserved_tenant',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_stock_reserved_tenant',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_stock_reserved_tenant',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::z5useiJFVo7q3tlp',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::zzSS19TB9zfs4Rvo' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/update_stock_status',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_stock_status',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_stock_status',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::zzSS19TB9zfs4Rvo',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::DYKJsmfX4QVLveBk' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'api/admin/dormitory/audit_placements',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@audit_placement',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@audit_placement',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::DYKJsmfX4QVLveBk',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::scyRJNIASc8TF2Hj' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/create_or_update_dormitory_inventory',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_or_update_dormitory_inventory',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_or_update_dormitory_inventory',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::scyRJNIASc8TF2Hj',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::EdkD7yIqQKsjKIl1' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'DELETE',
-      ),
-      'uri' => 'api/admin/dormitory/get_inventories/remove_dorm_inventory_stock/{stock_id}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@remove_dorm_inventory_stock',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@remove_dorm_inventory_stock',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::EdkD7yIqQKsjKIl1',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::gBmm7EAXE7vHBqLy' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'DELETE',
-      ),
-      'uri' => 'api/admin/dormitory/remove_dorm_inventory/{inv_id}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@remove_dorm_inventory',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@remove_dorm_inventory',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::gBmm7EAXE7vHBqLy',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::fEDKE5tMydUT8qYh' => 
+    'generated::dWfNffXLeDs3fmuw' => 
     array (
       'methods' => 
       array (
@@ -17418,7 +15969,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
@@ -17429,7 +15980,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::fEDKE5tMydUT8qYh',
+        'as' => 'generated::dWfNffXLeDs3fmuw',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17445,7 +15996,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::lWzk0pWH7yEBc2BB' => 
+    'generated::47Tlqu5gbVPIbJjJ' => 
     array (
       'methods' => 
       array (
@@ -17458,7 +16009,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
@@ -17469,7 +16020,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::lWzk0pWH7yEBc2BB',
+        'as' => 'generated::47Tlqu5gbVPIbJjJ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17485,7 +16036,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::hAO6L3lxmKYG3k0m' => 
+    'generated::QPE4TzrGeGo7sIkz' => 
     array (
       'methods' => 
       array (
@@ -17498,7 +16049,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
@@ -17509,7 +16060,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::hAO6L3lxmKYG3k0m',
+        'as' => 'generated::QPE4TzrGeGo7sIkz',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17525,31 +16076,31 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Bo2ct4lKinaQimIG' => 
+    'generated::ZiPK76o6c4Y5pALx' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'api/admin/dormitory/update_provided_stock_status',
+      'uri' => 'api/admin/dormitory/room_reservations',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_provided_stock_status',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_provided_stock_status',
+        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@room_reservations',
+        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@room_reservations',
         'namespace' => NULL,
         'prefix' => 'api/admin/dormitory',
         'where' => 
         array (
         ),
-        'as' => 'generated::Bo2ct4lKinaQimIG',
+        'as' => 'generated::ZiPK76o6c4Y5pALx',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17565,31 +16116,31 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::MRdqK50n9tc0WdEt' => 
+    'generated::PgtBNBA8TuHkxt8Y' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'api/admin/dormitory/update_provided_stock_list',
+      'uri' => 'api/admin/dormitory/new_room_reservation',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_provided_stock_list',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_provided_stock_list',
+        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@new_room_reservation',
+        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@new_room_reservation',
         'namespace' => NULL,
         'prefix' => 'api/admin/dormitory',
         'where' => 
         array (
         ),
-        'as' => 'generated::MRdqK50n9tc0WdEt',
+        'as' => 'generated::PgtBNBA8TuHkxt8Y',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17605,31 +16156,31 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::hd4LX3cdZPOsz34a' => 
+    'generated::0fljPnCyiar4rIug' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'api/admin/dormitory/count_dorm_reservation',
+      'uri' => 'api/admin/dormitory/get_match_rooms',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@count_dorm_reservation',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@count_dorm_reservation',
+        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_match_rooms',
+        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_match_rooms',
         'namespace' => NULL,
         'prefix' => 'api/admin/dormitory',
         'where' => 
         array (
         ),
-        'as' => 'generated::hd4LX3cdZPOsz34a',
+        'as' => 'generated::0fljPnCyiar4rIug',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17645,31 +16196,31 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::OPwspkXnsSUUerSO' => 
+    'generated::vBZGl7g0n6OKPHZz' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'api/admin/dormitory/get_requested_service',
+      'uri' => 'api/admin/dormitory/get_current_tenant_info',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_requested_service',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_requested_service',
+        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_current_tenant_info',
+        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_current_tenant_info',
         'namespace' => NULL,
         'prefix' => 'api/admin/dormitory',
         'where' => 
         array (
         ),
-        'as' => 'generated::OPwspkXnsSUUerSO',
+        'as' => 'generated::vBZGl7g0n6OKPHZz',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17685,31 +16236,31 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::HzuGg487yfwE83Xy' => 
+    'generated::NoctTJgbUx4IPQ7L' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'api/admin/dormitory/request_service',
+      'uri' => 'api/admin/dormitory/create_or_update_service_request',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@request_service',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@request_service',
+        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_or_update_service_request',
+        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@create_or_update_service_request',
         'namespace' => NULL,
         'prefix' => 'api/admin/dormitory',
         'where' => 
         array (
         ),
-        'as' => 'generated::HzuGg487yfwE83Xy',
+        'as' => 'generated::NoctTJgbUx4IPQ7L',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17725,31 +16276,31 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ewUmlADOGRKiDRXr' => 
+    'generated::AJ43dAy0kaKcgb4R' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'api/admin/dormitory/update_requested_service',
+      'uri' => 'api/admin/dormitory/get_service_request',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_requested_service',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@update_requested_service',
+        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_service_request',
+        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_service_request',
         'namespace' => NULL,
         'prefix' => 'api/admin/dormitory',
         'where' => 
         array (
         ),
-        'as' => 'generated::ewUmlADOGRKiDRXr',
+        'as' => 'generated::AJ43dAy0kaKcgb4R',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17765,31 +16316,31 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::2LujXWjmJm40jfti' => 
+    'generated::uTElSxScDajVqDyQ' => 
     array (
       'methods' => 
       array (
         0 => 'POST',
       ),
-      'uri' => 'api/admin/dormitory/set_status',
+      'uri' => 'api/admin/dormitory/set_service_request_as_action',
       'action' => 
       array (
         'middleware' => 
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
           4 => 'throttle:60,1',
         ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@set_status',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@set_status',
+        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@set_service_request_as_action',
+        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@set_service_request_as_action',
         'namespace' => NULL,
         'prefix' => 'api/admin/dormitory',
         'where' => 
         array (
         ),
-        'as' => 'generated::2LujXWjmJm40jfti',
+        'as' => 'generated::uTElSxScDajVqDyQ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17805,127 +16356,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::rcLkqrd4hBj9Cn4X' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/get_dormitory_charges',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_dormitory_charges',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_dormitory_charges',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::rcLkqrd4hBj9Cn4X',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::JCj9T2oJkiNz8Ibl' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'api/admin/dormitory/created_or_update_dormitory_charge',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@created_or_update_dormitory_charge',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@created_or_update_dormitory_charge',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::JCj9T2oJkiNz8Ibl',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::ljYr49l4NdH8eMcO' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'DELETE',
-      ),
-      'uri' => 'api/admin/dormitory/cancel_charge/{chargeId}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'admin-api',
-          1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
-          3 => 'user_role:SUPERADMIN,ADMIN-DORMITORY',
-          4 => 'throttle:60,1',
-        ),
-        'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@cancel_charge',
-        'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@cancel_charge',
-        'namespace' => NULL,
-        'prefix' => 'api/admin/dormitory',
-        'where' => 
-        array (
-        ),
-        'as' => 'generated::ljYr49l4NdH8eMcO',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::sdLr0SEPm9DC8Wi2' => 
+    'generated::FKf8cCRgUQzta4ik' => 
     array (
       'methods' => 
       array (
@@ -17940,7 +16371,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -17952,7 +16383,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::sdLr0SEPm9DC8Wi2',
+        'as' => 'generated::FKf8cCRgUQzta4ik',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17968,7 +16399,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::LcbMIPMVwIuGpHjf' => 
+    'generated::eVJqIvVQ3lXltGDj' => 
     array (
       'methods' => 
       array (
@@ -17982,7 +16413,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -17994,7 +16425,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::LcbMIPMVwIuGpHjf',
+        'as' => 'generated::eVJqIvVQ3lXltGDj',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18010,7 +16441,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::JhXxWu1Vg77uZF9Z' => 
+    'generated::ZabOLxod1JYrMRU8' => 
     array (
       'methods' => 
       array (
@@ -18024,7 +16455,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18036,7 +16467,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::JhXxWu1Vg77uZF9Z',
+        'as' => 'generated::ZabOLxod1JYrMRU8',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18052,7 +16483,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::788QFwBDVMXtwL2r' => 
+    'generated::mOadTC5Q4QKYnHoq' => 
     array (
       'methods' => 
       array (
@@ -18066,7 +16497,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18078,7 +16509,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::788QFwBDVMXtwL2r',
+        'as' => 'generated::mOadTC5Q4QKYnHoq',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18094,7 +16525,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::axsHUcHqgaZYGOrl' => 
+    'generated::LXWNm0mavdBoBjcy' => 
     array (
       'methods' => 
       array (
@@ -18107,7 +16538,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18119,7 +16550,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::axsHUcHqgaZYGOrl',
+        'as' => 'generated::LXWNm0mavdBoBjcy',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18135,7 +16566,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::5chafNLvQrTKHNH4' => 
+    'generated::go9E3He8g9Xww2Wb' => 
     array (
       'methods' => 
       array (
@@ -18148,7 +16579,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18160,7 +16591,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::5chafNLvQrTKHNH4',
+        'as' => 'generated::go9E3He8g9Xww2Wb',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18176,7 +16607,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3o978VBL8gzazsDY' => 
+    'generated::ldVg0GrzQJ9gFgOK' => 
     array (
       'methods' => 
       array (
@@ -18189,7 +16620,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18201,7 +16632,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::3o978VBL8gzazsDY',
+        'as' => 'generated::ldVg0GrzQJ9gFgOK',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18217,7 +16648,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::UGAI3hG6nKrxmVBA' => 
+    'generated::ITmj9icQ8cPhP2d3' => 
     array (
       'methods' => 
       array (
@@ -18230,7 +16661,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18242,7 +16673,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::UGAI3hG6nKrxmVBA',
+        'as' => 'generated::ITmj9icQ8cPhP2d3',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18258,7 +16689,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::TJQFvNCM1iXC39f2' => 
+    'generated::rZjCNRzq6FA9okbX' => 
     array (
       'methods' => 
       array (
@@ -18272,7 +16703,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18284,7 +16715,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::TJQFvNCM1iXC39f2',
+        'as' => 'generated::rZjCNRzq6FA9okbX',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18300,7 +16731,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::7aJNfYHP0zAZPCXV' => 
+    'generated::UU5wgE00qEZmulfX' => 
     array (
       'methods' => 
       array (
@@ -18313,7 +16744,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18325,7 +16756,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::7aJNfYHP0zAZPCXV',
+        'as' => 'generated::UU5wgE00qEZmulfX',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18341,7 +16772,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::PAgn3m7DWTKMlBnJ' => 
+    'generated::sowXIjztZlUsXo8v' => 
     array (
       'methods' => 
       array (
@@ -18354,7 +16785,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18366,7 +16797,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::PAgn3m7DWTKMlBnJ',
+        'as' => 'generated::sowXIjztZlUsXo8v',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18382,7 +16813,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::EcyQWa0cmB1y0Flg' => 
+    'generated::r0MprOyJK3AohrP6' => 
     array (
       'methods' => 
       array (
@@ -18396,7 +16827,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18408,7 +16839,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::EcyQWa0cmB1y0Flg',
+        'as' => 'generated::r0MprOyJK3AohrP6',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18424,7 +16855,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::8ENIoTerK9Cj3Z6K' => 
+    'generated::ko40eM2IyIbp2IeE' => 
     array (
       'methods' => 
       array (
@@ -18437,7 +16868,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18449,7 +16880,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::8ENIoTerK9Cj3Z6K',
+        'as' => 'generated::ko40eM2IyIbp2IeE',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18465,7 +16896,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::as7lAVS1TZjsTD3g' => 
+    'generated::lzFBYTIAfGiT3lRw' => 
     array (
       'methods' => 
       array (
@@ -18478,7 +16909,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
           5 => 'user_role:SUPERADMIN',
@@ -18490,7 +16921,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::as7lAVS1TZjsTD3g',
+        'as' => 'generated::lzFBYTIAfGiT3lRw',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18506,7 +16937,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::CXDpzObyteGjlNEz' => 
+    'generated::DM8QvOa6oabaDa1E' => 
     array (
       'methods' => 
       array (
@@ -18519,7 +16950,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
         ),
@@ -18530,7 +16961,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::CXDpzObyteGjlNEz',
+        'as' => 'generated::DM8QvOa6oabaDa1E',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18546,7 +16977,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::EEzFMZ02lvhF6bRK' => 
+    'generated::7B2BmO4ROGaizQXO' => 
     array (
       'methods' => 
       array (
@@ -18559,7 +16990,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
         ),
@@ -18570,7 +17001,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::EEzFMZ02lvhF6bRK',
+        'as' => 'generated::7B2BmO4ROGaizQXO',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18586,7 +17017,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::IuOzPgyVBQw6GsVu' => 
+    'generated::HndcPFkHSEcAYcQ9' => 
     array (
       'methods' => 
       array (
@@ -18599,7 +17030,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
         ),
@@ -18610,7 +17041,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::IuOzPgyVBQw6GsVu',
+        'as' => 'generated::HndcPFkHSEcAYcQ9',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18626,7 +17057,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::ubxAKcn6g9H1W1QE' => 
+    'generated::xyP8dcKIYDF3UlEH' => 
     array (
       'methods' => 
       array (
@@ -18639,7 +17070,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD',
           4 => 'throttle:60,1',
         ),
@@ -18650,7 +17081,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::ubxAKcn6g9H1W1QE',
+        'as' => 'generated::xyP8dcKIYDF3UlEH',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18666,7 +17097,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::QwfSoMh2xV4yVuy7' => 
+    'generated::HcMJieUiZTMPd1nW' => 
     array (
       'methods' => 
       array (
@@ -18679,7 +17110,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -18690,7 +17121,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::QwfSoMh2xV4yVuy7',
+        'as' => 'generated::HcMJieUiZTMPd1nW',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18706,7 +17137,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::XzFNjud57sNlYUFo' => 
+    'generated::BnWPmBzqkbUZXEmi' => 
     array (
       'methods' => 
       array (
@@ -18719,7 +17150,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -18730,7 +17161,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::XzFNjud57sNlYUFo',
+        'as' => 'generated::BnWPmBzqkbUZXEmi',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18746,7 +17177,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::spDl8zwL8AXPTJpK' => 
+    'generated::uKSc5XWl07QldnKi' => 
     array (
       'methods' => 
       array (
@@ -18759,7 +17190,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -18770,7 +17201,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::spDl8zwL8AXPTJpK',
+        'as' => 'generated::uKSc5XWl07QldnKi',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18786,7 +17217,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Ym67R4LzldllmAIE' => 
+    'generated::ZRMlUuo8WKM99yrm' => 
     array (
       'methods' => 
       array (
@@ -18799,7 +17230,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -18810,7 +17241,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Ym67R4LzldllmAIE',
+        'as' => 'generated::ZRMlUuo8WKM99yrm',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18826,7 +17257,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3CP6swgk0fmAxsam' => 
+    'generated::xddrQXnJXjb4KMJK' => 
     array (
       'methods' => 
       array (
@@ -18839,7 +17270,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -18850,7 +17281,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::3CP6swgk0fmAxsam',
+        'as' => 'generated::xddrQXnJXjb4KMJK',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18866,7 +17297,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::PfQV0aMtgRULqDYQ' => 
+    'generated::eVBI5v2jsdhMolYd' => 
     array (
       'methods' => 
       array (
@@ -18879,7 +17310,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -18890,7 +17321,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::PfQV0aMtgRULqDYQ',
+        'as' => 'generated::eVBI5v2jsdhMolYd',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18906,7 +17337,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::gYOGVKyxB8XooabM' => 
+    'generated::A47pEeWrDgZWRUq3' => 
     array (
       'methods' => 
       array (
@@ -18920,7 +17351,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -18931,7 +17362,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::gYOGVKyxB8XooabM',
+        'as' => 'generated::A47pEeWrDgZWRUq3',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18947,7 +17378,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::QxXcPaZtn3UvPdEe' => 
+    'generated::iRNnZJ6nadEgsxYD' => 
     array (
       'methods' => 
       array (
@@ -18961,7 +17392,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -18972,7 +17403,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::QxXcPaZtn3UvPdEe',
+        'as' => 'generated::iRNnZJ6nadEgsxYD',
       ),
       'fallback' => false,
       'defaults' => 
@@ -18988,7 +17419,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::WvjfiXBjO3wISuvH' => 
+    'generated::fcc4Qbfn7MUE52B1' => 
     array (
       'methods' => 
       array (
@@ -19002,7 +17433,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -19013,7 +17444,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::WvjfiXBjO3wISuvH',
+        'as' => 'generated::fcc4Qbfn7MUE52B1',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19029,7 +17460,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::2RZoDdaRXkfwa3nU' => 
+    'generated::EhNKbDHpGQEjvsvF' => 
     array (
       'methods' => 
       array (
@@ -19042,7 +17473,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -19053,7 +17484,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::2RZoDdaRXkfwa3nU',
+        'as' => 'generated::EhNKbDHpGQEjvsvF',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19069,7 +17500,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::zYenxwVnbYbdXtFR' => 
+    'generated::JoRr4lW0145jMyPx' => 
     array (
       'methods' => 
       array (
@@ -19082,7 +17513,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -19093,7 +17524,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::zYenxwVnbYbdXtFR',
+        'as' => 'generated::JoRr4lW0145jMyPx',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19109,7 +17540,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::pRtLKvhX7DdBmXN0' => 
+    'generated::TNUG9AZrp1NqmA6B' => 
     array (
       'methods' => 
       array (
@@ -19123,7 +17554,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -19134,7 +17565,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::pRtLKvhX7DdBmXN0',
+        'as' => 'generated::TNUG9AZrp1NqmA6B',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19150,7 +17581,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::q9nmgboG5gUdyl2j' => 
+    'generated::uyc0Bz9zHgxzFVOx' => 
     array (
       'methods' => 
       array (
@@ -19163,7 +17594,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -19174,7 +17605,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::q9nmgboG5gUdyl2j',
+        'as' => 'generated::uyc0Bz9zHgxzFVOx',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19190,7 +17621,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::yzJFSCTDuCFKQX0S' => 
+    'generated::Jlf3K0rMOsjF2vSk' => 
     array (
       'methods' => 
       array (
@@ -19203,7 +17634,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -19214,7 +17645,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::yzJFSCTDuCFKQX0S',
+        'as' => 'generated::Jlf3K0rMOsjF2vSk',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19230,7 +17661,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::j9LLumHC1z2kBMhe' => 
+    'generated::chns2LeMFIRngfeh' => 
     array (
       'methods' => 
       array (
@@ -19245,7 +17676,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -19256,7 +17687,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::j9LLumHC1z2kBMhe',
+        'as' => 'generated::chns2LeMFIRngfeh',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19272,7 +17703,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::HyuLulMyFV597izq' => 
+    'generated::TBBfpT1fS1RjM4sp' => 
     array (
       'methods' => 
       array (
@@ -19285,7 +17716,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -19296,7 +17727,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::HyuLulMyFV597izq',
+        'as' => 'generated::TBBfpT1fS1RjM4sp',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19312,7 +17743,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::RgoDSGqdM38IbQs8' => 
+    'generated::A1Fsy7JrhasP5oRn' => 
     array (
       'methods' => 
       array (
@@ -19325,7 +17756,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,CASHIER',
           4 => 'throttle:60,1',
         ),
@@ -19336,7 +17767,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::RgoDSGqdM38IbQs8',
+        'as' => 'generated::A1Fsy7JrhasP5oRn',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19352,7 +17783,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::RxxwR4xhvI9azTTF' => 
+    'generated::eEOZSYuUh3h2CLLr' => 
     array (
       'methods' => 
       array (
@@ -19365,7 +17796,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19376,7 +17807,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::RxxwR4xhvI9azTTF',
+        'as' => 'generated::eEOZSYuUh3h2CLLr',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19392,7 +17823,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::LoZraOYodLKetSAW' => 
+    'generated::SHjipSRmtOr3lJNh' => 
     array (
       'methods' => 
       array (
@@ -19405,7 +17836,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19416,7 +17847,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::LoZraOYodLKetSAW',
+        'as' => 'generated::SHjipSRmtOr3lJNh',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19432,7 +17863,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::sH9isGS3wsJSNovx' => 
+    'generated::JKVvsheUltmf8MIa' => 
     array (
       'methods' => 
       array (
@@ -19445,7 +17876,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19456,7 +17887,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::sH9isGS3wsJSNovx',
+        'as' => 'generated::JKVvsheUltmf8MIa',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19472,7 +17903,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::6yyleLEAEFWVWVis' => 
+    'generated::3zSiTvKIBDBWMOjm' => 
     array (
       'methods' => 
       array (
@@ -19486,7 +17917,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19497,7 +17928,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::6yyleLEAEFWVWVis',
+        'as' => 'generated::3zSiTvKIBDBWMOjm',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19513,7 +17944,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::1QxZMZGNYM82wjIs' => 
+    'generated::GFtbssmaF4DPfXqJ' => 
     array (
       'methods' => 
       array (
@@ -19526,7 +17957,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19537,7 +17968,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::1QxZMZGNYM82wjIs',
+        'as' => 'generated::GFtbssmaF4DPfXqJ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19553,7 +17984,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::eO3lU42oR5KUQbWw' => 
+    'generated::XRQng7biO1HOw4NK' => 
     array (
       'methods' => 
       array (
@@ -19566,7 +17997,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19577,7 +18008,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::eO3lU42oR5KUQbWw',
+        'as' => 'generated::XRQng7biO1HOw4NK',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19593,7 +18024,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::dSuPquQOGnAINKx5' => 
+    'generated::WR9U9ySWdg0XrjXb' => 
     array (
       'methods' => 
       array (
@@ -19606,7 +18037,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19617,7 +18048,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::dSuPquQOGnAINKx5',
+        'as' => 'generated::WR9U9ySWdg0XrjXb',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19633,7 +18064,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::KABWbr1RRtxRtRkj' => 
+    'generated::gQHq3dNMDsWg48PF' => 
     array (
       'methods' => 
       array (
@@ -19646,7 +18077,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19657,7 +18088,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::KABWbr1RRtxRtRkj',
+        'as' => 'generated::gQHq3dNMDsWg48PF',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19673,7 +18104,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::wNWUbUYy6ZzcUPQJ' => 
+    'generated::kV7rVfWPGlm49LHF' => 
     array (
       'methods' => 
       array (
@@ -19686,7 +18117,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19697,7 +18128,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::wNWUbUYy6ZzcUPQJ',
+        'as' => 'generated::kV7rVfWPGlm49LHF',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19713,7 +18144,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::IbLMVIfwcnFAGjjG' => 
+    'generated::gmyzZ4GCixdvncf6' => 
     array (
       'methods' => 
       array (
@@ -19726,7 +18157,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19737,7 +18168,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::IbLMVIfwcnFAGjjG',
+        'as' => 'generated::gmyzZ4GCixdvncf6',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19753,7 +18184,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3W7V7OPf96vLyT6t' => 
+    'generated::ZeHlcijoS7H8ufyv' => 
     array (
       'methods' => 
       array (
@@ -19766,7 +18197,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19777,7 +18208,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::3W7V7OPf96vLyT6t',
+        'as' => 'generated::ZeHlcijoS7H8ufyv',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19793,7 +18224,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::LwhJQ3lR3JPdJVGa' => 
+    'generated::TBBT8G2UBTw8qWfk' => 
     array (
       'methods' => 
       array (
@@ -19806,7 +18237,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19817,7 +18248,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::LwhJQ3lR3JPdJVGa',
+        'as' => 'generated::TBBT8G2UBTw8qWfk',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19833,7 +18264,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::hufhohHI35uofPU0' => 
+    'generated::keASoYGKPucvJCPP' => 
     array (
       'methods' => 
       array (
@@ -19846,7 +18277,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19857,7 +18288,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::hufhohHI35uofPU0',
+        'as' => 'generated::keASoYGKPucvJCPP',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19873,7 +18304,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::QhI8VM3e2x2Tywe1' => 
+    'generated::suDfl7xbX7jx9MMJ' => 
     array (
       'methods' => 
       array (
@@ -19886,7 +18317,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19897,7 +18328,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::QhI8VM3e2x2Tywe1',
+        'as' => 'generated::suDfl7xbX7jx9MMJ',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19913,7 +18344,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::G4Jrh7Xu9gxNL9jf' => 
+    'generated::LgkkiX9Ts2gdA35k' => 
     array (
       'methods' => 
       array (
@@ -19926,7 +18357,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19937,7 +18368,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::G4Jrh7Xu9gxNL9jf',
+        'as' => 'generated::LgkkiX9Ts2gdA35k',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19953,7 +18384,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::0foCoC5ehkqDjF58' => 
+    'generated::TTXK7MyqBiDaDiIE' => 
     array (
       'methods' => 
       array (
@@ -19966,7 +18397,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -19977,7 +18408,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::0foCoC5ehkqDjF58',
+        'as' => 'generated::TTXK7MyqBiDaDiIE',
       ),
       'fallback' => false,
       'defaults' => 
@@ -19993,7 +18424,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::tWJLHddisKsYxVaP' => 
+    'generated::puwgtIJRnRSs7L2i' => 
     array (
       'methods' => 
       array (
@@ -20006,7 +18437,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -20017,7 +18448,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::tWJLHddisKsYxVaP',
+        'as' => 'generated::puwgtIJRnRSs7L2i',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20033,7 +18464,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::5GI4EMaiEwS6OUOv' => 
+    'generated::yFLt1a9fsMwKqaxR' => 
     array (
       'methods' => 
       array (
@@ -20046,7 +18477,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -20057,7 +18488,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::5GI4EMaiEwS6OUOv',
+        'as' => 'generated::yFLt1a9fsMwKqaxR',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20073,7 +18504,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::NvMwwM7mylmQmTNe' => 
+    'generated::88gUVuLxnL4JJdjB' => 
     array (
       'methods' => 
       array (
@@ -20086,7 +18517,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -20097,7 +18528,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::NvMwwM7mylmQmTNe',
+        'as' => 'generated::88gUVuLxnL4JJdjB',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20113,7 +18544,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::Zp3nTqzUszkJGlc4' => 
+    'generated::rW5pYMvNNVknXaiv' => 
     array (
       'methods' => 
       array (
@@ -20126,7 +18557,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -20137,7 +18568,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::Zp3nTqzUszkJGlc4',
+        'as' => 'generated::rW5pYMvNNVknXaiv',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20153,7 +18584,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::y4voMhzyamhtxAHL' => 
+    'generated::LlvGFCkX5H1rr1iA' => 
     array (
       'methods' => 
       array (
@@ -20166,7 +18597,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -20177,7 +18608,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::y4voMhzyamhtxAHL',
+        'as' => 'generated::LlvGFCkX5H1rr1iA',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20193,7 +18624,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::M4y2Sz2esYPXbsyJ' => 
+    'generated::JxkYnvgQ8EFcGDmo' => 
     array (
       'methods' => 
       array (
@@ -20206,7 +18637,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
           3 => 'user_role:SUPERADMIN,ADMIN-RA',
           4 => 'throttle:60,1',
         ),
@@ -20217,7 +18648,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::M4y2Sz2esYPXbsyJ',
+        'as' => 'generated::JxkYnvgQ8EFcGDmo',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20233,7 +18664,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::EEsl1rgzemaxSrqI' => 
+    'generated::fBkk7Q2hMWLAF0Cd' => 
     array (
       'methods' => 
       array (
@@ -20247,7 +18678,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\QRReaderCheckInOutCtrl@qrReader',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\QRReaderCheckInOutCtrl@qrReader',
@@ -20256,7 +18687,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::EEsl1rgzemaxSrqI',
+        'as' => 'generated::fBkk7Q2hMWLAF0Cd',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20272,7 +18703,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::4Bexl2Riic770YQg' => 
+    'generated::4pRMlUcBksEWXAd9' => 
     array (
       'methods' => 
       array (
@@ -20285,7 +18716,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\QRReaderCheckInOutCtrl@check_in_out',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\QRReaderCheckInOutCtrl@check_in_out',
@@ -20294,7 +18725,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::4Bexl2Riic770YQg',
+        'as' => 'generated::4pRMlUcBksEWXAd9',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20310,7 +18741,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::PhsavENEQqbCelhZ' => 
+    'generated::o9wYTRRUJC2eIq8g' => 
     array (
       'methods' => 
       array (
@@ -20323,7 +18754,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\QRReaderCheckInOutCtrl@get_log_in_out_records',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\QRReaderCheckInOutCtrl@get_log_in_out_records',
@@ -20332,7 +18763,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::PhsavENEQqbCelhZ',
+        'as' => 'generated::o9wYTRRUJC2eIq8g',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20348,7 +18779,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::VQPCukOMmDttITql' => 
+    'generated::Vf0nYMCakEjugfgL' => 
     array (
       'methods' => 
       array (
@@ -20361,7 +18792,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_charges_predata',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_charges_predata',
@@ -20370,7 +18801,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::VQPCukOMmDttITql',
+        'as' => 'generated::Vf0nYMCakEjugfgL',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20386,7 +18817,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::kAV2MHqzFPZiahym' => 
+    'generated::Ur6dxdn7ukfan6ik' => 
     array (
       'methods' => 
       array (
@@ -20399,7 +18830,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_trainee_enrolled_trainings',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\DormitoryController@get_trainee_enrolled_trainings',
@@ -20408,7 +18839,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::kAV2MHqzFPZiahym',
+        'as' => 'generated::Ur6dxdn7ukfan6ik',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20424,7 +18855,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::WDdihHPCWO8GlQ5S' => 
+    'generated::M6sn16ZQVN1kjCXF' => 
     array (
       'methods' => 
       array (
@@ -20437,7 +18868,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\Account@submit_csm',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\Account@submit_csm',
@@ -20446,7 +18877,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::WDdihHPCWO8GlQ5S',
+        'as' => 'generated::M6sn16ZQVN1kjCXF',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20462,7 +18893,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::3MEO9X6MglLnom63' => 
+    'generated::DecLPle7bjQOUCVo' => 
     array (
       'methods' => 
       array (
@@ -20475,7 +18906,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\Account@update_personal',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\Account@update_personal',
@@ -20484,7 +18915,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::3MEO9X6MglLnom63',
+        'as' => 'generated::DecLPle7bjQOUCVo',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20500,7 +18931,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::XyCTlB9vrscCBNzk' => 
+    'generated::Nkewd4420fUVqv4x' => 
     array (
       'methods' => 
       array (
@@ -20513,7 +18944,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\Account@update_password',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\Account@update_password',
@@ -20522,7 +18953,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::XyCTlB9vrscCBNzk',
+        'as' => 'generated::Nkewd4420fUVqv4x',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20538,7 +18969,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::rjMwiwrjT4yfecP8' => 
+    'generated::fT7C9tmQDZLlWlra' => 
     array (
       'methods' => 
       array (
@@ -20552,7 +18983,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\Account@get_activities',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\Account@get_activities',
@@ -20561,7 +18992,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::rjMwiwrjT4yfecP8',
+        'as' => 'generated::fT7C9tmQDZLlWlra',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20577,7 +19008,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::i8LcHvpmBSU2Ixo7' => 
+    'generated::KG4C653uPZXkEYOp' => 
     array (
       'methods' => 
       array (
@@ -20590,7 +19021,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'admin-api',
           1 => 'auth:sanctum',
-          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA',
+          2 => 'user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS',
         ),
         'uses' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\Account@audit_trail_filter',
         'controller' => 'App\\Http\\Controllers\\Authenticated\\Administrator\\Account@audit_trail_filter',
@@ -20599,7 +19030,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::i8LcHvpmBSU2Ixo7',
+        'as' => 'generated::KG4C653uPZXkEYOp',
       ),
       'fallback' => false,
       'defaults' => 
@@ -20615,7 +19046,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::qY8NgrwR1cPshHY3' => 
+    'generated::9aUQaQ9MOVjrYem5' => 
     array (
       'methods' => 
       array (
@@ -20637,7 +19068,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::qY8NgrwR1cPshHY3',
+        'as' => 'generated::9aUQaQ9MOVjrYem5',
       ),
       'fallback' => false,
       'defaults' => 
