@@ -16,22 +16,22 @@ class DormitoryServiceManager
      * @param mixed $isPost
      * @return DormitoryService|\Illuminate\Database\Eloquent\Model
      */
-    public function createOrUpdate($payload, $isPost) {
-        return TransactionUtil::transact(null, [], function() use ($payload, $isPost) {
-            $this_service = DormitoryService::updateOrCreate(
-                ['id' => $payload->documentId],
-                $payload->only(['name', 'description', 'charge', 'status'])
-            );
+    public function createOrUpdate(object $payload, bool $isPost) {
+        // For creation, generate a new trace number. For update, find by ID.
+        $this_service = DormitoryService::updateOrCreate(
+            ['id' => $payload->documentId],
+            $payload->only(['name', 'description', 'charge', 'status'])
+        );
 
-            AuditHelper::log(
-                $payload->user()->id,
-                $isPost
-                    ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value
-                    : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value . " ID#{$this_service->id}"
-            );
+        // Log the appropriate audit action based on whether it's a creation or update.
+        AuditHelper::log(
+            $payload->user()->id,
+            $isPost
+                ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYSERVICE->value
+                : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYSERVICE->value . " ID#{$this_service->id}"
+        );
 
-            return $this_service;
-        });
+        return $this_service;
     }
 
     /**
@@ -40,26 +40,29 @@ class DormitoryServiceManager
      * @param int $serviceId
      * @return array{message: string, status: int}
      */
-    public function removeService($currentUserId, int $serviceId) {
-        return TransactionUtil::transact(null, [], function() use ($currentUserId, $serviceId) {
-            $this_service = DormitoryService::withCount([
-                'requestedService'
-            ])->whereKey($serviceId)->lockForUpdate()->firstOrFail();
+    public function removeService(int $currentUserId, int $serviceId) {
+        // Lock the service record for update and check if there are any associated requested services.
+        $this_service = DormitoryService::withCount([
+            'requestedService'
+        ])->lockForUpdate()->findOrFail($serviceId);
 
-            if($this_service->requested_service_count <= 0) {
-                $this_service->delete();
-                AuditHelper::log( $currentUserId, AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYSERVICE->value . " ID#$serviceId");
+        // If there are no associated requested services, delete the service and log the action.
+        // Otherwise, return a conflict response.
+        if($this_service->requested_service_count <= 0) {
+            $this_service->delete();
+            AuditHelper::log( $currentUserId, AdministratorAuditActions::DORMITORYCTRL_REMOVED_DORMITORYSERVICE->value . " ID#$serviceId");
 
-                return [
-                    'message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYSERVICE->value,
-                    'status' => 200
-                ];
-            }
-
+            // Return a success response indicating the service was removed.
             return [
-                'message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value,
-                'status' => 409
+                'message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYSERVICE->value,
+                'status' => 200
             ];
-        });
+        }
+
+        // Return a conflict response indicating that the service cannot be removed due to existing associations.
+        return [
+            'message' => AdministratorReturnResponse::DORMITORYCTRL_ERR_DORMITORYSERVICE->value,
+            'status' => 409
+        ];
     }
 }
