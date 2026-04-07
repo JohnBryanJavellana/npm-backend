@@ -5,7 +5,7 @@ namespace App\Services\Administrator\Dormitory;
 use App\Enums\Administrator\DormitoryEnum;
 use App\Models\{DormitoryTenant, DormitoryTenantSupDoc, DormitoryInvoice};
 use App\Jobs\SaveAvatar;
-use App\Utils\{GenerateTrace, TransactionUtil};
+use App\Utils\{GenerateTrace};
 use Illuminate\Support\Str;
 
 class DormitoryRoomReservationManager
