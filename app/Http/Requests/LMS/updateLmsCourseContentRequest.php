@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class updateLmsCourseContentRequest extends FormRequest
-{   
+{
     protected $stopOnFirstFailure = true;
     /**
      * Determine if the user is authorized to make this request.
@@ -28,8 +28,15 @@ class updateLmsCourseContentRequest extends FormRequest
         return [
             "course_content_id" => ["required", "exists:course_contents,id"],
             "title" => ["sometimes", "required", "string"],
-            "description"=> ["sometimes", "required", "string"],
+            "description" => ["sometimes", "required", "string"],
             "status" => ["sometimes", "required", "in:ACTIVE,INACTIVE"],
+            "files" => ["array", 'nullable'],
+            "files.*" => [
+                'nullable',
+                "file",
+                "mimes:pdf,doc,docx,ppt,pptx,jpg,jpeg,png,mp4,mp3",
+                "max:10240"
+            ]
         ];
     }
 
