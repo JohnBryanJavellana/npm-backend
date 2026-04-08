@@ -69,7 +69,7 @@ class LMSAssessmentController extends Controller
                 ->with([
                     'sections.questions.options'
                 ])
-                ->first(); //! <<-- Error ini pakiayos 
+                ->first();
 
             return new AssessmentResource($record);
         } catch (\Exception $e) {
@@ -126,21 +126,6 @@ class LMSAssessmentController extends Controller
         }
     }
 
-    // public function pagpasaHinDetalye(Request $request)
-    // {
-    //     try {
-    //         $Detalye = Assessments::whereKey($request->assessment_id)
-    //             ->with([
-    //                 'sections.questions.options'
-    //             ])
-    //             ->first();
-
-    //         return new AssessmentResource($Detalye);
-    //     } catch (\Exception $e) {
-    //         return response()->json(["message" => $e->getMessage()], 500);
-    //         return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
-    //     }
-    // }
 
     public function saveAnswersAssessment_attempts(Request $request)
     {
@@ -150,36 +135,60 @@ class LMSAssessmentController extends Controller
             }
 
             $validated = $request->validate([
-                "assessment_attempt_id" => "required|integer|exists:assessment_attempts,id",
-                "answers" => "required|array",
-                "answers.*.question_id" => "required|integer|exists:assessment_questions,id",
-                "answers.*.option_id" => "required|integer|exists:assessment_options,id"
+                "assessment_id" => "required|integer|exists:assessments,id",
+                "assessment_attempt_id" => "nullable|integer", //! adi lat sayop kanan assessment_attempts talbe it nakukuha
+                "answers" => "nullable|array",
+                "answers.*.question_id" => "required_with:answers|integer|exists:assessment_questions,id",
+                "answers.*.answer" => "required_with:answers|string",
+                "answers.*.options" => "nullable|array"
             ]);
 
             DB::beginTransaction();
 
             try {
-                $attempt = AssessmentAttemptAction::create([
-                    "assessment_attempt_id" => $validated["assessment_attempt_id"],
-                    "user_id" => $request->user()->id,
-                    "action" => "SUBMITTED"
-                ]);
+                $savedCount = 0;
+
+                if (!empty($validated["answers"])) {
+                    foreach ($validated["answers"] as $answer) {
+                        $assessmentOption = DB::table('assessment_options')
+                            ->where('assessment_question_id', $answer["question_id"])
+                            ->where('option_text', $answer["answer"])
+                            ->first();
 
 
-                foreach ($validated["answers"] as $answer) {
-                    AssessmentAnswer::create([
-                        "assessment_attempt_id" => $attempt->id,
-                        "assessment_question_id" => $answer["question_id"],
-                        "assessment_option_id" => $answer["option_id"]
-                    ]);
+                        $logAnswer = array_merge($answer, [
+                            'assessment_option_id' => $assessmentOption?->id
+                        ]);
+                        \Log::info('Processing Answer:', $logAnswer);
+
+                        AssessmentAnswer::updateOrCreate(
+                            [
+                                "assessment_attempt_id" => $validated["assessment_attempt_id"],
+                                "assessment_question_id" => $answer["question_id"]
+                            ],
+                            [
+                                "assessment_option_id" => $assessmentOption?->id,
+                                "answer_text" => $answer["answer"]
+                            ]
+                        );
+                        $savedCount++;
+                    }
                 }
 
                 DB::commit();
 
+                \Log::info('Assessment Answers Saved', [
+                    'assessment_id' => $validated["assessment_id"],
+                    'attempt_id' => $validated["assessment_attempt_id"],
+                    'user_id' => $request->user()->id,
+                    'answers_count' => $savedCount
+                ]);
+
                 return response()->json([
                     "message" => "Answers submitted successfully",
-                    "attempt_id" => $attempt->id,
-                    "count" => count($validated["answers"])
+                    "assessment_id" => $validated["assessment_id"],
+                    "assessment_attempt_id" => $validated["assessment_attempt_id"],
+                    "count" => $savedCount
                 ], 200);
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -189,6 +198,7 @@ class LMSAssessmentController extends Controller
             \Log::error('Assessment Submission Error: ' . $e->getMessage(), [
                 'assessment_id' => $request->assessment_id ?? null,
                 'user_id' => $request->user()?->id ?? null,
+                'error_line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
