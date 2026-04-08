@@ -9,7 +9,8 @@ use App\Utils\CashierGetTableRef;
 class CashierPaymentVerification
 {
     public function __construct(
-        public CashierGetTableRef $cashierGetTableRef
+        public CashierGetTableRef $cashierGetTableRef,
+        public CashierORManager $cashierORManager
     ) {}
 
     /**
@@ -19,14 +20,19 @@ class CashierPaymentVerification
      * @param mixed $parentTableId
      * @return array{message: string, status: int}
      */
-    public function verifyPayment(object $payload, int $invoiceId, int $parentTableId) {
-        $this->cashierGetTableRef->getTable($payload->invoiceTableServiceName, $invoiceId, null)->update([
-            'invoice_status' => $payload->invoiceStatus
-        ]);
+    public function verifyPayment(object $payload, int $invoiceId, int $parentTableId, bool $invoiceTableAlreadyUpdated = false) {
+        if(!$invoiceTableAlreadyUpdated) {
+            $this->cashierGetTableRef->getTable($payload->invoiceTableServiceName, $invoiceId, null)->update([
+                'invoice_status' => $payload->invoiceStatus
+            ]);
+        }
 
-        $thisParentTable = $this->cashierGetTableRef->getTable($payload->parentTableServiceName, $parentTableId, null)->firstOrFail();
+        $thisParentTable = $this->cashierGetTableRef->getTable($payload->parentTableServiceName, $parentTableId, null)
+            ->lockForUpdate()
+            ->firstOrFail();
+
         if($payload->invoiceStatus === CashierEnum::PAID->value &&
-           $thisParentTable->{$payload->parentTableStatusColumn} === CashierEnum::PROCESSING_PAYMENT->value &&
+           \in_array($thisParentTable->{$payload->parentTableStatusColumn}, [CashierEnum::PROCESSING_PAYMENT->value, CashierEnum::FOR_PAYMENT->value]) &&
            !empty($payload->parentTableStatusColumn) &&
            !empty($parentTableId)
         ) {
@@ -37,5 +43,26 @@ class CashierPaymentVerification
             'message' => AdministratorReturnResponse::CASHIERCTRL_UPDATED_PAYMENT->value,
             'status' => 200
         ];
+    }
+
+    /**
+     * Summary of payWalkIn
+     * @param object $payload
+     * @param int $invoiceId
+     * @param string $invoiceTableServiceName
+     * @return array{message: string, status: int}
+     */
+    public function payWalkIn(object $payload, int $invoiceId, string $invoiceTableServiceName) {
+        $this->cashierGetTableRef->getTable($invoiceTableServiceName, $invoiceId, null)->update([
+            'invoice_status' => $payload->invoiceStatus,
+            'datePaid' => now(),
+            'payment_type' => CashierEnum::WALK_IN,
+            'received_amount' => $payload->received_amount,
+            'cashier_o_r_id' => $payload->cashier_o_r_id
+        ]);
+
+        $this->cashierORManager->setUsedORAsStatus($payload->cashier_o_r_id, CashierEnum::UNAVAILABLE->value, false);
+
+        return $this->verifyPayment($payload, $invoiceId, $payload->parentTableId, true);
     }
 }

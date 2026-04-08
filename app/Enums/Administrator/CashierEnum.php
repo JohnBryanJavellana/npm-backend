@@ -11,7 +11,7 @@ enum CashierEnum : string
     case PROCESSING_PAYMENT = "PROCESSING PAYMENT";
     case PAID = "PAID";
     case UNAVAILABLE = "UNAVAILABLE";
-    case FOR_PAYMENT = "FOR-PAYMENT";
+    case FOR_PAYMENT = "FOR PAYMENT";
     case AVAILABLE = "AVAILABLE";
     case WALK_IN = "WALK-IN";
 }

@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Cashier\RemoveChargeCategory;
 use App\Http\Requests\Admin\Cashier\RemoveORNumber;
 use App\Http\Requests\Admin\Cashier\VerifyPayment;
+use App\Http\Requests\Admin\Cashier\WalkInPayment;
 use App\Jobs\SendingEmail;
 use App\Mail\CashierEmail;
 use App\Models\CashierOR;
@@ -75,85 +76,6 @@ class Cashier extends Controller
             return response()->json([
                 'categories' => json_decode($this->get_charges_category($request)->getContent(), true)['categories'],
             ], 200);
-        });
-    }
-
-    /**
-     * Summary of pay_walkin
-     * @param Request $request
-     */
-    public function pay_walkin (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            // update payment record
-            $this_payment = self::getTable($request->service, $request->documentId, null)->lockForUpdate()->first();
-
-            // if the payment is already paid or cancelled, return error response
-            if($request->orNumber) {
-                $this_or_parent = CashierOR::where('id', $request->orNumber)->lockForUpdate()->first();
-                $this_or_parent->status = CashierEnum::UNAVAILABLE;
-                $this_or_parent->save();
-            }
-
-            $this_payment->invoice_status = CashierEnum::PAID;
-            $this_payment->received_amount = $request->receivedAmount;
-            $this_payment->cashier_o_r_id = $request->orNumber;
-            $this_payment->payment_type = CashierEnum::WALK_IN;
-            $this_payment->datePaid = Carbon::now();
-            $this_payment->save();
-
-            // if the payment is for dormitory or library or enrollment, update the main table status to PAID
-            if(\in_array($request->service, ["DORMITORY-SERVICE", "DORMITORY-INCLUSION"])) {
-                $this_reference_table = $request->service === "DORMITORY-SERVICE"
-                    ? DormitoryReqService::where('dormitory_invoice_id', $this_payment->id)->lockForUpdate()->first()
-                    : DormitoryInclusionRequest::where('dormitory_invoice_id', $this_payment->id)->lockForUpdate()->first();
-
-                $this_main_table = self::getTable("$request->service-MAIN-TABLE", $this_reference_table->id, null)->lockForUpdate()->first();
-                $this_main_table->status = DormitoryEnum::PAID;
-                $this_main_table->save();
-            }
-
-            if($request->service === "LIBRARY") {
-                $this_main_table = self::getTable("LIBRARY-MAIN-TABLE", $this_payment->book_res_id, null)->lockForUpdate()->first();
-
-                if(\in_array($this_main_table->status, [LibraryEnum::PROCESSING_PAYMENT->value, LibraryEnum::FOR_PAYMENT->value])) {
-                    $this_main_table->status = LibraryEnum::PAID;
-                    $this_main_table->save();
-                }
-            }
-
-            if($request->service === "ENROLLMENT") {
-                $this_main_table = self::getTable("ENROLLMENT-MAIN-TABLE", $this_payment->enrolled_course_id, null)->lockForUpdate()->first();
-
-                if(\in_array($this_main_table->enrolled_course_status, [EnrollmentEnum::PROCESSING_PAYMENT->value, EnrollmentEnum::FOR_PAYMENT->value])) {
-                    $this_main_table->enrolled_course_status = EnrollmentEnum::PAID;
-                    $this_main_table->save();
-                }
-            }
-
-            if($request->service === "DORMITORY") {
-                $this_main_table = self::getTable("DORMITORY-MAIN-TABLE", $this_payment->dormitory_tenant_id, null)->lockForUpdate()->first();
-
-                if(\in_array($this_main_table->tenant_status, [DormitoryEnum::PROCESSING_PAYMENT->value, DormitoryEnum::FOR_PAYMENT->value])) {
-                    $this_main_table->tenant_status = DormitoryEnum::PAID;
-                    $this_main_table->save();
-                }
-            }
-
-            // if the payment is for dormitory service, update the service request status to PAID
-            SendingEmail::dispatch(User::find($this_payment->user_id), new CashierEmail([
-                'status' => $request->verificationStatus,
-                'service' => strtolower($request->service),
-                'message' => "We've successfully processed a walk-in payment for your " . strtolower($request->service) . " request."
-            ], User::find($this_payment->user_id)));
-
-            Notifications::notify($request->user()->id, $this_payment->user_id, $request->service, "processed a walk-in payment for you.");
-            AuditHelper::log(
-                $request->user()->id,
-                AdministratorAuditActions::CASHIERCTRL_PROCESSED_WALKIN->value . " ID# $this_payment->id"
-            );
-
-            // dispatch auto print job
-            return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_PAY_WALKIN->value], 201);
         });
     }
 
@@ -502,6 +424,21 @@ class Cashier extends Controller
             $parentTableId = $request->parentTableId;
 
             $result = $this->cashierPaymentVerification->verifyPayment($request, $invoiceId, $parentTableId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of pay_walkin
+     * @param WalkInPayment $request
+     */
+    public function pay_walkin(WalkInPayment $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $invoiceId = $request->invoiceId;
+            $invoiceTableServiceName = $request->invoiceTableServiceName;
+
+            $result = $this->cashierPaymentVerification->payWalkIn($request, $invoiceId, $invoiceTableServiceName);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }

@@ -44,6 +44,25 @@ class CashierORManager
     }
 
     /**
+     * Summary of setUsedORAsStatus
+     * @param int $orNumberId
+     * @param string $status
+     * @param bool $fromController
+     * @return array{message: string, status: int}|bool
+     */
+    public function setUsedORAsStatus(int $orNumberId, string $status, bool $fromController) {
+        CashierOR::lockForUpdate()->findOrFail($orNumberId)->update([ 'status' => $status ]);
+        if($fromController) {
+            return [
+                'message' => "OR Number has been set to $status.",
+                'status' => 200
+            ];
+        }
+
+        return true;
+    }
+
+    /**
      * Summary of removeOR
      * @param int $orNumberId
      * @return array{message: string, status: int}
