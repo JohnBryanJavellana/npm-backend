@@ -90,8 +90,8 @@ class TrainerEnrollmentController extends Controller
                                 $query->whereHas("attendance", function ($q) use ($request) {
                                     $q->where([
                                         "training_date" => $request->training_date,
-                                        "start_time" => $request->start_time,
-                                        "end_time" => $request->end_time
+                                        "time_in" => $request->start_time,
+                                        "time_out" => $request->end_time
                                     ]);
                                 });
                             }

@@ -58,7 +58,7 @@ class LMSCourseService
             ->whereKey($contentId)
             ->with([
                 "uploads",
-                "assessment",
+                "assessment:id,course_content_id,title,type,passed_type,passing_score,time_limit,status",
             ])
             ->first();
     }
@@ -126,7 +126,8 @@ class LMSCourseService
             ]);
             \Log::info("updateLmsCourseContentRequest", [$validated]);
 
-            if ($validated["files"]) {
+            if (\array_key_exists("files", $validated)) {
+
                 $uploadFiles = [];
                 foreach ($validated["files"] as $file) {
                     $filename = SaveFile::save($file, "course-modules-uploads");
