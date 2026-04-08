@@ -8,23 +8,17 @@ use App\Enums\Administrator\LibraryEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Cashier\RemoveChargeCategory;
 use App\Http\Requests\Admin\Cashier\RemoveORNumber;
-use App\Jobs\AutoPrint;
+use App\Http\Requests\Admin\Cashier\VerifyPayment;
 use App\Jobs\SendingEmail;
 use App\Mail\CashierEmail;
-use App\Models\BookRes;
 use App\Models\CashierOR;
 use App\Models\DormitoryInclusionRequest;
-use App\Models\DormitoryInvoice;
 use App\Models\DormitoryReqService;
-use App\Models\DormitoryTenant;
-use App\Models\EnrolledCourse;
-use App\Models\EnrollmentInvoice;
-use App\Models\LibraryInvoice;
-use App\Models\RAInvoices;
-use App\Models\RARequestInfo;
 use App\Models\User;
 use App\Services\Administrator\Cashier\CashierChargeCategoryManager;
 use App\Services\Administrator\Cashier\CashierORManager;
+use App\Services\Administrator\Cashier\CashierPaymentVerification;
+use App\Utils\CashierGetTableRef;
 use App\Utils\Notifications;
 
 use Illuminate\Http\Request;
@@ -32,10 +26,6 @@ use Carbon\Carbon;
 use App\Utils\{
     TransactionUtil,
     AuditHelper
-};
-use App\Events\{
-    BEInvoice,
-    BEAuditTrail
 };
 use App\Enums\Administrator\{
     CashierEnum,
@@ -51,7 +41,6 @@ use App\Models\{
     Charge,
     ChargeCategory
 };
-use App\Helpers\Administrator\General\CheckForDocumentExistence;
 use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
@@ -61,48 +50,10 @@ class Cashier extends Controller
 {
     public function __construct(
         public CashierORManager $cashierORManager,
-        public CashierChargeCategoryManager $cashierChargeCategoryManager
+        public CashierChargeCategoryManager $cashierChargeCategoryManager,
+        public CashierGetTableRef $cashierGetTableRef,
+        public CashierPaymentVerification $cashierPaymentVerification
     ) {}
-
-    /**
-     * Summary of getTable
-     * @param string $service
-     * @param mixed $referenceId
-     * @param mixed $whereIns
-     * @param bool $isMainTable
-     * @param bool $isInitialTable
-     * @throws \InvalidArgumentException
-     */
-    protected function getTable(string $service, ?int $referenceId, ?array $whereIns) {
-        $modelMap = [
-            'ENROLLMENT' => EnrollmentInvoice::class,
-            'ENROLLMENT-MAIN-TABLE' => EnrolledCourse::class,
-            'RECREATIONAL' => RAInvoices::class,
-            'RECREATIONAL-MAIN-TABLE' => RARequestInfo::class,
-            'LIBRARY' => LibraryInvoice::class,
-            'LIBRARY-MAIN-TABLE' => BookRes::class,
-            'DORMITORY' => DormitoryInvoice::class,
-            'DORMITORY-MAIN-TABLE' => DormitoryTenant::class,
-            'DORMITORY-SERVICE' => DormitoryInvoice::class,
-            'DORMITORY-SERVICE-MAIN-TABLE' => DormitoryReqService::class
-        ];
-
-        $query = $modelMap[$service]::query();
-
-        if ($referenceId) {
-            $query->where('id', $referenceId);
-        }
-
-        if($whereIns !== null) {
-            foreach ($whereIns as $column => $values) {
-                if (!empty($values)) {
-                    $query->whereIn($column, $values);
-                }
-            }
-        }
-
-        return $query;
-    }
 
     /**
      * Summary of get_charges
@@ -124,43 +75,6 @@ class Cashier extends Controller
             return response()->json([
                 'categories' => json_decode($this->get_charges_category($request)->getContent(), true)['categories'],
             ], 200);
-        });
-    }
-
-    /**
-     * Summary of get_payments
-     * @param Request $request
-     */
-    public function get_payments (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $payments = self::getTable($request->service, null, ['invoice_status' => $request->statuses]);
-            $relations = ['payee', 'orNumber'];
-
-            if($request->service === NotificationEnum::LIBRARY->value) {
-                $relations = [
-                    ...$relations,
-                    'bookRes',
-                    'selectedBooks',
-                    'selectedBooks.bookReservation',
-                    'selectedBooks.bookReservation.book',
-                    'selectedBooks.bookReservation.books',
-                    'selectedBooks.bookReservation.books.catalog'
-                ];
-            }
-
-            if($request->service === NotificationEnum::ENROLLMENT->value) {
-                $relations = [
-                    ...$relations,
-                    'training'
-                ];
-            }
-
-            $paymentsData = $payments->with($relations)->orderBy('created_at', 'DESC');
-
-            if($request->limitter) $paymentsData->take($request->limitter);
-            $paymentsData = $paymentsData ->get();
-
-            return response()->json(['payments' => $paymentsData], 200);
         });
     }
 
@@ -240,80 +154,6 @@ class Cashier extends Controller
 
             // dispatch auto print job
             return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_PAY_WALKIN->value], 201);
-        });
-    }
-
-    /**
-     * Summary of verify_payment
-     * @param Request $request
-     */
-    public function verify_payment (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $this_payment = self::getTable($request->service, $request->documentId, null)->lockForUpdate()->first();
-
-            // if the payment is already paid or cancelled, return error response
-            if(\in_array($this_payment->invoice_status, [CashierEnum::CANCELLED->value, CashierEnum::PAID->value])) {
-                return response()->json(['message' => AdministratorReturnResponse::CASHIERCTRL_ERR_PAYMENT->value], 200);
-            } else {
-                $this_payment->invoice_status = $request->verificationStatus;
-                $this_payment->save();
-
-                // if the payment is for dormitory or library or enrollment, update the main table status to PAID
-                if(\in_array($request->service, ["DORMITORY-SERVICE", "DORMITORY-INCLUSION"])) {
-                    $this_reference_table = $request->service === "DORMITORY-SERVICE"
-                        ? DormitoryReqService::where('dormitory_invoice_id', $this_payment->id)->lockForUpdate()->first()
-                        : DormitoryInclusionRequest::where('dormitory_invoice_id', $this_payment->id)->lockForUpdate()->first();
-
-                    $this_main_table = self::getTable("$request->service-MAIN-TABLE", $this_reference_table->id, null)->lockForUpdate()->first();
-                    $this_main_table->status = DormitoryEnum::PAID;
-                    $this_main_table->save();
-                }
-
-                // if the payment is for dormitory service, update the service request status to PAID
-                if($request->service === "LIBRARY") {
-                    $this_main_table = self::getTable("LIBRARY-MAIN-TABLE", $this_payment->book_res_id, null)->lockForUpdate()->first();
-
-                    if(\in_array($this_main_table->status, [LibraryEnum::PROCESSING_PAYMENT->value, LibraryEnum::FOR_PAYMENT->value])) {
-                        $this_main_table->status = LibraryEnum::PAID;
-                        $this_main_table->save();
-                    }
-                }
-
-                // if the payment is for dormitory or library or enrollment, update the main table status to PAID
-                if($request->service === "ENROLLMENT") {
-                    $this_main_table = self::getTable("ENROLLMENT-MAIN-TABLE", $this_payment->enrolled_course_id, null)->lockForUpdate()->first();
-
-                    if(\in_array($this_main_table->enrolled_course_status, [EnrollmentEnum::PROCESSING_PAYMENT->value, EnrollmentEnum::FOR_PAYMENT->value])) {
-                        $this_main_table->enrolled_course_status = EnrollmentEnum::PAID;
-                        $this_main_table->save();
-                    }
-                }
-
-                // if the payment is for dormitory or library or enrollment, update the main table status to PAID
-                if($request->service === "DORMITORY") {
-                    $this_main_table = self::getTable("DORMITORY-MAIN-TABLE", $this_payment->dormitory_tenant_id, null)->lockForUpdate()->first();
-
-                    if(\in_array($this_main_table->tenant_status, [DormitoryEnum::PROCESSING_PAYMENT->value, DormitoryEnum::FOR_PAYMENT->value])) {
-                        $this_main_table->tenant_status = DormitoryEnum::PAID;
-                        $this_main_table->save();
-                    }
-                }
-
-                // if the payment is for dormitory service, update the service request status to PAID
-                SendingEmail::dispatch(User::find($this_payment->user_id), new CashierEmail([
-                    'status' => $request->verificationStatus,
-                    'service' => strtolower($request->service),
-                    'message' => "We've updated your " . strtolower($request->service) . " invoice status to $request->verificationStatus"
-                ], User::find($this_payment->user_id)));
-
-                Notifications::notify($request->user()->id, $this_payment->user_id, $request->service, "updated your " . strtolower($request->service) . " invoice status.");
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::CASHIERCTRL_UPDATED_PAYMENT->value. " ID#$this_payment->id"
-                );
-
-                return response()->json(['message' =>  AdministratorReturnResponse::CASHIERCTRL_UPDATED_PAYMENT->value . "ID#$this_payment->id"], 200);
-            }
         });
     }
 
@@ -523,6 +363,51 @@ class Cashier extends Controller
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
+     * Summary of get_payments
+     * @param Request $request
+     */
+    public function get_payments (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $payments = $this->cashierGetTableRef->getTable($request->service, null, ['invoice_status' => $request->statuses]);
+            $relations = ['payee', 'orNumber'];
+
+            if($request->service === NotificationEnum::LIBRARY->value) {
+                $relations = [
+                    ...$relations,
+                    'bookRes',
+                    'selectedBooks',
+                    'selectedBooks.bookReservation',
+                    'selectedBooks.bookReservation.book',
+                    'selectedBooks.bookReservation.books',
+                    'selectedBooks.bookReservation.books.catalog'
+                ];
+            }
+
+            if($request->service === NotificationEnum::ENROLLMENT->value) {
+                $relations = [
+                    ...$relations,
+                    'training'
+                ];
+            }
+
+            if($request->service === NotificationEnum::DORMITORY->value) {
+                $relations = [
+                    ...$relations,
+                    'dormitoryReqService'
+                ];
+            }
+
+            $paymentsData = $payments->with($relations)->orderBy('created_at', 'DESC');
+
+            if($request->limitter) $paymentsData->take($request->limitter);
+            $paymentsData = $paymentsData ->get();
+
+            return response()->json(['payments' => $paymentsData], 200);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
      * Summary of get_or_numbers
      * @param Request $request
      */
@@ -602,6 +487,21 @@ class Cashier extends Controller
     public function remove_charge_category (RemoveChargeCategory $request, int $chargeCategoryId) {
         return TransactionUtil::transact($request, [], function() use ($request, $chargeCategoryId) {
             $result = $this->cashierChargeCategoryManager->removeChargeCategory($chargeCategoryId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of verify_payment
+     * @param VerifyPayment $request
+     */
+    public function verify_payment(VerifyPayment $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $invoiceId = $request->invoiceId;
+            $parentTableId = $request->parentTableId;
+
+            $result = $this->cashierPaymentVerification->verifyPayment($request, $invoiceId, $parentTableId);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }

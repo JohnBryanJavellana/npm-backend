@@ -26,6 +26,10 @@ class DormitoryInvoice extends Model
         return $this->hasOne(DormitoryTenant::class, 'id', 'dormitory_tenant_id');
     }
 
+    public function dormitoryReqService() {
+        return $this->hasOne(DormitoryReqService::class);
+    }
+
     public function charge()
     {
         return $this->belongsTo(Charge::class);
