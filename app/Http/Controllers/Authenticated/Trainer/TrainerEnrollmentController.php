@@ -74,6 +74,7 @@ class TrainerEnrollmentController extends Controller
         );
     }
 
+
     public function getTraineeDetails(Request $request)
     {
         return TransactionUtil::transact(

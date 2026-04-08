@@ -69,13 +69,8 @@ class LMSAssessmentController extends Controller
                 ->with([
                     'sections.questions.options'
                 ])
-                ->first(); ///! <<-- Error ini pakiayos 
+                ->first(); //! <<-- Error ini pakiayos 
 
-            //         if (!$record) {
-            //     return response()->json([
-            //         "message" => "Assessment not found"
-            //     ], 404);
-            // }
             return new AssessmentResource($record);
         } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
