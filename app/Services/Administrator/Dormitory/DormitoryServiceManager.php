@@ -17,10 +17,12 @@ class DormitoryServiceManager
      * @return DormitoryService|\Illuminate\Database\Eloquent\Model
      */
     public function createOrUpdate(object $payload, bool $isPost) {
-        $this_service = DormitoryService::updateOrCreate(
-            ['id' => $payload->documentId],
-            $payload->only(['name', 'description', 'charge', 'status'])
-        );
+        $this_service = DormitoryService::updateOrCreate(['id' => $payload->documentId], $payload->only([
+            'name',
+            'description',
+            'charge',
+            'status'
+        ]));
 
         AuditHelper::log(
             $payload->user()->id,

@@ -4,18 +4,21 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Authenticated\Trainee\TraineeLibrary;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Library\CreateBookCopy;
+use App\Http\Requests\Admin\Library\RemoveBook;
+use App\Http\Requests\Admin\Library\RemoveBookCopy;
+use App\Http\Requests\Admin\Library\RemoveGenre;
+use App\Http\Requests\Admin\Library\UpdateBookCopy;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
-use App\Jobs\AutoPrint;
-use Illuminate\Support\Str;
+use App\Services\Administrator\Library\LibraryBookCopyManager;
+use App\Services\Administrator\Library\LibraryBookEntryManager;
+use App\Services\Administrator\Library\LibraryBookManager;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Utils\{
     TransactionUtil,
 };
-
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Http\Requests\Trainee\Library\BookRequest;
 use App\Http\Requests\Admin\Library\{
@@ -45,14 +48,11 @@ use App\Models\{
     BookReservation,
     ExtensionRequest,
     LibraryInvoice,
-    LISelectedBook
 };
 use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse,
-    RequestStatus
 };
-use App\Helpers\Administrator\General\CheckForDocumentExistence;
 use App\Helpers\Administrator\General\CountCollection;
 use App\Enums\Administrator\{
     LibraryEnum
@@ -66,353 +66,16 @@ class LibraryController extends Controller
      * Summary of __construct
      * @param TraineeLibrary $traineeLibrary
      */
-    public function __construct(TraineeLibrary $traineeLibrary){
+    public function __construct(
+        TraineeLibrary $traineeLibrary,
+        public LibraryBookManager $libraryBookManager,
+        public LibraryBookCopyManager $libraryBookCopyManager,
+        public LibraryBookEntryManager $libraryBookEntryManager
+    ){
         $this->traineeCtrlInstance = $traineeLibrary;
     }
 
-    /**
-     * Summary of get_books
-     * @param Request $request
-     */
-    public function get_books (Request $request) {
-        return TransactionUtil::transact(null, [], function() {
-            $books = Book::withCount('copies', 'hasData')->with([
-                'catalog',
-                'catalog.genre'
-            ])->get();
-
-            return response()->json(['books' => $books], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_book
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateBookRequest $request
-     */
-    public function create_or_update_book (CreateOrUpdateBookRequest $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
-
-            if($request->copies && $request->copies > 30) {
-                return response()->json(['message' => "Creating copies are limited only to 30pcs. Please try again."], 409);
-            }
-
-            $book_catalog = $isPost ? new BookCatalog() : BookCatalog::find($request->catalogId);
-            $book_catalog->book_genre_id = $request->entry;
-            $book_catalog->title = $request->title;
-            $book_catalog->author = $request->author;
-            $book_catalog->abstract = $request->abstract;
-            $book_catalog->editor = $request->editor;
-            $book_catalog->isbn = $request->isbn;
-            $book_catalog->publisher = $request->publisher;
-            $book_catalog->type = $request->type;
-            $book_catalog->call_number = $request->call_number;
-            $book_catalog->file_location = $request->file_location;
-            $book_catalog->pages = $request->pages;
-            $book_catalog->price = $request->price;
-            $book_catalog->publication_year = $request->publication_year;
-            $book_catalog->save();
-
-            $book = $isPost ? new Book : Book::find($request->documentId);
-            $book->book_catalog_id = $book_catalog->id;
-
-            if($request->photo){
-                $image_name = Str::uuid() . '.png';
-                ConvertToBase64::generate($request->photo, 'image', "book-uploaded-files/image/$image_name");
-                $book->photo = $image_name;
-            }
-
-            if($request->pdf_file) {
-                $pdf_name = Str::uuid() . '.pdf';
-                ConvertToBase64::generate($request->pdf_file, 'application', "book-uploaded-files/pdf/$pdf_name");
-                $book->pdf_copy = $pdf_name;
-            }
-
-            $book->status = $request->status;
-            $book->save();
-
-            BookTrainingRelated::where("book_id", $book->id)->delete();
-
-            if($request->training_id) {
-                foreach ($request->training_id as $tid){
-                    $book_related = new BookTrainingRelated;
-                    $book_related->book_id = $book->id;
-                    $book_related->training_id = $tid;
-                    $book_related->save();
-                }
-            }
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYBOOK->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOK->value . " ID#$book->id"
-            );
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BELibrary(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            $dataToReturn = [];
-            if($request->copies) {
-                $fixedRequest = $request->merge([
-                    'insideJob' => true,
-                    'documentId' => $book->id
-                ]);
-
-                $dataToReturn = $this->create_book_copies($fixedRequest);
-            }
-
-            return response()->json([
-                'message' =>  ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYBOOK->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOK->value). " book. OKID#$book->id",
-                'returnedData' => $dataToReturn
-            ], 200);
-        });
-    }
-
-    /**
-     * Summary of create_book_copies
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     */
-    public function create_book_copies(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $copiesData = [];
-
-            if($request->copies > 30) {
-                return response()->json(['message' => "Creating copies are limited only to 30pcs. Please try again."], 409);
-            }
-
-            if($request->copies) {
-                for ($i = 0; $i < $request->copies; $i++) {
-                    $new_book_ui = GenerateTrace::createTraceNumber(BookCopy::class, '-BOOK-', 'unique_identifier', 10, 99);
-
-                    $book_copy = new BookCopy;
-                    $book_copy->unique_identifier = $new_book_ui;
-                    $book_copy->book_id = $request->documentId;
-                    $book_copy->save();
-
-                    array_push($copiesData, $new_book_ui);
-                }
-            }
-
-            return $request->insideJob ? $copiesData : response()->json([
-                'message' => "You've added " . \count($copiesData) . " book copies.",
-                'returnedData' => $copiesData
-            ], 201);
-        });
-    }
-
-    /**
-     * Summary of update_book_copy
-     * @param Request $request
-     */
-    public function update_book_copy(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $this_copy = BookCopy::findOrFail($request->documentId);
-            $this_copy->status = $request->status;
-            $this_copy->save();
-
-            return response()->json(['message' => "Book copy has been updated."], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_book
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $book_id
-     */
-    public function remove_book (Request $request, int $book_id) {
-        return TransactionUtil::transact(null, ['books_cache'], function() use ($request, $book_id) {
-            $this_book = Book::withCount(['hasData', 'copies'])->where('id', $book_id)->first();
-
-            if($this_book->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYBOOK->value], 200);
-            } else {
-                if(file_exists(public_path('book-images/' . $this_book->photo))){
-                    unlink(public_path('book-images/' . $this_book->photo));
-                }
-
-                $this_book->delete();
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOK->value . " ID#$book_id"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BELibrary(''),
-                        new BEAuditTrail(''),
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYBOOK->value. "ID#$book_id"], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of get_book_entries
-     * @param Request $request
-     */
-    public function get_book_entries (Request $request) {
-        return TransactionUtil::transact(null, [], function() {
-            $genres = BookGenre::withCount('hasData')->get();
-            return response()->json(['genres' => $genres], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_book_entry
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateGenre $request
-     */
-    public function create_or_update_book_entry (CreateOrUpdateGenre $request) {
-        return TransactionUtil::transact($request, ['genres_cache'], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-
-            $check = CheckForDocumentExistence::exists(
-                BookGenre::class,
-                ['name' => $request->name, 'category' => $request->category],
-                !$isPost,
-                $documentId,
-                'id',
-                "Book Entry already exist."
-            );
-
-            if($check) return $check;
-
-            $this_genre = $isPost ? new BookGenre : BookGenre::find($request->documentId);
-            $this_genre->category = $request->category;
-            $this_genre->name = $request->name;
-            if(!$isPost) $this_genre->status = $request->status;
-            $this_genre->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYBOOKENTRY->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOKENTRY->value . " ID#$this_genre->id"
-            );
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BELibrary(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYBOOKENTRY->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKENTRY->value). "ID#" . $this_genre->id], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_entry
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $entry_id
-     */
-    public function remove_entry (Request $request, int $entry_id) {
-        return TransactionUtil::transact(null, ['genres_cache'], function() use ($request, $entry_id) {
-            $this_book_genre = BookGenre::withCount(['hasData'])->where('id', $entry_id)->first();
-
-            if($this_book_genre->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYBOOKENTRY->value], 200);
-            } else {
-                $this_book_genre->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY->value. " ID#$entry_id"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BELibrary(''),
-                        new BEAuditTrail(''),
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYBOOKENTRY->value. "ID#$entry_id"], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of get_book_info
-     * @param Request $request
-     * @param int $book_id
-     */
-    public function get_book_info (Request $request, int $book_id){
-        return TransactionUtil::transact(null, [], function() use($request, $book_id) {
-            $book = Book::where('id', $book_id)
-                ->withCount('copies', 'hasData')
-                ->with([
-                    'related',
-                    'related.training',
-                    'related.training.module',
-                    'catalog',
-                    'catalog.genre'
-                ])->first();
-
-            return response()->json(['book' => $book], 200);
-        });
-    }
-
-    /**
-     * Summary of get_copies
-     * @param Request $request
-     * @param int $book_id
-     */
-    public function get_copies (Request $request, int $book_id) {
-        return TransactionUtil::transact(null, [], function() use ($book_id) {
-            $bookCopies = BookCopy::withCount('hasData')
-                ->with('book.catalog')
-                ->where('book_id', operator: $book_id)
-                ->get();
-            return response()->json(['bookCopies' => $bookCopies], 200);
-        });
-    }
-
-    /**
-     * Summary of remove_copy
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $copy_id
-     */
-    public function remove_copy (Request $request, int $copy_id) {
-        return TransactionUtil::transact(null, ['book_copies_cache'], function() use ($request, $copy_id) {
-            $this_book = BookCopy::withCount(['hasData'])->where('id', $copy_id)->first();
-
-            if($this_book->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYBOOKCOPY->value], 200);
-            } else {
-                $this_book->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY->value . " ID#$copy_id"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BELibrary(''),
-                        new BEAuditTrail(''),
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYBOOKCOPY->value."ID#$copy_id"], 200);
-            }
-        });
-    }
-
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of count_book_reservation
      * @param Request $request
@@ -433,6 +96,226 @@ class LibraryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_book_reservation
+     * @param Request $request
+     */
+    public function get_book_reservation (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $reservations = BookRes::with([
+                'trainee',
+                'borrowedBooks',
+                'borrowedBooks.book',
+                'borrowedBooks.books',
+                'borrowedBooks.books.catalog',
+                'borrowedBooks.books.catalog.genre',
+                'csm',
+                'csm.user'
+            ]);
+
+            if($request->userId) $reservations->where('user_id', $request->userId);
+            if($request->type) $reservations->where('status', $request->type);
+
+            $reservations = $request->traceNumber
+                ? $reservations->where('trace_number', $request->traceNumber)->first()
+                : $reservations->orderBy('created_at', 'DESC')->get();
+
+            return response()->json(['reservations' => $reservations], 200);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of submit_extension_request
+     * @param ExtendingRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function submit_extension_request (ExtendingRequest $request) {
+        return $this->traineeCtrlInstance->extend($request);
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of submit_renewal_request
+     * @param RenewBookRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function submit_renewal_request (RenewBookRequest $request) {
+        return $this->traineeCtrlInstance->renew($request);
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of create_walkin_request
+     * @param BookRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function create_walkin_request (BookRequest $request) {
+        return $this->traineeCtrlInstance->send_request_book($request);
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_books
+     * @param Request $request
+     */
+    public function get_books (Request $request) {
+        return TransactionUtil::transact(null, [], function() {
+            $books = Book::withCount('copies', 'hasData')->with([
+                'catalog',
+                'catalog.genre'
+            ])->get();
+
+            return response()->json(['books' => $books], 200);
+        });
+    }
+
+    /**
+     * Summary of get_book_info
+     * @param Request $request
+     * @param int $book_id
+     */
+    public function get_book_info (Request $request, int $book_id){
+        return TransactionUtil::transact(null, [], function() use($request, $book_id) {
+            $book = Book::whereKey($book_id)
+                ->withCount('copies', 'hasData')
+                ->with([
+                    'related',
+                    'related.training',
+                    'related.training.module',
+                    'catalog',
+                    'catalog.genre'
+                ])->first();
+
+            return response()->json(['book' => $book], 200);
+        });
+    }
+
+    /**
+     * Summary of remove_book
+     * @param RemoveBook $request
+     * @param int $bookId
+     */
+    public function remove_book (RemoveBook $request, int $bookId) {
+        return TransactionUtil::transact($request, [], function() use ($bookId) {
+            $result = $this->libraryBookManager->removeBook($bookId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_book
+     * @param CreateOrUpdateBookRequest $request
+     */
+    public function create_or_update_book (CreateOrUpdateBookRequest $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $catalogId = $request->catalogId;
+            $bookId = $request->bookId;
+
+            $result = $this->libraryBookManager->createOrUpdate($request, $isPost, $bookId, $catalogId);
+            return response()->json(['message' => $result['message'], 'returnedData' => $result['returnedData']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_copies
+     * @param Request $request
+     * @param int $book_id
+     */
+    public function get_copies (Request $request, int $book_id) {
+        return TransactionUtil::transact(null, [], function() use ($book_id) {
+            $bookCopies = BookCopy::withCount('hasData')
+                ->with('book.catalog')
+                ->where('book_id', operator: $book_id)
+                ->get();
+            return response()->json(['bookCopies' => $bookCopies], 200);
+        });
+    }
+
+    /**
+     * Summary of create_book_copies
+     * @param CreateBookCopy $request
+     */
+    public function create_book_copies(CreateBookCopy $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $bookId = $request->bookId;
+            $copies = $request->copies;
+
+            $result = $this->libraryBookCopyManager->createBookCopies($bookId, $copies);
+            return response()->json(['message' => "You've added book copies.", 'returnedData' => $result], 201);
+        });
+    }
+
+    /**
+     * Summary of update_book_copy
+     * @param UpdateBookCopy $request
+     */
+    public function update_book_copy(UpdateBookCopy $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $bookCopyId = $request->bookCopyId;
+            $status = $request->status;
+
+            $this->libraryBookCopyManager->updateBookCopy($bookCopyId, $status);
+            return response()->json(['message' => "Book copy has been updated."], 201);
+        });
+    }
+
+    /**
+     * Summary of remove_copy
+     * @param RemoveBookCopy $request
+     * @param int $bookCopyId
+     */
+    public function remove_copy (RemoveBookCopy $request, int $bookCopyId) {
+        return TransactionUtil::transact($request, [], function() use ($request, $bookCopyId) {
+            $result = $this->libraryBookCopyManager->removeBookCopy($bookCopyId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_book_entries
+     * @param Request $request
+     */
+    public function get_book_entries (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $genres = BookGenre::withCount('hasData')->get();
+            return response()->json(['genres' => $genres], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_book_entry
+     * @param CreateOrUpdateGenre $request
+     */
+    public function create_or_update_book_entry (CreateOrUpdateGenre $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $bookEntryId = $request->bookEntryId;
+
+            $result = $this->libraryBookEntryManager->createOrUpdate($request, $isPost, $bookEntryId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_entry
+     * @param RemoveGenre $request
+     * @param int $bookEntryId
+     */
+    public function remove_entry (RemoveGenre $request, int $bookEntryId) {
+        return TransactionUtil::transact($request, [], function() use ($request, $bookEntryId) {
+            $result = $this->libraryBookEntryManager->removeBookEntry($bookEntryId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+
+
+    # 📍📍📍📍📍📍📍📍
     /**
      * Summary of check_for_book_reservation
      * @param Request $request
@@ -464,34 +347,6 @@ class LibraryController extends Controller
             ];
 
             return response()->json(['bookReservationCheck' => $count], 200);
-        });
-    }
-
-    /**
-     * Summary of get_book_reservation
-     * @param Request $request
-     */
-    public function get_book_reservation (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $reservations = BookRes::with([
-                'trainee',
-                'borrowedBooks',
-                'borrowedBooks.book',
-                'borrowedBooks.books',
-                'borrowedBooks.books.catalog',
-                'borrowedBooks.books.catalog.genre',
-                'csm',
-                'csm.user'
-            ]);
-
-            if($request->userId) $reservations->where('user_id', $request->userId);
-            if($request->type) $reservations->where('status', $request->type);
-
-            $reservations = $request->traceNumber
-                ? $reservations->where('trace_number', $request->traceNumber)->first()
-                : $reservations->orderBy('created_at', 'DESC')->get();
-
-            return response()->json(['reservations' => $reservations], 200);
         });
     }
 
@@ -532,24 +387,6 @@ class LibraryController extends Controller
 
             return response()->json(['booksThatAreProtactible' => $booksThatAreProtactible], 200);
         });
-    }
-
-    /**
-     * Summary of submit_extension_request
-     * @param ExtendingRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function submit_extension_request (ExtendingRequest $request) {
-        return $this->traineeCtrlInstance->extend($request);
-    }
-
-    /**
-     * Summary of submit_renewal_request
-     * @param RenewBookRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function submit_renewal_request (RenewBookRequest $request) {
-        return $this->traineeCtrlInstance->renew($request);
     }
 
     /**
@@ -655,14 +492,7 @@ class LibraryController extends Controller
         });
     }
 
-    /**
-     * Summary of create_walkin_request
-     * @param BookRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function create_walkin_request (BookRequest $request) {
-        return $this->traineeCtrlInstance->send_request_book($request);
-    }
+
 
     /**
      * Summary of get_pre_data
@@ -793,57 +623,58 @@ class LibraryController extends Controller
             return response()->json(['message' => ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value). " a request fine ID#" . $new_fine->id], 201);
         });
     }
+
     //edrascoe
-  public function get_book_copy_activity(Request $request) {
-    return TransactionUtil::transact(null, [], function() use ($request) {
-        $copy = BookCopy::where('book_id', $request->bookId)
-            ->when($request->unique_identifier, fn($q) =>
-                $q->where('unique_identifier', $request->unique_identifier)
-            )
-            ->first();
+    public function get_book_copy_activity(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $copy = BookCopy::where('book_id', $request->bookId)
+                ->when($request->unique_identifier, fn($q) =>
+                    $q->where('unique_identifier', $request->unique_identifier)
+                )
+                ->first();
 
-        if (!$copy) {
-            return response()->json(['message' => 'Book copy not found.'], 404);
-        }
-        $bookRes = BookRes::whereIn('status', [
-                BookRes::STATUS_ACTIVE,
-                BookRes::STATUS_FOR_CSM
-            ])
-            ->whereHas('borrowedBooks', fn($q) =>
-                $q->where('book_id', $copy->book_id)
-            )
-            ->with([
-                'trainee',
-                'borrowedBooks' => fn($q) =>
+            if (!$copy) {
+                return response()->json(['message' => 'Book copy not found.'], 404);
+            }
+            $bookRes = BookRes::whereIn('status', [
+                    BookRes::STATUS_ACTIVE,
+                    BookRes::STATUS_FOR_CSM
+                ])
+                ->whereHas('borrowedBooks', fn($q) =>
                     $q->where('book_id', $copy->book_id)
-                      ->latest()
-                      ->limit(1)
-            ])
-            ->first();
+                )
+                ->with([
+                    'trainee',
+                    'borrowedBooks' => fn($q) =>
+                        $q->where('book_id', $copy->book_id)
+                        ->latest()
+                        ->limit(1)
+                ])
+                ->first();
 
-        $reservation = $bookRes?->borrowedBooks->first();
+            $reservation = $bookRes?->borrowedBooks->first();
 
-        return response()->json([
-            'bookCopyActivity' => [
-                'copy_id'           => $copy->id,
-                'unique_identifier' => $copy->unique_identifier,
-                'copy_status'       => $copy->status,
-                'activity'          => $bookRes ? [
-                    'reservation_status' => $bookRes->status,
-                    'type'               => $reservation?->type,
-                    'from_date'          => $reservation?->from_date,
-                    'to_date'            => $reservation?->to_date,
-                    'action_by'          => $copy->status === 'BORROWED' ? 'BORROWED' : 'RESERVED',
-                    'reserved_at'        => $bookRes->created_at,
-                    'trainee'            => [
-                        'id'    => $bookRes->trainee?->id,
-                        'name'  => $bookRes->trainee?->name,
-                        'email' => $bookRes->trainee?->email,
-                    ]
-                ] : null,
-            ]
-        ], 200);
-    });
-}
+            return response()->json([
+                'bookCopyActivity' => [
+                    'copy_id'           => $copy->id,
+                    'unique_identifier' => $copy->unique_identifier,
+                    'copy_status'       => $copy->status,
+                    'activity'          => $bookRes ? [
+                        'reservation_status' => $bookRes->status,
+                        'type'               => $reservation?->type,
+                        'from_date'          => $reservation?->from_date,
+                        'to_date'            => $reservation?->to_date,
+                        'action_by'          => $copy->status === 'BORROWED' ? 'BORROWED' : 'RESERVED',
+                        'reserved_at'        => $bookRes->created_at,
+                        'trainee'            => [
+                            'id'    => $bookRes->trainee?->id,
+                            'name'  => $bookRes->trainee?->name,
+                            'email' => $bookRes->trainee?->email,
+                        ]
+                    ] : null,
+                ]
+            ], 200);
+        });
+    }
 }
 

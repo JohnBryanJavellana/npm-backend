@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin\Library;
 
-use Illuminate\Validation\Rule;
+use App\Enums\UserRoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateOrUpdateGenre extends FormRequest
@@ -12,7 +12,10 @@ class CreateOrUpdateGenre extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_LIBRARY->value
+        ]);
     }
 
     /**
@@ -24,9 +27,10 @@ class CreateOrUpdateGenre extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'category' => ['required', 'string', 'in:BOOK,NON-BOOK'],
+            'status' => ['required', 'string', 'in:ACTIVE,INACTIVE'],
+            'httpMethod' => ['required', 'in:UPDATE,POST'],
+            'bookEntryId' => ['required_if:httpMethod,UPDATE', 'exists:book_genres,id', 'integer'],
         ];
     }
 }

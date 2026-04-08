@@ -9,33 +9,34 @@ use App\Models\DormitoryRoomImage;
 use App\Utils\AuditHelper;
 use App\Enums\AdministratorAuditActions;
 use App\Utils\GenerateTrace;
-use App\Utils\TransactionUtil;
+use App\Utils\RemoveFile;
 use Illuminate\Database\Eloquent\Model;
 
 class DormitoryRoomManager
 {
+    public function __construct(
+        public RemoveFile $removeFile
+    ) {}
+
     /**
      * Summary of createOrUpdate
      * @param mixed $payload
      * @param mixed $isPost
      */
     public function createOrUpdate(object $payload, bool $isPost) {
-        $this_room = DormitoryRoom::updateOrCreate(
-            ['id' => $payload->documentId],
-            $payload->only([
-                'room_name',
-                'room_slot',
-                'dormitory',
-                'room_type',
-                'guest_gender',
-                'wing',
-                'floor',
-                'room_cost',
-                'accommodation',
-                'guest_cost',
-                'remarks'
-            ])
-        );
+        $this_room = DormitoryRoom::updateOrCreate(['id' => $payload->documentId], $payload->only([
+            'room_name',
+            'room_slot',
+            'dormitory',
+            'room_type',
+            'guest_gender',
+            'wing',
+            'floor',
+            'room_cost',
+            'accommodation',
+            'guest_cost',
+            'remarks'
+        ]));
 
         $this->roomImages($this_room, $payload?->data_room_image, $payload?->room_image);
         AuditHelper::log(
@@ -58,9 +59,7 @@ class DormitoryRoomManager
     private function roomImages(Model $roomInstance, ?array $oldImages = [], array $newImages = []) {
         if($oldImages) {
             $roomInstance->roomImages()->whereNotIn('id', $oldImages)->get()->each(function($attachment) {
-                if(file_exists(public_path("room-images/$attachment->filename"))) {
-                    unlink(public_path("room-images/$attachment->filename"));
-                }
+                $this->removeFile->removeFile("room-images/$attachment->filename");
             });
 
             $roomInstance->roomImages()->whereNotIn('id', $oldImages)->delete();

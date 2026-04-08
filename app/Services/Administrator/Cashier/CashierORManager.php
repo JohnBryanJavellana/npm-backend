@@ -30,10 +30,10 @@ class CashierORManager
             return ['message' => "The OR Number '{$payload->name}' is already assigned to this service type.", 'status' => 409];
         }
 
-        $this_or = CashierOR::updateOrCreate(
-            ['id' => $documentId],
-            $payload->only(['name', 'service_type'])
-        );
+        $this_or = CashierOR::updateOrCreate(['id' => $documentId], $payload->only([
+            'name',
+            'service_type'
+        ]));
 
         return [
             'message' => $isPost

@@ -26,10 +26,9 @@ class CashierChargeCategoryManager
             return ['message' => "Charge Category already exist.", 'status' => 409];
         }
 
-        $this_or = ChargeCategory::updateOrCreate(
-            ['id' => $documentId],
-            $payload->only(['name'])
-        );
+        $this_or = ChargeCategory::updateOrCreate( ['id' => $documentId], $payload->only([
+            'name'
+        ]));
 
         return [
             'message' => $isPost

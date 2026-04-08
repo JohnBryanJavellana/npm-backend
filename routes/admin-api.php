@@ -110,15 +110,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_book_reservation/update_prolongation_request', [LibraryController::class, 'update_prolongation_request']);
             Route::post('get_book_reservation/count_book_reservation', [LibraryController::class, 'count_book_reservation']);
             Route::post('get_book_reservation/check_for_book_reservation', [LibraryController::class, 'check_for_book_reservation']);
-            Route::delete('get_book_info/remove_copy/{copy_id}', [LibraryController::class, 'remove_copy']);
-            Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book']);
+            Route::delete('get_book_info/remove_copy/{bookCopyId}', [LibraryController::class, 'remove_copy']);
+            Route::delete('remove_book/{bookId}', [LibraryController::class, 'remove_book']);
         });
 
         Route::prefix('/book_entry/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY', 'throttle:60,1'])->group(function () {
             Route::get('get_book_entries', [LibraryController::class, 'get_book_entries']);
             Route::get('get_active_entries', [LibraryController::class, 'get_active_entries']);
             Route::post('create_or_update_book_entry', [LibraryController::class, 'create_or_update_book_entry']);
-            Route::delete('remove_entry/{entry_id}', [LibraryController::class, 'remove_entry']);
+            Route::delete('remove_entry/{bookEntryId}', [LibraryController::class, 'remove_entry']);
         });
 
         Route::prefix('/dormitory/')->middleware(['user_role:SUPERADMIN,ADMIN-DORMITORY', 'throttle:60,1'])->group(function () {
