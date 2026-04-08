@@ -14,6 +14,7 @@ use App\Http\Requests\Trainee\Library\RenewBookRequest;
 use App\Services\Administrator\Library\LibraryBookCopyManager;
 use App\Services\Administrator\Library\LibraryBookEntryManager;
 use App\Services\Administrator\Library\LibraryBookManager;
+use App\Services\Administrator\Library\LibraryBookReservationManager;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Utils\{
@@ -70,7 +71,8 @@ class LibraryController extends Controller
         TraineeLibrary $traineeLibrary,
         public LibraryBookManager $libraryBookManager,
         public LibraryBookCopyManager $libraryBookCopyManager,
-        public LibraryBookEntryManager $libraryBookEntryManager
+        public LibraryBookEntryManager $libraryBookEntryManager,
+        public LibraryBookReservationManager $libraryBookReservationManager
     ){
         $this->traineeCtrlInstance = $traineeLibrary;
     }
@@ -313,7 +315,20 @@ class LibraryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of update_reservation
+     * @param UpdateBookRequest $request
+     */
+    public function update_reservation(UpdateBookRequest $request){
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $reservationId = $request->bookReservationId;
+            $status = $request->status;
 
+            $result = $this->libraryBookReservationManager->updateReservation($reservationId, $status);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
 
     # 📍📍📍📍📍📍📍📍
     /**
@@ -440,50 +455,6 @@ class LibraryController extends Controller
     }
 
     /**
-     * Summary of update_reservation
-     * @param UpdateBookRequest $request
-     */
-    public function update_reservation(UpdateBookRequest $request){
-        return TransactionUtil::transact($request, ["book_reservations_cache"], function() use ($request) {
-            $reservation = BookReservation::where('id', $request->documentId)->lockForUpdate()->firstOrFail();
-            $reservation->status = $request->status;
-
-            if ($reservation->type === "HARD-COPY" && $reservation->book_copy_id === null) {
-                $copy = BookCopy::where('status', 'AVAILABLE')->first();
-                if (!$copy) return response()->json(['message' => "No available copies for this book."], 422);
-                $reservation->book_copy_id = $copy->id;
-            }
-
-            $reservation->save();
-
-            if ($reservation->book_copy_id) {
-                $copy = BookCopy::where('id', $reservation->book_copy_id)->lockForUpdate()->firstOrFail();
-
-                $copy->status = match(true) {
-                    \in_array($request->status, ["RETURNED", "REJECTED", "CANCELLED"]) => "AVAILABLE",
-                    \in_array($request->status, ["DAMAGED", "LOST"]) => $request->status,
-                    \in_array($request->status, ["RECEIVED"]) => "BORROWED",
-                    $request->status => "RESERVED",
-                    default => $copy->status
-                };
-                $copy->save();
-            }
-
-            $hasActiveItems = BookReservation::where('book_res_id', $reservation->book_res_id)
-                ->whereIn('status', ['PENDING', 'APPROVED', 'RECEIVED', 'EXTENDING', 'EXTENDED', 'RENEWING'])
-                ->exists();
-
-            if (!$hasActiveItems) {
-                BookRes::where('id', $reservation->book_res_id)->update(['status' => 'FOR CSM']);
-            }
-
-            return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKREQ->value], 200);
-        });
-    }
-
-
-
-    /**
      * Summary of get_pre_data
      * @param Request $request
      */
@@ -581,7 +552,6 @@ class LibraryController extends Controller
     public function create_fine(RequestFine $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
-
             $new_fine = $isPost ? new LibraryInvoice() : LibraryInvoice::find($request->documentId);
 
             if($isPost) {
@@ -595,19 +565,6 @@ class LibraryController extends Controller
             $new_fine->description = $request->details;
             $new_fine->invoice_amount = $request->amount;
             $new_fine->save();
-
-            Notifications::notify($request->user()->id, $request->user_id, "LIBRARY", ($isPost ? 'created' : 'updated') . " a request fine for you.");
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value . " ID#$new_fine->id"
-            );
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BELibrary(''),
-                    new BEAuditTrail(''),
-                );
-            }
 
             return response()->json(['message' => ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value). " a request fine ID#" . $new_fine->id], 201);
         });

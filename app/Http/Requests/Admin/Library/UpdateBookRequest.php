@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin\Library;
 
-use Illuminate\Validation\Rule;
+use App\Enums\UserRoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBookRequest extends FormRequest
@@ -12,7 +12,10 @@ class UpdateBookRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_LIBRARY->value
+        ]);
     }
 
     /**
@@ -23,8 +26,8 @@ class UpdateBookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => ['required']
+            'bookReservationId' => ['required', 'integer', 'exists:book_reservations,id'],
+            'status' => ['required', 'string', 'in:APPROVED,REJECTED,CANCELLED,RETURNED,RECEIVED,LOST,DAMAGED,EXPIRED']
         ];
     }
 }
