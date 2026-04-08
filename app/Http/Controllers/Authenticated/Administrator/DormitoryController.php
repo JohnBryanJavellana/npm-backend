@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Authenticated\Administrator;
 
-// asasas
 use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
@@ -19,19 +18,16 @@ use App\Models\DormitoryInvoice;
 use App\Models\DormitoryItemBI;
 use App\Models\DormitoryItemBorrowing;
 use App\Models\DormitoryReqService;
-use App\Models\DormitoryTenantSupDoc;
 use App\Services\Administrator\Dormitory\DormitoryRoomManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceRequestManager;
-use File;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use App\Enums\Administrator\DormitoryEnum;
 use App\Http\Requests\Admin\Dormitory\{
     GetAvailableDorms,
-    CreateOrUpdateDormitory,
     CreateOrUpdateRequest,
     CreateOrUpdateDormitoryInv,
     CreateOrUpdateService,
@@ -41,7 +37,6 @@ use App\Http\Requests\Admin\Dormitory\{
 use Illuminate\Http\Request;
 use App\Utils\{
     AuditHelper,
-    ConvertToBase64,
     TransactionUtil,
     GenerateTrace,
     Notifications
@@ -51,7 +46,6 @@ use App\Jobs\SaveAvatar;
 use App\Models\{
     DormitoryRoom,
     DormitoryTenant,
-    DormitoryRoomImage,
     DormitoryInventory,
     DormitoryService,
     User,
