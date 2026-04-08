@@ -477,17 +477,6 @@ class LibraryController extends Controller
                 BookRes::where('id', $reservation->book_res_id)->update(['status' => 'FOR CSM']);
             }
 
-            Notifications::notify($request->user()->id, $reservation->bookRes->trainee->id, "LIBRARY", "updated your book reservation status.");
-
-            AuditHelper::log(
-                $request->user()->id,
-                AdministratorAuditActions::LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVSTATUS->value . " ID#$request->documentId"
-            );
-
-            if (env('USE_EVENT')) {
-                event(new BELibrary(''), new BEAuditTrail(''));
-            }
-
             return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKREQ->value], 200);
         });
     }
