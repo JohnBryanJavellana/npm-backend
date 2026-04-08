@@ -84,7 +84,7 @@ class DormitoryController extends Controller
         </div>";
     }
 
-    // GOOOOOOOOODSSS -->>>>>>>>>>>>>>>
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of count_dorm_reservation
      * @param Request $request
@@ -109,6 +109,7 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of count_service_requests
      * @param Request $request
@@ -133,6 +134,7 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of get_dormitory_rooms
      * @param Request $request
@@ -180,6 +182,7 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of services
      * @param Request $request
@@ -220,6 +223,7 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of room_reservations
      * @param Request $request
@@ -312,6 +316,7 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of create_or_update_service_request
      * @param CreateServiceReq $request
