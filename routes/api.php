@@ -248,6 +248,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             //! Paolo Code Start 
 
             Route::post('store_assessments/attempts', [LMSAssessmentController::class, 'saveAnswersAssessment_attempts']);
+
+            Route::post('create_assessment_attempts', [LMSAssessmentController::class, 'createAssessmentAttempt']);
         });
 
         Route::prefix('sections/')->group(function () {

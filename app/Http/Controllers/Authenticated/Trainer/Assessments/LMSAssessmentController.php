@@ -13,17 +13,21 @@ use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
 use App\Http\Resources\Trainer\LMS\Assessment\AssessmentResource;
 use App\Http\Resources\Trainer\LMS\ViewAssessmentContentResource;
 use App\Models\AssessmentAnswer;
+use App\Models\AssessmentAttempt;
 use App\Models\AssessmentAttemptAction;
 use App\Models\Assessments;
 use App\Models\CourseContent;
 use App\Models\CourseModuleSection;
+use App\Models\AssessmentAttempts;
 use App\Models\EnrolledCourse;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use DomainException;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use function Laravel\Prompts\select;
+use Illuminate\Validation\ValidationException;
 
 class LMSAssessmentController extends Controller
 {
@@ -136,7 +140,7 @@ class LMSAssessmentController extends Controller
 
             $validated = $request->validate([
                 "assessment_id" => "required|integer|exists:assessments,id",
-                "assessment_attempt_id" => "nullable|integer", //! adi lat sayop kanan assessment_attempts talbe it nakukuha
+                "assessment_attempt_id" => "nullable|integer",
                 "answers" => "nullable|array",
                 "answers.*.question_id" => "required_with:answers|integer|exists:assessment_questions,id",
                 "answers.*.answer" => "required_with:answers|string",
@@ -171,6 +175,16 @@ class LMSAssessmentController extends Controller
                                 "answer_text" => $answer["answer"]
                             ]
                         );
+
+                        //! Log action to assessment_attempt_actions
+                        DB::table('assessment_attempt_actions')->insert([
+                            'user_id' => $request->user()->id,
+                            'assessment_attempt_id' => $validated["assessment_attempt_id"],
+                            'actions' => 'ANSWER_SUBMITTED',
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+
                         $savedCount++;
                     }
                 }
@@ -205,6 +219,56 @@ class LMSAssessmentController extends Controller
             return response()->json([
                 "message" => "An unexpected server error occurred",
                 "error" => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    public function createAssessmentAttempt(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                "assessments_id" => "required|integer|exists:assessments,id",
+            ]);
+
+            $userId = $request->user()->id;
+            $assessmentId = $validated["assessments_id"];
+
+            // Get the enrolled course
+            $enrolledCourse = DB::table('enrolled_courses')
+                ->where('enrolled_courses.user_id', $userId)
+                ->where('enrolled_courses.enrolled_course_status', 'ENROLLED')
+                ->first();
+
+            if (!$enrolledCourse) {
+                return response()->json([
+                    "message" => "You are not enrolled in any course."
+                ], 403);
+            }
+
+            $attempt = AssessmentAttempt::create([
+                "assessments_id" => $assessmentId,
+                "enrolled_course_id" => $enrolledCourse->id,
+                "score" => 0.0,
+                "status" => "IN_PROGRESS",
+                "graded_by" => 1,
+                "submitted_at" => now(),
+                "graded_at" => now()  // Set to current time
+            ]);
+
+
+            return response()->json([
+                "message" => "Assessment attempt created successfully.",
+                "data" => $attempt
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                "message" => "Validation failed.",
+                "errors" => $e->errors()
+            ], 422);
+        } catch (Exception $e) {
+            return response()->json([
+                "message" => "An error occurred.",
+                "error" => $e->getMessage()
             ], 500);
         }
     }
