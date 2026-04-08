@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use File;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -25,6 +26,11 @@ class SaveAvatar implements ShouldQueue
 
     public function handle() {
         if ($this->avatar) {
+            $path = public_path($this->path);
+            if (!File::isDirectory($path)) {
+                File::makeDirectory($path, 0777, true, true);
+            }
+
             if($this->deletableFile) {
                 if(file_exists(public_path("$this->path/$this->filename"))) {
                     unlink(public_path("$this->path/$this->filename"));
@@ -41,7 +47,7 @@ class SaveAvatar implements ShouldQueue
                     if (str_contains($contentType, 'image')) {
                         file_put_contents(public_path($this->path . $this->filename), $response->body());
                     } else {
-                        \Log::error("URL did not return an image. Content-Type: " . $contentType);
+                        \Log::error("URL did not return an image. Content-Type: $contentType");
                     }
                 }
             }

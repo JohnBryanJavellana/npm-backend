@@ -604,9 +604,6 @@ class LibraryController extends Controller
 
     /**
      * Summary of update_reservation
-     * @param bool notification === FALSE
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
      * @param UpdateBookRequest $request
      */
     public function update_reservation(UpdateBookRequest $request){

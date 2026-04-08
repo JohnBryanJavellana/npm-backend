@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public const REQ_SERVICE_STATUS = ["PENDING", "APPROVED", "DECLINED", "DONE", "FOR PAYMENT" , "CANCELLED", "PAID", "PROCESSING PAYMENT"];
+    public const FEE_TYPES = ["UNSET", "APPROVED_WITH_FEE", "APPROVED_NO_FEE"];
+
     /**
      * Run the migrations.
      */
@@ -19,10 +22,11 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(DormitoryService::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(DormitoryInvoice::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(DormitoryInvoice::class)->nullable()->constrained()->cascadeOnDelete();
             $table->double('charge', 65, 2)->default(0);
             $table->longText('remarks')->nullable();
-            $table->enum("status", ["PENDING", "APPROVED", "DECLINED", "DONE", "FOR PAYMENT" , "CANCELLED", "PAID"])->default('PENDING');
+            $table->enum("status", self::REQ_SERVICE_STATUS)->default(self::REQ_SERVICE_STATUS[0]);
+            $table->enum("fee_type", self::FEE_TYPES)->default(self::FEE_TYPES[0]);
             $table->timestamps();
         });
     }

@@ -224,7 +224,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
     });
 
-    Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->prefix('lms/')->group(function () {
+    Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-LMS', 'throttle:60,1'])->prefix('lms/')->group(function () {
 
         Route::prefix("overview/")->group(function () {
             Route::post("trainings", [LMSHandoutController::class, "overview"]);
@@ -275,8 +275,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("create_course_contents", [LMSController::class, "createSectionContents"]);
             Route::post("update_course_contents", [LMSController::class, "updateForContent"]);
             Route::post("update_course_sections", [LMSController::class, "updateForContentParent"]);
-            Route::delete("delete_courses", [LMSController::class, "delete"]);
-            Route::delete("delete_content_uploads", [LMSController::class, "deleteUpload"]);
+            Route::post("delete_courses", [LMSController::class, "delete"]);
+            Route::post("delete_content_uploads", [LMSController::class, "deleteUpload"]);
         });
     });
 

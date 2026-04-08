@@ -15,7 +15,7 @@ class updateAssSectionRequest extends FormRequest
     public function authorize(): bool
     {
         \Log::info("updateSection", [$this->all()]);
-        return $this->user() !== null;    
+        return $this->user() !== null;
     }
 
     /**
@@ -26,7 +26,7 @@ class updateAssSectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "section_id" => ["required", "exists:assessments,id"],
+            "section_id" => ["required", "exists:assessment_sections,id"],
             "title" => ["sometimes", "required", "string", "max:255"],
             "instruction" => ["sometimes", "required", "string"],
             "status" => ["sometimes", "required", "in:ACTIVE,INACTIVE"],
@@ -35,9 +35,9 @@ class updateAssSectionRequest extends FormRequest
 
     public function messages()
     {
-        return[
+        return [
             "assessments_id.required" => "The parent assessment was not found."
-        ];  
+        ];
     }
 
 

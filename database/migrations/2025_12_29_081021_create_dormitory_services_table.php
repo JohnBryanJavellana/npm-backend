@@ -1,12 +1,16 @@
 <?php
 
-use App\Models\Charge;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public const SERVICE_STATUS = [
+        "AVAILABLE",
+        "UNAVAILABLE"
+    ];
+
     /**
      * Run the migrations.
      */
@@ -17,11 +21,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->double('charge', 65, 2);
-            $table->longText('description');
-            $table->enum("status", ["AVAILABLE", "UNAVAILABLE"])->default('AVAILABLE');
+            $table->longText('description')->nullable();
+            $table->enum("status", self::SERVICE_STATUS)->default(self::SERVICE_STATUS[0]);
             $table->timestamps();
-
-            // $table->foreignIdFor(Charge::class)->constrained()->cascadeOnDelete();
         });
     }
 
