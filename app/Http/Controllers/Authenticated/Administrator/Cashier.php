@@ -2,31 +2,20 @@
 
 namespace App\Http\Controllers\Authenticated\Administrator;
 
-use App\Enums\Administrator\DormitoryEnum;
-use App\Enums\Administrator\EnrollmentEnum;
-use App\Enums\Administrator\LibraryEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Cashier\RemoveChargeCategory;
 use App\Http\Requests\Admin\Cashier\RemoveORNumber;
 use App\Http\Requests\Admin\Cashier\VerifyPayment;
 use App\Http\Requests\Admin\Cashier\WalkInPayment;
-use App\Jobs\SendingEmail;
-use App\Mail\CashierEmail;
 use App\Models\CashierOR;
-use App\Models\DormitoryInclusionRequest;
-use App\Models\DormitoryReqService;
-use App\Models\User;
 use App\Services\Administrator\Cashier\CashierChargeCategoryManager;
 use App\Services\Administrator\Cashier\CashierORManager;
 use App\Services\Administrator\Cashier\CashierPaymentVerification;
 use App\Utils\CashierGetTableRef;
-use App\Utils\Notifications;
 
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 use App\Utils\{
     TransactionUtil,
-    AuditHelper
 };
 use App\Enums\Administrator\{
     CashierEnum,
@@ -43,7 +32,6 @@ use App\Models\{
     ChargeCategory
 };
 use App\Enums\{
-    AdministratorAuditActions,
     AdministratorReturnResponse
 };
 
@@ -81,11 +69,10 @@ class Cashier extends Controller
 
     /**
      * Summary of get_all_paid_payments
-    * @param Request $request
-    */
+     * @param Request $request
+     */
     public function get_all_paid_payments(Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-
             $services = [
                 NotificationEnum::ENROLLMENT->value,
                 NotificationEnum::DORMITORY->value,
