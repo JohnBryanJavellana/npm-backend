@@ -176,7 +176,7 @@ class LMSAssessmentController extends Controller
                             ]
                         );
 
-                        //! Log action to assessment_attempt_actions
+
                         DB::table('assessment_attempt_actions')->insert([
                             'user_id' => $request->user()->id,
                             'assessment_attempt_id' => $validated["assessment_attempt_id"],
@@ -233,7 +233,7 @@ class LMSAssessmentController extends Controller
             $userId = $request->user()->id;
             $assessmentId = $validated["assessments_id"];
 
-            // Get the enrolled course
+
             $enrolledCourse = DB::table('enrolled_courses')
                 ->where('enrolled_courses.user_id', $userId)
                 ->where('enrolled_courses.enrolled_course_status', 'ENROLLED')
@@ -252,7 +252,7 @@ class LMSAssessmentController extends Controller
                 "status" => "IN_PROGRESS",
                 "graded_by" => 1,
                 "submitted_at" => now(),
-                "graded_at" => now()  // Set to current time
+                "graded_at" => now()
             ]);
 
 
@@ -269,6 +269,192 @@ class LMSAssessmentController extends Controller
             return response()->json([
                 "message" => "An error occurred.",
                 "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    //! this is fix code // Create attempt and answers //score is fix to boolean
+    public function assessment_answers(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                "assessment_id" => "required|integer|exists:assessments,id",
+                "answers" => "required|array",
+                "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
+                "answers.*.assessment_option_id" => "required|integer|exists:assessment_options,id",
+                "answers.*.assessment_answer_text" => "nullable|string"
+            ]);
+
+            DB::beginTransaction();
+
+            try {
+                $enrolledCourse = DB::table('enrolled_courses')
+                    ->where('user_id', auth()->id())
+                    ->where('enrolled_course_status', 'ENROLLED')
+                    ->first();
+
+                $existingAttempt = AssessmentAttempt::where([
+                    "assessments_id" => $validated["assessment_id"],
+                    "enrolled_course_id" => $enrolledCourse->id,
+                    "status" => "SUBMITTED"
+                ])->first();
+
+                if ($existingAttempt) {
+                    return response()->json([
+                        "message" => "Assessment already submitted. No further submissions allowed.",
+                        "assessment_attempt_id" => $existingAttempt->id
+                    ], 403);
+                }
+
+                $attempt = AssessmentAttempt::firstOrCreate(
+                    [
+                        "assessments_id" => $validated["assessment_id"],
+                        "enrolled_course_id" => $enrolledCourse->id,
+                        "status" => "IN_PROGRESS"
+                    ],
+                    ["score" => 0, "graded_by" => 1, "submitted_at" => now(), "graded_at" => now()]
+                );
+
+                $correctCount = 0;
+                $answers = [];
+
+                foreach ($validated["answers"] as $answer) {
+                    $option = DB::table('assessment_options')
+                        ->where('id', $answer["assessment_option_id"])
+                        ->where('assessment_question_id', $answer["assessment_question_id"])
+                        ->first();
+
+                    if (!$option) {
+                        throw new Exception("Assessment option not found");
+                    }
+
+                    $answerMatches = strtolower($answer["assessment_answer_text"] ?? '') === strtolower($option->option_text);
+                    $isCorrect = (bool) $option->is_correct;
+                    $isFinalCorrect = $answerMatches && $isCorrect;
+
+                    if ($isFinalCorrect) $correctCount++;
+
+                    $answers[] = AssessmentAnswer::updateOrCreate(
+                        [
+                            "assessment_attempt_id" => $attempt->id,
+                            "assessment_question_id" => $answer["assessment_question_id"]
+                        ],
+                        [
+                            "assessment_option_id" => $option->id,
+                            "answer_text" => $answer["assessment_answer_text"] ?? null,
+                            "is_correct" => $isFinalCorrect ? 1 : 0,
+                            "score" => $isFinalCorrect ? 1 : 0
+                        ]
+                    );
+                }
+
+                $total = count($validated["answers"]);
+                $score = $total > 0 ? ($correctCount / $total) * 100 : 0;
+
+                // Pass $attempt object to the method
+                $status = $this->detectAssessmentStatus($score, $attempt);
+
+                $attempt->update([
+                    'score' => $score,
+                    'status' => $status,
+                    'graded_at' => now()
+                ]);
+
+                $this->logUserAction(new Request([
+                    'action' => 'assessment_submitted_successfully',
+                    'assessment_attempt_id' => $attempt->id
+                ]));
+
+                DB::commit();
+
+                return response()->json([
+                    "message" => "Answers submitted successfully.",
+                    "assessment_attempt_id" => $attempt->id,
+                    "score" => round($score, 2),
+                    "correct_answers" => $correctCount,
+                    "total_answers" => $total,
+                    "status" => $status,
+                    "data" => $answers
+                ], 201);
+            } catch (\Exception $e) {
+                DB::rollBack();
+
+                $this->logUserAction(new Request([
+                    'action' => 'assessment_failed: ' . $e->getMessage(),
+                    'assessment_attempt_id' => $attempt->id ?? null
+                ]));
+
+                throw $e;
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                "message" => "An error occurred.",
+                "error" => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    private function detectAssessmentStatus($score, $attempt)
+    {
+
+        if ($score === 100) {
+            return 'SUBMITTED';
+        }
+
+        if ($attempt->created_at->addHours(24)->isPast()) {
+            return 'SUBMITTED';
+        }
+
+        return 'IN_PROGRESS';
+    }
+
+    //! reusesable function for logging user actions during assessment attempts
+    public function logUserAction(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'action' => 'required|string|max:255',
+                'assessment_attempt_id' => 'nullable|integer'
+            ]);
+
+            DB::table('assessment_attempt_actions')->insert([
+                'user_id' => auth()->id(),
+                'assessment_attempt_id' => $validated['assessment_attempt_id'] ?? null,
+                'actions' => $validated['action'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            return response()->json([
+                'message' => 'Action logged successfully',
+                'action' => $validated['action']
+            ], 201);
+        } catch (\Exception $e) {
+            \Log::error('Failed to log action: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error logging action',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function detectAttemptActions(Request $request)
+    {
+        try {
+            $actions = DB::table('assessment_attempt_actions')
+                ->where('user_id', auth()->id())
+                ->orderBy('created_at', 'desc')
+                ->paginate(20);
+
+            return response()->json([
+                'message' => 'User assessment actions',
+                'total_actions' => $actions->total(),
+                'data' => $actions
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error fetching actions',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

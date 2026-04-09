@@ -250,6 +250,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('store_assessments/attempts', [LMSAssessmentController::class, 'saveAnswersAssessment_attempts']);
 
             Route::post('create_assessment_attempts', [LMSAssessmentController::class, 'createAssessmentAttempt']);
+            Route::post('create_attempts/assessment_answers', [LMSAssessmentController::class, 'assessment_answers']);
         });
 
         Route::prefix('sections/')->group(function () {
