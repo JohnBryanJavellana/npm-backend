@@ -3,12 +3,9 @@
 namespace App\Http\Requests\Admin\Library;
 
 use App\Enums\UserRoleEnum;
-use App\Rules\Admin\Library\RemoveBookCheckerRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
-class RemoveBook extends FormRequest
+class GetBookCopyRecords extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,13 +18,6 @@ class RemoveBook extends FormRequest
         ]);
     }
 
-    public function prepareForValidation()
-    {
-        $this->merge([
-            'bookId' => $this->route('bookId'),
-        ]);
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -36,7 +26,7 @@ class RemoveBook extends FormRequest
     public function rules(): array
     {
         return [
-            'bookId' => ['required', 'integer', 'exists:books,id', new RemoveBookCheckerRule()]
+            'bookCopyId' => ['required', 'exists:book_copies,id']
         ];
     }
 }

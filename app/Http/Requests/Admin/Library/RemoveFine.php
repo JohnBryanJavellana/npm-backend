@@ -39,12 +39,4 @@ class RemoveFine extends FormRequest
             'libraryInvoiceId' => ['required', 'exists:library_invoices,id', new UpdateBookFineRule()]
         ];
     }
-
-    public function failedValidation(Validator $validator)
-    {
-        $errors = $validator->errors()->all();
-        throw new HttpResponseException(
-            response()->json([ 'message' => implode(',', $errors) ])
-        );
-    }
 }

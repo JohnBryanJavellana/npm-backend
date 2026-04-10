@@ -21,7 +21,7 @@ class LibraryExtendService
     private function prepareData($records, $book_reservation_ids)
     {
         if ($records->count() !== count($book_reservation_ids)) {
-            throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be renewed.");
+            throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be extended.");
         }
 
         //validate DATE
@@ -40,10 +40,6 @@ class LibraryExtendService
                 ->whereIn("id", $book_ids)
                 ->lockForUpdate()
                 ->get();
-
-            $this->bookResModel->query()
-                ->whereIn("id", $book_ids)
-                ->update(["status" => RequestStatus::EXTENDING->value]);
 
             $this->prepareData($records, $book_ids);
 

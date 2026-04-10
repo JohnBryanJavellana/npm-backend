@@ -29,20 +29,12 @@ class RequestFine extends FormRequest
     public function rules(): array
     {
         return [
-            'invoiceAmount' => ['required', 'numeric'],
+            'invoice_amount' => ['required', 'numeric'],
             'description' => ['required', 'string'],
-            'invoiceStatus' => ['required', 'string'],
-            'bookResId' => ['required', 'exists:book_res,id'],
-            'userId' => ['required', 'exists:users,id'],
+            'invoice_status' => ['required', 'string'],
+            'book_res_id' => ['required', 'exists:book_res,id'],
+            'user_id' => ['required', 'exists:users,id'],
             'libraryInvoiceId' => ['required_if:httpMethod,UPDATE', 'exists:library_invoices,id', new UpdateBookFineRule()]
         ];
-    }
-
-    public function failedValidation(Validator $validator)
-    {
-        $errors = $validator->errors()->all();
-        throw new HttpResponseException(
-            response()->json([ 'message' => implode(',', $errors) ])
-        );
     }
 }

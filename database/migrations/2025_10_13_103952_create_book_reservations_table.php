@@ -25,7 +25,8 @@ return new class extends Migration
         'EXPIRED',
         'EXTENDING',
         'EXTENDED',
-        'RENEWING'
+        'RENEWING',
+        'RENEWED'
     ];
 
     /**

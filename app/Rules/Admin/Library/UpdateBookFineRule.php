@@ -16,7 +16,7 @@ class UpdateBookFineRule implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $this_invoice = LibraryInvoice::first($value);
+        $this_invoice = LibraryInvoice::find($value);
 
         if($this_invoice && !\in_array($this_invoice->invoice_status, [CashierEnum::PENDING->value])) {
             $fail("Invoice is already $this_invoice->invoice_status.");

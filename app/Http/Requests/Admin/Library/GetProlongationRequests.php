@@ -26,7 +26,7 @@ class GetProlongationRequests extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'string'],
+            'status' => ['required', 'array'],
             'bookResId' => ['required', 'exists:book_res,id']
         ];
     }

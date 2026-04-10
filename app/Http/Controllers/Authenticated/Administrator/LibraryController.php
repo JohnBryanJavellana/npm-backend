@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 use App\Http\Controllers\Authenticated\Trainee\TraineeLibrary;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Library\CreateBookCopy;
+use App\Http\Requests\Admin\Library\GetBookCopyRecords;
 use App\Http\Requests\Admin\Library\GetProlongationRequests;
 use App\Http\Requests\Admin\Library\RemoveBook;
 use App\Http\Requests\Admin\Library\RemoveBookCopy;
@@ -94,7 +95,8 @@ class LibraryController extends Controller
                 'total'     => CountCollection::startCount($reservations),
                 'active'    => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::ACTIVE)),
                 'for_csm'   => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::FOR_CSM)),
-                'extending' => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::EXTENDING)),
+                'extending' => CountCollection::startCount($reservations->clone()->whereHas('borrowedBooks', fn($query) => $query->where('status', LibraryEnum::EXTENDING))),
+                'renewing'  => CountCollection::startCount($reservations->clone()->whereHas('borrowedBooks', fn($query) => $query->where('status', LibraryEnum::RENEWING))),
                 'completed' => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::COMPLETED)),
             ];
 
@@ -107,28 +109,24 @@ class LibraryController extends Controller
      * Summary of get_book_reservation
      * @param Request $request
      */
-    public function get_book_reservation (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $reservations = BookRes::with([
-                'trainee',
-                'borrowedBooks',
-                'borrowedBooks.book',
-                'borrowedBooks.books',
-                'borrowedBooks.books.catalog',
-                'borrowedBooks.books.catalog.genre',
-                'csm',
-                'csm.user'
-            ]);
+    public function get_book_reservation(Request $request) {
+        $query = BookRes::with([
+            'trainee',
+            'csm.user',
+            'borrowedBooks.book',
+            'borrowedBooks.books.catalog.genre',
+        ])
+        ->when($request->userId, fn($q) => $q->where('user_id', $request->userId))
+        ->when($request->type, fn ($q, $type) => \in_array($type, ['EXTENDING', 'RENEWING'])
+            ? $q->whereHas('borrowedBooks', fn($sub) => $sub->where('status', $type))
+            : $q->where('status', $type)
+        );
 
-            if($request->userId) $reservations->where('user_id', $request->userId);
-            if($request->type) $reservations->where('status', $request->type);
+        $reservations = $request->traceNumber
+            ? $query->where('trace_number', $request->traceNumber)->first()
+            : $query->latest()->get();
 
-            $reservations = $request->traceNumber
-                ? $reservations->where('trace_number', $request->traceNumber)->first()
-                : $reservations->orderBy('created_at', 'DESC')->get();
-
-            return response()->json(['reservations' => $reservations], 200);
-        });
+        return response()->json(['reservations' => $reservations], 200);
     }
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -485,7 +483,7 @@ class LibraryController extends Controller
             $bR->status = $tempStatus;
             $bR->save();
 
-            return response()->json([AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKREQ->value], 201);
+            return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKREQ->value], 201);
         });
     }
 
@@ -512,78 +510,18 @@ class LibraryController extends Controller
     }
 
     /**
-     * Summary of get_book_reservation_that_needs_fine
-     * @param Request $request
+     * Summary of get_book_copy_activity
+     * @param GetBookCopyRecords $request
      */
-    public function get_book_reservation_that_needs_fine (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $booksThatNeedsFine = BookRes::where([
-                'id' => $request?->libraryId,
-                'user_id' => $request?->userId
-            ])->with([
-                'borrowedBooks' => function($query) {
-                    $query->whereIn('status', ['EXPIRED', 'DAMAGED', 'LOST'])
-                        ->whereHas('books', fn($q) => $q->where('pdf_copy', null));
-                },
-                'borrowedBooks.books',
-                'borrowedBooks.book',
-                'borrowedBooks.books.catalog'
-            ])->first();
+    public function get_book_copy_activity(GetBookCopyRecords $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $bookCopyId = $request->bookCopyId;
+            $book_reservation_with_this_copy = BookReservation::where('book_copy_id', $bookCopyId)
+                ->with([ 'bookRes.trainee' ])
+                ->latest()
+                ->get();
 
-            return response()->json(['booksThatNeedsFine' => $booksThatNeedsFine], 200);
-        });
-    }
-
-    //edrascoe
-    public function get_book_copy_activity(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $copy = BookCopy::where('book_id', $request->bookId)
-                ->when($request->unique_identifier, fn($q) =>
-                    $q->where('unique_identifier', $request->unique_identifier)
-                )
-                ->first();
-
-            if (!$copy) {
-                return response()->json(['message' => 'Book copy not found.'], 404);
-            }
-            $bookRes = BookRes::whereIn('status', [
-                    BookRes::STATUS_ACTIVE,
-                    BookRes::STATUS_FOR_CSM
-                ])
-                ->whereHas('borrowedBooks', fn($q) =>
-                    $q->where('book_id', $copy->book_id)
-                )
-                ->with([
-                    'trainee',
-                    'borrowedBooks' => fn($q) =>
-                        $q->where('book_id', $copy->book_id)
-                        ->latest()
-                        ->limit(1)
-                ])
-                ->first();
-
-            $reservation = $bookRes?->borrowedBooks->first();
-
-            return response()->json([
-                'bookCopyActivity' => [
-                    'copy_id'           => $copy->id,
-                    'unique_identifier' => $copy->unique_identifier,
-                    'copy_status'       => $copy->status,
-                    'activity'          => $bookRes ? [
-                        'reservation_status' => $bookRes->status,
-                        'type'               => $reservation?->type,
-                        'from_date'          => $reservation?->from_date,
-                        'to_date'            => $reservation?->to_date,
-                        'action_by'          => $copy->status === 'BORROWED' ? 'BORROWED' : 'RESERVED',
-                        'reserved_at'        => $bookRes->created_at,
-                        'trainee'            => [
-                            'id'    => $bookRes->trainee?->id,
-                            'name'  => $bookRes->trainee?->name,
-                            'email' => $bookRes->trainee?->email,
-                        ]
-                    ] : null,
-                ]
-            ], 200);
+            return response()->json([ 'bookCopyRecords' => $book_reservation_with_this_copy ], 200);
         });
     }
 }

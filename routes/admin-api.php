@@ -88,10 +88,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::get('get_books', [LibraryController::class, 'get_books']);
             Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
+            Route::post('get_book_info/get_book_copy_activity', [LibraryController::class, 'get_book_copy_activity']);
+            Route::post('get_book_info/get_copies/update_book_copy', [LibraryController::class, 'update_book_copy']);
             Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
             Route::get('get_book_info/get_copies/{book_id}', [LibraryController::class, 'get_copies']);
-            Route::get('activity', [LibraryController::class, 'get_book_copy_activity']);//edrascoe
-            Route::post('get_book_info/get_copies/update_book_copy', [LibraryController::class, 'update_book_copy']);
             Route::post('create_book_copies', [LibraryController::class, 'create_book_copies']);
             Route::get('get_book_total_reservations/{book_id}', [LibraryController::class, 'get_book_total_reservations']);
             Route::post('update_reservation', [LibraryController::class, 'update_reservation']);
@@ -100,9 +100,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('create_or_update_book', [LibraryController::class, 'create_or_update_book']);
             Route::match(['GET', 'POST'], 'get_book_reservation', [LibraryController::class, 'get_book_reservation']);
             Route::post('get_book_reservation/get_fines', [LibraryController::class, 'get_fines']);
-            Route::post('get_book_reservation/create_fine', [LibraryController::class, 'create_fine']);
+            Route::post('get_book_reservation/create_or_update_fine', [LibraryController::class, 'create_or_update_fine']);
             Route::delete('get_book_reservation/remove_fine/{libraryInvoiceId}', [LibraryController::class, 'remove_fine']);
-            Route::post('get_book_reservation/get_book_reservation_that_needs_fine', [LibraryController::class, 'get_book_reservation_that_needs_fine']);
             Route::post('get_book_reservation/get_prolongation_request', [LibraryController::class, 'get_prolongation_request']);
             Route::post('get_book_reservation/get_books_that_protractible', [LibraryController::class, 'get_books_that_protractible']);
             Route::post('get_book_reservation/submit_renewal_request', [LibraryController::class, 'submit_renewal_request']);

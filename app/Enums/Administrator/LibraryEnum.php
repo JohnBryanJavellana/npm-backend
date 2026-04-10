@@ -6,6 +6,7 @@ enum LibraryEnum : string {
     case APPROVED = "APPROVED";
     case PENDING = "PENDING";
     case ACTIVE = "ACTIVE";
+    case RENEWING = "RENEWING";
     case FOR_CSM = "FOR CSM";
     case HARD_COPY = "HARD-COPY";
     case EXTENDING = "EXTENDING";

@@ -39,12 +39,4 @@ class RemoveBookCopy extends FormRequest
             'bookCopyId' => ['exists:book_copies,id', 'integer', new RemoveBookCopyRule()],
         ];
     }
-
-    public function failedValidation(Validator $validator)
-    {
-        $errors = $validator->errors()->all();
-        throw new HttpResponseException(
-            response()->json([ 'message' => implode(',', $errors) ])
-        );
-    }
 }

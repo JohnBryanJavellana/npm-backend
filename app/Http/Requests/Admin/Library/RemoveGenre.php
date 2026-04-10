@@ -39,12 +39,4 @@ class RemoveGenre extends FormRequest
             'bookEntryId' => ['exists:book_genres,id', 'integer', new RemoveBookEntryRule()],
         ];
     }
-
-    public function failedValidation(Validator $validator)
-    {
-        $errors = $validator->errors()->all();
-        throw new HttpResponseException(
-            response()->json([ 'message' => implode(',', $errors) ])
-        );
-    }
 }
