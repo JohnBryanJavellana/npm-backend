@@ -272,6 +272,7 @@ class EnrollmentCtrl extends Controller
                 $premade_record->user_id = $this_training_status->user_id;
                 $premade_record->trace_number = GenerateTrace::createTraceNumber(EnrollmentInvoice::class, '-EAINV-');
                 $premade_record->invoice_amount = $request->invoiceAmount;
+                $premade_record->description = "Training Application";
                 $premade_record->save();
             }
 
@@ -445,6 +446,7 @@ class EnrollmentCtrl extends Controller
             $this_module->module_type_id = $request->module;
             $this_module->name = $request->name;
             $this_module->acronym = $request->short_name;
+            $this_module->number_of_days = $request->days;
             $this_module->compendium = $request->compendium;
             if ($request->status) {
                 $this_module->status = $request->status;

@@ -26,9 +26,8 @@ class viewAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "training_id" => ["sometimes","required", "exists:trainings,id"],
-            "course_module_id" => ["sometimes","required", "exists:course_modules,id"],
-            "type" => ["sometimes", "required", "in:EXAM,QUIZ,ASSIGNMENT,ACTIVITY"]
+            "course_content_id" => ["sometimes","required", "exists:course_modules,id"],
+            "type" => ["sometimes", "required", "in:EXAM,QUIZ,ASSIGNMENTS,ACTIVITY"]
         ];
     }
 

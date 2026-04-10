@@ -21,7 +21,7 @@ class AssessmentQuestion extends Model
 
     public function sections()
     {
-        return $this->belongsTo(AssessmentSection::class);
+        return $this->belongsTo(AssessmentSection::class, "assessment_section_id", "id");
     }
 
     /** Scopes */

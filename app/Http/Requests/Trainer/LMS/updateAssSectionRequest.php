@@ -26,7 +26,7 @@ class updateAssSectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "assessments_id" => ["required", "exists:assessments,id"],
+            "section_id" => ["required", "exists:assessments,id"],
             "title" => ["sometimes", "required", "string", "max:255"],
             "instruction" => ["sometimes", "required", "string"],
             "status" => ["sometimes", "required", "in:ACTIVE,INACTIVE"],

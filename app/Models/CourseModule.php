@@ -14,6 +14,11 @@ class CourseModule extends Model
         return $this->hasMany(RequirementSpecificModule::class);
     }
 
+    public function handout()
+    {
+        return $this->hasMany(CourseModuleHandouts::class);
+    }
+
     public function specific_requirements()
     {
         return $this->belongsToMany(

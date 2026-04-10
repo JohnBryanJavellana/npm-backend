@@ -191,6 +191,7 @@ class DormitoryController extends Controller
             $tempDorm = Dormitory::query();
 
             $tempDorm->where('room_fee_type', $isOfficer ? DormitoryEnum::OFFICERS : DormitoryEnum::RATINGS);
+
             $roomFilter = function($query) use ($isAirConditioned, $singleAccommodation, $dateFrom, $dateTo, $roomId) {
                 $query->where('is_air_conditioned', $isAirConditioned)
                     ->where('room_status', 'AVAILABLE')

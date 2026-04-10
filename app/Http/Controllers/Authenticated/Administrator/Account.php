@@ -80,19 +80,6 @@ class Account extends Controller
         });
     }
 
-    /**
-     * Summary of get_activities
-     * @param Request $request
-     */
-    public function get_activities (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $activities = AuditTrail::orderBy('created_at', 'DESC');
-            if ($request->user()->role !== UserRoleEnum::SUPERADMIN->value) $activities->where('user_id', $request->user()->id);
-
-            return response()->json(['activities' => $activities->get()], 200);
-        });
-    }
-
     public function getUserActivities(PaginationAuditViewRequest $request)
     {
         $validated = $request->validated();
@@ -131,6 +118,19 @@ class Account extends Controller
             ->paginate($perPage ?? 10);
 
             return AuditLogResource::collection($logs);
+    }
+
+    /**
+     * Summary of get_activities
+     * @param Request $request
+     */
+    public function get_activities (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $activities = AuditTrail::orderBy('created_at', 'DESC');
+            if ($request->user()->role !== UserRoleEnum::SUPERADMIN->value) $activities->where('user_id', $request->user()->id);
+
+            return response()->json(['activities' => $activities->get()], 200);
+        });
     }
 
     /**

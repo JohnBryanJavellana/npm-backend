@@ -43,7 +43,7 @@ class CreateExtendRequest extends FormRequest
             response()->json([
                 "message" => $firstError,
                 "errors" => $errors
-            ])
+            ], 422)
         );
     }
 }
