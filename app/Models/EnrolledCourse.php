@@ -12,7 +12,10 @@ class EnrolledCourse extends Model
     protected $guarded = ["id"];
 
     /** RELATIONS */
-
+    public function assessmentAttempts()
+    {
+        return $this->hasMany(AssessmentAttempt::class);
+    }
     public function enrolled_course_certificate()
     {
         return $this->hasMany(Certificate::class);
