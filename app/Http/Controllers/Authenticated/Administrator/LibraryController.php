@@ -153,7 +153,6 @@ class LibraryController extends Controller
     /**
      * Summary of create_walkin_request
      * @param BookRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function create_walkin_request (BookRequest $request) {
         return $this->traineeCtrlInstance->send_request_book($request);
