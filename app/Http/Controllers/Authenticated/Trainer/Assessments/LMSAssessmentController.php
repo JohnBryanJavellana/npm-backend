@@ -285,12 +285,14 @@ class LMSAssessmentController extends Controller
         return 'IN_PROGRESS';
     }
 
-    
 
-
-
-
-
+    public function validationTimeDate(Request $request)
+    {
+        $enrolledCourse = EnrolledCourse::where('user_id', auth()->id())
+            ->with('enrolled_course_status', 'ENROLLED')
+            ->where('training_id', $request->training_id)
+            ->first();
+    }
 
     //! reusesable function for logging user actions during assessment attempts
     public function logUserAction(Request $request)
