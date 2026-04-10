@@ -225,6 +225,21 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_pre_data
+     * @param Request $request
+     */
+    public function get_pre_data (Request $request) {
+        return TransactionUtil::transact(null, [], function() {
+            $genres = BookGenre::where('status', 'ACTIVE')
+                ->orderBy('category', 'ASC')
+                ->get();
+
+            $trainings = Training::with(['module', 'module.moduleType'])->get();
+            return response()->json(['genres' => $genres, 'trainings' => $trainings], 200);
+        });
+    }
+
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of get_copies
@@ -278,6 +293,22 @@ class LibraryController extends Controller
         return TransactionUtil::transact($request, [], function() use ($request, $bookCopyId) {
             $result = $this->libraryBookCopyManager->removeBookCopy($bookCopyId);
             return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of get_book_copy_activity
+     * @param GetBookCopyRecords $request
+     */
+    public function get_book_copy_activity(GetBookCopyRecords $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $bookCopyId = $request->bookCopyId;
+            $book_reservation_with_this_copy = BookReservation::where('book_copy_id', $bookCopyId)
+                ->with([ 'bookRes.trainee' ])
+                ->latest()
+                ->get();
+
+            return response()->json([ 'bookCopyRecords' => $book_reservation_with_this_copy ], 200);
         });
     }
 
@@ -467,44 +498,6 @@ class LibraryController extends Controller
             ];
 
             return response()->json(['bookReservationCheck' => $count], 200);
-        });
-    }
-
-    /**
-     * Summary of get_pre_data
-     * @param Request $request
-     */
-    public function get_pre_data (Request $request) {
-        return TransactionUtil::transact(null, [], function() {
-            $genres = BookGenre::withCount(['hasData'])
-                ->where('status', 'ACTIVE')
-                ->orderBy('category', 'ASC')
-                ->get();
-            $trainings = Training::with([
-                'module',
-                'module.moduleType'
-            ])->get();
-
-            return response()->json([
-                'genres' => $genres,
-                'trainings' => $trainings
-            ], 200);
-        });
-    }
-
-    /**
-     * Summary of get_book_copy_activity
-     * @param GetBookCopyRecords $request
-     */
-    public function get_book_copy_activity(GetBookCopyRecords $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
-            $bookCopyId = $request->bookCopyId;
-            $book_reservation_with_this_copy = BookReservation::where('book_copy_id', $bookCopyId)
-                ->with([ 'bookRes.trainee' ])
-                ->latest()
-                ->get();
-
-            return response()->json([ 'bookCopyRecords' => $book_reservation_with_this_copy ], 200);
         });
     }
 }
