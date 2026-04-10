@@ -12,6 +12,7 @@ use App\Http\Requests\Admin\Library\RemoveBookCopy;
 use App\Http\Requests\Admin\Library\RemoveFine;
 use App\Http\Requests\Admin\Library\RemoveGenre;
 use App\Http\Requests\Admin\Library\UpdateBookCopy;
+use App\Http\Requests\Admin\Library\UpdateProlongationRequest;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
 use App\Services\Administrator\Library\LibraryBookCopyManager;
@@ -19,6 +20,7 @@ use App\Services\Administrator\Library\LibraryBookEntryManager;
 use App\Services\Administrator\Library\LibraryBookFinesManager;
 use App\Services\Administrator\Library\LibraryBookManager;
 use App\Services\Administrator\Library\LibraryBookReservationManager;
+use App\Services\Administrator\Library\LibraryProlongationManager;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Utils\{
@@ -77,7 +79,8 @@ class LibraryController extends Controller
         public LibraryBookCopyManager $libraryBookCopyManager,
         public LibraryBookEntryManager $libraryBookEntryManager,
         public LibraryBookReservationManager $libraryBookReservationManager,
-        public LibraryBookFinesManager $libraryBookFinesManager
+        public LibraryBookFinesManager $libraryBookFinesManager,
+        public LibraryProlongationManager $libraryProlongationManager
     ){
         $this->traineeCtrlInstance = $traineeLibrary;
     }
@@ -397,6 +400,41 @@ class LibraryController extends Controller
         });
     }
 
+    /**
+     * Summary of get_books_that_protractible
+     * @param Request $request
+     */
+    public function get_books_that_protractible (Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $booksThatAreProtactible = BookReservation::with([
+                'bookRes',
+                'books',
+                'books.catalog',
+                'books.catalog.genre'
+            ])->where([
+                'book_res_id' => $request->libraryId
+            ])->whereIn('status', $request->status)->get();
+
+            return response()->json(['booksThatAreProtactible' => $booksThatAreProtactible], 200);
+        });
+    }
+
+    /**
+     * Summary of update_prolongation_request
+     * @param Request $request
+     */
+    public function update_prolongation_request(UpdateProlongationRequest $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $prolongationRequestId = $request->prolongationRequestId;
+            $status = $request->status;
+            $acceptedStatus = $request->acceptedStatus;
+            $targetDateTime = $request->targetDateTime;
+
+            $result = $this->libraryProlongationManager->updateProlongationRequest($prolongationRequestId, $status, $acceptedStatus, $targetDateTime);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
     # 📍📍📍📍📍📍📍📍
     /**
      * Summary of check_for_book_reservation
@@ -429,60 +467,6 @@ class LibraryController extends Controller
             ];
 
             return response()->json(['bookReservationCheck' => $count], 200);
-        });
-    }
-
-    /**
-     * Summary of get_books_that_protractible
-     * @param Request $request
-     */
-    public function get_books_that_protractible (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $booksThatAreProtactible = BookReservation::with([
-                'bookRes',
-                'books',
-                'books.catalog',
-                'books.catalog.genre'
-            ])->where([
-                'book_res_id' => $request->libraryId
-            ])->whereIn('status', $request->status)->get();
-
-            return response()->json(['booksThatAreProtactible' => $booksThatAreProtactible], 200);
-        });
-    }
-
-    /**
-     * Summary of update_prolongation_request
-     * @param bool notification === FALSE
-     * @param bool auditActions === FALSE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     */
-    public function update_prolongation_request(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $bR = BookReservation::find($request->documentId);
-
-            if (!$bR) {
-                return response()->json(['message' => 'Reservation not found.'], 404);
-            }
-
-            $isPastDue = now()->gt(Carbon::parse($bR->to_date));
-
-            $tempStatus = match(true) {
-                $isPastDue => 'EXPIRED',
-                $request->status === "APPROVED" => $request->acceptedStatus,
-                \in_array($request->status, ["REJECTED", "CANCELLED"]) => 'RECEIVED',
-                default => 'ERROR'
-            };
-
-            if (\in_array($tempStatus, ["EXTENDED", "RENEWED"])) {
-                $bR->to_date = Carbon::parse($request->to_date);
-            }
-
-            $bR->status = $tempStatus;
-            $bR->save();
-
-            return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKREQ->value], 201);
         });
     }
 
