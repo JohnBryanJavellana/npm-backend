@@ -260,12 +260,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('ra_create_or_update_equipment', [RecreationalActivityCtrl::class, 'ra_create_or_update_equipment']);
             Route::post('ra_equipment_create_stock', [RecreationalActivityCtrl::class, 'ra_equipment_create_stock']);
             Route::post('ra_equipment_update_stock', [RecreationalActivityCtrl::class, 'ra_update_equipment_stock']);
-            Route::delete('ra_remove_equipment/{equipment_id}', [RecreationalActivityCtrl::class, 'ra_remove_equipment']);
-            Route::delete('ra_remove_equipment_stock/{equipment_stock_id}', [RecreationalActivityCtrl::class, 'ra_remove_equipment_stock']);
+            Route::delete('ra_remove_equipment/{equipmentId}', [RecreationalActivityCtrl::class, 'ra_remove_equipment']);
+            Route::delete('ra_remove_equipment_stock/{equipmentStockId}', [RecreationalActivityCtrl::class, 'ra_remove_equipment_stock']);
 
             Route::post('ra_facilities', [RecreationalActivityCtrl::class, 'ra_facilities']);
             Route::post('ra_create_or_update_facility', [RecreationalActivityCtrl::class, 'ra_create_or_update_facility']);
-            Route::delete('ra_remove_facility/{facility_id}', [RecreationalActivityCtrl::class, 'ra_remove_facility']);
+            Route::delete('ra_remove_facility/{facilityId}', [RecreationalActivityCtrl::class, 'ra_remove_facility']);
         });
 
         Route::get('qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);

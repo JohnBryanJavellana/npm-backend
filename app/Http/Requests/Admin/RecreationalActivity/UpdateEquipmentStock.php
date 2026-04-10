@@ -4,9 +4,8 @@ namespace App\Http\Requests\Admin\RecreationalActivity;
 
 use App\Enums\UserRoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class RequestInvoice extends FormRequest
+class UpdateEquipmentStock extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,16 +20,15 @@ class RequestInvoice extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'r_a_request_info_id' => ['required', 'integer', 'exists:r_a_request_infos,id'],
-            'userId'              => ['required', 'integer', 'exists:users,id'],
-            'description'         => ['required', 'string'],
-            'invoiceAmount'       => ['required', 'numeric'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'equipmentStockId' => ['required', 'integer', 'exists:r_a_equipment_stocks,id'],
+            'availability_status' => ['required', 'string', 'in:AVAILABLE,UNAVAILABLE'],
+            'condition_status' => ['required', 'string', 'in:GOOD CONDITION,BORROWED,DAMAGED,LOST']
         ];
     }
 }

@@ -3,10 +3,10 @@
 namespace App\Http\Requests\Admin\RecreationalActivity;
 
 use App\Enums\UserRoleEnum;
+use App\Rules\Admin\Library\RemoveEquipmentStockRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class RequestInvoice extends FormRequest
+class RemoveEquipment extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,18 +19,22 @@ class RequestInvoice extends FormRequest
         ]);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'equipmentId' => $this->route('equipmentId')
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'r_a_request_info_id' => ['required', 'integer', 'exists:r_a_request_infos,id'],
-            'userId'              => ['required', 'integer', 'exists:users,id'],
-            'description'         => ['required', 'string'],
-            'invoiceAmount'       => ['required', 'numeric'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'equipmentId' => ['required', 'integer', 'exists:r_a_equipments,id', new RemoveEquipmentStockRule()]
         ];
     }
 }

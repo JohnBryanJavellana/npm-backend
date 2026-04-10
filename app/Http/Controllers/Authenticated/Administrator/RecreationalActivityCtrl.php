@@ -4,25 +4,26 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Events\BERecreational;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\RecreationalActivity\CreateEquipmentStock;
+use App\Http\Requests\Admin\RecreationalActivity\RemoveEquipment;
+use App\Http\Requests\Admin\RecreationalActivity\RemoveEquipmentStock;
+use App\Http\Requests\Admin\RecreationalActivity\RemoveFacility;
+use App\Http\Requests\Admin\RecreationalActivity\UpdateEquipmentStock;
 use App\Models\RAEquipmentRequest;
-use App\Models\RARelationship;
+use App\Services\Administrator\Recreational\RecreationalEquipmentManager;
+use App\Services\Administrator\Recreational\RecreationalEquipmentStockManager;
+use App\Services\Administrator\Recreational\RecreationalFacilityManager;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use App\Utils\{
     TransactionUtil,
     AuditHelper,
     GenerateTrace,
-    ConvertToBase64
 };
 use App\Models\{
     RARequestInfo,
     RAFacility,
     RAEquipments,
     RAEquipmentStock,
-    RAEquipmentImage,
-    RAFacilityImage,
     RAFacilityRequest,
     RAInvoices
 };
@@ -34,13 +35,194 @@ use App\Http\Requests\Admin\RecreationalActivity\{
 use Carbon\Carbon;
 use App\Enums\Administrator\RAEnum;
 use App\Enums\{
-    AdministratorAuditActions,
     AdministratorReturnResponse
 };
 use App\Helpers\Administrator\General\CountCollection;
 
 class RecreationalActivityCtrl extends Controller
 {
+    public function __construct(
+        public RecreationalFacilityManager $recreationalFacilityManager,
+        public RecreationalEquipmentManager $recreationalEquipmentManager,
+        public RecreationalEquipmentStockManager $recreationalEquipmentStockManager
+    ) {}
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_ra_count
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_ra_count(Request $request){
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $reservations = RARequestInfo::query();
+
+            $count = [
+                'count_total'    => CountCollection::startCount($reservations),
+                'count_active'   => CountCollection::startCount($reservations->clone()->where('status', RAEnum::ACTIVE)),
+                'count_forCSM'   => CountCollection::startCount($reservations->clone()->where('status', RAEnum::FOR_CSM)),
+                'count_complete' => CountCollection::startCount($reservations->clone()->where('status', RAEnum::COMPLETED)),
+                'count_pending'  => CountCollection::startCount($reservations->clone()->where('status', RAEnum::PENDING)),
+            ];
+
+            return response()->json(['reservationCount' => $count], 200);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of ra_facilities
+     * @param Request $request
+     */
+    public function ra_facilities(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $ra_facilities_temp = RAFacility::withCount(['hasData']);
+            $ra_facilities = $request->documentId
+                ? $ra_facilities_temp->where('unique_identifier', $request->documentId)->with(['images', 'relationships', 'relationships.equipment'])->first()
+                : $ra_facilities_temp->get();
+
+            return response()->json(['ra_facilities' => $ra_facilities], 200);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of ra_create_or_update_facility
+     * @param CreateOrUpdateFacility $request
+     */
+    public function ra_create_or_update_facility(CreateOrUpdateFacility $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $facilityId = $request->facilityId;
+
+            $result = $this->recreationalFacilityManager->createOrUpdate($request, $isPost, $facilityId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of ra_remove_facility
+     * @param RemoveFacility $request
+     * @param int $facilityId
+     */
+    public function ra_remove_facility(RemoveFacility $request, int $facilityId)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request, $facilityId) {
+            $result = $this->recreationalFacilityManager->removeFacility($facilityId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of ra_equipments
+     * @param Request $request
+     */
+    public function ra_equipments(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $ra_equipments_temp = RAEquipments::withCount('hasData', 'stocks');
+            $ra_equipments = $request->documentId
+                ? $ra_equipments_temp->where('id', $request->documentId)->with(['images'])->first()
+                : $ra_equipments_temp->get();
+
+            return response()->json(['ra_equipments' => $ra_equipments], 200);
+        });
+    }
+
+    /**
+     * Summary of ra_create_or_update_equipment
+     * @param CreateOrUpdateEquipment $request
+     */
+    public function ra_create_or_update_equipment(CreateOrUpdateEquipment $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $equipmentId = $request->equipmentId;
+
+            $result = $this->recreationalEquipmentManager->createOrUpdate($request, $isPost, $equipmentId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of ra_remove_equipment
+     * @param RemoveEquipment $request
+     * @param int $equipmentId
+     */
+    public function ra_remove_equipment(RemoveEquipment $request, int $equipmentId)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request, $equipmentId) {
+            $result = $this->recreationalEquipmentManager->removeEquipment($equipmentId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of ra_equipment_stock
+     * @param Request $request
+     */
+    public function ra_equipment_stock(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $ra_equipment_stock = RAEquipmentStock::where('r_a_equipments_id', $request->documentId)
+                ->withCount(['hasData'])
+                ->get();
+
+            return response()->json(['ra_equipment_stock' => $ra_equipment_stock], 200);
+        });
+    }
+
+    /**
+     * Summary of ra_equipment_create_stock
+     * @param Request $request
+     */
+    public function ra_equipment_create_stock(CreateEquipmentStock $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $equipmentId = $request->equipmentId;
+            $stockCount = $request->stockCount;
+
+            $result = $this->recreationalEquipmentStockManager->createEquipmentStock($equipmentId, $stockCount);
+            return response()->json([
+                'message' => $result['message'],
+                'returnedData' => $result['returnedData']
+            ], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of ra_update_equipment_stock
+     * @param UpdateEquipmentStock $request
+     */
+    public function ra_update_equipment_stock(UpdateEquipmentStock $request) {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $equipmentStockId = $request->equipmentStockId;
+
+            $result = $this->recreationalEquipmentStockManager->updateEquipmentStockInfo($request, $equipmentStockId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of ra_remove_equipment_stock
+     * @param RemoveEquipmentStock $request
+     * @param int $equipmentStockId
+     */
+    public function ra_remove_equipment_stock(RemoveEquipmentStock $request, int $equipmentStockId)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request, $equipmentStockId) {
+            $result = $this->recreationalEquipmentStockManager->removeEquipmentStock($equipmentStockId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+
+
+    # 📍📍📍📍📍
     /**
      * Summary of ra_requests
      * @param Request $request
@@ -365,394 +547,15 @@ class RecreationalActivityCtrl extends Controller
         });
     }
 
-    /**
-     * Summary of ra_facilities
-     * @param Request $request
-     */
-    public function ra_facilities(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            $ra_facilities_temp = RAFacility::withCount(['hasData']);
-            $ra_facilities = $request->documentId
-                ? $ra_facilities_temp->where('unique_identifier', $request->documentId)->with([
-                    'images',
-                    'relationships',
-                    'relationships.equipment'
-                ])->first()
-                : $ra_facilities_temp->get();
 
-            return response()->json(['ra_facilities' => $ra_facilities], 200);
-        });
-    }
 
-    /**
-     * Summary of ra_create_or_update_facility
-     * @param CreateOrUpdateFacility $request
-     */
-    public function ra_create_or_update_facility(CreateOrUpdateFacility $request)
-    {
-        return TransactionUtil::transact($request, [], function () use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
 
-            $this_facility = $isPost ? new RAFacility() : RAFacility::findOrFail($documentId);
-            if($isPost) $this_facility->unique_identifier = GenerateTrace::createTraceNumber(RAFacility::class, '-RAF-', 'unique_identifier', 10, 99);
-            $this_facility->name = $request->name;
-            $this_facility->additional_details = $request->additionalDetails;
-            $this_facility->location = $request->location;
-            $this_facility->open_time = $request->openTime;
-            $this_facility->close_time = $request->closeTime;
-            $this_facility->condition_status = $request->conditionStatus;
-            if ($request->availabilityStatus) $this_facility->availability_status = $request->availabilityStatus;
-            $this_facility->save();
 
-            if ($request->related_equipment) {
-                foreach ($request->related_equipment as $equipment) {
-                    $checkExistence = RARelationship::where([
-                        'r_a_facility_id' => $this_facility->id,
-                        'r_a_equipments_id' => $equipment
-                    ])->count();
 
-                    if ($checkExistence <= 0) {
-                        $relationship = new RARelationship();
-                        $relationship->r_a_facility_id = $this_facility->id;
-                        $relationship->r_a_equipments_id = $equipment;
-                        $relationship->save();
-                    }
-                }
-            }
 
-            $dataPhotos = $request->input('data_photos', []);
-            $room_images = RAFacilityImage::whereNotIn('id', $dataPhotos)
-                ->where('r_a_facility_id', $request->documentId)
-                ->get();
 
-            if($room_images->isNotEmpty()) {
-                foreach ($room_images as $item) {
-                    if (file_exists(public_path('recreational-activity/facility/image/' . $item->filename))) {
-                        unlink(public_path('recreational-activity/facility/image/' . $item->filename));
-                    }
 
-                    $item->delete();
-                }
-            }
 
-            if ($request->photos) {
-                foreach ($request->photos as $photos) {
-                    $image_name = Str::uuid() . '.png';
-
-                    $photo = new RAFacilityImage();
-                    $photo->r_a_facility_id = $this_facility->id;
-                    $photo->filename = $image_name;
-                    $photo->save();
-
-                    ConvertToBase64::generate($photos, 'image', "recreational-activity/facility/image/$image_name");
-                }
-            }
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BERecreational('')
-                );
-            }
-
-            AuditHelper::log($request->user()->id, ($isPost ? AdministratorAuditActions::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY->value : AdministratorAuditActions::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY->value). " ID#" . $this_facility->id);
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYFACILITY->value : AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYFACILITY->value)." ID#" .$this_facility->id] , 200);
-        });
-    }
-
-    /**
-     * Summary of ra_remove_facility
-     * @param Request $request
-     */
-    public function ra_remove_facility(Request $request, int $facility_id)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request, $facility_id) {
-            $this_facility = RAFacility::where('id', $facility_id)
-                ->with(['images'])
-                ->withCount(['hasData'])
-                ->first();
-
-            if ($this_facility->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYFACILITY->value], 409);
-            } else {
-                foreach ($this_facility->images as $images) {
-                    if (file_exists(public_path('recreational-activity/facility/image/' . $images->filename))) {
-                        unlink(public_path('recreational-activity/facility/image/' . $images->filename));
-                    }
-                }
-
-                $this_facility->delete();
-                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY->value. " ID#$facility_id");
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BERecreational('')
-                    );
-                }
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY->value], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of get_ra_count
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function get_ra_count(Request $request){
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $reservations = RARequestInfo::query();
-
-            $count = [
-                'count_total'    => CountCollection::startCount($reservations),
-                'count_active'   => CountCollection::startCount($reservations->clone()->where('status', RAEnum::ACTIVE)),
-                'count_forCSM'   => CountCollection::startCount($reservations->clone()->where('status', RAEnum::FOR_CSM)),
-                'count_complete' => CountCollection::startCount($reservations->clone()->where('status', RAEnum::COMPLETED)),
-                'count_pending'  => CountCollection::startCount($reservations->clone()->where('status', RAEnum::PENDING)),
-            ];
-
-            return response()->json(['reservationCount' => $count], 200);
-        });
-    }
-
-    /**
-     * Summary of ra_equipments
-     * @param Request $request
-     */
-    public function ra_equipments(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            $ra_equipments_temp = RAEquipments::withCount('hasData', 'stocks');
-            $ra_equipments = $request->documentId
-                ? $ra_equipments_temp->where('id', $request->documentId)->with(['images'])->first()
-                : $ra_equipments_temp->get();
-
-            return response()->json(['ra_equipments' => $ra_equipments], 200);
-        });
-    }
-
-    /**
-     * Summary of ra_equipment_stock
-     * @param Request $request
-     */
-    public function ra_equipment_stock(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            $ra_equipment_stock = RAEquipmentStock::where('r_a_equipments_id', $request->documentId)
-                ->withCount(['hasData'])
-                ->get();
-
-            return response()->json(['ra_equipment_stock' => $ra_equipment_stock], 200);
-        });
-    }
-
-    /**
-     * Summary of ra_remove_equipment_stock
-     * @param bool auditActions === FALSE
-     * @param bool returnedMessage === TRUE
-     * @param Request $request
-     * @param int $equipment_stock_id
-     */
-    public function ra_remove_equipment_stock(Request $request, int $equipment_stock_id)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request, $equipment_stock_id) {
-            $this_equipment_stock = RAEquipmentStock::where('id', $equipment_stock_id)
-                ->withCount(['hasData'])
-                ->first();
-
-            if ($this_equipment_stock->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYFACILITY->value], 409);
-            } else {
-                $this_equipment_stock->delete();
-                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYFACILITY->value. " ID#$equipment_stock_id");
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BERecreational('')
-                    );
-                }
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPSTCK->value], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of ra_update_equipment_stock
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === TRUE
-     * @param Request $request
-     */
-    public function ra_update_equipment_stock(Request $request) {
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            $documentId = $request->documentId;
-            $conditionStatus = $request->conditionStatus;
-            $availabilityStatus = $request->availabilityStatus;
-
-            $this_equipment_stock = RAEquipmentStock::where('id', $documentId)
-                ->lockForUpdate()
-                ->first();
-
-            if (!$this_equipment_stock) {
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_UPDATED_RECREATIONALACTIVITYEQUIPSTCK->value], 409);
-            } else {
-                $this_equipment_stock->condition_status = $conditionStatus;
-                $this_equipment_stock->availability_status = $availabilityStatus;
-                $this_equipment_stock->save();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUPSTCK->value . " ID#$documentId"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BERecreational('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPSTCK->value], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of ra_create_or_update_equipment
-     * @param CreateOrUpdateEquipment $request
-     */
-    public function ra_create_or_update_equipment(CreateOrUpdateEquipment $request)
-    {
-        return TransactionUtil::transact($request, [], function () use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-
-            $this_equipment = $isPost ? new RAEquipments() : RAEquipments::findOrFail($documentId);
-            $this_equipment->name = $request->name;
-            $this_equipment->additional_details = $request->additionalDetails;
-            if ($request->status) $this_equipment->availability_status = $request->status;
-            $this_equipment->save();
-
-            $dataToReturn = [];
-            if ($request->copies) {
-                $request->merge([
-                    'insideJob' => true,
-                    'documentId' => $this_equipment->id
-                ]);
-
-                $dataToReturn = $this->ra_equipment_create_stock($request);
-            }
-
-            if ($request->data_photos) {
-                $room_images = RAEquipmentImage::whereNotIn('id', $request->data_photos)
-                    ->where('r_a_equipments_id', $request->documentId)
-                    ->get();
-
-                foreach ($room_images as $item) {
-                    if (file_exists(public_path('recreational-activity/inventory/image/' . $item->filename))) {
-                        unlink(public_path('recreational-activity/inventory/image/' . $item->filename));
-                    }
-
-                    $item->delete();
-                }
-            }
-
-            if ($request->photos) {
-                foreach ($request->photos as $photos) {
-                    $image_name = Str::uuid() . '.png';
-
-                    $photo = new RAEquipmentImage();
-                    $photo->r_a_equipments_id = $this_equipment->id;
-                    $photo->filename = $image_name;
-                    $photo->save();
-
-                    ConvertToBase64::generate($photos, 'image', "recreational-activity/equipment/image/$image_name");
-                }
-            }
-
-            AuditHelper::log($request->user()->id, ($isPost ? AdministratorAuditActions::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENT->value : AdministratorAuditActions::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPMENT->value). " ID#" . $this_equipment->id);
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BERecreational('')
-                );
-            }
-
-            return response()->json([
-                'message' => ($isPost ? AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENT->value : AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYEQUIPMENT->value),
-                'returnedData' => $dataToReturn
-            ], 200);
-        });
-    }
-
-    /**
-     * Summary of ra_equipment_create_stock
-     * @param Request $request
-     */
-    public function ra_equipment_create_stock(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            $stockData = [];
-
-            if ($request->copies) {
-                for ($i = 0; $i < $request->copies; $i++) {
-                    $new_equipment_stock_ui = GenerateTrace::createTraceNumber(RAEquipmentStock::class, '-RAE-', 'unique_identifier', 10, 99);
-
-                    $book_copy = new RAEquipmentStock;
-                    $book_copy->unique_identifier = $new_equipment_stock_ui;
-                    $book_copy->r_a_equipments_id = $request->documentId;
-                    $book_copy->save();
-
-                    array_push($stockData, $new_equipment_stock_ui);
-                }
-            }
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BERecreational('')
-                );
-            }
-
-            return $request->insideJob ? $stockData : response()->json([
-                'message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_CREATED_RECREATIONALACTIVITYEQUIPMENTSTCK->value,
-                'returnedData' => $stockData
-            ], 201);
-        });
-    }
-
-    /**
-     * Summary of ra_remove_equipment
-     * @param Request $request
-     */
-    public function ra_remove_equipment(Request $request, int $equipment_id)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request, $equipment_id) {
-            $this_equipment = RAEquipments::where('id', $equipment_id)
-                ->with(['images'])
-                ->withCount(['hasData'])
-                ->first();
-
-            if ($this_equipment->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYEQUIPMENT->value], 409);
-            } else {
-                foreach ($this_equipment->images as $images) {
-                    if (file_exists(public_path('recreational-activity/equipment/image/' . $images->filename))) {
-                        unlink(public_path('recreational-activity/equipment/image/' . $images->filename));
-                    }
-                }
-
-                $this_equipment->delete();
-                AuditHelper::log($request->user()->id, AdministratorAuditActions::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT->value. " ID#$equipment_id");
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BERecreational('')
-                    );
-                }
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_REMOVED_RECREATIONALACTIVITYEQUIPMENT->value], 200);
-                //OK TANAN
-            }
-        });
-    }
 
     /**
      * Summary of ra_request_charges
