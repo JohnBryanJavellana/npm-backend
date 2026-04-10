@@ -351,7 +351,7 @@ class LMSAssessmentController extends Controller
                 $total = count($validated["answers"]);
                 $score = $total > 0 ? ($correctCount / $total) * 100 : 0;
 
-                // Pass $attempt object to the method
+                
                 $status = $this->detectAssessmentStatus($score, $attempt);
 
                 $attempt->update([
