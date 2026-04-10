@@ -198,6 +198,12 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('courses', [TrainerEnrollmentController::class, 'view']);
             Route::get('courses/{course}', [TrainerEnrollmentController::class, 'viewTrainingSchedules']); //*
             Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
+            // ! get trainee details along with small assessment details: ps izack
+            Route::post("trainee_assessment_details", [TrainerEnrollmentController::class, 'TraineeAssessmentDetails']);
+
+            Route::post("trainee_details", [TrainerEnrollmentController::class, 'getTraineeDetails']);
+
+
             Route::post("course_details", [TrainerEnrollmentController::class, 'getCourseDetails']);
             Route::post('traineeAttendanceRecord', [AttendanceController::class, 'TraineeAttendanceRecord']);
             Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
@@ -253,7 +259,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('create_assessment_attempts', [LMSAssessmentController::class, 'createAssessmentAttempt']);
 
             Route::post('create_attempts/assessments_answers', [LMSAssessmentController::class, 'assessment_answers']);
-            Route::post('assessment_time_date/validation', [LMSAssessmentController::class, 'assessment_time_date_validation']);
+            Route::post('details/assessments_options_questions', [LMSAssessmentController::class, 'TraineeAssessmentDetailsForTrainer']);
+            //! Paolo Code End
+
         });
 
         Route::prefix('sections/')->group(function () {

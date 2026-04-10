@@ -18,6 +18,10 @@ class CourseModule extends Model
     {
         return $this->hasMany(CourseModuleHandouts::class);
     }
+    public function courseModuleSection()
+    {
+        return $this->hasMany(CourseModuleSection::class);
+    }
 
     public function specific_requirements()
     {

@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\DB;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use function Laravel\Prompts\select;
 use Illuminate\Validation\ValidationException;
+use App\Utils\AuditHelper;
+use App\Utils\TransactionUtil;
 
 class LMSAssessmentController extends Controller
 {
@@ -225,7 +227,7 @@ class LMSAssessmentController extends Controller
                     $frontendStatus = $request->input('status');
                     $status = $this->detectAssessmentStatus($score, $frontendStatus);
 
-                    
+
                     if (now()->diffInMinutes($attempt->created_at) >= 60) {
                         $status = 'SUBMITTED';
                     }
@@ -279,9 +281,79 @@ class LMSAssessmentController extends Controller
         return 'IN_PROGRESS';
     }
 
+    //! Trainee details assessments /assessment_option and assessment_question details for trainer to view during assessment attempt monitoring
 
+    public function TraineeAssessmentDetailsForTrainer(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            try {
+                // Just fetch data - no submission logic
+                $list = EnrolledCourse::where('training_id', $request->training_id)
+                    ->with([
+                        'trainee:id,id,fname,lname,mname,suffix,email',
+                        'assessmentAttempts' => function ($query) use ($request) {
+                            $query->where('assessments_id', $request->assessment_id)
+                                ->with([
+                                    'answers.assessment_option',
+                                    'answers.assessment_question'
+                                ]);
+                        }
+                    ])
+                    ->get()
+                    ->map(function ($enrolled) {
+                        return [
+                            'enrolled_course_id' => $enrolled->id,
+                            'trainee' => $enrolled->trainee ? [
+                                'id' => $enrolled->trainee->id,
+                                'fname' => $enrolled->trainee->fname,
+                                'lname' => $enrolled->trainee->lname,
+                                'mname' => $enrolled->trainee->mname,
+                                'suffix' => $enrolled->trainee->suffix,
+                                'email' => $enrolled->trainee->email
+                            ] : null,
+                            'questions' => $enrolled->assessmentAttempts->flatMap(function ($attempt) {
+                                return $attempt->answers->map(function ($answer) {
+                                    return [
+                                        'question' => $answer->assessment_question ? [
+                                            'id' => $answer->assessment_question->id,
+                                            'question' => $answer->assessment_question->question,
+                                            'question_text' => $answer->assessment_question->question,
+                                            'type' => $answer->assessment_question->type ?? null,
+                                            'score' => $answer->assessment_question->score ?? null,
+                                            'status' => $answer->assessment_question->status ?? null,
+                                            'assessment_section_id' => $answer->assessment_question->assessment_section_id ?? null,
+                                            'updated_by' => $answer->assessment_question->updated_by ?? null,
+                                            'created_at' => $answer->assessment_question->created_at ?? null,
+                                            'updated_at' => $answer->assessment_question->updated_at ?? null
+                                        ] : null,
+                                        'answer' => [
+                                            'id' => $answer->id,
+                                            'answer_text' => $answer->answer_text,
+                                            'is_correct' => $answer->is_correct,
+                                            'score' => $answer->score,
+                                            'assessment_question_id' => $answer->assessment_question_id,
+                                            'assessment_option_id' => $answer->assessment_option_id
+                                        ],
+                                        'option' => $answer->assessment_option ? [
+                                            'id' => $answer->assessment_option->id,
+                                            'option_text' => $answer->assessment_option->option_text,
+                                            'is_correct' => $answer->assessment_option->is_correct,
+                                            'order' => $answer->assessment_option->order ?? null
+                                        ] : null
+                                    ];
+                                });
+                            })->toArray()
+                        ];
+                    })->toArray();
 
-    //! reusesable function for logging user actions during assessment attempts
+                return response()->json(["data" => $list], 200);
+            } catch (\Exception $e) {
+                return response()->json(["message" => "Error", "error" => $e->getMessage()], 500);
+            }
+        });
+    }
+
+    //! Reusable function for logging user actions during assessment attempts
     public function logUserAction(Request $request)
     {
         try {
@@ -303,7 +375,7 @@ class LMSAssessmentController extends Controller
                 'action' => $validated['action']
             ], 201);
         } catch (\Exception $e) {
-            \Log::error('Failed to log action: ' . $e->getMessage());
+            Log::error('Failed to log action: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Error logging action',
                 'error' => $e->getMessage()
