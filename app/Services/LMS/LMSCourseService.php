@@ -20,7 +20,7 @@ class LMSCourseService
         protected CourseModuleSection $courseModuleSectionModel,
         protected CourseContent $courseContentModel,
         protected CourseContentUpload $courseContentUploadModel,
-        // protected AssessmentAttempt $assessmentAttemptModel,
+        protected AssessmentAttempt $assessmentAttemptModel,
     ) {}
 
     public function getCourseModules($courseModuleId, $section_id = null)
@@ -56,13 +56,13 @@ class LMSCourseService
 
     public function getContentById($contentId)
     {
+
         return $this->courseContentModel->query()
             ->whereKey($contentId)
             ->with([
                 "uploads",
+                "assessment_attempts",
                 "assessment:id,course_content_id,title,type,passed_type,passing_score,time_limit,status",
-                "assessment_attempts:id,assessments_id,status",
-
             ])
             ->first();
     }

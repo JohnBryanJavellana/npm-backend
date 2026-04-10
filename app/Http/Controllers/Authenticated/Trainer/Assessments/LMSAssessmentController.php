@@ -223,7 +223,12 @@ class LMSAssessmentController extends Controller
                     $score = $total > 0 ? ($correctCount / $total) * 100 : 0;
 
                     $frontendStatus = $request->input('status');
-                    $status = $this->detectAssessmentStatus($score, $attempt, $frontendStatus);
+                    $status = $this->detectAssessmentStatus($score, $frontendStatus);
+
+                    
+                    if (now()->diffInMinutes($attempt->created_at) >= 60) {
+                        $status = 'SUBMITTED';
+                    }
                 } else {
 
                     $score = 0;
@@ -237,11 +242,6 @@ class LMSAssessmentController extends Controller
                     'status' => $status,
                     'graded_at' => now()
                 ]);
-
-                // $this->logUserAction(new Request([
-                //     'action' => 'assessment_submitted_successfully',
-                //     'assessment_attempt_id' => $attempt->id
-                // ]));
 
                 DB::commit();
 
@@ -257,11 +257,6 @@ class LMSAssessmentController extends Controller
             } catch (\Exception $e) {
                 DB::rollBack();
 
-                // $this->logUserAction(new Request([
-                //     'action' => 'assessment_failed: ' . $e->getMessage(),
-                //     'assessment_attempt_id' => $attempt->id ?? null
-                // ]));
-
                 throw $e;
             }
         } catch (\Exception $e) {
@@ -271,7 +266,6 @@ class LMSAssessmentController extends Controller
             ], 500);
         }
     }
-
 
     private function detectAssessmentStatus($score, $status = null)
     {
@@ -286,13 +280,6 @@ class LMSAssessmentController extends Controller
     }
 
 
-    public function validationTimeDate(Request $request)
-    {
-        $enrolledCourse = EnrolledCourse::where('user_id', auth()->id())
-            ->with('enrolled_course_status', 'ENROLLED')
-            ->where('training_id', $request->training_id)
-            ->first();
-    }
 
     //! reusesable function for logging user actions during assessment attempts
     public function logUserAction(Request $request)
