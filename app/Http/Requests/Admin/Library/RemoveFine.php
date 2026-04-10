@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class RequestFine extends FormRequest
+class RemoveFine extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,6 +21,13 @@ class RequestFine extends FormRequest
         ]);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'libraryInvoiceId' => $this->route('libraryInvoiceId')
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -29,12 +36,7 @@ class RequestFine extends FormRequest
     public function rules(): array
     {
         return [
-            'invoiceAmount' => ['required', 'numeric'],
-            'description' => ['required', 'string'],
-            'invoiceStatus' => ['required', 'string'],
-            'bookResId' => ['required', 'exists:book_res,id'],
-            'userId' => ['required', 'exists:users,id'],
-            'libraryInvoiceId' => ['required_if:httpMethod,UPDATE', 'exists:library_invoices,id', new UpdateBookFineRule()]
+            'libraryInvoiceId' => ['required', 'exists:library_invoices,id', new UpdateBookFineRule()]
         ];
     }
 

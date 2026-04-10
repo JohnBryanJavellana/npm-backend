@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 use App\Http\Controllers\Authenticated\Trainee\TraineeLibrary;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Library\CreateBookCopy;
+use App\Http\Requests\Admin\Library\GetProlongationRequests;
 use App\Http\Requests\Admin\Library\RemoveBook;
 use App\Http\Requests\Admin\Library\RemoveBookCopy;
+use App\Http\Requests\Admin\Library\RemoveFine;
 use App\Http\Requests\Admin\Library\RemoveGenre;
 use App\Http\Requests\Admin\Library\UpdateBookCopy;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
 use App\Services\Administrator\Library\LibraryBookCopyManager;
 use App\Services\Administrator\Library\LibraryBookEntryManager;
+use App\Services\Administrator\Library\LibraryBookFinesManager;
 use App\Services\Administrator\Library\LibraryBookManager;
 use App\Services\Administrator\Library\LibraryBookReservationManager;
 use Illuminate\Http\Request;
@@ -72,7 +75,8 @@ class LibraryController extends Controller
         public LibraryBookManager $libraryBookManager,
         public LibraryBookCopyManager $libraryBookCopyManager,
         public LibraryBookEntryManager $libraryBookEntryManager,
-        public LibraryBookReservationManager $libraryBookReservationManager
+        public LibraryBookReservationManager $libraryBookReservationManager,
+        public LibraryBookFinesManager $libraryBookFinesManager
     ){
         $this->traineeCtrlInstance = $traineeLibrary;
     }
@@ -231,7 +235,7 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($book_id) {
             $bookCopies = BookCopy::withCount('hasData')
                 ->with('book.catalog')
-                ->where('book_id', operator: $book_id)
+                ->where('book_id', $book_id)
                 ->get();
             return response()->json(['bookCopies' => $bookCopies], 200);
         });
@@ -330,6 +334,72 @@ class LibraryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_fines
+     * @param Request $request
+     */
+    public function get_fines(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $fines = LibraryInvoice::with([
+                'payee',
+                'orNumber'
+            ])->where([
+                'book_res_id' => $request->libraryId,
+                'user_id' => $request->userId
+            ])->orderBy('created_at', 'DESC')->get();
+
+            return response()->json(['fines' => $fines], 200);
+        });
+    }
+
+    /**
+     * Summary of create_fine
+     * @param RequestFine $request
+     */
+    public function create_or_update_fine(RequestFine $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $libraryInvoiceId = $request->libraryInvoiceId;
+
+            $result = $this->libraryBookFinesManager->createOrUpdate($request, $isPost, $libraryInvoiceId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_fine
+     * @param RemoveFine $request
+     * @param int $libraryInvoiceId
+     */
+    public function remove_fine (RemoveFine $request, int $libraryInvoiceId) {
+        return TransactionUtil::transact($request, [], function() use ($libraryInvoiceId) {
+            $result = $this->libraryBookFinesManager->removeFine($libraryInvoiceId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_prolongation_request
+     * @param Request $request
+     */
+    public function get_prolongation_request (GetProlongationRequests $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $prolongationMain = BookReservation::with([
+                'bookRes',
+                'books',
+                'bookRes.trainee',
+                'books.catalog',
+                'books.catalog.genre'
+            ])->where([
+                'book_res_id' => $request->bookResId
+            ])->whereIn('status', $request->status)->get();
+
+            return response()->json(['prolongationRequests' => $prolongationMain], 200);
+        });
+    }
+
     # 📍📍📍📍📍📍📍📍
     /**
      * Summary of check_for_book_reservation
@@ -362,26 +432,6 @@ class LibraryController extends Controller
             ];
 
             return response()->json(['bookReservationCheck' => $count], 200);
-        });
-    }
-
-    /**
-     * Summary of get_prolongation_request
-     * @param Request $request
-     */
-    public function get_prolongation_request (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $prolongationMain = BookReservation::with([
-                'bookRes',
-                'books',
-                'bookRes.trainee',
-                'books.catalog',
-                'books.catalog.genre'
-            ])->where([
-                'book_res_id' => $request->libraryId
-            ])->whereIn('status', $request->status)->get();
-
-            return response()->json(['prolongationRequests' => $prolongationMain], 200);
         });
     }
 
@@ -435,21 +485,6 @@ class LibraryController extends Controller
             $bR->status = $tempStatus;
             $bR->save();
 
-            Notifications::notify(
-                $request->user()->id,
-                $bR->bookRes->trainee->id,
-                "LIBRARY",
-                "updated your book reservation request to {$tempStatus}."
-            );
-
-            AuditHelper::log(
-                $request->user()->id,
-                 AdministratorAuditActions:: LIBRARYCTRL_UPDATED_LIBRARYBOOKRESERVREQ->value);
-
-            if (env('USE_EVENT')) {
-                event(new BELibrary(''), new BEAuditTrail(''));
-            }
-
             return response()->json([AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYBOOKREQ->value], 201);
         });
     }
@@ -477,24 +512,6 @@ class LibraryController extends Controller
     }
 
     /**
-     * Summary of get_fines
-     * @param Request $request
-     */
-    public function get_fines(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $fines = LibraryInvoice::with([
-                'payee',
-                'orNumber'
-            ])->where([
-                'book_res_id' => $request->libraryId,
-                'user_id' => $request->userId
-            ])->orderBy('created_at', 'DESC')->get();
-
-            return response()->json(['fines' => $fines], 200);
-        });
-    }
-
-    /**
      * Summary of get_book_reservation_that_needs_fine
      * @param Request $request
      */
@@ -514,59 +531,6 @@ class LibraryController extends Controller
             ])->first();
 
             return response()->json(['booksThatNeedsFine' => $booksThatNeedsFine], 200);
-        });
-    }
-
-    /**
-     * Summary of remove_fine
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $id
-     */
-    public function remove_fine (Request $request, int $id) {
-        return TransactionUtil::transact(null, [], function() use ($request, $id) {
-            $libraryInvoice = LibraryInvoice::find($id);
-
-            if($libraryInvoice->invoice_status !== "PENDING") {
-                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_ERR_LIBRARYFINE->value], 400);
-            } else {
-                $libraryInvoice->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::LIBRARYCTRL_REMOVED_LIBRARYFINE->value . " ID#$id"
-                );
-
-                return response()->json(['message' => AdministratorReturnResponse::LIBRARYCTRL_REMOVED_LIBRARYFINE->value], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of create_fine
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param RequestFine $request
-     */
-    public function create_fine(RequestFine $request) {
-        return TransactionUtil::transact($request, [], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $new_fine = $isPost ? new LibraryInvoice() : LibraryInvoice::find($request->documentId);
-
-            if($isPost) {
-                $new_fine->trace_number = GenerateTrace::createTraceNumber(LibraryInvoice::class, '-RFINE-', 'trace_number', 10, 99);
-                $new_fine->user_id = $request->user_id;
-                $new_fine->book_res_id = $request->book_res_id;
-            } else {
-                $new_fine->invoice_status = $request->status;
-            }
-
-            $new_fine->description = $request->details;
-            $new_fine->invoice_amount = $request->amount;
-            $new_fine->save();
-
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::LIBRARYCTRL_CREATED_LIBRARYREQUESTFINE->value : AdministratorReturnResponse::LIBRARYCTRL_UPDATED_LIBRARYREQUESTFINE->value). " a request fine ID#" . $new_fine->id], 201);
         });
     }
 

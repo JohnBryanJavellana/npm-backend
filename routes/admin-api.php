@@ -101,7 +101,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::match(['GET', 'POST'], 'get_book_reservation', [LibraryController::class, 'get_book_reservation']);
             Route::post('get_book_reservation/get_fines', [LibraryController::class, 'get_fines']);
             Route::post('get_book_reservation/create_fine', [LibraryController::class, 'create_fine']);
-            Route::delete('get_book_reservation/remove_fine/{id}', [LibraryController::class, 'remove_fine']);
+            Route::delete('get_book_reservation/remove_fine/{libraryInvoiceId}', [LibraryController::class, 'remove_fine']);
             Route::post('get_book_reservation/get_book_reservation_that_needs_fine', [LibraryController::class, 'get_book_reservation_that_needs_fine']);
             Route::post('get_book_reservation/get_prolongation_request', [LibraryController::class, 'get_prolongation_request']);
             Route::post('get_book_reservation/get_books_that_protractible', [LibraryController::class, 'get_books_that_protractible']);

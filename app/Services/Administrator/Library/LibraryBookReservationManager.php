@@ -45,7 +45,7 @@ class LibraryBookReservationManager
     {
         $copy = BookCopy::where(['book_id' => $bookId, 'status' => LibraryEnum::AVAILABLE])
             ->lockForUpdate()
-            ->first() ?? throw new \Exception("No available copies for this book.");
+            ->first() ?? throw new \DomainException("No available copies for this book.");
 
         $copy->update(['status' => LibraryEnum::BORROWED]);
         return $copy->id;
