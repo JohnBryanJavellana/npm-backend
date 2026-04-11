@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 class DormitoryTenant extends Model {
 
     protected $guarded = ['id'];
+    protected $fillable = [
+        'dormitory_room_id', 'user_id', 'trace_number', 'check_in_datetime', 'check_out_datetime',
+        'accommodation', 'status_of_occupancy', 'room_type', 'tenant_status', 'process_type',
+    ];
+
     public const MALE = "MALE";
     public const FEMALE = "FEMALE";
     public const COUPLE = "COUPLE";
@@ -83,5 +88,9 @@ class DormitoryTenant extends Model {
     public function rooms()
     {
         return $this->hasMany(DormitoryRoom::class, 'dormitory_id', 'id');
+    }
+     public function room()
+    {
+        return $this->belongsTo(DormitoryRoom::class, 'dormitory_room_id');
     }
 }

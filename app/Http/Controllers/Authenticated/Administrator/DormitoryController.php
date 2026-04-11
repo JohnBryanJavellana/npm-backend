@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Authenticated\Administrator;
 
+
 // asasas
+use Illuminate\Support\Facades\DB;
 use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
@@ -57,6 +59,7 @@ use App\Models\{
 };
 use App\Helpers\Administrator\General\CountCollection;
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
+use Illuminate\Support\Facades\Validator;
 
 class DormitoryController extends Controller
 {
@@ -2118,36 +2121,127 @@ class DormitoryController extends Controller
             ], 200);
         });
     }
-public function getRoomsForSelection(Request $request)
-{
-    $isPost = $request->httpMethod === "POST";
-    if (!$isPost) {
-        return response()->json([
-            'message' => 'Method not allowed. Use POST.'
-        ], 405);
+
+        public function getRoomsForSelection(Request $request)
+        {
+            $isPost = $request->httpMethod === "POST";
+            if (!$isPost) {
+                return response()->json([
+                    'message' => 'Method not allowed. Use POST.'
+                ], 405);
+            }
+
+            $roomTypeFilter = $request->room_type ?? null;
+
+            $query = DormitoryRoom::query();
+
+            if ($roomTypeFilter) {
+                $query->where('room_type', $roomTypeFilter);
+            }
+
+            $rooms = $query->get();
+
+            $roomsFormatted = $rooms->map(function ($room) {
+                return [
+                    'id' => $room->id,
+                    'room_name' => $room->room_name,
+                    'room_cost' => $room->room_cost,
+                    'guest_cost' => $room->guest_cost,
+                    'building_name' => $room->building_name ?? 'Main Dorm',
+                    'is_air_conditioned' => $room->room_type === 'AIRCON' ? 'YES' : 'NO',
+                ];
+            });
+
+            return response()->json(['rooms' => $roomsFormatted]);
+        }
+
+       
+    public function room_reservations_with_costs(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            // Fetch tenants with boarder and dormitory room
+            $room_reservations = DormitoryTenant::with(['boarder', 'dormitory_room'])
+                ->when($request->tenantStatus, fn($query, $status) => $query->whereIn('tenant_status', (array) $status))
+                ->latest()
+                ->get()
+                ->map(function ($tenant) {
+                    return [
+                        'id' => $tenant->id,
+                        'trace_number' => $tenant->trace_number,
+                        'boarder' => $tenant->boarder, // user info
+                        'room_name' => $tenant->dormitory_room->room_name ?? null,
+                        'room_type' => $tenant->room_type,
+                        'tenant_status' => $tenant->tenant_status,
+                        'trainee_cost' => $tenant->dormitory_room->room_cost ?? null,
+                        'guest_cost' => $tenant->dormitory_room->guest_cost ?? null,
+                        'check_in' => $tenant->check_in_datetime,
+                        'check_out' => $tenant->check_out_datetime,
+                    ];
+                });
+
+            return response()->json(['room_reservations' => $room_reservations], 200);
+        });
     }
 
-    $roomTypeFilter = $request->room_type ?? null;
+    public function getTraineePricingInfo($userId)
+    {
+        try {
+            $user = User::with([
+                'trainee_enrolled_courses.training'
+            ])->find($userId);
 
-    $query = DormitoryRoom::query();
+            if (!$user) {
+                return response()->json([
+                    'message' => 'User not found'
+                ], 404);
+            }
 
-    if ($roomTypeFilter) {
-        $query->where('room_type', $roomTypeFilter);
+            return response()->json([
+                'traineeInfo' => $user
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error fetching trainee pricing info',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    $rooms = $query->get();
+        public function updateTenant(Request $request)
+        {
+                $validator = Validator::make($request->all(), [
+                'tenant_id' => 'required|exists:dormitory_tenants,id',
+                'dormitory_room_id' => 'required|exists:dormitory_rooms,id',
+                'check_in_datetime' => 'required|date',
+                'check_out_datetime' => 'required|date|after:check_in_datetime',
+            ]);
 
-    $roomsFormatted = $rooms->map(function ($room) {
-        return [
-            'id' => $room->id,
-            'room_name' => $room->room_name,
-            'room_cost' => $room->room_cost,
-            'guest_cost' => $room->guest_cost,
-            'building_name' => $room->building_name ?? 'Main Dorm',
-            'is_air_conditioned' => $room->room_type === 'AIRCON' ? 'YES' : 'NO',
-        ];
-    });
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-    return response()->json(['rooms' => $roomsFormatted]);
-}
-}
+            $tenant = DormitoryTenant::find($request->tenant_id);
+
+            $tenant->update([
+                'guest_id' => $request->guest_id,
+                'dormitory_room_id' => $request->dormitory_room_id, // 🔥 adjust if needed
+                'status_of_occupancy' => $request->status_of_occupancy,
+                'room_type' => $request->room_type,
+                'accommodation' => $request->accommodation,
+                'purpose' => $request->purpose,
+                'remarks' => $request->remarks,
+                'payment_remarks' => $request->payment_remarks,
+                'check_in_datetime' => $request->check_in_datetime,
+                'check_out_datetime' => $request->check_out_datetime,
+            ]);
+
+            return response()->json([
+                'message' => 'Tenant updated successfully',
+                'tenant' => $tenant->load('dormitory_room', 'boarder')
+            ]);
+        }
+        }

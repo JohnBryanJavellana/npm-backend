@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 class DormitoryRoom extends Model
 {
       protected $fillable = [
+        'room_name', 'room_slot', 'dormitory', 'guest_gender', 'wing',
+        'floor', 'accommodation', 'room_cost', 'guest_cost', 'remarks',
         'name',         // or whatever fields you have
         'room_type',    // AIRCON or NON-AIRCON
         'capacity',     // max slots

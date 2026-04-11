@@ -186,6 +186,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
 
             Route::post('getRoomsForSelection', [DormitoryController::class, 'getRoomsForSelection']);
+            Route::post('room_reservations_with_costs', [DormitoryController::class, 'room_reservations_with_costs']);
+            Route::post('updateTenant', [DormitoryController::class, 'updateTenant']);
 
         });
 
