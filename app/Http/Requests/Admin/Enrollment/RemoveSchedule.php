@@ -3,10 +3,10 @@
 namespace App\Http\Requests\Admin\Enrollment;
 
 use App\Enums\UserRoleEnum;
-use Illuminate\Validation\Rule;
+use App\Rules\Admin\Enrollment\RemoveTrainingRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateModule extends FormRequest
+class RemoveSchedule extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,8 +19,14 @@ class CreateOrUpdateModule extends FormRequest
         ]);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'scheduleId' => $this->route('scheduleId')
+        ]);
+    }
+
     /**
-     *
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -28,14 +34,7 @@ class CreateOrUpdateModule extends FormRequest
     public function rules(): array
     {
         return [
-            'module_type_id' => ['required', 'integer', 'exists:module_types,id'],
-            'name' => ['required', 'string'],
-            'short_name' => ['required', 'string'],
-            'compendium' => ['nullable', 'string'],
-            'number_of_days' => ['required', "integer", 'min:1'],
-            'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],
-            'status' => ['required_if:httpMethod,UPDATE', 'string', 'in:ACTIVE,INACTIVE'],
-            'moduleId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:course_modules,id'],
+            'scheduleId' => ['required_if:httpMethod,UPDATE', 'exists:trainings,id', 'integer', new RemoveTrainingRule()]
         ];
     }
 }

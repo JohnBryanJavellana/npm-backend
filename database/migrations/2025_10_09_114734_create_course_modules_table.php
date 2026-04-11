@@ -7,6 +7,8 @@ use App\Models\ModuleType;
 
 return new class extends Migration
 {
+    public const COURSE_MODULE_STATUS = ['ACTIVE', 'INACTIVE'];
+
     /**
      * Run the migrations.
      */
@@ -20,7 +22,7 @@ return new class extends Migration
             $table->string('acronym');
             $table->integer('number_of_days');
             $table->longText('compendium');
-            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+            $table->enum('status', self::COURSE_MODULE_STATUS)->default(self::COURSE_MODULE_STATUS[0]);
             $table->timestamps();
         });
     }
