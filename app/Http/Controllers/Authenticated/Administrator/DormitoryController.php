@@ -293,9 +293,6 @@ class DormitoryController extends Controller
     public function get_current_tenant_info (GetCurrentTenantInfo $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $userId = $request->userId;
-
-            // get the user's current active tenant record. Active tenant record is the tenant record
-            // that has tenant_status other than PENDING, CANCELLED, REJECTED, and TERMINATED.
             $currentTenant = DormitoryTenant::with([
                 'dormitory_room'
             ])->where('user_id', $userId)
