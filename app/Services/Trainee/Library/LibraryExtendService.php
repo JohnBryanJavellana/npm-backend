@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class LibraryExtendService
 {
     public function __construct(
+        protected BookRes $bookResModel,
         protected BookReservation $bookReservationModel,
         protected LibraryExtraService $libraryExtraService,
         protected BookRes $bookResModel
@@ -57,6 +58,8 @@ class LibraryExtendService
                     ->where("id", $validated["reference_id"])
                     ->update(['status' => $status]);
             }
+
+            $bookRes = $this->bookResModel->where("id", $validated["book_res_id"])->firstOrFail();
 
             $this->prepareData($records, $book_ids);
 

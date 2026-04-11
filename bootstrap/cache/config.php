@@ -201,8 +201,8 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\framework/cache/data',
-        'lock_path' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\framework/cache/data',
+        'path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\framework/cache/data',
+        'lock_path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -376,13 +376,13 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\app',
+        'root' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\app',
         'throw' => false,
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\app/public',
+        'root' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
@@ -402,7 +402,7 @@
     ),
     'links' => 
     array (
-      'C:\\laragon\\www\\nmp-backend\\npm-backend\\public\\storage' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\app/public',
+      'C:\\laragon\\www\\FreqIT\\npm-backend\\public\\storage' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\app/public',
     ),
   ),
   'hashing' => 
@@ -443,14 +443,14 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\logs/laravel.log',
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
         'replace_placeholders' => true,
@@ -515,12 +515,12 @@
       ),
       'emergency' => 
       array (
-        'path' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\logs/laravel.log',
+        'path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\logs/laravel.log',
       ),
       'errormonitor' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\logs/forerror.log',
+        'path' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\logs/forerror.log',
         'level' => 'info',
       ),
     ),
@@ -597,7 +597,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\resources\\views/vendor/mail',
+        0 => 'C:\\laragon\\www\\FreqIT\\npm-backend\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -749,7 +749,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\framework/sessions',
+    'files' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -770,9 +770,9 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\resources\\views',
+      0 => 'C:\\laragon\\www\\FreqIT\\npm-backend\\resources\\views',
     ),
-    'compiled' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\framework\\views',
+    'compiled' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\framework\\views',
   ),
   'dompdf' => 
   array (
@@ -781,10 +781,10 @@
     'convert_entities' => true,
     'options' => 
     array (
-      'font_dir' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\fonts',
-      'font_cache' => 'C:\\laragon\\www\\nmp-backend\\npm-backend\\storage\\fonts',
-      'temp_dir' => 'C:\\Users\\admin\\AppData\\Local\\Temp',
-      'chroot' => 'C:\\laragon\\www\\nmp-backend\\npm-backend',
+      'font_dir' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\fonts',
+      'font_cache' => 'C:\\laragon\\www\\FreqIT\\npm-backend\\storage\\fonts',
+      'temp_dir' => 'C:\\Users\\MARKNA~1\\AppData\\Local\\Temp',
+      'chroot' => 'C:\\laragon\\www\\FreqIT\\npm-backend',
       'allowed_protocols' => 
       array (
         'data://' => 
@@ -913,7 +913,7 @@
     array (
     ),
     'enable_runnable_solutions' => NULL,
-    'remote_sites_path' => 'C:\\laragon\\www\\nmp-backend\\npm-backend',
+    'remote_sites_path' => 'C:\\laragon\\www\\FreqIT\\npm-backend',
     'local_sites_path' => '',
     'housekeeping_endpoint_prefix' => '_ignition',
     'settings_file_path' => '',
@@ -962,6 +962,5 @@
     array (
       0 => 'App\\Nova',
     ),
-    'trust_project' => 'always',
   ),
 );
