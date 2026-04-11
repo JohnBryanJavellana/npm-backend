@@ -62,7 +62,7 @@ class LMSCourseService
             ->with([
                 "uploads",
                 "assessment_attempts",
-                "assessment:id,course_content_id,title,type,passed_type,passing_score,time_limit,status",
+                "assessment:id,control_number,course_content_id,title,type,passed_type,passing_score,time_limit,status",
             ])
             ->first();
     }

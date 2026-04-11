@@ -19,6 +19,11 @@ class Assessments extends Model
         return $this->hasMany(AssessmentSection::class);
     }
 
+    public function attempts()
+    {
+        return $this->hasMany(AssessmentAttempt::class);
+    }
+
     public function course()
     {
         return $this->belongsTo(CourseModule::class);

@@ -8,6 +8,7 @@ use App\Models\{
     Assessments,
     CourseModuleHandouts
 };
+use App\Utils\GenerateTrace;
 use Illuminate\Support\Facades\DB;
 use DomainException;
 
@@ -44,10 +45,11 @@ class LMSAssessmentService
     public function storeAssessment($validated, $userId)
     {
         return DB::transaction(function () use ($validated, $userId) {
-            // $this->domainRuleValidation($validated);        
+            // $this->domainRuleValidation($validated);
 
             return $this->assessmentsModel->create([
                 ...$validated,
+                "control_number" => GenerateTrace::createTraceNumber($this->assessmentsModel, uniqid(), 'control_number', 100000000, 999999999),
                 "created_by" => $userId
             ]);
         });
@@ -56,7 +58,7 @@ class LMSAssessmentService
     public function updateAssessment($validated, $user_id)
     {
         return DB::transaction(function () use ($validated, $user_id) {
-            // $this->domainRuleValidation($validated);      
+            // $this->domainRuleValidation($validated);
 
             $data = collect($validated)->only([
                 'course_content_id',
