@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Rules\Admin\Library;
+namespace App\Rules\Admin\Recreational;
 
 use App\Enums\AdministratorReturnResponse;
 use App\Models\RAFacility;

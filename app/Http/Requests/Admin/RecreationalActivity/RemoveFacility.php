@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Admin\RecreationalActivity;
 
 use App\Enums\UserRoleEnum;
-use App\Rules\Admin\Library\RemoveFacilityRule;
+use App\Rules\Admin\Recreational\RemoveFacilityRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RemoveFacility extends FormRequest
