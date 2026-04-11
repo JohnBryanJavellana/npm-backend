@@ -144,7 +144,10 @@ class RecreationalActivityCtrl extends Controller
             $equipmentId = $request->equipmentId;
 
             $result = $this->recreationalEquipmentManager->createOrUpdate($request, $isPost, $equipmentId);
-            return response()->json(['message' => $result['message']], $result['status']);
+            return response()->json([
+                'message' => $result['message'],
+                'returnedData' => $result['returnedData']
+            ], $result['status']);
         });
     }
 

@@ -291,7 +291,7 @@ class DormitoryController extends Controller
      * @param GetCurrentTenantInfo $request
      */
     public function get_current_tenant_info (GetCurrentTenantInfo $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $userId = $request->userId;
 
             // get the user's current active tenant record. Active tenant record is the tenant record
