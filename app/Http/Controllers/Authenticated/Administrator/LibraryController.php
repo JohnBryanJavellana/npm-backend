@@ -34,31 +34,15 @@ use App\Http\Requests\Admin\Library\{
     UpdateBookRequest,
     RequestFine
 };
-use App\Events\{
-    BELibrary,
-    BEAuditTrail
-};
-use App\Utils\{
-    AuditHelper,
-    ConvertToBase64,
-    GenerateTrace,
-    Notifications
-};
 use App\Models\{
     Book,
     Training,
     BookRes,
-    BookCatalog,
     BookGenre,
     BookCopy,
-    BookTrainingRelated,
     BookReservation,
     ExtensionRequest,
     LibraryInvoice,
-};
-use App\Enums\{
-    AdministratorAuditActions,
-    AdministratorReturnResponse,
 };
 use App\Helpers\Administrator\General\CountCollection;
 use App\Enums\Administrator\{
