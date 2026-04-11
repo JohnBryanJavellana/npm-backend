@@ -23,7 +23,9 @@ class CreateOrUpdateOR extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'service_type' => ['required', 'string']
+            'service_type' => ['required', 'string'],
+            'httpMethod' => ['required', 'in:UPDATE,POST'],
+            'documentId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:cashier_o_r_s,id']
         ];
     }
 }
