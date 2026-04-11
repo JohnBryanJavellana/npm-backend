@@ -8,16 +8,16 @@ use App\Http\Requests\Admin\RecreationalActivity\CreateEquipmentStock;
 use App\Http\Requests\Admin\RecreationalActivity\RemoveEquipment;
 use App\Http\Requests\Admin\RecreationalActivity\RemoveEquipmentStock;
 use App\Http\Requests\Admin\RecreationalActivity\RemoveFacility;
+use App\Http\Requests\Admin\RecreationalActivity\RemoveRACharge;
 use App\Http\Requests\Admin\RecreationalActivity\UpdateEquipmentStock;
 use App\Models\RAEquipmentRequest;
+use App\Services\Administrator\Recreational\RecreationalChargeManager;
 use App\Services\Administrator\Recreational\RecreationalEquipmentManager;
 use App\Services\Administrator\Recreational\RecreationalEquipmentStockManager;
 use App\Services\Administrator\Recreational\RecreationalFacilityManager;
 use Illuminate\Http\Request;
 use App\Utils\{
     TransactionUtil,
-    AuditHelper,
-    GenerateTrace,
 };
 use App\Models\{
     RARequestInfo,
@@ -44,7 +44,8 @@ class RecreationalActivityCtrl extends Controller
     public function __construct(
         public RecreationalFacilityManager $recreationalFacilityManager,
         public RecreationalEquipmentManager $recreationalEquipmentManager,
-        public RecreationalEquipmentStockManager $recreationalEquipmentStockManager
+        public RecreationalEquipmentStockManager $recreationalEquipmentStockManager,
+        public RecreationalChargeManager $recreationalChargeManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -216,6 +217,47 @@ class RecreationalActivityCtrl extends Controller
     {
         return TransactionUtil::transact($request, [], function () use ($request, $equipmentStockId) {
             $result = $this->recreationalEquipmentStockManager->removeEquipmentStock($equipmentStockId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of ra_request_charges
+     * @param Request $request
+     */
+    public function ra_request_charges(Request $request){
+        return TransactionUtil::transact(null, [], function () use($request) {
+            $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
+                ->orderBy('created_at', 'DESC')
+                ->get();
+
+            return response()->json(['ra_charges' => $raCharges], 200);
+        });
+    }
+
+    /**
+     * Summary of ra_create_or_update_charge
+     * @param RequestInvoice $request
+     */
+    public function ra_create_or_update_charge(RequestInvoice $request){
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === 'POST';
+            $recreationalInvoiceId = $request->recreationalInvoiceId;
+
+            $result = $this->recreationalChargeManager->createOrUpdate($request, $isPost, $recreationalInvoiceId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of ra_delete_charge
+     * @param RemoveRACharge $request
+     * @param int $recreationalInvoiceId
+     */
+    public function ra_delete_charge(RemoveRACharge $request, int $recreationalInvoiceId){
+        return TransactionUtil::transact($request, [], function () use ($recreationalInvoiceId) {
+            $result = $this->recreationalChargeManager->removeCharge($recreationalInvoiceId);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }
@@ -557,80 +599,5 @@ class RecreationalActivityCtrl extends Controller
 
 
 
-    /**
-     * Summary of ra_request_charges
-     * @param Request $request
-     */
-    public function ra_request_charges(Request $request){
-        return TransactionUtil::transact(null, [], function () use($request) {
-            $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
-                ->orderBy('created_at', 'DESC')
-                ->get();
 
-            return response()->json(['ra_charges' => $raCharges], 200);
-        });
-    }
-
-    /**
-     * Summary of ra_create_or_update_charge
-     * @param Request $request
-     */
-    public function ra_create_or_update_charge(RequestInvoice $request){
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            $isPost = $request->httpMethod === 'POST';
-            $this_charge = $isPost
-                ? new RAInvoices()
-                : RAInvoices::where('id', $request->documentId)->lockForUpdate()->first();
-
-            if (!$isPost && \in_array($this_charge->invoice_status, [
-                RAEnum::CANCELLED,
-                RAEnum::PAID
-            ])) {
-                return response()->json(['message' => "We're sorry. You can't update this charge for the moment."], 409);
-            }
-
-            if ($isPost) {
-                $this_charge->user_id = $request->userId;
-                $this_charge->r_a_request_info_id = $request->r_a_request_info_id;
-                $this_charge->trace_number = GenerateTrace::createTraceNumber(RAInvoices::class, '-RAINV-');
-            } else {
-                $this_charge->invoice_status = $request->status;
-            }
-
-            $this_charge->description = $request->description;
-            $this_charge->invoice_amount = $request->invoiceAmount;
-            $this_charge->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                ($isPost ? 'Created' : 'Updated') . " a charge. ID#{$this_charge->id}"
-            );
-
-            return response()->json(['message' => ($isPost ? 'created' : 'updated') . " a charge. ID#{$this_charge->id}"], 200);
-        });
-    }
-
-    /**
-     * Summary of ra_delete_charge
-     * @param Request $request
-     * @param mixed $id
-     */
-    public function ra_delete_charge(Request $request, $id){
-        return TransactionUtil::transact(null, [], function () use ($request, $id) {
-            $raInvoice = RAInvoices::findOrFail($id);
-
-            if (\in_array($raInvoice->invoice_status, [RAEnum::PAID, RAEnum::CANCELLED])) {
-                return response()->json([ 'message' => "We're sorry. You can't delete this charge for the moment." ], 409);
-            }
-
-            $raInvoice->delete();
-
-            AuditHelper::log(
-                $request->user()->id,
-                "Deleted RA Invoice ID#$id"
-            );
-
-            return response()->json(['message' => "RA Invoice ID#$id has been deleted successfully."], 200);
-        });
-    }
 }
