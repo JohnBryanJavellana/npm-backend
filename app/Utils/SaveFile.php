@@ -22,7 +22,6 @@ class SaveFile
                 return $file_requested ? $filename_requested : null;
             }
         } catch (\Exception $e) {
-            throw $e;
             return response()->json(['message' => "Something went wrong! Please try again"], 422);
         }
     }

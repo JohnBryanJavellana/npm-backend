@@ -11,7 +11,7 @@ class CreateOrUpdateOR extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, ['SUPERADMIN', 'ADMIN-CASHIER']);
     }
 
     /**
@@ -23,7 +23,7 @@ class CreateOrUpdateOR extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'service' => ['required', 'string']
+            'service_type' => ['required', 'string']
         ];
     }
 }

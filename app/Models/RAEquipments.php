@@ -10,6 +10,8 @@ class RAEquipments extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function hasData() {
         return $this->hasManyThrough(
             RAEquipmentRequest::class,

@@ -88,10 +88,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::get('get_books', [LibraryController::class, 'get_books']);
             Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
+            Route::post('get_book_info/get_book_copy_activity', [LibraryController::class, 'get_book_copy_activity']);
+            Route::post('get_book_info/get_copies/update_book_copy', [LibraryController::class, 'update_book_copy']);
             Route::match(['GET', 'POST'], 'get_book_info/{book_id}', [LibraryController::class, 'get_book_info']);
             Route::get('get_book_info/get_copies/{book_id}', [LibraryController::class, 'get_copies']);
-            Route::get('activity', [LibraryController::class, 'get_book_copy_activity']);//edrascoe
-            Route::post('get_book_info/get_copies/update_book_copy', [LibraryController::class, 'update_book_copy']);
             Route::post('create_book_copies', [LibraryController::class, 'create_book_copies']);
             Route::get('get_book_total_reservations/{book_id}', [LibraryController::class, 'get_book_total_reservations']);
             Route::post('update_reservation', [LibraryController::class, 'update_reservation']);
@@ -100,9 +100,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('create_or_update_book', [LibraryController::class, 'create_or_update_book']);
             Route::match(['GET', 'POST'], 'get_book_reservation', [LibraryController::class, 'get_book_reservation']);
             Route::post('get_book_reservation/get_fines', [LibraryController::class, 'get_fines']);
-            Route::post('get_book_reservation/create_fine', [LibraryController::class, 'create_fine']);
-            Route::delete('get_book_reservation/remove_fine/{id}', [LibraryController::class, 'remove_fine']);
-            Route::post('get_book_reservation/get_book_reservation_that_needs_fine', [LibraryController::class, 'get_book_reservation_that_needs_fine']);
+            Route::post('get_book_reservation/create_or_update_fine', [LibraryController::class, 'create_or_update_fine']);
+            Route::delete('get_book_reservation/remove_fine/{libraryInvoiceId}', [LibraryController::class, 'remove_fine']);
             Route::post('get_book_reservation/get_prolongation_request', [LibraryController::class, 'get_prolongation_request']);
             Route::post('get_book_reservation/get_books_that_protractible', [LibraryController::class, 'get_books_that_protractible']);
             Route::post('get_book_reservation/submit_renewal_request', [LibraryController::class, 'submit_renewal_request']);
@@ -110,17 +109,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_book_reservation/update_prolongation_request', [LibraryController::class, 'update_prolongation_request']);
             Route::post('get_book_reservation/count_book_reservation', [LibraryController::class, 'count_book_reservation']);
             Route::post('get_book_reservation/check_for_book_reservation', [LibraryController::class, 'check_for_book_reservation']);
-            Route::delete('get_book_info/remove_copy/{copy_id}', [LibraryController::class, 'remove_copy']);
-            Route::delete('remove_book/{book_id}', [LibraryController::class, 'remove_book']);
-
-            Route::post('summarize_report', [LibraryController::class, 'summarize_report']); //userkenneth22
+            Route::delete('get_book_info/remove_copy/{bookCopyId}', [LibraryController::class, 'remove_copy']);
+            Route::delete('remove_book/{bookId}', [LibraryController::class, 'remove_book']);
         });
 
         Route::prefix('/book_entry/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY', 'throttle:60,1'])->group(function () {
             Route::get('get_book_entries', [LibraryController::class, 'get_book_entries']);
             Route::get('get_active_entries', [LibraryController::class, 'get_active_entries']);
             Route::post('create_or_update_book_entry', [LibraryController::class, 'create_or_update_book_entry']);
-            Route::delete('remove_entry/{entry_id}', [LibraryController::class, 'remove_entry']);
+            Route::delete('remove_entry/{bookEntryId}', [LibraryController::class, 'remove_entry']);
         });
 
         Route::prefix('/dormitory/')->middleware(['user_role:SUPERADMIN,ADMIN-DORMITORY', 'throttle:60,1'])->group(function () {
@@ -136,8 +133,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('remove_service/{service_id}', [DormitoryController::class, 'remove_service']);
 
             Route::post('room_reservations', [DormitoryController::class, 'room_reservations']);
-          //  Route::post('manual_price_adjustment', [DormitoryController::class, 'manual_price_adjustment']);
-            Route::post('set_tenant_reserved', [DormitoryController::class, 'set_tenant_as_reserved']);
+            Route::post('room_reservations/set_as_reserved', [DormitoryController::class, 'set_as_reserved']);
             Route::post('new_room_reservation', [DormitoryController::class, 'new_room_reservation']);
             Route::post('get_match_rooms', [DormitoryController::class, 'get_match_rooms']);
 
@@ -240,16 +236,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::get('get_charges_category', [Cashier::class, 'get_charges_category']);
             Route::post('create_or_update_charge_category', [Cashier::class, 'create_or_update_charge_category']);
-            Route::delete('remove_charge_category/{fee_category_id}', [Cashier::class, 'remove_charge_category']);
+            Route::delete('remove_charge_category/{chargeCategoryId}', [Cashier::class, 'remove_charge_category']);
 
             Route::match(['GET', 'POST'], 'get_or_numbers', [Cashier::class, 'get_or_numbers']);
             Route::post('create_or_update_or_number', [Cashier::class, 'create_or_update_or_number']);
-            Route::delete('remove_or_number/{fee_category_id}', [Cashier::class, 'remove_or_number']);
-
-            Route::post('verify-invoice/{type}/{id}', [Cashier::class, 'verify']);
-            Route::post('batch_generate_invoices', [Cashier::class, 'batch_generate_invoices']);
-            Route::post('verifyTransactions', [Cashier::class, 'verifyTransactions']);
-            Route::get('get_all_paid_payments', [Cashier::class, 'get_all_paid_payments']);
+            Route::delete('remove_or_number/{orNumber}', [Cashier::class, 'remove_or_number']);
         });
 
         Route::prefix('/recreational-activity/')->middleware(['user_role:SUPERADMIN,ADMIN-RA', 'throttle:60,1'])->group(function () {
@@ -272,12 +263,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('ra_create_or_update_equipment', [RecreationalActivityCtrl::class, 'ra_create_or_update_equipment']);
             Route::post('ra_equipment_create_stock', [RecreationalActivityCtrl::class, 'ra_equipment_create_stock']);
             Route::post('ra_equipment_update_stock', [RecreationalActivityCtrl::class, 'ra_update_equipment_stock']);
-            Route::delete('ra_remove_equipment/{equipment_id}', [RecreationalActivityCtrl::class, 'ra_remove_equipment']);
-            Route::delete('ra_remove_equipment_stock/{equipment_stock_id}', [RecreationalActivityCtrl::class, 'ra_remove_equipment_stock']);
+            Route::delete('ra_remove_equipment/{equipmentId}', [RecreationalActivityCtrl::class, 'ra_remove_equipment']);
+            Route::delete('ra_remove_equipment_stock/{equipmentStockId}', [RecreationalActivityCtrl::class, 'ra_remove_equipment_stock']);
 
             Route::post('ra_facilities', [RecreationalActivityCtrl::class, 'ra_facilities']);
             Route::post('ra_create_or_update_facility', [RecreationalActivityCtrl::class, 'ra_create_or_update_facility']);
-            Route::delete('ra_remove_facility/{facility_id}', [RecreationalActivityCtrl::class, 'ra_remove_facility']);
+            Route::delete('ra_remove_facility/{facilityId}', [RecreationalActivityCtrl::class, 'ra_remove_facility']);
         });
 
         Route::get('qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);

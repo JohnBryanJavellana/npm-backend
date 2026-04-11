@@ -5,12 +5,13 @@ namespace App\Models;
 use App\Enums\RequestStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Factories\Relationship;
 use Illuminate\Database\Eloquent\Model;
 
 class RAFacility extends Model
 {
     use HasFactory;
+
+    protected $guarded = ['id'];
 
     public function hasData() {
         return $this->hasMany(RAFacilityRequest::class);
@@ -22,6 +23,10 @@ class RAFacility extends Model
 
     public function relationships() {
         return $this->hasMany(RARelationship::class);
+    }
+
+    public function relationshipToEquipment() {
+        return $this->belongsToMany(RAEquipments::class, 'r_a_relationships', 'r_a_facility_id', 'r_a_equipments_id');
     }
 
     public function relatedEquipment()
@@ -40,7 +45,7 @@ class RAFacility extends Model
     public function scopeOkayCondition(Builder $query)
     {
         return $query->whereIn("condition_status", ["GOOD CONDITION", "DAMAGED"]);
-    }   
+    }
 
     public function scopeUniqueIdentifier(Builder $query,array $ui)
     {
