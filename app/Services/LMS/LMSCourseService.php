@@ -3,7 +3,6 @@
 namespace App\Services\LMS;
 
 use App\Enums\RequestStatus;
-use App\Models\AssessmentAttempt;
 use App\Models\CourseContent;
 use App\Models\CourseContentUpload;
 use App\Models\CourseModuleSection;
@@ -20,7 +19,6 @@ class LMSCourseService
         protected CourseModuleSection $courseModuleSectionModel,
         protected CourseContent $courseContentModel,
         protected CourseContentUpload $courseContentUploadModel,
-        protected AssessmentAttempt $assessmentAttemptModel,
     ) {}
 
     public function getCourseModules($courseModuleId, $section_id = null)
@@ -56,12 +54,24 @@ class LMSCourseService
 
     public function getContentById($contentId)
     {
-
         return $this->courseContentModel->query()
             ->whereKey($contentId)
             ->with([
                 "uploads",
-                "assessment_attempts",
+                "assessment_attempts" => function ($query) {
+                    $query->select(
+                        "assessment_attempts.id",
+                        "assessment_attempts.assessments_id",
+                        "assessment_attempts.enrolled_course_id",
+                        "assessment_attempts.score",
+                        "assessment_attempts.status",
+                        "assessment_attempts.graded_by",
+                        "assessment_attempts.submitted_at",
+                        "assessment_attempts.graded_at",
+                        "assessment_attempts.created_at",
+                        "assessment_attempts.updated_at"
+                    );
+                },
                 "assessment:id,course_content_id,title,type,passed_type,passing_score,time_limit,status",
             ])
             ->first();

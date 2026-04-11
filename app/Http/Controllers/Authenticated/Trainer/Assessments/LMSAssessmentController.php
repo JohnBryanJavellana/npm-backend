@@ -28,7 +28,6 @@ use Illuminate\Support\Facades\DB;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 use function Laravel\Prompts\select;
 use Illuminate\Validation\ValidationException;
-use App\Utils\AuditHelper;
 use App\Utils\TransactionUtil;
 
 class LMSAssessmentController extends Controller
@@ -132,162 +131,13 @@ class LMSAssessmentController extends Controller
         }
     }
 
-    //! this is fix code // Create attempt and answers //score is fix to boolean
-    public function assessment_answers(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                "assessment_id" => "required|integer|exists:assessments,id",
-                "answers" => "nullable|array",
-                "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
-                "answers.*.assessment_option_id" => "required|integer|exists:assessment_options,id",
-                "answers.*.assessment_answer_text" => "nullable|string"
-            ]);
-
-            DB::beginTransaction();
-
-            try {
-
-                $enrolledCourse = DB::table('enrolled_courses')
-                    ->where('user_id', auth()->id())
-                    ->where('enrolled_course_status', 'ENROLLED')
-                    ->first();
-
-                if (!$enrolledCourse) {
-                    return response()->json([
-                        "message" => "No enrolled course found."
-                    ], 404);
-                }
 
 
-                $existingAttempt = AssessmentAttempt::where([
-                    "assessments_id" => $validated["assessment_id"],
-                    "enrolled_course_id" => $enrolledCourse->id,
-                    "status" => "SUBMITTED"
-                ])->first();
-
-                if ($existingAttempt) {
-                    return response()->json([
-                        "message" => "Assessment already submitted. No further submissions allowed.",
-                        "assessment_attempt_id" => $existingAttempt->id
-                    ], 403);
-                }
-
-
-                $attempt = AssessmentAttempt::firstOrCreate(
-                    [
-                        "assessments_id" => $validated["assessment_id"],
-                        "enrolled_course_id" => $enrolledCourse->id,
-                        "status" => "IN_PROGRESS"
-                    ],
-                    ["score" => 0, "graded_by" => 1, "submitted_at" => now(), "graded_at" => now()]
-                );
-
-                $correctCount = 0;
-                $answers = [];
-                $status = 'IN_PROGRESS';
-
-
-                if (!empty($validated["answers"]) && is_array($validated["answers"])) {
-
-                    foreach ($validated["answers"] as $answer) {
-                        $option = DB::table('assessment_options')
-                            ->where('id', $answer["assessment_option_id"])
-                            ->where('assessment_question_id', $answer["assessment_question_id"])
-                            ->first();
-
-                        if (!$option) {
-                            throw new Exception("Assessment option not found");
-                        }
-
-                        $answerMatches = strtolower($answer["assessment_answer_text"] ?? '') === strtolower($option->option_text);
-                        $isCorrect = (bool) $option->is_correct;
-                        $isFinalCorrect = $answerMatches && $isCorrect;
-
-                        if ($isFinalCorrect) $correctCount++;
-
-                        $answers[] = AssessmentAnswer::updateOrCreate(
-                            [
-                                "assessment_attempt_id" => $attempt->id,
-                                "assessment_question_id" => $answer["assessment_question_id"]
-                            ],
-                            [
-                                "assessment_option_id" => $option->id,
-                                "answer_text" => $answer["assessment_answer_text"] ?? null,
-                                "is_correct" => $isFinalCorrect ? 1 : 0,
-                                "score" => $isFinalCorrect ? 1 : 0
-                            ]
-                        );
-                    }
-
-
-                    $total = count($validated["answers"]);
-                    $score = $total > 0 ? ($correctCount / $total) * 100 : 0;
-
-                    $frontendStatus = $request->input('status');
-                    $status = $this->detectAssessmentStatus($score, $frontendStatus);
-
-
-                    if (now()->diffInMinutes($attempt->created_at) >= 60) {
-                        $status = 'SUBMITTED';
-                    }
-                } else {
-
-                    $score = 0;
-                    $total = 0;
-                    $correctCount = 0;
-                }
-
-
-                $attempt->update([
-                    'score' => $score,
-                    'status' => $status,
-                    'graded_at' => now()
-                ]);
-
-                DB::commit();
-
-                return response()->json([
-                    "message" => $status === 'SUBMITTED' ? "Assessment submitted successfully." : "Assessment attempt created. Waiting for answers...",
-                    "assessment_attempt_id" => $attempt->id,
-                    "score" => round($score ?? 0, 2),
-                    "correct_answers" => $correctCount,
-                    "total_answers" => $total ?? 0,
-                    "status" => $status,
-                    "data" => $answers
-                ], 201);
-            } catch (\Exception $e) {
-                DB::rollBack();
-
-                throw $e;
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                "message" => "An error occurred.",
-                "error" => config('app.debug') ? $e->getMessage() : null
-            ], 500);
-        }
-    }
-
-    private function detectAssessmentStatus($score, $status = null)
-    {
-        if ($status == 'SUBMITTED') {
-            return 'SUBMITTED';
-        }
-        if ($score === 100) {
-            return 'SUBMITTED';
-        }
-
-        return 'IN_PROGRESS';
-    }
-
-    //! Trainee details assessments /assessment_option and assessment_question details for trainer to view during assessment attempt monitoring
 
     public function TraineeAssessmentDetailsForTrainer(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             try {
-                // Just fetch data - no submission logic
                 $list = EnrolledCourse::where('training_id', $request->training_id)
                     ->with([
                         'trainee:id,id,fname,lname,mname,suffix,email',
@@ -353,7 +203,190 @@ class LMSAssessmentController extends Controller
         });
     }
 
-    //! Reusable function for logging user actions during assessment attempts
+    public function assessment_answers(Request $request)
+    {
+        try {
+
+            \Log::info("Received assessment attempt request", $request->all());
+            $validated = $request->validate([
+                "assessment_id" => "required|integer|exists:assessments,id",
+                "answers" => "nullable|array",
+                "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
+                "answers.*.assessment_option_id" => "required|integer|exists:assessment_options,id",
+                "answers.*.assessment_answer_text" => "nullable|string",
+            ]);
+
+            if (!isset($validated['assessment_id']) || $validated['assessment_id'] === 'undefined' || $validated['assessment_id'] <= 0) {
+                return response()->json([
+                    "message" => "Invalid assessment_id",
+                    "error" => "assessment_id is required and must be a valid positive integer"
+                ], 422);
+            }
+
+            DB::beginTransaction();
+
+            try {
+                $userId = auth()->id();
+                $assessmentId = $validated["assessment_id"];
+
+                \Log::info("Starting assessment attempt for user: $userId, assessment: $assessmentId");
+
+                $enrolledCourse = DB::table('enrolled_courses')
+                    ->where('user_id', $userId)
+                    ->where('enrolled_course_status', 'ENROLLED')
+                    ->orderByDesc('id')
+                    ->first();
+
+                if (!$enrolledCourse) {
+                    $defaultTrainingId = env('DEFAULT_TRAINING_ID', 1);
+
+                    $enrolledCourseId = DB::table('enrolled_courses')->insertGetId([
+                        'user_id' => $userId,
+                        'training_id' => $defaultTrainingId,
+                        'enrolled_course_status' => 'ENROLLED',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+
+                    $enrolledCourse = DB::table('enrolled_courses')
+                        ->where('id', $enrolledCourseId)
+                        ->first();
+                }
+
+                $existingAttempt = AssessmentAttempt::where([
+                    "assessments_id" => $assessmentId,
+                    "enrolled_course_id" => $enrolledCourse->id,
+                    "status" => "SUBMITTED"
+                ])->first();
+
+                if ($existingAttempt) {
+                    DB::rollBack();
+                    return response()->json([
+                        "message" => "Assessment already submitted. No further submissions allowed.",
+                        "assessment_attempt_id" => $existingAttempt->id
+                    ], 403);
+                }
+
+                $attempt = AssessmentAttempt::firstOrCreate(
+                    [
+                        "assessments_id" => $assessmentId,
+                        "enrolled_course_id" => $enrolledCourse->id,
+                        "status" => "IN_PROGRESS"
+                    ],
+                    ["score" => 0, "graded_by" => 1, "submitted_at" => now(), "graded_at" => now()]
+                );
+
+                \Log::info("Assessment attempt ID: " . $attempt->id);
+
+                $correctCount = 0;
+                $answers = [];
+                $status = 'IN_PROGRESS';
+                $passingScore = 60;
+
+                if (!empty($validated["answers"]) && is_array($validated["answers"])) {
+                    \Log::info("Processing " . count($validated["answers"]) . " answers");
+
+                    foreach ($validated["answers"] as $answer) {
+                        $option = DB::table('assessment_options')
+                            ->where('id', $answer["assessment_option_id"])
+                            ->where('assessment_question_id', $answer["assessment_question_id"])
+                            ->first();
+
+                        if (!$option) {
+                            throw new Exception("Assessment option not found");
+                        }
+
+                        $answerMatches = strtolower($answer["assessment_answer_text"] ?? '') === strtolower($option->option_text);
+                        $isCorrect = (bool) $option->is_correct;
+                        $isFinalCorrect = $answerMatches && $isCorrect;
+
+                        if ($isFinalCorrect) $correctCount++;
+
+                        $answers[] = AssessmentAnswer::updateOrCreate(
+                            [
+                                "assessment_attempt_id" => $attempt->id,
+                                "assessment_question_id" => $answer["assessment_question_id"]
+                            ],
+                            [
+                                "assessment_option_id" => $option->id,
+                                "answer_text" => $answer["assessment_answer_text"] ?? null,
+                                "is_correct" => $isFinalCorrect ? 1 : 0,
+                                "score" => $isFinalCorrect ? 1 : 0
+                            ]
+                        );
+                    }
+
+                    $total = count($validated["answers"]);
+                    $score = $total > 0 ? ($correctCount / $total) * 100 : 0;
+
+                    \Log::info("Score calculation - Correct: $correctCount, Total: $total, Score: $score%");
+
+                    $assessment = DB::table('assessments')
+                        ->where('id', $assessmentId)
+                        ->first();
+
+                    $passingScore = $assessment->passing_score ?? 60;
+
+
+                    if ($score >= $passingScore) {
+                        $status = 'PASSED';
+                    } else {
+                        $status = 'FAILED';
+                    }
+
+                    \Log::info("Result - Status: $status, Score: $score%, Passing: $passingScore%");
+
+
+                    if (now()->diffInMinutes($attempt->created_at) >= 60) {
+                        if ($status !== 'PASSED' && $status !== 'FAILED') {
+                            $status = 'SUBMITTED';
+                        }
+                        \Log::info("Time limit check - Final status: $status");
+                    }
+                }
+
+                $attempt->update([
+                    'score' => $score ?? 0,
+                    'status' => $status,
+                    'graded_at' => now()
+                ]);
+
+                DB::commit();
+
+                \Log::info("Assessment attempt completed successfully - Status: $status");
+
+                return response()->json([
+                    "message" => $status === 'PASSED' ? "Assessment passed!" : ($status === 'FAILED' ? "Assessment failed. Please try again." : "Assessment submitted."),
+                    "assessment_attempt_id" => $attempt->id,
+                    "score" => round($score ?? 0, 2),
+                    "correct_answers" => $correctCount ?? 0,
+                    "total_answers" => $total ?? 0,
+                    "status" => $status,
+                    "passing_score" => $passingScore,
+                    "data" => $answers
+                ], 201);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                \Log::error("Error in tryAnswers: " . $e->getMessage());
+                throw $e;
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error("Validation failed: " . json_encode($e->errors()));
+            return response()->json([
+                "message" => "Validation failed",
+                "errors" => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error("Exception: " . $e->getMessage());
+            return response()->json([
+                "message" => "An error occurred.",
+                "error" => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+
+    //! reusesable function for logging user actions during assessment attempts
     public function logUserAction(Request $request)
     {
         try {
@@ -375,7 +408,7 @@ class LMSAssessmentController extends Controller
                 'action' => $validated['action']
             ], 201);
         } catch (\Exception $e) {
-            Log::error('Failed to log action: ' . $e->getMessage());
+            \Log::error('Failed to log action: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Error logging action',
                 'error' => $e->getMessage()

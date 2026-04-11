@@ -25,7 +25,7 @@ use App\Http\Controllers\Authenticated\Trainee\{
     TraineeInvoices,
     CsmsController,
     TraineeRecreational,
-    TraineeDashboardController,
+    TraineeDashboardController
 };
 
 /** administrator controllers */
@@ -209,8 +209,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('attendance_record', [AttendanceController::class, 'attendance_record']);
             Route::post('attendance_ByGroup', [AttendanceController::class, 'attendanceByGroup']);
             Route::post('update_record', [AttendanceController::class, 'update_attendance_record']);
-            //! kan reyden adi cancer
-            Route::post('color_bg', [AttendanceController::class, 'color_background']);
             //! announcement
 
             Route::post('announcement_edit', [AnnouncementController::class, 'AnnouncementEdit']);
@@ -253,15 +251,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("update_assessments", [LMSAssessmentController::class, "update"]);
             Route::delete("delete_assessments", [LMSAssessmentController::class, "delete"]);
 
-            //! Paolo Code Start 
-
-            Route::post('store_assessments/attempts', [LMSAssessmentController::class, 'saveAnswersAssessment_attempts']);
-            Route::post('create_assessment_attempts', [LMSAssessmentController::class, 'createAssessmentAttempt']);
-
+            //! Paolo Code Start            
             Route::post('create_attempts/assessments_answers', [LMSAssessmentController::class, 'assessment_answers']);
-            Route::post('details/assessments_options_questions', [LMSAssessmentController::class, 'TraineeAssessmentDetailsForTrainer']);
-            //! Paolo Code End
-
+            Route::post('details/assessment_answers_option', [LMSAssessmentController::class, 'TraineeAssessmentDetailsForTrainer']);
+            
         });
 
         Route::prefix('sections/')->group(function () {

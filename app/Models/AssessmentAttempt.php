@@ -14,14 +14,12 @@ class AssessmentAttempt extends Model
     {
         return $this->belongsTo(EnrolledCourse::class);
     }
-    //! PAOLO NAGADD WARAY PO RELATIONSHIP PAGKUHA HIN DATA HA ASSESSMENT ATTEMPT TO ASSESSMENT ANSWER
     public function answers()
     {
-        return $this->hasMany(AssessmentAnswer::class, 'assessment_attempt_id');
+        return $this->hasMany(AssessmentAnswer::class);
     }
+    public function attempt(){
+        return $this->hasOne(Assessments::class, "id", "assessments_id");
 
-    public function assessment()
-    {
-        return $this->belongsTo(Assessments::class, 'assessments_id');
-    }
+        }
 }
