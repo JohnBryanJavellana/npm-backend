@@ -16,7 +16,7 @@ return new class extends Migration
             $table->engine = "InnoDB";
             $table->id();
             $table->foreignIdFor(AssessmentQuestion::class)->constrained()->cascadeOnDelete();
-            $table->string("option_text");
+            $table->longText("option_text");
             $table->boolean("is_correct")->default(false);
             $table->timestamps();
         });

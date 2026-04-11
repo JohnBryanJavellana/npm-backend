@@ -12,6 +12,7 @@ enum UserRoleEnum: string
     case TRAINER = "TRAINER";
     case ADMIN_RA = "ADMIN-RA";
     case CASHIER = "ADMIN-CASHIER";
+    case LMS = "ADMIN-LMS";
 
 
     public static function enrollmentRoles(): array
@@ -36,6 +37,7 @@ enum UserRoleEnum: string
             self::SUPERADMIN->value,
             self::ADMIN_ENROLLMENT->value,
             self::TRAINER->value,
+            self::LMS->value,
         ];
     }
 }

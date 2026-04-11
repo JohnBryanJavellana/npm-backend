@@ -19,10 +19,10 @@ use App\Http\Controllers\Authenticated\Administrator\{
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA'])->group(function () {
+    Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS'])->group(function () {
         Route::post('dashboard_data', [DashboardCtrl::class, 'dashboard_data']);
 
-        Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT', 'throttle:60,1'])->group(function () {
+        Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS', 'throttle:60,1'])->group(function () {
             Route::post('get_terms_and_condition', [TermsAndConditionCtrl::class, 'get_terms_and_condition']);
             Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
             Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);
@@ -238,7 +238,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_payments', [Cashier::class, 'get_payments']);
             Route::post('pay-walk-in', [Cashier::class, 'pay_walkin']);
             Route::post('verify_payment', [Cashier::class, 'verify_payment']);
-            Route::get('payments', [Cashier::class, 'get_all_paid_payments']);//edrascoe
+            Route::get('payments', [Cashier::class, 'get_all_paid_payments']); //edrascoe
 
             Route::get('get_charges', [Cashier::class, 'get_charges']);
             Route::get('get_charges/get_charges_predata', [Cashier::class, 'get_charges_predata']);

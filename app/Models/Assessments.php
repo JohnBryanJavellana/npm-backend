@@ -46,7 +46,7 @@ class Assessments extends Model
 
     public function scopeActive(Builder $query)
     {
-        return $query->where("status", RequestStatus::ACTIVE->value);       
+        return $query->where("status", RequestStatus::ACTIVE->value);
     }
 
     public function scopeType(Builder $query, $type)

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Authenticated\Trainer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
-use App\Models\{EnrolledCourse, Training, AttendanceRecord};
+use App\Models\{AssessmentAttempt, EnrolledCourse, Training, AttendanceRecord};
 use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
 use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
@@ -64,8 +64,8 @@ class TrainerEnrollmentController extends Controller
                     "module.facilitator",
                     "module.facilitator.facilitator:id,fname,mname,lname"
                 ])
-                ->whereKey($request->trainingId)
-                ->first();
+                    ->whereKey($request->trainingId)
+                    ->first();
 
                 return response()->json([
                     "training" => $record,
@@ -73,6 +73,7 @@ class TrainerEnrollmentController extends Controller
             }
         );
     }
+
 
     public function getTraineeDetails(Request $request)
     {
@@ -89,8 +90,8 @@ class TrainerEnrollmentController extends Controller
                                 $query->whereHas("attendance", function ($q) use ($request) {
                                     $q->where([
                                         "training_date" => $request->training_date,
-                                        "start_time" => $request->start_time,
-                                        "end_time" => $request->end_time
+                                        "time_in" => $request->start_time,
+                                        "time_out" => $request->end_time
                                     ]);
                                 });
                             }
@@ -104,6 +105,45 @@ class TrainerEnrollmentController extends Controller
                 }
             }
         );
+    }
+
+
+    // ! ayaw pag labot, Izack ini nag ayad, para lista hand mga attempts
+    public function TraineeAssessmentDetails(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            try {
+                $data = EnrolledCourse::where('training_id', $request->trainingId)
+                    ->with([
+                        'trainee:id,fname,lname,mname,suffix,email',
+                        'assessmentAttempts' => function ($query) use ($request) {
+                            $query->where('assessments_id', $request->assessmentId);
+                        }
+                    ])
+                    ->get()
+                    ->map(function ($enrolled) {
+                        $traineeData = $enrolled->trainee ? $enrolled->trainee->toArray() : [];
+                        $attempts = $enrolled->assessmentAttempts->map(function ($attempt) {
+                            return [
+                                'id' => $attempt->id,
+                                'score' => $attempt->score,
+                                'status' => $attempt->status,
+                                'graded_at' => $attempt->graded_at,
+                                'enrolled_course_id' => $attempt->enrolled_course_id
+                            ];
+                        });
+                        return [
+                            'trainee' => array_merge($traineeData, [
+                                'attempts' => $attempts
+                            ])
+                        ];
+                    });
+
+                return response()->json(["data" => $data], 200);
+            } catch (\Exception $e) {
+                return response()->json(["message" => "Server Error", "error" => $e->getMessage()], 500);
+            }
+        });
     }
 
     public function getFacilitatorDetails(Request $request)
