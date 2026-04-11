@@ -17,8 +17,7 @@ class RemoveBookCheckerRule implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $this_book = Book::withCount([
-            'hasData',
-            'copies'
+            'hasData'
         ])->lockForUpdate()->findOrFail($value);
 
         if($this_book->has_data_count > 0) {

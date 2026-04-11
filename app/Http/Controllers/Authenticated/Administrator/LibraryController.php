@@ -183,18 +183,6 @@ class LibraryController extends Controller
     }
 
     /**
-     * Summary of remove_book
-     * @param RemoveBook $request
-     * @param int $bookId
-     */
-    public function remove_book (RemoveBook $request, int $bookId) {
-        return TransactionUtil::transact($request, [], function() use ($bookId) {
-            $result = $this->libraryBookManager->removeBook($bookId);
-            return response()->json(['message' => $result['message']], $result['status']);
-        });
-    }
-
-    /**
      * Summary of create_or_update_book
      * @param CreateOrUpdateBookRequest $request
      */
@@ -206,6 +194,18 @@ class LibraryController extends Controller
 
             $result = $this->libraryBookManager->createOrUpdate($request, $isPost, $bookId, $catalogId);
             return response()->json(['message' => $result['message'], 'returnedData' => $result['returnedData']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_book
+     * @param RemoveBook $request
+     * @param int $bookId
+     */
+    public function remove_book (RemoveBook $request, int $bookId) {
+        return TransactionUtil::transact($request, [], function() use ($bookId) {
+            $result = $this->libraryBookManager->removeBook($bookId);
+            return response()->json(['message' => $result['message']], $result['status']);
         });
     }
 

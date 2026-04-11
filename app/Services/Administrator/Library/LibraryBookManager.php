@@ -75,7 +75,8 @@ class LibraryBookManager
     public function removeBook(int $bookId) {
         $this_book = Book::lockForUpdate()->findOrFail($bookId);
 
-        $this->removeFile->removeFile("book-images/$this_book->photo");
+        $this->removeFile->removeFile("book-uploaded-files/image/$this_book->photo");
+        $this->removeFile->removeFile("book-uploaded-files/pdf/$this_book->pdf_copy");
         $this_book->delete();
 
         return [

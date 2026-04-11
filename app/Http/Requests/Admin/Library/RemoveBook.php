@@ -5,8 +5,6 @@ namespace App\Http\Requests\Admin\Library;
 use App\Enums\UserRoleEnum;
 use App\Rules\Admin\Library\RemoveBookCheckerRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
 class RemoveBook extends FormRequest
 {
