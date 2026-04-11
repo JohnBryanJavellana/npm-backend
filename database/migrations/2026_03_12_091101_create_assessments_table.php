@@ -18,6 +18,7 @@ return new class extends Migration
         Schema::create('assessments', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
+            $table->longText("control_number");
             $table->foreignIdFor(CourseContent::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string("title");
             $table->text("description");

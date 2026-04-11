@@ -39,7 +39,7 @@ class TraineeSingleRecResource extends JsonResource
             "schedule_preference" => $this->training?->schedule_preference,
             "batch_number" => $this->training?->batch_number,
             "course_module_id" => $this->training?->course_module_id,
-            
+
             "module_name" => $this->training?->module?->name,
             "acronym" => $this->training?->module?->acronym,
             "compendium" => $this->training?->module?->compendium,

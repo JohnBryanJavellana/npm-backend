@@ -30,7 +30,7 @@ class CreateOrUpdateModule extends FormRequest
         return [
             'module_type_id' => ['required', 'integer', 'exists:module_types,id'],
             'name' => ['required', 'string'],
-            'short_name' => ['required', 'string'],
+            'acronym' => ['required', 'string'],
             'compendium' => ['nullable', 'string'],
             'number_of_days' => ['required', "integer", 'min:1'],
             'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],

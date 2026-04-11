@@ -10,7 +10,7 @@ class Training extends Model
 {
     use HasFactory;
 
-    protected $guarder = ['id'];
+    protected $guarded = ['id'];
 
     public const STATUS_ACTIVE = 'ACTIVE';
     public const STATUS_INACTIVE = 'INACTIVE';

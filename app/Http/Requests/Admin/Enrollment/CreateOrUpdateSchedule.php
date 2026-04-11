@@ -33,7 +33,7 @@ class CreateOrUpdateSchedule extends FormRequest
             'venue' => ['required', 'string'],
             'room' => ['required', 'string'],
             'batch_number' => ['required', 'string'],
-            'schedule_preference' => ['required', 'string', 'in:FACE TO FACE, ONLINE'],
+            'schedule_preference' => ['required', 'string', 'in:FACE TO FACE,ONLINE'],
             'daily_hours' => ['required', 'integer'],
             'status' => ['required_if:httpMethod,UPDATE', 'string', 'exists:trainings,id'],
             'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],
