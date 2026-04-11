@@ -88,7 +88,7 @@ class RecreationalEquipmentManager
         $this_equipment = RAEquipments::findOrFail($equipmentId);
 
         $this_equipment->images()->get()->each(function($image) {
-            $this->removeFile->removeFile("recreational-activity/equipment/image/$image->filename");
+            $this->removeFile->removeFile("recreational-activity/inventory/image/$image->filename");
             $image->delete();
         });
 
