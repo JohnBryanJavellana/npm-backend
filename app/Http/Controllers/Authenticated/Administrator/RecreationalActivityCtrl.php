@@ -400,12 +400,6 @@ class RecreationalActivityCtrl extends Controller
             ])->exists() ? RAEnum::FOR_CSM : RAEnum::ACTIVE;
             $this_request_info->save();
 
-            if(env('USE_EVENT')) {
-                event(
-                    new BERecreational('')
-                );
-            }
-
             return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY->value]);
         });
     }
