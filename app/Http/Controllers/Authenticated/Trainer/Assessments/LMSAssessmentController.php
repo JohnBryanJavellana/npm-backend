@@ -141,7 +141,7 @@ class LMSAssessmentController extends Controller
                 "answers" => "nullable|array",
                 "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
                 "answers.*.assessment_option_id" => "required|integer|exists:assessment_options,id",
-                "answers.*.assessment_answer_text" => "nullable|string"
+                "answers.*.assessment_answer_text" => "nullable|string",
             ]);
 
             DB::beginTransaction();
@@ -282,12 +282,11 @@ class LMSAssessmentController extends Controller
     }
 
     //! Trainee details assessments /assessment_option and assessment_question details for trainer to view during assessment attempt monitoring
-
     public function TraineeAssessmentDetailsForTrainer(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             try {
-                // Just fetch data - no submission logic
+                //! Just fetch data - no submission logic
                 $list = EnrolledCourse::where('training_id', $request->training_id)
                     ->with([
                         'trainee:id,id,fname,lname,mname,suffix,email',
@@ -403,4 +402,6 @@ class LMSAssessmentController extends Controller
             ], 500);
         }
     }
+
+    
 }
