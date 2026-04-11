@@ -10,6 +10,8 @@ class Training extends Model
 {
     use HasFactory;
 
+    protected $guarder = ['id'];
+
     public const STATUS_ACTIVE = 'ACTIVE';
     public const STATUS_INACTIVE = 'INACTIVE';
 
@@ -30,7 +32,7 @@ class Training extends Model
     // {
     //     return $this->hasMany(AttendanceRecord::class, 'user_id', 'id', 'attendance_id');
     // }
-    
+
 
     // public function requirements()
     // {

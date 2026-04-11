@@ -52,6 +52,7 @@ use App\Models\{
     TrainingRegFile,
     Voucher
 };
+use App\Services\Administrator\Enrollment\EnrollmentScheduleManager;
 use App\Utils\{
     AuditHelper,
     ConvertToBase64,
@@ -67,6 +68,48 @@ use App\Helpers\Administrator\General\CountCollection;
 
 class EnrollmentCtrl extends Controller
 {
+    public function __construct(
+        public EnrollmentScheduleManager $enrollmentScheduleManager
+    ) {}
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_schedules
+     * @param Request $request
+     */
+    public function get_schedules(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $schedules = Training::withCount(['hasData'])->get()->map(fn ($self) => [
+                'main' => $self->toArray(),
+                'module' => [
+                    'main' => $self->module->toArray(),
+                    'type' => $self->module->moduleType->toArray(),
+                ],
+            ])->values();
+
+            return response()->json(['schedules' => $schedules], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_schedule
+     * @param bool auditActions === TRUE
+     * @param bool returnedMessage === FALSE
+     * @param CreateOrUpdateSchedule $request
+     */
+    public function create_or_update_schedule(CreateOrUpdateSchedule $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === 'POST';
+            $scheduleId = $request->scheduleId;
+
+            $result = $this->enrollmentScheduleManager->createOrUpdate($request, $isPost, $scheduleId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ✖️✖️✖️✖️✖️✖️✖️
     /**
      * Summary of get_applications
      * @param Request $request
@@ -317,105 +360,25 @@ class EnrollmentCtrl extends Controller
         });
     }
 
-    /**
-     * Summary of get_schedules
-     * @param Request $request
-     */
-    public function get_schedules(Request $request)
+
+
+
+
+
+    public function remove_schedule(Request $request, int $scheduleId)
     {
-        return TransactionUtil::transact(null, [], function () {
-            $schedules = Training::withCount(['hasData'])->get()->map(function ($self) {
-                return [
-                    'main' => $self->toArray(),
-                    'module' => [
-                        'main' => $self->module->toArray(),
-                        'type' => $self->module->moduleType->toArray(),
-                    ],
-                ];
-            })->values();
+        return TransactionUtil::transact(null, [], function () use ($request, $scheduleId) {
+            // $this_schedule = Training::withCount(['hasData'])->where('id', $scheduleId)->first();
 
-            return response()->json(['schedules' => $schedules], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_schedule
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateSchedule $request
-     */
-    public function create_or_update_schedule(CreateOrUpdateSchedule $request)
-    {
-        return TransactionUtil::transact($request, ['schedules_cache'], function () use ($request) {
-            $isPost = $request->httpMethod === 'POST';
-            $this_schedule = $isPost
-                ? new Training()
-                : Training::findOrFail($request->documentId);
-
-            $this_schedule->id = $isPost
-                ? Carbon::now()->year . str_pad((int) substr(Training::max('id'), 4) + 1, 4, 0, STR_PAD_LEFT)
-                : $request->documentId;
-
-            $this_schedule->course_module_id = $request->module;
-            $this_schedule->schedule_from = Carbon::parse($request->fromDate);
-            $this_schedule->schedule_to = Carbon::parse($request->toDate);
-            $this_schedule->schedule_slot = $request->slot;
-            $this_schedule->venue = $request->venue;
-            $this_schedule->room = $request->room;
-            $this_schedule->batch_number = $request->batch;
-            $this_schedule->schedule_preference = $request->preference;
-            $this_schedule->daily_hours = $request->dailyHour;
-            if ($request->status) {
-                $this_schedule->status = $request->status;
-            }
-            $this_schedule->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHED->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHED->value . " ID#$this_schedule->id"
-            );
-
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail('')
-                );
-            }
-
-            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHED->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHED->value) . 'ID# ' . $this_schedule->id], 200);
-        });
-    }
-
-    /**
-     * Summary of remove_schedule
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $schedule_id
-     */
-    public function remove_schedule(Request $request, int $schedule_id)
-    {
-        return TransactionUtil::transact(null, ['schedules_cache'], function () use ($request, $schedule_id) {
-            $this_schedule = Training::withCount(['hasData'])->where('id', $schedule_id)->first();
-
-            if ($this_schedule->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTSCHED->value], 409);
-            } else {
-                $this_schedule->delete();
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHED->value. " ID#$schedule_id"
-                );
-
-                if (env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHED->value. " ID#$schedule_id"], 200);
-            }
+            // # rule
+            // if ($this_schedule->has_data_count > 0) {
+            //     return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTSCHED->value], 409);
+            // } else {
+            //     $this_schedule->delete();
+            //     return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHED->value. " ID#$scheduleId"], 200);
+            // }
+            $result = $this->enrollmentScheduleManager->removeSchedule($scheduleId);
+            return response()->json(['message' => $result['message']], $result['status']);
         });
     }
 

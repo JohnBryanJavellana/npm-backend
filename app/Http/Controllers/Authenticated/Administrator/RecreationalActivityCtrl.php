@@ -72,6 +72,48 @@ class RecreationalActivityCtrl extends Controller
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
+     * Summary of ra_requests
+     * @param Request $request
+     */
+    public function ra_requests(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            $query = RARequestInfo::with(['requestor']);
+
+            if ($request->status) {
+                $query->whereIn('status', $request->status);
+            }
+
+            $ra_requests = $request->trace_number
+                ? $query->where('trace_number', $request->trace_number)
+                    ->with([
+                        'equipment_request.equipment',
+                        'equipment_request.updatedByWhom',
+                        'facility_request.facility',
+                        'facility_request.updatedByWhom'
+                    ])
+                    ->get()
+                    ->map(function ($raReq) {
+                        $grouped = $raReq->equipment_request->groupBy('r_a_equipments_id');
+
+                        $raReq->grouped_equipment = $grouped->map(function ($items) {
+                            $first = $items->first();
+                            $first->requested_qty = $items->count();
+                            $first->requested_issued_qty = $items->whereNotNull('r_a_equipment_stock_id')->count();
+                            return $first;
+                        })->values();
+
+                        unset($raReq->equipment_request);
+                        return $raReq;
+                    })->first()
+                : $query->orderBy('created_at', 'DESC')->get();
+
+            return response()->json(['ra_requests' => $ra_requests], 200);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
      * Summary of ra_facilities
      * @param Request $request
      */
@@ -268,49 +310,7 @@ class RecreationalActivityCtrl extends Controller
 
 
     # 📍📍📍📍📍
-    /**
-     * Summary of ra_requests
-     * @param Request $request
-     */
-    public function ra_requests(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            $query = RARequestInfo::with(['requestor']);
 
-            if ($request->status) {
-                $query->whereIn('status', $request->status);
-            }
-
-            if ($request->trace_number) {
-                $ra_requests = $query->where('trace_number', $request->trace_number)
-                    ->with([
-                        'equipment_request.equipment',
-                        'equipment_request.updatedByWhom',
-                        'facility_request.facility',
-                        'facility_request.updatedByWhom'
-                    ])
-                    ->get()
-                    ->map(function ($request) {
-                        $grouped = $request->equipment_request->groupBy('r_a_equipments_id');
-
-                        $request->grouped_equipment = $grouped->map(function ($items) {
-                            $first = $items->first();
-                            $first->requested_qty = $items->count();
-                            $first->requested_issued_qty = $items->whereNotNull('r_a_equipment_stock_id')->count();
-                            return $first;
-                        })->values();
-
-                        unset($request->equipment_request);
-                        return $request;
-                    })
-                    ->first();
-            } else {
-                $ra_requests = $query->orderBy('created_at', 'DESC')->get();
-            }
-
-            return response()->json(['ra_requests' => $ra_requests], 200);
-        });
-    }
 
     /**
      * Summary of get_requested_equipments
@@ -378,7 +378,7 @@ class RecreationalActivityCtrl extends Controller
             $this_facility->remarks = $documentRemarks;
             $this_facility->issued_condition = $this_main_facility->condition_status;
             $this_facility->updated_by_whom = $request->user()->id;
-            $this_facility->issued_at = $this_facility->issued_at ?? Carbon::now();
+            $this_facility->issued_at ??= Carbon::now();
             $this_facility->returned_at = $isClosing ? Carbon::now() : $this_facility->returned_at;
             $this_facility->returned_condition = $isClosing ? ($documentStatus === RAEnum::DONE->value ? RAEnum::GOOD_CONDITION->value : $documentStatus) : $this_facility->returned_condition;
             $this_facility->save();

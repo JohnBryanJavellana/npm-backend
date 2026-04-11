@@ -41,7 +41,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('training/schedules/traineelist', [EnrollmentCtrl::class, 'get_trainees_by_schedule']);
             Route::post('/move_trainees', [EnrollmentCtrl::class, 'move_trainees']);
             Route::post('create_or_update_schedule', [EnrollmentCtrl::class, 'create_or_update_schedule']);
-            Route::delete('remove_schedule/{schedule_id}', [EnrollmentCtrl::class, 'remove_schedule']);
+            Route::delete('remove_schedule/{scheduleId}', [EnrollmentCtrl::class, 'remove_schedule']);
             Route::get('get_modules', [EnrollmentCtrl::class, 'get_modules']);
             Route::post('create_or_update_module', [EnrollmentCtrl::class, 'create_or_update_module']);
             Route::delete('remove_module/{module_id}', [EnrollmentCtrl::class, 'remove_module']);
