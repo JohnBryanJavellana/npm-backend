@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Admin\RecreationalActivity;
 
 use App\Enums\UserRoleEnum;
-use App\Rules\Admin\Library\RemoveEquipmentRule;
+use App\Rules\Admin\Library\RemoveEquipmentStockRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RemoveEquipmentStock extends FormRequest
@@ -34,7 +34,7 @@ class RemoveEquipmentStock extends FormRequest
     public function rules(): array
     {
         return [
-            'equipmentStockId' => ['required', 'integer', 'exists:r_a_equipment_stocks,id', new RemoveEquipmentRule()]
+            'equipmentStockId' => ['required', 'integer', 'exists:r_a_equipment_stocks,id', new RemoveEquipmentStockRule()]
         ];
     }
 }
