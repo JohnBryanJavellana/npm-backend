@@ -30,6 +30,7 @@ use function Laravel\Prompts\select;
 use Illuminate\Validation\ValidationException;
 use App\Utils\AuditHelper;
 use App\Utils\TransactionUtil;
+use Carbon\Carbon;
 
 class LMSAssessmentController extends Controller
 {
@@ -140,39 +141,25 @@ class LMSAssessmentController extends Controller
                 "assessment_id" => "required|integer|exists:assessments,id",
                 "answers" => "nullable|array",
                 "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
-                "answers.*.assessment_option_id" => "required|integer|exists:assessment_options,id",
-                "answers.*.assessment_answer_text" => "nullable|string"
+                //! nullable kay it essay waray option id 
+                "answers.*.assessment_option_id" => "nullable|integer|exists:assessment_options,id",
+                "answers.*.assessment_answer_text" => "nullable|string",
+
+                "proctoring_events" => "nullable|array",
+                // "type" => "nullable|array",
             ]);
 
             DB::beginTransaction();
 
             try {
-
                 $enrolledCourse = DB::table('enrolled_courses')
                     ->where('user_id', auth()->id())
                     ->where('enrolled_course_status', 'ENROLLED')
                     ->first();
 
                 if (!$enrolledCourse) {
-                    return response()->json([
-                        "message" => "No enrolled course found."
-                    ], 404);
+                    return response()->json(["message" => "No enrolled course found."], 404);
                 }
-
-
-                $existingAttempt = AssessmentAttempt::where([
-                    "assessments_id" => $validated["assessment_id"],
-                    "enrolled_course_id" => $enrolledCourse->id,
-                    "status" => "SUBMITTED"
-                ])->first();
-
-                if ($existingAttempt) {
-                    return response()->json([
-                        "message" => "Assessment already submitted. No further submissions allowed.",
-                        "assessment_attempt_id" => $existingAttempt->id
-                    ], 403);
-                }
-
 
                 $attempt = AssessmentAttempt::firstOrCreate(
                     [
@@ -185,26 +172,28 @@ class LMSAssessmentController extends Controller
 
                 $correctCount = 0;
                 $answers = [];
-                $status = 'IN_PROGRESS';
+                $autoGradableCount = 0; //!count con ano la it pwede ma grade (partial)
 
-
-                if (!empty($validated["answers"]) && is_array($validated["answers"])) {
-
+                if (!empty($validated["answers"])) {
                     foreach ($validated["answers"] as $answer) {
-                        $option = DB::table('assessment_options')
-                            ->where('id', $answer["assessment_option_id"])
-                            ->where('assessment_question_id', $answer["assessment_question_id"])
-                            ->first();
+                        $isFinalCorrect = 0;
+                        $scoreValue = 0;
+                        $optionId = $answer["assessment_option_id"] ?? null;
 
-                        if (!$option) {
-                            throw new Exception("Assessment option not found");
+                        //! mag auto score pag mayda optionId
+                        if ($optionId) {
+                            $option = DB::table('assessment_options')
+                                ->where('id', $optionId)
+                                ->where('assessment_question_id', $answer["assessment_question_id"])
+                                ->first();
+
+                            if ($option) {
+                                $isFinalCorrect = (bool)$option->is_correct ? 1 : 0;
+                                $scoreValue = $isFinalCorrect;
+                                $correctCount += $isFinalCorrect;
+                                $autoGradableCount++;
+                            }
                         }
-
-                        $answerMatches = strtolower($answer["assessment_answer_text"] ?? '') === strtolower($option->option_text);
-                        $isCorrect = (bool) $option->is_correct;
-                        $isFinalCorrect = $answerMatches && $isCorrect;
-
-                        if ($isFinalCorrect) $correctCount++;
 
                         $answers[] = AssessmentAnswer::updateOrCreate(
                             [
@@ -212,53 +201,64 @@ class LMSAssessmentController extends Controller
                                 "assessment_question_id" => $answer["assessment_question_id"]
                             ],
                             [
-                                "assessment_option_id" => $option->id,
+                                "assessment_option_id" => $optionId,
                                 "answer_text" => $answer["assessment_answer_text"] ?? null,
-                                "is_correct" => $isFinalCorrect ? 1 : 0,
-                                "score" => $isFinalCorrect ? 1 : 0
+                                "is_correct" => $isFinalCorrect,
+                                "score" => $scoreValue
                             ]
                         );
                     }
 
-
-                    $total = count($validated["answers"]);
-                    $score = $total > 0 ? ($correctCount / $total) * 100 : 0;
+                    $score = $autoGradableCount > 0 ? ($correctCount / $autoGradableCount) * 100 : 0;
 
                     $frontendStatus = $request->input('status');
-                    $status = $this->detectAssessmentStatus($score, $frontendStatus);
-
-
-                    if (now()->diffInMinutes($attempt->created_at) >= 60) {
-                        $status = 'SUBMITTED';
-                    }
+                    $status = ($frontendStatus === 'SUBMITTED') ? 'SUBMITTED' : 'IN_PROGRESS';
                 } else {
-
                     $score = 0;
-                    $total = 0;
-                    $correctCount = 0;
+                    $status = 'IN_PROGRESS';
                 }
-
 
                 $attempt->update([
                     'score' => $score,
                     'status' => $status,
                     'graded_at' => now()
                 ]);
+                if ($request->proctoring_events) {
+                    $eventCounts = collect($validated['proctoring_events'])
+                        ->groupBy('type')
+                        ->map(fn($group) => $group->count());
 
+                    foreach ($eventCounts as $type => $count) {
+                        $actionRecord = AssessmentAttemptAction::where([
+                            'user_id' => auth()->id(),
+                            'assessment_attempt_id' => $attempt->id,
+                            'actions' => $type,
+                        ])->first();
+
+                        if ($actionRecord) {
+                            $actionRecord->increment('action_count', $count);
+                        } else {
+                            AssessmentAttemptAction::create([
+                                'user_id' => auth()->id(),
+                                'assessment_attempt_id' => $attempt->id,
+                                'actions' => $type,
+                                'action_count' => $count,
+                            ]);
+                        }
+                    }
+                }
                 DB::commit();
 
                 return response()->json([
-                    "message" => $status === 'SUBMITTED' ? "Assessment submitted successfully." : "Assessment attempt created. Waiting for answers...",
-                    "assessment_attempt_id" => $attempt->id,
-                    "score" => round($score ?? 0, 2),
-                    "correct_answers" => $correctCount,
-                    "total_answers" => $total ?? 0,
+                    "message" => $status === 'SUBMITTED' ? "Submitted successfully." : "Progress saved.",
+                    // !ayaw ig display it score
+                    // "score" => round($score, 2),
                     "status" => $status,
-                    "data" => $answers
+                    // ! pati it answer
+                    // "data" => $answers
                 ], 201);
             } catch (\Exception $e) {
                 DB::rollBack();
-
                 throw $e;
             }
         } catch (\Exception $e) {
