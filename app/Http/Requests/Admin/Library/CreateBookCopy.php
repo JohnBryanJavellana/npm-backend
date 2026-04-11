@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Library;
 
+use App\Enums\UserRoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateBookCopy extends FormRequest
@@ -11,7 +12,10 @@ class CreateBookCopy extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_LIBRARY->value
+        ]);
     }
 
     /**
@@ -22,7 +26,8 @@ class CreateBookCopy extends FormRequest
     public function rules(): array
     {
         return [
-            'bookId' => ['required', 'numeric'],
+            'bookId' => ['required', 'integer', 'exists:books,id'],
+            'copies' => ['required', 'integer', 'max:30']
         ];
     }
 }

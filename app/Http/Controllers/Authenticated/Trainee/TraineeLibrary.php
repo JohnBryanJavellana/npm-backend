@@ -328,7 +328,7 @@ class TraineeLibrary extends Controller
             return response()->json(['message' => "You're request has been cancelled successfully."], 200);
         } catch (\Exception $e) {
             \Log::error('error_cancel_book', [$e]);
-            return response()->json(["message" => "Something went wrong, Please try again"], 500);
+            return response()->json(["message" => $e->getMessage()], 500);
         }
     }
 
@@ -340,7 +340,7 @@ class TraineeLibrary extends Controller
             $user_id = $validated["user_id"];
 
             $this->libraryExtendService->storeExtendRequest($validated);
-            AuditHelper::log($user_id, "User {$user_id} sent a book extension request."); 
+            AuditHelper::log($user_id, "User {$user_id} sent a book extension request.");
             Notifications::notify($user_id, null, 'LIBRARY', 'has sent a book extension request.');
 
             $this->forgetCache($user_id);

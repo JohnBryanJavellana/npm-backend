@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests\Admin\Library;
 
-use Illuminate\Validation\Rule;
+use App\Enums\UserRoleEnum;
+use App\Rules\Admin\Library\UpdateBookFineRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class RequestFine extends FormRequest
 {
@@ -12,7 +15,10 @@ class RequestFine extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_LIBRARY->value
+        ]);
     }
 
     /**
@@ -23,12 +29,12 @@ class RequestFine extends FormRequest
     public function rules(): array
     {
         return [
-            'amount' => ['required', 'numeric'],
-            'details' => ['required', 'string'],
-            'book_res_id' => ['required'],
-            'user_id' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'invoice_amount' => ['required', 'numeric'],
+            'description' => ['required', 'string'],
+            'invoice_status' => ['required', 'string'],
+            'book_res_id' => ['required', 'exists:book_res,id'],
+            'user_id' => ['required', 'exists:users,id'],
+            'libraryInvoiceId' => ['required_if:httpMethod,UPDATE', 'exists:library_invoices,id', new UpdateBookFineRule()]
         ];
     }
 }

@@ -26,7 +26,8 @@ class CreateOrUpdateService extends FormRequest
             'name' => ['required'],
             'charge' => ['required'],
             'httpMethod' => ['required'],
-            'documentId' => [ Rule::when($this->httpMethod === "UPDATE", ['required', 'exists:dormitory_services,id'], ['nullable']) ],
+            'status' => ['required', 'in:AVAILABLE,UNAVAILABLE'],
+            'documentId' => ['required_if:httpMethod,UPDATE', 'exists:dormitory_services,id'],
         ];
     }
 }

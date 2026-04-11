@@ -47,7 +47,7 @@ class TraineeEnrollment extends Controller
         'PENDING',
         'RESERVED',
         'ENROLLED',
-        'FOR-PAYMENT',
+        'FOR PAYMENT',
         'PROCESSING PAYMENT',
     ];
 
@@ -118,6 +118,8 @@ class TraineeEnrollment extends Controller
             return response()->json(["message" => "Something went wrong, Please try again."], 500);
         }
     }
+
+
 
     public function getCourseModule(getModuleRequest $request)
     {
@@ -233,10 +235,10 @@ class TraineeEnrollment extends Controller
             $validated = $request->validated();
             $this->enrollmentService->cancelEnrollmentRequest($validated);
 
-            // //TRAINING ID PASS   
+            // //TRAINING ID PASS
             Training::where("id", $validated["training_id"])->increment('schedule_slot', 1);
             AuditHelper::log($validated["user_id"], "User " . $validated["user_id"] . " has cancelled training request. {$validated["training_id"]}");
-            
+
             if (env("USE_EVENT")) {
                 event(new BETraineeApplication(''));
             }

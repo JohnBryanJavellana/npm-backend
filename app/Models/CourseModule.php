@@ -9,6 +9,8 @@ class CourseModule extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function hasData()
     {
         return $this->hasMany(RequirementSpecificModule::class);
@@ -17,6 +19,10 @@ class CourseModule extends Model
     public function handout()
     {
         return $this->hasMany(CourseModuleHandouts::class);
+    }
+    public function courseModuleSection()
+    {
+        return $this->hasMany(CourseModuleSection::class);
     }
 
     public function specific_requirements()

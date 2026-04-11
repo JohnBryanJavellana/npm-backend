@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\DB;
 use DomainException;
 
 
-class LMSAssessmentService {
+class LMSAssessmentService
+{
     public function __construct(
-        protected Assessments $assessmentsModel,
-        protected CourseModuleHandouts $courseModuleHandouts
-    ){}
+        protected Assessments $assessmentsModel
+    ) {}
 
     public function getAssessments($validated, $userRole)
     {
@@ -26,13 +26,13 @@ class LMSAssessmentService {
     public function getAssessmentContentById($validated)
     {
         return $this->assessmentsModel->query()
-        ->whereKey($validated["assessment_id"])
-        ->with([
-            "sections:id,assessments_id,title,instruction",
-            "sections.questions:id,assessment_section_id,question,type,score",
-            "sections.questions.options:id,assessment_question_id,option_text"
-        ])
-        ->first();
+            ->whereKey($validated["assessment_id"])
+            ->with([
+                "sections:id,assessments_id,title,instruction",
+                "sections.questions:id,assessment_section_id,question,type,score",
+                "sections.questions.options:id,assessment_question_id,option_text"
+            ])
+            ->first();
     }
 
     // public function domainRuleValidation($validated) {
@@ -43,12 +43,12 @@ class LMSAssessmentService {
 
     public function storeAssessment($validated, $userId)
     {
-        return DB::transaction(function () use ($validated, $userId){
+        return DB::transaction(function () use ($validated, $userId) {
             // $this->domainRuleValidation($validated);        
 
             return $this->assessmentsModel->create([
                 ...$validated,
-                "created_by" => $userId 
+                "created_by" => $userId
             ]);
         });
     }
@@ -69,17 +69,17 @@ class LMSAssessmentService {
                 'time_limit'
             ])->toArray();
 
-            if (!empty($data['training_id'])) {
-                $data['course_content_id'] = null;
-            }
+            // if (!empty($data['training_id'])) {
+            //     $data['course_content_id'] = null;
+            // }
 
-            if (!empty($data['course_content_id'])) {
-                $data['training_id'] = null;
-            }
+            // if (!empty($data['course_content_id'])) {
+            //     $data['training_id'] = null;
+            // }
 
-            if(\array_key_exists("is_hidden", $validated)) {
+            if (\array_key_exists("is_hidden", $validated)) {
                 $isHidden = filter_var($validated['is_hidden'], FILTER_VALIDATE_BOOLEAN);
-                $data["is_hidden"] = $isHidden;    
+                $data["is_hidden"] = $isHidden;
             }
 
             return $this->assessmentsModel
@@ -92,7 +92,7 @@ class LMSAssessmentService {
     {
         $record = $this->assessmentsModel->find($validated["assessment_id"]);
 
-        if($record->created_by !== $validated["user_id"]) {
+        if ($record->created_by !== $validated["user_id"]) {
             throw new DomainException(AssessmentMessageResponse::UNAUTHORIZED->value);
         }
 

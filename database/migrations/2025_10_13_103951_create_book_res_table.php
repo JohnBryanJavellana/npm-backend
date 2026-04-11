@@ -1,16 +1,20 @@
 <?php
 
-use App\Models\TermsAndCondition;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\{
-    User,
-    Book
+    User
 };
 
 return new class extends Migration
 {
+    public const BOOK_RES_STATUS = [
+        "ACTIVE",
+        "FOR CSM",
+        "COMPLETED"
+    ];
+
     /**
      * Run the migrations.
      */
@@ -20,10 +24,8 @@ return new class extends Migration
             $table->engine = "InnoDB";
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(TermsAndCondition::class)->constrained()->cascadeOnDelete();
-            $table->longText('trace_number')->nullable();
-            $table->enum('status', ["COMPLETED", "ACTIVE", "FOR CSM", "EXTENDING"])->default("ACTIVE");
-            $table->enum('type', ["WALK-IN", "ONLINE"]);
+            $table->longText('trace_number');
+            $table->enum('status', self::BOOK_RES_STATUS)->default(self::BOOK_RES_STATUS[1]);
             $table->timestamps();
         });
     }
