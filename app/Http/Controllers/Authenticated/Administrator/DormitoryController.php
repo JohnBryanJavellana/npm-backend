@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Authenticated\Administrator;
 
-// asasas
 use App\Enums\{
     AdministratorAuditActions,
     AdministratorReturnResponse
@@ -12,25 +11,23 @@ use App\Http\Requests\Admin\Dormitory\CreateOrUpdateDormitoryRoom;
 use App\Http\Requests\Admin\Dormitory\GetCurrentTenantInfo;
 use App\Http\Requests\Admin\Dormitory\GetMatchRooms;
 use App\Http\Requests\Admin\Dormitory\NewRoomReservation;
+use App\Http\Requests\Admin\Dormitory\SetRoomReservationAsReserved;
 use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
 use App\Models\DormitoryItemBI;
 use App\Models\DormitoryItemBorrowing;
 use App\Models\DormitoryReqService;
-use App\Models\DormitoryTenantSupDoc;
 use App\Services\Administrator\Dormitory\DormitoryRoomManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceRequestManager;
-use File;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use App\Enums\Administrator\DormitoryEnum;
 use App\Http\Requests\Admin\Dormitory\{
     GetAvailableDorms,
-    CreateOrUpdateDormitory,
     CreateOrUpdateRequest,
     CreateOrUpdateDormitoryInv,
     CreateOrUpdateService,
@@ -40,7 +37,6 @@ use App\Http\Requests\Admin\Dormitory\{
 use Illuminate\Http\Request;
 use App\Utils\{
     AuditHelper,
-    ConvertToBase64,
     TransactionUtil,
     GenerateTrace,
     Notifications
@@ -50,7 +46,6 @@ use App\Jobs\SaveAvatar;
 use App\Models\{
     DormitoryRoom,
     DormitoryTenant,
-    DormitoryRoomImage,
     DormitoryInventory,
     DormitoryService,
     User,
@@ -83,7 +78,7 @@ class DormitoryController extends Controller
         </div>";
     }
 
-    // GOOOOOOOOODSSS -->>>>>>>>>>>>>>>
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of count_dorm_reservation
      * @param Request $request
@@ -108,6 +103,7 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of count_service_requests
      * @param Request $request
@@ -132,6 +128,7 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of get_dormitory_rooms
      * @param Request $request
@@ -179,6 +176,7 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of services
      * @param Request $request
@@ -219,6 +217,7 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of room_reservations
      * @param Request $request
@@ -231,6 +230,17 @@ class DormitoryController extends Controller
                 ->get();
 
             return response()->json(['room_reservations' => $room_reservations], 200);
+        });
+    }
+
+    /**
+     * Summary of set_as_reserved
+     * @param SetRoomReservationAsReserved $request
+     */
+    public function set_as_reserved(SetRoomReservationAsReserved $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $result = $this->dormitoryRoomReservationManager->setAsReserved($request->roomReservationId);
+            return response()->json(['message' => $result['message']], $result['status']);
         });
     }
 
@@ -281,11 +291,8 @@ class DormitoryController extends Controller
      * @param GetCurrentTenantInfo $request
      */
     public function get_current_tenant_info (GetCurrentTenantInfo $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
             $userId = $request->userId;
-
-            // get the user's current active tenant record. Active tenant record is the tenant record
-            // that has tenant_status other than PENDING, CANCELLED, REJECTED, and TERMINATED.
             $currentTenant = DormitoryTenant::with([
                 'dormitory_room'
             ])->where('user_id', $userId)
@@ -300,6 +307,7 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
      * Summary of create_or_update_service_request
      * @param CreateServiceReq $request

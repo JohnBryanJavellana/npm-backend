@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    public const MODULE_TYPE_STATUS = ['ACTIVE', 'INACTIVE'];
+
     /**
      * Run the migrations.
      */
@@ -15,7 +17,7 @@ return new class extends Migration
             $table->engine = 'InnoDB';
             $table->id();
             $table->string('name');
-            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+            $table->enum('status', self::MODULE_TYPE_STATUS)->default(self::MODULE_TYPE_STATUS[0]);
             $table->timestamps();
         });
     }

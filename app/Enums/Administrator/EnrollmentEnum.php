@@ -9,7 +9,7 @@ enum EnrollmentEnum : string
     case DECLINED = "DECLINED";
     case CANCELLED = "CANCELLED";
     case ENROLLED = "ENROLLED";
-    case FOR_PAYMENT = "FOR-PAYMENT";
+    case FOR_PAYMENT = "FOR PAYMENT";
     case PROCESSING_PAYMENT = "PROCESSING PAYMENT";
     case COMPLETED = "COMPLETED";
     case PAID = "PAID";

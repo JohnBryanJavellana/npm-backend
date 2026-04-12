@@ -19,7 +19,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(AssessmentAttempt::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(AssessmentQuestion::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(AssessmentOption::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(AssessmentOption::class)->nullable()->constrained()->cascadeOnDelete();
             $table->longText("answer_text");
             $table->decimal("score",65);
             $table->boolean("is_correct")->default(false);

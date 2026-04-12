@@ -7,6 +7,9 @@ use App\Models\CourseModule;
 
 return new class extends Migration
 {
+    public const SCHEDULE_PREFERENCE = ['FACE TO FACE', 'ONLINE'];
+    public const SCHEDULE_STATUS = ['ACTIVE', 'INACTIVE'];
+
     /**
      * Run the migrations.
      */
@@ -23,8 +26,8 @@ return new class extends Migration
             $table->string('venue');
             $table->string('room');
             $table->string('batch_number');
-            $table->enum('schedule_preference', ['FACE TO FACE', 'ONLINE']);
-            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+            $table->enum('schedule_preference', self::SCHEDULE_PREFERENCE);
+            $table->enum('status', self::SCHEDULE_STATUS)->default('ACTIVE');
             $table->timestamps();
         });
     }

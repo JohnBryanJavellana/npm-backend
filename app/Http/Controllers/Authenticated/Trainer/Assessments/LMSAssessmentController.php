@@ -72,16 +72,19 @@ class LMSAssessmentController extends Controller
     public function viewTopic(Request $request)
     {
         try {
-            $record = Assessments::whereKey($request->assessment_id)
+            $record = Assessments::where('control_number', $request->control_number)
                 ->with([
-                    'sections.questions.options'
-                ])
-                ->first();
+                    'sections.questions.options',
+                    'attempts' => function($query) use ($request) {
+                        return $request->user_id ? $query->where([
+                            'created_by' => $request->user_id
+                        ]) : $query;
+                    }
+                ])->first();
 
             return new AssessmentResource($record);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
-            return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
     }
 
@@ -138,10 +141,10 @@ class LMSAssessmentController extends Controller
     {
         try {
             $validated = $request->validate([
-                "assessment_id" => "required|integer|exists:assessments,id",
+                "control_number" => "required|string|exists:assessments,control_number",
                 "answers" => "nullable|array",
                 "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
-                //! nullable kay it essay waray option id 
+                //! nullable kay it essay waray option id
                 "answers.*.assessment_option_id" => "nullable|integer|exists:assessment_options,id",
                 "answers.*.assessment_answer_text" => "nullable|string",
 
@@ -161,9 +164,19 @@ class LMSAssessmentController extends Controller
                     return response()->json(["message" => "No enrolled course found."], 404);
                 }
 
+                $this_assessment = Assessments::where('control_number', $validated["control_number"])->firstOrFail();
+
+                AssessmentAttempt::where([
+                    "assessments_id" => $this_assessment->id,
+                    "enrolled_course_id" => $enrolledCourse->id,
+                    'status' => 'FOR_REMOVAL'
+                ])->update([
+                    'status' => 'FAILED'
+                ]);
+
                 $attempt = AssessmentAttempt::firstOrCreate(
                     [
-                        "assessments_id" => $validated["assessment_id"],
+                        "assessments_id" => $this_assessment->id,
                         "enrolled_course_id" => $enrolledCourse->id,
                         "status" => "IN_PROGRESS"
                     ],
@@ -210,19 +223,19 @@ class LMSAssessmentController extends Controller
                     }
 
                     $score = $autoGradableCount > 0 ? ($correctCount / $autoGradableCount) * 100 : 0;
-
-                    $frontendStatus = $request->input('status');
-                    $status = ($frontendStatus === 'SUBMITTED') ? 'SUBMITTED' : 'IN_PROGRESS';
                 } else {
                     $score = 0;
-                    $status = 'IN_PROGRESS';
                 }
+
+                $frontendStatus = $request->input('status');
+                $status = ($frontendStatus === 'SUBMITTED') ? 'SUBMITTED' : 'IN_PROGRESS';
 
                 $attempt->update([
                     'score' => $score,
                     'status' => $status,
                     'graded_at' => now()
                 ]);
+
                 if ($request->proctoring_events) {
                     $eventCounts = collect($validated['proctoring_events'])
                         ->groupBy('type')

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Admin\Cashier;
 
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateOrUpdateFeeCategory extends FormRequest
@@ -12,7 +11,7 @@ class CreateOrUpdateFeeCategory extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, ['SUPERADMIN', 'ADMIN-CASHIER']);
     }
 
     /**
@@ -24,8 +23,8 @@ class CreateOrUpdateFeeCategory extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'httpMethod' => ['required', 'in:POST,UPDATE'],
+            'documentId' => ['required_if:httpMethod,UPDATE', 'exists:charge_categories,id']
         ];
     }
 }

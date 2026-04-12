@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Admin\RecreationalActivity;
 
+use App\Enums\UserRoleEnum;
+use App\Rules\Admin\Library\UpdateRAChargeRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class RequestInvoice extends FormRequest
 {
@@ -12,7 +13,10 @@ class RequestInvoice extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_RA->value
+        ]);
     }
 
     /**
@@ -22,11 +26,12 @@ class RequestInvoice extends FormRequest
     {
         return [
             'r_a_request_info_id' => ['required', 'integer', 'exists:r_a_request_infos,id'],
-            'userId'              => ['required', 'integer', 'exists:users,id'],
-            'description'         => ['required', 'string'],
-            'invoiceAmount'       => ['required', 'numeric'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'description' => ['required', 'string'],
+            'invoice_status' => ['required', 'string'],
+            'invoice_amount' => ['required', 'numeric'],
+            'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],
+            'recreationalInvoiceId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:r_a_invoices,id', new UpdateRAChargeRule()]
         ];
     }
 }

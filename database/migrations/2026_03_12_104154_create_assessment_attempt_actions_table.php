@@ -19,7 +19,7 @@ return new class extends Migration
             $table->engine = "InnoDB";
             $table->id();
             $table->foreignIdFor(User::class);
-            $table->foreignIdFor(AssessmentAttempt::class);
+            $table->foreignIdFor(AssessmentAttempt::class)->constrained()->cascadeOnDelete();
             $table->enum('actions', [
                 'TAB_SWITCH',
                 'COPY_ATTEMPT',

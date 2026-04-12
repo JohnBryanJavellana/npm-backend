@@ -9,6 +9,8 @@ class RARelationship extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function facility()
     {
         return $this->belongsTo(RAFacility::class, "r_a_facility_id", "id");

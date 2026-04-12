@@ -9,12 +9,13 @@ class AssessmentResource extends JsonResource
 {
     public function toArray($request)
     {
-        // return parent::toArray($request); 
+        // return parent::toArray($request);
 
         $isTrainee = $request->user()->role === 'TRAINEE';
 
         return [
             'id' => $this?->id,
+            'control_number' => $this->control_number,
             'course_content_id' => $this->course_content_id,
             'title' => $this->title,
             'description' => $this->description,
@@ -50,6 +51,8 @@ class AssessmentResource extends JsonResource
                     }),
                 ];
             }),
+            'withSubmittedAttempt' => true,
+            'attempt' => $this?->attempts->first()
         ];
     }
 }
