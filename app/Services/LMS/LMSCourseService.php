@@ -32,7 +32,7 @@ class LMSCourseService
                 return $query->whereKey($section_id)->with([
                     "contents",
                     "contents.uploads",
-                    "contents.assessment:id,course_content_id,title,type,status",
+                    "contents.assessment:id,course_content_id,control_number,title,type,status",
                     "updated_by:id,fname,mname,lname"
                 ])->first();
             },
