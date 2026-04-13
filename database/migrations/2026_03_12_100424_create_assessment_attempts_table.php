@@ -19,11 +19,11 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Assessments::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(EnrolledCourse::class)->constrained()->cascadeOnDelete();
-            $table->decimal("score",65);
+            $table->decimal("score", 65)->nullable();
             $table->enum("status", ["IN_PROGRESS","PASSED","FAILED","SUBMITTED","FOR_REMOVAL"]);
-            $table->foreignId("graded_by")->constrained("users");
-            $table->dateTime("submitted_at");
-            $table->dateTime("graded_at");
+            $table->foreignId("graded_by")->nullable()->constrained("users")->cascadeOnDelete();
+            $table->dateTime("submitted_at")->nullable();
+            $table->dateTime("graded_at")->nullable();
             $table->timestamps();
         });
     }

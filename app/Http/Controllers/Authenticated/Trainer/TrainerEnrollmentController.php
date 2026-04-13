@@ -116,28 +116,9 @@ class TrainerEnrollmentController extends Controller
                 $data = EnrolledCourse::where('training_id', $request->trainingId)
                     ->with([
                         'trainee:id,fname,lname,mname,suffix,email',
-                        'assessmentAttempts' => function ($query) use ($request) {
-                            $query->where('assessments_id', $request->assessmentId);
-                        }
+                        'trainee.assessmentAttempts'
                     ])
-                    ->get()
-                    ->map(function ($enrolled) {
-                        $traineeData = $enrolled->trainee ? $enrolled->trainee->toArray() : [];
-                        $attempts = $enrolled->assessmentAttempts->map(function ($attempt) {
-                            return [
-                                'id' => $attempt->id,
-                                'score' => $attempt->score,
-                                'status' => $attempt->status,
-                                'graded_at' => $attempt->graded_at,
-                                'enrolled_course_id' => $attempt->enrolled_course_id
-                            ];
-                        });
-                        return [
-                            'trainee' => array_merge($traineeData, [
-                                'attempts' => $attempts
-                            ])
-                        ];
-                    });
+                    ->get();
 
                 return response()->json(["data" => $data], 200);
             } catch (\Exception $e) {

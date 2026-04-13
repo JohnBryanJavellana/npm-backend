@@ -32,7 +32,7 @@ class LMSCourseService
                 return $query->whereKey($section_id)->with([
                     "contents",
                     "contents.uploads",
-                    "contents.assessment:id,course_content_id,control_number,title,type,status",
+                    "contents.assessment:id,control_number,course_content_id,title,type,status",
                     "updated_by:id,fname,mname,lname"
                 ])->first();
             },
@@ -48,7 +48,7 @@ class LMSCourseService
             ->forCourseModule($moduleId)
             ->with([
                 "contents:id,course_module_section_id,title,status",
-                "contents.assessment:id,course_content_id,title,status",
+                "contents.assessment:id,control_number,course_content_id,title,status",
                 "updated_by:id,fname,mname,lname",
             ])
             ->get();

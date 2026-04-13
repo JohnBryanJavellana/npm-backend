@@ -87,6 +87,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(RARequestInfo::class);
     }
 
+    public function assessmentAttempts()
+    {
+        return $this->hasMany(AssessmentAttempt::class, 'created_by', 'id');
+    }
+
     // public function creditAmount () {
     //     return $this->hasMany(Credit::class);
     // }
