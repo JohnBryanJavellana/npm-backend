@@ -62,9 +62,17 @@ class LMSCourseService
             ->with([
                 "uploads",
                 "assessment_attempts",
-                "assessment" => function($query) {
-                    $query->select('id','control_number','course_content_id','title','type','passed_type','passing_score','time_limit','status');
-                },
+                "assessment" => fn($query) => [
+                    'id' => $query->id,
+                    'control_number' => $query->control_number,
+                    'course_content_id' => $query->course_content_id,
+                    'title' => $query->title,
+                    'type' => $query->type,
+                    'passed_type' => $query->passed_type,
+                    'passing_score' => $query->passing_score,
+                    'time_limit' => $query->time_limit,
+                    'status' => 'INACTIVE'
+                ],
             ])
             ->first();
     }
