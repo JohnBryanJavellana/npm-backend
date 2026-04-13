@@ -3,10 +3,10 @@
 namespace App\Http\Requests\Admin\Enrollment;
 
 use App\Enums\UserRoleEnum;
-use Illuminate\Validation\Rule;
+use App\Rules\Admin\Enrollment\RemoveVoucherRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateVoucher extends FormRequest
+class RemoveVoucher extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,6 +19,13 @@ class CreateOrUpdateVoucher extends FormRequest
         ]);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'voucherId' => $this->route('voucherId')
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -27,11 +34,9 @@ class CreateOrUpdateVoucher extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
-            'code' => ['required', 'string'],
-            'httpMethod' => ['required', 'string', 'in:POST,UPDATE'],
-            'voucherId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:vouchers,id'],
-            'status' => ['required_if:httpMethod,UPDATE', 'string', 'in:ACTIVE,INACTIVE']
+            'voucherId' => ['required_if:httpMethod,UPDATE', 'exists:vouchers,id', 'integer',
+                // new RemoveVoucherRule()
+            ]
         ];
     }
 }

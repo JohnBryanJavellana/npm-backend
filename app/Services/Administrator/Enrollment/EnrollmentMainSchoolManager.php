@@ -16,10 +16,7 @@ class EnrollmentMainSchoolManager extends DocumentExistenceChecker
      * @return array{message: string, status: int}
      */
     public function createOrUpdate(object $payload, bool $isPost, ?int $schoolId) {
-        $isSchoolExists = DocumentExistenceChecker::checkForExistence(MainSchool::class, [
-            'school_name' => $payload->school_name,
-            'school_address' => $payload->school_address
-        ], $schoolId);
+        $isSchoolExists = DocumentExistenceChecker::checkForExistence(MainSchool::class, $payload->only(['school_name', 'school_address']), $schoolId);
 
         if($isSchoolExists) {
             return ['message' => "School already exist.", 'status' => 409];

@@ -33,7 +33,7 @@ use App\Http\Requests\Admin\Enrollment\{
     RemoveMainCertificate, RemoveMainCourse, RemoveMainSchool,
     RemoveModule,
     RemoveModuleType,
-    RemoveSchedule
+    RemoveSchedule, RemoveVoucher
 };
 use App\Models\{
     ChargeCategory,
@@ -63,6 +63,7 @@ use App\Services\Administrator\Enrollment\EnrollmentModuleManager;
 use App\Services\Administrator\Enrollment\EnrollmentModuleTypeManager;
 use App\Services\Administrator\Enrollment\EnrollmentRequirementManager;
 use App\Services\Administrator\Enrollment\EnrollmentScheduleManager;
+use App\Services\Administrator\Enrollment\EnrollmentVoucherManager;
 use App\Utils\{
     AuditHelper,
     GenerateTrace,
@@ -83,7 +84,8 @@ class EnrollmentCtrl extends Controller
         public EnrollmentMainCertificateManager $enrollmentMainCertificateManager,
         public EnrollmentMainSchoolManager $enrollmentMainSchoolManager,
         public EnrollmentMainCourseManager $enrollmentMainCourseManager,
-        public EnrollmentRequirementManager $enrollmentRequirementManager
+        public EnrollmentRequirementManager $enrollmentRequirementManager,
+        public EnrollmentVoucherManager $enrollmentVoucherManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -389,6 +391,47 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_vouchers
+     * @param Request $request
+     */
+    public function get_vouchers(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $vouchers = Voucher::all();
+            return response()->json(['vouchers' => $vouchers], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_voucher
+     * @param CreateOrUpdateVoucher $request
+     */
+    public function create_or_update_voucher(CreateOrUpdateVoucher $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $voucherId = $request->voucherId;
+
+            $result = $this->enrollmentVoucherManager->createOrUpdate($request, $isPost, $voucherId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_voucher
+     * @param RemoveVoucher $request
+     * @param int $voucherId
+     */
+    public function remove_voucher(RemoveVoucher $request, int $voucherId)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request, $voucherId) {
+            $result = $this->enrollmentVoucherManager->removeVoucher($voucherId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
 
 
     # ✖️✖️✖️✖️✖️✖️✖️
@@ -642,98 +685,12 @@ class EnrollmentCtrl extends Controller
         });
     }
 
-    /**
-     * Summary of get_vouchers
-     * @param Request $request
-     */
-    public function get_vouchers(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () {
-            $vouchers = Voucher::all();
-            return response()->json(['vouchers' => $vouchers], 200);
-        });
-    }
 
-    /**
-     * Summary of create_or_update_voucher
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateVoucher $request
-     */
-    public function create_or_update_voucher(CreateOrUpdateVoucher $request)
-    {
-        return TransactionUtil::transact($request, [], function () use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
 
-            $check = CheckForDocumentExistence::exists(
-                Voucher::class,
-                [
-                    'name' => $request->name,
-                    'code' => $request->code
-                ],
-                !$isPost,
-                $documentId,
-                'id',
-                "Voucher already exist."
-            );
 
-            if ($check) return $check;
 
-            $this_voucher = $isPost ? new Voucher() : Voucher::findOrFail($request->documentId);
-            $this_voucher->name = $request->name;
-            $this_voucher->code = $request->code;
-            if (!$isPost) $this_voucher->status = $request->status;
-            $this_voucher->save();
 
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTVOUCHER->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTVOUCHER->value. "ID#$this_voucher->id"
-            );
 
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTVOUCHER->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTVOUCHER->value). ' ID#' . $this_voucher->id], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_voucher
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $voucher_id
-     */
-    public function remove_voucher(Request $request, int $voucher_id)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request, $voucher_id) {
-            $this_voucher = Voucher::where('id', $voucher_id)->first();
-
-            if ($this_voucher->has_data_count > 0 && $this_voucher->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTCOURSE->value], 409);
-            } else {
-                $this_voucher->delete();
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTVOUCHER->value . " ID#$voucher_id"
-                );
-
-                if (env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail(''),
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTCOURSE->value. "ID#$voucher_id"], 200);
-            }
-        });
-    }
 
     /**
      * Summary of get_sponsors

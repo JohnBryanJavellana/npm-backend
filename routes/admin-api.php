@@ -71,7 +71,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::get('get_vouchers', [EnrollmentCtrl::class, 'get_vouchers']);
             Route::post('create_or_update_voucher', [EnrollmentCtrl::class, 'create_or_update_voucher']);
-            Route::delete('remove_voucher/{voucher_id}', [EnrollmentCtrl::class, 'remove_voucher']);
+            Route::delete('remove_voucher/{voucherId}', [EnrollmentCtrl::class, 'remove_voucher']);
 
             Route::get('get_sponsors', [EnrollmentCtrl::class, 'get_sponsors']);
             Route::post('create_or_update_sponsor', [EnrollmentCtrl::class, 'create_or_update_sponsor']);
