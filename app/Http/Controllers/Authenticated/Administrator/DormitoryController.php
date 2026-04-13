@@ -14,6 +14,8 @@ use App\Http\Requests\Admin\Dormitory\GetMatchRooms;
 use App\Http\Requests\Admin\Dormitory\NewRoomReservation;
 use App\Http\Requests\Admin\Dormitory\SetRoomReservationAsReserved;
 use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
+use App\Http\Requests\Admin\Dormitory\UpdateTenantRequest;
+use App\Http\Requests\Admin\Dormitory\RoomReservationsWithCostsRequest;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
 use App\Models\DormitoryItemBI;
@@ -1875,14 +1877,7 @@ class DormitoryController extends Controller
         public function getRoomsForSelection(Request $request)
         {
             $isPost = $request->httpMethod === "POST";
-            if (!$isPost) {
-                return response()->json([
-                    'message' => 'Method not allowed. Use POST.'
-                ], 405);
-            }
-
             $roomTypeFilter = $request->room_type ?? null;
-
             $query = DormitoryRoom::query();
 
             if ($roomTypeFilter) {
@@ -1906,32 +1901,34 @@ class DormitoryController extends Controller
         }
 
        
-    public function room_reservations_with_costs(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            // Fetch tenants with boarder and dormitory room
-            $room_reservations = DormitoryTenant::with(['boarder', 'dormitory_room'])
-                ->when($request->tenantStatus, fn($query, $status) => $query->whereIn('tenant_status', (array) $status))
-                ->latest()
-                ->get()
-                ->map(function ($tenant) {
-                    return [
-                        'id' => $tenant->id,
-                        'trace_number' => $tenant->trace_number,
-                        'boarder' => $tenant->boarder, // user info
-                        'room_name' => $tenant->dormitory_room->room_name ?? null,
-                        'room_type' => $tenant->room_type,
-                        'tenant_status' => $tenant->tenant_status,
-                        'trainee_cost' => $tenant->dormitory_room->room_cost ?? null,
-                        'guest_cost' => $tenant->dormitory_room->guest_cost ?? null,
-                        'check_in' => $tenant->check_in_datetime,
-                        'check_out' => $tenant->check_out_datetime,
-                    ];
-                });
+   public function room_reservations_with_costs(RoomReservationsWithCostsRequest $request)
+{
+    return TransactionUtil::transact($request, [], function() use ($request) {
 
-            return response()->json(['room_reservations' => $room_reservations], 200);
-        });
-    }
+        $room_reservations = DormitoryTenant::with(['boarder', 'dormitory_room'])
+            ->when($request->tenantStatus, fn($query, $status) =>
+                $query->whereIn('tenant_status', (array) $status)
+            )
+            ->latest()
+            ->get()
+            ->map(function ($tenant) {
+                return [
+                    'id' => $tenant->id,
+                    'trace_number' => $tenant->trace_number,
+                    'boarder' => $tenant->boarder,
+                    'room_name' => $tenant->dormitory_room->room_name ?? null,
+                    'room_type' => $tenant->room_type,
+                    'tenant_status' => $tenant->tenant_status,
+                    'trainee_cost' => $tenant->dormitory_room->room_cost ?? null,
+                    'guest_cost' => $tenant->dormitory_room->guest_cost ?? null,
+                    'check_in' => $tenant->check_in_datetime,
+                    'check_out' => $tenant->check_out_datetime,
+                ];
+            });
+
+        return response()->json(['room_reservations' => $room_reservations], 200);
+    });
+}
 
     public function getTraineePricingInfo($userId)
     {
@@ -1958,27 +1955,13 @@ class DormitoryController extends Controller
         }
     }
 
-        public function updateTenant(Request $request)
+        public function updateTenant(UpdateTenantRequest $request)
         {
-                $validator = Validator::make($request->all(), [
-                'tenant_id' => 'required|exists:dormitory_tenants,id',
-                'dormitory_room_id' => 'required|exists:dormitory_rooms,id',
-                'check_in_datetime' => 'required|date',
-                'check_out_datetime' => 'required|date|after:check_in_datetime',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
             $tenant = DormitoryTenant::find($request->tenant_id);
 
             $tenant->update([
                 'guest_id' => $request->guest_id,
-                'dormitory_room_id' => $request->dormitory_room_id, // 🔥 adjust if needed
+                'dormitory_room_id' => $request->dormitory_room_id,
                 'status_of_occupancy' => $request->status_of_occupancy,
                 'room_type' => $request->room_type,
                 'accommodation' => $request->accommodation,
@@ -1987,12 +1970,8 @@ class DormitoryController extends Controller
                 'payment_remarks' => $request->payment_remarks,
                 'check_in_datetime' => $request->check_in_datetime,
                 'check_out_datetime' => $request->check_out_datetime,
-                'tenant_status'        => $request->status ?? 'FOR PAYMENT',
+                'tenant_status' => $request->status ?? 'FOR PAYMENT',
             ]);
 
-            return response()->json([
-                'message' => 'Tenant updated successfully',
-                'tenant' => $tenant->load('dormitory_room', 'boarder')
-            ]);
         }
         }
