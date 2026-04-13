@@ -61,6 +61,7 @@ use App\Services\Administrator\Enrollment\EnrollmentMainCourseManager;
 use App\Services\Administrator\Enrollment\EnrollmentMainSchoolManager;
 use App\Services\Administrator\Enrollment\EnrollmentModuleManager;
 use App\Services\Administrator\Enrollment\EnrollmentModuleTypeManager;
+use App\Services\Administrator\Enrollment\EnrollmentRequirementManager;
 use App\Services\Administrator\Enrollment\EnrollmentScheduleManager;
 use App\Utils\{
     AuditHelper,
@@ -81,7 +82,8 @@ class EnrollmentCtrl extends Controller
         public EnrollmentModuleTypeManager $enrollmentModuleTypeManager,
         public EnrollmentMainCertificateManager $enrollmentMainCertificateManager,
         public EnrollmentMainSchoolManager $enrollmentMainSchoolManager,
-        public EnrollmentMainCourseManager $enrollmentMainCourseManager
+        public EnrollmentMainCourseManager $enrollmentMainCourseManager,
+        public EnrollmentRequirementManager $enrollmentRequirementManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -341,6 +343,53 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_requirements
+     * @param Request $request
+     */
+    public function get_requirements(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $requirements = Requirement::withCount([
+                'hasData',
+                'trainee_file',
+                'forModules',
+            ])->with('forModules')->get();
+
+            return response()->json(['requirements' => $requirements], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_requirement
+     * @param CreateOrUpdateRequirement $request
+     */
+    public function create_or_update_requirement(CreateOrUpdateRequirement $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $requirementId = $request->requirementId;
+
+            $result = $this->enrollmentRequirementManager->createOrUpdate($request, $isPost, $requirementId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_requirement
+     * @param Request $request
+     * @param int $requirementId
+     */
+    public function remove_requirement(Request $request, int $requirementId)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request, $requirementId) {
+            $result = $this->enrollmentRequirementManager->removeRequirement($requirementId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+
 
     # ✖️✖️✖️✖️✖️✖️✖️
     /**
@@ -592,124 +641,6 @@ class EnrollmentCtrl extends Controller
             return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTEXPIREDSTATUS->value. "ID# " . $this_training->id], 201);
         });
     }
-
-    /**
-     * Summary of get_requirements
-     * @param Request $request
-     */
-    public function get_requirements(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () {
-            $requirements = Requirement::withCount([
-                'hasData',
-                'trainee_file',
-                'forModules',
-            ])->with('forModules')->get();
-
-            return response()->json(['requirements' => $requirements], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_requirement
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateRequirement $request
-     */
-    public function create_or_update_requirement(CreateOrUpdateRequirement $request)
-    {
-        return TransactionUtil::transact($request, [], function () use ($request) {
-            $isPost = $request->httpMethod === 'POST';
-
-            $this_requirement = $isPost ? new Requirement() : Requirement::findOrFail($request->documentId);
-            $this_requirement->name = $request->name;
-            $this_requirement->description = $request->description;
-            $this_requirement->isRequired = $request->requiredStatus;
-            $this_requirement->isBasic = $request->type;
-            if ($request->status) {
-                $this_requirement->status = $request->status;
-            }
-
-            if ($request->upload_reference) {
-                if ($this_requirement->upload_reference !== null && file_exists(public_path('upload-reference/' . $this_requirement->upload_reference))) {
-                    unlink(public_path('upload-reference/' . $this_requirement->upload_reference));
-                }
-
-                $image_name = Str::uuid() . '-upload-reference-.png';
-                $image = $request->upload_reference;
-                SaveFile::save($image, "upload-reference");
-                $this_requirement->upload_reference = $image_name;
-            }
-
-            $this_requirement->save();
-
-            if ($request->module) {
-                foreach ($request->module as $module) {
-                    $checkExistence = RequirementSpecificModule::where([
-                        'requirement_id' => $this_requirement->id,
-                        'course_module_id' => $module,
-                    ])->count();
-
-                    if ($checkExistence <= 0) {
-                        $specific_module = new RequirementSpecificModule;
-                        $specific_module->requirement_id = $this_requirement->id;
-                        $specific_module->course_module_id = $module;
-                        $specific_module->save();
-                    }
-                }
-            }
-
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENT->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREMENT->value). " ID# " . $this_requirement->id], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_requirement
-     * @param Request $request
-     * @param int $requirement_id
-     */
-    public function remove_requirement(Request $request, int $requirement_id)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request, $requirement_id) {
-            $this_requirement = Requirement::withCount(['hasData', 'trainee_file'])->where('id', $requirement_id)->first();
-
-            if ($this_requirement->has_data_count > 0 || $this_requirement->trainee_file_count > 0 || $this_requirement->for_modules_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTREQUIREMENT->value], 409);
-            } else {
-                $this_requirement->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTREQUIREMENT->value. " ID#$requirement_id"
-                );
-
-                if (env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTREQUIREMENT->value. " ID#$requirement_id"], 200);
-            }
-        });
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /**
      * Summary of get_vouchers

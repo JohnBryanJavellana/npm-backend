@@ -3,10 +3,10 @@
 namespace App\Http\Requests\Admin\Enrollment;
 
 use App\Enums\UserRoleEnum;
-use Illuminate\Validation\Rule;
+use App\Rules\Admin\Enrollment\RemoveRequirementRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateCourse extends FormRequest
+class RemoveRequirement extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,6 +19,13 @@ class CreateOrUpdateCourse extends FormRequest
         ]);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'requirementId' => $this->route('requirementId')
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -27,10 +34,7 @@ class CreateOrUpdateCourse extends FormRequest
     public function rules(): array
     {
         return [
-            'course_name' => ['required', 'string'],
-            'httpMethod' => ['required', 'string', 'in:POST,UPDATE'],
-            'course_status' => ['required_if:httpMethod,UPDATE', 'string', 'in:ACTIVE,INACTIVE'],
-            'courseId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:main_courses,id'],
+            'requirementId' => ['required_if:httpMethod,UPDATE', 'exists:requirements,id', 'integer', new RemoveRequirementRule()]
         ];
     }
 }
