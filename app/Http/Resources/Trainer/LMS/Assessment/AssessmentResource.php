@@ -43,8 +43,7 @@ class AssessmentResource extends JsonResource
                             'id' => $question->id,
                             'question' => $question->question,
                             'type' => $question->type,
-                            'score' => $question->score,
-                            'status' => $question->status
+                            'score' => $question->score
                         ];
 
                         if($isTrainee) {
@@ -52,20 +51,21 @@ class AssessmentResource extends JsonResource
                                 $preparedData['answer'] = $userAnswer->answer_text;
                             }
 
-                            $preparedData['options'] = $question->options->map(function ($option) use ($isTrainee, $userAnswer) {
-                                return [
-                                    'id' => $option->id,
-                                    'option_text' => $option->option_text,
-                                    'is_correct' => $isTrainee ? null : $option->is_correct,
-                                    'is_user_selected' => $userAnswer && $userAnswer->assessment_option_id == $option->id
-                                ];
-                            });
+                            if(\count($question->options) > 0) {
+                                $preparedData['options'] = $question->options->map(function ($option) use ($isTrainee, $userAnswer) {
+                                    return [
+                                        'id' => $option->id,
+                                        'option_text' => $option->option_text,
+                                        'is_user_selected' => $userAnswer && $userAnswer->assessment_option_id == $option->id
+                                    ];
+                                });
+                            }
                         } else {
                             $preparedData['options'] = $question->options->map(function ($option) use ($isTrainee, $userAnswer) {
                                 return [
                                     'id' => $option->id,
                                     'option_text' => $option->option_text,
-                                    'is_correct' => $isTrainee ? null : $option->is_correct
+                                    'is_correct' => $option->is_correct
                                 ];
                             });
                         }
@@ -74,7 +74,7 @@ class AssessmentResource extends JsonResource
                     }),
                 ];
             }),
-            'withSubmittedAttempt' => true
+            'withSubmittedAttempt' => $this->submittedAttempts->isNotEmpty()
         ];
     }
 }

@@ -66,13 +66,18 @@ class LMSAssessmentController extends Controller
             $record = Assessments::where('control_number', $request->control_number)
                 ->with([
                     'sections.questions.options',
+                    'submittedAttempts' => function($query) use ($request) {
+                        $query->when($request->user_id, function($q) use ($request) {
+                            $q->where('created_by', $request->user_id);
+                        });
+                    },
                     'attempts' => function($query) use ($request) {
                         $query->when($request->user_id, function($q) use ($request) {
-                            return $q->where('created_by', $request->user_id);
+                            $q->where('created_by', $request->user_id);
                         });
 
                         $query->when($request->assessment_attempt_id, function($q) use ($request) {
-                            return $q->whereKey($request->assessment_attempt_id);
+                            $q->whereKey($request->assessment_attempt_id);
                         });
                     },
                     'attempts.answers'
