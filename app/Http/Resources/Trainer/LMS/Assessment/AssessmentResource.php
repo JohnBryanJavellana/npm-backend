@@ -2,6 +2,11 @@
 
 namespace App\Http\Resources\Trainer\LMS\Assessment;
 
+use App\Models\Assessments;
+use App\Models\CourseModule;
+use App\Models\EnrolledCourse;
+use App\Models\Training;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -15,6 +20,40 @@ class AssessmentResource extends JsonResource
 
         $attempt = $this->attempts->first();
         $userAnswers = $attempt ? $attempt->answers->keyBy('assessment_question_id') : collect();
+
+        $this_assessment = Assessments::where('control_number', $this?->control_number)->first();
+        $courseModule = CourseModule::whereKey($this_assessment->courseContent->courseModuleSection->courseModule->id)->get();
+
+        $training = null;
+        foreach ($courseModule as $cm) {
+            $training = Training::where('course_module_id', $cm->id)->first();
+            $isCurrentEnrolled = EnrolledCourse::where([
+                'user_id' => auth()->id(),
+                'training_id' => $training->id,
+                'enrolled_course_status' => 'ENROLLED'
+            ])->first();
+
+            if($isCurrentEnrolled) {
+                $training = $isCurrentEnrolled;
+                break;
+            }
+        }
+
+        $accessible = false;
+        if ($training) {
+            $start = Carbon::parse($training->schedule_from)->startOfDay();
+            $end = Carbon::parse($training->schedule_to)->startOfDay();
+            $today = now()->startOfDay();
+
+            if ($today->lt($start) || $today->gt($end)) {
+                $accessible = false;
+            } else {
+                $dayCount = $today->diffInDays($start) + 1;
+                $accessible = $this_assessment->courseContent->courseModuleSection->day_number === $dayCount;
+            }
+        }
+
+        $isAccessible = $this->attempts->whereNotIn('status', ['SUBMITTED', 'FAILED'. 'PASSED'])->isNotEmpty() || $accessible;
 
         $preparedData = [
             'id' => $this?->id,
@@ -79,6 +118,7 @@ class AssessmentResource extends JsonResource
             });
 
             $preparedData['withSubmittedAttempts'] = $this->submittedAttempts->isNotEmpty();
+            $preparedData['isAccessible'] = false;
         } else {
             $preparedData['sections'] = $this->sections->map(function ($section) use ($isTrainee) {
                 return [

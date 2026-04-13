@@ -99,13 +99,13 @@ class LMSCourseService
                             $accessible = false;
                         } else {
                             $dayCount = $today->diffInDays($start) + 1;
-                            $accessible = $this_assessment->courseContent->courseModuleSection === $dayCount;
+                            $accessible = $this_assessment->courseContent->courseModuleSection->day_number === $dayCount;
                         }
                     }
 
                     $isAccessible = $content->assessment_attempts->whereNotIn('status', ['SUBMITTED', 'FAILED'. 'PASSED'])->isNotEmpty() || $accessible;
 
-                    $item->status = $isAccessible;
+                    $item->isAccessible = $isAccessible;
                     return $item;
                 });
             });

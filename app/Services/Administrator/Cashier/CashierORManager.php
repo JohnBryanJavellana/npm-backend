@@ -7,12 +7,8 @@ use App\Enums\AdministratorReturnResponse;
 use App\Models\CashierOR;
 use App\Utils\DocumentExistenceChecker;
 
-class CashierORManager
+class CashierORManager extends DocumentExistenceChecker
 {
-    public function __construct(
-        public DocumentExistenceChecker $documentExistenceChecker
-    ) {}
-
     /**
      * Summary of createOrUpdate
      * @param object $payload
@@ -20,11 +16,7 @@ class CashierORManager
      * @return array{message: string, status: int}
      */
     public function createOrUpdate(object $payload, bool $isPost, ?int $documentId) {
-        $isOrExists = $this->documentExistenceChecker->checkForExistence(
-            CashierOR::class,
-            ['name' => $payload->name, 'service_type' => $payload->service_type],
-            $documentId
-        );
+        $isOrExists = DocumentExistenceChecker::checkForExistence(CashierOR::class, ['name' => $payload->name, 'service_type' => $payload->service_type], $documentId);
 
         if($isOrExists) {
             return ['message' => "The OR Number '{$payload->name}' is already assigned to this service type.", 'status' => 409];

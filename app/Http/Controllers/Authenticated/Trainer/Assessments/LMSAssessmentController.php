@@ -313,66 +313,19 @@ class LMSAssessmentController extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             try {
-                // Just fetch data - no submission logic
-                $list = EnrolledCourse::where('training_id', $request->training_id)
+                $list = Assessments::where('control_number', $request->control_number)
                     ->with([
-                        'trainee:id,id,fname,lname,mname,suffix,email',
-                        'assessmentAttempts' => function ($query) use ($request) {
-                            $query->where([
-                                'id' => $request->attempt_id,
-                                'assessments_id' => $request->assessment_id
-                            ])->with([
-                                'answers.assessment_option',
-                                'answers.assessment_question'
-                            ]);
-                        }
-                    ])
-                    ->get()
-                    ->map(function ($enrolled) {
+                        'attempts'
+                    ])->get()->map(function($query) {
                         return [
-                            'enrolled_course_id' => $enrolled->id,
-                            'trainee' => $enrolled->trainee ? [
-                                'id' => $enrolled->trainee->id,
-                                'fname' => $enrolled->trainee->fname,
-                                'lname' => $enrolled->trainee->lname,
-                                'mname' => $enrolled->trainee->mname,
-                                'suffix' => $enrolled->trainee->suffix,
-                                'email' => $enrolled->trainee->email
-                            ] : null,
-                            'questions' => $enrolled->assessmentAttempts->flatMap(function ($attempt) {
-                                return $attempt->answers->map(function ($answer) {
-                                    return [
-                                        'question' => $answer->assessment_question ? [
-                                            'id' => $answer->assessment_question->id,
-                                            'question' => $answer->assessment_question->question,
-                                            'question_text' => $answer->assessment_question->question,
-                                            'type' => $answer->assessment_question->type ?? null,
-                                            'score' => $answer->assessment_question->score ?? null,
-                                            'status' => $answer->assessment_question->status ?? null,
-                                            'assessment_section_id' => $answer->assessment_question->assessment_section_id ?? null,
-                                            'updated_by' => $answer->assessment_question->updated_by ?? null,
-                                            'created_at' => $answer->assessment_question->created_at ?? null,
-                                            'updated_at' => $answer->assessment_question->updated_at ?? null
-                                        ] : null,
-                                        'answer' => [
-                                            'id' => $answer->id,
-                                            'answer_text' => $answer->answer_text,
-                                            'is_correct' => $answer->is_correct,
-                                            'score' => $answer->score,
-                                            'assessment_question_id' => $answer->assessment_question_id,
-                                            'assessment_option_id' => $answer->assessment_option_id
-                                        ],
-                                        'option' => $answer->assessment_option ? [
-                                            'id' => $answer->assessment_option->id,
-                                            'option_text' => $answer->assessment_option->option_text,
-                                            'is_correct' => $answer->assessment_option->is_correct,
-                                            'order' => $answer->assessment_option->order ?? null
-                                        ] : null
-                                    ];
-                                });
-                            })->toArray()
+                            'assessment_id' => $query->id,
+                            'attempts' => $query->attempts->map(function($query2) {
+                                return [
+                                    'id' => $query2->id
+                                ];
+                            })
                         ];
-                    })->toArray();
+                    })->values();
 
                 return response()->json(["data" => $list], 200);
             } catch (Exception $e) {

@@ -29,7 +29,11 @@ use App\Http\Requests\Admin\Enrollment\{
     CreateOrUpdateSchool,
     CreateOrUpdateSponsor,
     MoveTrainees,
-    CreateOrUpdateVoucher, RemoveModule, RemoveModuleType, RemoveSchedule
+    CreateOrUpdateVoucher,
+    RemoveMainCertificate,
+    RemoveModule,
+    RemoveModuleType,
+    RemoveSchedule
 };
 use App\Models\{
     ChargeCategory,
@@ -52,12 +56,13 @@ use App\Models\{
     TrainingRegFile,
     Voucher
 };
+use App\Services\Administrator\Enrollment\EnrollmentMainCertificateManager;
+use App\Services\Administrator\Enrollment\EnrollmentMainSchoolManager;
 use App\Services\Administrator\Enrollment\EnrollmentModuleManager;
 use App\Services\Administrator\Enrollment\EnrollmentModuleTypeManager;
 use App\Services\Administrator\Enrollment\EnrollmentScheduleManager;
 use App\Utils\{
     AuditHelper,
-    ConvertToBase64,
     GenerateTrace,
     Notifications, SaveFile,
     TransactionUtil
@@ -72,7 +77,9 @@ class EnrollmentCtrl extends Controller
     public function __construct(
         public EnrollmentScheduleManager $enrollmentScheduleManager,
         public EnrollmentModuleManager $enrollmentModuleManager,
-        public EnrollmentModuleTypeManager $enrollmentModuleTypeManager
+        public EnrollmentModuleTypeManager $enrollmentModuleTypeManager,
+        public EnrollmentMainCertificateManager $enrollmentMainCertificateManager,
+        public EnrollmentMainSchoolManager $enrollmentMainSchoolManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -205,7 +212,79 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_certificates
+     * @param Request $request
+     */
+    public function get_certificates(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $certificates = MainCertificate::withCount(['module' => function ($query) {
+                return $query->whereHas('schedules', function ($schedulesQuery) {
+                    return $schedulesQuery->whereHas('hasData');
+                });
+            }])->with('module')->get();
 
+            return response()->json(['certificates' => $certificates], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_certificate
+     * @param CreateOrUpdateCertificate $request
+     */
+    public function create_or_update_certificate(CreateOrUpdateCertificate $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $certificateId = $request->certificateId;
+
+            $result = $this->enrollmentMainCertificateManager->createOrUpdate($request, $isPost, $certificateId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_certificate
+     * @param RemoveMainCertificate $request
+     * @param int $certificateId
+     */
+    public function remove_certificate(RemoveMainCertificate $request, int $certificateId)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request, $certificateId) {
+            $result = $this->enrollmentMainCertificateManager->removeCertificate($certificateId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_schools
+     * @param Request $request
+     */
+    public function get_schools(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $schools = MainSchool::withCount(['hasData'])->get();
+            return response()->json(['schools' => $schools], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_school
+     * @param CreateOrUpdateSchool $request
+     */
+    public function create_or_update_school(CreateOrUpdateSchool $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $schoolId = $request->schoolId;
+
+            $result = $this->enrollmentMainSchoolManager->createOrUpdate($request, $isPost, $schoolId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
 
 
 
@@ -461,99 +540,6 @@ class EnrollmentCtrl extends Controller
         });
     }
 
-
-
-
-    /**
-     * Summary of get_certificates
-     * @param Request $request
-     */
-    public function get_certificates(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () {
-            $certificates = MainCertificate::withCount(['module' => function ($query) {
-                return $query->whereHas('schedules', function ($schedulesQuery) {
-                    return $schedulesQuery->whereHas('hasData');
-                });
-            }])->with('module')->get();
-
-            return response()->json(['certificates' => $certificates], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_certificate
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateCertificate $request
-     */
-    public function create_or_update_certificate(CreateOrUpdateCertificate $request)
-    {
-        return TransactionUtil::transact($request, [], function () use ($request) {
-            $isPost = $request->httpMethod === 'POST';
-
-            $this_certificate = $isPost ? new MainCertificate() : MainCertificate::findOrFail($request->documentId);
-            $this_certificate->course_module_id = $request->module;
-            $this_certificate->name = $request->name;
-            $this_certificate->header = $request->header;
-            $this_certificate->header_1 = $request->header_1;
-            $this_certificate->header_2 = $request->header_2;
-            $this_certificate->body = $request->body;
-            $this_certificate->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTCERT->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTCERT->value . " ID#$this_certificate->id"
-            );
-
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail('')
-                );
-            }
-
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTCERT->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTCERT->value). "ID#" . $this_certificate->id], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_certificate
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $certificate_id
-     */
-    public function remove_certificate(Request $request, int $certificate_id)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request, $certificate_id) {
-            $this_certificate = MainCertificate::withCount(['module' => function ($query) {
-                return $query->whereHas('schedules', function ($schedulesQuery) {
-                    return $schedulesQuery->whereHas('hasData');
-                });
-            }])->where('id', $certificate_id)->first();
-
-            if ($this_certificate->module_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTCERT->value ], 409);
-            } else {
-                $this_certificate->delete();
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTCERT->value. " ID#$certificate_id"
-                );
-
-                if (env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTCERT->value. "ID#$certificate_id"], 200);
-            }
-        });
-    }
-
     /**
      * Summary of get_requirements
      * @param Request $request
@@ -620,18 +606,6 @@ class EnrollmentCtrl extends Controller
                 }
             }
 
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENT->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREMENT->value . " ID#$this_requirement->id"
-            );
-
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail('')
-                );
-            }
-
             return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTREQUIREMENT->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTREQUIREMENT->value). " ID# " . $this_requirement->id], 201);
         });
     }
@@ -668,65 +642,10 @@ class EnrollmentCtrl extends Controller
         });
     }
 
-    /**
-     * Summary of get_schools
-     * @param Request $request
-     */
-    public function get_schools(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () {
-            $schools = MainSchool::withCount(['hasData'])->get();
-            return response()->json(['schools' => $schools], 200);
-        });
-    }
 
-    /**
-     * Summary of create_or_update_school
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateSchool $request
-     */
-    public function create_or_update_school(CreateOrUpdateSchool $request)
-    {
-        return TransactionUtil::transact($request, [], function () use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
 
-            $check = CheckForDocumentExistence::exists(
-                MainSchool::class,
-                [
-                    'name' => $request->name,
-                    'school_address' => $request->address
-                ],
-                !$isPost,
-                $documentId,
-                'id',
-                "School details already exist."
-            );
 
-            if ($check) return $check;
 
-            $this_school = $isPost ? new MainSchool() : MainSchool::findOrFail($request->documentId);
-            $this_school->school_name = $request->name;
-            $this_school->school_address = $request->address;
-            if (!$isPost) $this_school->school_status = $request->status;
-            $this_school->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHL->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHL->value . " ID#$this_school->id"
-            );
-
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTSCHL->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTSCHL->value). "ID#" . $this_school->id], 200);
-        });
-    }
 
     /**
      * Summary of remove_school

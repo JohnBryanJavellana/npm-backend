@@ -3,9 +3,10 @@
 namespace App\Http\Requests\Admin\Enrollment;
 
 use App\Enums\UserRoleEnum;
+use App\Rules\Admin\Enrollment\RemoveMainCertificateRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateCertificate extends FormRequest
+class RemoveMainCertificate extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -18,6 +19,13 @@ class CreateOrUpdateCertificate extends FormRequest
         ]);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'certificateId' => $this->route('certificateId')
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,14 +34,7 @@ class CreateOrUpdateCertificate extends FormRequest
     public function rules(): array
     {
         return [
-            'course_module_id' => ['required', 'integer', 'exists:course_modules,id'],
-            'name' => ['required', 'string'],
-            'header' => ['required', 'string'],
-            'header_1' => ['required', 'string'],
-            'header_2' => ['required', 'string'],
-            'body' => ['required', 'string'],
-            'httpMethod' => ['required', 'string', 'in:POST,UPDATE'],
-            'certificateId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:main_certificates,id']
+            'certificateId' => ['required_if:httpMethod,UPDATE', 'exists:main_certificates,id', 'integer', new RemoveMainCertificateRule()]
         ];
     }
 }

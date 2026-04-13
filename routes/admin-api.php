@@ -55,7 +55,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::get('get_certificates', [EnrollmentCtrl::class, 'get_certificates']);
             Route::post('create_or_update_certificate', [EnrollmentCtrl::class, 'create_or_update_certificate']);
-            Route::delete('remove_certificate/{certificate_id}', [EnrollmentCtrl::class, 'remove_certificate']);
+            Route::delete('remove_certificate/{certificateId}', [EnrollmentCtrl::class, 'remove_certificate']);
 
             Route::get('get_requirements', [EnrollmentCtrl::class, 'get_requirements']);
             Route::post('create_or_update_requirement', [EnrollmentCtrl::class, 'create_or_update_requirement']);
@@ -63,7 +63,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::get('get_schools', [EnrollmentCtrl::class, 'get_schools']);
             Route::post('create_or_update_school', [EnrollmentCtrl::class, 'create_or_update_school']);
-            Route::delete('remove_school/{school_id}', [EnrollmentCtrl::class, 'remove_school']);
+            Route::delete('remove_school/{schoolId}', [EnrollmentCtrl::class, 'remove_school']);
 
             Route::get('get_courses', [EnrollmentCtrl::class, 'get_courses']);
             Route::post('create_or_update_course', [EnrollmentCtrl::class, 'create_or_update_course']);
