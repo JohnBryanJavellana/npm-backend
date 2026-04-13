@@ -1987,6 +1987,7 @@ class DormitoryController extends Controller
                 'payment_remarks' => $request->payment_remarks,
                 'check_in_datetime' => $request->check_in_datetime,
                 'check_out_datetime' => $request->check_out_datetime,
+                'tenant_status'        => $request->status ?? 'FOR PAYMENT',
             ]);
 
             return response()->json([
