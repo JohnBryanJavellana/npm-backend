@@ -251,10 +251,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("update_assessments", [LMSAssessmentController::class, "update"]);
             Route::delete("delete_assessments", [LMSAssessmentController::class, "delete"]);
 
-            //! Paolo Code Start            
+            //! Paolo Code Start
             Route::post('create_attempts/assessments_answers', [LMSAssessmentController::class, 'assessment_answers']);
             Route::post('details/assessment_answers_option', [LMSAssessmentController::class, 'TraineeAssessmentDetailsForTrainer']);
-            
+
         });
 
         Route::prefix('sections/')->group(function () {
@@ -283,6 +283,8 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("delete_courses", [LMSController::class, "delete"]);
             Route::post("delete_content_uploads", [LMSController::class, "deleteUpload"]);
         });
+
+        Route::post("grade_essay", [TrainerEnrollmentController::class, 'grade_essay']);
     });
 
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Authenticated\Trainer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LMS\GradeEssay;
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
-use App\Models\{AssessmentAttempt, EnrolledCourse, Training, AttendanceRecord};
+use App\Models\{AssessmentAnswer, AssessmentAttempt, EnrolledCourse, Training, AttendanceRecord};
+use App\Services\LMS\GradeEssayManager;
 use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
 use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
@@ -13,6 +15,7 @@ class TrainerEnrollmentController extends Controller
 {
     public function __construct(
         protected TrainerEnrollmentService $trainerEnrollmentService,
+        public GradeEssayManager $gradeEssayManager
     ) {}
 
     public function viewAllTrainingsAndFacilitators(Request $request)
@@ -47,6 +50,27 @@ class TrainerEnrollmentController extends Controller
         }
     }
 
+    public function grade_essay(Request $request) {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            \Log::info($request->all());
+
+            $data = $request->input('data');
+            $items = isset($data['answerId']) ? [$data] : $data;
+
+            foreach($items as $item) {
+                AssessmentAnswer::lockForUpdate()
+                    ->where([
+                        'assessment_attempt_id' => $request->attempt_id,
+                        'assessment_question_id' => (int) $item['answerId']
+                    ])
+                    ->update([
+                        'score' => $item['grade']
+                    ]);
+            }
+
+            return ['message' => "Success!", 'status' => 200];
+        });
+    }
 
     public function getCourseDetails(Request $request)
     {
