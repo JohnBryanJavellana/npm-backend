@@ -358,7 +358,8 @@ class LMSAssessmentController extends Controller
         });
     }
 
-    //! Reusable function for logging user actions during assessment attempts
+
+    //! reusesable function for logging user actions during assessment attempts
     public function logUserAction(Request $request)
     {
         try {
@@ -380,7 +381,7 @@ class LMSAssessmentController extends Controller
                 'action' => $validated['action']
             ], 201);
         } catch (Exception $e) {
-            Log::error('Failed to log action: ' . $e->getMessage());
+            \Log::error('Failed to log action: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Error logging action',
                 'error' => $e->getMessage()

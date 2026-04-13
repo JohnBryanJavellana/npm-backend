@@ -25,7 +25,6 @@ class LMSCourseService
         protected CourseModuleSection $courseModuleSectionModel,
         protected CourseContent $courseContentModel,
         protected CourseContentUpload $courseContentUploadModel,
-        protected AssessmentAttempt $assessmentAttemptModel,
     ) {}
 
     public function getCourseModules($courseModuleId, $section_id = null)

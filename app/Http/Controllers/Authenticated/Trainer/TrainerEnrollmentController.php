@@ -108,7 +108,9 @@ class TrainerEnrollmentController extends Controller
     }
 
 
-    // ! ayaw pag labot, Izack ini nag ayad, para lista hand mga attempts
+
+
+    // ! ayaw pag labot, Izack ini nag ayad, para lista hand mga attemptss
     public function TraineeAssessmentDetails(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
