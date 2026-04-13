@@ -74,7 +74,7 @@ class AssessmentResource extends JsonResource
                     }),
                 ];
             }),
-            'withSubmittedAttempt' => $this->submittedAttempts->isNotEmpty()
+            'withSubmittedAttempt' => $isTrainee ? $this->submittedAttempts->isNotEmpty() : null
         ];
     }
 }

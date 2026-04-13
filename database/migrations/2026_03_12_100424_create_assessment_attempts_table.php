@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal("score",65);
             $table->enum("status", ["IN_PROGRESS","PASSED","FAILED","SUBMITTED","FOR_REMOVAL"]);
             $table->foreignId("graded_by")->constrained("users");
-            $table->dateTime("submitted_at");
+            $table->dateTime("submitted_at")->nullable();
             $table->dateTime("graded_at");
             $table->timestamps();
         });

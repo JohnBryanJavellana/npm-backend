@@ -232,7 +232,8 @@ class LMSAssessmentController extends Controller
                 $attempt->update([
                     'score' => $score,
                     'status' => $status,
-                    'graded_at' => now()
+                    'graded_at' => now(),
+                    'submitted_at' => $status === "SUBMITTED" ? now() : null
                 ]);
 
                 if ($request->proctoring_events) {
