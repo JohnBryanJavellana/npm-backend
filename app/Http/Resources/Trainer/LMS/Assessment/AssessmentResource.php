@@ -47,8 +47,8 @@ class AssessmentResource extends JsonResource
                         ];
 
                         if($isTrainee) {
-                            if($question->type === "ESSAY" && !\is_null($userAnswer->answer_text)) {
-                                $preparedData['answer'] = $userAnswer->answer_text;
+                            if($question->type === "ESSAY" && !\is_null($userAnswer?->answer_text)) {
+                                $preparedData['answer'] = $userAnswer?->answer_text;
                             }
 
                             if(\count($question->options) > 0) {

@@ -172,15 +172,12 @@ class LMSAssessmentController extends Controller
                     'status' => 'FAILED'
                 ]);
 
-                $attempt = AssessmentAttempt::firstOrCreate(
-                    [
-                        "assessments_id" => $this_assessment->id,
-                        "enrolled_course_id" => $enrolledCourse->id,
-                        "status" => "IN_PROGRESS",
-                        'created_by' => $request->user()->id
-                    ],
-                    ["score" => 0, "graded_by" => 1, "submitted_at" => now(), "graded_at" => now()]
-                );
+                $attempt = AssessmentAttempt::firstOrCreate([
+                    "assessments_id"     => $this_assessment->id,
+                    "enrolled_course_id" => $enrolledCourse->id,
+                    "status"             => "IN_PROGRESS",
+                    "created_by"         => $request->user()->id,
+                ]);
 
                 $correctCount = 0;
                 $answers = [];
@@ -220,19 +217,14 @@ class LMSAssessmentController extends Controller
                             ]
                         );
                     }
-
-                    $score = $autoGradableCount > 0 ? ($correctCount / $autoGradableCount) * 100 : 0;
-                } else {
-                    $score = 0;
                 }
 
                 $frontendStatus = $request->input('status');
                 $status = ($frontendStatus === 'SUBMITTED') ? 'SUBMITTED' : 'IN_PROGRESS';
 
                 $attempt->update([
-                    'score' => $score,
+                    'score' => $attempt->answers->sum('score'),
                     'status' => $status,
-                    'graded_at' => now(),
                     'submitted_at' => $status === "SUBMITTED" ? now() : null
                 ]);
 
