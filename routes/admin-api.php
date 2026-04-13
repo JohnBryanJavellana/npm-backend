@@ -75,7 +75,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::get('get_sponsors', [EnrollmentCtrl::class, 'get_sponsors']);
             Route::post('create_or_update_sponsor', [EnrollmentCtrl::class, 'create_or_update_sponsor']);
-            Route::delete('remove_sponsor/{sponsorid}', [EnrollmentCtrl::class, 'remove_sponsor']);
+            Route::delete('remove_sponsor/{sponsorId}', [EnrollmentCtrl::class, 'remove_sponsor']);
 
             Route::get('get_licenses', [EnrollmentCtrl::class, 'get_licenses']);
             Route::post('create_or_update_license', [EnrollmentCtrl::class, 'create_or_update_license']);
