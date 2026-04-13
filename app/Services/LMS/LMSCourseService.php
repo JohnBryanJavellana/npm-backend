@@ -4,11 +4,16 @@ namespace App\Services\LMS;
 
 use App\Enums\RequestStatus;
 use App\Models\AssessmentAttempt;
+use App\Models\Assessments;
 use App\Models\CourseContent;
 use App\Models\CourseContentUpload;
+use App\Models\CourseModule;
 use App\Models\CourseModuleSection;
+use App\Models\EnrolledCourse;
+use App\Models\Training;
 use App\Utils\AuditHelper;
 use App\Utils\SaveFile;
+use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -57,24 +62,64 @@ class LMSCourseService
     public function getContentById($contentId)
     {
 
-        return $this->courseContentModel->query()
+        return tap($this->courseContentModel->query()
             ->whereKey($contentId)
             ->with([
                 "uploads",
                 "assessment_attempts",
-                "assessment" => fn($query) => [
-                    'id' => $query->id,
-                    'control_number' => $query->control_number,
-                    'course_content_id' => $query->course_content_id,
-                    'title' => $query->title,
-                    'type' => $query->type,
-                    'passed_type' => $query->passed_type,
-                    'passing_score' => $query->passing_score,
-                    'time_limit' => $query->time_limit,
-                    'status' => 'INACTIVE'
-                ],
+                "assessment",
             ])
-            ->first();
+            ->first(), function ($content) {
+                $content->assessment->transform(function ($item) use($content) {
+                    $this_assessment = Assessments::where('control_number', $item->control_number)->first();
+                    $courseModule = CourseModule::whereKey($this_assessment->courseContent->courseModuleSection->courseModule->id)->get();
+
+                    $training = null;
+                    foreach ($courseModule as $cm) {
+                        $training = Training::where('course_module_id', $cm->id)->first();
+                        $isCurrentEnrolled = EnrolledCourse::where([
+                            'user_id' => auth()->id(),
+                            'training_id' => $training->id,
+                            'enrolled_course_status' => 'ENROLLED'
+                        ])->first();
+
+                        if($isCurrentEnrolled) {
+                            $training = $isCurrentEnrolled;
+                            break;
+                        }
+                    }
+
+                    $accessible = [];
+                    if ($training) {
+                        $start = Carbon::parse($training->schedule_from)->startOfDay();
+                        $end = Carbon::parse($training->schedule_to)->startOfDay();
+                        $today = now()->startOfDay();
+                        $totalDays = $start->diffInDays($end) + 1;
+
+                        if ($today->lt($start)) {
+                            $dayCount = 0;
+                            $message = "Training starts in " . $today->diffInDays($start) . " days.";
+                        } else if ($today->gt($end)) {
+                            $dayCount = $totalDays;
+                            $message = "Training completed.";
+                        } else {
+                            $dayCount = $today->diffInDays($start);
+                            $message = "Currently on Day $dayCount of $totalDays";
+                        }
+
+                        return $accessible[] = [
+                            'current_day' => $dayCount,
+                            'total_days'  => $totalDays,
+                            'status_msg'  => $message
+                        ];
+                    }
+
+                    $inActive = $content->assessment_attempts->whereNotIn('status', ['FOR_REMOVAL', 'IN_PROGRESS'])->isNotEmpty() || $training;
+
+                    $item->status = $accessible;
+                    return $item;
+                });
+            });
     }
 
     public function storeCourseSections($validated, $userId)

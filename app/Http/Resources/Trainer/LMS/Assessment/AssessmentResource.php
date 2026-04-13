@@ -16,7 +16,7 @@ class AssessmentResource extends JsonResource
         $attempt = $this->attempts->first();
         $userAnswers = $attempt ? $attempt->answers->keyBy('assessment_question_id') : collect();
 
-        return [
+        $preparedData = [
             'id' => $this?->id,
             'control_number' => $this->control_number,
             'course_content_id' => $this->course_content_id,
@@ -29,8 +29,11 @@ class AssessmentResource extends JsonResource
             'time_limit' => $this->time_limit,
             'created_by' => $this->created_by,
             'created_at' => $this->created_at,
-            'passing_score' => $this->passing_score,
-            'sections' => $this->sections->map(function ($section) use ($isTrainee, $userAnswers) {
+            'passing_score' => $this->passing_score
+        ];
+
+        if($isTrainee) {
+            $preparedData['sections'] = $this->sections->map(function ($section) use ($isTrainee, $userAnswers) {
                 return [
                     'id' => $section->id,
                     'title' => $section->title,
@@ -73,8 +76,37 @@ class AssessmentResource extends JsonResource
                         return $preparedData;
                     }),
                 ];
-            }),
-            'withSubmittedAttempt' => $isTrainee ? $this->submittedAttempts->isNotEmpty() : null
-        ];
+            });
+
+            $preparedData['withSubmittedAttempts'] = $this->submittedAttempts->isNotEmpty();
+        } else {
+            $preparedData['sections'] = $this->sections->map(function ($section) use ($isTrainee) {
+                return [
+                    'id' => $section->id,
+                    'title' => $section->title,
+                    'instruction' => $section->instruction,
+                    'status' => $section->status,
+                    'questions' => $section->questions->map(function ($question) use ($isTrainee) {
+                        $preparedData = [
+                            'id' => $question->id,
+                            'question' => $question->question,
+                            'type' => $question->type,
+                            'score' => $question->score,
+                            'options' => $question->options->map(function ($option) use ($isTrainee) {
+                                return [
+                                    'id' => $option->id,
+                                    'option_text' => $option->option_text,
+                                    'is_correct' => $option->is_correct
+                                ];
+                            })
+                        ];
+
+                        return $preparedData;
+                    }),
+                ];
+            });
+        }
+
+        return $preparedData;
     }
 }
