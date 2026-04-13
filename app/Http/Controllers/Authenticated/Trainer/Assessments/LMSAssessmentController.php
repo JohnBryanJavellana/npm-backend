@@ -206,10 +206,9 @@ class LMSAssessmentController extends Controller
     public function assessment_answers(Request $request)
     {
         try {
-
             \Log::info("Received assessment attempt request", $request->all());
             $validated = $request->validate([
-                "assessment_id" => "required|integer|exists:assessments,id",
+                "assessment_id" => "required|integer|   exists:assessments,id",
                 "answers" => "nullable|array",
                 "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
                 "answers.*.assessment_option_id" => "required|integer|exists:assessment_options,id",
@@ -230,7 +229,6 @@ class LMSAssessmentController extends Controller
                 $assessmentId = $validated["assessment_id"];
 
                 \Log::info("Starting assessment attempt for user: $userId, assessment: $assessmentId");
-
                 $enrolledCourse = DB::table('enrolled_courses')
                     ->where('user_id', $userId)
                     ->where('enrolled_course_status', 'ENROLLED')
