@@ -89,34 +89,23 @@ class LMSCourseService
                         }
                     }
 
-                    $accessible = [];
+                    $accessible = false;
                     if ($training) {
                         $start = Carbon::parse($training->schedule_from)->startOfDay();
                         $end = Carbon::parse($training->schedule_to)->startOfDay();
                         $today = now()->startOfDay();
-                        $totalDays = $start->diffInDays($end) + 1;
 
-                        if ($today->lt($start)) {
-                            $dayCount = 0;
-                            $message = "Training starts in " . $today->diffInDays($start) . " days.";
-                        } else if ($today->gt($end)) {
-                            $dayCount = $totalDays;
-                            $message = "Training completed.";
+                        if ($today->lt($start) || $today->gt($end)) {
+                            $accessible = false;
                         } else {
-                            $dayCount = $today->diffInDays($start);
-                            $message = "Currently on Day $dayCount of $totalDays";
+                            $dayCount = $today->diffInDays($start) + 1;
+                            $accessible = $this_assessment->courseContent->courseModuleSection === $dayCount;
                         }
-
-                        return $accessible[] = [
-                            'current_day' => $dayCount,
-                            'total_days'  => $totalDays,
-                            'status_msg'  => $message
-                        ];
                     }
 
-                    $inActive = $content->assessment_attempts->whereNotIn('status', ['FOR_REMOVAL', 'IN_PROGRESS'])->isNotEmpty() || $training;
+                    $isAccessible = $content->assessment_attempts->whereNotIn('status', ['SUBMITTED', 'FAILED'. 'PASSED'])->isNotEmpty() || $accessible;
 
-                    $item->status = $accessible;
+                    $item->status = $isAccessible;
                     return $item;
                 });
             });
