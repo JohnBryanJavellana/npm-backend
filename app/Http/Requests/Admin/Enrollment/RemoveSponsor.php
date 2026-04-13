@@ -3,9 +3,10 @@
 namespace App\Http\Requests\Admin\Enrollment;
 
 use App\Enums\UserRoleEnum;
+use App\Rules\Admin\Enrollment\RemoveSponsorRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateSponsor extends FormRequest
+class RemoveSponsor extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -18,6 +19,13 @@ class CreateOrUpdateSponsor extends FormRequest
         ]);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'sponsorId' => $this->route('sponsorId')
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,11 +34,9 @@ class CreateOrUpdateSponsor extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
-            'short_name' => ['required', 'string'],
-            'httpMethod' => ['required', 'string', 'in:POST,UPDATE'],
-            'sponsorId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:sponsors,id'],
-            'status' => ['required_if:httpMethod,UPDATE', 'string', 'in:ACTIVE,INACTIVE']
+            'sponsorId' => ['required_if:httpMethod,UPDATE', 'exists:sponsors,id', 'integer',
+                // new RemoveSponsorRule()
+            ]
         ];
     }
 }

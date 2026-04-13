@@ -33,7 +33,7 @@ use App\Http\Requests\Admin\Enrollment\{
     RemoveMainCertificate, RemoveMainCourse, RemoveMainSchool,
     RemoveModule,
     RemoveModuleType,
-    RemoveSchedule, RemoveVoucher
+    RemoveSchedule, RemoveSponsor, RemoveVoucher
 };
 use App\Models\{
     ChargeCategory,
@@ -63,6 +63,7 @@ use App\Services\Administrator\Enrollment\EnrollmentModuleManager;
 use App\Services\Administrator\Enrollment\EnrollmentModuleTypeManager;
 use App\Services\Administrator\Enrollment\EnrollmentRequirementManager;
 use App\Services\Administrator\Enrollment\EnrollmentScheduleManager;
+use App\Services\Administrator\Enrollment\EnrollmentSponsorManager;
 use App\Services\Administrator\Enrollment\EnrollmentVoucherManager;
 use App\Utils\{
     AuditHelper,
@@ -85,7 +86,8 @@ class EnrollmentCtrl extends Controller
         public EnrollmentMainSchoolManager $enrollmentMainSchoolManager,
         public EnrollmentMainCourseManager $enrollmentMainCourseManager,
         public EnrollmentRequirementManager $enrollmentRequirementManager,
-        public EnrollmentVoucherManager $enrollmentVoucherManager
+        public EnrollmentVoucherManager $enrollmentVoucherManager,
+        public EnrollmentSponsorManager $enrollmentSponsorManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -432,6 +434,48 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_sponsors
+     * @param Request $request
+     */
+    public function get_sponsors(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $sponsors = Sponsor::all();
+            return response()->json(['sponsors' => $sponsors], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_sponsor
+     * @param CreateOrUpdateSponsor $request
+     */
+    public function create_or_update_sponsor(CreateOrUpdateSponsor $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $sponsorId = $request->sponsorId;
+
+            $result = $this->enrollmentSponsorManager->createOrUpdate($request, $isPost, $sponsorId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_sponsor
+     * @param RemoveSponsor $request
+     * @param int $sponsorId
+     */
+    public function remove_sponsor(RemoveSponsor $request, int $sponsorId)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request, $sponsorId) {
+            $result = $this->enrollmentSponsorManager->removeSponsor($sponsorId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+
 
 
     # ✖️✖️✖️✖️✖️✖️✖️
@@ -691,99 +735,6 @@ class EnrollmentCtrl extends Controller
 
 
 
-
-    /**
-     * Summary of get_sponsors
-     * @param Request $request
-     */
-    public function get_sponsors(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () {
-            $sponsors = Sponsor::all();
-            return response()->json(['sponsors' => $sponsors], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_sponsor
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateSponsor $request
-     */
-    public function create_or_update_sponsor(CreateOrUpdateSponsor $request)
-    {
-        return TransactionUtil::transact($request, [], function () use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-
-            $check = CheckForDocumentExistence::exists(
-                Sponsor::class,
-                [
-                    'name' => $request->name,
-                    'short_name' => $request->short_name
-                ],
-                !$isPost,
-                $documentId,
-                'id',
-                "Sponsor already exist."
-            );
-
-            if ($check) return $check;
-
-            $this_sponsor = $isPost ? new Sponsor() : Sponsor::findOrFail($request->documentId);
-            $this_sponsor->name = $request->name;
-            $this_sponsor->short_name = $request->short_name;
-            if (!$isPost) $this_sponsor->status = $request->status;
-            $this_sponsor->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTSPONSOR->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTSPONSOR->value . " ID#$this_sponsor->id"
-            );
-
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTSPONSOR->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTSPONSOR->value). 'ID#' . $this_sponsor->id], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_sponsor
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $sponsor_id
-     */
-    public function remove_sponsor(Request $request, int $sponsor_id)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request, $sponsor_id) {
-            $this_sponsor = Sponsor::where('id', $sponsor_id)->first();
-
-            if (!$this_sponsor) {
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTSPONSOR->value], 409);
-            } else {
-                $this_sponsor->delete();
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTSPONSOR->value. " ID#$sponsor_id"
-                );
-
-                if (env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail(''),
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTSPONSOR->value. "ID#$sponsor_id"], 200);
-            }
-        });
-    }
 
     /**
      * Summary of get_licenses
