@@ -173,7 +173,7 @@ class LMSAssessmentController extends Controller
 
                     if($isCurrentEnrolled) {
                         $training = $isCurrentEnrolled;
-                        return;
+                        break;
                     }
                 }
 
@@ -186,8 +186,6 @@ class LMSAssessmentController extends Controller
                 if (!$enrolledCourse) {
                     return response()->json(["message" => "No enrolled course found."], 404);
                 }
-
-                $courseModuleTotalDayCount = $enrolledCourse->training->module->number_of_days;
 
                 AssessmentAttempt::where([
                     "assessments_id" => $this_assessment->id,
@@ -282,12 +280,8 @@ class LMSAssessmentController extends Controller
 
                 return response()->json([
                     "message" => $status === 'SUBMITTED' ? "Submitted successfully." : "Progress saved.",
-                    // !ayaw ig display it score
-                    // "score" => round($score, 2),
                     "status" => $status,
                     'assessment_attempt_id' => $attempt->id
-                    // ! pati it answer
-                    // "data" => $answers
                 ], 201);
             } catch (Exception $e) {
                 DB::rollBack();
