@@ -173,7 +173,7 @@ class LMSAssessmentController extends Controller
 
                     if($isCurrentEnrolled) {
                         $training = $isCurrentEnrolled;
-                        break;
+                        return;
                     }
                 }
 
@@ -186,6 +186,8 @@ class LMSAssessmentController extends Controller
                 if (!$enrolledCourse) {
                     return response()->json(["message" => "No enrolled course found."], 404);
                 }
+
+                $courseModuleTotalDayCount = $enrolledCourse->training->module->number_of_days;
 
                 AssessmentAttempt::where([
                     "assessments_id" => $this_assessment->id,
@@ -313,21 +315,43 @@ class LMSAssessmentController extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             try {
-                $list = Assessments::where('control_number', $request->control_number)
+                $assessment = Assessments::whereKey($request->assessment_id)
                     ->with([
-                        'attempts'
-                    ])->get()->map(function($query) {
-                        return [
-                            'assessment_id' => $query->id,
-                            'attempts' => $query->attempts->map(function($query2) {
-                                return [
-                                    'id' => $query2->id
-                                ];
-                            })
-                        ];
-                    })->values();
+                        'sections.questions.options',
+                        'attempts' => function($query) use ($request) {
+                            $query->when($request->attempt_id, fn($q) => $q->whereKey($request->attempt_id));
+                        },
+                        'attempts.answers'
+                    ])
+                    ->firstOrFail();
 
-                return response()->json(["data" => $list], 200);
+                $attempt = $assessment->attempts->first();
+
+                if ($attempt) {
+                    $attempt->makeHidden('answers');
+                    $userAnswers = $attempt->answers->keyBy('assessment_question_id');
+                    $attempt->sections = $assessment->sections->map(function($section) use ($userAnswers) {
+                        $sectionData = clone $section;
+
+                        $sectionData->questions->each(function($question) use ($userAnswers) {
+                            $userAnswer = $userAnswers->get($question->id);
+                            $question->user_answer_text = $userAnswer?->answer_text;
+
+                            $question->options->each(function($option) use ($userAnswer) {
+                                $option->is_user_selected = $userAnswer && ($userAnswer->assessment_option_id == $option->id);
+                            });
+                        });
+
+                        return $sectionData;
+                    });
+                }
+
+                $result = $assessment->toArray();
+                $result['attempt'] = $attempt;
+                unset($result['sections']);
+                unset($result['attempts']);
+
+                return response()->json(["data" => $result], 200);
             } catch (Exception $e) {
                 return response()->json(["message" => "Error", "error" => $e->getMessage()], 500);
             }

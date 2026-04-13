@@ -3,11 +3,12 @@
 namespace App\Rules\Admin\Enrollment;
 
 use App\Enums\AdministratorReturnResponse;
-use App\Models\MainCertificate;
+use App\Models\MainCourse;
+use App\Models\MainSchool;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class RemoveMainCertificateRule implements ValidationRule
+class RemoveMainCourseRule implements ValidationRule
 {
     /**
      * Run the validation rule.
@@ -16,12 +17,12 @@ class RemoveMainCertificateRule implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $this_certificate = MainCertificate::withCount([
+        $this_school = MainCourse::withCount([
             'hasData'
         ])->lockForUpdate()->findOrFail($value);
 
-        if($this_certificate->has_data_count > 0) {
-            $fail(AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTCERT->value);
+        if($this_school->has_data_count > 0) {
+            $fail(AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTCOURSE->value);
         }
     }
 }

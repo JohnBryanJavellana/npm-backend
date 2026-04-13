@@ -23,10 +23,10 @@ class CreateOrUpdateCourse extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'course_name' => ['required', 'string'],
+            'httpMethod' => ['required', 'string', 'in:POST,UPDATE'],
+            'course_status' => ['required_if:httpMethod,UPDATE', 'string', 'in:ACTIVE,INACTIVE'],
+            'courseId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:main_courses,id'],
         ];
     }
 }

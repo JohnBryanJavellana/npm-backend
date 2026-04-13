@@ -47,7 +47,7 @@ class EnrollmentMainSchoolManager extends DocumentExistenceChecker
     public function removeSchool(int $schoolId) {
         MainSchool::whereKey($schoolId)->delete();
         return [
-            'message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTCERT->value,
+            'message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTSCHL->value,
             'status' => 200
         ];
     }
