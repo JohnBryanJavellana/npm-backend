@@ -16,8 +16,10 @@ use App\Models\AssessmentAttempt;
 use App\Models\AssessmentAttemptAction;
 use App\Models\Assessments;
 use App\Models\CourseContent;
+use App\Models\CourseModule;
 use App\Models\CourseModuleSection;
 use App\Models\EnrolledCourse;
+use App\Models\Training;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use DomainException;
 use Exception;
@@ -134,7 +136,9 @@ class LMSAssessmentController extends Controller
         }
     }
 
-    //! this is fix code // Create attempt and answers //score is fix to boolean
+    //! this is fix code
+    // Create attempt and answers
+    // score is fix to boolean
     public function assessment_answers(Request $request)
     {
         try {
@@ -153,16 +157,37 @@ class LMSAssessmentController extends Controller
             DB::beginTransaction();
 
             try {
-                $enrolledCourse = DB::table('enrolled_courses')
-                    ->where('user_id', auth()->id())
-                    ->where('enrolled_course_status', 'ENROLLED')
-                    ->first();
+                $this_assessment = Assessments::where('control_number', $validated["control_number"])->firstOrFail();
+                $courseModule = CourseModule::whereKey($this_assessment->courseContent->courseModuleSection->courseModule->id)->get();
+
+                // check if trainee is enrolled to this specific module
+                // if yes, find training. otherwise show error response
+                $training = null;
+                foreach ($courseModule as $cm) {
+                    $training = Training::where('course_module_id', $cm->id)->first();
+                    $isCurrentEnrolled = EnrolledCourse::where([
+                        'user_id' => auth()->id(),
+                        'training_id' => $training->id,
+                        'enrolled_course_status' => 'ENROLLED'
+                    ])->first();
+
+                    if($isCurrentEnrolled) {
+                        $training = $isCurrentEnrolled;
+                        return;
+                    }
+                }
+
+                $enrolledCourse = EnrolledCourse::where([
+                    'user_id' => auth()->id(),
+                    'training_id' => $training?->id,
+                    'enrolled_course_status' => 'ENROLLED'
+                ])->first();
 
                 if (!$enrolledCourse) {
                     return response()->json(["message" => "No enrolled course found."], 404);
                 }
 
-                $this_assessment = Assessments::where('control_number', $validated["control_number"])->firstOrFail();
+                $courseModuleTotalDayCount = $enrolledCourse->training->module->number_of_days;
 
                 AssessmentAttempt::where([
                     "assessments_id" => $this_assessment->id,
@@ -299,11 +324,13 @@ class LMSAssessmentController extends Controller
                     ->with([
                         'trainee:id,id,fname,lname,mname,suffix,email',
                         'assessmentAttempts' => function ($query) use ($request) {
-                            $query->where('assessments_id', $request->assessment_id)
-                                ->with([
-                                    'answers.assessment_option',
-                                    'answers.assessment_question'
-                                ]);
+                            $query->where([
+                                'id' => $request->attempt_id,
+                                'assessments_id' => $request->assessment_id
+                            ])->with([
+                                'answers.assessment_option',
+                                'answers.assessment_question'
+                            ]);
                         }
                     ])
                     ->get()

@@ -44,6 +44,11 @@ class Assessments extends Model
         return $this->belongsTo(User::class, "updated_by", "id");
     }
 
+    public function courseContent()
+    {
+        return $this->belongsTo(CourseContent::class, "course_content_id", "id");
+    }
+
 
     /** Scope */
     public function scopeForTraining(Builder $query, int $trainingId)

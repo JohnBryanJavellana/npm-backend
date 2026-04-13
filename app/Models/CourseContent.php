@@ -23,6 +23,11 @@ class CourseContent extends Model
         return $this->hasMany(CourseContentUpload::class);
     }
 
+    public function courseModuleSection()
+    {
+        return $this->belongsTo(CourseModuleSection::class, 'course_module_section_id', 'id');
+    }
+
     public function assessment()
     {
         return $this->hasMany(Assessments::class);

@@ -118,11 +118,7 @@ class TrainerEnrollmentController extends Controller
                         'trainee:id,fname,lname,mname,suffix,email',
                         'trainee.assessmentAttempts'
                     ])
-                    ->get()->map(function($query) {
-                        return [
-                            'trainee' => $query->trainee
-                        ];
-                    });
+                    ->get();
 
                 return response()->json(["data" => $data], 200);
             } catch (\Exception $e) {
