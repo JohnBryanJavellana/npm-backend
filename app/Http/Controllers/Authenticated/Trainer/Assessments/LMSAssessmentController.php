@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Authenticated\Trainer\Assessments;
 
 use App\Enums\LMS\AssessmentMessageResponse;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LMS\ViewSpecifiedAssessment;
 use App\Http\Requests\Trainer\LMS\Assessment\viewSpecificAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\createAssessmentRequest;
 use App\Http\Requests\Trainer\LMS\deleteAssessmentRequest;
@@ -18,19 +17,13 @@ use App\Models\AssessmentAttemptAction;
 use App\Models\Assessments;
 use App\Models\CourseContent;
 use App\Models\CourseModuleSection;
-use App\Models\AssessmentAttempts;
 use App\Models\EnrolledCourse;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use DomainException;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Intervention\Image\Colors\Rgb\Channels\Red;
-use function Laravel\Prompts\select;
-use Illuminate\Validation\ValidationException;
-use App\Utils\AuditHelper;
 use App\Utils\TransactionUtil;
-use Carbon\Carbon;
 
 class LMSAssessmentController extends Controller
 {
@@ -43,8 +36,7 @@ class LMSAssessmentController extends Controller
         try {
             return CourseContent::with(['assessment'])
                 ->get();
-        } catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+        } catch (Exception $e) {
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
     }
@@ -63,8 +55,7 @@ class LMSAssessmentController extends Controller
                     'contents.assessment:id,training_id,course_content_id,title,type,passed_type'
                 ])
                 ->get();
-        } catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+        } catch (Exception $e) {
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
     }
@@ -76,11 +67,17 @@ class LMSAssessmentController extends Controller
                 ->with([
                     'sections.questions.options',
                     'attempts' => function($query) use ($request) {
-                        return $request->user_id ? $query->where([
-                            'created_by' => $request->user_id
-                        ]) : $query;
-                    }
-                ])->first();
+                        $query->when($request->user_id, function($q) use ($request) {
+                            return $q->where('created_by', $request->user_id);
+                        });
+
+                        $query->when($request->assessment_attempt_id, function($q) use ($request) {
+                            return $q->whereKey($request->assessment_attempt_id);
+                        });
+                    },
+                    'attempts.answers'
+                ])
+                ->firstOrFail();
 
             return new AssessmentResource($record);
         } catch (Exception $e) {
@@ -92,7 +89,7 @@ class LMSAssessmentController extends Controller
     {
         try {
             return new ViewAssessmentContentResource($this->lmsAssessmentService->getAssessmentContentById($request->validated()));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
@@ -105,8 +102,7 @@ class LMSAssessmentController extends Controller
             return response()->json(["message" => AssessmentMessageResponse::CREATED->value], 200);
         } catch (DomainException $e) {
             throw $e;
-        } catch (\Exception $e) {
-            return response()->json([$e->getMessage()], 500);
+        } catch (Exception $e) {
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
     }
@@ -116,9 +112,7 @@ class LMSAssessmentController extends Controller
         try {
             $this->lmsAssessmentService->updateAssessment($request->validated(), $request->user()->id);
             return response()->json(["message" => AssessmentMessageResponse::UPDATED->value], 200);
-        } catch (\Exception $e) {
-            // \Log::error("updateError", [$e->getMessage()]);
-            return response()->json(["message" => $e->getMessage()], 500);
+        } catch (Exception $e) {
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
     }
@@ -130,8 +124,7 @@ class LMSAssessmentController extends Controller
             return response()->json(["message" => "Assessment has been deleted successfully."], 200);
         } catch (DomainException $e) {
             throw $e;
-        } catch (\Exception $e) {
-            return response()->json(["message" => $e->getMessage()], 500);
+        } catch (Exception $e) {
             return response()->json(["message" => AssessmentMessageResponse::SERVER_ERROR->value], 500);
         }
     }
@@ -178,7 +171,8 @@ class LMSAssessmentController extends Controller
                     [
                         "assessments_id" => $this_assessment->id,
                         "enrolled_course_id" => $enrolledCourse->id,
-                        "status" => "IN_PROGRESS"
+                        "status" => "IN_PROGRESS",
+                        'created_by' => $request->user()->id
                     ],
                     ["score" => 0, "graded_by" => 1, "submitted_at" => now(), "graded_at" => now()]
                 );
@@ -260,6 +254,7 @@ class LMSAssessmentController extends Controller
                         }
                     }
                 }
+
                 DB::commit();
 
                 return response()->json([
@@ -267,14 +262,15 @@ class LMSAssessmentController extends Controller
                     // !ayaw ig display it score
                     // "score" => round($score, 2),
                     "status" => $status,
+                    'assessment_attempt_id' => $attempt->id
                     // ! pati it answer
                     // "data" => $answers
                 ], 201);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::rollBack();
                 throw $e;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 "message" => "An error occurred.",
                 "error" => config('app.debug') ? $e->getMessage() : null
@@ -360,7 +356,7 @@ class LMSAssessmentController extends Controller
                     })->toArray();
 
                 return response()->json(["data" => $list], 200);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return response()->json(["message" => "Error", "error" => $e->getMessage()], 500);
             }
         });
@@ -387,7 +383,7 @@ class LMSAssessmentController extends Controller
                 'message' => 'Action logged successfully',
                 'action' => $validated['action']
             ], 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to log action: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Error logging action',
@@ -409,7 +405,7 @@ class LMSAssessmentController extends Controller
                 'total_actions' => $actions->total(),
                 'data' => $actions
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'message' => 'Error fetching actions',
                 'error' => $e->getMessage()

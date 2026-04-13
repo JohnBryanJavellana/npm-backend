@@ -13,6 +13,9 @@ class AssessmentResource extends JsonResource
 
         $isTrainee = $request->user()->role === 'TRAINEE';
 
+        $attempt = $this->attempts->first();
+        $userAnswers = $attempt ? $attempt->answers->keyBy('assessment_question_id') : collect();
+
         return [
             'id' => $this?->id,
             'control_number' => $this->control_number,
@@ -27,32 +30,51 @@ class AssessmentResource extends JsonResource
             'created_by' => $this->created_by,
             'created_at' => $this->created_at,
             'passing_score' => $this->passing_score,
-            'sections' => $this->sections->map(function ($section) use ($isTrainee) {
+            'sections' => $this->sections->map(function ($section) use ($isTrainee, $userAnswers) {
                 return [
                     'id' => $section->id,
                     'title' => $section->title,
                     'instruction' => $section->instruction,
                     'status' => $section->status,
-                    'questions' => $section->questions->map(function ($question) use ($isTrainee) {
-                        return [
+                    'questions' => $section->questions->map(function ($question) use ($isTrainee, $userAnswers) {
+                        $userAnswer = $userAnswers->get($question->id);
+
+                        $preparedData = [
                             'id' => $question->id,
                             'question' => $question->question,
                             'type' => $question->type,
                             'score' => $question->score,
-                            'status' => $question->status,
-                            'options' => $question->options->map(function ($option) use ($isTrainee) {
+                            'status' => $question->status
+                        ];
+
+                        if($isTrainee) {
+                            if($question->type === "ESSAY" && !\is_null($userAnswer->answer_text)) {
+                                $preparedData['answer'] = $userAnswer->answer_text;
+                            }
+
+                            $preparedData['options'] = $question->options->map(function ($option) use ($isTrainee, $userAnswer) {
                                 return [
                                     'id' => $option->id,
                                     'option_text' => $option->option_text,
                                     'is_correct' => $isTrainee ? null : $option->is_correct,
+                                    'is_user_selected' => $userAnswer && $userAnswer->assessment_option_id == $option->id
                                 ];
-                            }),
-                        ];
+                            });
+                        } else {
+                            $preparedData['options'] = $question->options->map(function ($option) use ($isTrainee, $userAnswer) {
+                                return [
+                                    'id' => $option->id,
+                                    'option_text' => $option->option_text,
+                                    'is_correct' => $isTrainee ? null : $option->is_correct
+                                ];
+                            });
+                        }
+
+                        return $preparedData;
                     }),
                 ];
             }),
-            'withSubmittedAttempt' => true,
-            'attempt' => $this?->attempts->first()
+            'withSubmittedAttempt' => true
         ];
     }
 }
