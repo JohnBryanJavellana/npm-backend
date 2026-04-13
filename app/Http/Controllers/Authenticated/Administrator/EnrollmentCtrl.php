@@ -59,7 +59,7 @@ use App\Utils\{
     AuditHelper,
     ConvertToBase64,
     GenerateTrace,
-    Notifications,
+    Notifications, SaveFile,
     TransactionUtil
 };
 use Illuminate\Http\Request;
@@ -598,7 +598,7 @@ class EnrollmentCtrl extends Controller
 
                 $image_name = Str::uuid() . '-upload-reference-.png';
                 $image = $request->upload_reference;
-                ConvertToBase64::generate($image, 'image', "upload-reference/$image_name");
+                SaveFile::save($image, "upload-reference");
                 $this_requirement->upload_reference = $image_name;
             }
 
