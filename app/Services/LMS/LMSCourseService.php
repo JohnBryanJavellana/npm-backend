@@ -81,7 +81,6 @@ class LMSCourseService
                         ])->first();
 
                         if($isCurrentEnrolled) {
-                            $training = $isCurrentEnrolled;
                             break;
                         }
                     }
@@ -90,7 +89,7 @@ class LMSCourseService
                     if ($training) {
                         $start = Carbon::parse($training->schedule_from)->startOfDay();
                         $end = Carbon::parse($training->schedule_to)->startOfDay();
-                        $today = now()->startOfDay();
+                        $today = Carbon::today();
 
                         if ($today->lt($start) || $today->gt($end)) {
                             $accessible = false;
@@ -100,8 +99,8 @@ class LMSCourseService
                         }
                     }
 
-                    // $isAccessible = $item->attempts->where('created_by', auth()->user()->id)->whereIn('status', ['IN_PROGRESS', 'FOR_REMOVAL'])->isNotEmpty() || $accessible;
-                    $item->isAccessible = $accessible;
+                    $isAccessible = $item->attempts->where('created_by', auth()->user()->id)->whereIn('status', ['IN_PROGRESS', 'FOR_REMOVAL'])->isNotEmpty() || $accessible;
+                    $item->isAccessible = $isAccessible;
                     $item->overallAttempts = $item->attempts->where('created_by', auth()->user()->id)->map(function($query) {
                         return [
                             "id" => $query->id,

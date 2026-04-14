@@ -34,7 +34,6 @@ class AssessmentResource extends JsonResource
             ])->first();
 
             if($isCurrentEnrolled) {
-                $training = $isCurrentEnrolled;
                 break;
             }
         }
@@ -43,7 +42,7 @@ class AssessmentResource extends JsonResource
         if ($training) {
             $start = Carbon::parse($training->schedule_from)->startOfDay();
             $end = Carbon::parse($training->schedule_to)->startOfDay();
-            $today = now()->startOfDay();
+            $today = Carbon::today();
 
             if ($today->lt($start) || $today->gt($end)) {
                 $accessible = false;
@@ -118,7 +117,7 @@ class AssessmentResource extends JsonResource
             });
 
             $preparedData['withSubmittedAttempts'] = $this->submittedAttempts->isNotEmpty();
-            $preparedData['isAccessible'] = false;
+            $preparedData['isAccessible'] = $isAccessible;
         } else {
             $preparedData['sections'] = $this->sections->map(function ($section) use ($isTrainee) {
                 return [
