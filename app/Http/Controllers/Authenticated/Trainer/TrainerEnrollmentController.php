@@ -139,8 +139,9 @@ class TrainerEnrollmentController extends Controller
     public function grade_essay(GradeEssay $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $attemptId = $request->attempt_id;
+            $attemptStatus = $request->attemptStatus;
 
-            $result = $this->gradeEssayManager->gradeEssay($request, $attemptId);
+            $result = $this->gradeEssayManager->gradeEssay($request, $attemptId, $attemptStatus);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }

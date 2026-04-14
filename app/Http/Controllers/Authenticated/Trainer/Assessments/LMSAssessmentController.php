@@ -338,6 +338,7 @@ class LMSAssessmentController extends Controller
                         $sectionData->questions->each(function($question) use ($userAnswers) {
                             $userAnswer = $userAnswers->get($question->id);
                             $question->user_answer_text = $userAnswer?->answer_text;
+                            $question->grade = $userAnswer?->score;
 
                             $question->options->each(function($option) use ($userAnswer) {
                                 $option->is_user_selected = $userAnswer && ($userAnswer->assessment_option_id == $option->id);

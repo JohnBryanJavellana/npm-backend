@@ -31,6 +31,7 @@ class CourseContent extends Model
     {
         return $this->hasMany(Assessments::class);
     }
+
     public function assessment_attempts()
     {
         return $this->hasManyThrough(

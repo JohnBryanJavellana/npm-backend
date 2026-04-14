@@ -4,7 +4,7 @@ namespace App\Http\Requests\LMS;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GradeEssay extends FormRequest
+class AttemptResult extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,7 @@ class GradeEssay extends FormRequest
     public function rules(): array
     {
         return [
-            'attempt_id' => ['required', 'exists:assessment_attempts,id', 'integer'],
-            'attemptStatus' => ['required', 'string', 'in:PASSED,FAILED'],
-            'data' => ['required', 'array'],
-            'data.*.answerId' => ['required', 'integer'],
-            'data.*.grade' => ['required', 'numeric'],
+            'attemptId' => ['required', 'exists:assessment_attempts,id', 'integer']
         ];
     }
 }

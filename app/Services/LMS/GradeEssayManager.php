@@ -13,7 +13,7 @@ class GradeEssayManager
      * @param int $attemptId
      * @return array{message: string, status: int}
      */
-    public function gradeEssay(object $payload, int $attemptId) {
+    public function gradeEssay(object $payload, int $attemptId, string $attemptStatus) {
         foreach($payload->data as $value) {
             AssessmentAnswer::where([
                 'assessment_attempt_id' => $attemptId,
@@ -26,6 +26,7 @@ class GradeEssayManager
         AssessmentAttempt::whereKey($attemptId)
             ->lockForUpdate()
             ->update([
+                'status' => $attemptStatus,
                 'graded_by' => $payload->user()->id,
                 'graded_at' => now()
             ]);

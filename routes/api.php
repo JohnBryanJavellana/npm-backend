@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Authenticated\Trainee\TraineeLMSController;
 use App\Http\Controllers\Authenticated\Trainer\AnnouncementController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -236,7 +237,6 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("trainings", [LMSHandoutController::class, "overview"]);
         });
 
-
         Route::prefix("handouts/")->group(function () {
             Route::post("view_handouts", [LMSHandoutController::class, "view"]);
             Route::post("create_handouts", [LMSHandoutController::class, "store"]);
@@ -275,6 +275,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("view_module", [LMSController::class, "overview"]);
             Route::post("view_courses", [LMSController::class, "view"]);
             Route::post("view", [LMSController::class, "viewModule"]);
+            Route::post("content/view_attempt_result", [TraineeLMSController::class, "view_attempt_result"]);
             Route::post("content", [LMSController::class, "viewContentById"]);
             Route::post("create_courses", [LMSController::class, "create"]);
             Route::post("create_course_contents", [LMSController::class, "createSectionContents"]);

@@ -60,12 +60,10 @@ class LMSCourseService
 
     public function getContentById($contentId)
     {
-
         return tap($this->courseContentModel->query()
             ->whereKey($contentId)
             ->with([
                 "uploads",
-                "assessment_attempts",
                 "assessment",
             ])
             ->first(), function ($content) {
@@ -102,9 +100,19 @@ class LMSCourseService
                         }
                     }
 
-                    $isAccessible = $content->assessment_attempts->whereNotIn('status', ['SUBMITTED', 'FAILED'. 'PASSED'])->isNotEmpty() || $accessible;
-
+                    $isAccessible = $item->attempts->where('created_by', auth()->user()->id)->whereNotIn('status', ['SUBMITTED', 'FAILED'. 'PASSED'])->isNotEmpty() && $accessible;
                     $item->isAccessible = $isAccessible;
+                    $item->overallAttempts = $item->attempts->where('created_by', auth()->user()->id)->map(function($query) {
+                        return [
+                            "id" => $query->id,
+                            "score" => $query->answers->sum('score'),
+                            "status" => $query->status,
+                            "submitted_at" => $query->submitted_at,
+                            "graded_at" => $query->graded_at
+                        ];
+                    });
+
+                    unset($item->attempts);
                     return $item;
                 });
             });
