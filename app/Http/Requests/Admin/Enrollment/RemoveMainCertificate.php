@@ -34,7 +34,7 @@ class RemoveMainCertificate extends FormRequest
     public function rules(): array
     {
         return [
-            'certificateId' => ['required_if:httpMethod,UPDATE', 'exists:main_certificates,id', 'integer', new RemoveMainCertificateRule()]
+            'certificateId' => ['exists:main_certificates,id', 'integer', new RemoveMainCertificateRule()]
         ];
     }
 }

@@ -34,9 +34,7 @@ class RemoveVoucher extends FormRequest
     public function rules(): array
     {
         return [
-            'voucherId' => ['required_if:httpMethod,UPDATE', 'exists:vouchers,id', 'integer',
-                // new RemoveVoucherRule()
-            ]
+            'voucherId' => ['exists:vouchers,id', 'integer']
         ];
     }
 }

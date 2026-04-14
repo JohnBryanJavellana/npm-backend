@@ -34,9 +34,7 @@ class RemoveSponsor extends FormRequest
     public function rules(): array
     {
         return [
-            'sponsorId' => ['required_if:httpMethod,UPDATE', 'exists:sponsors,id', 'integer',
-                // new RemoveSponsorRule()
-            ]
+            'sponsorId' => ['exists:sponsors,id', 'integer']
         ];
     }
 }

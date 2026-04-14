@@ -34,7 +34,7 @@ class RemoveMainSchool extends FormRequest
     public function rules(): array
     {
         return [
-            'schoolId' => ['required_if:httpMethod,UPDATE', 'exists:main_schools,id', 'integer', new RemoveMainSchoolRule()]
+            'schoolId' => ['exists:main_schools,id', 'integer', new RemoveMainSchoolRule()]
         ];
     }
 }

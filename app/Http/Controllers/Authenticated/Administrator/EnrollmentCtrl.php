@@ -3,19 +3,25 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Helpers\Administrator\General\CountCollection;
+
 use App\Enums\Administrator\{
     EnrollmentEnum
 };
+
 use App\Enums\{
     AdministratorAuditActions,
-    AdministratorReturnResponse
+    AdministratorReturnResponse,
+    NotificationEnum
 };
-use App\Enums\NotificationEnum;
+
 use App\Events\{
     BEAuditTrail,
     BEEnrollment,
     BETraineeApplication
 };
+
 use App\Http\Requests\Admin\Enrollment\{
     CreateOrUpdateCertificate,
     CreateOrUpdateCourse,
@@ -28,13 +34,22 @@ use App\Http\Requests\Admin\Enrollment\{
     CreateOrUpdateSchedule,
     CreateOrUpdateSchool,
     CreateOrUpdateSponsor,
+    CreateOrUpdateTrainingFee,
     MoveTrainees,
-    CreateOrUpdateVoucher, RemoveLicense,
-    RemoveMainCertificate, RemoveMainCourse, RemoveMainSchool,
+    CreateOrUpdateVoucher,
+    RemoveFacilitator,
+    RemoveLicense,
+    RemoveMainCertificate,
+    RemoveMainCourse,
+    RemoveMainSchool,
     RemoveModule,
     RemoveModuleType,
-    RemoveSchedule, RemoveSponsor, RemoveVoucher
+    RemoveRank,
+    RemoveSchedule,
+    RemoveSponsor,
+    RemoveVoucher
 };
+
 use App\Models\{
     ChargeCategory,
     CourseModule,
@@ -48,7 +63,6 @@ use App\Models\{
     ModuleType,
     Rank,
     Requirement,
-    RequirementSpecificModule,
     Sponsor,
     TraineeRequirement,
     Training,
@@ -56,25 +70,29 @@ use App\Models\{
     TrainingRegFile,
     Voucher
 };
-use App\Services\Administrator\Enrollment\EnrollmentLicenseManager;
-use App\Services\Administrator\Enrollment\EnrollmentMainCertificateManager;
-use App\Services\Administrator\Enrollment\EnrollmentMainCourseManager;
-use App\Services\Administrator\Enrollment\EnrollmentMainSchoolManager;
-use App\Services\Administrator\Enrollment\EnrollmentModuleManager;
-use App\Services\Administrator\Enrollment\EnrollmentModuleTypeManager;
-use App\Services\Administrator\Enrollment\EnrollmentRequirementManager;
-use App\Services\Administrator\Enrollment\EnrollmentScheduleManager;
-use App\Services\Administrator\Enrollment\EnrollmentSponsorManager;
-use App\Services\Administrator\Enrollment\EnrollmentVoucherManager;
+
+use App\Services\Administrator\Enrollment\{
+    EnrollmentFacilitatorManager,
+    EnrollmentLicenseManager,
+    EnrollmentMainCertificateManager,
+    EnrollmentMainCourseManager,
+    EnrollmentMainSchoolManager,
+    EnrollmentModuleManager,
+    EnrollmentModuleTypeManager,
+    EnrollmentRankManager,
+    EnrollmentRequirementManager,
+    EnrollmentScheduleManager,
+    EnrollmentSponsorManager,
+    EnrollmentTrainingFeeManager,
+    EnrollmentVoucherManager
+};
+
 use App\Utils\{
     AuditHelper,
     GenerateTrace,
     Notifications,
     TransactionUtil
 };
-use Illuminate\Http\Request;
-use App\Helpers\Administrator\General\CheckForDocumentExistence;
-use App\Helpers\Administrator\General\CountCollection;
 
 class EnrollmentCtrl extends Controller
 {
@@ -88,7 +106,10 @@ class EnrollmentCtrl extends Controller
         public EnrollmentRequirementManager $enrollmentRequirementManager,
         public EnrollmentVoucherManager $enrollmentVoucherManager,
         public EnrollmentSponsorManager $enrollmentSponsorManager,
-        public EnrollmentLicenseManager $enrollmentLicenseManager
+        public EnrollmentLicenseManager $enrollmentLicenseManager,
+        public EnrollmentRankManager $enrollmentRankManager,
+        public EnrollmentFacilitatorManager $enrollmentFacilitatorManager,
+        public EnrollmentTrainingFeeManager $enrollmentTrainingFeeManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -511,12 +532,159 @@ class EnrollmentCtrl extends Controller
      */
     public function remove_license(RemoveLicense $request, int $licenseId)
     {
-        return TransactionUtil::transact(null, ['rank:license:all'], function () use ($request, $licenseId) {
+        return TransactionUtil::transact($request, [], function () use ($request, $licenseId) {
             $result = $this->enrollmentLicenseManager->removeLicense($licenseId);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_ranks
+     * @param Request $request
+     */
+    public function get_ranks(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $ranks = Rank::withCount(['hasData'])->get();
+            return response()->json(['ranks' => $ranks], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_rank
+     * @param CreateOrUpdateRank $request
+     */
+    public function create_or_update_rank(CreateOrUpdateRank $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $rankId = $request->rankId;
+
+            $result = $this->enrollmentRankManager->createOrUpdate($request, $isPost, $rankId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_rank
+     * @param RemoveRank $request
+     * @param int $rankId
+     */
+    public function remove_rank(RemoveRank $request, int $rankId)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request, $rankId) {
+            $result = $this->enrollmentRankManager->removeRank($rankId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_facilitators
+     * @param Request $request
+     */
+    public function get_facilitators(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $facilitators = TrainingFacilitator::withCount(['hasData'])->with([
+                'facilitator',
+                'module',
+            ])->get();
+
+            return response()->json(['facilitators' => $facilitators], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_facilitator
+     * @param CreateOrUpdateFacilitator $request
+     */
+    public function create_or_update_facilitator(CreateOrUpdateFacilitator $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $facilitatorId = $request->facilitatorId;
+
+            $result = $this->enrollmentFacilitatorManager->createOrUpdate($request, $isPost, $facilitatorId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_facilitator
+     * @param RemoveFacilitator $request
+     * @param int $facilitatorId
+     */
+    public function remove_facilitator(RemoveFacilitator $request, int $facilitatorId)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request, $facilitatorId) {
+            $result = $this->enrollmentFacilitatorManager->removeFacilitator($facilitatorId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_course_module_fees
+     * @param Request $request
+     */
+    public function get_course_module_fees(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $course_module_fees = CourseModuleFee::with([
+                'category',
+                'module',
+            ])->get();
+
+            return response()->json(['courseModuleFees' => $course_module_fees], 200);
+        });
+    }
+
+    /**
+     * Summary of get_training_fees_predata
+     * @param Request $request
+     */
+    public function get_training_fees_predata(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () {
+            $modules = CourseModule::all();
+            $categories = ChargeCategory::all();
+
+            return response()->json([
+                'modules' => $modules,
+                'categories' => $categories,
+            ], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_course_fee
+     * @param CreateOrUpdateTrainingFee $request
+     */
+    public function create_or_update_course_fee(CreateOrUpdateTrainingFee $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $trainingFeeId = $request->trainingFeeId;
+
+            $result = $this->enrollmentTrainingFeeManager->createOrUpdate($request, $isPost, $trainingFeeId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_course_fee
+     * @param Request $request
+     * @param int $trainingFeeId
+     */
+    public function remove_course_fee(Request $request, int $trainingFeeId)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request, $trainingFeeId) {
+            $result = $this->enrollmentTrainingFeeManager->removeTrainingFee($trainingFeeId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
 
 
     # ✖️✖️✖️✖️✖️✖️✖️
@@ -624,8 +792,6 @@ class EnrollmentCtrl extends Controller
     /**
      * Summary of requirement_remark
      * @param Request $request
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
      */
     public function requirement_remark(Request $request)
     {
@@ -708,9 +874,6 @@ class EnrollmentCtrl extends Controller
     /**
      * Summary of set_training_status
      * @param Request $request
-     * @param bool notifications === FALSE
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
      */
     public function set_training_status(Request $request)
     {
@@ -749,8 +912,6 @@ class EnrollmentCtrl extends Controller
     /**
      * Summary of set_expired_status
      * @param Request $request
-     * @param bool auditActions === FALSE
-     * @param bool returnedMessage === FALSE
      */
     public function set_expired_status(Request $request)
     {
@@ -767,325 +928,6 @@ class EnrollmentCtrl extends Controller
             }
 
             return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTEXPIREDSTATUS->value. "ID# " . $this_training->id], 201);
-        });
-    }
-
-
-
-
-
-
-
-    /**
-     * Summary of get_ranks
-     * @param Request $request
-     */
-    public function get_ranks(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () {
-            $ranks = Rank::withCount(['hasData'])->get();
-            return response()->json(['ranks' => $ranks], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_rank
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateRank $request
-     */
-    public function create_or_update_rank(CreateOrUpdateRank $request)
-    {
-        return TransactionUtil::transact($request, ['rank:license:all'], function () use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-
-            $check = CheckForDocumentExistence::exists(
-                Rank::class,
-                [
-                    'name' => $request->name,
-                    'short_name' => $request->short_name,
-                    'type' => $request->type
-                ],
-                !$isPost,
-                $documentId,
-                'id',
-                "Rank already exist."
-            );
-
-            if ($check) return $check;
-
-            $this_rank = $isPost ? new Rank() : Rank::findOrFail($request->documentId);
-            $this_rank->short_name = $request->short_name;
-            $this_rank->name = $request->name;
-            $this_rank->type = $request->type;
-            $this_rank->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTLICENSE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTLICENSE->value . " ID#$this_rank->id"
-            );
-
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTLICENSE->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTLICENSE->value). 'ID# ' . $this_rank->id], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_rank
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $rank_id
-     */
-    public function remove_rank(Request $request, int $rank_id)
-    {
-        return TransactionUtil::transact(null, ['rank:license:all'], function () use ($request, $rank_id) {
-            $this_rank = Rank::withCount(['hasData'])->where('id', $rank_id)->first();
-
-            if ($this_rank->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTRANK->value ], 409);
-            } else {
-                $this_rank->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTRANK->value . " ID#$rank_id"
-                );
-
-                if (env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTRANK->value. "ID#$rank_id"], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of get_facilitators
-     * @param Request $request
-     */
-    public function get_facilitators(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () {
-            $facilitators = TrainingFacilitator::withCount(['hasData'])->with([
-                'facilitator',
-                'module',
-            ])->get();
-
-            return response()->json(['facilitators' => $facilitators], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_facilitator
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateFacilitator $request
-     */
-    public function create_or_update_facilitator(CreateOrUpdateFacilitator $request)
-    {
-        return TransactionUtil::transact($request, [], function () use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-
-            $check = CheckForDocumentExistence::exists(
-                TrainingFacilitator::class,
-                [
-                    'course_module_id' => $request->module,
-                    'user_id' => $request->facilitator,
-                    'role' => $request->role
-                ],
-                !$isPost,
-                $documentId,
-                'id',
-                "Training Facilitator already exist."
-            );
-
-            if ($check) return $check;
-
-            $this_facilitator = $isPost ? new TrainingFacilitator() : TrainingFacilitator::findOrFail($request->documentId);
-            $this_facilitator->course_module_id = $request->module;
-            $this_facilitator->user_id = $request->facilitator;
-            $this_facilitator->role = $request->role;
-            $this_facilitator->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTFACILITATOR->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTFACILITATOR->value . " ID#$this_facilitator->id"
-            );
-
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            return response()->json(['message' =>  ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTFACILITATOR->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTFACILITATOR->value). 'ID# ' . $this_facilitator->id], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_facilitator
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $facilitator_id
-     */
-    public function remove_facilitator(Request $request, int $facilitator_id)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request, $facilitator_id) {
-            $this_facilitator = TrainingFacilitator::withCount(['hasData'])->where('id', $facilitator_id)->first();
-
-            if ($this_facilitator->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTFACILITATOR->value ], 409);
-            } else {
-                $this_facilitator->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTFACILITATOR->value. " ID#$facilitator_id"
-                );
-
-                if (env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTFACILITATOR->value. " ID#$facilitator_id"], 200);
-            }
-        });
-    }
-
-    /**
-     * Summary of get_course_module_fees
-     * @param Request $request
-     */
-    public function get_course_module_fees(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () {
-            $course_module_fees = CourseModuleFee::with([
-                'category',
-                'module',
-            ])->get();
-
-            return response()->json(['courseModuleFees' => $course_module_fees], 200);
-        });
-    }
-
-    /**
-     * Summary of get_training_fees_predata
-     * @param Request $request
-     */
-    public function get_training_fees_predata(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () {
-            $modules = CourseModule::all();
-            $categories = ChargeCategory::all();
-
-            return response()->json([
-                'modules' => $modules,
-                'categories' => $categories,
-            ], 200);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_course_fee
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     */
-    public function create_or_update_course_fee(Request $request)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-
-            $check = CheckForDocumentExistence::exists(
-                CourseModuleFee::class,
-                [
-                    'course_module_id' => $request->module,
-                    'charge_category_id' => $request->category,
-                    'name' => $request->name,
-                    'amount' => $request->amount
-                ],
-                !$isPost,
-                $documentId,
-                'id',
-                "Course Module Fee already exist."
-            );
-
-            if ($check) return $check;
-
-            $this_course_fee = $isPost ? new CourseModuleFee() : CourseModuleFee::findOrFail($request->documentId);
-            $this_course_fee->course_module_id = $request->module;
-            $this_course_fee->charge_category_id = $request->category;
-            $this_course_fee->name = $request->name;
-            $this_course_fee->amount = $request->amount;
-            if (!$isPost) $this_course_fee->status = $request->status;
-            $this_course_fee->save();
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::ENROLLMENTCTRL_CREATED_ENROLLMENTTRAININGFEE->value : AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE->value . " ID#$this_course_fee->id"
-            );
-
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail(''),
-                );
-            }
-
-            return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTTRAININGFEE->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGFEE->value).'ID# ' . $this_course_fee->id], 201);
-        });
-    }
-
-    /**
-     * Summary of remove_course_fee
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     * @param int $course_fee_id
-     */
-    public function remove_course_fee(Request $request, int $course_fee_id)
-    {
-        return TransactionUtil::transact(null, [], function () use ($request, $course_fee_id) {
-            $this_course_fee = CourseModuleFee::where('id', $course_fee_id)->first();
-
-            if ($this_course_fee->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTTRAININGFEE->value], 409);
-            } else {
-                $this_course_fee->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE->value. " ID#$course_fee_id"
-                );
-
-                if (env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTTRAININGFEE->value. "ID#$course_fee_id"], 200);
-            }
         });
     }
 

@@ -34,7 +34,7 @@ class RemoveMainCourse extends FormRequest
     public function rules(): array
     {
         return [
-            'courseId' => ['required_if:httpMethod,UPDATE', 'exists:main_courses,id', 'integer', new RemoveMainCourseRule()]
+            'courseId' => ['exists:main_courses,id', 'integer', new RemoveMainCourseRule()]
         ];
     }
 }

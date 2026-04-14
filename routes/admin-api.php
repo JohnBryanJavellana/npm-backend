@@ -92,7 +92,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('get_training_fees_predata', [EnrollmentCtrl::class, 'get_training_fees_predata']);
             Route::get('get_course_module_fees', [EnrollmentCtrl::class, 'get_course_module_fees']);
             Route::post('create_or_update_course_fee', [EnrollmentCtrl::class, 'create_or_update_course_fee']);
-            Route::delete('remove_course_fee/{courseFeeId}', [EnrollmentCtrl::class, 'remove_course_fee']);
+            Route::delete('remove_course_fee/{trainingFeeId}', [EnrollmentCtrl::class, 'remove_course_fee']);
         });
 
         Route::prefix('/books/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY', 'throttle:60,1'])->group(function () {

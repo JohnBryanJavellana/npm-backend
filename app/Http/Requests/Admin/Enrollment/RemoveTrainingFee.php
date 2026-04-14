@@ -3,9 +3,10 @@
 namespace App\Http\Requests\Admin\Enrollment;
 
 use App\Enums\UserRoleEnum;
+use App\Rules\Admin\Enrollment\RemoveTrainingFeeRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateFacilitator extends FormRequest
+class RemoveTrainingFee extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -18,6 +19,13 @@ class CreateOrUpdateFacilitator extends FormRequest
         ]);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'trainingFeeId' => $this->route('trainingFeeId')
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,11 +34,7 @@ class CreateOrUpdateFacilitator extends FormRequest
     public function rules(): array
     {
         return [
-            'course_module_id' => ['required', 'integer', 'exists:course_modules,id'],
-            'user_id' => ['required', 'integer', 'exists:users,id'],
-            'role' => ['required', 'string', 'in:INSTRUCTOR,ASSESSOR,MODERATOR,MENTOR,COORDINATOR,OBSERVER'],
-            'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],
-            'facilitatorId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:training_facilitators,id']
+            'trainingFeeId' => ['exists:course_module_fees,id', 'integer', new RemoveTrainingFeeRule()]
         ];
     }
 }

@@ -34,7 +34,7 @@ class RemoveLicense extends FormRequest
     public function rules(): array
     {
         return [
-            'licenseId' => ['required_if:httpMethod,UPDATE', 'exists:licenses,id', 'integer', new RemoveLicenseRule()]
+            'licenseId' => ['exists:licenses,id', 'integer', new RemoveLicenseRule()]
         ];
     }
 }

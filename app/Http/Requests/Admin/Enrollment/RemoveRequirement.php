@@ -34,7 +34,7 @@ class RemoveRequirement extends FormRequest
     public function rules(): array
     {
         return [
-            'requirementId' => ['required_if:httpMethod,UPDATE', 'exists:requirements,id', 'integer', new RemoveRequirementRule()]
+            'requirementId' => ['exists:requirements,id', 'integer', new RemoveRequirementRule()]
         ];
     }
 }
