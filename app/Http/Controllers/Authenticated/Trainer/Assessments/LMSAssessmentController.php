@@ -75,7 +75,6 @@ class LMSAssessmentController extends Controller
                     'sections.questions.options'
                 ])
                 ->first();
-
             return new AssessmentResource($record);
         } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
