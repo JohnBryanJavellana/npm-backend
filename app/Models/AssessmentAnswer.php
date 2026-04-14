@@ -15,6 +15,7 @@ class AssessmentAnswer extends Model
     {
         return $this->belongsTo(AssessmentAttempt::class, "assessment_attempt_id", "id");
     }
+
     public function assessment_option()
     {
         return $this->hasOne(AssessmentOption::class, "id", "assessment_question_id");

@@ -24,18 +24,8 @@ class GradeEssay extends FormRequest
         return [
             'attempt_id' => ['required', 'exists:assessment_attempts,id', 'integer'],
             'data' => ['required', 'array'],
-            // 'data.*.answerId' => ['required', 'exists:assessment_answers,id'],
-            // 'data.*.grade' => ['required', 'integer'],
+            'data.*.answerId' => ['required', 'integer'],
+            'data.*.grade' => ['required', 'numeric'],
         ];
-
-        // {
-        //     attempt_id: 50,
-        //     data: [
-        //         {
-        //             answerId: 3,
-        //             grade: 10
-        //         }
-        //     ]
-        // }
     }
 }
