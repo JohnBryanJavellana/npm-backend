@@ -9,14 +9,13 @@ use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
 use App\Models\AssessmentAttempt;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use App\Utils\TransactionUtil;
-use Illuminate\Http\Request;
 
 class TraineeLMSController extends Controller
 {
     public function __construct(
         protected LMSAssessmentService $lmsAssessmentService
     ){}
-    //what
+
     public function view(viewAssessmentRequest $request)
     {
         try
@@ -40,12 +39,10 @@ class TraineeLMSController extends Controller
 
             $result = AssessmentAttempt::with([
                 'assessment:title,id,control_number,description,type,passing_score,time_limit',
-                'gradedBy:id,fname,mname,lname,suffix,email',
-                'answers'
+                'gradedBy:id,fname,mname,lname,suffix,email'
             ])->whereKey($attemptId)->firstOrFail();
 
-            $result->score = $result->answers->sum('score');
-            $result->makeHidden('answers');
+            $result->score = $result->answers()->sum('score');
             return response()->json(['result' => $result], 201);
         });
     }
