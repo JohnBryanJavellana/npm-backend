@@ -68,17 +68,17 @@ class LMSAssessmentController extends Controller
             $record = Assessments::where('control_number', $request->control_number)
                 ->with([
                     'sections.questions.options',
-                    'submittedAttempts' => function($query) use ($request) {
-                        $query->when($request->user_id, function($q) use ($request) {
+                    'submittedAttempts' => function ($query) use ($request) {
+                        $query->when($request->user_id, function ($q) use ($request) {
                             $q->where('created_by', $request->user_id);
                         });
                     },
-                    'attempts' => function($query) use ($request) {
-                        $query->when($request->user_id, function($q) use ($request) {
+                    'attempts' => function ($query) use ($request) {
+                        $query->when($request->user_id, function ($q) use ($request) {
                             $q->where('created_by', $request->user_id);
                         });
 
-                        $query->when($request->assessment_attempt_id, function($q) use ($request) {
+                        $query->when($request->assessment_attempt_id, function ($q) use ($request) {
                             $q->whereKey($request->assessment_attempt_id);
                         });
                     },
@@ -137,13 +137,13 @@ class LMSAssessmentController extends Controller
     }
 
     //! this is fix code
-    // Create attempt and answers
-    // score is fix to boolean
+    //! Create attempt and answers
+    //! score is fix to boolean
     public function assessment_answers(Request $request)
     {
         try {
             $validated = $request->validate([
-                "control_number" => "required|string|exists:assessments,control_number",
+                "control_number" => "required|string|exists:assessments,control_number", 
                 "answers" => "nullable|array",
                 "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
                 //! nullable kay it essay waray option id
@@ -151,7 +151,7 @@ class LMSAssessmentController extends Controller
                 "answers.*.assessment_answer_text" => "nullable|string",
 
                 "proctoring_events" => "nullable|array",
-                // "type" => "nullable|array",
+                //! "type" => "nullable|array",
             ]);
 
             DB::beginTransaction();
@@ -160,8 +160,8 @@ class LMSAssessmentController extends Controller
                 $this_assessment = Assessments::where('control_number', $validated["control_number"])->firstOrFail();
                 $courseModule = CourseModule::whereKey($this_assessment->courseContent->courseModuleSection->courseModule->id)->get();
 
-                // check if trainee is enrolled to this specific module
-                // if yes, find training. otherwise show error response
+                //! check if trainee is enrolled to this specific module
+                //! if yes, find training. otherwise show error response
                 $training = null;
                 foreach ($courseModule as $cm) {
                     $training = Training::where('course_module_id', $cm->id)->first();
@@ -171,7 +171,7 @@ class LMSAssessmentController extends Controller
                         'enrolled_course_status' => 'ENROLLED'
                     ])->first();
 
-                    if($isCurrentEnrolled) {
+                    if ($isCurrentEnrolled) {
                         $training = $isCurrentEnrolled;
                         return;
                     }
@@ -318,7 +318,7 @@ class LMSAssessmentController extends Controller
                 $assessment = Assessments::whereKey($request->assessment_id)
                     ->with([
                         'sections.questions.options',
-                        'attempts' => function($query) use ($request) {
+                        'attempts' => function ($query) use ($request) {
                             $query->when($request->attempt_id, fn($q) => $q->whereKey($request->attempt_id));
                         },
                         'attempts.answers'
@@ -329,18 +329,16 @@ class LMSAssessmentController extends Controller
 
                 if ($attempt) {
                     $attempt->makeHidden('answers');
-                    $attempt->score = $attempt->answers->sum('score');
-
                     $userAnswers = $attempt->answers->keyBy('assessment_question_id');
-                    $attempt->sections = $assessment->sections->map(function($section) use ($userAnswers) {
+                    $attempt->sections = $assessment->sections->map(function ($section) use ($userAnswers) {
                         $sectionData = clone $section;
 
-                        $sectionData->questions->each(function($question) use ($userAnswers) {
+                        $sectionData->questions->each(function ($question) use ($userAnswers) {
                             $userAnswer = $userAnswers->get($question->id);
                             $question->user_answer_text = $userAnswer?->answer_text;
                             $question->grade = $userAnswer?->score;
 
-                            $question->options->each(function($option) use ($userAnswer) {
+                            $question->options->each(function ($option) use ($userAnswer) {
                                 $option->is_user_selected = $userAnswer && ($userAnswer->assessment_option_id == $option->id);
                             });
                         });
