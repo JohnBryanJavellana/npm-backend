@@ -29,7 +29,7 @@ use App\Http\Requests\Admin\Enrollment\{
     CreateOrUpdateSchool,
     CreateOrUpdateSponsor,
     MoveTrainees,
-    CreateOrUpdateVoucher,
+    CreateOrUpdateVoucher, RemoveLicense,
     RemoveMainCertificate, RemoveMainCourse, RemoveMainSchool,
     RemoveModule,
     RemoveModuleType,
@@ -56,6 +56,7 @@ use App\Models\{
     TrainingRegFile,
     Voucher
 };
+use App\Services\Administrator\Enrollment\EnrollmentLicenseManager;
 use App\Services\Administrator\Enrollment\EnrollmentMainCertificateManager;
 use App\Services\Administrator\Enrollment\EnrollmentMainCourseManager;
 use App\Services\Administrator\Enrollment\EnrollmentMainSchoolManager;
@@ -86,7 +87,8 @@ class EnrollmentCtrl extends Controller
         public EnrollmentMainCourseManager $enrollmentMainCourseManager,
         public EnrollmentRequirementManager $enrollmentRequirementManager,
         public EnrollmentVoucherManager $enrollmentVoucherManager,
-        public EnrollmentSponsorManager $enrollmentSponsorManager
+        public EnrollmentSponsorManager $enrollmentSponsorManager,
+        public EnrollmentLicenseManager $enrollmentLicenseManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -487,6 +489,33 @@ class EnrollmentCtrl extends Controller
         });
     }
 
+    /**
+     * Summary of create_or_update_license
+     * @param CreateOrUpdateLicense $request
+     */
+    public function create_or_update_license(CreateOrUpdateLicense $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $licenseId = $request->licenseId;
+
+            $result = $this->enrollmentLicenseManager->createOrUpdate($request, $isPost, $licenseId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_license
+     * @param RemoveLicense $request
+     * @param int $licenseId
+     */
+    public function remove_license(RemoveLicense $request, int $licenseId)
+    {
+        return TransactionUtil::transact(null, ['rank:license:all'], function () use ($request, $licenseId) {
+            $result = $this->enrollmentLicenseManager->removeLicense($licenseId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
 
 
 
@@ -743,61 +772,9 @@ class EnrollmentCtrl extends Controller
 
 
 
-    public function create_or_update_license(CreateOrUpdateLicense $request)
-    {
-        return TransactionUtil::transact($request, [], function () use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $licenseId = $request->licenseId;
 
-            // $check = CheckForDocumentExistence::exists(
-            //     Sponsor::class,
-            //     [
-            //         'license' => $request->license,
-            //         'short_name' => $request->short_name
-            //     ],
-            //     !$isPost,
-            //     $documentId,
-            //     'id',
-            //     "License already exist."
-            // );
 
-            // if ($check) return $check;
 
-            // $this_license = $isPost ? new License() : License::findOrFail($request->documentId);
-            // $this_license->short_name = $request->name;
-            // $this_license->license = $request->license;
-            // $this_license->save();
-
-            // return response()->json(['message' => ($isPost ? AdministratorReturnResponse::ENROLLMENTCTRL_CREATED_ENROLLMENTLICENSE->value : AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTLICENSE->value). 'ID#' . $this_license->id], 201);
-        });
-    }
-
-    public function remove_license(Request $request, int $license_id)
-    {
-        return TransactionUtil::transact(null, ['rank:license:all'], function () use ($request, $license_id) {
-            $this_license = License::withCount(['hasData'])->where('id', $license_id)->first();
-
-            if ($this_license->has_data_count > 0) {
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_ERR_ENROLLMENTLICENSE->value], 409);
-            } else {
-                $this_license->delete();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::ENROLLMENTCTRL_REMOVED_ENROLLMENTLICENSE->value . " ID#$license_id"
-                );
-
-                if (env('USE_EVENT')) {
-                    event(
-                        new BEEnrollment(''),
-                        new BEAuditTrail(''),
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_REMOVED_ENROLLMENTLICENSE->value. "ID#$license_id"], 200);
-            }
-        });
-    }
 
     /**
      * Summary of get_ranks

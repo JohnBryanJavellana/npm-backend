@@ -3,9 +3,10 @@
 namespace App\Http\Requests\Admin\Enrollment;
 
 use App\Enums\UserRoleEnum;
+use App\Rules\Admin\Enrollment\RemoveLicenseRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateLicense extends FormRequest
+class RemoveLicense extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -18,6 +19,13 @@ class CreateOrUpdateLicense extends FormRequest
         ]);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'licenseId' => $this->route('licenseId')
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,10 +34,7 @@ class CreateOrUpdateLicense extends FormRequest
     public function rules(): array
     {
         return [
-            'short_name' => ['required', 'string'],
-            'license' => ['required', 'string'],
-            'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],
-            'licenseId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:licenses,id']
+            'licenseId' => ['required_if:httpMethod,UPDATE', 'exists:licenses,id', 'integer', new RemoveLicenseRule()]
         ];
     }
 }

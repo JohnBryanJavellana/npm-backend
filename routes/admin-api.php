@@ -79,15 +79,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::get('get_licenses', [EnrollmentCtrl::class, 'get_licenses']);
             Route::post('create_or_update_license', [EnrollmentCtrl::class, 'create_or_update_license']);
-            Route::delete('remove_license/{licenseid}', [EnrollmentCtrl::class, 'remove_license']);
+            Route::delete('remove_license/{licenseId}', [EnrollmentCtrl::class, 'remove_license']);
 
             Route::get('get_ranks', [EnrollmentCtrl::class, 'get_ranks']);
             Route::post('create_or_update_rank', [EnrollmentCtrl::class, 'create_or_update_rank']);
-            Route::delete('remove_rank/{rankid}', [EnrollmentCtrl::class, 'remove_rank']);
+            Route::delete('remove_rank/{rankId}', [EnrollmentCtrl::class, 'remove_rank']);
 
             Route::get('get_facilitators', [EnrollmentCtrl::class, 'get_facilitators']);
             Route::post('create_or_update_facilitator', [EnrollmentCtrl::class, 'create_or_update_facilitator']);
-            Route::delete('remove_facilitator/{facilitatorid}', [EnrollmentCtrl::class, 'remove_facilitator']);
+            Route::delete('remove_facilitator/{facilitatorId}', [EnrollmentCtrl::class, 'remove_facilitator']);
 
             Route::get('get_training_fees_predata', [EnrollmentCtrl::class, 'get_training_fees_predata']);
             Route::get('get_course_module_fees', [EnrollmentCtrl::class, 'get_course_module_fees']);

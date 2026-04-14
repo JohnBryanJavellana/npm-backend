@@ -22,7 +22,7 @@ class EnrollmentLicenseManager extends DocumentExistenceChecker
             return ['message' => "License already exist.", 'status' => 409];
         }
 
-        License::updateOrCreate(['id' => $licenseId], $payload->only(['name', 'code', 'status']));
+        License::updateOrCreate(['id' => $licenseId], $payload->only(['short_name', 'license']));
 
         return [
             'message' => $isPost
