@@ -100,7 +100,7 @@ class LMSCourseService
                         }
                     }
 
-                    $isAccessible = $item->attempts->where('created_by', auth()->user()->id)->whereNotIn('status', ['SUBMITTED', 'FAILED'. 'PASSED'])->isNotEmpty() && $accessible;
+                    $isAccessible = $item->attempts->where('created_by', auth()->user()->id)->whereIn('status', ['IN_PROGRESS', 'FOR_REMOVAL'])->isNotEmpty() && $accessible;
                     $item->isAccessible = $isAccessible;
                     $item->overallAttempts = $item->attempts->where('created_by', auth()->user()->id)->map(function($query) {
                         return [

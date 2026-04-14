@@ -42,7 +42,10 @@ class TraineeLMSController extends Controller
                 'gradedBy:id,fname,mname,lname,suffix,email'
             ])->whereKey($attemptId)->firstOrFail();
 
+            $result->assessment->totalAssessmentScore = $result->assessment->sections->sum(fn($section) => $section->questions->sum('score'));
             $result->score = $result->answers()->sum('score');
+            $result->assessment->makeHidden('sections');
+
             return response()->json(['result' => $result], 201);
         });
     }
