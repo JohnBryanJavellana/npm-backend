@@ -18,6 +18,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(CourseModule::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->string('bgColor')->nullable();
             $table->enum('role', [
                 "INSTRUCTOR",
                 "ASSESSOR",

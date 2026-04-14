@@ -19,6 +19,17 @@ class Assessments extends Model
         return $this->hasMany(AssessmentSection::class);
     }
 
+    public function attempts()
+    {
+        return $this->hasMany(AssessmentAttempt::class);
+    }
+
+    public function submittedAttempts()
+    {
+        return $this->hasMany(AssessmentAttempt::class, 'assessments_id')
+            ->where('status', 'SUBMITTED');
+    }
+
     public function course()
     {
         return $this->belongsTo(CourseModule::class);
@@ -31,6 +42,11 @@ class Assessments extends Model
     public function updated_by()
     {
         return $this->belongsTo(User::class, "updated_by", "id");
+    }
+
+    public function courseContent()
+    {
+        return $this->belongsTo(CourseContent::class, "course_content_id", "id");
     }
 
 

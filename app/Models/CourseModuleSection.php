@@ -31,6 +31,11 @@ class CourseModuleSection extends Model
         return $this->belongsTo(User::class, "updated_by", "id");
     }
 
+    public function courseModule()
+    {
+        return $this->belongsTo(CourseModule::class, "course_module_id", "id");
+    }
+
     /** Scopes */
 
     public function scopeForCourseModule(Builder $query, $courseId)

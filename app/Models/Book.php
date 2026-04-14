@@ -10,6 +10,8 @@ class Book extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function catalog()
     {
         return $this->belongsTo(BookCatalog::class, 'book_catalog_id', 'id');
@@ -23,6 +25,10 @@ class Book extends Model
     public function related()
     {
         return $this->hasMany(BookTrainingRelated::class);
+    }
+
+    public function trainings() {
+        return $this->belongsToMany(BookTrainingRelated::class, 'book_training_related', 'book_id', 'training_id');
     }
 
     public function hasData()

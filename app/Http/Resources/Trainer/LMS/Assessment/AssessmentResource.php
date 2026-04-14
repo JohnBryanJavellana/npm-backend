@@ -2,6 +2,11 @@
 
 namespace App\Http\Resources\Trainer\LMS\Assessment;
 
+use App\Models\Assessments;
+use App\Models\CourseModule;
+use App\Models\EnrolledCourse;
+use App\Models\Training;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -9,12 +14,50 @@ class AssessmentResource extends JsonResource
 {
     public function toArray($request)
     {
-        // return parent::toArray($request); 
+        // return parent::toArray($request);
 
         $isTrainee = $request->user()->role === 'TRAINEE';
 
-        return [
+        $attempt = $this->attempts->first();
+        $userAnswers = $attempt ? $attempt->answers->keyBy('assessment_question_id') : collect();
+
+        $this_assessment = Assessments::where('control_number', $this?->control_number)->first();
+        $courseModule = CourseModule::whereKey($this_assessment->courseContent->courseModuleSection->courseModule->id)->get();
+
+        $training = null;
+        foreach ($courseModule as $cm) {
+            $training = Training::where('course_module_id', $cm->id)->first();
+            $isCurrentEnrolled = EnrolledCourse::where([
+                'user_id' => auth()->id(),
+                'training_id' => $training->id,
+                'enrolled_course_status' => 'ENROLLED'
+            ])->first();
+
+            if($isCurrentEnrolled) {
+                $training = $isCurrentEnrolled;
+                break;
+            }
+        }
+
+        $accessible = false;
+        if ($training) {
+            $start = Carbon::parse($training->schedule_from)->startOfDay();
+            $end = Carbon::parse($training->schedule_to)->startOfDay();
+            $today = now()->startOfDay();
+
+            if ($today->lt($start) || $today->gt($end)) {
+                $accessible = false;
+            } else {
+                $dayCount = $today->diffInDays($start) + 1;
+                $accessible = $this_assessment->courseContent->courseModuleSection->day_number === $dayCount;
+            }
+        }
+
+        $isAccessible = $this->attempts->whereNotIn('status', ['SUBMITTED', 'FAILED'. 'PASSED'])->isNotEmpty() || $accessible;
+
+        $preparedData = [
             'id' => $this?->id,
+            'control_number' => $this->control_number,
             'course_content_id' => $this->course_content_id,
             'title' => $this->title,
             'description' => $this->description,
@@ -25,31 +68,85 @@ class AssessmentResource extends JsonResource
             'time_limit' => $this->time_limit,
             'created_by' => $this->created_by,
             'created_at' => $this->created_at,
-            'passing_score' => $this->passing_score,
-            'sections' => $this->sections->map(function ($section) use ($isTrainee) {
+            'passing_score' => $this->passing_score
+        ];
+
+        if($isTrainee) {
+            $preparedData['sections'] = $this->sections->map(function ($section) use ($isTrainee, $userAnswers) {
+                return [
+                    'id' => $section->id,
+                    'title' => $section->title,
+                    'instruction' => $section->instruction,
+                    'status' => $section->status,
+                    'questions' => $section->questions->map(function ($question) use ($isTrainee, $userAnswers) {
+                        $userAnswer = $userAnswers->get($question->id);
+
+                        $preparedData = [
+                            'id' => $question->id,
+                            'question' => $question->question,
+                            'type' => $question->type,
+                            'score' => $question->score
+                        ];
+
+                        if($isTrainee) {
+                            if($question->type === "ESSAY" && !\is_null($userAnswer?->answer_text)) {
+                                $preparedData['answer'] = $userAnswer?->answer_text;
+                            }
+
+                            if(\count($question->options) > 0) {
+                                $preparedData['options'] = $question->options->map(function ($option) use ($isTrainee, $userAnswer) {
+                                    return [
+                                        'id' => $option->id,
+                                        'option_text' => $option->option_text,
+                                        'is_user_selected' => $userAnswer && $userAnswer->assessment_option_id == $option->id
+                                    ];
+                                });
+                            }
+                        } else {
+                            $preparedData['options'] = $question->options->map(function ($option) use ($isTrainee, $userAnswer) {
+                                return [
+                                    'id' => $option->id,
+                                    'option_text' => $option->option_text,
+                                    'is_correct' => $option->is_correct
+                                ];
+                            });
+                        }
+
+                        return $preparedData;
+                    }),
+                ];
+            });
+
+            $preparedData['withSubmittedAttempts'] = $this->submittedAttempts->isNotEmpty();
+            $preparedData['isAccessible'] = false;
+        } else {
+            $preparedData['sections'] = $this->sections->map(function ($section) use ($isTrainee) {
                 return [
                     'id' => $section->id,
                     'title' => $section->title,
                     'instruction' => $section->instruction,
                     'status' => $section->status,
                     'questions' => $section->questions->map(function ($question) use ($isTrainee) {
-                        return [
+                        $preparedData = [
                             'id' => $question->id,
                             'question' => $question->question,
                             'type' => $question->type,
                             'score' => $question->score,
-                            'status' => $question->status,
                             'options' => $question->options->map(function ($option) use ($isTrainee) {
                                 return [
                                     'id' => $option->id,
                                     'option_text' => $option->option_text,
-                                    'is_correct' => $isTrainee ? null : $option->is_correct,
+                                    'is_correct' => $option->is_correct
                                 ];
-                            }),
+                            })
                         ];
+
+                        return $preparedData;
                     }),
                 ];
-            }),
-        ];
+            });
+        }
+
+        return $preparedData;
     }
 }

@@ -16,9 +16,9 @@ class EnrollmentMainCourseManager extends DocumentExistenceChecker
      * @return array{message: string, status: int}
      */
     public function createOrUpdate(object $payload, bool $isPost, ?int $courseId) {
-        $isSchoolExists = DocumentExistenceChecker::checkForExistence(MainCourse::class, ['course_name' => $payload->course_name], $courseId);
+        $isCourseExists = DocumentExistenceChecker::checkForExistence(MainCourse::class, $payload->only(['course_name' ]), $courseId);
 
-        if($isSchoolExists) {
+        if($isCourseExists) {
             return ['message' => "Course already exist.", 'status' => 409];
         }
 

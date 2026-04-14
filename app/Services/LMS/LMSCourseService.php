@@ -3,11 +3,17 @@
 namespace App\Services\LMS;
 
 use App\Enums\RequestStatus;
+use App\Models\AssessmentAttempt;
+use App\Models\Assessments;
 use App\Models\CourseContent;
 use App\Models\CourseContentUpload;
+use App\Models\CourseModule;
 use App\Models\CourseModuleSection;
+use App\Models\EnrolledCourse;
+use App\Models\Training;
 use App\Utils\AuditHelper;
 use App\Utils\SaveFile;
+use Carbon\Carbon;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -30,7 +36,7 @@ class LMSCourseService
                 return $query->whereKey($section_id)->with([
                     "contents",
                     "contents.uploads",
-                    "contents.assessment:id,course_content_id,title,type,status",
+                    "contents.assessment:id,control_number,course_content_id,title,type,status",
                     "updated_by:id,fname,mname,lname"
                 ])->first();
             },
@@ -46,7 +52,7 @@ class LMSCourseService
             ->forCourseModule($moduleId)
             ->with([
                 "contents:id,course_module_section_id,title,status",
-                "contents.assessment:id,course_content_id,title,status",
+                "contents.assessment:id,control_number,course_content_id,title,status",
                 "updated_by:id,fname,mname,lname",
             ])
             ->get();
@@ -54,27 +60,54 @@ class LMSCourseService
 
     public function getContentById($contentId)
     {
-        return $this->courseContentModel->query()
+
+        return tap($this->courseContentModel->query()
             ->whereKey($contentId)
             ->with([
                 "uploads",
-                "assessment_attempts" => function ($query) {
-                    $query->select(
-                        "assessment_attempts.id",
-                        "assessment_attempts.assessments_id",
-                        "assessment_attempts.enrolled_course_id",
-                        "assessment_attempts.score",
-                        "assessment_attempts.status",
-                        "assessment_attempts.graded_by",
-                        "assessment_attempts.submitted_at",
-                        "assessment_attempts.graded_at",
-                        "assessment_attempts.created_at",
-                        "assessment_attempts.updated_at"
-                    );
-                },
-                "assessment:id,course_content_id,title,type,passed_type,passing_score,time_limit,status",
+                "assessment_attempts",
+                "assessment",
             ])
-            ->first();
+            ->first(), function ($content) {
+                $content->assessment->transform(function ($item) use($content) {
+                    $this_assessment = Assessments::where('control_number', $item->control_number)->first();
+                    $courseModule = CourseModule::whereKey($this_assessment->courseContent->courseModuleSection->courseModule->id)->get();
+
+                    $training = null;
+                    foreach ($courseModule as $cm) {
+                        $training = Training::where('course_module_id', $cm->id)->first();
+                        $isCurrentEnrolled = EnrolledCourse::where([
+                            'user_id' => auth()->id(),
+                            'training_id' => $training->id,
+                            'enrolled_course_status' => 'ENROLLED'
+                        ])->first();
+
+                        if($isCurrentEnrolled) {
+                            $training = $isCurrentEnrolled;
+                            break;
+                        }
+                    }
+
+                    $accessible = false;
+                    if ($training) {
+                        $start = Carbon::parse($training->schedule_from)->startOfDay();
+                        $end = Carbon::parse($training->schedule_to)->startOfDay();
+                        $today = now()->startOfDay();
+
+                        if ($today->lt($start) || $today->gt($end)) {
+                            $accessible = false;
+                        } else {
+                            $dayCount = $today->diffInDays($start) + 1;
+                            $accessible = $this_assessment->courseContent->courseModuleSection->day_number === $dayCount;
+                        }
+                    }
+
+                    $isAccessible = $content->assessment_attempts->whereNotIn('status', ['SUBMITTED', 'FAILED'. 'PASSED'])->isNotEmpty() || $accessible;
+
+                    $item->isAccessible = $isAccessible;
+                    return $item;
+                });
+            });
     }
 
     public function storeCourseSections($validated, $userId)

@@ -58,24 +58,21 @@ class DormitoryServiceRequestManager
     /**
      * Summary of setAsGivenAction
      * @param string $action
-     * @param int $serviceRequestId
+     * @param int $id
      * @return array{message: string, status: int}
      */
     public function setAsGivenAction(string $action, int $id) {
         $req = DormitoryReqService::lockForUpdate()->findOrFail($id);
 
-        // 1. Validation: Prevent "DONE" if the request isn't in a valid starting state
         if ($action === DormitoryEnum::DONE->value &&
            !\in_array($req->status, [DormitoryEnum::APPROVED->value, DormitoryEnum::FOR_PAYMENT->value])) {
             return ['message' => "Only Approved or For Payment requests can be set to DONE.", 'status' => 409];
         }
 
-        // 2. Validation: Prevent "CANCEL" if already finished
         if ($action === DormitoryEnum::CANCELLED->value && $req->status === DormitoryEnum::DONE->value) {
             return ['message' => "Completed services cannot be cancelled.", 'status' => 409];
         }
 
-        // 3. Invoice Handling: Only cancel invoice if it isn't PAID yet
         if ($action === DormitoryEnum::CANCELLED->value && $req->dormitory_invoice_id) {
             DormitoryInvoice::lockForUpdate()
                 ->where('id', $req->dormitory_invoice_id)

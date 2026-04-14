@@ -14,14 +14,13 @@ class LibraryExtendService
 {
     public function __construct(
         protected BookReservation $bookReservationModel,
-        protected LibraryExtraService $libraryExtraService,
-        protected BookRes $bookResModel
+        protected LibraryExtraService $libraryExtraService
     ) {}
 
     private function prepareData($records, $book_reservation_ids)
     {
         if ($records->count() !== count($book_reservation_ids)) {
-            throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be renewed.");
+            throw new DomainException("Only 'RECEIVED', 'EXTENDED', 'RENEWED' books are allowed to be extended.");
         }
     }
 
@@ -67,7 +66,7 @@ class LibraryExtendService
             );
         });
     }
-    //!KAN SIR ALLEN ADI CODE gn comment kula kay d asya 
+    //!KAN SIR ALLEN ADI CODE gn comment kula kay d asya
     // public function cancelExtendRequest($validated)
     // {
     //     DB::transaction(function () use ($validated) {
@@ -92,7 +91,7 @@ class LibraryExtendService
     //     });
     // }
 
-    //!Working na adi na Code pagkuha nala bossing 
+    //!Working na adi na Code pagkuha nala bossing
     public function cancelExtendRequest($validated)
     {
         DB::transaction(function () use ($validated) {

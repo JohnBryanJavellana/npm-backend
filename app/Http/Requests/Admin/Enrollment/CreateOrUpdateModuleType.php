@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Enrollment;
 
+use App\Enums\UserRoleEnum;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -12,7 +13,10 @@ class CreateOrUpdateModuleType extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_ENROLLMENT->value
+        ]);
     }
 
     /**
@@ -24,9 +28,9 @@ class CreateOrUpdateModuleType extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],
+            'status' => ['required_if:httpMethod,UPDATE', 'string', 'in:ACTIVE,INACTIVE'],
+            'moduleTypeId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:module_types,id']
         ];
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin\Enrollment;
 
-use Illuminate\Validation\Rule;
+use App\Enums\UserRoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateOrUpdateSchedule extends FormRequest
@@ -12,7 +12,10 @@ class CreateOrUpdateSchedule extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_ENROLLMENT->value
+        ]);
     }
 
     /**
@@ -23,18 +26,18 @@ class CreateOrUpdateSchedule extends FormRequest
     public function rules(): array
     {
         return [
-            'module' => ['required'],
-            'fromDate' => ['required', 'date'],
-            'toDate' => ['required', 'date'],
-            'slot' => ['required', 'numeric'],
-            'venue' => ['required'],
+            'course_module_id' => ['required', 'integer', 'exists:course_modules,id'],
+            'schedule_from' => ['required', 'date'],
+            'schedule_to' => ['required', 'date'],
+            'schedule_slot' => ['required', 'numeric'],
+            'venue' => ['required', 'string'],
             'room' => ['required', 'string'],
-            'batch' => ['required'],
-            'preference' => ['required'],
-            'dailyHour' => ['required', 'numeric'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'batch_number' => ['required', 'string'],
+            'schedule_preference' => ['required', 'string', 'in:FACE TO FACE,ONLINE'],
+            'daily_hours' => ['required', 'integer'],
+            'status' => ['required_if:httpMethod,UPDATE', 'string', 'exists:trainings,id'],
+            'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],
+            'scheduleId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:trainings,id']
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Enrollment;
 
+use App\Enums\UserRoleEnum;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -12,7 +13,10 @@ class CreateOrUpdateCourse extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_ENROLLMENT->value
+        ]);
     }
 
     /**
@@ -23,10 +27,10 @@ class CreateOrUpdateCourse extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'course_name' => ['required', 'string'],
+            'httpMethod' => ['required', 'string', 'in:POST,UPDATE'],
+            'course_status' => ['required_if:httpMethod,UPDATE', 'string', 'in:ACTIVE,INACTIVE'],
+            'courseId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:main_courses,id'],
         ];
     }
 }

@@ -9,6 +9,8 @@ class ModuleType extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function hasData () {
         return $this->hasMany(CourseModule::class);
     }

@@ -11,12 +11,18 @@ class Requirement extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function hasData () {
         return $this->hasMany(TrainingRequirement::class);
     }
 
     public function forModules () {
         return $this->hasMany(RequirementSpecificModule::class);
+    }
+
+    public function forSpecificModules () {
+        return $this->belongsToMany(CourseModule::class, 'requirement_specific_modules', 'requirement_id', 'course_module_id');
     }
 
     public function trainee_file()

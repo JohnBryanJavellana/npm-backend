@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin\Enrollment;
 
-use Illuminate\Validation\Rule;
+use App\Enums\UserRoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateOrUpdateSponsor extends FormRequest
@@ -12,7 +12,10 @@ class CreateOrUpdateSponsor extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_ENROLLMENT->value
+        ]);
     }
 
     /**
@@ -25,9 +28,9 @@ class CreateOrUpdateSponsor extends FormRequest
         return [
             'name' => ['required', 'string'],
             'short_name' => ['required', 'string'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'httpMethod' => ['required', 'string', 'in:POST,UPDATE'],
+            'sponsorId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:sponsors,id'],
+            'status' => ['required_if:httpMethod,UPDATE', 'string', 'in:ACTIVE,INACTIVE']
         ];
     }
 }

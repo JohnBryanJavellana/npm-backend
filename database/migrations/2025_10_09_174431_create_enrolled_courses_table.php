@@ -32,7 +32,7 @@ return new class extends Migration
                 'CANCELLED',
                 'PAID',
                 'DECLINED',
-                'FOR-PAYMENT',
+                'FOR PAYMENT',
                 'IR',
                 'CSFB',
                 'PROCESSING PAYMENT'

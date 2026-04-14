@@ -19,8 +19,14 @@ return new class extends Migration
             $table->engine = "InnoDB";
             $table->id();
             $table->foreignIdFor(User::class);
-            $table->foreignIdFor(AssessmentAttempt::class);
-            $table->string("actions");
+            $table->foreignIdFor(AssessmentAttempt::class)->constrained()->cascadeOnDelete();
+            $table->enum('actions', [
+                'TAB_SWITCH',
+                'COPY_ATTEMPT',
+                'PASTE_ATTEMPT',
+                'SCREENSHOT_ATTEMPT'
+            ]);
+            $table->integer('action_count')->default(1);
             $table->timestamps();
         });
     }

@@ -16,7 +16,7 @@ class EnrollmentModuleTypeManager extends DocumentExistenceChecker
      * @return array{message: string, status: int}
      */
     public function createOrUpdate(object $payload, bool $isPost, ?int $moduleTypeId) {
-        $isModuleTypeExists = DocumentExistenceChecker::checkForExistence(ModuleType::class, ['name' => $payload->name], $moduleTypeId);
+        $isModuleTypeExists = DocumentExistenceChecker::checkForExistence(ModuleType::class, $payload->only(['name']), $moduleTypeId);
 
         if($isModuleTypeExists) {
             return ['message' => "Module type already exist.", 'status' => 409];
