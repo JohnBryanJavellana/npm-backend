@@ -50,28 +50,6 @@ class TrainerEnrollmentController extends Controller
         }
     }
 
-    public function grade_essay(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            \Log::info($request->all());
-
-            $data = $request->input('data');
-            $items = isset($data['answerId']) ? [$data] : $data;
-
-            foreach($items as $item) {
-                AssessmentAnswer::lockForUpdate()
-                    ->where([
-                        'assessment_attempt_id' => $request->attempt_id,
-                        'assessment_question_id' => (int) $item['answerId']
-                    ])
-                    ->update([
-                        'score' => $item['grade']
-                    ]);
-            }
-
-            return ['message' => "Success!", 'status' => 200];
-        });
-    }
-
     public function getCourseDetails(Request $request)
     {
         return TransactionUtil::transact(
@@ -156,5 +134,18 @@ class TrainerEnrollmentController extends Controller
     public function getFacilitatorDetails(Request $request)
     {
         return AttendanceRecord::whereKey($request->attendance_id)->get();
+    }
+
+    /**
+     * Summary of grade_essay
+     * @param GradeEssay $request
+     */
+    public function grade_essay(GradeEssay $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $attemptId = $request->attempt_id;
+
+            $result = $this->gradeEssayManager->gradeEssay($request, $attemptId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
     }
 }

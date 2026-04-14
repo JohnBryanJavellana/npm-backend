@@ -3,6 +3,7 @@
 namespace App\Services\LMS;
 
 use App\Models\AssessmentAnswer;
+use App\Models\AssessmentAttempt;
 
 class GradeEssayManager
 {
@@ -12,18 +13,22 @@ class GradeEssayManager
      * @param int $attemptId
      * @return array{message: string, status: int}
      */
-    public function gradeEssay($payload, int $attemptId) {
-        foreach($payload->data as $item) {
-            AssessmentAnswer::lockForUpdate()
-                ->whereKey($item->answerId)
-                ->where([
-                    'assessement_attempt_id' => $attemptId,
-                    'assessment_question_id' => $item->answerId
-                ])
-                ->update([
-                    'score' => $item->grade
-                ]);
+    public function gradeEssay(object $payload, int $attemptId) {
+        foreach($payload->data as $value) {
+            AssessmentAnswer::where([
+                'assessment_attempt_id' => $attemptId,
+                'assessment_question_id' => $value['answerId']
+            ])
+            ->lockForUpdate()
+            ->update(['score' => $value['grade']]);
         }
+
+        AssessmentAttempt::whereKey($attemptId)
+            ->lockForUpdate()
+            ->update([
+                'graded_by' => $payload->user()->id,
+                'graded_at' => now()
+            ]);
 
         return ['message' => "Success!", 'status' => 200];
     }
