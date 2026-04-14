@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AssessmentAttempt;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -19,14 +20,8 @@ return new class extends Migration
         Schema::create('assessment_submissions', function (Blueprint $table) {
             $table->engine = "InnoDB";
             $table->id();
-            $table->foreignIdFor(Assessments::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(EnrolledCourse::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class, "created_by")->constrained("users")->cascadeOnDelete();
-            $table->foreignIdFor(User::class, "graded_by")->constrained("users")->cascadeOnDelete();
+            $table->foreignIdFor(AssessmentAttempt::class)->constrained()->cascadeOnDelete();
             $table->longText("file_path");
-            $table->decimal("score", 65);
-            $table->dateTime("graded_at")->nullable();
-            $table->dateTime("submitted_at");
             $table->timestamps();
         });
     }

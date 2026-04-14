@@ -5,32 +5,39 @@ namespace App\Services\Administrator\Cashier;
 use App\Enums\Administrator\CashierEnum;
 use App\Enums\AdministratorReturnResponse;
 use App\Models\CashierOR;
-use App\Utils\DocumentExistenceChecker;
 
-class CashierORManager extends DocumentExistenceChecker
+class CashierORManager
 {
     /**
      * Summary of createOrUpdate
      * @param object $payload
-     * @param bool $isPost
      * @return array{message: string, status: int}
      */
-    public function createOrUpdate(object $payload, bool $isPost, ?int $documentId) {
-        $isOrExists = DocumentExistenceChecker::checkForExistence(CashierOR::class, ['name' => $payload->name, 'service_type' => $payload->service_type], $documentId);
+    public function createOrUpdate(object $payload)
+    {
+        $requestedRange = range($payload->starting_or_number, $payload->ending_or_number);
+        $existingNumbers = CashierOR::whereIn('name', $requestedRange)->pluck('name')->toArray();
+        $newNumbers = array_diff($requestedRange, $existingNumbers);
 
-        if($isOrExists) {
-            return ['message' => "The OR Number '{$payload->name}' is already assigned to this service type.", 'status' => 409];
+        if (empty($newNumbers)) {
+            return [
+                'message' => 'All numbers in this range already exist.',
+                'status' => 409
+            ];
         }
 
-        $this_or = CashierOR::updateOrCreate(['id' => $documentId], $payload->only([
-            'name',
-            'service_type'
-        ]));
+        $now = now();
+        $preparedData = array_map(fn($number) => [
+            'name' => $number,
+            'office' => $payload->office,
+            'charge_category_id' => $payload->charge_category_id,
+            'created_at' => $now,
+            'updated_at' => $now
+        ], $newNumbers);
 
+        CashierOR::insert($preparedData);
         return [
-            'message' => $isPost
-                ? AdministratorReturnResponse::CASHIERCTRL_CREATED_ORNUMBER->value
-                : AdministratorReturnResponse::CASHIERCTRL_UPDATED_ORNUMBER->value . "ID#$this_or->id",
+            'message' => AdministratorReturnResponse::CASHIERCTRL_CREATED_ORNUMBER->value,
             'status' => 200
         ];
     }

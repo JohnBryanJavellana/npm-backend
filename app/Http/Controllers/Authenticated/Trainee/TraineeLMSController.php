@@ -5,15 +5,18 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 use App\Enums\LMS\AssessmentMessageResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LMS\AttemptResult;
+use App\Http\Requests\LMS\SubmitAssessmentFileUpload;
 use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
 use App\Models\AssessmentAttempt;
+use App\Services\LMS\SubmitAssessmentFileUploadManager;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use App\Utils\TransactionUtil;
 
 class TraineeLMSController extends Controller
 {
     public function __construct(
-        protected LMSAssessmentService $lmsAssessmentService
+        protected LMSAssessmentService $lmsAssessmentService,
+        public SubmitAssessmentFileUploadManager $submitAssessmentFileUploadManager
     ){}
 
     public function view(viewAssessmentRequest $request)
@@ -47,6 +50,15 @@ class TraineeLMSController extends Controller
             $result->assessment->makeHidden('sections');
 
             return response()->json(['result' => $result], 201);
+        });
+    }
+
+    public function submit_assesment_file_upload(SubmitAssessmentFileUpload $request) {
+        return TransactionUtil::transact($request, [], function() use($request) {
+            $assessmentControlNumber = $request->control_number;
+            $result = $this->submitAssessmentFileUploadManager->submitFileUpload($request, $assessmentControlNumber);
+
+            return response()->json(['message' => $result['message']], $result['status']);
         });
     }
 }

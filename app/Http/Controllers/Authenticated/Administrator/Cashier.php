@@ -24,8 +24,8 @@ use App\Enums\{
     NotificationEnum
 };
 use App\Http\Requests\Admin\Cashier\{
-CreateOrUpdateFeeCategory,
-    CreateOrUpdateOR
+    CreateOrUpdateFeeCategory,
+    CreateOR
 };
 use App\Models\{
     Charge,
@@ -337,15 +337,12 @@ class Cashier extends Controller
     }
 
     /**
-     * Summary of create_or_update_or_number
-     * @param CreateOrUpdateOR $request
+     * Summary of create_or_number
+     * @param CreateOR $request
      */
-    public function create_or_update_or_number (CreateOrUpdateOR $request) {
+    public function create_or_number (CreateOR $request) {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-
-            $result = $this->cashierORManager->createOrUpdate($request, $isPost, $documentId);
+            $result = $this->cashierORManager->createOrUpdate($request);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }
