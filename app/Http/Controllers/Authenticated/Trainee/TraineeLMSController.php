@@ -53,11 +53,16 @@ class TraineeLMSController extends Controller
         });
     }
 
+    /**
+     * Summary of submit_assesment_file_upload
+     * @param SubmitAssessmentFileUpload $request
+     */
     public function submit_assesment_file_upload(SubmitAssessmentFileUpload $request) {
         return TransactionUtil::transact($request, [], function() use($request) {
-            $assessmentControlNumber = $request->control_number;
-            $result = $this->submitAssessmentFileUploadManager->submitFileUpload($request, $assessmentControlNumber);
+            $assessmentControlNumber = $request->assessmentControlNumber;
+            $enrolledCourseId = $request->enrolledCourseId;
 
+            $result = $this->submitAssessmentFileUploadManager->submitFileUpload($request, $assessmentControlNumber, $enrolledCourseId);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }
