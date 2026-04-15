@@ -20,8 +20,11 @@ return new class extends Migration
             $table->longText('trace_number')->nullable();
             // $table->enum('transfer_type', ['ROOM', 'CLASS']);
             // $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);
+            $table->enum('accommodation', ["SINGLE", "SHARED", "COUPLE"]);
+            $table->enum('status_of_occupancy', ["TRAINEE","NON-PAYING GUEST/VISITOR","NMP PERSONNEL (REGULAR/JOW)","PAYING GUEST/VISITOR"]);
             $table->enum('room_type', ["AIR-CONDITIONED", "NON-AIRCON"]);
-            $table->enum("status", ['PENDING', 'CANCELLED', 'APPROVED'])->default('PENDING');
+            $table->enum("status", ['PENDING', 'CANCELLED', 'APPROVED', 'FOR PAYMENT'])->default('PENDING');
+            $table->enum('process_type', ["ONLINE", "WALK-IN"]);
             $table->longText("reason")->nullable();
             $table->timestamps();
         });

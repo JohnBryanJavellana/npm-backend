@@ -35,7 +35,9 @@ use App\Http\Requests\Admin\Dormitory\{
     CreateOrUpdateDormitoryInv,
     CreateOrUpdateService,
     CreateServiceReq,
-    CreateOrUpdateDormitoryCharge
+    CreateOrUpdateDormitoryCharge,
+    GetTransferRequest,
+    CreateTransferRequest
 };
 use Illuminate\Http\Request;
 use App\Utils\{
@@ -52,7 +54,8 @@ use App\Models\{
     DormitoryInventory,
     DormitoryService,
     User,
-    DormitoryTenantHistory
+    DormitoryTenantHistory,
+    DormitoryTransfer
 };
 use App\Helpers\Administrator\General\CountCollection;
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
@@ -1920,6 +1923,7 @@ class DormitoryController extends Controller
                     'room_type' => $tenant->room_type,
                     'tenant_status' => $tenant->tenant_status,
                     'trainee_cost' => $tenant->dormitory_room->room_cost ?? null,
+                    'dormitory' => $tenant->dormitory_room->dormitory ?? null,
                     'guest_cost' => $tenant->dormitory_room->guest_cost ?? null,
                     'check_in' => $tenant->check_in_datetime,
                     'check_out' => $tenant->check_out_datetime,
@@ -1955,23 +1959,69 @@ class DormitoryController extends Controller
         }
     }
 
-        public function updateTenant(UpdateTenantRequest $request)
+        // public function updateTenant(UpdateTenantRequest $request)
+        // {
+        //     $tenant = DormitoryTenant::find($request->tenant_id);
+
+        //     $tenant->update([
+        //         'guest_id' => $request->guest_id,
+        //         'dormitory_room_id' => $request->dormitory_room_id,
+        //         'status_of_occupancy' => $request->status_of_occupancy,
+        //         'room_type' => $request->room_type,
+        //         'accommodation' => $request->accommodation,
+        //         'purpose' => $request->purpose,
+        //         'remarks' => $request->remarks,
+        //         'payment_remarks' => $request->payment_remarks,
+        //         'check_in_datetime' => $request->check_in_datetime,
+        //         'check_out_datetime' => $request->check_out_datetime,
+        //         'tenant_status' => $request->status ?? 'FOR PAYMENT',
+        //     ]);
+        // }
+
+         public function createTransfer(CreateTransferRequest $request)
+    {
+        return TransactionUtil::transact($request, [], function () use ($request) {
+            // Get the tenant with their current room
+           $tenant = DormitoryTenant::with('dormitoryRoom')->findOrFail($request->tenant_id);
+        $newRoom = DormitoryRoom::findOrFail($request->new_room_id);
+        
+        $transfer = DormitoryTransfer::create([
+            'dormitory_tenant_id' => $tenant->id,
+            'processed_by' => auth()->id(),
+            'trace_number' => $tenant->trace_number,
+            'accommodation' => $request->accommodation ?? $tenant->accommodation,
+            'status_of_occupancy' => $request->status_of_occupancy ?? $tenant->status_of_occupancy,
+            'room_type' => $newRoom->room_type,
+            'status' => 'PENDING',
+            'process_type' => $request->process_type ?? 'WALK-IN',
+            'reason' => $request->reason,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Room change request created successfully',
+            'transfer' => $transfer,
+            'current_room' => $tenant->dormitoryRoom,
+            'requested_room' => $newRoom,
+        ], 201);
+    });
+    }
+
+        public function getDormitoryTransfers(GetTransferRequest $request)
         {
-            $tenant = DormitoryTenant::find($request->tenant_id);
-
-            $tenant->update([
-                'guest_id' => $request->guest_id,
-                'dormitory_room_id' => $request->dormitory_room_id,
-                'status_of_occupancy' => $request->status_of_occupancy,
-                'room_type' => $request->room_type,
-                'accommodation' => $request->accommodation,
-                'purpose' => $request->purpose,
-                'remarks' => $request->remarks,
-                'payment_remarks' => $request->payment_remarks,
-                'check_in_datetime' => $request->check_in_datetime,
-                'check_out_datetime' => $request->check_out_datetime,
-                'tenant_status' => $request->status ?? 'FOR PAYMENT',
-            ]);
-
+            return TransactionUtil::transact($request, [], function () use ($request) {
+                $transfers = DormitoryTransfer::with([
+                    'dormitoryTenant',
+                    'dormitoryTenant.boarder',
+                    'processedByUser'
+                ])
+                ->orderBy('created_at', 'desc')
+                ->get();
+                
+                return response()->json([
+                    'success' => true,
+                    'transfers' => $transfers
+                ]);
+            });
         }
         }

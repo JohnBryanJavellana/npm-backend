@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class DormitoryRoom extends Model
 {
+
+    protected $table = 'dormitory_rooms';
+
       protected $fillable = [
         'room_name', 'room_slot', 'dormitory', 'guest_gender', 'wing',
         'floor', 'accommodation', 'room_cost', 'guest_cost', 'remarks',
-        'name',         // or whatever fields you have
-        'room_type',    // AIRCON or NON-AIRCON
-        'capacity',     // max slots
-        // add other fields as needed
+        'name', 'room_type','room_slot','guest_gender', 'capacity'   
     ];
 
     protected $guarded = ['id'];

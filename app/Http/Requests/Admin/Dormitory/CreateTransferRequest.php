@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Trainee\Dormitory;
+namespace App\Http\Requests\Admin\Dormitory;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -16,24 +16,26 @@ class CreateTransferRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return true; // or check role
     }
+
 
     /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            'document_id' => 'required',
-            'transfer_type' => 'required|in:ROOM,CLASS',
-            'type' => 'required',
-            'reason' => 'required|string|max:500'
+             'tenant_id' => 'required|exists:dormitory_tenants,id',
+            'new_room_id' => 'required|exists:dormitory_rooms,id',
+            'accommodation' => 'nullable|in:SINGLE,SHARED,COUPLE',
+            'status_of_occupancy' => 'nullable|in:TRAINEE,NON-PAYING GUEST/VISITOR,NMP PERSONNEL (REGULAR/JOW),PAYING GUEST/VISITOR',
+            'reason' => 'nullable|string',
+            'process_type' => 'nullable|in:ONLINE,WALK-IN',
         ];
     }
-
 
     protected function failedValidation(Validator $validator)
     {

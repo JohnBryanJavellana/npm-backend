@@ -34,6 +34,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
     Account,
     LMSController,
     NotificationCtrl,
+    DormitoryController
 };
 
 /** other controllers */
@@ -57,6 +58,8 @@ Route::post('/register', [RegisterController::class, 'register_user']);
 Route::get('/email/verify', [EmailVerificationController::class, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+Route::post('get_dormitory_transfers', [DormitoryController::class, 'getDormitoryTransfers']);
+Route::post('createTransfer', [DormitoryController::class, 'createTransfer']);
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {

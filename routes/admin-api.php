@@ -199,7 +199,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::post('getRoomsForSelection', [DormitoryController::class, 'getRoomsForSelection']);
             Route::post('room_reservations_with_costs', [DormitoryController::class, 'room_reservations_with_costs']);
-            Route::post('updateTenant', [DormitoryController::class, 'updateTenant']);
+            // Route::post('updateTenant', [DormitoryController::class, 'updateTenant']);
+
 
         });
 

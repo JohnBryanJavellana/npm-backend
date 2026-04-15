@@ -5,57 +5,93 @@ namespace App\Models;
 use App\Enums\RequestStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class DormitoryTenant extends Model {
-
+class DormitoryTenant extends Model 
+{
     protected $guarded = ['id'];
+    
     protected $fillable = [
-        'dormitory_room_id', 'user_id', 'trace_number', 'check_in_datetime', 'check_out_datetime',
-        'accommodation', 'status_of_occupancy', 'room_type', 'tenant_status', 'process_type',
+        'dormitory_room_id', 
+        'user_id', 
+        'trace_number', 
+        'check_in_datetime', 
+        'check_out_datetime',
+        'accommodation', 
+        'status_of_occupancy', 
+        'room_type', 
+        'tenant_status', 
+        'process_type',
+        'purpose',
+        'remarks',
+        'payment_remarks',
+        'offset_check_out_date',
+        'transfer_type',
+    ];
+
+    protected $casts = [
+        'check_in_datetime' => 'datetime',
+        'check_out_datetime' => 'datetime',
+        'offset_check_out_date' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public const MALE = "MALE";
     public const FEMALE = "FEMALE";
     public const COUPLE = "COUPLE";
 
-    public function trainee() {
-        return $this->hasOne(User::class, 'id', 'user_id');
-    }
-
-    public function boarder() {
-        return $this->belongsTo(User::class, 'user_id', 'id');
-    }
-
-    public function dormitory_room() {
-        return $this->belongsTo(DormitoryRoom::class, 'dormitory_room_id', 'id');
-    }
-
-    public function tenant_invoices() {
-        return $this->hasMany(DormitoryInvoice::class, 'dormitory_tenant_id', 'id');
-    }
-
-    public function dormitory_histories () {
-        return $this->hasMany(DormitoryTenantHistory::class, 'dormitory_tenant_id', 'id');
-    }
-
-    public function transferRequest()
+    // Main relationship for room (camelCase - preferred for Laravel)
+    public function dormitoryRoom(): BelongsTo
     {
-        return $this->hasMany(DormitoryTransfer::class, 'dormitory_tenant_id', 'id');
+        return $this->belongsTo(DormitoryRoom::class, 'dormitory_room_id');
     }
 
-    public function extendRequest()
+    // Alias for snake_case version (for backward compatibility)
+    public function dormitory_room(): BelongsTo
     {
-        return $this->hasMany(DormitoryExtensionRequest::class, 'dormitory_tenant_id', 'id');
+        return $this->dormitoryRoom();
     }
 
-    public function borrowedItems()
+    public function boarder(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function trainee(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function tenant_invoices(): HasMany
+    {
+        return $this->hasMany(DormitoryInvoice::class, 'dormitory_tenant_id');
+    }
+
+    public function dormitory_histories(): HasMany
+    {
+        return $this->hasMany(DormitoryTenantHistory::class, 'dormitory_tenant_id');
+    }
+
+    public function transferRequest(): HasMany
+    {
+        return $this->hasMany(DormitoryTransfer::class, 'dormitory_tenant_id');
+    }
+
+    public function extendRequest(): HasMany
+    {
+        return $this->hasMany(DormitoryExtensionRequest::class, 'dormitory_tenant_id');
+    }
+
+    public function borrowedItems(): HasMany
     {
         return $this->hasMany(DormitoryItemBorrowing::class);
     }
 
-    public function services()
+    public function services(): HasMany
     {
-        return $this->hasMany(DormitoryReqService::class, 'dormitory_tenant_id', 'id');
+        return $this->hasMany(DormitoryReqService::class, 'dormitory_tenant_id');
     }
 
     public function isExpired()
@@ -70,6 +106,7 @@ class DormitoryTenant extends Model {
     {
         return $query->where("user_id", $userId);
     }
+
     public function scopeForStatus($query, array $status)
     {
         return $query->whereIn("tenant_status", $status);
@@ -82,15 +119,6 @@ class DormitoryTenant extends Model {
 
     public function scopeApprovedActive(Builder $query)
     {
-        return $query->where("tenant_status", [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value]);
-    }
-
-    public function rooms()
-    {
-        return $this->hasMany(DormitoryRoom::class, 'dormitory_id', 'id');
-    }
-     public function room()
-    {
-        return $this->belongsTo(DormitoryRoom::class, 'dormitory_room_id');
+        return $query->whereIn("tenant_status", [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value]);
     }
 }
