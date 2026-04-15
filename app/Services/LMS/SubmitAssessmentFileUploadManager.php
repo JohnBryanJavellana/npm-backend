@@ -30,13 +30,22 @@ class SubmitAssessmentFileUploadManager
         $newAttempt = AssessmentAttempt::create([
             'assessment_id' => $thisAssessment->id,
             'enrolled_course_id' => $enrolledCourseId,
-            'created_by' => $payload->user()->id
+            'created_by' => $payload->user()->id,
+            'submitted_at' => now(),
+            'status' => "SUBMITTED"
         ]);
 
-        AssessmentSubmission::create([
-            'assessment_attempt_id' => $newAttempt->id,
-            'file_path' => SaveFile::save($payload->fileUpload, "upload-reference")
-        ]);
+        $dataToInsert = [];
+        foreach ($payload->fileUpload as $fileUpload) {
+            $dataToInsert[] = [
+                'assessment_attempt_id' => $newAttempt->id,
+                'file_path' => SaveFile::save($fileUpload, "upload-reference"),
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+        }
+
+        AssessmentSubmission::insert($dataToInsert);
 
         return ['message' => 'Success!', 'status' => 200];
     }
