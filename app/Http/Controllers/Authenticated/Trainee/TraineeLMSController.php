@@ -94,6 +94,7 @@ class TraineeLMSController extends Controller
             $asessmentAttemptId = $request->asessmentAttemptId;
 
             $result = AssessmentAttempt::with([
+                'assessment',
                 'uploadedFile' => function($query) {
                     $query->select('id', 'assessment_attempt_id', 'original_filename', 'file_path');
                 }

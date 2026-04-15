@@ -290,6 +290,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         });
 
         Route::post("grade_essay", [TrainerEnrollmentController::class, 'grade_essay']);
+        Route::post("grade_file_assessment", [TrainerEnrollmentController::class, 'grade_file_assessment']);
     });
 
     Route::get('trainee-info/{traineeId}', [Account::class, 'trainee_info']);

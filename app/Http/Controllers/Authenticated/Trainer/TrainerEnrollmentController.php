@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Authenticated\Trainer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LMS\GradeEssay;
+use App\Http\Requests\LMS\GradeFileAssesment;
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
 use App\Models\{AssessmentAnswer, AssessmentAttempt, EnrolledCourse, Training, AttendanceRecord};
 use App\Services\LMS\GradeEssayManager;
+use App\Services\LMS\GradeFileAssessmentManager;
 use App\Services\Trainer\Enrollment\TrainerEnrollmentService;
 use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
@@ -15,7 +17,8 @@ class TrainerEnrollmentController extends Controller
 {
     public function __construct(
         protected TrainerEnrollmentService $trainerEnrollmentService,
-        public GradeEssayManager $gradeEssayManager
+        public GradeEssayManager $gradeEssayManager,
+        public GradeFileAssessmentManager $gradeFileAssessmentManager
     ) {}
 
     public function viewAllTrainingsAndFacilitators(Request $request)
@@ -160,6 +163,20 @@ class TrainerEnrollmentController extends Controller
             $attemptStatus = $request->attemptStatus;
 
             $result = $this->gradeEssayManager->gradeEssay($request, $attemptId, $attemptStatus);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of grade_file_assessment
+     * @param GradeFileAssesment $request
+     */
+    public function grade_file_assessment(GradeFileAssesment $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $attemptId = $request->attempt_id;
+            $attemptStatus = $request->attemptStatus;
+
+            $result = $this->gradeFileAssessmentManager->gradeFileAssessment($request, $attemptId, $attemptStatus);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }
