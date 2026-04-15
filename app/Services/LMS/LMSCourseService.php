@@ -2,22 +2,13 @@
 
 namespace App\Services\LMS;
 
-use App\Enums\RequestStatus;
-use App\Models\AssessmentAttempt;
 use App\Models\Assessments;
 use App\Models\CourseContent;
 use App\Models\CourseContentUpload;
-use App\Models\CourseModule;
 use App\Models\CourseModuleSection;
-use App\Models\EnrolledCourse;
-use App\Models\Training;
 use App\Utils\AuditHelper;
 use App\Utils\SaveFile;
-use Carbon\Carbon;
-use DomainException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Http\Request;
 
 class LMSCourseService
 {
@@ -25,6 +16,7 @@ class LMSCourseService
         protected CourseModuleSection $courseModuleSectionModel,
         protected CourseContent $courseContentModel,
         protected CourseContentUpload $courseContentUploadModel,
+        public SubmitAssessmentFileUploadManager $submitAssessmentFileUploadManager
     ) {}
 
     public function getCourseModules($courseModuleId, $section_id = null)
@@ -69,41 +61,10 @@ class LMSCourseService
             ->first(), function ($content) {
                 $content->assessment->transform(function ($item) use($content) {
                     $this_assessment = Assessments::where('control_number', $item->control_number)->first();
-                    $courseModule = CourseModule::whereKey($this_assessment->courseContent->courseModuleSection->courseModule->id)->get();
+                    $isAccessibleResult = $this->submitAssessmentFileUploadManager->checkIfAccessible($this_assessment);
 
-                    $training = null;
-                    $enrolledCourse = null;
-                    foreach ($courseModule as $cm) {
-                        $training = Training::where('course_module_id', $cm->id)->first();
-                        $isCurrentEnrolled = EnrolledCourse::where([
-                            'user_id' => auth()->id(),
-                            'training_id' => $training->id,
-                            'enrolled_course_status' => 'ENROLLED'
-                        ])->first();
-
-                        if($isCurrentEnrolled) {
-                            $enrolledCourse = $isCurrentEnrolled;
-                            break;
-                        }
-                    }
-
-                    $accessible = false;
-                    if ($training) {
-                        $start = Carbon::parse($training->schedule_from)->startOfDay();
-                        $end = Carbon::parse($training->schedule_to)->startOfDay();
-                        $today = Carbon::today();
-
-                        if ($today->lt($start) || $today->gt($end)) {
-                            $accessible = false;
-                        } else {
-                            $dayCount = $today->diffInDays($start) + 1;
-                            $accessible = $this_assessment->courseContent->courseModuleSection->day_number === $dayCount;
-                        }
-                    }
-
-                    $isAccessible = $item->attempts->where('created_by', auth()->user()->id)->whereIn('status', ['IN_PROGRESS', 'FOR_REMOVAL'])->isNotEmpty() || $accessible;
-                    $item->isAccessible = $isAccessible;
-                    $item->enrolled_course_id = $enrolledCourse?->id;
+                    $item->isAccessible = $isAccessibleResult['isAccessible'];
+                    $item->enrolled_course_id = $isAccessibleResult['enrolledCourse']?->id;
                     $item->overallAttempts = $item->attempts->where('created_by', auth()->user()->id)->map(function($query) {
                         return [
                             "id" => $query->id,

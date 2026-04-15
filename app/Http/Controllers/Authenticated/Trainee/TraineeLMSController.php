@@ -64,7 +64,10 @@ class TraineeLMSController extends Controller
             $enrolledCourseId = $request->enrolledCourseId;
 
             $result = $this->submitAssessmentFileUploadManager->submitFileUpload($request, $assessmentControlNumber, $enrolledCourseId);
-            return response()->json(['message' => $result['message']], $result['status']);
+            return response()->json([
+                'message' => $result['message'],
+                'asessmentAttemptId' => $result['asessmentAttemptId']
+            ], $result['status']);
         });
     }
 
