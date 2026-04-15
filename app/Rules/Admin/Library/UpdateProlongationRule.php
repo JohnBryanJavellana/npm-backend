@@ -20,7 +20,7 @@ class UpdateProlongationRule implements ValidationRule
     {
         $this_prolongation_request = BookReservation::find($value);
 
-        if($this_prolongation_request && !\in_array($this_prolongation_request->status, [LibraryEnum::RENEWING->value, LibraryEnum::EXTENDING->value])) {
+        if ($this_prolongation_request && !\in_array($this_prolongation_request->status, [LibraryEnum::RENEWING->value, LibraryEnum::EXTENDING->value])) {
             $fail("Can't update prolongation request right now.");
         }
     }

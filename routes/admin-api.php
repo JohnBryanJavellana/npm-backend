@@ -250,7 +250,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('remove_charge_category/{chargeCategoryId}', [Cashier::class, 'remove_charge_category']);
 
             Route::match(['GET', 'POST'], 'get_or_numbers', [Cashier::class, 'get_or_numbers']);
+<<<<<<< HEAD
             Route::post('create_or_number', [Cashier::class, 'create_or_number']);
+=======
+            Route::post('createor_update_or_number', [Cashier::class, 'create_or_update_or_number']);
+>>>>>>> 38fc64b577b6c4e9043407bf3d7f0a7c8fe288b9
             Route::delete('remove_or_number/{orNumber}', [Cashier::class, 'remove_or_number']);
         });
 

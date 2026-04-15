@@ -223,6 +223,9 @@ class RecreationalService
 
     public function storeEquipmentRequest($info, $record)
     {
+        // \Log::info("stock_data", $stock->all());
+
+
         $uniqueIdentifiers = $info["UI"] ?? null;
         $data = [];
         if (!empty($uniqueIdentifiers)) {

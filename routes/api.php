@@ -216,6 +216,10 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post('announcement_delete', [AnnouncementController::class, 'AnnouncementDelete']);
             Route::post('trainerAnnouncement', [AnnouncementController::class, 'Announcement']);
         });
+
+
+
+
     });
 
     Route::middleware(['user_role:TRAINEE,TRAINER,SUPERADMIN', 'throttle:60,1'])->group(function () {

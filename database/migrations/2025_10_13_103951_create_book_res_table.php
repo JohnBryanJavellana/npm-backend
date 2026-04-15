@@ -12,7 +12,17 @@ return new class extends Migration
     public const BOOK_RES_STATUS = [
         "ACTIVE",
         "FOR CSM",
-        "COMPLETED"
+        "COMPLETED",
+        'ACTIVE',
+        //!nagpa add hin book res status
+         'FOR CSM',
+        'COMPLETED',
+        'EXTENDING',
+        'RENEWING',
+        'APPROVED',
+        'DAMAGED',
+        'RECEIVED'
+
     ];
 
     /**

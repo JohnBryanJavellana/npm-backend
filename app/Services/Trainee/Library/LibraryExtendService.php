@@ -14,7 +14,8 @@ class LibraryExtendService
 {
     public function __construct(
         protected BookReservation $bookReservationModel,
-        protected LibraryExtraService $libraryExtraService
+        protected LibraryExtraService $libraryExtraService,
+        protected BookRes $bookResModel
     ) {}
 
     private function prepareData($records, $book_reservation_ids)

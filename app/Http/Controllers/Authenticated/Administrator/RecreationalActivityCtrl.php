@@ -54,8 +54,9 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function get_ra_count(Request $request){
-        return TransactionUtil::transact(null, [], function() use ($request) {
+    public function get_ra_count(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $reservations = RARequestInfo::query();
 
             $count = [
@@ -86,26 +87,26 @@ class RecreationalActivityCtrl extends Controller
 
             $ra_requests = $request->trace_number
                 ? $query->where('trace_number', $request->trace_number)
-                    ->with([
-                        'equipment_request.equipment',
-                        'equipment_request.updatedByWhom',
-                        'facility_request.facility',
-                        'facility_request.updatedByWhom'
-                    ])
-                    ->get()
-                    ->map(function ($raReq) {
-                        $grouped = $raReq->equipment_request->groupBy('r_a_equipments_id');
+                ->with([
+                    'equipment_request.equipment',
+                    'equipment_request.updatedByWhom',
+                    'facility_request.facility',
+                    'facility_request.updatedByWhom'
+                ])
+                ->get()
+                ->map(function ($raReq) {
+                    $grouped = $raReq->equipment_request->groupBy('r_a_equipments_id');
 
-                        $raReq->grouped_equipment = $grouped->map(function ($items) {
-                            $first = $items->first();
-                            $first->requested_qty = $items->count();
-                            $first->requested_issued_qty = $items->whereNotNull('r_a_equipment_stock_id')->count();
-                            return $first;
-                        })->values();
+                    $raReq->grouped_equipment = $grouped->map(function ($items) {
+                        $first = $items->first();
+                        $first->requested_qty = $items->count();
+                        $first->requested_issued_qty = $items->whereNotNull('r_a_equipment_stock_id')->count();
+                        return $first;
+                    })->values();
 
-                        unset($raReq->equipment_request);
-                        return $raReq;
-                    })->first()
+                    unset($raReq->equipment_request);
+                    return $raReq;
+                })->first()
                 : $query->orderBy('created_at', 'DESC')->get();
 
             return response()->json(['ra_requests' => $ra_requests], 200);
@@ -244,7 +245,8 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_update_equipment_stock
      * @param UpdateEquipmentStock $request
      */
-    public function ra_update_equipment_stock(UpdateEquipmentStock $request) {
+    public function ra_update_equipment_stock(UpdateEquipmentStock $request)
+    {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $equipmentStockId = $request->equipmentStockId;
 
@@ -271,8 +273,9 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_request_charges
      * @param Request $request
      */
-    public function ra_request_charges(Request $request){
-        return TransactionUtil::transact(null, [], function () use($request) {
+    public function ra_request_charges(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
                 ->orderBy('created_at', 'DESC')
                 ->get();
@@ -285,7 +288,8 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_create_or_update_charge
      * @param RequestInvoice $request
      */
-    public function ra_create_or_update_charge(RequestInvoice $request){
+    public function ra_create_or_update_charge(RequestInvoice $request)
+    {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === 'POST';
             $recreationalInvoiceId = $request->recreationalInvoiceId;
@@ -300,7 +304,8 @@ class RecreationalActivityCtrl extends Controller
      * @param RemoveRACharge $request
      * @param int $recreationalInvoiceId
      */
-    public function ra_delete_charge(RemoveRACharge $request, int $recreationalInvoiceId){
+    public function ra_delete_charge(RemoveRACharge $request, int $recreationalInvoiceId)
+    {
         return TransactionUtil::transact($request, [], function () use ($recreationalInvoiceId) {
             $result = $this->recreationalChargeManager->removeCharge($recreationalInvoiceId);
             return response()->json(['message' => $result['message']], $result['status']);
@@ -316,16 +321,17 @@ class RecreationalActivityCtrl extends Controller
      * Summary of get_requested_equipments
      * @param Request $request
      */
-    public function get_requested_equipments(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+    public function get_requested_equipments(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $raEquipmentRequests_temp = RAEquipmentRequest::with([
                 'equipment_stock',
                 'equipment'
             ])
-            ->where([
-                'r_a_request_info_id' => $request->rARequestInfoId,
-                'r_a_equipments_id' => $request->rAEquipmentsId
-            ]);
+                ->where([
+                    'r_a_request_info_id' => $request->rARequestInfoId,
+                    'r_a_equipments_id' => $request->rAEquipmentsId
+                ]);
 
             $raEquipmentRequests = $request->status
                 ? $raEquipmentRequests_temp->whereIn('status', $request->status)->get()
@@ -339,8 +345,9 @@ class RecreationalActivityCtrl extends Controller
      * Summary of update_requested_facility
      * @param Request $request
      */
-    public function update_requested_facility(Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
+    public function update_requested_facility(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $documentId = $request->documentId;
             $documentStatus = $request->documentStatus;
             $requestInfoId = $request->requestInfoId;
@@ -349,7 +356,7 @@ class RecreationalActivityCtrl extends Controller
             $this_facility = RAFacilityRequest::findOrFail($documentId);
             $this_main_facility = RAFacility::findOrFail($this_facility->r_a_facility_id);
 
-            if(\in_array($this_facility->status, [
+            if (\in_array($this_facility->status, [
                 RAEnum::CANCELLED->value,
                 RAEnum::DECLINED->value
             ])) {
@@ -362,9 +369,9 @@ class RecreationalActivityCtrl extends Controller
                     RAEnum::APPROVED,
                     RAEnum::OCCUPIED
                 ])
-                ->where(function($query) use ($this_facility) {
+                ->where(function ($query) use ($this_facility) {
                     $query->where('start_date', '<', $this_facility->end_date)
-                          ->where('end_date', '>', $this_facility->start_date);
+                        ->where('end_date', '>', $this_facility->start_date);
                 })
                 ->exists();
 
@@ -383,7 +390,7 @@ class RecreationalActivityCtrl extends Controller
             $this_facility->returned_condition = $isClosing ? ($documentStatus === RAEnum::DONE->value ? RAEnum::GOOD_CONDITION->value : $documentStatus) : $this_facility->returned_condition;
             $this_facility->save();
 
-            if($isClosing) {
+            if ($isClosing) {
                 $this_main_facility->condition_status = $documentStatus === RAEnum::DONE->value ? RAEnum::GOOD_CONDITION->value : $documentStatus;
                 $this_main_facility->save();
             }
@@ -493,7 +500,7 @@ class RecreationalActivityCtrl extends Controller
                 }
             };
 
-            if(env('USE_EVENT')) {
+            if (env('USE_EVENT')) {
                 event(
                     new BERecreational('')
                 );
@@ -507,7 +514,8 @@ class RecreationalActivityCtrl extends Controller
      * Summary of update_requested_equipment
      * @param Request $request
      */
-    public function update_requested_equipment(Request $request){
+    public function update_requested_equipment(Request $request)
+    {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $selectedRows = $request->row;
             $summary = [
@@ -527,9 +535,9 @@ class RecreationalActivityCtrl extends Controller
                 $hasDateTimeConflicts = RAEquipmentRequest::where('id', '!=', $requestId)
                     ->where('r_a_equipments_id', $row['rowId'])
                     ->whereIn('status', [RAEnum::APPROVED, RAEnum::RECEIVED])
-                    ->where(function($query) use ($equipment) {
+                    ->where(function ($query) use ($equipment) {
                         $query->where('start_date', '<', $equipment->end_date)
-                              ->where('end_date', '>', $equipment->start_date);
+                            ->where('end_date', '>', $equipment->start_date);
                     })
                     ->exists();
 
@@ -569,14 +577,14 @@ class RecreationalActivityCtrl extends Controller
             $successCount = \count($summary['success_ids']);
 
             if ($failCount > 0) {
-                $errorDetails = array_map(function($item) {
+                $errorDetails = array_map(function ($item) {
                     return "ID {$item['id']} ({$item['reason']})";
                 }, $summary['failed_items']);
 
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQFACILITY->value. implode(', ', $errorDetails)], 207);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQFACILITY->value . implode(', ', $errorDetails)], 207);
             }
 
-            if(env('USE_EVENT')) {
+            if (env('USE_EVENT')) {
                 event(
                     new BERecreational('')
                 );
