@@ -892,19 +892,6 @@ class EnrollmentCtrl extends Controller
                 $premade_record->save();
             }
 
-            Notifications::notify($request->user()->id, $this_training_status->user_id, NotificationEnum::DORMITORY, 'updated your enrollment application status.');
-            AuditHelper::log(
-                $request->user()->id,
-                AdministratorAuditActions::ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGSTATUS->value.  "ID#$this_training_status->id"
-            );
-
-            if (env('USE_EVENT')) {
-                event(
-                    new BEEnrollment(''),
-                    new BEAuditTrail('')
-                );
-            }
-
             return response()->json(['message' => AdministratorReturnResponse::ENROLLMENTCTRL_UPDATED_ENROLLMENTTRAININGSTATUS->value. "ID#" . $this_training_status->id], 201);
         });
     }
