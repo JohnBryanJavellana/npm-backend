@@ -289,6 +289,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::post("delete_content_uploads", [LMSController::class, "deleteUpload"]);
         });
 
+        Route::post("view_specific_grade_details", [TraineeLMSController::class, 'view_specific_grade_details']);
         Route::post("grade_essay", [TrainerEnrollmentController::class, 'grade_essay']);
         Route::post("grade_file_assessment", [TrainerEnrollmentController::class, 'grade_file_assessment']);
     });

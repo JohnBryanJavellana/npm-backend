@@ -65,10 +65,10 @@ class LMSCourseService
 
                     $item->isAccessible = $isAccessibleResult['isAccessible'];
                     $item->enrolled_course_id = $isAccessibleResult['enrolledCourse']?->id;
-                    $item->overallAttempts = $item->attempts->where('created_by', auth()->user()->id)->map(function($query) {
+                    $item->overallAttempts = $item->attempts->where('created_by', auth()->user()->id)->map(function($query) use ($this_assessment) {
                         return [
                             "id" => $query->id,
-                            "score" => $query->answers->sum('score'),
+                            "score" => $this_assessment->passed_type === 'file_upload' ? $query->score : $query->answers->sum('score'),
                             "status" => $query->status,
                             "submitted_at" => $query->submitted_at,
                             "graded_at" => $query->graded_at

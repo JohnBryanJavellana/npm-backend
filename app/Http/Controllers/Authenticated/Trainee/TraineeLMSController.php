@@ -8,8 +8,10 @@ use App\Http\Requests\LMS\AttemptResult;
 use App\Http\Requests\LMS\DeleteAssessmentFileUpload;
 use App\Http\Requests\LMS\SubmitAssessmentFileUpload;
 use App\Http\Requests\LMS\ViewAssessmentFileUpload;
+use App\Http\Requests\LMS\ViewSpecificGradeDetails;
 use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
 use App\Models\AssessmentAttempt;
+use App\Models\Assessments;
 use App\Services\LMS\SubmitAssessmentFileUploadManager;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use App\Utils\TransactionUtil;
@@ -101,6 +103,45 @@ class TraineeLMSController extends Controller
             ])->whereKey($asessmentAttemptId)->firstOrFail();
 
             return response()->json(['result' => $result], 201);
+        });
+    }
+
+    /**
+     * Summary of view_specific_grade_details
+     * @param ViewSpecificGradeDetails $request
+     */
+    public function view_specific_grade_details(ViewSpecificGradeDetails $request) {
+        return TransactionUtil::transact($request, [], function() use($request) {
+            $enrolledCourseId = $request->enrolledCourseId;
+
+            $result = AssessmentAttempt::with([
+                'assessment:id,title,type,passing_score,passed_type',
+                'gradedBy:id,fname,mname,lname,suffix,email'
+            ])
+            ->where('enrolled_course_id', $enrolledCourseId)
+            ->latest()
+            ->get()
+            ->unique('assessments_id')
+            ->values();
+
+            $result->transform(function($attempt) {
+                $attempt->score = ($attempt->assessment->passed_type === "file_upload")
+                    ? $attempt->score
+                    : $attempt->answers()->sum('score');
+
+                $attempt->assessment->totalScore = ($attempt->assessment->passed_type === "file_upload")
+                    ? 100
+                    : $attempt->assessment->sections->sum(fn($query) => $query->questions()->sum('score'));
+
+                $attempt->percentageScore = ($attempt->assessment->passed_type === "file_upload")
+                    ? $attempt->score
+                    : number_format(($attempt->score / $attempt->assessment->totalScore) * 100, 2, '.', ',');
+
+                unset($attempt->assessment->sections);
+                return $attempt;
+            });
+
+            return response()->json(['result' => $result], 200);
         });
     }
 }
