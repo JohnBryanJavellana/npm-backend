@@ -72,6 +72,7 @@ class LMSCourseService
                     $courseModule = CourseModule::whereKey($this_assessment->courseContent->courseModuleSection->courseModule->id)->get();
 
                     $training = null;
+                    $enrolledCourse = null;
                     foreach ($courseModule as $cm) {
                         $training = Training::where('course_module_id', $cm->id)->first();
                         $isCurrentEnrolled = EnrolledCourse::where([
@@ -81,6 +82,7 @@ class LMSCourseService
                         ])->first();
 
                         if($isCurrentEnrolled) {
+                            $enrolledCourse = $isCurrentEnrolled;
                             break;
                         }
                     }
@@ -101,6 +103,7 @@ class LMSCourseService
 
                     $isAccessible = $item->attempts->where('created_by', auth()->user()->id)->whereIn('status', ['IN_PROGRESS', 'FOR_REMOVAL'])->isNotEmpty() || $accessible;
                     $item->isAccessible = $isAccessible;
+                    $item->enrolled_course_id = $enrolledCourse?->id;
                     $item->overallAttempts = $item->attempts->where('created_by', auth()->user()->id)->map(function($query) {
                         return [
                             "id" => $query->id,

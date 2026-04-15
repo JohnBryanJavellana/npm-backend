@@ -6,6 +6,7 @@ use App\Enums\LMS\AssessmentMessageResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LMS\AttemptResult;
 use App\Http\Requests\LMS\SubmitAssessmentFileUpload;
+use App\Http\Requests\LMS\ViewAssessmentFileUpload;
 use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
 use App\Models\AssessmentAttempt;
 use App\Services\LMS\SubmitAssessmentFileUploadManager;
@@ -64,6 +65,24 @@ class TraineeLMSController extends Controller
 
             $result = $this->submitAssessmentFileUploadManager->submitFileUpload($request, $assessmentControlNumber, $enrolledCourseId);
             return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of view_submitted_file_upload
+     * @param ViewAssessmentFileUpload $request
+     */
+    public function view_submitted_file_upload(ViewAssessmentFileUpload $request) {
+        return TransactionUtil::transact($request, [], function() use($request) {
+            $asessmentAttemptId = $request->asessmentAttemptId;
+
+            $result = AssessmentAttempt::with([
+                'uploadedFile' => function($query) {
+                    $query->select('id', 'assessment_attempt_id', 'file_path');
+                }
+            ])->whereKey($asessmentAttemptId)->firstOrFail();
+
+            return response()->json(['result' => $result], 201);
         });
     }
 }

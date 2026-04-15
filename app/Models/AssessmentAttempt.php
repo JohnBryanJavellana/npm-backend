@@ -35,4 +35,8 @@ class AssessmentAttempt extends Model
     public function gradedBy(){
         return $this->hasOne(User::class, "id", "graded_by");
     }
+
+    public function uploadedFile() {
+        return $this->hasMany(AssessmentSubmission::class);
+    }
 }
