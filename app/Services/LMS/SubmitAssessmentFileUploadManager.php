@@ -28,7 +28,7 @@ class SubmitAssessmentFileUploadManager
             return ['message' => 'Attempt on this assessment has already been submitted or is inaccessible.', 'status' => 409];
         }
 
-        $newAttempt = AssessmentAttempt::updateOrCreate(['submissionId' => $payload->submissionId], [
+        $thisAttempt = AssessmentAttempt::updateOrCreate(['id' => $payload->attemptId], [
             'assessments_id' => $thisAssessment->id,
             'enrolled_course_id' => $enrolledCourseId,
             'created_by' => $payload->user()->id,
@@ -39,7 +39,7 @@ class SubmitAssessmentFileUploadManager
         $dataToInsert = [];
         foreach ($payload->fileUpload as $fileUpload) {
             $dataToInsert[] = [
-                'assessment_attempt_id' => $newAttempt->id,
+                'assessment_attempt_id' => $thisAttempt->id,
                 'original_filename' => $fileUpload->getClientOriginalName(),
                 'file_path' => SaveFile::save($fileUpload, "upload-reference"),
                 'created_at' => now(),
@@ -51,7 +51,7 @@ class SubmitAssessmentFileUploadManager
 
         return [
             'message' => 'Success!',
-            'asessmentAttemptId' => $newAttempt->id,
+            'asessmentAttemptId' => $thisAttempt->id,
             'status' => 200
         ];
     }

@@ -116,9 +116,27 @@ class TrainerEnrollmentController extends Controller
                 $data = EnrolledCourse::where('training_id', $request->trainingId)
                     ->with([
                         'trainee:id,fname,lname,mname,suffix,email',
-                        'trainee.assessmentAttempts'
+                        'trainee.assessmentAttempts' => fn($query) => $query->withSum('answers', 'score'),
+                        'trainee.assessmentAttempts.assessment:id,type,passed_type'
                     ])
-                    ->get();
+                    ->get()
+                    ->map(function($enrolledCourse) {
+                        $courseData = $enrolledCourse->toArray();
+
+                        if (isset($courseData['trainee']['assessment_attempts'])) {
+                            $courseData['trainee']['assessment_attempts'] = collect($courseData['trainee']['assessment_attempts'])
+                                ->map(function($attempt) {
+                                    if ($attempt['assessment']['passed_type'] === 'questionnaire') {
+                                        $attempt['score'] = $attempt['answers_sum_score'] ?? 0;
+                                    }
+
+                                    unset($attempt['answers_sum_score']);
+                                    return $attempt;
+                                })->toArray();
+                        }
+
+                        return $courseData;
+                    });
 
                 return response()->json(["data" => $data], 200);
             } catch (\Exception $e) {

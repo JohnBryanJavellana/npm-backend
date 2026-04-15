@@ -24,7 +24,7 @@ class SubmitAssessmentFileUpload extends FormRequest
         return [
             'assessmentControlNumber' => ['required', 'exists:assessments,control_number', 'string'],
             'enrolledCourseId' => ['required', 'exists:enrolled_courses,id', 'integer'],
-            'submissionId' => ['nullable', 'exists:assessment_submissions,id'],
+            'attemptId' => ['nullable', 'exists:assessment_attempts,id'],
             'fileUpload' => ['required', 'array'],
             'fileUpload.*' => ['file']
         ];
