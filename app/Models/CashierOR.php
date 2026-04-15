@@ -13,6 +13,10 @@ class CashierOR extends Model
 
     protected $table = "cashier_o_r_s";
 
+    public function category() {
+        return $this->hasOne(ChargeCategory::class, 'id', 'charge_category_id');
+    }
+
     public function connectionInLibrary() {
         return $this->hasMany(LibraryInvoice::class);
     }

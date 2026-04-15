@@ -143,7 +143,7 @@ class LMSAssessmentController extends Controller
     {
         try {
             $validated = $request->validate([
-                "control_number" => "required|string|exists:assessments,control_number", 
+                "control_number" => "required|string|exists:assessments,control_number",
                 "answers" => "nullable|array",
                 "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
                 //! nullable kay it essay waray option id

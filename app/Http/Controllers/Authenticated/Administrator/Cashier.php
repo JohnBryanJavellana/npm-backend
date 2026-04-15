@@ -322,7 +322,9 @@ class Cashier extends Controller
      */
     public function get_or_numbers (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $orNumbersTemp = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment']);
+            $orNumbersTemp = CashierOR::with([
+                'category'
+            ])->withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment']);
 
             if($request->service) {
                 $orNumbersTemp->where([

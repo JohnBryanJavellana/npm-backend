@@ -28,6 +28,14 @@ class SubmitAssessmentFileUploadManager
             return ['message' => 'Attempt on this assessment has already been submitted or is inaccessible.', 'status' => 409];
         }
 
+        AssessmentAttempt::where([
+            "assessments_id" => $thisAssessment->id,
+            "enrolled_course_id" => $enrolledCourseId,
+            'status' => 'FOR_REMOVAL'
+        ])->update([
+            'status' => 'FAILED'
+        ]);
+
         $thisAttempt = AssessmentAttempt::updateOrCreate(['id' => $payload->attemptId], [
             'assessments_id' => $thisAssessment->id,
             'enrolled_course_id' => $enrolledCourseId,
