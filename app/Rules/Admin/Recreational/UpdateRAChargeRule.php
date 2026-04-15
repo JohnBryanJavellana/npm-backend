@@ -18,7 +18,7 @@ class UpdateRAChargeRule implements ValidationRule
     {
         $this_ra_invoice = RAInvoices::lockForUpdate()->whereKey($value)->first();
 
-        if($this_ra_invoice && \in_array($this_ra_invoice->invoice_status, [
+        if ($this_ra_invoice && \in_array($this_ra_invoice->invoice_status, [
             RAEnum::CANCELLED->value,
             RAEnum::PAID->value
         ])) {

@@ -12,7 +12,16 @@ return new class extends Migration
     public const BOOK_RES_STATUS = [
         "ACTIVE",
         "FOR CSM",
-        "COMPLETED"
+        "COMPLETED",
+        // 'ACTIVE',
+        // 'FOR CSM',
+        // 'COMPLETED',
+        // 'EXTENDING',
+        // 'RENEWING',
+        // 'APPROVED', gin pabutangan adi ni sir allen dati pa sir na mga status connected ha book reservation
+        // 'DAMAGED',
+        // 'RECEIVED'
+
     ];
 
     /**
