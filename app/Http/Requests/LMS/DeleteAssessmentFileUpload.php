@@ -4,7 +4,7 @@ namespace App\Http\Requests\LMS;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SubmitAssessmentFileUpload extends FormRequest
+class DeleteAssessmentFileUpload extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -12,6 +12,13 @@ class SubmitAssessmentFileUpload extends FormRequest
     public function authorize(): bool
     {
         return $this->user() !== null;
+    }
+
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'assessmentSubmmissionId' => $this->route('assessmentSubmmissionId')
+        ]);
     }
 
     /**
@@ -22,11 +29,7 @@ class SubmitAssessmentFileUpload extends FormRequest
     public function rules(): array
     {
         return [
-            'assessmentControlNumber' => ['required', 'exists:assessments,control_number', 'string'],
-            'enrolledCourseId' => ['required', 'exists:enrolled_courses,id', 'integer'],
-            'submissionId' => ['nullable', 'exists:assessment_submissions,id'],
-            'fileUpload' => ['required', 'array'],
-            'fileUpload.*' => ['file']
+            'assessmentSubmmissionId' => ['required', 'exists:assessment_submissions,id', 'integer'],
         ];
     }
 }

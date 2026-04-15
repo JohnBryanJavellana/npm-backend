@@ -21,6 +21,7 @@ return new class extends Migration
             $table->engine = "InnoDB";
             $table->id();
             $table->foreignIdFor(AssessmentAttempt::class)->constrained()->cascadeOnDelete();
+            $table->string("original_filename", 255);
             $table->longText("file_path");
             $table->timestamps();
         });

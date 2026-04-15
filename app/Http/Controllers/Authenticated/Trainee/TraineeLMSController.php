@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 use App\Enums\LMS\AssessmentMessageResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LMS\AttemptResult;
+use App\Http\Requests\LMS\DeleteAssessmentFileUpload;
 use App\Http\Requests\LMS\SubmitAssessmentFileUpload;
 use App\Http\Requests\LMS\ViewAssessmentFileUpload;
 use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
@@ -68,6 +69,19 @@ class TraineeLMSController extends Controller
                 'message' => $result['message'],
                 'asessmentAttemptId' => $result['asessmentAttemptId']
             ], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of delete_submission_file_upload
+     * @param DeleteAssessmentFileUpload $request
+     */
+    public function delete_submission_file_upload(DeleteAssessmentFileUpload $request) {
+        return TransactionUtil::transact($request, [], function() use($request) {
+            $assessmentSubmmissionId = $request->assessmentSubmmissionId;
+
+            $result = $this->submitAssessmentFileUploadManager->deleteFileUpload($assessmentSubmmissionId);
+            return response()->json(['message' => $result['message'],], $result['status']);
         });
     }
 

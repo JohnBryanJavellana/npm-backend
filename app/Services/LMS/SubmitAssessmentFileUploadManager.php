@@ -8,6 +8,7 @@ use App\Models\AssessmentSubmission;
 use App\Models\CourseModule;
 use App\Models\EnrolledCourse;
 use App\Models\Training;
+use App\Utils\RemoveFile;
 use App\Utils\SaveFile;
 use Carbon\Carbon;
 
@@ -27,7 +28,7 @@ class SubmitAssessmentFileUploadManager
             return ['message' => 'Attempt on this assessment has already been submitted or is inaccessible.', 'status' => 409];
         }
 
-        $newAttempt = AssessmentAttempt::create([
+        $newAttempt = AssessmentAttempt::updateOrCreate(['submissionId' => $payload->submissionId], [
             'assessments_id' => $thisAssessment->id,
             'enrolled_course_id' => $enrolledCourseId,
             'created_by' => $payload->user()->id,
@@ -39,6 +40,7 @@ class SubmitAssessmentFileUploadManager
         foreach ($payload->fileUpload as $fileUpload) {
             $dataToInsert[] = [
                 'assessment_attempt_id' => $newAttempt->id,
+                'original_filename' => $fileUpload->getClientOriginalName(),
                 'file_path' => SaveFile::save($fileUpload, "upload-reference"),
                 'created_at' => now(),
                 'updated_at' => now()
@@ -52,6 +54,19 @@ class SubmitAssessmentFileUploadManager
             'asessmentAttemptId' => $newAttempt->id,
             'status' => 200
         ];
+    }
+
+    /**
+     * Summary of deleteFileUpload
+     * @param int $assessmentSubmmissionId
+     * @return array{message: string, status: int}
+     */
+    public function deleteFileUpload(int $assessmentSubmmissionId) {
+        $thisAsessmentSubmission = AssessmentSubmission::findOrFail($assessmentSubmmissionId);
+        RemoveFile::removeFile("upload-reference/$thisAsessmentSubmission->file_path");
+
+        $thisAsessmentSubmission->delete();
+        return ['message' => 'Success!', 'status' => 200];
     }
 
     /**
