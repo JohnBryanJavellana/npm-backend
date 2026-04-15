@@ -23,7 +23,8 @@ class GradeFileAssesment extends FormRequest
     {
         return [
             'attempt_id' => ['required', 'exists:assessment_attempts,id', 'integer'],
-            'attemptStatus' => ['required', 'string', 'in:PASSED,FAILED,FOR_REMOVAL']
+            'attemptStatus' => ['required', 'string', 'in:PASSED,FAILED,FOR_REMOVAL'],
+            'grade' => ['required', 'integer']
         ];
     }
 }
