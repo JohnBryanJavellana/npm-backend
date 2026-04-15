@@ -13,14 +13,15 @@ return new class extends Migration
         "ACTIVE",
         "FOR CSM",
         "COMPLETED",
-        // 'ACTIVE',
-        // 'FOR CSM',
-        // 'COMPLETED',
-        // 'EXTENDING',
-        // 'RENEWING',
-        // 'APPROVED', gin pabutangan adi ni sir allen dati pa sir na mga status connected ha book reservation
-        // 'DAMAGED',
-        // 'RECEIVED'
+        'ACTIVE',
+        //!nagpa add hin book res status
+         'FOR CSM',
+        'COMPLETED',
+        'EXTENDING',
+        'RENEWING',
+        'APPROVED',
+        'DAMAGED',
+        'RECEIVED'
 
     ];
 
