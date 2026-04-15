@@ -141,155 +141,148 @@ class LMSAssessmentController extends Controller
     //! score is fix to boolean
     public function assessment_answers(Request $request)
     {
+        $validated = $request->validate([
+            "control_number" => "required|string|exists:assessments,control_number",
+            "answers" => "nullable|array",
+            "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
+            "answers.*.assessment_option_id" => "nullable|integer|exists:assessment_options,id",
+            "answers.*.assessment_answer_text" => "nullable|string",
+            "proctoring_events" => "nullable|array"
+        ]);
+
+        \Log::debug($validated);
+
+        DB::beginTransaction();
+
         try {
-            $validated = $request->validate([
-                "control_number" => "required|string|exists:assessments,control_number",
-                "answers" => "nullable|array",
-                "answers.*.assessment_question_id" => "required|integer|exists:assessment_questions,id",
-                //! nullable kay it essay waray option id
-                "answers.*.assessment_option_id" => "nullable|integer|exists:assessment_options,id",
-                "answers.*.assessment_answer_text" => "nullable|string",
+            $this_assessment = Assessments::where('control_number', $validated["control_number"])->firstOrFail();
+            $courseModule = CourseModule::whereKey($this_assessment->courseContent->courseModuleSection->courseModule->id)->get();
 
-                "proctoring_events" => "nullable|array",
-                //! "type" => "nullable|array",
-            ]);
-
-            DB::beginTransaction();
-
-            try {
-                $this_assessment = Assessments::where('control_number', $validated["control_number"])->firstOrFail();
-                $courseModule = CourseModule::whereKey($this_assessment->courseContent->courseModuleSection->courseModule->id)->get();
-
-                //! check if trainee is enrolled to this specific module
-                //! if yes, find training. otherwise show error response
-                $training = null;
-                foreach ($courseModule as $cm) {
-                    $training = Training::where('course_module_id', $cm->id)->first();
-                    $isCurrentEnrolled = EnrolledCourse::where([
-                        'user_id' => auth()->id(),
-                        'training_id' => $training->id,
-                        'enrolled_course_status' => 'ENROLLED'
-                    ])->first();
-
-                    if ($isCurrentEnrolled) {
-                        $training = $isCurrentEnrolled;
-                        return;
-                    }
-                }
-
-                $enrolledCourse = EnrolledCourse::where([
+            //! check if trainee is enrolled to this specific module
+            //! if yes, find training. otherwise show error response
+            $training = null;
+            foreach ($courseModule as $cm) {
+                $training = Training::where('course_module_id', $cm->id)->first();
+                $isCurrentEnrolled = EnrolledCourse::where([
                     'user_id' => auth()->id(),
-                    'training_id' => $training?->id,
+                    'training_id' => $training->id,
                     'enrolled_course_status' => 'ENROLLED'
                 ])->first();
 
-                if (!$enrolledCourse) {
-                    return response()->json(["message" => "No enrolled course found."], 404);
+                if ($isCurrentEnrolled) {
+                    $training = $isCurrentEnrolled;
+                    break;
                 }
+            }
 
-                $courseModuleTotalDayCount = $enrolledCourse->training->module->number_of_days;
+            $enrolledCourse = EnrolledCourse::where([
+                'user_id' => auth()->id(),
+                'training_id' => $training?->id,
+                'enrolled_course_status' => 'ENROLLED'
+            ])->first();
 
-                AssessmentAttempt::where([
-                    "assessments_id" => $this_assessment->id,
-                    "enrolled_course_id" => $enrolledCourse->id,
-                    'status' => 'FOR_REMOVAL'
-                ])->update([
-                    'status' => 'FAILED'
-                ]);
+            if (!$enrolledCourse) {
+                return response()->json(["message" => "No enrolled course found."], 409);
+            }
 
-                $attempt = AssessmentAttempt::firstOrCreate([
-                    "assessments_id"     => $this_assessment->id,
-                    "enrolled_course_id" => $enrolledCourse->id,
-                    "status"             => "IN_PROGRESS",
-                    "created_by"         => $request->user()->id,
-                ]);
+            AssessmentAttempt::where([
+                "assessments_id" => $this_assessment->id,
+                "enrolled_course_id" => $enrolledCourse->id,
+                'status' => 'FOR_REMOVAL'
+            ])->update([
+                'status' => 'FAILED'
+            ]);
 
-                $correctCount = 0;
-                $answers = [];
-                $autoGradableCount = 0; //!count con ano la it pwede ma grade (partial)
+            $attempt = AssessmentAttempt::firstOrCreate([
+                "assessments_id"     => $this_assessment->id,
+                "enrolled_course_id" => $enrolledCourse->id,
+                "status"             => "IN_PROGRESS",
+                "created_by"         => $request->user()->id,
+            ]);
 
-                if (!empty($validated["answers"])) {
-                    foreach ($validated["answers"] as $answer) {
-                        $isFinalCorrect = 0;
-                        $scoreValue = 0;
-                        $optionId = $answer["assessment_option_id"] ?? null;
+            $correctCount = 0;
+            $answers = [];
+            $autoGradableCount = 0; //!count con ano la it pwede ma grade (partial)
 
-                        //! mag auto score pag mayda optionId
-                        if ($optionId) {
-                            $option = DB::table('assessment_options')
-                                ->where('id', $optionId)
-                                ->where('assessment_question_id', $answer["assessment_question_id"])
-                                ->first();
+            if (!empty($validated["answers"])) {
+                foreach ($validated["answers"] as $answer) {
+                    $isFinalCorrect = 0;
+                    $scoreValue = 0;
+                    $optionId = $answer["assessment_option_id"] ?? null;
 
-                            if ($option) {
-                                $isFinalCorrect = (bool)$option->is_correct ? 1 : 0;
-                                $scoreValue = $isFinalCorrect;
-                                $correctCount += $isFinalCorrect;
-                                $autoGradableCount++;
-                            }
+                    //! mag auto score pag mayda optionId
+                    if ($optionId) {
+                        $option = DB::table('assessment_options')
+                            ->where('id', $optionId)
+                            ->where('assessment_question_id', $answer["assessment_question_id"])
+                            ->first();
+
+                        if ($option) {
+                            $isFinalCorrect = (bool)$option->is_correct ? 1 : 0;
+                            $scoreValue = $isFinalCorrect;
+                            $correctCount += $isFinalCorrect;
+                            $autoGradableCount++;
                         }
-
-                        $answers[] = AssessmentAnswer::updateOrCreate(
-                            [
-                                "assessment_attempt_id" => $attempt->id,
-                                "assessment_question_id" => $answer["assessment_question_id"]
-                            ],
-                            [
-                                "assessment_option_id" => $optionId,
-                                "answer_text" => $answer["assessment_answer_text"] ?? null,
-                                "is_correct" => $isFinalCorrect,
-                                "score" => $scoreValue
-                            ]
-                        );
                     }
+
+                    $answers[] = AssessmentAnswer::updateOrCreate(
+                        [
+                            "assessment_attempt_id" => $attempt->id,
+                            "assessment_question_id" => $answer["assessment_question_id"]
+                        ],
+                        [
+                            "assessment_option_id" => $optionId,
+                            "answer_text" => $answer["assessment_answer_text"] ?? null,
+                            "is_correct" => $isFinalCorrect,
+                            "score" => $scoreValue
+                        ]
+                    );
                 }
+            }
 
-                $frontendStatus = $request->input('status');
-                $status = ($frontendStatus === 'SUBMITTED') ? 'SUBMITTED' : 'IN_PROGRESS';
+            $frontendStatus = $request->input('status');
+            $status = ($frontendStatus === 'SUBMITTED') ? 'SUBMITTED' : 'IN_PROGRESS';
 
-                $attempt->update([
-                    'score' => $attempt->answers->sum('score'),
-                    'status' => $status,
-                    'submitted_at' => $status === "SUBMITTED" ? now() : null
-                ]);
+            $attempt->update([
+                'score' => $attempt->answers->sum('score'),
+                'status' => $status,
+                'submitted_at' => $status === "SUBMITTED" ? now() : null
+            ]);
 
-                if ($request->proctoring_events) {
-                    $eventCounts = collect($validated['proctoring_events'])
-                        ->groupBy('type')
-                        ->map(fn($group) => $group->count());
+            if ($request->proctoring_events) {
+                $eventCounts = collect($validated['proctoring_events'])
+                    ->groupBy('type')
+                    ->map(fn($group) => $group->count());
 
-                    foreach ($eventCounts as $type => $count) {
-                        $actionRecord = AssessmentAttemptAction::where([
+                foreach ($eventCounts as $type => $count) {
+                    $actionRecord = AssessmentAttemptAction::where([
+                        'user_id' => auth()->id(),
+                        'assessment_attempt_id' => $attempt->id,
+                        'actions' => $type,
+                    ])->first();
+
+                    if ($actionRecord) {
+                        $actionRecord->increment('action_count', $count);
+                    } else {
+                        AssessmentAttemptAction::create([
                             'user_id' => auth()->id(),
                             'assessment_attempt_id' => $attempt->id,
                             'actions' => $type,
-                        ])->first();
-
-                        if ($actionRecord) {
-                            $actionRecord->increment('action_count', $count);
-                        } else {
-                            AssessmentAttemptAction::create([
-                                'user_id' => auth()->id(),
-                                'assessment_attempt_id' => $attempt->id,
-                                'actions' => $type,
-                                'action_count' => $count,
-                            ]);
-                        }
+                            'action_count' => $count,
+                        ]);
                     }
                 }
-
-                DB::commit();
-
-                return response()->json([
-                    "message" => $status === 'SUBMITTED' ? "Submitted successfully." : "Progress saved.",
-                    "status" => $status,
-                    'assessment_attempt_id' => $attempt->id
-                ], 201);
-            } catch (Exception $e) {
-                DB::rollBack();
-                throw $e;
             }
+
+            DB::commit();
+
+            return response()->json([
+                "message" => $status === 'SUBMITTED' ? "Submitted successfully." : "Progress saved.",
+                "status" => $status,
+                'assessment_attempt_id' => $attempt->id
+            ], 200);
         } catch (Exception $e) {
+            DB::rollBack();
             return response()->json([
                 "message" => "An error occurred.",
                 "error" => config('app.debug') ? $e->getMessage() : null
