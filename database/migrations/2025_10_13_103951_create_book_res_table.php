@@ -15,14 +15,13 @@ return new class extends Migration
         "COMPLETED",
         'ACTIVE',
         //!nagpa add hin book res status
-         'FOR CSM',
+        'FOR CSM',
         'COMPLETED',
         'EXTENDING',
         'RENEWING',
         'APPROVED',
         'DAMAGED',
         'RECEIVED'
-
     ];
 
     /**
