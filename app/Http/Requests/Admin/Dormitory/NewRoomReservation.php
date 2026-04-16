@@ -19,7 +19,8 @@ class NewRoomReservation extends FormRequest
     {
         $this->merge([
             'withFee' => $this->has('withFee') ? filter_var($this->input('withFee'), FILTER_VALIDATE_BOOLEAN) : null,
-            'withGivenCoupleDocuments' => $this->boolean('withGivenCoupleDocuments')
+            'withGivenCoupleDocuments' => $this->boolean('withGivenCoupleDocuments'),
+            'pricingBreakdown' => \is_string($this->pricingBreakdown) ? json_decode($this->pricingBreakdown, true) : $this->pricingBreakdown,
         ]);
     }
 

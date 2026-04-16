@@ -57,6 +57,9 @@ class DormitoryRoomReservationManager
                     'user_id' => $payload->user_id,
                     'trace_number' => GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-INV-'),
                     'paying_as_trainee_days' => $pb->traineeDays ?? 0,
+                    'paying_as_trainee_amount' => $pb->traineeTotal ?? 0,
+                    'paying_as_guest_days' => $pb->guestDays ?? 0,
+                    'paying_as_guest_amount' => $pb->guestTotal ?? 0,
                     'invoice_amount' => $pb->grandTotal ?? 0,
                     'type' => DormitoryEnum::DORMITORY,
                     'remarks' => $payload->payment_remarks

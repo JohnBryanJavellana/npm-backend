@@ -21,16 +21,16 @@ class DormitoryInvoiceResource extends JsonResource
             "tenant_id" => $this->dormitory_tenant_id,
             "room_id" => $this->dormitory_room_id,
             "trace_number" => $this->trace_number,
-            
-            "reference_id" => ($this->payment_type === "WALK-IN" && empty($this->reference_id)) 
-                ? $this->orNumber?->name  
+
+            "reference_id" => ($this->payment_type === "WALK-IN" && empty($this->reference_id))
+                ? $this->orNumber?->name
                 : $this->invoice_reference ?? null,
 
             "payment_type" => $this->payment_type,
             "final_amount" => $this->total_amount,
             "description" => $this->description,
             "remarks" => $this->remarks,
-            "status" => $this->invoice_status,  
+            "status" => $this->invoice_status,
             "datePaid" => $this->datePaid,
             "type" => $this->type,
             "charge_name" => $this->charge?->name,
