@@ -125,17 +125,11 @@ class TraineeLMSController extends Controller
             ->values();
 
             $result->transform(function($attempt) {
-                $attempt->score = ($attempt->assessment->passed_type === "file_upload")
-                    ? $attempt->score
-                    : $attempt->answers()->sum('score');
+                $isFileUpload = $attempt->assessment->passed_type === "file_upload";
 
-                $attempt->assessment->totalScore = ($attempt->assessment->passed_type === "file_upload")
-                    ? 100
-                    : $attempt->assessment->sections->sum(fn($query) => $query->questions()->sum('score'));
-
-                $attempt->percentageScore = ($attempt->assessment->passed_type === "file_upload")
-                    ? $attempt->score
-                    : number_format(($attempt->score / $attempt->assessment->totalScore) * 100, 2, '.', ',');
+                $attempt->score = $isFileUpload ? $attempt->score : $attempt->answers()->sum('score');
+                $attempt->assessment->totalScore = $isFileUpload ? 100 : $attempt->assessment->sections->sum(fn($query) => $query->questions()->sum('score'));
+                $attempt->percentageScore = $isFileUpload ? $attempt->score : number_format(($attempt->score / $attempt->assessment->totalScore) * 100, 2, '.', ',');
 
                 unset($attempt->assessment->sections);
                 return $attempt;
