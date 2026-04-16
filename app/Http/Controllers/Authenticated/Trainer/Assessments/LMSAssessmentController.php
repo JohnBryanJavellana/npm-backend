@@ -322,6 +322,8 @@ class LMSAssessmentController extends Controller
 
                 if ($attempt) {
                     $attempt->makeHidden('answers');
+
+                    $attempt->score = $attempt->answers->sum('score');
                     $userAnswers = $attempt->answers->keyBy('assessment_question_id');
                     $attempt->sections = $assessment->sections->map(function ($section) use ($userAnswers) {
                         $sectionData = clone $section;

@@ -134,11 +134,13 @@ class TrainerEnrollmentController extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             try {
-                $data = EnrolledCourse::where('training_id', $request->trainingId)
+                $this_assessment = Assessments::where('control_number', $request->controlNumber)->firstOrFail();
+
+                $data = EnrolledCourse::when($request->trainingId, fn($query) => $query->where('training_id', $request->trainingId))
                     ->with([
                         'trainee:id,fname,lname,mname,suffix,email',
-                        'trainee.assessmentAttempts' => fn($query) => $query->withSum('answers', 'score'),
-                        'trainee.assessmentAttempts.assessment:id,type,passed_type'
+                        'trainee.assessmentAttempts' => fn($query) => $query->where('assessments_id', $this_assessment->id)->withSum('answers', 'score'),
+                        'trainee.assessmentAttempts.assessment:id,control_number,type,passed_type'
                     ])
                     ->get()
                     ->map(function($enrolledCourse) {

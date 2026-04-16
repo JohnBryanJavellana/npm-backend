@@ -2,32 +2,25 @@
 
 namespace App\Http\Requests\Trainee\Dormitory;
 
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
 class DormRoomRequest extends FormRequest
 {
-
-    protected $stopOnFirstFailure = true;
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
-    {        
-        \Log::info("dormitoryRequest", [$this->all()]);
+    {
         return $this->user() !== null;
     }
-    
 
-    // protected function prepareForValidation()
-    // {
-    //     $base = $this->input();
-
-    //     \Log::info("prepareForValidation", [$base]);
-    //     \Log::info("prepareForValidation", [$base["forType"]]);
-
-    // }
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'user_id' => $this->user()->id,
+            'process_type' => "ONLINE"
+        ]);
+    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -37,25 +30,18 @@ class DormRoomRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "room_id" => "nullable|exists:dormitory_rooms,id",
-            "is_air_conditioned" => "required|in:YES,NO",
-            "single_accomodation" => "required|in:YES,NO",
-            "purpose" => "required|string|max:255",
-            "fromDate" => "required|date",
-            "toDate" => "required|date|after:fromDate",
-            "file" => "mimes:jpg,jpeg,png,pdf,doc,docx|max:5120",
-        ];
-    }
+            "dormitory_room_id" => ["nullable", 'integer', "exists:dormitory_rooms,id"],
+            "user_id" => ["required", 'integer', "exists:users,id"],
+            "room_type" => ["required", "in:AIRCON,NON-AIRCON"],
+            "accommodation" => ["required", "in:SINGLE,SHARED,COUPLE"],
+            "purpose" => ["required", "string"],
+            "process_type" => ["required", "string"],
+            "check_in_datetime" => ["required", "date"],
+            "check_out_datetime" => ["required", "date", "after:fromDate"],
+            "status_of_occupancy" => ["required", "string", "in:TRAINEE,NMP PERSONNEL (REGULAR/JOW)"],
 
-    protected function failedValidation(Validator $validator)
-    {
-        $errors = $validator->errors();
-        $firstError = $errors->first();
-        throw new HttpResponseException(
-            response()->json([
-                "message" => $firstError,
-                "errors" => $errors 
-            ], 422)
-        );
+            "suppportingCoupleDocuments" => ['required_if:accommodation,COUPLE', 'array'],
+            "suppportingCoupleDocuments.*" => ["file"]
+        ];
     }
 }

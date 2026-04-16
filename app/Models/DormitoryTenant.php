@@ -48,6 +48,11 @@ class DormitoryTenant extends Model {
         return $this->hasMany(DormitoryItemBorrowing::class);
     }
 
+    public function coupleSupportingDocuments()
+    {
+        return $this->hasMany(DormitoryTenantSupDoc::class);
+    }
+
     public function services()
     {
         return $this->hasMany(DormitoryReqService::class, 'dormitory_tenant_id', 'id');

@@ -61,7 +61,7 @@ class TraineeDormitory extends Controller
     public function viewTenantCount(Request $request)
     {
         try {
-            return $this->dormitory_service->getDormRequestCount($request->user()->id);            
+            return $this->dormitory_service->getDormRequestCount($request->user()->id);
         }
         catch (\Exception $e) {
             \Log::info("viewTenantCountError", [$e]);
@@ -101,8 +101,7 @@ class TraineeDormitory extends Controller
         try {
             $applications = DormitoryTenant::forUser($request->user()->id)
             ->with([
-                "dormitory_room.dormitory.room_images",
-                "dormitory_room.dormitory"
+                "dormitory_room.roomImages"
             ]);
 
             if(empty($request->tenantStatus)) $applications->whereNot("tenant_status", RequestStatus::CANCELLED->value);
@@ -294,27 +293,6 @@ class TraineeDormitory extends Controller
         }
     }
 
-    //additional
-    public function request_tenant_room(DormRoomRequest $request) {
-        $user = User::findOrFail($request->userId ?? $request->user()->id);
-        $validated = $request->validated();
-
-        try {
-            $this->dormitory_service->createRequest($validated, $user->id);
-
-            if(env("USE_EVENT")) {
-                event(new BEDormitory(''));
-            }
-
-            return response()->json(["message"=> 'Dormitory request sent successfully.'], 200);
-        } catch (DomainException $e) {
-            throw $e;
-        }
-        catch (\Exception $e) {
-            \Log::error("error-send-reqesut", [$e->getMessage()]);
-            return response()->json(["message"=> "An unexpected error occurred. Please try again."],500);
-        }
-    }
     public function remove_applied_dormitories (Request $request, int $dormitory_id) {
         try {
             $this->dormitory_service->cancelRequest($request, $dormitory_id);
@@ -462,5 +440,20 @@ class TraineeDormitory extends Controller
             \Log::error("error_cancel_service_request", [$e->getMessage()]);
             return response()->json(["message" => "An unexpected error occurred. Please try again."], 500);
         }
+    }
+
+    /** //////////////////////// !! CODE */
+
+    /**
+     * Summary of request_tenant_room
+     * @param DormRoomRequest $request
+     */
+    public function request_tenant_room(DormRoomRequest $request) {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $guestId = $request->user_id;
+
+            $result = $this->dormitory_service->requestDormitoryRoom($request, $guestId);
+            return response()->json(["message" => $result['message']], $result['status']);
+        });
     }
 }
