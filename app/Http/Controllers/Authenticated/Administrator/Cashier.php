@@ -280,37 +280,22 @@ class Cashier extends Controller
             $payments = $this->cashierGetTableRef->getTable($request->service, null, ['invoice_status' => $request->statuses]);
             $relations = ['payee', 'orNumber'];
 
-            if($request->service === NotificationEnum::LIBRARY->value) {
-                $relations = [
-                    ...$relations,
+            $serviceRelations = match($request->service) {
+                NotificationEnum::DORMITORY->value  => ['dormitoryReqService'],
+                NotificationEnum::ENROLLMENT->value => ['training'],
+                NotificationEnum::LIBRARY->value => [
                     'bookRes',
                     'selectedBooks',
                     'selectedBooks.bookReservation',
                     'selectedBooks.bookReservation.book',
                     'selectedBooks.bookReservation.books',
                     'selectedBooks.bookReservation.books.catalog'
-                ];
-            }
+                ],
+                default => []
+            };
 
-            if($request->service === NotificationEnum::ENROLLMENT->value) {
-                $relations = [
-                    ...$relations,
-                    'training'
-                ];
-            }
-
-            if($request->service === NotificationEnum::DORMITORY->value) {
-                $relations = [
-                    ...$relations,
-                    'dormitoryReqService'
-                ];
-            }
-
-            $paymentsData = $payments->with($relations)->orderBy('created_at', 'DESC');
-
-            if($request->limitter) $paymentsData->take($request->limitter);
-            $paymentsData = $paymentsData ->get();
-
+            $mergedRelations = [...$relations, ...$serviceRelations];
+            $paymentsData = $payments->with($mergedRelations)->orderBy('created_at', 'DESC')->get();
             return response()->json(['payments' => $paymentsData], 200);
         });
     }
@@ -322,18 +307,17 @@ class Cashier extends Controller
      */
     public function get_or_numbers (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $orNumbersTemp = CashierOR::with([
-                'category'
-            ])->withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment']);
-
-            if($request->service) {
-                $orNumbersTemp->where([
-                    "service_type" => $request->service,
+            $orNumbers = CashierOR::with(['category'])->withCount([
+                'connectionInLibrary',
+                'connectionInDormitory',
+                'connectionInEnrollment'
+            ])->when($request->service, function ($query, $service) {
+                $query->where([
+                    'service_type' => $service,
                     'status' => CashierEnum::AVAILABLE
                 ]);
-            }
+            })->get();
 
-            $orNumbers = $orNumbersTemp->get();
             return response()->json(['orNumbers' => $orNumbers], 200);
         });
     }
