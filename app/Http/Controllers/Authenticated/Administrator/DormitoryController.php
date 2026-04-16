@@ -224,7 +224,7 @@ class DormitoryController extends Controller
      */
     public function room_reservations (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $room_reservations = DormitoryTenant::with(['boarder', 'dormitory_room'])
+            $room_reservations = DormitoryTenant::with(['boarder', 'dormitory_room', 'coupleSupportingDocuments'])
                 ->when($request->tenantStatus, fn($query, $status) => $query->whereIn('tenant_status', (array) $status))
                 ->latest()
                 ->get();

@@ -19,6 +19,7 @@ class NewRoomReservation extends FormRequest
     {
         $this->merge([
             'withFee' => $this->has('withFee') ? filter_var($this->input('withFee'), FILTER_VALIDATE_BOOLEAN) : null,
+            'withGivenCoupleDocuments' => $this->boolean('withGivenCoupleDocuments')
         ]);
     }
 
@@ -38,11 +39,12 @@ class NewRoomReservation extends FormRequest
             'purpose' => ['required_if:status_of_occupancy,TRAINEE'],
             'accommodation' => ['required', 'in:SINGLE,SHARED,COUPLE'],
             'room_type' => ['required', 'in:AIRCON,NON-AIRCON'],
-            'supporting_documents' => ['required_if:accommodation,COUPLE', 'array'],
             'status' => ['required_if:httpMethod,UPDATE', 'in:APPROVED,REJECTED,FOR PAYMENT'],
             'remarks' => ['required_if:status,REJECTED'],
             'pricingBreakdown' => ['required_if:status_of_occupancy,TRAINEE'],
             'withFee' => ['required', 'boolean'],
+            'withGivenCoupleDocuments' => ['required', 'boolean'],
+            'supporting_documents' => ['exclude_if:withGivenCoupleDocuments,true', 'required_if:accommodation,COUPLE', 'array'],
 
             'httpMethod' => ['required', 'in:POST,UPDATE'],
             'documentId' => [Rule::when($this->httpMethod === "UPDATE", ['required', 'exists:dormitory_tenants,id'], ['nullable'])],

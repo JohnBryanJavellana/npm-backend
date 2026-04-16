@@ -16,6 +16,8 @@ class DormitoryRoomReservationManager
      * @param bool $isPost
      */
     public function handleReservation(object $payload, bool $isPost) {
+        \Log::debug($payload);
+
         $res = $isPost ? new DormitoryTenant(['trace_number' => GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DR-')])
                        : DormitoryTenant::lockForUpdate()->findOrFail($payload->documentId);
 
@@ -48,8 +50,8 @@ class DormitoryRoomReservationManager
                 }
             }
 
-            $pb = (object)($payload->pricing_breakdown ?? []);
-            if ($payload->with_fee && \in_array($payload->status_of_occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $payload->status === DormitoryEnum::FOR_PAYMENT->value) {
+            $pb = (object)($payload->pricingBreakdown ?? []);
+            if ($payload->withFee && \in_array($payload->status_of_occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $payload->status === DormitoryEnum::FOR_PAYMENT->value) {
                 DormitoryInvoice::create([
                     'dormitory_tenant_id' => $res->id,
                     'user_id' => $payload->user_id,
