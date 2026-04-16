@@ -23,7 +23,7 @@ class SetServiceRequestAsAction extends FormRequest
     {
         return [
             'serviceRequestId' => ['required', 'exists:dormitory_req_services,id'],
-            'action' => ['required', 'in:DONE,CANCELLED']
+            'action' => ['required', 'in:DONE,CANCELLED,APPROVED']
         ];
     }
 }
