@@ -16,8 +16,6 @@ class DormitoryRoomReservationManager
      * @param bool $isPost
      */
     public function handleReservation(object $payload, bool $isPost) {
-        \Log::debug($payload);
-
         $res = $isPost ? new DormitoryTenant(['trace_number' => GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DR-')])
                        : DormitoryTenant::lockForUpdate()->findOrFail($payload->documentId);
 

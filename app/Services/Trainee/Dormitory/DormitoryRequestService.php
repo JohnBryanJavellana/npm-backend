@@ -99,30 +99,11 @@ class DormitoryRequestService
                 );
             }
 
-            if (!in_array($record->tenant_status, [
+            if (!\in_array($record->tenant_status, [
                 RequestStatus::PENDING->value,
                 RequestStatus::FOR_PAYMENT->value,
             ])) {
                 throw new DomainException("Dormitory request cancellation is not permitted.");
-            }
-
-            if (!is_null($record->dormitory_room_id)) {
-                $dorm = $this->roomModel
-                    ->find($record->dormitory_room_id)
-                    ->lockForUpdate();
-
-                $dorm->update([
-                    "room_slot" =>  $record->room_for_type === "COUPLE"
-                        || $record->single_accommodation === "YES" ? 2 : 1,
-                    "room_status" => RequestStatus::AVAILABLE
-                ]);
-            }
-            if (
-                $record->room_for_type === "COUPLE" &&
-                $record->filename &&
-                file_exists(public_path('marriage-files/' . $record->filename))
-            ) {
-                unlink(public_path('marriage-files/' . $record->filename));
             }
 
             $record->update([

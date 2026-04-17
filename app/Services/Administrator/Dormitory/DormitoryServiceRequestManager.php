@@ -79,7 +79,11 @@ class DormitoryServiceRequestManager
             $preparedData['dormitory_invoice_id'] = $thisInvoice->id;
         }
 
-        if ($action === DormitoryEnum::DONE->value && !\in_array($req->status, [DormitoryEnum::APPROVED->value, DormitoryEnum::FOR_PAYMENT->value])) {
+        if ($action === DormitoryEnum::DONE->value && !\in_array($req->status, [
+            DormitoryEnum::APPROVED->value,
+            DormitoryEnum::FOR_PAYMENT->value,
+            DormitoryEnum::PAID->value
+        ])) {
             return ['message' => "Only Approved or For Payment requests can be set to DONE.", 'status' => 409];
         }
 
