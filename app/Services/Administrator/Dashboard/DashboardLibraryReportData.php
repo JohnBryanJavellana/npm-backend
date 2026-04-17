@@ -5,7 +5,7 @@ use App\Enums\Administrator\LibraryEnum;
 use App\Enums\NotificationEnum;
 use App\Helpers\Administrator\General\CountCollection;
 use Illuminate\Database\Eloquent\Builder;
-use \Illuminate\Support\Collection;
+use Illuminate\Support\Collection;
 
 class DashboardLibraryReportData extends CountCollection
 {
@@ -14,7 +14,7 @@ class DashboardLibraryReportData extends CountCollection
      * @param Builder $bookResBuilder
      * @param Builder $bookCopyBuilder
      * @param Builder $notificationBuilder
-     * @return array{totalLibraryApplications: mixed, reservationStatus: array, libraryHealthCount: array, recentActivity: Collection}
+     * @return array{libraryHealthCount: array{available: string, total: string, recentActivity: Collection, reservationStatus: array{newReservations: string, overdue: string}, totalLibraryApplications: string}}
      */
     public function libraryReportData(Builder $bookResBuilder, Builder $bookCopyBuilder, Builder $notificationBuilder): array
     {
@@ -60,7 +60,7 @@ class DashboardLibraryReportData extends CountCollection
     /**
      * Summary of recentActivity
      * @param Builder $notificationBuilder
-     * @return Builder[]|Collection|\Illuminate\Support\Collection
+     * @return Collection
      */
     private function recentActivity(Builder $notificationBuilder): Collection
     {

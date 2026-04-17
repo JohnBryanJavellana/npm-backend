@@ -5,7 +5,7 @@ use App\Enums\Administrator\CashierEnum;
 use App\Enums\Administrator\DormitoryEnum;
 use App\Helpers\Administrator\General\CountCollection;
 use Illuminate\Database\Eloquent\Builder;
-use \Illuminate\Support\Collection;
+use Illuminate\Support\Collection;
 
 class DashboardDormitoryReportData extends CountCollection
 {
@@ -15,7 +15,7 @@ class DashboardDormitoryReportData extends CountCollection
      * @param Builder $dormitoryInventoryBuilder
      * @param Builder $dormitoryServiceBuilder
      * @param Builder $dormitoryInvoiceBuilder
-     * @return array{dormitoryPaymentsData: array, dormitoryTenantOccupancy: array, inventoryAlerts: \Illuminate\Support\Collection, monthlyOccupancyData: array, serviceRequestStatus: \Illuminate\Support\Collection, totalDormitoryApplications: string}
+     * @return array{dormitoryPaymentsData: array, dormitoryTenantOccupancy: array, inventoryAlerts: Collection, monthlyOccupancyData: array, serviceRequestStatus: Collection, totalDormitoryApplications: string}
      */
     public function dormitoryReportData(
         Builder $dormitoryTenantBuilder,
@@ -95,7 +95,7 @@ class DashboardDormitoryReportData extends CountCollection
     /**
      * Summary of inventoryAlerts
      * @param Builder $dormitoryInventoryBuilder
-     * @return \Illuminate\Support\Collection<int, array{available: mixed, item: mixed, status: string, total_count: mixed>}
+     * @return Collection<int, array{available: mixed, item: mixed, status: string, total_count: mixed>}
      */
     private function inventoryAlerts (Builder $dormitoryInventoryBuilder): Collection
     {
@@ -123,7 +123,7 @@ class DashboardDormitoryReportData extends CountCollection
     /**
      * Summary of serviceRequestStatus
      * @param Builder $dormitoryServiceBuilder
-     * @return \Illuminate\Support\Collection<int, array{id: mixed, remarks: mixed, service: mixed, status: mixed>}
+     * @return Collection<int, array{id: mixed, remarks: mixed, service: mixed, status: mixed>}
      */
     private function serviceRequestStatus (Builder $dormitoryServiceBuilder): Collection
     {

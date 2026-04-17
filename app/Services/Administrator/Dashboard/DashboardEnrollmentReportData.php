@@ -5,7 +5,7 @@ use App\Enums\Administrator\CashierEnum;
 use App\Helpers\Administrator\General\CountCollection;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use \Illuminate\Support\Collection;
+use Illuminate\Support\Collection;
 
 class DashboardEnrollmentReportData extends CountCollection
 {
@@ -14,7 +14,7 @@ class DashboardEnrollmentReportData extends CountCollection
      * @param Builder $enrollmentInstanceBuilder
      * @param Builder $trainingInstanceBuilder
      * @param Builder $enrollmentInvoiceBuilder
-     * @return array{enrollmentPayments: array, enrollmentTrend: \Illuminate\Support\Collection, topPopularCourse: \Illuminate\Support\Collection, totalEnrollmentApplications: string}
+     * @return array{enrollmentPayments: array, enrollmentTrend: Collection, topPopularCourse: Collection, totalEnrollmentApplications: string}
      */
     public function enrollmentReportData(Builder $enrollmentInstanceBuilder, Builder $trainingInstanceBuilder, Builder $enrollmentInvoiceBuilder): array
     {
@@ -50,7 +50,7 @@ class DashboardEnrollmentReportData extends CountCollection
     /**
      * Summary of enrollmentTrend
      * @param Builder $enrollmentInstanceBuilder
-     * @return \Illuminate\Support\Collection<int, array{count: int, week: string>}
+     * @return Collection<int, array{count: int, week: string>}
      */
     private function enrollmentTrend(Builder $enrollmentInstanceBuilder): Collection
     {
@@ -72,7 +72,7 @@ class DashboardEnrollmentReportData extends CountCollection
     /**
      * Summary of topPopularCourse
      * @param Builder $trainingInstanceBuilder
-     * @return \Illuminate\Support\Collection<int, array{count: mixed, course: mixed>}
+     * @return Collection<int, array{count: mixed, course: mixed>}
      */
     private function topPopularCourse(Builder $trainingInstanceBuilder): Collection
     {

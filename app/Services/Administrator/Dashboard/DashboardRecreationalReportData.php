@@ -18,8 +18,8 @@ class DashboardRecreationalReportData extends CountCollection
         $recreationalApplications = $this->recreationalApplications($recreationalBuilder);
 
         return [
-            'totalRecreationalApplications' => $totalRecreationalApplications,
-            'recreationalApplications' => $recreationalApplications
+            'recreationalApplications' => $recreationalApplications,
+            'totalRecreationalApplications' => $totalRecreationalApplications
         ];
     }
 
