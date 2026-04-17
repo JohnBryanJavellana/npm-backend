@@ -15,6 +15,7 @@ use App\Services\Administrator\Dashboard\{
     DashboardRecreationalReportData
 };
 use App\Utils\TransactionUtil;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class DashboardCtrl extends Controller
@@ -34,7 +35,8 @@ class DashboardCtrl extends Controller
      * Summary of dashboard_data
      * @param Request $request
      */
-    public function dashboard_data(Request $request) {
+    public function dashboard_data(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $userRole = $request->user()->role;
             $givenYear = $request->year;
@@ -67,30 +69,30 @@ class DashboardCtrl extends Controller
                 );
             }
 
-            // if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_RA->value])) {
-            //     $reportData['recreationalReportData'] = $this->dashboardRecreationalReportData->recreationalReportData(
-            //         $modelInstances['recreationalInstance']
-            //     );
-            // }
+            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_RA->value])) {
+                $reportData['recreationalReportData'] = $this->dashboardRecreationalReportData->recreationalReportData(
+                    $modelInstances['recreationalInstance']
+                );
+            }
 
-            // if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value])) {
-            //     $reportData['masterlistReportData'] = $this->dashboardMasterlistReportData->masterlistReportData(
-            //         $modelInstances['userInstance'],
-            //         $modelInstances['employerInstance']
-            //     );
-            // }
+            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value])) {
+                $reportData['masterlistReportData'] = $this->dashboardMasterlistReportData->masterlistReportData(
+                    $modelInstances['userInstance'],
+                    $modelInstances['employerInstance']
+                );
+            }
 
-            // if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::CASHIER->value])) {
-            //     $reportData['cashierReportData'] = $this->dashboardCashierReportData->cashierReportData(
-            //         $modelInstances['dormitoryInvoiceInstance'],
-            //         $modelInstances['enrollmentInvoiceInstance'],
-            //         $modelInstances['libraryInvoiceInstance'],
-            //         $modelInstances['raInvoiceInvoiceInstance'],
-            //         $modelInstances['cashierORInstance']
-            //     );
-            // }
+            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::CASHIER->value])) {
+                $reportData['cashierReportData'] = $this->dashboardCashierReportData->cashierReportData(
+                    $modelInstances['dormitoryInvoiceInstance'],
+                    $modelInstances['enrollmentInvoiceInstance'],
+                    $modelInstances['libraryInvoiceInstance'],
+                    $modelInstances['raInvoiceInvoiceInstance'],
+                    $modelInstances['cashierORInstance']
+                );
+            }
 
-            // $reportData['accountReportData'] = $this->dashboardAccountReportData->accountReportData($request, $modelInstances['auditTrailInstance']);
+            $reportData['accountReportData'] = $this->dashboardAccountReportData->accountReportData($request, $modelInstances['auditTrailInstance']);
 
             return response()->json(['reportData' => $reportData], 200);
         });

@@ -45,27 +45,23 @@ class DashboardModelInstances
      * userInstance: \Illuminate\Database\Eloquent\Builder<User>
      * }
      */
-    public function modelInstances(?int $givenYear) {
+    public function modelInstances(?int $givenYear): array
+    {
         $instances = [
             "userInstance" => User::query(),
             "employerInstance" => Employer::query(),
-
             "auditTrailInstance" => AuditTrail::query(),
             "cashierORInstance" => CashierOR::query(),
             "enrolledCourseInstance" => EnrolledCourse::query(),
-
             "bookResInstance" => BookRes::query(),
             "bookCopyInstance" => BookCopy::query(),
             "notificationInstance" => Notification::query(),
             "libraryInvoiceInstance" => LibraryInvoice::query(),
-
             "recreationalInstance" => RARequestInfo::query(),
-
             "dormitoryTenantInstance" => DormitoryTenant::query(),
             "dormitoryServiceInstance" => DormitoryReqService::query(),
             "dormitoryInventoryInstance" => DormitoryInventory::query(),
             "dormitoryInvoiceInstance" => DormitoryInvoice::query(),
-
             "trainingInstance" => Training::query(),
             "enrollmentInvoiceInstance" => EnrollmentInvoice::query(),
             "raInvoiceInvoiceInstance" => RAInvoices::query()

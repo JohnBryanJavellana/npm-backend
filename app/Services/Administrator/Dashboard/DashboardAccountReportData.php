@@ -1,18 +1,21 @@
 <?php
 
 namespace App\Services\Administrator\Dashboard;
+
 use App\Helpers\Administrator\General\CountCollection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+
 
 class DashboardAccountReportData extends CountCollection
 {
     /**
      * Summary of accountReportData
-     * @param object $request
+     * @param Request $request
      * @param Builder $auditTrailBuilder
      * @return array{accountActivities: array{audit_trails: string, email: string}}
      */
-    public function accountReportData(object $request, Builder $auditTrailBuilder): array
+    public function accountReportData(Request $request, Builder $auditTrailBuilder): array
     {
         $accountActivities = $this->accountActivities($request, $auditTrailBuilder);
 
@@ -23,15 +26,15 @@ class DashboardAccountReportData extends CountCollection
 
     /**
      * Summary of accountActivities
-     * @param object $request
+     * @param Request $request
      * @param Builder $auditTrailBuilder
      * @return array{audit_trails: string, email: string}
      */
-    private function accountActivities(object $request, Builder $auditTrailBuilder): array
+    private function accountActivities(Request $request, Builder $auditTrailBuilder): array
     {
         return [
-            'email'        => (string) $request->user()->email,
-            'audit_trails' => CountCollection::startCount($auditTrailBuilder->clone()->where('user_id', $request->user()->id))
+            'audit_trails' => CountCollection::startCount($auditTrailBuilder->clone()->where('user_id', $request->user()->id)),
+            'email'        => $request->user()->email
         ];
     }
 }

@@ -23,7 +23,7 @@ class DashboardCashierReportData extends CountCollection
         Builder $libraryInvoiceBuilder,
         Builder $raInvoiceInvoiceBuilder,
         Builder $cashierOrBuilder
-    ) {
+    ): array {
         $totalPaymentTransactions = collect([
             CountCollection::startCount($dormitoryInvoiceBuilder->clone()),
             CountCollection::startCount($enrollmentInvoiceBuilder->clone()),
@@ -54,7 +54,7 @@ class DashboardCashierReportData extends CountCollection
         Builder $libraryInvoiceBuilder,
         Builder $raInvoiceInvoiceBuilder,
         Builder $cashierOrBuilder
-    ) {
+    ): array {
         return [
             'orNumbers' => CountCollection::startCount($cashierOrBuilder->clone()),
 

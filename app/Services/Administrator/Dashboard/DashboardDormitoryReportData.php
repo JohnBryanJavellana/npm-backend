@@ -5,7 +5,7 @@ use App\Enums\Administrator\CashierEnum;
 use App\Enums\Administrator\DormitoryEnum;
 use App\Helpers\Administrator\General\CountCollection;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use \Illuminate\Support\Collection;
 
 class DashboardDormitoryReportData extends CountCollection
 {

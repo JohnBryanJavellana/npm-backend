@@ -10,9 +10,10 @@ class DashboardRecreationalReportData extends CountCollection
     /**
      * Summary of recreationalReportData
      * @param Builder $recreationalBuilder
-     * @return array{recreationalApplications: array{ACTIVE: string, COMPLETED: string, FOR CSM: string, PENDING: string, TOTAL: string, totalRecreationalApplications: string}}
+     * @return array{recreationalApplications: array, totalRecreationalApplications: string}
      */
-    public function recreationalReportData(Builder $recreationalBuilder) {
+    public function recreationalReportData(Builder $recreationalBuilder): array
+    {
         $totalRecreationalApplications = CountCollection::startCount($recreationalBuilder->clone());
         $recreationalApplications = $this->recreationalApplications($recreationalBuilder);
 
@@ -27,7 +28,8 @@ class DashboardRecreationalReportData extends CountCollection
      * @param Builder $recreationalBuilder
      * @return array{ACTIVE: string, COMPLETED: string, FOR CSM: string, PENDING: string, TOTAL: string}
      */
-    private function recreationalApplications(Builder $recreationalBuilder) {
+    private function recreationalApplications(Builder $recreationalBuilder): array
+    {
         return [
             'ACTIVE' => CountCollection::startCount($recreationalBuilder->clone()->where('status', RAEnum::ACTIVE)),
             'COMPLETED' => CountCollection::startCount($recreationalBuilder->clone()->where('status', RAEnum::COMPLETED)),

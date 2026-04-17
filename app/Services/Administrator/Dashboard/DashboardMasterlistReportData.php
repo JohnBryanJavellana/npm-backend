@@ -13,7 +13,8 @@ class DashboardMasterlistReportData extends CountCollection
      * @param Builder $employerBuilder
      * @return array{employerCount: array, totalUserRegistration: int, userAccountStatus: array{UNVERIFIED: mixed, VERIFIED: mixed}}
      */
-    public function masterlistReportData(Builder $userBuilder, Builder $employerBuilder) {
+    public function masterlistReportData(Builder $userBuilder, Builder $employerBuilder): array
+    {
         $totalUserRegistration = $userBuilder->clone()->count();
         $employerCount = $this->employerCount($employerBuilder);
         $userAccountStatus = $this->userAccountStatus($userBuilder->clone());
@@ -30,7 +31,8 @@ class DashboardMasterlistReportData extends CountCollection
      * @param Builder $employerBuilder
      * @return array{this_month: mixed, total: mixed}
      */
-    private function employerCount (Builder $employerBuilder) {
+    private function employerCount (Builder $employerBuilder): array
+    {
         return [
             'total'      => CountCollection::startCount($employerBuilder),
             'this_month' => CountCollection::startCount($employerBuilder->clone()->whereMonth('created_at', Carbon::now()->format('m')))
@@ -42,7 +44,8 @@ class DashboardMasterlistReportData extends CountCollection
      * @param Builder $userBuilder
      * @return array{UNVERIFIED: mixed, VERIFIED: mixed}
      */
-    private function userAccountStatus(Builder $userBuilder) {
+    private function userAccountStatus(Builder $userBuilder): array
+    {
         return [
             'VERIFIED'   => CountCollection::startCount($userBuilder->clone()->whereNotNull('email_verified_at')),
             'UNVERIFIED' => CountCollection::startCount($userBuilder->clone()->whereNull('email_verified_at'))
