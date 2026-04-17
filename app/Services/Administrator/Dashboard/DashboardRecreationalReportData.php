@@ -10,10 +10,10 @@ class DashboardRecreationalReportData extends CountCollection
     /**
      * Summary of recreationalReportData
      * @param Builder $recreationalBuilder
-     * @return array{recreationalApplications: array, totalRecreationalApplications: int}
+     * @return array{recreationalApplications: array{ACTIVE: string, COMPLETED: string, FOR CSM: string, PENDING: string, TOTAL: string, totalRecreationalApplications: string}}
      */
     public function recreationalReportData(Builder $recreationalBuilder) {
-        $totalRecreationalApplications = $recreationalBuilder->clone()->count();
+        $totalRecreationalApplications = CountCollection::startCount($recreationalBuilder->clone());
         $recreationalApplications = $this->recreationalApplications($recreationalBuilder);
 
         return [
@@ -25,14 +25,15 @@ class DashboardRecreationalReportData extends CountCollection
     /**
      * Summary of recreationalApplications
      * @param Builder $recreationalBuilder
-     * @return array{ACTIVE: mixed, COMPLETED: mixed, FOR CSM: mixed, PENDING: mixed}
+     * @return array{ACTIVE: string, COMPLETED: string, FOR CSM: string, PENDING: string, TOTAL: string}
      */
     private function recreationalApplications(Builder $recreationalBuilder) {
         return [
-            'PENDING' => CountCollection::startCount($recreationalBuilder->clone()->where('status', RAEnum::PENDING)),
-            'FOR CSM' => CountCollection::startCount($recreationalBuilder->clone()->where('status', RAEnum::FOR_CSM)),
             'ACTIVE' => CountCollection::startCount($recreationalBuilder->clone()->where('status', RAEnum::ACTIVE)),
-            'COMPLETED' => CountCollection::startCount($recreationalBuilder->clone()->where('status', RAEnum::COMPLETED))
+            'COMPLETED' => CountCollection::startCount($recreationalBuilder->clone()->where('status', RAEnum::COMPLETED)),
+            'FOR CSM' => CountCollection::startCount($recreationalBuilder->clone()->where('status', RAEnum::FOR_CSM)),
+            'PENDING' => CountCollection::startCount($recreationalBuilder->clone()->where('status', RAEnum::PENDING)),
+            'TOTAL' => CountCollection::startCount($recreationalBuilder)
         ];
     }
 }

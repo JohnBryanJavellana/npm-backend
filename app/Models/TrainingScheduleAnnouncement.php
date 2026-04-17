@@ -10,4 +10,8 @@ class TrainingScheduleAnnouncement extends Model
     use HasFactory;
 
     protected $guarded = ["id"];
+
+    public function trainer() {
+        return $this->hasOne(User::class, 'id', 'trainer');
+    }
 }

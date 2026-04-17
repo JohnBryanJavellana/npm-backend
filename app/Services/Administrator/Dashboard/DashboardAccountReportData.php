@@ -10,9 +10,10 @@ class DashboardAccountReportData extends CountCollection
      * Summary of accountReportData
      * @param object $request
      * @param Builder $auditTrailBuilder
-     * @return array{accountActivities: array{audit_trails: mixed, email: mixed}}
+     * @return array{accountActivities: array{audit_trails: string, email: string}}
      */
-    public function accountReportData(object $request, Builder $auditTrailBuilder) {
+    public function accountReportData(object $request, Builder $auditTrailBuilder): array
+    {
         $accountActivities = $this->accountActivities($request, $auditTrailBuilder);
 
         return [
@@ -24,11 +25,12 @@ class DashboardAccountReportData extends CountCollection
      * Summary of accountActivities
      * @param object $request
      * @param Builder $auditTrailBuilder
-     * @return array{audit_trails: mixed, email: mixed}
+     * @return array{audit_trails: string, email: string}
      */
-    private function accountActivities(object $request, Builder $auditTrailBuilder) {
+    private function accountActivities(object $request, Builder $auditTrailBuilder): array
+    {
         return [
-            'email'        => $request->user()->email,
+            'email'        => (string) $request->user()->email,
             'audit_trails' => CountCollection::startCount($auditTrailBuilder->clone()->where('user_id', $request->user()->id))
         ];
     }

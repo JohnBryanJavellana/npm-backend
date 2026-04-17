@@ -5,6 +5,7 @@ use App\Enums\Administrator\CashierEnum;
 use App\Enums\Administrator\DormitoryEnum;
 use App\Helpers\Administrator\General\CountCollection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class DashboardDormitoryReportData extends CountCollection
 {
@@ -14,15 +15,15 @@ class DashboardDormitoryReportData extends CountCollection
      * @param Builder $dormitoryInventoryBuilder
      * @param Builder $dormitoryServiceBuilder
      * @param Builder $dormitoryInvoiceBuilder
-     * @return array{dormitoryPaymentsData: array, dormitoryTenantOccupancy: array, inventoryAlerts: \Illuminate\Support\Collection, monthlyOccupancyData: array, serviceRequestStatus: \Illuminate\Support\Collection, totalDormitoryApplications: int}
+     * @return array{dormitoryPaymentsData: array, dormitoryTenantOccupancy: array, inventoryAlerts: \Illuminate\Support\Collection, monthlyOccupancyData: array, serviceRequestStatus: \Illuminate\Support\Collection, totalDormitoryApplications: string}
      */
     public function dormitoryReportData(
         Builder $dormitoryTenantBuilder,
         Builder $dormitoryInventoryBuilder,
         Builder $dormitoryServiceBuilder,
         Builder $dormitoryInvoiceBuilder
-    ) {
-        $totalDormitoryApplications = $dormitoryTenantBuilder->clone()->count();
+    ): array {
+        $totalDormitoryApplications = CountCollection::startCount($dormitoryTenantBuilder->clone());
         $dormitoryTenantOccupancy = $this->dormitoryTenantOccupancy($dormitoryTenantBuilder);
         $monthlyOccupancyData = $this->monthlyOccupancyData($dormitoryTenantBuilder);
         $dormitoryPaymentsData = $this->dormitoryPaymentsData($dormitoryInvoiceBuilder);
@@ -42,9 +43,10 @@ class DashboardDormitoryReportData extends CountCollection
     /**
      * Summary of dormitoryTenantOccupancy
      * @param Builder $dormitoryTenantBuilder
-     * @return array{ACTIVE: mixed, APPROVED: mixed, CANCELLED: mixed, EXTENDING: mixed, FOR PAYMENT: mixed, PAID: mixed, PENDING: mixed, PROCESSING PAYMENT: mixed, REJECTED: mixed, RESERVED: mixed, TERMINATED: mixed, TRANSFERRED: mixed, TRANSFERRING: mixed}
+     * @return array{ACTIVE: string, APPROVED: string, CANCELLED: string, EXTENDING: string, FOR PAYMENT: string, PAID: string, PENDING: string, PROCESSING PAYMENT: string, REJECTED: string, RESERVED: string, TERMINATED: string, TRANSFERRED: string, TRANSFERRING: string}
      */
-    private function dormitoryTenantOccupancy(Builder $dormitoryTenantBuilder) {
+    private function dormitoryTenantOccupancy(Builder $dormitoryTenantBuilder): array
+    {
         return [
             'PENDING' => CountCollection::startCount($dormitoryTenantBuilder->clone()->where('tenant_status', DormitoryEnum::PENDING)),
             'APPROVED' => CountCollection::startCount($dormitoryTenantBuilder->clone()->where('tenant_status', DormitoryEnum::APPROVED)),
@@ -67,7 +69,8 @@ class DashboardDormitoryReportData extends CountCollection
      * @param Builder $dormitoryTenantBuilder
      * @return array{count: int, month: mixed[]}
      */
-    private function monthlyOccupancyData(Builder $dormitoryTenantBuilder) {
+    private function monthlyOccupancyData(Builder $dormitoryTenantBuilder): array
+    {
         $annualDormitoryRequest = [];
         for ($m = 1; $m <= 12; $m++) {
             $annualDormitoryRequest[date('M', mktime(0, 0, 0, $m, 1))] = 0;
@@ -94,7 +97,8 @@ class DashboardDormitoryReportData extends CountCollection
      * @param Builder $dormitoryInventoryBuilder
      * @return \Illuminate\Support\Collection<int, array{available: mixed, item: mixed, status: string, total_count: mixed>}
      */
-    private function inventoryAlerts (Builder $dormitoryInventoryBuilder) {
+    private function inventoryAlerts (Builder $dormitoryInventoryBuilder): Collection
+    {
         $inventoryAlerts = $dormitoryInventoryBuilder->clone()
             ->with('stock')
             ->withCount([
@@ -121,7 +125,8 @@ class DashboardDormitoryReportData extends CountCollection
      * @param Builder $dormitoryServiceBuilder
      * @return \Illuminate\Support\Collection<int, array{id: mixed, remarks: mixed, service: mixed, status: mixed>}
      */
-    private function serviceRequestStatus (Builder $dormitoryServiceBuilder) {
+    private function serviceRequestStatus (Builder $dormitoryServiceBuilder): Collection
+    {
         $serviceRequestStatus = $dormitoryServiceBuilder->clone()
             ->with(['services'])
             ->orderBy('created_at', 'DESC')
@@ -141,9 +146,10 @@ class DashboardDormitoryReportData extends CountCollection
     /**
      * Summary of dormitoryPaymentsData
      * @param Builder $dormitoryInvoiceBuilder
-     * @return array{CANCELLED: mixed, FOR VERIFICATION: mixed, PAID: mixed, PENDING: mixed}
+     * @return array{CANCELLED: string, FOR VERIFICATION: string, PAID: string, PENDING: string}
      */
-    private function dormitoryPaymentsData (Builder $dormitoryInvoiceBuilder) {
+    private function dormitoryPaymentsData (Builder $dormitoryInvoiceBuilder): array
+    {
         return [
             'PENDING' => CountCollection::startCount($dormitoryInvoiceBuilder->clone()->where('invoice_status', CashierEnum::PENDING)),
             'FOR VERIFICATION' => CountCollection::startCount($dormitoryInvoiceBuilder->clone()->where('invoice_status', CashierEnum::FOR_VERIFICATION)),

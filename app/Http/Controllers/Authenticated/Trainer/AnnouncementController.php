@@ -12,52 +12,47 @@ class AnnouncementController extends Controller
 {
     public function Announcement(Request $request)
     {
-        return TransactionUtil::transact(
-            null,
-            [],
-            function () use ($request) {
-                if ($request->has('title') && $request->has('content')) {
-                    $request->merge([
-                        // 'title' => $request->title,
-                        // 'content' => $request->content,
-                        "trainer" => $request->user()->id,
-                        "training_id" => (int) $request->training_id
-                    ]);
+        return TransactionUtil::transact(null, [], function () use ($request) {
+            if ($request->has('title') && $request->has('content')) {
+                $request->merge([
+                    "trainer" => $request->user()->id,
+                    "training_id" => (int) $request->training_id
+                ]);
 
 
-                    $validated = $request->validate([
-                        'training_id' => 'required|exists:trainings,id',
-                        'trainer'     => 'required|exists:users,id',
-                        'title'       => 'required|string|max:255',
-                        'content'     => 'required|string'
-                    ]);
+                $validated = $request->validate([
+                    'training_id' => 'required|exists:trainings,id',
+                    'trainer'     => 'required|exists:users,id',
+                    'title'       => 'required|string|max:255',
+                    'content'     => 'required|string'
+                ]);
 
-                    $announcement = TrainingScheduleAnnouncement::create([
-                        "training_id" => $validated["training_id"],
-                        "trainer"     => $request["trainer"],
-                        "title"       => $request["title"],
-                        "content"     => $request["content"]
-                    ]);
-
-                    return response()->json([
-                        "message" => "Announcement created successfully",
-                        "data" => $announcement
-                    ], 201);
-                }
-
-                $trainingId = $request->training_id;
-                $announcements = TrainingScheduleAnnouncement::where('training_id', $trainingId)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-
-                AuditHelper::log($request->user_id, "User $request->user_id has announcement!");
+                $announcement = TrainingScheduleAnnouncement::create([
+                    "training_id" => $validated["training_id"],
+                    "trainer"     => $request["trainer"],
+                    "title"       => $request["title"],
+                    "content"     => $request["content"]
+                ]);
 
                 return response()->json([
-                    //! "message" => "Announcements fetched successfully",
-                    "data" => $announcements
-                ], 200);
+                    "message" => "Announcement created successfully",
+                    "data" => $announcement
+                ], 201);
             }
-        );
+
+            $trainingId = $request->training_id;
+            $announcements = TrainingScheduleAnnouncement::where('training_id', $trainingId)
+                ->with('trainer:id,fname,mname,lname,suffix,email')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            AuditHelper::log($request->user_id, "User $request->user_id has announcement!");
+
+            return response()->json([
+                //! "message" => "Announcements fetched successfully",
+                "data" => $announcements
+            ], 200);
+        });
     }
 
     public function AnnouncementDelete(Request $request)

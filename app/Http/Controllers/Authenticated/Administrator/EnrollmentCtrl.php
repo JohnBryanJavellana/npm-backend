@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Helpers\Administrator\General\CountCollection;
 
@@ -117,7 +118,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_schedules
      * @param Request $request
      */
-    public function get_schedules(Request $request)
+    public function get_schedules(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $schedules = Training::withCount(['hasData'])->get()->map(fn ($self) => [
@@ -136,7 +137,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_schedule
      * @param CreateOrUpdateSchedule $request
      */
-    public function create_or_update_schedule(CreateOrUpdateSchedule $request)
+    public function create_or_update_schedule(CreateOrUpdateSchedule $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === 'POST';
@@ -152,7 +153,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveSchedule $request
      * @param int $scheduleId
      */
-    public function remove_schedule(RemoveSchedule $request, int $scheduleId)
+    public function remove_schedule(RemoveSchedule $request, int $scheduleId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $scheduleId) {
             $result = $this->enrollmentScheduleManager->removeSchedule($scheduleId);
@@ -165,7 +166,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_modules
      * @param Request $request
      */
-    public function get_modules(Request $request)
+    public function get_modules(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $modules = CourseModule::withCount(['hasData'])->with('moduleType')->get();
@@ -177,7 +178,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_module
      * @param CreateOrUpdateModule $request
      */
-    public function create_or_update_module(CreateOrUpdateModule $request)
+    public function create_or_update_module(CreateOrUpdateModule $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === 'POST';
@@ -193,7 +194,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveModule $request
      * @param int $moduleId
      */
-    public function remove_module(RemoveModule $request, int $moduleId)
+    public function remove_module(RemoveModule $request, int $moduleId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $moduleId) {
             $result = $this->enrollmentModuleManager->removeModule($moduleId);
@@ -206,7 +207,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_module_types
      * @param Request $request
      */
-    public function get_module_types(Request $request)
+    public function get_module_types(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $moduleTypes = ModuleType::withCount(['hasData'])->get();
@@ -218,7 +219,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_module_type
      * @param CreateOrUpdateModuleType $request
      */
-    public function create_or_update_module_type(CreateOrUpdateModuleType $request)
+    public function create_or_update_module_type(CreateOrUpdateModuleType $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -234,7 +235,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveModuleType $request
      * @param int $moduleTypeId
      */
-    public function remove_module_type(RemoveModuleType $request, int $moduleTypeId)
+    public function remove_module_type(RemoveModuleType $request, int $moduleTypeId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $moduleTypeId) {
             $result = $this->enrollmentModuleTypeManager->removeModuleType($moduleTypeId);
@@ -247,7 +248,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_certificates
      * @param Request $request
      */
-    public function get_certificates(Request $request)
+    public function get_certificates(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $certificates = MainCertificate::withCount([
@@ -263,7 +264,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_certificate
      * @param CreateOrUpdateCertificate $request
      */
-    public function create_or_update_certificate(CreateOrUpdateCertificate $request)
+    public function create_or_update_certificate(CreateOrUpdateCertificate $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -279,7 +280,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveMainCertificate $request
      * @param int $certificateId
      */
-    public function remove_certificate(RemoveMainCertificate $request, int $certificateId)
+    public function remove_certificate(RemoveMainCertificate $request, int $certificateId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $certificateId) {
             $result = $this->enrollmentMainCertificateManager->removeCertificate($certificateId);
@@ -292,7 +293,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_schools
      * @param Request $request
      */
-    public function get_schools(Request $request)
+    public function get_schools(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $schools = MainSchool::withCount(['hasData'])->get();
@@ -304,7 +305,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_school
      * @param CreateOrUpdateSchool $request
      */
-    public function create_or_update_school(CreateOrUpdateSchool $request)
+    public function create_or_update_school(CreateOrUpdateSchool $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -320,7 +321,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveMainSchool $request
      * @param int $schoolId
      */
-    public function remove_school(RemoveMainSchool $request, int $schoolId)
+    public function remove_school(RemoveMainSchool $request, int $schoolId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $schoolId) {
             $result = $this->enrollmentMainSchoolManager->removeSchool($schoolId);
@@ -333,7 +334,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_courses
      * @param Request $request
      */
-    public function get_courses(Request $request)
+    public function get_courses(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $courses = MainCourse::withCount(['hasData'])->get();
@@ -345,7 +346,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_course
      * @param CreateOrUpdateCourse $request
      */
-    public function create_or_update_course(CreateOrUpdateCourse $request)
+    public function create_or_update_course(CreateOrUpdateCourse $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -361,7 +362,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveMainCourse $request
      * @param int $courseId
      */
-    public function remove_course(RemoveMainCourse $request, int $courseId)
+    public function remove_course(RemoveMainCourse $request, int $courseId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $courseId) {
             $result = $this->enrollmentMainCourseManager->removeCourse($courseId);
@@ -374,7 +375,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_requirements
      * @param Request $request
      */
-    public function get_requirements(Request $request)
+    public function get_requirements(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $requirements = Requirement::withCount([
@@ -391,7 +392,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_requirement
      * @param CreateOrUpdateRequirement $request
      */
-    public function create_or_update_requirement(CreateOrUpdateRequirement $request)
+    public function create_or_update_requirement(CreateOrUpdateRequirement $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -407,7 +408,7 @@ class EnrollmentCtrl extends Controller
      * @param Request $request
      * @param int $requirementId
      */
-    public function remove_requirement(Request $request, int $requirementId)
+    public function remove_requirement(Request $request, int $requirementId): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request, $requirementId) {
             $result = $this->enrollmentRequirementManager->removeRequirement($requirementId);
@@ -420,7 +421,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_vouchers
      * @param Request $request
      */
-    public function get_vouchers(Request $request)
+    public function get_vouchers(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $vouchers = Voucher::all();
@@ -432,7 +433,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_voucher
      * @param CreateOrUpdateVoucher $request
      */
-    public function create_or_update_voucher(CreateOrUpdateVoucher $request)
+    public function create_or_update_voucher(CreateOrUpdateVoucher $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -448,7 +449,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveVoucher $request
      * @param int $voucherId
      */
-    public function remove_voucher(RemoveVoucher $request, int $voucherId)
+    public function remove_voucher(RemoveVoucher $request, int $voucherId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $voucherId) {
             $result = $this->enrollmentVoucherManager->removeVoucher($voucherId);
@@ -461,7 +462,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_sponsors
      * @param Request $request
      */
-    public function get_sponsors(Request $request)
+    public function get_sponsors(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $sponsors = Sponsor::all();
@@ -473,7 +474,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_sponsor
      * @param CreateOrUpdateSponsor $request
      */
-    public function create_or_update_sponsor(CreateOrUpdateSponsor $request)
+    public function create_or_update_sponsor(CreateOrUpdateSponsor $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -489,7 +490,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveSponsor $request
      * @param int $sponsorId
      */
-    public function remove_sponsor(RemoveSponsor $request, int $sponsorId)
+    public function remove_sponsor(RemoveSponsor $request, int $sponsorId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $sponsorId) {
             $result = $this->enrollmentSponsorManager->removeSponsor($sponsorId);
@@ -502,7 +503,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_licenses
      * @param Request $request
      */
-    public function get_licenses(Request $request)
+    public function get_licenses(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $licenses = License::withCount(['hasData'])->get();
@@ -514,7 +515,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_license
      * @param CreateOrUpdateLicense $request
      */
-    public function create_or_update_license(CreateOrUpdateLicense $request)
+    public function create_or_update_license(CreateOrUpdateLicense $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -530,7 +531,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveLicense $request
      * @param int $licenseId
      */
-    public function remove_license(RemoveLicense $request, int $licenseId)
+    public function remove_license(RemoveLicense $request, int $licenseId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $licenseId) {
             $result = $this->enrollmentLicenseManager->removeLicense($licenseId);
@@ -543,7 +544,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_ranks
      * @param Request $request
      */
-    public function get_ranks(Request $request)
+    public function get_ranks(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $ranks = Rank::withCount(['hasData'])->get();
@@ -555,7 +556,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_rank
      * @param CreateOrUpdateRank $request
      */
-    public function create_or_update_rank(CreateOrUpdateRank $request)
+    public function create_or_update_rank(CreateOrUpdateRank $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -571,7 +572,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveRank $request
      * @param int $rankId
      */
-    public function remove_rank(RemoveRank $request, int $rankId)
+    public function remove_rank(RemoveRank $request, int $rankId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $rankId) {
             $result = $this->enrollmentRankManager->removeRank($rankId);
@@ -584,7 +585,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_facilitators
      * @param Request $request
      */
-    public function get_facilitators(Request $request)
+    public function get_facilitators(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $facilitators = TrainingFacilitator::withCount(['hasData'])->with([
@@ -600,7 +601,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_facilitator
      * @param CreateOrUpdateFacilitator $request
      */
-    public function create_or_update_facilitator(CreateOrUpdateFacilitator $request)
+    public function create_or_update_facilitator(CreateOrUpdateFacilitator $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -616,7 +617,7 @@ class EnrollmentCtrl extends Controller
      * @param RemoveFacilitator $request
      * @param int $facilitatorId
      */
-    public function remove_facilitator(RemoveFacilitator $request, int $facilitatorId)
+    public function remove_facilitator(RemoveFacilitator $request, int $facilitatorId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $facilitatorId) {
             $result = $this->enrollmentFacilitatorManager->removeFacilitator($facilitatorId);
@@ -629,7 +630,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_course_module_fees
      * @param Request $request
      */
-    public function get_course_module_fees(Request $request)
+    public function get_course_module_fees(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $course_module_fees = CourseModuleFee::with([
@@ -645,7 +646,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_training_fees_predata
      * @param Request $request
      */
-    public function get_training_fees_predata(Request $request)
+    public function get_training_fees_predata(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () {
             $modules = CourseModule::all();
@@ -662,7 +663,7 @@ class EnrollmentCtrl extends Controller
      * Summary of create_or_update_course_fee
      * @param CreateOrUpdateTrainingFee $request
      */
-    public function create_or_update_course_fee(CreateOrUpdateTrainingFee $request)
+    public function create_or_update_course_fee(CreateOrUpdateTrainingFee $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -678,7 +679,7 @@ class EnrollmentCtrl extends Controller
      * @param Request $request
      * @param int $trainingFeeId
      */
-    public function remove_course_fee(Request $request, int $trainingFeeId)
+    public function remove_course_fee(Request $request, int $trainingFeeId): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request, $trainingFeeId) {
             $result = $this->enrollmentTrainingFeeManager->removeTrainingFee($trainingFeeId);
@@ -692,7 +693,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_applications
      * @param Request $request
      */
-    public function get_applications(Request $request)
+    public function get_applications(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $allRequirements = Requirement::where('status', 'ACTIVE')->get();
@@ -793,7 +794,7 @@ class EnrollmentCtrl extends Controller
      * Summary of requirement_remark
      * @param Request $request
      */
-    public function requirement_remark(Request $request)
+    public function requirement_remark(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $isPost = $request->httpMethod == 'POST';
@@ -825,7 +826,7 @@ class EnrollmentCtrl extends Controller
      * Summary of get_enrollment_count
      * @param Request $request
      */
-    public function get_enrollment_count(Request $request)
+    public function get_enrollment_count(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             return TransactionUtil::transact(null, [], function() use ($request) {
@@ -852,7 +853,7 @@ class EnrollmentCtrl extends Controller
      * Summary of lock_requirement
      * @param Request $request
      */
-    public function lock_requirement(Request $request)
+    public function lock_requirement(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $this_requirement = $request->isBasic === 'YES'
@@ -875,7 +876,7 @@ class EnrollmentCtrl extends Controller
      * Summary of set_training_status
      * @param Request $request
      */
-    public function set_training_status(Request $request)
+    public function set_training_status(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $this_training_status = EnrolledCourse::findOrFail($request->documentId);
@@ -900,7 +901,7 @@ class EnrollmentCtrl extends Controller
      * Summary of set_expired_status
      * @param Request $request
      */
-    public function set_expired_status(Request $request)
+    public function set_expired_status(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $this_training = EnrolledCourse::findOrFail($request->documentId);
@@ -922,7 +923,8 @@ class EnrollmentCtrl extends Controller
      * Summary of get_trainees_by_schedule
      * @param Request $request
      */
-    public function get_trainees_by_schedule(Request $request){
+    public function get_trainees_by_schedule(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $scheduleId = $request->scheduleId;
             $trainees = EnrolledCourse::with('trainee')
@@ -937,7 +939,8 @@ class EnrollmentCtrl extends Controller
      * Move trainees to another schedule
      * @param Request $request
      */
-    public function move_trainees(MoveTrainees $request) {
+    public function move_trainees(MoveTrainees $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $fromScheduleId = $request->fromScheduleId;
             $toScheduleId   = $request->toScheduleId;

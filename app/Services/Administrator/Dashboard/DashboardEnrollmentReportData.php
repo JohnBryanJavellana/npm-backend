@@ -5,6 +5,7 @@ use App\Enums\Administrator\CashierEnum;
 use App\Helpers\Administrator\General\CountCollection;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class DashboardEnrollmentReportData extends CountCollection
 {
@@ -13,10 +14,11 @@ class DashboardEnrollmentReportData extends CountCollection
      * @param Builder $enrollmentInstanceBuilder
      * @param Builder $trainingInstanceBuilder
      * @param Builder $enrollmentInvoiceBuilder
-     * @return array{enrollmentPayments: array, enrollmentTrend: \Illuminate\Support\Collection, topPopularCourse: \Illuminate\Support\Collection, totalEnrollmentApplications: int}
+     * @return array{enrollmentPayments: array, enrollmentTrend: \Illuminate\Support\Collection, topPopularCourse: \Illuminate\Support\Collection, totalEnrollmentApplications: string}
      */
-    public function enrollmentReportData(Builder $enrollmentInstanceBuilder, Builder $trainingInstanceBuilder, Builder $enrollmentInvoiceBuilder) {
-        $totalEnrollmentApplications = $enrollmentInstanceBuilder->clone()->count();
+    public function enrollmentReportData(Builder $enrollmentInstanceBuilder, Builder $trainingInstanceBuilder, Builder $enrollmentInvoiceBuilder): array
+    {
+        $totalEnrollmentApplications = CountCollection::startCount($enrollmentInstanceBuilder->clone());
 
         $enrollmentTrend = $this->enrollmentTrend($enrollmentInstanceBuilder);
         $topPopularCourse = $this->topPopularCourse($trainingInstanceBuilder);
@@ -33,9 +35,10 @@ class DashboardEnrollmentReportData extends CountCollection
     /**
      * Summary of enrollmentPayments
      * @param Builder $enrollmentInvoiceBuilder
-     * @return array{CANCELLED: mixed, FOR VERIFICATION: mixed, PAID: mixed, PENDING: mixed}
+     * @return array{CANCELLED: string, FOR VERIFICATION: string, PAID: string, PENDING: string}
      */
-    private function enrollmentPayments(Builder $enrollmentInvoiceBuilder) {
+    private function enrollmentPayments(Builder $enrollmentInvoiceBuilder): array
+    {
         return [
             'PENDING' => CountCollection::startCount($enrollmentInvoiceBuilder->clone()->where('invoice_status', CashierEnum::PENDING)),
             'FOR VERIFICATION' => CountCollection::startCount($enrollmentInvoiceBuilder->clone()->where('invoice_status', CashierEnum::FOR_VERIFICATION)),
@@ -49,7 +52,8 @@ class DashboardEnrollmentReportData extends CountCollection
      * @param Builder $enrollmentInstanceBuilder
      * @return \Illuminate\Support\Collection<int, array{count: int, week: string>}
      */
-    private function enrollmentTrend(Builder $enrollmentInstanceBuilder) {
+    private function enrollmentTrend(Builder $enrollmentInstanceBuilder): Collection
+    {
         $targetDate = Carbon::now()->subMonth();
         $trends = $enrollmentInstanceBuilder
             ->whereMonth('created_at', $targetDate->month)
@@ -70,7 +74,8 @@ class DashboardEnrollmentReportData extends CountCollection
      * @param Builder $trainingInstanceBuilder
      * @return \Illuminate\Support\Collection<int, array{count: mixed, course: mixed>}
      */
-    private function topPopularCourse(Builder $trainingInstanceBuilder) {
+    private function topPopularCourse(Builder $trainingInstanceBuilder): Collection
+    {
         $topPopularCourse = $trainingInstanceBuilder->with('module')
             ->has('hasData')
             ->withCount(['hasData'])

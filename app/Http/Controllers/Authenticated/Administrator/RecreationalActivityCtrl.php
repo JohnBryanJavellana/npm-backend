@@ -15,6 +15,7 @@ use App\Services\Administrator\Recreational\RecreationalChargeManager;
 use App\Services\Administrator\Recreational\RecreationalEquipmentManager;
 use App\Services\Administrator\Recreational\RecreationalEquipmentStockManager;
 use App\Services\Administrator\Recreational\RecreationalFacilityManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Utils\{
     TransactionUtil,
@@ -54,7 +55,7 @@ class RecreationalActivityCtrl extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function get_ra_count(Request $request)
+    public function get_ra_count(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $reservations = RARequestInfo::query();
@@ -76,7 +77,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_requests
      * @param Request $request
      */
-    public function ra_requests(Request $request)
+    public function ra_requests(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $query = RARequestInfo::with(['requestor']);
@@ -118,7 +119,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_facilities
      * @param Request $request
      */
-    public function ra_facilities(Request $request)
+    public function ra_facilities(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $ra_facilities_temp = RAFacility::withCount(['hasData']);
@@ -135,7 +136,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_create_or_update_facility
      * @param CreateOrUpdateFacility $request
      */
-    public function ra_create_or_update_facility(CreateOrUpdateFacility $request)
+    public function ra_create_or_update_facility(CreateOrUpdateFacility $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -151,7 +152,7 @@ class RecreationalActivityCtrl extends Controller
      * @param RemoveFacility $request
      * @param int $facilityId
      */
-    public function ra_remove_facility(RemoveFacility $request, int $facilityId)
+    public function ra_remove_facility(RemoveFacility $request, int $facilityId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $facilityId) {
             $result = $this->recreationalFacilityManager->removeFacility($facilityId);
@@ -164,7 +165,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_equipments
      * @param Request $request
      */
-    public function ra_equipments(Request $request)
+    public function ra_equipments(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $ra_equipments_temp = RAEquipments::withCount('hasData', 'stocks');
@@ -180,7 +181,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_create_or_update_equipment
      * @param CreateOrUpdateEquipment $request
      */
-    public function ra_create_or_update_equipment(CreateOrUpdateEquipment $request)
+    public function ra_create_or_update_equipment(CreateOrUpdateEquipment $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
@@ -199,7 +200,7 @@ class RecreationalActivityCtrl extends Controller
      * @param RemoveEquipment $request
      * @param int $equipmentId
      */
-    public function ra_remove_equipment(RemoveEquipment $request, int $equipmentId)
+    public function ra_remove_equipment(RemoveEquipment $request, int $equipmentId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $equipmentId) {
             $result = $this->recreationalEquipmentManager->removeEquipment($equipmentId);
@@ -212,7 +213,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_equipment_stock
      * @param Request $request
      */
-    public function ra_equipment_stock(Request $request)
+    public function ra_equipment_stock(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $ra_equipment_stock = RAEquipmentStock::where('r_a_equipments_id', $request->documentId)
@@ -227,7 +228,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_equipment_create_stock
      * @param Request $request
      */
-    public function ra_equipment_create_stock(CreateEquipmentStock $request)
+    public function ra_equipment_create_stock(CreateEquipmentStock $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $equipmentId = $request->equipmentId;
@@ -245,7 +246,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_update_equipment_stock
      * @param UpdateEquipmentStock $request
      */
-    public function ra_update_equipment_stock(UpdateEquipmentStock $request)
+    public function ra_update_equipment_stock(UpdateEquipmentStock $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $equipmentStockId = $request->equipmentStockId;
@@ -260,7 +261,7 @@ class RecreationalActivityCtrl extends Controller
      * @param RemoveEquipmentStock $request
      * @param int $equipmentStockId
      */
-    public function ra_remove_equipment_stock(RemoveEquipmentStock $request, int $equipmentStockId)
+    public function ra_remove_equipment_stock(RemoveEquipmentStock $request, int $equipmentStockId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request, $equipmentStockId) {
             $result = $this->recreationalEquipmentStockManager->removeEquipmentStock($equipmentStockId);
@@ -273,7 +274,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_request_charges
      * @param Request $request
      */
-    public function ra_request_charges(Request $request)
+    public function ra_request_charges(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
@@ -289,7 +290,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of ra_create_or_update_charge
      * @param RequestInvoice $request
      */
-    public function ra_create_or_update_charge(RequestInvoice $request)
+    public function ra_create_or_update_charge(RequestInvoice $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === 'POST';
@@ -305,7 +306,7 @@ class RecreationalActivityCtrl extends Controller
      * @param RemoveRACharge $request
      * @param int $recreationalInvoiceId
      */
-    public function ra_delete_charge(RemoveRACharge $request, int $recreationalInvoiceId)
+    public function ra_delete_charge(RemoveRACharge $request, int $recreationalInvoiceId): JsonResponse
     {
         return TransactionUtil::transact($request, [], function () use ($recreationalInvoiceId) {
             $result = $this->recreationalChargeManager->removeCharge($recreationalInvoiceId);
@@ -322,7 +323,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of get_requested_equipments
      * @param Request $request
      */
-    public function get_requested_equipments(Request $request)
+    public function get_requested_equipments(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $raEquipmentRequests_temp = RAEquipmentRequest::with([
@@ -346,7 +347,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of update_requested_facility
      * @param Request $request
      */
-    public function update_requested_facility(Request $request)
+    public function update_requested_facility(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $documentId = $request->documentId;
@@ -416,7 +417,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of get_requested_match_equipments
      * @param Request $request
      */
-    public function get_requested_match_equipments(Request $request)
+    public function get_requested_match_equipments(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $raEquipmentMainFromRequests = RAEquipmentStock::where([
@@ -431,7 +432,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of issue_requested_equipments
      * @param Request $request
      */
-    public function issue_requested_equipments(Request $request)
+    public function issue_requested_equipments(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $rARequestInfoId = $request->rARequestInfoId;
@@ -515,7 +516,7 @@ class RecreationalActivityCtrl extends Controller
      * Summary of update_requested_equipment
      * @param Request $request
      */
-    public function update_requested_equipment(Request $request)
+    public function update_requested_equipment(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $selectedRows = $request->row;

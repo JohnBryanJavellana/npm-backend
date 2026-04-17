@@ -4,14 +4,16 @@ namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
-use App\Services\Administrator\Dashboard\DashboardAccountReportData;
-use App\Services\Administrator\Dashboard\DashboardCashierReportData;
-use App\Services\Administrator\Dashboard\DashboardDormitoryReportData;
-use App\Services\Administrator\Dashboard\DashboardEnrollmentReportData;
-use App\Services\Administrator\Dashboard\DashboardLibraryReportData;
-use App\Services\Administrator\Dashboard\DashboardMasterlistReportData;
-use App\Services\Administrator\Dashboard\DashboardModelInstances;
-use App\Services\Administrator\Dashboard\DashboardRecreationalReportData;
+use App\Services\Administrator\Dashboard\{
+    DashboardAccountReportData,
+    DashboardCashierReportData,
+    DashboardDormitoryReportData,
+    DashboardEnrollmentReportData,
+    DashboardLibraryReportData,
+    DashboardMasterlistReportData,
+    DashboardModelInstances,
+    DashboardRecreationalReportData
+};
 use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
 
@@ -65,30 +67,30 @@ class DashboardCtrl extends Controller
                 );
             }
 
-            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_RA->value])) {
-                $reportData['recreationalReportData'] = $this->dashboardRecreationalReportData->recreationalReportData(
-                    $modelInstances['recreationalInstance']
-                );
-            }
+            // if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_RA->value])) {
+            //     $reportData['recreationalReportData'] = $this->dashboardRecreationalReportData->recreationalReportData(
+            //         $modelInstances['recreationalInstance']
+            //     );
+            // }
 
-            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value])) {
-                $reportData['masterlistReportData'] = $this->dashboardMasterlistReportData->masterlistReportData(
-                    $modelInstances['userInstance'],
-                    $modelInstances['employerInstance']
-                );
-            }
+            // if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value])) {
+            //     $reportData['masterlistReportData'] = $this->dashboardMasterlistReportData->masterlistReportData(
+            //         $modelInstances['userInstance'],
+            //         $modelInstances['employerInstance']
+            //     );
+            // }
 
-            if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::CASHIER->value])) {
-                $reportData['cashierReportData'] = $this->dashboardCashierReportData->cashierReportData(
-                    $modelInstances['dormitoryInvoiceInstance'],
-                    $modelInstances['enrollmentInvoiceInstance'],
-                    $modelInstances['libraryInvoiceInstance'],
-                    $modelInstances['raInvoiceInvoiceInstance'],
-                    $modelInstances['cashierORInstance']
-                );
-            }
+            // if(\in_array($userRole, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::CASHIER->value])) {
+            //     $reportData['cashierReportData'] = $this->dashboardCashierReportData->cashierReportData(
+            //         $modelInstances['dormitoryInvoiceInstance'],
+            //         $modelInstances['enrollmentInvoiceInstance'],
+            //         $modelInstances['libraryInvoiceInstance'],
+            //         $modelInstances['raInvoiceInvoiceInstance'],
+            //         $modelInstances['cashierORInstance']
+            //     );
+            // }
 
-            $reportData['accountReportData'] = $this->dashboardAccountReportData->accountReportData($request, $modelInstances['auditTrailInstance']);
+            // $reportData['accountReportData'] = $this->dashboardAccountReportData->accountReportData($request, $modelInstances['auditTrailInstance']);
 
             return response()->json(['reportData' => $reportData], 200);
         });

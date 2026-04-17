@@ -11,7 +11,7 @@ class DashboardMasterlistReportData extends CountCollection
      * Summary of masterlistReportData
      * @param Builder $userBuilder
      * @param Builder $employerBuilder
-     * @return array{employerCount: array{this_month: mixed, total: mixed, totalUserRegistration: int, userAccountStatus: array{UNVERIFIED: mixed, VERIFIED: mixed}}}
+     * @return array{employerCount: array, totalUserRegistration: int, userAccountStatus: array{UNVERIFIED: mixed, VERIFIED: mixed}}
      */
     public function masterlistReportData(Builder $userBuilder, Builder $employerBuilder) {
         $totalUserRegistration = $userBuilder->clone()->count();

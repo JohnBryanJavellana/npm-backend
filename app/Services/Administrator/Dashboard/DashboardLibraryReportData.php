@@ -5,6 +5,7 @@ use App\Enums\Administrator\LibraryEnum;
 use App\Enums\NotificationEnum;
 use App\Helpers\Administrator\General\CountCollection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class DashboardLibraryReportData extends CountCollection
 {
@@ -13,52 +14,56 @@ class DashboardLibraryReportData extends CountCollection
      * @param Builder $bookResBuilder
      * @param Builder $bookCopyBuilder
      * @param Builder $notificationBuilder
-     * @return array{actionCenter: array{new_reservations: mixed, overdue: int, libraryHealthCount: array{available: mixed, total: mixed}, recentActivity: Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection, totalLibraryApplications: int}}
+     * @return array{totalLibraryApplications: mixed, reservationStatus: array, libraryHealthCount: array, recentActivity: Collection}
      */
-    public function libraryReportData(Builder $bookResBuilder, Builder $bookCopyBuilder, Builder $notificationBuilder) {
-        $totalLibraryApplications = $bookResBuilder->clone()->count();
-        $libraryHealthCount = $this->libraryHealthCount($bookCopyBuilder);
-        $actionCenter = $this->actionCenter($bookCopyBuilder);
+    public function libraryReportData(Builder $bookResBuilder, Builder $bookCopyBuilder, Builder $notificationBuilder): array
+    {
+        $totalLibraryApplications = CountCollection::startCount($bookResBuilder->clone());
+        $reservationStatus = $this->reservationStatus($bookResBuilder);
         $recentActivity = $this->recentActivity($notificationBuilder);
+        $libraryHealthCount = $this->libraryHealthCount($bookCopyBuilder);
 
         return [
             'totalLibraryApplications' => $totalLibraryApplications,
-            'libraryHealthCount' => $libraryHealthCount,
-            'actionCenter' => $actionCenter,
-            'recentActivity' => $recentActivity
+            'reservationStatus'        => $reservationStatus,
+            'libraryHealthCount'       => $libraryHealthCount,
+            'recentActivity'           => $recentActivity
         ];
     }
 
     /**
      * Summary of libraryHealthCount
      * @param Builder $bookCopyBuilder
-     * @return array{available: mixed, total: mixed}
+     * @return array{available: string, total: string}
      */
-    private function libraryHealthCount(Builder $bookCopyBuilder) {
+    private function libraryHealthCount(Builder $bookCopyBuilder): array
+    {
         return [
-            'total'     => CountCollection::startCount($bookCopyBuilder),
-            'available' => CountCollection::startCount($bookCopyBuilder->clone()->where('status', LibraryEnum::AVAILABLE)),
+            'total'     => CountCollection::startCount($bookCopyBuilder->clone()),
+            'available' => CountCollection::startCount($bookCopyBuilder->clone()->where('status', LibraryEnum::AVAILABLE))
         ];
     }
 
     /**
-     * Summary of actionCenter
+     * Summary of reservationStatus
      * @param Builder $bookResBuilder
-     * @return array{new_reservations: mixed, overdue: int}
+     * @return array{newReservations: string, overdue: string}
      */
-    private function actionCenter(Builder $bookResBuilder) {
+    private function reservationStatus(Builder $bookResBuilder): array
+    {
         return [
-            'overdue' => 0,
-            'new_reservations' => CountCollection::startCount($bookResBuilder->clone()->where('status', LibraryEnum::PENDING)),
+            'overdue'         => CountCollection::startCount($bookResBuilder->clone()->whereHas('borrowedBooks', fn($query) => $query->where('status', LibraryEnum::EXPIRED))),
+            'newReservations' => CountCollection::startCount($bookResBuilder->clone()->where('status', LibraryEnum::PENDING))
         ];
     }
 
     /**
      * Summary of recentActivity
      * @param Builder $notificationBuilder
-     * @return Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
+     * @return Builder[]|Collection|\Illuminate\Support\Collection
      */
-    private function recentActivity(Builder $notificationBuilder) {
+    private function recentActivity(Builder $notificationBuilder): Collection
+    {
         $recentActivity = $notificationBuilder
             ->with('sender')
             ->where('type', NotificationEnum::LIBRARY)
