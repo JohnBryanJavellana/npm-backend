@@ -24,10 +24,10 @@ class DashboardLibraryReportData extends CountCollection
         $libraryHealthCount = $this->libraryHealthCount($bookCopyBuilder);
 
         return [
-            'totalLibraryApplications' => $totalLibraryApplications,
-            'reservationStatus'        => $reservationStatus,
             'libraryHealthCount'       => $libraryHealthCount,
-            'recentActivity'           => $recentActivity
+            'recentActivity'           => $recentActivity,
+            'reservationStatus'        => $reservationStatus,
+            'totalLibraryApplications' => $totalLibraryApplications
         ];
     }
 
@@ -39,8 +39,8 @@ class DashboardLibraryReportData extends CountCollection
     private function libraryHealthCount(Builder $bookCopyBuilder): array
     {
         return [
-            'total'     => CountCollection::startCount($bookCopyBuilder->clone()),
-            'available' => CountCollection::startCount($bookCopyBuilder->clone()->where('status', LibraryEnum::AVAILABLE))
+            'available' => CountCollection::startCount($bookCopyBuilder->clone()->where('status', LibraryEnum::AVAILABLE)),
+            'total'     => CountCollection::startCount($bookCopyBuilder->clone())
         ];
     }
 
@@ -52,8 +52,8 @@ class DashboardLibraryReportData extends CountCollection
     private function reservationStatus(Builder $bookResBuilder): array
     {
         return [
-            'overdue'         => CountCollection::startCount($bookResBuilder->clone()->whereHas('borrowedBooks', fn($query) => $query->where('status', LibraryEnum::EXPIRED))),
-            'newReservations' => CountCollection::startCount($bookResBuilder->clone()->where('status', LibraryEnum::PENDING))
+            'newReservations' => CountCollection::startCount($bookResBuilder->clone()->where('status', LibraryEnum::PENDING)),
+            'overdue'         => CountCollection::startCount($bookResBuilder->clone()->whereHas('borrowedBooks', fn($query) => $query->where('status', LibraryEnum::EXPIRED)))
         ];
     }
 

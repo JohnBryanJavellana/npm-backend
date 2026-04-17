@@ -95,7 +95,7 @@ class DashboardDormitoryReportData extends CountCollection
     /**
      * Summary of inventoryAlerts
      * @param Builder $dormitoryInventoryBuilder
-     * @return Collection<int, array{available: mixed, item: mixed, status: string, total_count: mixed>}
+     * @return Collection
      */
     private function inventoryAlerts (Builder $dormitoryInventoryBuilder): Collection
     {
@@ -123,7 +123,7 @@ class DashboardDormitoryReportData extends CountCollection
     /**
      * Summary of serviceRequestStatus
      * @param Builder $dormitoryServiceBuilder
-     * @return Collection<int, array{id: mixed, remarks: mixed, service: mixed, status: mixed>}
+     * @return Collection
      */
     private function serviceRequestStatus (Builder $dormitoryServiceBuilder): Collection
     {

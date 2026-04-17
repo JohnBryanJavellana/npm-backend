@@ -50,7 +50,7 @@ class DashboardEnrollmentReportData extends CountCollection
     /**
      * Summary of enrollmentTrend
      * @param Builder $enrollmentInstanceBuilder
-     * @return Collection<int, array{count: int, week: string>}
+     * @return Collection
      */
     private function enrollmentTrend(Builder $enrollmentInstanceBuilder): Collection
     {
@@ -72,7 +72,7 @@ class DashboardEnrollmentReportData extends CountCollection
     /**
      * Summary of topPopularCourse
      * @param Builder $trainingInstanceBuilder
-     * @return Collection<int, array{count: mixed, course: mixed>}
+     * @return Collection
      */
     private function topPopularCourse(Builder $trainingInstanceBuilder): Collection
     {
