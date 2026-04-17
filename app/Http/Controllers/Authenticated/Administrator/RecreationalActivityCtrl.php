@@ -277,6 +277,7 @@ class RecreationalActivityCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $raCharges = RAInvoices::where('r_a_request_info_id', $request->raRequestInfoId)
+                ->with(['orNumber'])
                 ->orderBy('created_at', 'DESC')
                 ->get();
 
@@ -400,7 +401,7 @@ class RecreationalActivityCtrl extends Controller
                 RAEnum::APPROVED,
                 RAEnum::OCCUPIED,
                 RAEnum::PENDING
-            ])->exists() || RAEquipmentRequest::where('r_a_request_info_id', $requestInfoId)->whereNotIn('status', [
+            ])->exists() && RAEquipmentRequest::where('r_a_request_info_id', $requestInfoId)->whereNotIn('status', [
                 RAEnum::ACTIVE,
                 RAEnum::RECEIVED,
                 RAEnum::PENDING
@@ -581,7 +582,7 @@ class RecreationalActivityCtrl extends Controller
                     return "ID {$item['id']} ({$item['reason']})";
                 }, $summary['failed_items']);
 
-                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQFACILITY->value . implode(', ', $errorDetails)], 207);
+                return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQEQUIPMENT->value . implode(', ', $errorDetails)], 207);
             }
 
             if (env('USE_EVENT')) {
@@ -590,7 +591,7 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY->value], 200);
+            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_ERR_RECREATIONALACTIVITYREQEQUIPMENT->value], 200);
         });
     }
 }

@@ -17,6 +17,8 @@ class RecreationalChargeManager
      */
     public function createOrUpdate(object $payload, bool $isPost, ?int $recreationalInvoiceId)
     {
+        \Log::debug($payload);
+
         $preparedData = $payload->only(['user_id', 'r_a_request_info_id', 'invoice_status', 'description', 'invoice_amount']);
 
         if ($isPost) {

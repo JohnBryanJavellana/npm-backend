@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Rules\Admin\Library;
+namespace App\Rules\Admin\Recreational;
 
 use App\Enums\Administrator\RAEnum;
 use App\Models\RAInvoices;
