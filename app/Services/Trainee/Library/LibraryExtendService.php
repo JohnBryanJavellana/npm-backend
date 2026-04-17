@@ -40,22 +40,12 @@ class LibraryExtendService
                 ->get();
 
             foreach ($records as $record) {
-                $status = null;
-
-                if ($record->to_date && now()->greaterThan(Carbon::parse($record->to_date))) {
-                    $status = RequestStatus::EXPIRED->value;
-                } else {
-                    $status = RequestStatus::EXTENDING->value;
-                }
-
+                $status = $record->to_date && now()->greaterThan(Carbon::parse($record->to_date))
+                    ? RequestStatus::EXPIRED
+                    : RequestStatus::EXTENDING;
 
                 $record->status = $status;
                 $record->save();
-
-
-                $this->bookResModel->query()
-                    ->where("id", $validated["reference_id"])
-                    ->update(['status' => $status]);
             }
 
             $this->prepareData($records, $book_ids);

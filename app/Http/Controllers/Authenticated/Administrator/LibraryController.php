@@ -80,6 +80,7 @@ class LibraryController extends Controller
 
             $count = [
                 'total'     => CountCollection::startCount($reservations),
+                'pending'   => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::PENDING)),
                 'active'    => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::ACTIVE)),
                 'for_csm'   => CountCollection::startCount($reservations->clone()->where('status', LibraryEnum::FOR_CSM)),
                 'extending' => CountCollection::startCount($reservations->clone()->whereHas('borrowedBooks', fn($query) => $query->where('status', LibraryEnum::EXTENDING))),
