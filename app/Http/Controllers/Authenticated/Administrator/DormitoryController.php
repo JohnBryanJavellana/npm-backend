@@ -37,7 +37,8 @@ use App\Http\Requests\Admin\Dormitory\{
     CreateServiceReq,
     CreateOrUpdateDormitoryCharge,
     GetTransferRequest,
-    CreateTransferRequest
+    CreateTransferRequest,
+    CreateExtensionRequest
 };
 use Illuminate\Http\Request;
 use App\Utils\{
@@ -55,7 +56,8 @@ use App\Models\{
     DormitoryService,
     User,
     DormitoryTenantHistory,
-    DormitoryTransfer
+    DormitoryTransfer,
+    DormitoryExtensionRequest
 };
 use App\Helpers\Administrator\General\CountCollection;
 use App\Helpers\Administrator\General\CheckForDocumentExistence;
@@ -2023,5 +2025,51 @@ class DormitoryController extends Controller
                     'transfers' => $transfers
                 ]);
             });
+        }
+
+         public function createExtension(CreateExtensionRequest $request)
+        {
+            return TransactionUtil::transact($request, [], function () use ($request) {
+                $extensionRequest = DormitoryExtensionRequest::create([
+                    'dormitory_tenant_id' => $request->dormitory_tenant_id,
+                    'old_end_date' => $request->old_end_date,
+                    'new_end_date' => $request->new_end_date,
+                    'trace_number' => $request->trace_number ?? null,
+                    'purpose' => $request->purpose,
+                    'status' => 'PENDING'
+                ]);
+
+                return $extensionRequest;
+            });
+        }
+
+       public function getExtensionRequests(Request $request)
+        {
+            try {
+                $query = DormitoryExtensionRequest::with([
+                    'dormitoryTenant',
+                    'dormitoryTenant.boarder',
+                    'dormitoryTenant.dormitoryRoom'
+                ]);
+                
+                // Use $request->input() instead of $request->validated()
+                if ($request->has('status') && !empty($request->input('status')) && is_array($request->input('status'))) {
+                    $query->whereIn('status', $request->input('status'));
+                }
+                
+                $extensions = $query->orderBy('created_at', 'desc')->get();
+                
+                return response()->json([
+                    'success' => true,
+                    'extensions' => $extensions
+                ], 200);
+                
+            } catch (\Exception $e) {
+                \Log::error('Error fetching extension requests: ' . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch extension requests: ' . $e->getMessage()
+                ], 500);
+            }
         }
         }

@@ -202,6 +202,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             // Route::post('updateTenant', [DormitoryController::class, 'updateTenant']);
 
 
+
         });
 
         Route::prefix('/masterlist/')->middleware(['user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD', 'throttle:60,1'])->group(function () {
