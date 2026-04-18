@@ -7,10 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Enums\UserRoleEnum;
 use App\Http\Requests\Trainee\Account\StoreAccountRequest;
 use App\Http\Requests\Trainee\Enrollment\UploadAvatarRequest;
+use App\Jobs\SaveAvatar;
 use App\Mail\UpdatePassword;
 use App\Mail\UpdatePasswordMail;
 use App\Utils\ConvertToBase64;
 use App\Utils\GenerateUniqueFilename;
+use App\Utils\SaveFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\{
@@ -64,17 +66,6 @@ class MyAccount extends Controller
     {
 
         \Log::info("usser", [$request->all()]);
-        // $validation = [
-        //     "user_id" => "required|exists:users,id",
-        //     'avatar' => 'required',
-        // ];
-
-        // $validator = \Validator::make($request->all(), $validation);
-
-        // if($validator->fails()) {
-        //     $errors = $validator->messages()->all();
-        //     return response()->json(['message' => implode(', ', $errors)], 422);
-        // } else {
 
         try {
             $validated = $request->validated();
@@ -82,31 +73,7 @@ class MyAccount extends Controller
             $user = User::findOrFail($user_id);
 
             if ($request->has('avatar')) {
-                // $filePath = public_path('user_images/' . $user->profile_picture);
-
-                // if (file_exists($filePath) && is_file($filePath) && $user->profile_picture !== "default-avatar.png") {
-                //     unlink($filePath);
-                // }
-
-                // $avatar = $request->file('avatar');
-                // $filename = time() . '_' . uniqid() . '.' . $avatar->getClientOriginalExtension();
-                // $avatar->move(public_path('user_images'), $filename);
-
-                // $user->profile_picture = $filename;
-                // $user->save();
-
-                /**
-                 * @param string
-                 */
-                if (($request->avatar !== $user->profile_picture) && $user->profile_picture !== 'default-avatar.png') {
-                    if (file_exists(public_path('user-images/' . $user->profile_picture))) {
-                        unlink(public_path('user-images/' . $user->profile_picture));
-                    }
-                }
-
-                $image_name = Str::uuid() . '.png';
-                ConvertToBase64::generate($request->avatar, 'image', "user_images/$image_name");
-                $user->profile_picture = $image_name;
+                $user->profile_picture = SaveFile::save($validated["avatar"], "user_images/");;
                 $user->save();
             }
 
@@ -116,10 +83,6 @@ class MyAccount extends Controller
 
             Cache::forget('user_profile_' . $user_id);
 
-            if (env("USE_EVENT")) {
-                event(new BEAccount(''));
-            }
-
             return response()->json(['message' => "You have successfully updated the avatar!"], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(["User not found."], 404);
@@ -127,8 +90,6 @@ class MyAccount extends Controller
             \Log::error("error_upload_profile_picture", [$e]);
             return response()->json(['message' => "Something went wrong, Please try again."], 500);
         }
-
-        // }
     }
     public function create_or_update_additional_info(StoreAccountRequest $request)
     {
