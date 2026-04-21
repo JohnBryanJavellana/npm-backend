@@ -34,7 +34,7 @@ class RemoveModuleType extends FormRequest
     public function rules(): array
     {
         return [
-            'moduleTypeId' => ['required_if:httpMethod,UPDATE', 'exists:module_types,id', 'integer', new RemoveModuleTypeRule()]
+            'moduleTypeId' => ['exists:module_types,id', 'integer', new RemoveModuleTypeRule()]
         ];
     }
 }

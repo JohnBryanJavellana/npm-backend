@@ -34,7 +34,7 @@ class TraineeRecreational extends Controller
 {
     public function __construct(
         protected RecreationalService $recreationalService
-    ){}
+    ) {}
 
     public function testFetch(Request $request)
     {
@@ -44,7 +44,7 @@ class TraineeRecreational extends Controller
             "relatedFacility.facility.images"
         ])->get();
         $facility = RAFacility::with([
-            "hasData" => function($query){
+            "hasData" => function ($query) {
                 $query->where("status", [RequestStatus::APPROVED->value, RequestStatus::RECEIVED->value]);
             },
             "images",
@@ -59,11 +59,9 @@ class TraineeRecreational extends Controller
 
     public function viewRecRequestCount(Request $request)
     {
-        try
-        {
+        try {
             return $this->recreationalService->getRecRequestCount($request->user()->id);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("viewRecRequestCountError", [$e]);
         }
     }
@@ -75,11 +73,9 @@ class TraineeRecreational extends Controller
      */
     public function viewEquipment(Request $request)
     {
-        try
-        {
+        try {
             return ViewRecEquipment::collection($this->recreationalService->getEquipments());
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::info("viewEquipmentError", [$e]);
             return response()->json([$e->getMessage()], 500);
             return response()->json(["Something went wrong."], 500);
@@ -93,11 +89,9 @@ class TraineeRecreational extends Controller
      */
     public function viewFacilities(Request $request)
     {
-        try
-        {
+        try {
             return RecreationalsViewRecFacilities::collection($this->recreationalService->getFacilities());
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([$e], 500);
         }
     }
@@ -111,13 +105,11 @@ class TraineeRecreational extends Controller
     {
         $validated = $request->validated();
         $validated["userId"] = $request->user()->id;
-        try
-        {
+        try {
             $data = $this->recreationalService->getUserRecRecord($validated);
 
             return response()->json(["data" => $data], 200);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("error_data", [$validated]);
 
             return response()->json(["message" => $e->getMessage()], 500);
@@ -129,8 +121,9 @@ class TraineeRecreational extends Controller
      * fetching trainee records
      * @param Request $request
      */
-    public function get_recreational_request(Request $request) {
-        return TransactionUtil::transact(null, [], function() use($request) {
+    public function get_recreational_request(Request $request)
+    {
+        return TransactionUtil::transact(null, [], function () use ($request) {
             $userId = $request->user()->id;
             $recRequests_temp = RARequestInfo::where('user_id', $userId)->orderBy('created_at', 'DESC');
 
@@ -140,35 +133,35 @@ class TraineeRecreational extends Controller
 
             $recRequests = $request->traceNumber
                 ?  $recRequests->where('trace_number', $request->traceNumber)
-                    ->with([
-                        'equipment_request',
-                        'equipment_request.updatedByWhom',
-                        'equipment_request.equipment.images',
-                        'facility_request',
-                        'facility_request.updatedByWhom',
-                        'facility_request.facility.images',
-                        'invoices',
-                        'csm'
-                        ])
-                    ->get()
-                    ->map(function($request) {
-                        $grouped = $request->equipment_request->groupBy('r_a_equipments_id');
+                ->with([
+                    'equipment_request',
+                    'equipment_request.updatedByWhom',
+                    'equipment_request.equipment.images',
+                    'facility_request',
+                    'facility_request.updatedByWhom',
+                    'facility_request.facility.images',
+                    'invoices',
+                    'csm'
+                ])
+                ->get()
+                ->map(function ($request) {
+                    $grouped = $request->equipment_request->groupBy('r_a_equipments_id');
 
-                        $request->grouped_equipment = $grouped->map(function($items) {
-                            $first = $items->first();
-                            $first->requested_qty = $items->count();
-                            $first->requested_issued_qty = $items->whereNotNull('r_a_equipment_stock_id')->count();
-                            return $first;
-                        })->values();
+                    $request->grouped_equipment = $grouped->map(function ($items) {
+                        $first = $items->first();
+                        $first->requested_qty = $items->count();
+                        $first->requested_issued_qty = $items->whereNotNull('r_a_equipment_stock_id')->count();
+                        return $first;
+                    })->values();
 
-                        return $request;
-                    })
-                    ->first()
+                    return $request;
+                })
+                ->first()
                 : $recRequests->get();
 
             return response()->json(['recRequests' => $recRequests], 200);
         });
-    }                            
+    }
 
     /**
      * Summary of getRecreationalRequest
@@ -178,15 +171,13 @@ class TraineeRecreational extends Controller
     public function getRecreationalRequest(ViewRecreationalRequest $request)
     {
         $validated = $request->validated();
-        try
-        {
-            $result = match ($validated["type"] ) {
+        try {
+            $result = match ($validated["type"]) {
                 "EQUIPMENT" =>  $this->recreationalService->getEquipmentRequests($validated),
                 "FACILITY" =>  $this->recreationalService->getFacilityRequests($validated)
             };
             return response()->json(['raEquipmentRequests' => $result], 200);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
@@ -199,22 +190,18 @@ class TraineeRecreational extends Controller
     public function cancelUnitsRequest(CancelRecRequest $request)
     {
         $validated = $request->validated();
-        try
-        {
+        try {
             $type = Str::lower($validated["documentType"]);
             $this->recreationalService->cancelRequests($validated);
             AuditHelper::log($request->user()->id, "User {$request->user()->id} has cancelled a {$type} recreational request.");
             // Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has cancelled a recreational request.');
 
             return response()->json(["message" => "Success! Unit has been successfully cancelled."], 200);
-        }
-        catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Request not found"], 404);
-        }
-        catch (DomainException $e) {
+        } catch (DomainException $e) {
             throw $e;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }
@@ -228,32 +215,26 @@ class TraineeRecreational extends Controller
     {
 
         $validated = $request->validated();
-        try
-        {
+        try {
             $this->recreationalService->storeRecreationalRequests($validated);
 
             AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} has sent a recreational request.");
             Notifications::notify($validated["user_id"], null, 'RECREATIONAL', 'has sent a recreational request.');
 
-            if(env("USE_EVENT")) {
-                try
-                {
-                    event (
+            if (env("USE_EVENT")) {
+                try {
+                    event(
                         new BERecreational(''),
                     );
-                }
-                catch (\Exception $e) {
+                } catch (\Exception $e) {
                 }
             }
             return response()->json(["message" => "Successfully sent a recreational request"], 200);
-        }
-        catch (DomainException $e) {
+        } catch (DomainException $e) {
             throw $e;
-        }
-        catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Facility record not found"], 404);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             \Log::error("requestEquipmentError", [$e]);
             return response()->json(["message" => "Something went wrong."], 500);
         }
@@ -261,18 +242,14 @@ class TraineeRecreational extends Controller
 
     public function checkUniqueIdentifier(Request $request)
     {
-        try
-        {
+        try {
             $exists = $this->recreationalService->isUniqueIdenfierExistV2($request);
             return response()->json(["data" => $exists], 200);
-        }
-        catch (DomainException $e) {
+        } catch (DomainException $e) {
             throw $e;
-        }
-        catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json(["message" => "Record not found!"], 422);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }
     }

@@ -4,6 +4,7 @@ namespace App\Services\Administrator\Cashier;
 
 use App\Enums\Administrator\CashierEnum;
 use App\Enums\AdministratorReturnResponse;
+use App\Models\CashierOR;
 use App\Utils\CashierGetTableRef;
 
 class CashierPaymentVerification
@@ -53,15 +54,18 @@ class CashierPaymentVerification
      * @return array{message: string, status: int}
      */
     public function payWalkIn(object $payload, int $invoiceId, string $invoiceTableServiceName) {
+        $availableOR = CashierOR::lockForUpdate()->where('status', CashierEnum::AVAILABLE)->first();
+
         $this->cashierGetTableRef->getTable($invoiceTableServiceName, $invoiceId, null)->update([
             'invoice_status' => $payload->invoiceStatus,
             'datePaid' => now(),
             'payment_type' => CashierEnum::WALK_IN,
             'received_amount' => $payload->received_amount,
-            'cashier_o_r_id' => $payload->cashier_o_r_id
+            'cashier_o_r_id' => $availableOR->id
         ]);
 
-        $this->cashierORManager->setUsedORAsStatus($payload->cashier_o_r_id, CashierEnum::UNAVAILABLE->value, false);
+        $availableOR->update(['status' => CashierEnum::UNAVAILABLE]);
+        $this->cashierORManager->setUsedORAsStatus($availableOR->id, CashierEnum::UNAVAILABLE->value, false);
 
         return $this->verifyPayment($payload, $invoiceId, $payload->parentTableId, true);
     }

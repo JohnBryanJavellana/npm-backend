@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
 class CourseContent extends Model
 {
     use HasFactory;
@@ -32,6 +31,7 @@ class CourseContent extends Model
     {
         return $this->hasMany(Assessments::class);
     }
+
     public function assessment_attempts()
     {
         return $this->hasManyThrough(

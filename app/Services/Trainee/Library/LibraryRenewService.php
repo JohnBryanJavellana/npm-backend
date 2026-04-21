@@ -45,10 +45,6 @@ class LibraryRenewService
                 ->lockForUpdate()
                 ->get();
 
-            // $this->bookResModel->query()
-            //     ->where('id', $validated['reference_id'])
-            //     ->update(['status' => RequestStatus::RENEWING->value]);
-
             $this->prepareData($records, $bookIds);
 
             $this->libraryExtraService->storeExtraService($validated, $userId, 'RENEW');
@@ -56,10 +52,6 @@ class LibraryRenewService
             foreach ($records as $record) {
                 $record->status = RequestStatus::RENEWING->value;
                 $record->save();
-
-                $record->bookRes()->update([
-                    'status' => RequestStatus::RENEWING->value,
-                ]);
             }
         });
     }

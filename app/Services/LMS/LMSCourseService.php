@@ -2,17 +2,13 @@
 
 namespace App\Services\LMS;
 
-use App\Enums\RequestStatus;
-use App\Models\AssessmentAttempt;
+use App\Models\Assessments;
 use App\Models\CourseContent;
 use App\Models\CourseContentUpload;
 use App\Models\CourseModuleSection;
 use App\Utils\AuditHelper;
 use App\Utils\SaveFile;
-use DomainException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Http\Request;
 
 class LMSCourseService
 {
@@ -20,7 +16,7 @@ class LMSCourseService
         protected CourseModuleSection $courseModuleSectionModel,
         protected CourseContent $courseContentModel,
         protected CourseContentUpload $courseContentUploadModel,
-        protected AssessmentAttempt $assessmentAttemptModel,
+        public SubmitAssessmentFileUploadManager $submitAssessmentFileUploadManager
     ) {}
 
     public function getCourseModules($courseModuleId, $section_id = null)
@@ -56,17 +52,33 @@ class LMSCourseService
 
     public function getContentById($contentId)
     {
-
-        return $this->courseContentModel->query()
+        return tap($this->courseContentModel->query()
             ->whereKey($contentId)
             ->with([
                 "uploads",
-                "assessment_attempts",
-                "assessment" => function($query) {
-                    $query->select('id','control_number','course_content_id','title','type','passed_type','passing_score','time_limit','status');
-                },
+                "assessment",
             ])
-            ->first();
+            ->first(), function ($content) {
+                $content->assessment->transform(function ($item) use($content) {
+                    $this_assessment = Assessments::where('control_number', $item->control_number)->first();
+                    $isAccessibleResult = $this->submitAssessmentFileUploadManager->checkIfAccessible($this_assessment);
+
+                    $item->isAccessible = $isAccessibleResult['isAccessible'];
+                    $item->enrolled_course_id = $isAccessibleResult['enrolledCourse']?->id;
+                    $item->overallAttempts = $item->attempts->where('created_by', auth()->user()->id)->map(function($query) use ($this_assessment) {
+                        return [
+                            "id" => $query->id,
+                            "score" => $this_assessment->passed_type === 'file_upload' ? $query->score : $query->answers->sum('score'),
+                            "status" => $query->status,
+                            "submitted_at" => $query->submitted_at,
+                            "graded_at" => $query->graded_at
+                        ];
+                    });
+
+                    unset($item->attempts);
+                    return $item;
+                });
+            });
     }
 
     public function storeCourseSections($validated, $userId)

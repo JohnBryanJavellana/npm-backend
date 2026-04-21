@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Enrollment;
 
+use App\Enums\UserRoleEnum;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -12,7 +13,10 @@ class CreateOrUpdateRequirement extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_ENROLLMENT->value
+        ]);
     }
 
     /**
@@ -25,12 +29,14 @@ class CreateOrUpdateRequirement extends FormRequest
         return [
             'name' => ['required', 'string'],
             'description' => ['required', 'string'],
-            'requiredStatus' => ['required', 'string'],
-            'type' => ['required', 'string'],
-            'httpMethod' => ['required'],
-            'module' => [Rule::when($this->type === 'SPECIFIC', ['required'], ['nullable'])],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'isRequired' => ['required', 'string', 'in:YES,NO'],
+            'upload_reference' => ['required_if:httpMethod,POST', 'file', 'nullable'],
+            'isBasic' => ['required', 'string', 'in:YES,NO'],
+            'httpMethod' => ['required', 'string', 'in:POST,UPDATE'],
+            'requirement_specific_modules' => ['required_if:isBasic,NO', 'array', 'nullable'],
+            'requirement_specific_modules.*' => ['integer', 'exists:course_modules,id'],
+            'requirementId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:requirements,id'],
+            'status' => ['required_if:httpMethod,UPDATE', 'string', 'in:ACTIVE,INACTIVE']
         ];
     }
 }

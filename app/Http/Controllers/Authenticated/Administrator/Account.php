@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use App\Jobs\SaveAvatar;
 use App\Jobs\SendingEmail;
 use Illuminate\Http\Request;
@@ -42,7 +43,6 @@ use App\Enums\{
 };
 use App\Http\Requests\AuditLog\PaginationAuditViewRequest;
 use App\Http\Resources\AuditLog\AuditLogResource;
-use Carbon\Carbon;
 
 class Account extends Controller
 {

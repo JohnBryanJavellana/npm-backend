@@ -34,7 +34,7 @@ class RemoveSchedule extends FormRequest
     public function rules(): array
     {
         return [
-            'scheduleId' => ['required_if:httpMethod,UPDATE', 'exists:trainings,id', 'integer', new RemoveTrainingRule()]
+            'scheduleId' => ['exists:trainings,id', 'integer', new RemoveTrainingRule()]
         ];
     }
 }

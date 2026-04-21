@@ -17,13 +17,13 @@ class DormitoryExtraService {
         protected DormitoryReqService $dormitoryReqService,
         protected DormitoryService $dormitoryService,
         protected DormitoryInvoice $dormitoryInvoiceModel
-        
+
     ) {}
     public function viewServices()
     {
         \Log::info("not_found",[Cache::has("dormitory:services:all")]);
         $cacheKey = "dormitory:services:all";
-        return Cache::remember($cacheKey, self::LONG_TTL, function() { 
+        return Cache::remember($cacheKey, self::LONG_TTL, function() {
            return $this->dormitoryService
            ->with([
             "charge:id,charge_category_id,name,amount,description,service_type",
@@ -90,17 +90,16 @@ class DormitoryExtraService {
     {
         return DB::transaction(function() use ($userId, $validated) {
             $this->prepareData($validated, $userId);
-            $invoice =$this->dormitoryInvoiceModel->create([
-                "dormitory_tenant_id" => $validated["dormitory_id"],
-                "user_id" => $userId,
-                "type" => RequestStatus::SERVICE,
-                "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
-            ]);
+            // $invoice =$this->dormitoryInvoiceModel->create([
+            //     "dormitory_tenant_id" => $validated["dormitory_id"],
+            //     "user_id" => $userId,
+            //     "type" => RequestStatus::SERVICE,
+            //     "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
+            // ]);
 
             $this->dormitoryReqService->create([
                 "dormitory_tenant_id" => $validated["dormitory_id"],
-                "dormitory_service_id" => $validated["service_id"],
-                "dormitory_invoice_id" => $invoice->id
+                "dormitory_service_id" => $validated["service_id"]
             ]);
         });
     }
@@ -115,7 +114,7 @@ class DormitoryExtraService {
             ->whereRelation("tenant", "user_id", "=", $userId)
             ->lockForUpdate()
             ->first();
-            
+
             if(!$record) {
                 throw new DomainException("Service record not found!");
             }

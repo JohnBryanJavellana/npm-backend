@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin\Enrollment;
 
-use Illuminate\Validation\Rule;
+use App\Enums\UserRoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateOrUpdateRank extends FormRequest
@@ -12,7 +12,10 @@ class CreateOrUpdateRank extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_ENROLLMENT->value
+        ]);
     }
 
     /**
@@ -26,8 +29,8 @@ class CreateOrUpdateRank extends FormRequest
             'name' => ['required', 'string'],
             'short_name' => ['required', 'string'],
             'type' => ['required', 'string'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
+            'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],
+            'rankId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:ranks,id']
         ];
     }
 }

@@ -9,6 +9,8 @@ class CourseModuleFee extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function module()
     {
         return $this->hasOne(CourseModule::class, 'id', 'course_module_id');

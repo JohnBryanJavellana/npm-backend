@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin\Enrollment;
 
-use Illuminate\Validation\Rule;
+use App\Enums\UserRoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateOrUpdateTrainingFee extends FormRequest
@@ -12,7 +12,10 @@ class CreateOrUpdateTrainingFee extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_ENROLLMENT->value
+        ]);
     }
 
     /**
@@ -25,11 +28,11 @@ class CreateOrUpdateTrainingFee extends FormRequest
         return [
             'name' => ['required', 'string'],
             'amount' => ['required', 'numeric'],
-            'category' => ['required'],
-            'module' => ['required'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])],
-            'status' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'charge_category_id' => ['required', 'integer', 'exists:charge_categories,id'],
+            'course_module_id' => ['required', 'integer', 'exists:course_modules,id'],
+            'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],
+            'status' => ['required_if:httpMethod,UPDATE', 'string', 'in:ACTIVE,INACTIVE'],
+            'trainingFeeId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:course_module_fees,id']
         ];
     }
 }

@@ -2,17 +2,12 @@
 
 namespace App\Services\Administrator\Cashier;
 
-use App\Enums\Administrator\CashierEnum;
 use App\Enums\AdministratorReturnResponse;
 use App\Models\ChargeCategory;
 use App\Utils\DocumentExistenceChecker;
 
-class CashierChargeCategoryManager
+class CashierChargeCategoryManager extends DocumentExistenceChecker
 {
-    public function __construct(
-        public DocumentExistenceChecker $documentExistenceChecker
-    ) {}
-
     /**
      * Summary of createOrUpdate
      * @param object $payload
@@ -20,7 +15,7 @@ class CashierChargeCategoryManager
      * @return array{message: string, status: int}
      */
     public function createOrUpdate(object $payload, bool $isPost, ?int $documentId) {
-        $isChargeCategoryExists = $this->documentExistenceChecker->checkForExistence(ChargeCategory::class, ['name' => $payload->name], $documentId);
+        $isChargeCategoryExists = DocumentExistenceChecker::checkForExistence(ChargeCategory::class, ['name' => $payload->name], $documentId);
 
         if($isChargeCategoryExists) {
             return ['message' => "Charge Category already exist.", 'status' => 409];

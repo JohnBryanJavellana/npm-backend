@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin\Enrollment;
 
-use Illuminate\Validation\Rule;
+use App\Enums\UserRoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateOrUpdateCertificate extends FormRequest
@@ -12,7 +12,10 @@ class CreateOrUpdateCertificate extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_ENROLLMENT->value
+        ]);
     }
 
     /**
@@ -23,14 +26,14 @@ class CreateOrUpdateCertificate extends FormRequest
     public function rules(): array
     {
         return [
-            'module' => ['required'],
+            'course_module_id' => ['required', 'integer', 'exists:course_modules,id'],
             'name' => ['required', 'string'],
             'header' => ['required', 'string'],
             'header_1' => ['required', 'string'],
             'header_2' => ['required', 'string'],
             'body' => ['required', 'string'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'httpMethod' => ['required', 'string', 'in:POST,UPDATE'],
+            'certificateId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:main_certificates,id']
         ];
     }
 }

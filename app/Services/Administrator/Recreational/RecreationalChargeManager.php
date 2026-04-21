@@ -15,10 +15,13 @@ class RecreationalChargeManager
      * @param mixed $recreationalInvoiceId
      * @return array{message: string, status: int}
      */
-    public function createOrUpdate(object $payload, bool $isPost, ?int $recreationalInvoiceId) {
+    public function createOrUpdate(object $payload, bool $isPost, ?int $recreationalInvoiceId)
+    {
+        \Log::debug($payload);
+
         $preparedData = $payload->only(['user_id', 'r_a_request_info_id', 'invoice_status', 'description', 'invoice_amount']);
 
-        if($isPost) {
+        if ($isPost) {
             $preparedData['trace_number'] = GenerateTrace::createTraceNumber(RAInvoices::class, '-RAINV-');
         }
 
@@ -34,7 +37,8 @@ class RecreationalChargeManager
      * @param int $recreationalInvoiceId
      * @return array{message: string, status: int}
      */
-    public function removeCharge(int $recreationalInvoiceId) {
+    public function removeCharge(int $recreationalInvoiceId)
+    {
         RAInvoices::findOrFail($recreationalInvoiceId)->delete();
         return [
             'message' => "RA Invoice ID#$recreationalInvoiceId has been deleted successfully.",

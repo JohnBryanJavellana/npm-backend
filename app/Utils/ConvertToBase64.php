@@ -9,20 +9,14 @@ class ConvertToBase64 {
         $base64String = preg_replace('/^data:' . $type . '\/\w+;base64,/', '', $base64String);
         $decodedString = base64_decode($base64String, true);
 
-        $filePath = public_path($filename);
-
-        if (!File::exists($filePath)) {
-            File::makeDirectory($filePath, 0755, true);
-        }
-
         if ($decodedString === false) {
             throw new \Exception('Base64 decoding failed');
         }
 
-        if (!file_put_contents($filePath, $decodedString)) {
+        if (!file_put_contents($filename, $decodedString)) {
             throw new \Exception('Failed to save image');
         }
 
-        return $filePath;
+        return $filename;
     }
 }

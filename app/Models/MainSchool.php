@@ -9,6 +9,8 @@ class MainSchool extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function hasData () {
         return $this->hasMany(EducationalAttainment::class);
     }

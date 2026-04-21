@@ -10,9 +10,11 @@ use App\Models\{
 return new class extends Migration
 {
     public const BOOK_RES_STATUS = [
+        "PENDING",
         "ACTIVE",
         "FOR CSM",
-        "COMPLETED"
+        "COMPLETED",
+        'ACTIVE'
     ];
 
     /**
@@ -25,7 +27,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->longText('trace_number');
-            $table->enum('status', self::BOOK_RES_STATUS)->default(self::BOOK_RES_STATUS[1]);
+            $table->enum('status', self::BOOK_RES_STATUS)->default(self::BOOK_RES_STATUS[0]);
             $table->timestamps();
         });
     }

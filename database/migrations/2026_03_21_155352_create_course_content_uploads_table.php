@@ -13,6 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('course_content_uploads', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
             $table->id();
             $table->foreignIdFor(CourseContent::class)->constrained()->cascadeOnDelete();
             $table->string("original_filename", 255);

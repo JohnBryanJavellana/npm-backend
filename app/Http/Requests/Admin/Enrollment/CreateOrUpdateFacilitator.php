@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin\Enrollment;
 
-use Illuminate\Validation\Rule;
+use App\Enums\UserRoleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateOrUpdateFacilitator extends FormRequest
@@ -12,7 +12,10 @@ class CreateOrUpdateFacilitator extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null && \in_array($this->user()->role, [
+            UserRoleEnum::SUPERADMIN->value,
+            UserRoleEnum::ADMIN_ENROLLMENT->value
+        ]);
     }
 
     /**
@@ -23,11 +26,11 @@ class CreateOrUpdateFacilitator extends FormRequest
     public function rules(): array
     {
         return [
-            'module' => ['required'],
-            'facilitator' => ['required'],
-            'role' => ['required'],
-            'httpMethod' => ['required'],
-            'documentId' => [Rule::when($this->httpMethod !== 'POST', ['required'], ['nullable'])]
+            'course_module_id' => ['required', 'integer', 'exists:course_modules,id'],
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'role' => ['required', 'string', 'in:INSTRUCTOR,ASSESSOR,MODERATOR,MENTOR,COORDINATOR,OBSERVER'],
+            'httpMethod' => ['required', 'string', 'in:UPDATE,POST'],
+            'facilitatorId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:training_facilitators,id']
         ];
     }
 }

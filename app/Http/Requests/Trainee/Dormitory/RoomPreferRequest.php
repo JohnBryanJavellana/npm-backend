@@ -26,10 +26,12 @@ class RoomPreferRequest extends FormRequest
     {
         return [
             "forType" => "required|in:OFFICERS,RATINGS",
-            "roomType" => "required|in:YES,NO",
-            "fromDate" => "required|date",
-            "toDate" => "required|date",
-            "single_accomodation" => "required|in:YES,NO"
+            "roomType" => "required|in:AIRCON,NON-AIRCON",
+            "accommodation" => "required|in:SINGLE,SHARED,COUPLE",
+            "guestGender" => "required|in:MALE,FEMALE",
+
+            "fromDate" => "nullable|date",
+            "toDate" => "nullable|date",
         ];
     }
 

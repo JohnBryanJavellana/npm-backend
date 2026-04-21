@@ -45,7 +45,7 @@ class LibraryBookReservationManager
     {
         $copy = BookCopy::where(['book_id' => $bookId, 'status' => LibraryEnum::AVAILABLE])
             ->lockForUpdate()
-            ->first() ?? throw new \DomainException("No available copies for this book.");
+            ->first() ?? throw new \DomainException("No available copies for this book.", 409);
 
         $copy->update(['status' => LibraryEnum::BORROWED]);
         return $copy->id;
@@ -81,8 +81,6 @@ class LibraryBookReservationManager
             ->whereIn('status', $activeStatuses)
             ->exists();
 
-        if (!$hasActive) {
-            BookRes::whereKey($bookResId)->update(['status' => LibraryEnum::FOR_CSM]);
-        }
+        BookRes::whereKey($bookResId)->update(['status' => !$hasActive ? LibraryEnum::FOR_CSM : LibraryEnum::ACTIVE]);
     }
 }

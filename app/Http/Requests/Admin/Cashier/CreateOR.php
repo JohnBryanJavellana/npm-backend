@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin\Cashier;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrUpdateOR extends FormRequest
+class CreateOR extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,10 +22,10 @@ class CreateOrUpdateOR extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
-            'service_type' => ['required', 'string'],
-            'httpMethod' => ['required', 'in:UPDATE,POST'],
-            'documentId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:cashier_o_r_s,id']
+            'starting_or_number' => ['required', 'integer'],
+            'ending_or_number' => ['required', 'integer'],
+            'office' => ['required', 'string'],
+            'charge_category_id' => ['required', 'integer', 'exists:charge_categories,id']
         ];
     }
 }

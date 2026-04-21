@@ -20,7 +20,7 @@ class CourseModuleResource extends JsonResource
             "id" => $this->id,
             "name" => $this->name,
             "acronym" => $this->acronym,
-            "bgColor" => $this->facilitator?->first()->bgColor,
+            "bgColor" => $this->bgColor,
             "type" => $this->moduleType?->name,
             "compendium" => $this->compendium,
             "price" => $this->trainingFees?->first()?->amount,

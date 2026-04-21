@@ -21,8 +21,7 @@ class WalkInPayment extends VerifyPayment
     {
         return [
             ...parent::rules(),
-            'received_amount' => ['required', 'numeric'],
-            'cashier_o_r_id' => ['required', 'integer', 'exists:cashier_o_r_s,id']
+            'received_amount' => ['required', 'numeric']
         ];
     }
 }

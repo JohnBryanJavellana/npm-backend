@@ -2,13 +2,14 @@
 
 namespace App\Services\Trainee\Dormitory;
 
+use App\Enums\Administrator\DormitoryEnum;
 use App\Models\{
     Dormitory,
     DormitoryInventory,
     DormitoryRoom,
     DormitoryTenant,
     DormitoryTenantHistory,
-    DormitoryItemBorrowing
+    DormitoryItemBorrowing, DormitoryTenantSupDoc
 };
 use App\Enums\RequestStatus;
 use App\Utils\AuditHelper;
@@ -26,7 +27,6 @@ class DormitoryRequestService
     private const PREFIX = "-DR-";
 
     public function __construct(
-        protected Dormitory $dormitoryModel,
         protected DormitoryRoom $roomModel,
         protected DormitoryTenant $tenantModel,
         protected DormitoryTenantHistory $dormitoryTenantHistory,
@@ -37,63 +37,51 @@ class DormitoryRequestService
 
     public function getRecommendedRoom($validated)
     {
-        $start = $validated['fromDate'];
-        $end   = $validated['toDate'];
+        // $start = $validated['fromDate'];
+        // $end   = $validated['toDate'];
 
-        $requiredSlots = $validated['single_accomodation'] === 'YES' ? 2 : 1;
-        $capacity = 2;
+        // $requiredSlots = $validated['single_accomodation'] === 'YES' ? 2 : 1;
+        // $capacity = 2;
 
-        return $this->roomModel->query()
-            ->select()
-            ->with([
-                "dormitory:id,room_name,room_description,room_fee_type,room_cost,guest_cost",
-                "dormitory.room_images:id,dormitory_id,filename"
-            ])
-            ->whereHas('dormitory', fn($query) => $query->where("room_fee_type", $validated["forType"]))
-            ->where('is_air_conditioned', $validated["roomType"])
-            ->withCount([
-                'hasData as overlapping_tenants_count' => function ($q) use ($start, $end) {
-                    $q->where('tenant_from_date', '<', $end)
-                        ->where('tenant_to_date', '>', $start)
-                        ->whereIn('tenant_status', [RequestStatus::APPROVED->value, RequestStatus::ACTIVE->value]);
-                }
-            ])
-            ->available()
-            ->havingRaw("overlapping_tenants_count + ? <= ?", [$requiredSlots, $capacity])
-            ->orderBy('overlapping_tenants_count', 'asc')
-            ->get();
+        return $this->roomModel->query()->with([
+            "roomImages"
+        ])->where([
+            'room_type' => $validated["roomType"],
+            'dormitory' => $validated["forType"],
+            'accommodation' => $validated["accommodation"],
+            'guest_gender' => $validated["guestGender"]
+        ])->get();
     }
 
 
     public function createRequest($validated, $userId)
     {
         DB::transaction(function () use ($validated, $userId) {
-
             $this->validateData($userId);
 
             $data = [
                 "user_id" => $userId,
                 "dormitory_room_id" => $validated["room_id"] ?? null,
                 "trace_number" => GenerateTrace::createTraceNumber($this->tenantModel, self::PREFIX),
-                "is_air_conditioned" => $validated["is_air_conditioned"],
-                "single_accomodation" => $validated["single_accomodation"],
-                "tenant_from_date" => $validated["fromDate"],
-                "tenant_to_date" => $validated["toDate"],
+                "room_type" => $validated["is_air_conditioned"],
+                "accommodation" => $validated["single_accomodation"],
+                "check_in_datetime" => $validated["fromDate"],
+                "check_out_datetime" => $validated["toDate"],
                 "purpose" => $validated["purpose"],
+                "process_type" => "ONLINE",
+                "status_of_occupancy" => "TRAINEE"
             ];
-
-            if (isset($validated["file"])) {
-                $data["filename"] = SaveFile::save($validated["file"], 'dormitory/supporting-document') ?? null;
-            }
 
             $record = $this->tenantModel->create($data);
 
-            $this->loggingDetails(
-                $record,
-                $userId,
-                "sent",
-                "You’ve sent a dormitory request."
-            );
+            if ($validated['accommodation'] === 'COUPLE' && isset($validated["file"])) {
+                DormitoryTenantSupDoc::create([
+                    'dormitory_tenant_id' => $record->id,
+                    'filename' =>SaveFile::save($validated["file"], 'dormitory/supporting-document')
+                ]);
+            }
+
+            $this->loggingDetails($record, $userId, "sent", "You've sent a dormitory request.");
         });
     }
 
@@ -111,30 +99,11 @@ class DormitoryRequestService
                 );
             }
 
-            if (!in_array($record->tenant_status, [
+            if (!\in_array($record->tenant_status, [
                 RequestStatus::PENDING->value,
                 RequestStatus::FOR_PAYMENT->value,
             ])) {
                 throw new DomainException("Dormitory request cancellation is not permitted.");
-            }
-
-            if (!is_null($record->dormitory_room_id)) {
-                $dorm = $this->roomModel
-                    ->find($record->dormitory_room_id)
-                    ->lockForUpdate();
-
-                $dorm->update([
-                    "room_slot" =>  $record->room_for_type === "COUPLE"
-                        || $record->single_accommodation === "YES" ? 2 : 1,
-                    "room_status" => RequestStatus::AVAILABLE
-                ]);
-            }
-            if (
-                $record->room_for_type === "COUPLE" &&
-                $record->filename &&
-                file_exists(public_path('marriage-files/' . $record->filename))
-            ) {
-                unlink(public_path('marriage-files/' . $record->filename));
             }
 
             $record->update([
@@ -180,5 +149,57 @@ class DormitoryRequestService
             ->forUser($userId)
             ->groupBy("tenant_status")
             ->pluck("status_count", "tenant_status");
+    }
+
+    /**
+     * Summary of requestDormitoryRoom
+     * @param object $payload
+     * @return array{message: string, status: int}
+     */
+    public function requestDormitoryRoom(object $payload, int $guestId) {
+        $checkIfHasActiveRequest = DormitoryTenant::where('user_id', $guestId)
+            ->whereNotIn('tenant_status', [
+                DormitoryEnum::CANCELLED,
+                DormitoryEnum::REJECTED,
+                DormitoryEnum::TERMINATED
+            ])
+            ->first();
+
+        if($checkIfHasActiveRequest) {
+            return [
+                'message' => "Can't create new request. You still have a $checkIfHasActiveRequest->tenant_status request.",
+                'status' => 409
+            ];
+        }
+
+        $preparedData = $payload->only([
+            'dormitory_room_id',
+            'user_id',
+            'room_type',
+            'accommodation',
+            'purpose',
+            'process_type',
+            'check_in_datetime',
+            'check_out_datetime',
+            'status_of_occupancy'
+        ]);
+        $preparedData['trace_number'] = GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DG-');
+
+        $this_request = DormitoryTenant::create($preparedData);
+
+        if($payload->accommodation === DormitoryEnum::COUPLE->value && isset($payload->suppportingCoupleDocuments)) {
+            $dataToInsert = [];
+
+            foreach ($payload->suppportingCoupleDocuments as $suppportingCoupleDocuments) {
+                $dataToInsert[] = [
+                    'dormitory_tenant_id' => $this_request->id,
+                    'filename' => SaveFile::save($suppportingCoupleDocuments, "dormitory/supporting-document")
+                ];
+            }
+
+            $this_request->coupleSupportingDocuments()->createMany($dataToInsert);
+        }
+
+        return ['message' => "Success!", 'status' => 200];
     }
 }

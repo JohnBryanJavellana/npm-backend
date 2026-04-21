@@ -10,6 +10,7 @@ enum LibraryEnum : string {
     case FOR_CSM = "FOR CSM";
     case HARD_COPY = "HARD-COPY";
     case EXTENDING = "EXTENDING";
+    case EXPIRED = "EXPIRED";
     case COMPLETED = "COMPLETED";
     case AVAILABLE = "AVAILABLE";
     case BORROWED = "BORROWED";

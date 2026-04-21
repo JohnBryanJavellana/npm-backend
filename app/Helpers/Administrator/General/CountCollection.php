@@ -12,6 +12,6 @@ class CountCollection
     public static function startCount($collection)
     {
         $count = $collection->count();
-        return $count > 99 ? '99+' : $count;
+        return $count > 99 ? '99+' : (string) $count;
     }
 }
