@@ -312,9 +312,17 @@ class LMSAssessmentController extends Controller
                     ->with([
                         'sections.questions.options',
                         'attempts' => function ($query) use ($request) {
-                            $query->when($request->attempt_id, fn($q) => $q->whereKey($request->attempt_id));
+                            $query
+                                ->when($request->attempt_id, fn($q) => $q->whereKey($request->attempt_id))
+                                ->when($request->filled('user_id'), fn($q) => $q->where('created_by', $request->user_id));
                         },
-                        'attempts.answers'
+                        'attempts.answers',
+                        'attempts.attemptActions' => function ($query) use ($request) {
+                            $query->when(
+                                $request->filled('user_id'),
+                                fn($q) => $q->where('user_id', $request->user_id)
+                            )->orderBy('created_at');
+                        },
                     ])
                     ->firstOrFail();
 
