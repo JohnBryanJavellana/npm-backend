@@ -32,7 +32,7 @@ class Assessments extends Model
 
     public function course()
     {
-        return $this->belongsTo(CourseModule::class);
+        return $this->belongsTo(CourseModule::class, "created_by", "id");
     }
 
     public function created_by()
