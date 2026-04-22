@@ -12,6 +12,8 @@ use App\Http\Requests\LMS\ViewSpecificGradeDetails;
 use App\Http\Requests\Trainer\LMS\viewAssessmentRequest;
 use App\Models\AssessmentAttempt;
 use App\Models\Assessments;
+use App\Models\CourseModule;
+use App\Models\EnrolledCourse;
 use App\Services\LMS\SubmitAssessmentFileUploadManager;
 use App\Services\Trainer\LMS\Assessments\LMSAssessmentService;
 use App\Utils\TransactionUtil;
@@ -114,8 +116,12 @@ class TraineeLMSController extends Controller
         return TransactionUtil::transact($request, [], function() use($request) {
             $enrolledCourseId = $request->enrolledCourseId;
 
+            $this_enrolled_course = EnrolledCourse::findOrFail($enrolledCourseId);
+            $courseModule = CourseModule::whereKey($this_enrolled_course->training->course_module_id)->firstOrFail();
+
             $result = AssessmentAttempt::with([
-                'assessment:id,title,type,passing_score,passed_type',
+                'assessment',
+                'assessment.courseContent.courseModuleSection.courseModule',
                 'gradedBy:id,fname,mname,lname,suffix,email'
             ])
             ->where('enrolled_course_id', $enrolledCourseId)
@@ -135,7 +141,18 @@ class TraineeLMSController extends Controller
                 return $attempt;
             });
 
-            return response()->json(['result' => $result], 200);
+            return response()->json([
+                'result' => $result,
+                'course_module' => tap($courseModule, function($module) use ($this_enrolled_course) {
+                    $training = $this_enrolled_course->training;
+
+                    $module->schedule_from = $training->schedule_from;
+                    $module->schedule_to = $training->schedule_to;
+                    $module->schedule_preference = $training->schedule_preference;
+                    $module->venue = $training->venue;
+                    $module->module_type = $training->module->moduleType->name;
+                })
+            ], 200);
         });
     }
 }
