@@ -21,13 +21,13 @@ class AttendanceController extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             \Log::info("Attendance record request: ", $request->all());
-            
+
             $validated = $request->validate([
                 'training_id' => 'required|exists:trainings,id',
                 'training_date' => 'required|date',
                 'start_time' => 'nullable',
                 'end_time' => 'nullable',
-                'records' => 'required|array',
+                'records' => 'nullable|array',
                 // 'records.*.profile_picture' => 'required|string',
                 'records.*.enrolled_course_id' => 'required|exists:enrolled_courses,id',
                 'records.*.time_in' => 'nullable|date',
@@ -96,7 +96,8 @@ class AttendanceController extends Controller
 
             $lateLimit = $scheduleStart->copy()->addMinutes(15);
 
-            foreach ($validated['records'] as $record) {
+            if(\array_key_exists('records', $validated)) {
+                foreach ($validated['records'] as $record) {
                 $enrolledCourseId = $record['enrolled_course_id'];
 
                 $timeIn  = !empty($record['time_in']) ? Carbon::parse($record['time_in']) : null;
@@ -123,6 +124,8 @@ class AttendanceController extends Controller
                 );
 
                 $responseData[] = $attendanceRecord;
+            }
+
             }
 
             AuditHelper::log($request->user()->id, "User {$request->user()->id} have submitted attendance!");
