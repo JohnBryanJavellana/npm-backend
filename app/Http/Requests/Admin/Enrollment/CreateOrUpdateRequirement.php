@@ -19,6 +19,13 @@ class CreateOrUpdateRequirement extends FormRequest
         ]);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'upload_reference' => $this->upload_reference instanceof File ? $this->upload_reference : null
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
