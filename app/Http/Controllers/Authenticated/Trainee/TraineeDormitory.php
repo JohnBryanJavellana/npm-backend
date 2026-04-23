@@ -146,8 +146,7 @@ class TraineeDormitory extends Controller
                 },
             ])
             ->where([
-                'trace_number' => $dormitory_id,
-                'user_id' => $request->user()->id
+                'trace_number' => $dormitory_id
             ])
             ->first();
 

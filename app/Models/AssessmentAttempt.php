@@ -20,6 +20,11 @@ class AssessmentAttempt extends Model
         return $this->hasMany(AssessmentAnswer::class);
     }
 
+    public function attemptActions()
+    {
+        return $this->hasMany(AssessmentAttemptAction::class);
+    }
+
     public function attempt(){
         return $this->hasOne(Assessments::class, "id", "assessments_id");
     }
