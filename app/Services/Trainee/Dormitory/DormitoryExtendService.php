@@ -49,7 +49,7 @@ class DormitoryExtendService {
         ->forUser($userId)
         ->whereKey($documentId)
         ->first();
-        
+
         if(!$record) {
             throw new DomainException("Dormitory request is not approved yet or an extending request is already existing.");
         }
@@ -74,7 +74,7 @@ class DormitoryExtendService {
     {
         return DB::transaction(function () use ($userId, $validated) {
             $this->prepareData($userId, $validated["document_id"]);
-            
+
             $record = $this->dormitoryExtensionRequest->create([
                 "dormitory_tenant_id" => $validated["document_id"],
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryExtensionRequest, self::PREFIX),
@@ -85,7 +85,7 @@ class DormitoryExtendService {
             $this->dormitoryTenantService->updateTenantRecordById($validated["document_id"], $userId, RequestStatus::EXTENDING);
 
             $this->loggingDetails(
-                $validated["document_id"], 
+                $validated["document_id"],
                 $userId,
                 "sent",
                 "You’ve sent your dormitory extend request."
@@ -116,19 +116,18 @@ class DormitoryExtendService {
             ])) {
                 throw new DomainException('Extending request cancellation is not permitted.');
             }
-            
+
             $extend->update([
                 "status" => RequestStatus::CANCELLED
             ]);
 
-            $status = Carbon::parse($extend->tenant?->tenant_to_date)->isPast() ? RequestStatus::TERMINATED->value : RequestStatus::ACTIVE->value;
-
+            $status = RequestStatus::ACTIVE->value;
 
             $this->dormitoryTenantService->updateTenantRecordById($extend->dormitory_tenant_id, $userId, $status);
-        
+
             $this->loggingDetails(
                 $extend->dormitory_tenant_id,
-                $userId, 
+                $userId,
                 "cancelled",
                 "You cancelled your room extend request."
             );

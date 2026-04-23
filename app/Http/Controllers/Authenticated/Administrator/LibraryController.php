@@ -434,7 +434,7 @@ class LibraryController extends Controller
                 'books.catalog.genre'
             ])->where([
                 'book_res_id' => $request->bookResId
-            ])->whereIn('status', $request->status)->get();
+            ])->get();
 
             return response()->json(['prolongationRequests' => $prolongationMain], 200);
         });

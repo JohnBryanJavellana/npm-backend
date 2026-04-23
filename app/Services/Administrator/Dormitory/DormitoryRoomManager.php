@@ -38,7 +38,7 @@ class DormitoryRoomManager
             'remarks'
         ]));
 
-        $this->roomImages($this_room, $payload?->data_room_image, $payload?->room_image);
+        $this->roomImages($this_room, $payload?->data_room_image ?? [], $payload?->room_image ?? []);
         AuditHelper::log(
             $payload->user()->id,
             $isPost

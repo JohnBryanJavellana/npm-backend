@@ -16,6 +16,7 @@ use App\Http\Requests\Trainee\Enrollment\UpdateRequirementRequest;
 use App\Http\Requests\Trainee\Enrollment\ViewApplicationRequest;
 use App\Http\Requests\Trainee\Enrollment\ViewTraineeRecRequest;
 use App\Http\Resources\Trainee\Enrollment\ViewTraineeRecResource;
+use App\Models\TrainingFacilitator;
 use Illuminate\Http\Request;
 use App\Utils\{AuditHelper, GenerateUniqueFilename, SaveFile, Notifications};
 use App\Http\Resources\{TrainingListResource, AvailableTrainingsResource, SelectedTrainingResource};
@@ -400,6 +401,7 @@ class TraineeEnrollment extends Controller
         $validations = [
             'documentId' => 'required',
             'bgColor' => 'required',
+            'type' => 'required|string|in:EnrolledCourse,TrainingFacilitator',
         ];
 
         $validator = \Validator::make($request->all(), $validations);
@@ -411,7 +413,12 @@ class TraineeEnrollment extends Controller
             try {
                 DB::beginTransaction();
 
-                $training = EnrolledCourse::find($request->documentId);
+                $model = match(true) {
+                    $request->type === "EnrolledCourse" => EnrolledCourse::class,
+                    $request->type === "TrainingFacilitator" => TrainingFacilitator::class
+                };
+
+                $training = $model::find($request->documentId);
                 $training->bgColor = $request->bgColor;
                 $training->save();
 

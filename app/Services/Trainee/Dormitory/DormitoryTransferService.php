@@ -106,8 +106,8 @@ class DormitoryTransferService extends DormitoryHistoryService {
             ]);
 
             $this->loggingDetails(
-                $validated["document_id"], 
-                $userId, 
+                $validated["document_id"],
+                $userId,
                 "sent",
                 "You’ve sent your dormitory transfer request."
             );
@@ -136,7 +136,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
                 throw new DomainException("Transfer request cancellation is not permitted.");
             }
 
-            $status = Carbon::parse($record->tenant->tenant_to_date)->isPast() ? RequestStatus::TERMINATED->value : RequestStatus::ACTIVE->value;
+            $status = RequestStatus::ACTIVE->value;
 
             $record->update(["status" => RequestStatus::CANCELLED]);
 
@@ -144,7 +144,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
 
             $this->loggingDetails(
                 $record->dormitory_tenant_id,
-                $userId, 
+                $userId,
                 "cancelled",
                 "You cancelled your room transfer request."
             );

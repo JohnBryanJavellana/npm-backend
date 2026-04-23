@@ -32,8 +32,8 @@ class CreateOrUpdateDormitoryRoom extends FormRequest
             'floor' => ['required', 'numeric', 'min:1'],
             'room_cost' => ['required', 'numeric'],
             'guest_cost' => ['required', 'numeric'],
-            'data_room_image' => ['sometimes', 'array'],
-            'room_image' => ['sometimes', 'array'],
+            'data_room_image' => ['nullable', 'array'],
+            'room_image' => ['nullable', 'array'],
             'accommodation' => ['required', 'in:SINGLE,SHARED,COUPLE'],
 
             'httpMethod' => ['required', 'in:POST,UPDATE'],
