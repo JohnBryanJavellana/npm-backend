@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Authenticated\Administrator\CSMAnalyicsController;
 use Illuminate\Support\Facades\Route;
 
 /** administrator controllers */
@@ -281,6 +282,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('ra_create_or_update_facility', [RecreationalActivityCtrl::class, 'ra_create_or_update_facility']);
             Route::delete('ra_remove_facility/{facilityId}', [RecreationalActivityCtrl::class, 'ra_remove_facility']);
         });
+
+        Route::post('get_csms', [CSMAnalyicsController::class, 'get_csms']);
+        Route::post('get_specific_csm', [CSMAnalyicsController::class, 'get_specific_csm']);
+        Route::get('get_csm_analytics', [CSMAnalyicsController::class, 'get_csm_analytics']);
 
         Route::get('qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
         Route::post('qrreader/check-in-out', [QRReaderCheckInOutCtrl::class, 'check_in_out']);
