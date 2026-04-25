@@ -17,9 +17,9 @@ class CSMService {
     public function __construct(
         protected CSM $csmModel,
         protected EnrolledCourse $enrolledCourseModel,
-        protected BookRes $bookResModel,  
-        protected RARequestInfo $rARequestInfoModel, 
-        protected DormitoryTenant $dormitoryTenantModel, 
+        protected BookRes $bookResModel,
+        protected RARequestInfo $rARequestInfoModel,
+        protected DormitoryTenant $dormitoryTenantModel,
     ){}
 
     public function checkExistingCSM($validated, $userId)
@@ -27,9 +27,12 @@ class CSMService {
         \Log::info("inside_csm_service", [$validated]);
         $CSM = $this->csmModel->query()
             ->forUser($userId)
-            ->where('reference_id' , $validated["reference_id"])
+            ->where([
+                'reference_id' => $validated["reference_id"],
+                'service' => $validated["service"]
+            ])
             ->exists();
-                                
+
         if($CSM) {
             throw new DomainException("A CSM is already existing for this request.");
         }

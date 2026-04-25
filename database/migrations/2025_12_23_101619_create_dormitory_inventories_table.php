@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->longText("control_number");
             $table->string("name", 255);
-            $table->enum("is_consumable", ['YES', 'NO']);
+            $table->boolean("is_consumable");
             $table->longText("description");
             $table->longText("filename")->nullable();
             $table->double("charge", 65, 2);

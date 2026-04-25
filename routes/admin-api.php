@@ -157,6 +157,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_service_request', [DormitoryController::class, 'get_service_request']);
             Route::post('set_service_request_as_action', [DormitoryController::class, 'set_service_request_as_action']);
 
+            Route::post('get_inventories/create_or_update_inventory', [DormitoryController::class, 'create_or_update_inventory']);
+            Route::delete('get_inventories/remove_inventory/{documentId}', [DormitoryController::class, 'remove_inventory']);
+            Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories']);
+
+            Route::delete('get_dormitory_inventory_stocks/remove_inventory_stock/{documentId}', [DormitoryController::class, 'remove_inventory_stock']);
+            Route::post('get_dormitory_inventory_stocks/create_inventory_stock', [DormitoryController::class, 'create_inventory_stock']);
+            Route::post('get_dormitory_inventory_stocks', [DormitoryController::class, 'get_dormitory_inventory_stocks']);
+
+            Route::get('get_dormitory_inclusion_requests', [DormitoryController::class, 'get_dormitory_inclusion_requests']);
+
             // Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
             // Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
 

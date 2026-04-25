@@ -175,6 +175,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('surveys', [CsmsController::class, 'view']);
             Route::post('surveys/create', [CsmsController::class, 'createV1']);
             Route::post('surveys/delete/{id}', [CsmsController::class, 'delete']);
+            Route::get('/get-all-for-csm-transactions', [CsmsController::class, 'getAllForCSMTransactions']);
         });
 
         Route::prefix('/invoices/')->group(function () {

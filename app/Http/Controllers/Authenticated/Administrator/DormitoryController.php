@@ -7,17 +7,25 @@ use App\Enums\{
     AdministratorReturnResponse
 };
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Dormitory\CreateInventoryStock;
 use App\Http\Requests\Admin\Dormitory\CreateOrUpdateDormitoryRoom;
+use App\Http\Requests\Admin\Dormitory\CreateOrUpdateInventory;
 use App\Http\Requests\Admin\Dormitory\GetCurrentTenantInfo;
+use App\Http\Requests\Admin\Dormitory\GetDormitoryInventoryStockRequest;
 use App\Http\Requests\Admin\Dormitory\GetMatchRooms;
 use App\Http\Requests\Admin\Dormitory\NewRoomReservation;
+use App\Http\Requests\Admin\Dormitory\RemoveInventoryRequest;
+use App\Http\Requests\Admin\Dormitory\RemoveInventoryStock;
 use App\Http\Requests\Admin\Dormitory\SetRoomReservationAsReserved;
 use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
+use App\Models\DormitoryInclusionRequest;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
 use App\Models\DormitoryItemBI;
 use App\Models\DormitoryItemBorrowing;
 use App\Models\DormitoryReqService;
+use App\Services\Administrator\Dormitory\DormitoryInventoryManager;
+use App\Services\Administrator\Dormitory\DormitoryInventoryStockManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceManager;
@@ -62,7 +70,9 @@ class DormitoryController extends Controller
         public DormitoryServiceManager $dormitoryServiceManager,
         public DormitoryRoomManager $dormitoryRoomManager,
         public DormitoryRoomReservationManager $dormitoryRoomReservationManager,
-        public DormitoryServiceRequestManager $dormitoryServiceRequestManager
+        public DormitoryServiceRequestManager $dormitoryServiceRequestManager,
+        public DormitoryInventoryManager $dormitoryInventoryManager,
+        public DormitoryInventoryStockManager $dormitoryInventoryStockManager
     ) {}
 
     /**
@@ -383,6 +393,124 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_dorm_inventories
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function get_dorm_inventories (Request $request): JsonResponse
+    {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $dorm_inventory = DormitoryInventory::withCount([
+                'stock',
+                'stock as available_stock' => fn($query) => $query->whereIn('status', ["AVAILABLE", "DAMAGED"]),
+                'borrowings'
+            ]);
+
+            $di = $request->controlNumber
+                ? $dorm_inventory->where('control_number', $request->controlNumber)->first()
+                : $dorm_inventory->get();
+
+            return response()->json(['dormInventory' => $di], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_inventory
+     * @param CreateOrUpdateInventory $request
+     */
+    public function create_or_update_inventory(CreateOrUpdateInventory $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $documentId = $request->documentId;
+
+            $result = $this->dormitoryInventoryManager->createOrUpdate($request, $isPost, $documentId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_inventory
+     * @param RemoveInventoryRequest $request
+     * @return JsonResponse
+     */
+    public function remove_inventory(RemoveInventoryRequest $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $documentId = $request->documentId;
+
+            $result = $this->dormitoryInventoryManager->removeInventory($documentId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_dormitory_inventory_stocks
+     * @param GetDormitoryInventoryStockRequest $request
+     * @return JsonResponse
+     */
+    public function get_dormitory_inventory_stocks (GetDormitoryInventoryStockRequest $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $controlNumber = $request->controlNumber;
+
+            $stock = DormitoryInventoryItem::whereHas('itemInfo', fn($query) => $query->where('control_number', $controlNumber))->get();
+            return response()->json(['stocks' => $stock], 200);
+        });
+    }
+
+    /**
+     * Summary of create_inventory_stock
+     * @param CreateInventoryStock $request
+     * @return JsonResponse
+     */
+    public function create_inventory_stock(CreateInventoryStock $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $stockCount = $request->stock_count;
+            $controlNumber = $request->controlNumber;
+
+            $result = $this->dormitoryInventoryStockManager->createStock($stockCount, $controlNumber);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of remove_inventory_stock
+     * @param RemoveInventoryStock $request
+     * @return JsonResponse
+     */
+    public function remove_inventory_stock (RemoveInventoryStock $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $documentId = $request->documentId;
+
+            $result = $this->dormitoryInventoryStockManager->removeStock($documentId);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_dormitory_inclusion_requests
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function get_dormitory_inclusion_requests (Request $request): JsonResponse
+    {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $inclusionRequests = DormitoryInclusionRequest::with([
+                'tenant:id,fname,mname,lname,suffix,email',
+                'itemInfo:id,name'
+            ])->orderByDesc('created_at')->get();
+
+            return response()->json(['inclusionRequests' => $inclusionRequests], 200);
+        });
+    }
+
     // END OF GOOOOOOOOODSSS -->>>>>>>>>>>>>>>
     /**
      *
@@ -437,6 +565,95 @@ class DormitoryController extends Controller
      *
      * Summary of get_available_dorms
      */
+
+    /**
+     * Summary of get_dorm_inventories
+     * @param Request $request
+     */
+    // public function get_dorm_inventories (Request $request): JsonResponse
+    // {
+    //     return TransactionUtil::transact(null, [], function() use ($request) {
+    //         $dorm_inventory = DormitoryInventory::withCount([
+    //             'stock',
+    //             'stock as available_stock' => fn($query) => $query->whereIn('status', ["AVAILABLE", "DAMAGED"]),
+    //             'borrowings'
+    //         ]);
+
+    //         $di = $request->controlNumber
+    //             ? $dorm_inventory->where('control_number', $request->controlNumber)->first()
+    //             : $dorm_inventory->get();
+
+    //         return response()->json(['dormInventory' => $di], 200);
+    //     });
+    // }
+
+    /**
+     * Summary of create_dormitory_inventory_stock
+     * @param Request $request
+     */
+    public function create_dormitory_inventory_stock (Request $request): JsonResponse
+    {
+        return TransactionUtil::transact(null, ["dormitory:inclusions:all"], function() use ($request) {
+            $dataToReturn = [];
+
+            if($request->stock) {
+                for($i = 0; $i < $request->stock; $i++) {
+                    $room = new DormitoryInventoryItem;
+                    $room->dormitory_inventory_id = $request->dormitoryInventoryId;
+                    $room->unique_identifier = GenerateTrace::createTraceNumber(DormitoryInventoryItem::class, '-DIS-', 'unique_identifier');
+                    $room->save();
+
+                    array_push($dataToReturn, $room->unique_identifier);
+                }
+            }
+
+            return $request->insideJob ? $dataToReturn : response()->json([
+                'message' => "You've added a dormitory inventory stock.",
+                'returnedData' => $dataToReturn
+            ], 201);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_dormitory_inventory
+     * @param CreateOrUpdateDormitoryInv $request
+     */
+    public function create_or_update_dormitory_inventory (CreateOrUpdateDormitoryInv $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, ["inventoryItems", "dormitory:inclusions:all"], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+
+            $dorm_inventory = $isPost ? new DormitoryInventory() : DormitoryInventory::findOrFail($request->documentId);
+            $dorm_inventory->name = $request->name;
+            $dorm_inventory->charge = $request->amount;
+            $dorm_inventory->description = $request->description;
+            $dorm_inventory->is_consumable = $request->isConsumable;
+
+            if($isPost) $dorm_inventory->control_number = GenerateTrace::createTraceNumber(DormitoryInventory::class, "-DI-", 'control_number');
+            if($request->filename) {
+                $filename = Str::uuid() . '.png';
+                SaveAvatar::dispatch($request->filename, $filename, "dormitory/inventory", false, true, $dorm_inventory->filename ?? '');
+                $dorm_inventory->filename = $filename;
+            }
+
+            $dorm_inventory->save();
+            $dataToReturn = [];
+
+            if($request->stock) {
+                $adjustedRequest = $request->merge([
+                    "insideJob" => true,
+                    "dormitoryInventoryId" => $dorm_inventory->id,
+                ]);
+
+                $dataToReturn = $this->create_dormitory_inventory_stock($adjustedRequest);
+            }
+
+            return response()->json([
+                'message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYINV->value . " ID#$dorm_inventory->id",
+                'returnedData' => $dataToReturn
+            ], 200);
+        });
+    }
 
     /**
      * Summary of get_available_dorms
@@ -750,160 +967,7 @@ class DormitoryController extends Controller
         });
     }
 
-    /**
-     * Summary of get_dorm_inventories
-     * @param Request $request
-     */
-    public function get_dorm_inventories (Request $request): JsonResponse
-    {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $dorm_inventory = DormitoryInventory::withCount([
-                'stock',
-                'stock as available_stock' => fn($query) => $query->whereIn('status', ["AVAILABLE", "DAMAGED"]),
-                'borrowings'
-            ]);
 
-            $di = $request->controlNumber
-                ? $dorm_inventory->where('control_number', $request->controlNumber)->first()
-                : $dorm_inventory->get();
-
-            return response()->json(['dormInventory' => $di], 200);
-        });
-    }
-
-    /**
-     * Summary of create_dormitory_inventory_stock
-     * @param bool returnedMessage === FALSE
-     * @param Request $request
-     */
-    public function create_dormitory_inventory_stock (Request $request): JsonResponse
-    {
-        return TransactionUtil::transact(null, ["dormitory:inclusions:all"], function() use ($request) {
-            $dataToReturn = [];
-
-            if($request->stock) {
-                for($i = 0; $i < $request->stock; $i++) {
-                    $room = new DormitoryInventoryItem;
-                    $room->dormitory_inventory_id = $request->dormitoryInventoryId;
-                    $room->unique_identifier = GenerateTrace::createTraceNumber(DormitoryInventoryItem::class, '-DIS-', 'unique_identifier');
-                    $room->save();
-
-                    array_push($dataToReturn, $room->unique_identifier);
-                }
-            }
-
-            return $request->insideJob ? $dataToReturn : response()->json([
-                'message' => "You've added a dormitory inventory stock.",
-                'returnedData' => $dataToReturn
-            ], 201);
-        });
-    }
-
-    /**
-     * Summary of create_or_update_dormitory_inventory
-     * @param bool auditActions === TRUE
-     * @param bool returnedMessage === FALSE
-     * @param CreateOrUpdateDormitoryInv $request
-     */
-    public function create_or_update_dormitory_inventory (CreateOrUpdateDormitoryInv $request): JsonResponse
-    {
-        return TransactionUtil::transact($request, ["inventoryItems", "dormitory:inclusions:all"], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
-
-            $dorm_inventory = $isPost ? new DormitoryInventory() : DormitoryInventory::findOrFail($request->documentId);
-            $dorm_inventory->name = $request->name;
-            $dorm_inventory->charge = $request->amount;
-            $dorm_inventory->description = $request->description;
-            $dorm_inventory->is_consumable = $request->isConsumable;
-
-            if($isPost) $dorm_inventory->control_number = GenerateTrace::createTraceNumber(DormitoryInventory::class, "-DI-", 'control_number');
-            if($request->filename) {
-                $filename = Str::uuid() . '.png';
-                SaveAvatar::dispatch($request->filename, $filename, "dormitory/inventory", false, true, $dorm_inventory->filename ?? '');
-                $dorm_inventory->filename = $filename;
-            }
-
-            $dorm_inventory->save();
-            $dataToReturn = [];
-
-            if($request->stock) {
-                $adjustedRequest = $request->merge([
-                    "insideJob" => true,
-                    "dormitoryInventoryId" => $dorm_inventory->id,
-                ]);
-
-                $dataToReturn = $this->create_dormitory_inventory_stock($adjustedRequest);
-            }
-
-            AuditHelper::log(
-                $request->user()->id,
-                $isPost ? AdministratorAuditActions::DORMITORYCTRL_CREATED_DORMITORYINV->value : AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYINV->value . " ID#$dorm_inventory->id"
-            );
-
-            if(env('USE_EVENT')) {
-                event(
-                    new BEDormitory(''),
-                    new BEAuditTrail('')
-                );
-            }
-
-            return response()->json([
-                'message' => AdministratorReturnResponse::DORMITORYCTRL_REMOVED_DORMITORYINV->value . " ID#$dorm_inventory->id",
-                'returnedData' => $dataToReturn
-            ], 200);
-        });
-    }
-
-    /**
-     * Summary of get_dormitory_inventory_stock
-     * @param Request $request
-     */
-    public function get_dormitory_inventory_stock (Request $request): JsonResponse
-    {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $stock = DormitoryInventoryItem::withCount('borrowed')
-                ->where('dormitory_inventory_id', $request->documentId)
-                ->get();
-
-            return response()->json(['stocks' => $stock], 200);
-        });
-    }
-
-    /**
-     * Summary of update_dormitory_inventory_stock
-     * @param Request $request
-     */
-    public function update_dormitory_inventory_stock(Request $request): JsonResponse
-    {
-        return TransactionUtil::transact(null, [], function () use ($request) {
-            $documentId = $request->documentId;
-            $availabilityStatus = $request->availabilityStatus;
-
-            $this_inventory_stock = DormitoryInventoryItem::where('id', $documentId)
-                ->lockForUpdate()
-                ->first();
-
-            if (!$this_inventory_stock) {
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK->value], 409);
-            } else {
-                $this_inventory_stock->status = $availabilityStatus;
-                $this_inventory_stock->save();
-
-                AuditHelper::log(
-                    $request->user()->id,
-                    AdministratorAuditActions::DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK->value . " ID#$documentId"
-                );
-
-                if(env('USE_EVENT')) {
-                    event(
-                        new BEDormitory('')
-                    );
-                }
-
-                return response()->json(['message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK->value], 200);
-            }
-        });
-    }
     //tunying
     /**
      * Summary of get_stock_reserved_tenant
