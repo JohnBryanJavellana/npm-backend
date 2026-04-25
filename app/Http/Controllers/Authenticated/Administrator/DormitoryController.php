@@ -18,12 +18,14 @@ use App\Http\Requests\Admin\Dormitory\RemoveInventoryRequest;
 use App\Http\Requests\Admin\Dormitory\RemoveInventoryStock;
 use App\Http\Requests\Admin\Dormitory\SetRoomReservationAsReserved;
 use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
+use App\Http\Requests\Admin\Dormitory\UpdateInclusionRequest;
 use App\Models\DormitoryInclusionRequest;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
 use App\Models\DormitoryItemBI;
 use App\Models\DormitoryItemBorrowing;
 use App\Models\DormitoryReqService;
+use App\Services\Administrator\Dormitory\DormitoryInclusionManager;
 use App\Services\Administrator\Dormitory\DormitoryInventoryManager;
 use App\Services\Administrator\Dormitory\DormitoryInventoryStockManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomManager;
@@ -72,7 +74,8 @@ class DormitoryController extends Controller
         public DormitoryRoomReservationManager $dormitoryRoomReservationManager,
         public DormitoryServiceRequestManager $dormitoryServiceRequestManager,
         public DormitoryInventoryManager $dormitoryInventoryManager,
-        public DormitoryInventoryStockManager $dormitoryInventoryStockManager
+        public DormitoryInventoryStockManager $dormitoryInventoryStockManager,
+        public DormitoryInclusionManager $dormitoryInclusionManager
     ) {}
 
     /**
@@ -503,11 +506,35 @@ class DormitoryController extends Controller
     {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $inclusionRequests = DormitoryInclusionRequest::with([
-                'tenant:id,fname,mname,lname,suffix,email',
-                'itemInfo:id,name'
-            ])->orderByDesc('created_at')->get();
+                'tenant.boarder:id,fname,mname,lname,suffix,email',
+                'itemInfo:id,name,charge,description,filename,is_consumable'
+            ])->orderByDesc('created_at')->get()->map(fn($query) => [
+                'id' => $query->id,
+                'tenant' => "{$query->tenant->boarder->fname} {$query->tenant->boarder?->mname} {$query->tenant->boarder->lname} {$query->tenant->boarder->suffix}",
+                'itemInfo' => $query->itemInfo,
+                'status' => $query->status,
+                'quantity' => $query->quantity,
+                'created_at' => $query->created_at,
+                'updated_at' => $query->updated_at
+            ]);
 
             return response()->json(['inclusionRequests' => $inclusionRequests], 200);
+        });
+    }
+
+    /**
+     * Summary of update_inclusion_request
+     * @param UpdateInclusionRequest $request
+     * @return JsonResponse
+     */
+    public function update_inclusion_request(UpdateInclusionRequest $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $documentId = $request->documentId;
+            $status = $request->status;
+
+            $result = $this->dormitoryInclusionManager->updateInclusionRequest($documentId, $status);
+            return response()->json(['message' => $result['message']], $result['status']);
         });
     }
 }

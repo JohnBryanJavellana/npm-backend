@@ -17,6 +17,7 @@ return new class extends Migration
         Schema::create('dormitory_inclusion_requests', function (Blueprint $table) {
             $table->engine = "innoDb";
             $table->id();
+            $table->longText('control_number');
             $table->foreignIdFor(DormitoryInventory::class)->constrained()->onDelete("cascade");
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->onDelete("cascade");
             $table->foreignIdFor(DormitoryInvoice::class)->nullable()->constrained()->cascadeOnDelete();

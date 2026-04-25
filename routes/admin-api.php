@@ -165,6 +165,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_dormitory_inventory_stocks/create_inventory_stock', [DormitoryController::class, 'create_inventory_stock']);
             Route::post('get_dormitory_inventory_stocks', [DormitoryController::class, 'get_dormitory_inventory_stocks']);
 
+            Route::post('get_dormitory_inclusion_requests/update_inclusion_request', [DormitoryController::class, 'update_inclusion_request']);
             Route::get('get_dormitory_inclusion_requests', [DormitoryController::class, 'get_dormitory_inclusion_requests']);
         });
 

@@ -34,8 +34,8 @@ class DormitoryInclusionService {
         return  Cache::remember($cacheKey, self::LONG_TTL, function () {
             return $this->dormitoryInventory
             ->whereHas("stock", fn($q) => $q->available())
-            ->get();    
-        });    
+            ->get();
+        });
     }
 
     public function getUserInclusionRequest($documentId)
@@ -63,20 +63,11 @@ class DormitoryInclusionService {
 
     public function createInclusionRequest($validated, $userId)
     {
-         DB::transaction(function () use ($validated, $userId) {
-
-            //prepareData
-            // $invoice =$this->dormitoryInvoiceModel->create([
-            //     "user_id" => $userId,
-            //     "dormitory_tenant_id" => $validated["request_id"],
-            //     "type" => RequestStatus::INCLUSION,
-            //     "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryInvoiceModel, "-DRINV-"),
-            // ]);
-
+        DB::transaction(function () use ($validated, $userId) {
             $this->dormitoryInclusionRequest->create([
+                "control_number" => GenerateTrace::createTraceNumber($this->dormitoryInclusionRequest, '-INCR-', 'control_number'),
                 "dormitory_inventory_id" => $validated["inclusion_id"],
                 "dormitory_tenant_id" => $validated["request_id"],
-                // "dormitory_invoice_id" => $invoice->id,
                 "quantity" => $validated["quantity"]
             ]);
         });
