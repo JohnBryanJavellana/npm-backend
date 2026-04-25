@@ -19,6 +19,7 @@ use App\Http\Requests\Admin\Dormitory\RemoveInventoryStock;
 use App\Http\Requests\Admin\Dormitory\SetRoomReservationAsReserved;
 use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
 use App\Http\Requests\Admin\Dormitory\UpdateInclusionRequest;
+use App\Http\Requests\Admin\Dormitory\UpdateInventoryStock;
 use App\Models\DormitoryInclusionRequest;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryInvoice;
@@ -477,6 +478,22 @@ class DormitoryController extends Controller
             $controlNumber = $request->controlNumber;
 
             $result = $this->dormitoryInventoryStockManager->createStock($stockCount, $controlNumber);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of update_inventory_stock
+     * @param UpdateInventoryStock $request
+     * @return JsonResponse
+     */
+    public function update_inventory_stock(UpdateInventoryStock $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $status = $request->status;
+            $uniqueIdentifier = $request->uniqueIdentifier;
+
+            $result = $this->dormitoryInventoryStockManager->updateStock($status, $uniqueIdentifier);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }

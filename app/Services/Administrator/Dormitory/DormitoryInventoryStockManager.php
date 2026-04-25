@@ -33,6 +33,22 @@ class DormitoryInventoryStockManager
     }
 
     /**
+     * Summary of updateStock
+     * @param string $status
+     * @param string $uniqueIdentifier
+     * @return array{message: string, status: int}
+     */
+    public function updateStock(string $status, string $uniqueIdentifier): array
+    {
+        DormitoryInventoryItem::where('unique_identifier', $uniqueIdentifier)->update([ 'status' => $status ]);
+
+        return [
+            'message' => AdministratorReturnResponse::DORMITORYCTRL_UPDATED_DORMITORYINVSTOCK->value,
+            'status' => 200
+        ];
+    }
+
+    /**
      * Summary of removeStock
      * @param int $dormitoryStockId
      * @return array{message: string, status: int}

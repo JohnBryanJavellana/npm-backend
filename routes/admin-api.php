@@ -163,6 +163,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::delete('get_dormitory_inventory_stocks/remove_inventory_stock/{documentId}', [DormitoryController::class, 'remove_inventory_stock']);
             Route::post('get_dormitory_inventory_stocks/create_inventory_stock', [DormitoryController::class, 'create_inventory_stock']);
+            Route::post('get_dormitory_inventory_stocks/update_inventory_stock', [DormitoryController::class, 'update_inventory_stock']);
             Route::post('get_dormitory_inventory_stocks', [DormitoryController::class, 'get_dormitory_inventory_stocks']);
 
             Route::post('get_dormitory_inclusion_requests/update_inclusion_request', [DormitoryController::class, 'update_inclusion_request']);
