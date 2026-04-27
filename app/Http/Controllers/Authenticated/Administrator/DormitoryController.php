@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Authenticated\Administrator;
 
 use App\Enums\{
-    AdministratorAuditActions,
     AdministratorReturnResponse
 };
 use App\Http\Controllers\Controller;
@@ -18,13 +17,11 @@ use App\Http\Requests\Admin\Dormitory\RemoveInventoryRequest;
 use App\Http\Requests\Admin\Dormitory\RemoveInventoryStock;
 use App\Http\Requests\Admin\Dormitory\SetRoomReservationAsReserved;
 use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
+use App\Http\Requests\Admin\Dormitory\UpdateExtensionRequest;
 use App\Http\Requests\Admin\Dormitory\UpdateInclusionRequest;
 use App\Http\Requests\Admin\Dormitory\UpdateInventoryStock;
 use App\Models\DormitoryInclusionRequest;
 use App\Models\DormitoryInventoryItem;
-use App\Models\DormitoryInvoice;
-use App\Models\DormitoryItemBI;
-use App\Models\DormitoryItemBorrowing;
 use App\Models\DormitoryReqService;
 use App\Services\Administrator\Dormitory\DormitoryInclusionManager;
 use App\Services\Administrator\Dormitory\DormitoryInventoryManager;
@@ -34,37 +31,22 @@ use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceRequestManager;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use App\Enums\Administrator\DormitoryEnum;
 use App\Http\Requests\Admin\Dormitory\{
-    GetAvailableDorms,
-    CreateOrUpdateRequest,
-    CreateOrUpdateDormitoryInv,
     CreateOrUpdateService,
     CreateServiceReq,
-    CreateOrUpdateDormitoryCharge
 };
 use Illuminate\Http\Request;
 use App\Utils\{
-    AuditHelper,
     TransactionUtil,
-    GenerateTrace,
-    Notifications
 };
-use App\Events\{BEDormitory, BEAuditTrail};
-use App\Jobs\SaveAvatar;
 use App\Models\{
     DormitoryRoom,
     DormitoryTenant,
     DormitoryInventory,
-    DormitoryService,
-    User,
-    DormitoryTenantHistory
+    DormitoryService
 };
 use App\Helpers\Administrator\General\CountCollection;
-use App\Helpers\Administrator\General\CheckForDocumentExistence;
 
 class DormitoryController extends Controller
 {
@@ -78,21 +60,6 @@ class DormitoryController extends Controller
         public DormitoryInventoryStockManager $dormitoryInventoryStockManager,
         public DormitoryInclusionManager $dormitoryInclusionManager
     ) {}
-
-    /**
-     * Summary of addDescription
-     * @param string $content
-     * @return string
-     */
-    private function addDescription (string $content): string
-    {
-        return "<div style='margin-top: 8px; padding: 16px; border: 1px dashed lightgrey; background-color: #FFFDD0;'>
-            <div style='font-weight: bold; font-size: 1.25rem;'>Payable Amount</div>
-            <div style='margin-top: 10px; line-height: 20px;'>
-                $content
-            </div>
-        </div>";
-    }
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
     /**
@@ -553,5 +520,10 @@ class DormitoryController extends Controller
             $result = $this->dormitoryInclusionManager->updateInclusionRequest($documentId, $status);
             return response()->json(['message' => $result['message']], $result['status']);
         });
+    }
+
+    public function update_extension_request(UpdateExtensionRequest $request): JsonResponse
+    {
+
     }
 }

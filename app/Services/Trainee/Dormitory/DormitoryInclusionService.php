@@ -64,12 +64,16 @@ class DormitoryInclusionService {
     public function createInclusionRequest($validated, $userId)
     {
         DB::transaction(function () use ($validated, $userId) {
-            $this->dormitoryInclusionRequest->create([
+            $dataToInsert = collect($validated["data"])->map(fn($query) => [
                 "control_number" => GenerateTrace::createTraceNumber($this->dormitoryInclusionRequest, '-INCR-', 'control_number'),
-                "dormitory_inventory_id" => $validated["inclusion_id"],
+                "dormitory_inventory_id" => $query["inclusion_id"],
                 "dormitory_tenant_id" => $validated["request_id"],
-                "quantity" => $validated["quantity"]
-            ]);
+                "quantity" => $query["quantity"],
+                'created_at' => now(),
+                'updated_at' => now()
+            ])->toArray();
+
+            $this->dormitoryInclusionRequest->insert($dataToInsert);
         });
     }
 

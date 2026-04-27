@@ -28,7 +28,7 @@ class InclusionRequestsResource extends JsonResource
             "description" => $this->itemInfo?->description,
             "filename" => $this->itemInfo?->filename,
             "is_consumable" => $this->itemInfo?->is_consumable,
-            "price" => $this->itemInfo?->price,
+            "price" => $this->itemInfo?->charge,
         ];
     }
 }

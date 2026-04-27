@@ -24,9 +24,9 @@ class CreateInclusionRequest extends FormRequest
     {
         return [
             "request_id" => "required|exists:dormitory_tenants,id",
-            "inclusion_id" => "required|exists:dormitory_inventories,id",
-            "quantity" => "required|integer",
-            "amount" => "nullable"
+            "data" => ['array', 'required'],
+            'data.*.inclusion_id' => ["required", "exists:dormitory_inventories,id"],
+            'data.*.quantity' => ["required", "integer"]
         ];
     }
 }

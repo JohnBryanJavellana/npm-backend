@@ -48,7 +48,14 @@ class Masterlist extends Controller
     public function get_users (Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $users = User::withCount([
+            $query = $request->q;
+
+            $users = User::when($query, fn($search) => $search->where('id', 'LIKE', "%{$query}%")
+                ->orWhere('fname', 'LIKE', "%{$query}%")
+                ->orWhere('mname', 'LIKE', "%{$query}%")
+                ->orWhere('lname', 'LIKE', "%{$query}%")
+                ->orWhere('suffix', 'LIKE', "%{$query}%")
+            )->withCount([
                 'trainee_enrolled_courses' => function($query) {
                     $query->whereNotIn('status', ['CANCELLED', 'COMPLETED', 'DECLINED', 'IR', 'CSFB']);
                 }
