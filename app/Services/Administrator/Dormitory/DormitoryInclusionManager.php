@@ -2,6 +2,7 @@
 
 namespace App\Services\Administrator\Dormitory;
 
+use App\Enums\Administrator\DormitoryEnum;
 use App\Models\DormitoryInclusionRequest;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryItemBI;
@@ -10,6 +11,10 @@ use App\Utils\DocumentExistenceChecker;
 
 class DormitoryInclusionManager extends DocumentExistenceChecker
 {
+    public function __construct(
+        public DormitoryRoomReservationManager $dormitoryRoomReservationManager
+    ) {}
+
     /**
      * Summary of updateInclusionRequest
      * @param int $documentId
@@ -19,12 +24,17 @@ class DormitoryInclusionManager extends DocumentExistenceChecker
     public function updateInclusionRequest(int $documentId, string $status): array
     {
         $this_request = DormitoryInclusionRequest::findOrFail($documentId);
+        $this_invoice_id = $this_request->dormitory_invoice_id;
 
-        if($status === "APPROVED") {
+        if($status === DormitoryEnum::FOR_PAYMENT->value && $this_request->status === DormitoryEnum::PENDING->value) {
+            $this_invoice_id = $this->dormitoryRoomReservationManager->createInvoice("INCLUSION", $this_request->dormitory_tenant_id, $this_request->tenant->user_id, null, (object)['grandTotal' => $this_request->itemInfo->charge]);
+        }
+
+        if($status === DormitoryEnum::APPROVED->value) {
             $this->addToBorrowings($this_request->dormitory_tenant_id, $this_request->dormitory_inventory_id, $this_request->quantity, "APPROVED");
         }
 
-        $this_request->update(['status' => $status]);
+        $this_request->update([ 'status' => $status, 'dormitory_invoice_id' => $this_invoice_id ]);
         return ['message' => "Success. Inclusion request has been updated.", 'status' => 200];
     }
 
@@ -51,13 +61,13 @@ class DormitoryInclusionManager extends DocumentExistenceChecker
         $chosen = collect(DormitoryInventoryItem::where([
             'dormitory_inventory_id' => $inventoryId,
             'status' => 'AVAILABLE'
-        ])->take($count)->get()->map(fn($query) => [
+        ])->take($count)->get()->each(fn ($query) => $query->update([ 'status' => "UNAVAILABLE" ])))->map(fn($query) => [
             'dormitory_item_borrowing_id' => $borrowingInstance->id,
             'dormitory_inventory_item_id' => $query->id,
             'status' => $status,
             'created_at' => now(),
             'updated_at' => now()
-        ]));
+        ]);
 
         DormitoryItemBI::insert($chosen->toArray());
     }

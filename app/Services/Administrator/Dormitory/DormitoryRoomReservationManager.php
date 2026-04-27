@@ -50,22 +50,46 @@ class DormitoryRoomReservationManager
 
             $pb = (object)($payload->pricingBreakdown ?? []);
             if ($payload->withFee && \in_array($payload->status_of_occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $payload->status === DormitoryEnum::FOR_PAYMENT->value) {
-                DormitoryInvoice::create([
-                    'dormitory_tenant_id' => $res->id,
-                    'user_id' => $payload->user_id,
-                    'trace_number' => GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-INV-'),
-                    'paying_as_trainee_days' => $pb->traineeDays ?? 0,
-                    'paying_as_trainee_amount' => $pb->traineeTotal ?? 0,
-                    'paying_as_guest_days' => $pb->guestDays ?? 0,
-                    'paying_as_guest_amount' => $pb->guestTotal ?? 0,
-                    'invoice_amount' => $pb->grandTotal ?? 0,
-                    'type' => DormitoryEnum::DORMITORY,
-                    'remarks' => $payload->payment_remarks
-                ]);
+                $this->createInvoice(DormitoryEnum::DORMITORY->value, $res->id, $payload->user_id, $payload->payment_remarks, $pb);
             }
         }
 
         return $res;
+    }
+
+    /**
+     * Summary of createInvoice
+     * @param string $serviceType
+     * @param int $dormitoryTenantId
+     * @param int $userId
+     * @param mixed $remarks
+     * @param object $pb
+     * @return int
+     */
+    public function createInvoice(string $serviceType, int $dormitoryTenantId, int $userId, ?string $remarks, object $pb): int
+    {
+        $preparedData = [
+            'dormitory_tenant_id' => $dormitoryTenantId,
+            'user_id' => $userId,
+            'trace_number' => GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-INV-'),
+            'type' => $serviceType,
+            'remarks' => $remarks,
+            'invoice_amount' => $pb->grandTotal ?? 0
+        ];
+
+        if($serviceType === DormitoryEnum::DORMITORY->value) {
+            $preparedData = [
+                ...$preparedData,
+                'paying_as_trainee_days' => $pb->traineeDays ?? 0,
+                'paying_as_trainee_amount' => $pb->traineeTotal ?? 0,
+                'paying_as_guest_days' => $pb->guestDays ?? 0,
+                'paying_as_guest_amount' => $pb->guestTotal ?? 0,
+                'invoice_amount' => $pb->grandTotal ?? 0
+            ];
+        }
+
+        $inv = DormitoryInvoice::create($preparedData);
+        return $inv->id;
     }
 
     /**

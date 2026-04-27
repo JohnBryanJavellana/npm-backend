@@ -130,7 +130,7 @@ class Cashier extends Controller
 
                 foreach ($allStatuses as $status) {
 
-                    $payments = self::getTable($service, null, [
+                    $payments = $this->cashierGetTableRef->getTable($service, null, [
                         'invoice_status' => [$status],
                     ])
                     ->with($baseRelations)
@@ -286,7 +286,7 @@ class Cashier extends Controller
             $relations = ['payee', 'orNumber'];
 
             $serviceRelations = match($request->service) {
-                NotificationEnum::DORMITORY->value  => ['dormitoryReqService'],
+                NotificationEnum::DORMITORY->value  => ['dormitoryReqService', 'dormitoryIncService'],
                 NotificationEnum::ENROLLMENT->value => ['training'],
                 NotificationEnum::LIBRARY->value => [
                     'bookRes',

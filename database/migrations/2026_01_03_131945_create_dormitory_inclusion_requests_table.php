@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->onDelete("cascade");
             $table->foreignIdFor(DormitoryInvoice::class)->nullable()->constrained()->cascadeOnDelete();
             $table->integer("quantity")->default(1);
-            $table->enum("status", ["PENDING", "APPROVED", "CANCELLED", "COMPLETED"])->default("PENDING");
+            $table->enum("status", ["PENDING", "APPROVED", "CANCELLED", "COMPLETED", "PAID", "FOR PAYMENT"])->default("PENDING");
             $table->timestamps();
         });
     }

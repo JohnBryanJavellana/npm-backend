@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use App\Models\AuditTrail;
 use App\Models\BookRes;
+use App\Models\DormitoryInclusionRequest;
 use App\Models\DormitoryInvoice;
 use App\Models\DormitoryReqService;
 use App\Models\DormitoryTenant;
@@ -27,7 +28,9 @@ class CashierGetTableRef
             'DORMITORY' => DormitoryInvoice::class,
             'DORMITORY-MAIN-TABLE' => DormitoryTenant::class,
             'DORMITORY-SERVICE' => DormitoryInvoice::class,
-            'DORMITORY-SERVICE-MAIN-TABLE' => DormitoryReqService::class
+            'DORMITORY-SERVICE-MAIN-TABLE' => DormitoryReqService::class,
+            'DORMITORY-INCLUSION' => DormitoryInvoice::class,
+            'DORMITORY-INCLUSION-MAIN-TABLE' => DormitoryInclusionRequest::class
         ];
 
         $query = $modelMap[$service]::query();

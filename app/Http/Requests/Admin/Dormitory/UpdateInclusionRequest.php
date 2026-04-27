@@ -22,7 +22,7 @@ class UpdateInclusionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "status" => ['required', 'string', 'in:PENDING,APPROVED,CANCELLED,COMPLETED'],
+            "status" => ['required', 'string', 'in:PENDING,APPROVED,CANCELLED,COMPLETED,FOR PAYMENT'],
             "documentId" => ['required', 'integer', 'exists:dormitory_inclusion_requests,id']
         ];
     }
