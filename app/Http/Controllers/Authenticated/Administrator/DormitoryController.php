@@ -23,6 +23,7 @@ use App\Http\Requests\Admin\Dormitory\UpdateInventoryStock;
 use App\Models\DormitoryInclusionRequest;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryReqService;
+use App\Services\Administrator\Dormitory\DormitoryExtensionManager;
 use App\Services\Administrator\Dormitory\DormitoryInclusionManager;
 use App\Services\Administrator\Dormitory\DormitoryInventoryManager;
 use App\Services\Administrator\Dormitory\DormitoryInventoryStockManager;
@@ -58,7 +59,8 @@ class DormitoryController extends Controller
         public DormitoryServiceRequestManager $dormitoryServiceRequestManager,
         public DormitoryInventoryManager $dormitoryInventoryManager,
         public DormitoryInventoryStockManager $dormitoryInventoryStockManager,
-        public DormitoryInclusionManager $dormitoryInclusionManager
+        public DormitoryInclusionManager $dormitoryInclusionManager,
+        public DormitoryExtensionManager $dormitoryExtensionManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -522,8 +524,19 @@ class DormitoryController extends Controller
         });
     }
 
+    /**
+     * Summary of update_extension_request
+     * @param UpdateExtensionRequest $request
+     * @return JsonResponse
+     */
     public function update_extension_request(UpdateExtensionRequest $request): JsonResponse
     {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $documentId = $request->documentId;
+            $status = $request->status;
 
+            $result = $this->dormitoryExtensionManager->updateExtensionRequest($documentId, $status);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
     }
 }

@@ -23,7 +23,7 @@ class UpdateExtensionRequest extends FormRequest
     {
         return [
             "status" => ['required', 'string', 'in:PENDING,CANCELLED,APPROVED,FOR PAYMENT,COMPLETED,DECLINED'],
-            "documentId" => ['required', 'integer', 'exists:dormitory_extension_requests,id']
+            "documentId" => ['required', 'integer', 'exists:dormitory_tenants,id']
         ];
     }
 }
