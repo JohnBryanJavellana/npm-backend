@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Dormitory;
 
+use App\Models\DormitoryTransfer;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTransferRequest extends FormRequest
@@ -14,6 +15,15 @@ class UpdateTransferRequest extends FormRequest
         return $this->user() !== null && \in_array($this->user()->role, ['SUPERADMIN', 'ADMIN-DORMITORY']);
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'roomId' => \in_array($this->status, ["APPROVED"])
+                ? DormitoryTransfer::whereKey($this->documentId)->first()->dormitory_room_id
+                : $this->roomId
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,7 +34,7 @@ class UpdateTransferRequest extends FormRequest
         return [
             "status" => ['required', 'string', 'in:PENDING,APPROVED,CANCELLED,COMPLETED,PAID,FOR PAYMENT'],
             "documentId" => ['required', 'integer', 'exists:dormitory_transfers,id'],
-            "roomId" => ['nullable', 'required_if:status,APPROVED,PAID,FOR PAYMENT', 'integer', 'exists:dormitory_rooms,id']
+            "roomId" => ['nullable', 'required_if:status,FOR PAYMENT', 'integer', 'exists:dormitory_rooms,id']
         ];
     }
 }

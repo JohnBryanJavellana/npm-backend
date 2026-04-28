@@ -139,6 +139,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('count_dorm_reservation', [DormitoryController::class, 'count_dorm_reservation']);
             Route::post('count_service_requests', [DormitoryController::class, 'count_service_requests']);
 
+            Route::post('get_all_dormitory_invoices', [DormitoryController::class, 'get_all_dormitory_invoices']);
+
             Route::get('get_dormitory_rooms', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::post('create_or_update_room', [DormitoryController::class, 'create_or_update_room']);
             Route::delete('remove_room/{roomId}', [DormitoryController::class, 'remove_room']);

@@ -22,6 +22,11 @@ class DormitoryTransfer extends Model
         return $this->hasOne(DormitoryInvoice::class, "id", "dormitory_invoice_id");
     }
 
+    public function newRoom()
+    {
+        return $this->hasOne(DormitoryRoom::class, "id", "dormitory_room_id");
+    }
+
     /** Scopes */
 
     public function scopeForUser(Builder $query, int $userId)

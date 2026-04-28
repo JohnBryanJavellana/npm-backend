@@ -24,6 +24,7 @@ use App\Http\Requests\Admin\Dormitory\UpdateTransferRequest;
 use App\Models\DormitoryExtensionRequest;
 use App\Models\DormitoryInclusionRequest;
 use App\Models\DormitoryInventoryItem;
+use App\Models\DormitoryInvoice;
 use App\Models\DormitoryReqService;
 use App\Models\DormitoryTransfer;
 use App\Services\Administrator\Dormitory\DormitoryExtensionManager;
@@ -594,6 +595,7 @@ class DormitoryController extends Controller
 
             $transferRequests = DormitoryTransfer::with([
                 'tenant.dormitory_room',
+                'newRoom:id,room_name',
                 'tenant.trainee',
                 'invoice.orNumber'
             ])->when(\count($status) > 0, fn($s) => $s->whereIn('status', $status))
@@ -628,6 +630,44 @@ class DormitoryController extends Controller
 
             $result = $this->dormitoryTransferManager->updateTransferRequest($documentId, $status, $roomId);
             return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of get_all_dormitory_invoices
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function get_all_dormitory_invoices(Request $request): JsonResponse
+    {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $query = $request->q;
+            $status = $request->status;
+
+            $transferRequests = DormitoryInvoice::with([
+                'payee',
+                'orNumber',
+                'dormitoryReqService',
+                'dormitoryIncService',
+                'extendRequest',
+                'transferRequest'
+            ])->when(\count($status) > 0, fn($s) => $s->whereIn('invoice_status', $status))
+            ->when($query, function($q) use ($query) {
+                $q->where('type', 'LIKE', "%{$query}%")
+                    ->orWhere('trace_number', 'LIKE', "%{$query}%")
+                    ->orWhere('invoice_status', 'LIKE', "%{$query}%")
+                    ->orWhere('invoice_amount', 'LIKE', "%{$query}%")
+                    ->orWhereHas('payee', function($q2) use ($query) {
+                        $q2->where('fname', 'LIKE', "%{$query}%")
+                            ->orWhere('mname', 'LIKE', "%{$query}%")
+                            ->orWhere('lname', 'LIKE', "%{$query}%")
+                            ->orWhere('suffix', 'LIKE', "%{$query}%");
+                    });
+            })
+            ->orderByDesc('created_at')->paginate($pageCounter);
+
+            return response()->json(['transferRequests' => $transferRequests], 200);
         });
     }
 }
