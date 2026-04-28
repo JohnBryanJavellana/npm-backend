@@ -286,7 +286,7 @@ class Cashier extends Controller
             $relations = ['payee', 'orNumber'];
 
             $serviceRelations = match($request->service) {
-                NotificationEnum::DORMITORY->value  => ['dormitoryReqService', 'dormitoryIncService'],
+                NotificationEnum::DORMITORY->value  => ['dormitoryReqService', 'dormitoryIncService', 'extendRequest'],
                 NotificationEnum::ENROLLMENT->value => ['training'],
                 NotificationEnum::LIBRARY->value => [
                     'bookRes',

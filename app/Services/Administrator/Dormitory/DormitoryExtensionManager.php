@@ -26,8 +26,8 @@ class DormitoryExtensionManager extends DocumentExistenceChecker
         $this_extension_request = DormitoryExtensionRequest::lockForUpdate()->where('dormitory_tenant_id', $documentId)->latest()->first();
 
         $preparedData = $this->finalPreparedData($status, $documentId, $this_request->user_id, $this_extension_request->new_end_date);
-        $this_request->update($preparedData);
-        $this_extension_request->update(['status' => $status]);
+        $this_request->update($preparedData[0]);
+        $this_extension_request->update($preparedData[1]);
 
         return ['message' => "Success. Extension request has been updated.", 'status' => 200];
     }
@@ -38,28 +38,25 @@ class DormitoryExtensionManager extends DocumentExistenceChecker
      * @param int $documentId
      * @param int $tenantUserId
      * @param string $newEndDate
-     * @return array{check_out_datetime: string|array{tenant_status: string}}
+     * @return array<array|array{check_out_datetime: Carbon, tenant_status: string|array{dormitory_invoice_id: int}|array{tenant_status: string}>}
      */
     private function finalPreparedData(string $status, int $documentId, int $tenantUserId, string $newEndDate): array
     {
-        $preparedData = ['tenant_status' => DormitoryEnum::RESERVED->value];
+        $preparedData = [['tenant_status' => DormitoryEnum::ACTIVE->value], []];
 
         switch($status) {
             case DormitoryEnum::FOR_PAYMENT->value:
-                $this->dormitoryRoomReservationManager->createInvoice(DormitoryEnum::DORMITORY->value, $documentId, $tenantUserId, null, (object)['grandTotal' => 9999999]);
-                $preparedData['tenant_status'] = DormitoryEnum::FOR_PAYMENT->value;
+                $invId = $this->dormitoryRoomReservationManager->createInvoice(DormitoryEnum::EXTENSION->value, $documentId, $tenantUserId, null, (object)['grandTotal' => 9999999]);
+                $preparedData = [[], ['dormitory_invoice_id' => $invId, 'status' => $status]];
                 break;
             case DormitoryEnum::DECLINED->value:
-                $preparedData['tenant_status'] = DormitoryEnum::RESERVED->value;
+                $preparedData = [['tenant_status' => DormitoryEnum::ACTIVE->value], ['status' => $status]];
                 break;
             case DormitoryEnum::APPROVED->value:
-                $preparedData = [
-                    ...$preparedData,
-                    'check_out_datetime' => Carbon::parse($newEndDate)
-                ];
+                $preparedData = [['tenant_status' => DormitoryEnum::ACTIVE->value, 'check_out_datetime' => Carbon::parse($newEndDate)], ['status' => $status]];
                 break;
             default:
-                $preparedData['tenant_status'] = DormitoryEnum::RESERVED->value;
+                $preparedData = [['tenant_status' => DormitoryEnum::ACTIVE->value], ['status' => $status]];
                 break;
         }
 

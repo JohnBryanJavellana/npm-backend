@@ -22,7 +22,7 @@ class UpdateExtensionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "status" => ['required', 'string', 'in:PENDING,CANCELLED,APPROVED,FOR PAYMENT,COMPLETED,DECLINED'],
+            "status" => ['required', 'string', 'in:PENDING,APPROVED,CANCELLED,COMPLETED,PAID,FOR PAYMENT'],
             "documentId" => ['required', 'integer', 'exists:dormitory_tenants,id']
         ];
     }
