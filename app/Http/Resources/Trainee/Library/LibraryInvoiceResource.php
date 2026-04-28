@@ -17,7 +17,7 @@ class LibraryInvoiceResource extends JsonResource
         // return parent::toArray($request);z
 
         return [
-        'id' => $this->id,
+            'id' => $this->id,
             'trace_number' => $this->trace_number,
             'status' => $this->status,
             'type' => $this->type,

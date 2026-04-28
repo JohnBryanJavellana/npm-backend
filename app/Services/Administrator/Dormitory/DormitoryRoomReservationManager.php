@@ -48,13 +48,16 @@ class DormitoryRoomReservationManager
                 }
             }
 
-            $pb = (object)($payload->pricing_breakdown ?? []);
-            if ($payload->with_fee && \in_array($payload->status_of_occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $payload->status === DormitoryEnum::FOR_PAYMENT->value) {
+            $pb = (object)($payload->pricingBreakdown ?? []);
+            if ($payload->withFee && \in_array($payload->status_of_occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $payload->status === DormitoryEnum::FOR_PAYMENT->value) {
                 DormitoryInvoice::create([
                     'dormitory_tenant_id' => $res->id,
                     'user_id' => $payload->user_id,
                     'trace_number' => GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-INV-'),
                     'paying_as_trainee_days' => $pb->traineeDays ?? 0,
+                    'paying_as_trainee_amount' => $pb->traineeTotal ?? 0,
+                    'paying_as_guest_days' => $pb->guestDays ?? 0,
+                    'paying_as_guest_amount' => $pb->guestTotal ?? 0,
                     'invoice_amount' => $pb->grandTotal ?? 0,
                     'type' => DormitoryEnum::DORMITORY,
                     'remarks' => $payload->payment_remarks

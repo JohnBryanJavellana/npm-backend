@@ -308,8 +308,8 @@ class TraineeLibrary extends Controller
             $book_res = BookReservation::whereHas('bookRes', function ($q) use ($res_id) {
                 $q->where('id', $res_id);
             })
-            ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
-            ->exists();
+                ->whereNotIn('status', ['CANCELLED', 'REJECTED', 'LOST', 'DAMAGED', 'RETURNED'])
+                ->exists();
 
             if (!$book_res) {
                 BookRes::where(['id' => $res_id, 'user_id' => $user_id])->update(['status' => RequestStatus::FOR_CSM]);
@@ -337,7 +337,10 @@ class TraineeLibrary extends Controller
     {
         try {
             $validated = $request->validated();
-            $user_id = $validated["user_id"];
+
+            // ← Get user_id from authenticated user
+            $user_id = auth()->id();
+            $validated['user_id'] = $user_id;
 
             $this->libraryExtendService->storeExtendRequest($validated);
             AuditHelper::log($user_id, "User {$user_id} sent a book extension request.");

@@ -25,6 +25,7 @@ use App\Services\Administrator\Dormitory\DormitoryRoomManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceRequestManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -78,7 +79,8 @@ class DormitoryController extends Controller
      * @param string $content
      * @return string
      */
-    private function addDescription (string $content) {
+    private function addDescription (string $content): string
+    {
         return "<div style='margin-top: 8px; padding: 16px; border: 1px dashed lightgrey; background-color: #FFFDD0;'>
             <div style='font-weight: bold; font-size: 1.25rem;'>Payable Amount</div>
             <div style='margin-top: 10px; line-height: 20px;'>
@@ -92,7 +94,8 @@ class DormitoryController extends Controller
      * Summary of count_dorm_reservation
      * @param Request $request
      */
-    public function count_dorm_reservation (Request $request){
+    public function count_dorm_reservation (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reservations = DormitoryTenant::query();
 
@@ -117,7 +120,8 @@ class DormitoryController extends Controller
      * Summary of count_service_requests
      * @param Request $request
      */
-    public function count_service_requests (Request $request){
+    public function count_service_requests (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $serviceRequests = DormitoryReqService::query();
 
@@ -142,7 +146,8 @@ class DormitoryController extends Controller
      * Summary of get_dormitory_rooms
      * @param Request $request
      */
-    public function get_dormitory_rooms(Request $request) {
+    public function get_dormitory_rooms(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $room_managements = DormitoryRoom::withCount(['hasData'])
                 ->orderBy('wing')
@@ -160,7 +165,8 @@ class DormitoryController extends Controller
      * Summary of create_or_update_room
      * @param Request $request
      */
-    public function create_or_update_room(CreateOrUpdateDormitoryRoom $request) {
+    public function create_or_update_room(CreateOrUpdateDormitoryRoom $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
             $result = $this->dormitoryRoomManager->createOrUpdate($request, $isPost);
@@ -178,7 +184,8 @@ class DormitoryController extends Controller
      * @param Request $request
      * @param int $roomId
      */
-    public function remove_room (Request $request, int $roomId) {
+    public function remove_room (Request $request, int $roomId): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function () use ($request, $roomId) {
             $result = $this->dormitoryRoomManager->removeRoom($request->user()->id, $roomId);
             return response()->json(['message' => $result['message']], $result['status']);
@@ -190,7 +197,8 @@ class DormitoryController extends Controller
      * Summary of services
      * @param Request $request
      */
-    public function services (Request $request) {
+    public function services (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $services = DormitoryService::withCount('requestedService')->get();
             return response()->json(['services' => $services], 200);
@@ -201,7 +209,8 @@ class DormitoryController extends Controller
      * Summary of create_or_update_service
      * @param CreateOrUpdateService $request
      */
-    public function create_or_update_service (CreateOrUpdateService $request) {
+    public function create_or_update_service (CreateOrUpdateService $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
             $this_service = $this->dormitoryServiceManager->createOrUpdate($request, $isPost);
@@ -219,7 +228,8 @@ class DormitoryController extends Controller
      * @param Request $request
      * @param int $service_id
      */
-    public function remove_service (Request $request, int $service_id) {
+    public function remove_service (Request $request, int $service_id): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function () use ($request, $service_id) {
             $result = $this->dormitoryServiceManager->removeService($request->user()->id, $service_id);
             return response()->json(['message' => $result['message']], $result['status']);
@@ -231,9 +241,10 @@ class DormitoryController extends Controller
      * Summary of room_reservations
      * @param Request $request
      */
-    public function room_reservations (Request $request) {
+    public function room_reservations (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $room_reservations = DormitoryTenant::with(['boarder', 'dormitory_room'])
+            $room_reservations = DormitoryTenant::with(['boarder', 'dormitory_room', 'coupleSupportingDocuments'])
                 ->when($request->tenantStatus, fn($query, $status) => $query->whereIn('tenant_status', (array) $status))
                 ->latest()
                 ->get();
@@ -246,7 +257,8 @@ class DormitoryController extends Controller
      * Summary of set_as_reserved
      * @param SetRoomReservationAsReserved $request
      */
-    public function set_as_reserved(SetRoomReservationAsReserved $request) {
+    public function set_as_reserved(SetRoomReservationAsReserved $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $result = $this->dormitoryRoomReservationManager->setAsReserved($request->roomReservationId);
             return response()->json(['message' => $result['message']], $result['status']);
@@ -257,7 +269,8 @@ class DormitoryController extends Controller
      * Summary of new_room_reservation
      * @param NewRoomReservation $request
      */
-    public function new_room_reservation (NewRoomReservation $request) {
+    public function new_room_reservation (NewRoomReservation $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function () use ($request) {
             $isPost = $request->httpMethod === "POST";
             $result = $this->dormitoryRoomReservationManager->handleReservation($request, $isPost);
@@ -274,7 +287,8 @@ class DormitoryController extends Controller
      * Summary of get_match_rooms
      * @param GetMatchRooms $request
      */
-    public function get_match_rooms(GetMatchRooms $request) {
+    public function get_match_rooms(GetMatchRooms $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $accommodation = $request->accommodation;
             $dormitory = $request->dormitory;
@@ -299,7 +313,8 @@ class DormitoryController extends Controller
      * Summary of get_current_tenant_info
      * @param GetCurrentTenantInfo $request
      */
-    public function get_current_tenant_info (GetCurrentTenantInfo $request) {
+    public function get_current_tenant_info (GetCurrentTenantInfo $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $userId = $request->userId;
             $currentTenant = DormitoryTenant::with([
@@ -321,7 +336,8 @@ class DormitoryController extends Controller
      * Summary of create_or_update_service_request
      * @param CreateServiceReq $request
      */
-    public function create_or_update_service_request (CreateServiceReq $request) {
+    public function create_or_update_service_request (CreateServiceReq $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
             $result = $this->dormitoryServiceRequestManager->createOrUpdate($request, $isPost);
@@ -338,7 +354,8 @@ class DormitoryController extends Controller
      * Summary of get_requested_service
      * @param Request $request
      */
-    public function get_service_request (Request $request) {
+    public function get_service_request (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $status = $request->status;
 
@@ -364,7 +381,8 @@ class DormitoryController extends Controller
      * Summary of set_service_request_as_action
      * @param SetServiceRequestAsAction $request
      */
-    public function set_service_request_as_action (SetServiceRequestAsAction $request) {
+    public function set_service_request_as_action (SetServiceRequestAsAction $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $action = $request->action;
             $serviceRequestId = $request->serviceRequestId;
@@ -433,7 +451,8 @@ class DormitoryController extends Controller
      * Summary of get_available_dorms
      * @param GetAvailableDorms $request
      */
-    public function get_available_dorms(GetAvailableDorms $request) {
+    public function get_available_dorms(GetAvailableDorms $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $roomId = $request->roomId;
             $isAirConditioned = $request->isAirConditioned;
@@ -511,7 +530,8 @@ class DormitoryController extends Controller
      * Summary of update_dormitory_room_request
      * @param Request $request
      */
-    public function update_dormitory_room_request(Request $request) {
+    public function update_dormitory_room_request(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $status = $request->status;
             $remarks = $request->remarks;
@@ -550,7 +570,8 @@ class DormitoryController extends Controller
      * Summary of get_available_supplies
      * @param Request $request
      */
-    public function get_available_supplies (Request $request) {
+    public function get_available_supplies (Request $request): JsonResponse
+    {
     return TransactionUtil::transact(null, [], function() use ($request) {
 
         $tenantId = $request->userId;
@@ -601,7 +622,8 @@ class DormitoryController extends Controller
      * Summary of get_and_provide
      * @param Request $request
      */
-    public function get_and_provide(Request $request) {
+    public function get_and_provide(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
 
         });
@@ -611,7 +633,8 @@ class DormitoryController extends Controller
      * Summary of get_available_rooms
      * @param Request $request
      */
-    public function get_available_rooms (Request $request) {
+    public function get_available_rooms (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $targetRoomId = $request->roomId;
 
@@ -644,7 +667,8 @@ class DormitoryController extends Controller
      * Summary of create_dormitory_rooms
      * @param Request $request
      */
-    public function create_dormitory_rooms (Request $request) {
+    public function create_dormitory_rooms (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             if($request->room_count) {
                 $existingNumbers = DormitoryRoom::where('dormitory_id', $request->dormitoryId)
@@ -690,7 +714,8 @@ class DormitoryController extends Controller
      * @param bool returnedMessage === TRUE
      * @param Request $request
      */
-    public function update_dormitory_room (Request $request) {
+    public function update_dormitory_room (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
 
             $this_room = DormitoryRoom::findOrFail($request->documentId);
@@ -738,7 +763,8 @@ class DormitoryController extends Controller
      * Summary of get_dorm_inventories
      * @param Request $request
      */
-    public function get_dorm_inventories (Request $request) {
+    public function get_dorm_inventories (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $dorm_inventory = DormitoryInventory::withCount([
                 'stock',
@@ -759,7 +785,8 @@ class DormitoryController extends Controller
      * @param bool returnedMessage === FALSE
      * @param Request $request
      */
-    public function create_dormitory_inventory_stock (Request $request) {
+    public function create_dormitory_inventory_stock (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, ["dormitory:inclusions:all"], function() use ($request) {
             $dataToReturn = [];
 
@@ -787,7 +814,8 @@ class DormitoryController extends Controller
      * @param bool returnedMessage === FALSE
      * @param CreateOrUpdateDormitoryInv $request
      */
-    public function create_or_update_dormitory_inventory (CreateOrUpdateDormitoryInv $request) {
+    public function create_or_update_dormitory_inventory (CreateOrUpdateDormitoryInv $request): JsonResponse
+    {
         return TransactionUtil::transact($request, ["inventoryItems", "dormitory:inclusions:all"], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
 
@@ -839,7 +867,8 @@ class DormitoryController extends Controller
      * Summary of get_dormitory_inventory_stock
      * @param Request $request
      */
-    public function get_dormitory_inventory_stock (Request $request) {
+    public function get_dormitory_inventory_stock (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $stock = DormitoryInventoryItem::withCount('borrowed')
                 ->where('dormitory_inventory_id', $request->documentId)
@@ -853,7 +882,8 @@ class DormitoryController extends Controller
      * Summary of update_dormitory_inventory_stock
      * @param Request $request
      */
-    public function update_dormitory_inventory_stock(Request $request) {
+    public function update_dormitory_inventory_stock(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $documentId = $request->documentId;
             $availabilityStatus = $request->availabilityStatus;
@@ -888,7 +918,8 @@ class DormitoryController extends Controller
      * Summary of get_stock_reserved_tenant
      * @param Request $request
      */
-    public function get_stock_reserved_tenant(Request $request) {
+    public function get_stock_reserved_tenant(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
 
             if (!$request->stockId) {
@@ -953,7 +984,8 @@ class DormitoryController extends Controller
      * @param Request $request
      * @param int $stock_id
      */
-    public function remove_dorm_inventory_stock (Request $request, int $stock_id) {
+    public function remove_dorm_inventory_stock (Request $request, int $stock_id): JsonResponse
+    {
         return TransactionUtil::transact(null, ["inventoryItems"], function() use ($request, $stock_id) {
             $this_stock = DormitoryInventoryItem::withCount(['borrowed'])->where('id', $stock_id)->first();
 
@@ -985,7 +1017,8 @@ class DormitoryController extends Controller
      * @param Request $request
      * @param int $inv_id
      */
-    public function remove_dorm_inventory (Request $request, int $inv_id) {
+    public function remove_dorm_inventory (Request $request, int $inv_id): JsonResponse
+    {
         return TransactionUtil::transact(null, ["inventoryItems"], function() use ($request, $inv_id) {
             $this_dorm = DormitoryInventory::withCount(['borrowings'])->where('id', $inv_id)->first();
 
@@ -1016,7 +1049,8 @@ class DormitoryController extends Controller
     }
 
     // TO BE REMOVED
-    public function create_or_update_request (CreateOrUpdateRequest $request) {
+    public function create_or_update_request (CreateOrUpdateRequest $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $checkForPending = DormitoryTenant::where('user_id', $request->userId)
                 ->whereIn('tenant_status', ['PENDING', 'APPROVED', 'EXTENDING', 'FOR PAYMENT', 'PAID', 'PROCESSING PAYMENT', 'ACTIVE', 'RESERVED'])
@@ -1187,7 +1221,8 @@ class DormitoryController extends Controller
     }
 
     // DI SURE
-    public function get_dormitory_info (Request $request, int $room_id) {
+    public function get_dormitory_info (Request $request, int $room_id): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request, $room_id) {
             $dormitory = Dormitory::with([
                 'room_images',
@@ -1205,7 +1240,8 @@ class DormitoryController extends Controller
      * Summary of get_all_requests
      * @param Request $request
      */
-    public function get_all_requests (Request $request) {
+    public function get_all_requests (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $room_requests = DormitoryTenant::with([
                 'boarder',
@@ -1230,7 +1266,8 @@ class DormitoryController extends Controller
     }
 
     // DI SURE
-    public function cancel_dorm_request (Request $request, int $dormReqId) {
+    public function cancel_dorm_request (Request $request, int $dormReqId): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request, $dormReqId) {
             $this_dorm_request = DormitoryTenant::where('id', $dormReqId)->lockForUpdate()->first();
 
@@ -1285,7 +1322,8 @@ class DormitoryController extends Controller
      * @param bool returnedMessage === FALSE
      * @param Request $request
      */
-    public function update_provided_stock_status (Request $request) {
+    public function update_provided_stock_status (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $a = DormitoryItemBorrowing::where('id', $request->documentId)->lockForUpdate()->first();
             $a->status = DormitoryEnum::ACTIVE->value;
@@ -1329,7 +1367,8 @@ class DormitoryController extends Controller
      * @param bool returnedMessage === FALSE
      * @param Request $request
      */
-    public function update_provided_stock_list (Request $request) {
+    public function update_provided_stock_list (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $borrowing = DormitoryItemBorrowing::findOrFail($request->documentId);
             $borrowing->count = count($request->item);
@@ -1370,7 +1409,8 @@ class DormitoryController extends Controller
      * Summary of get_trainee_enrolled_trainings
      * @param Request $request
      */
-    public function get_trainee_enrolled_trainings (Request $request) {
+    public function get_trainee_enrolled_trainings (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $user = User::findOrFail($request->userId);
 
@@ -1415,7 +1455,8 @@ class DormitoryController extends Controller
      * Summary of get_dormitory_charges
      * @param Request $request ok
      */
-    public function get_dormitory_charges (Request $request) {
+    public function get_dormitory_charges (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $reqTemp = DormitoryInvoice::with([
                 'tenant.boarder',
@@ -1464,7 +1505,8 @@ class DormitoryController extends Controller
      * @param Request $request
      * @param int $chargeId
      */
-    public function cancel_charge (Request $request, int $chargeId) {
+    public function cancel_charge (Request $request, int $chargeId): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request, $chargeId) {
             $this_charge = DormitoryInvoice::where('id', $chargeId)->lockForUpdate()->first();
 
@@ -1497,7 +1539,8 @@ class DormitoryController extends Controller
      * @param bool returnedMessage === FALSE
      * @param Request $request
      */
-    public function set_status (Request $request) {
+    public function set_status (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $this_dormitory_tenant = DormitoryTenant::where('id', $request->documentId)->lockForUpdate()->first();
             $this_dormitory_tenant->tenant_status = $request->status;
@@ -1526,7 +1569,8 @@ class DormitoryController extends Controller
      * Summary of provide_stocks_to_boarder
      * @param Request $request
      */
-    public function provide_stocks_to_boarder(Request $request) {
+    public function provide_stocks_to_boarder(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, ["dormitory:inclusions:all"], function() use ($request) {
             $dormitoryTenantId = $request->dormitoryTenantId;
             $inventoryId       = $request->inventoryId;
@@ -1635,7 +1679,8 @@ class DormitoryController extends Controller
      * Summary of get_provided_stocks
      * @param Request $request
      */
-    public function get_provided_stocks(Request $request) {
+    public function get_provided_stocks(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $dormitoryTenantId = $request->dormitoryTenantId;
             $inventoryId       = $request->inventoryId;
@@ -1684,7 +1729,7 @@ class DormitoryController extends Controller
      * Summary of update_stock_status
      * @param Request $request (stockId required, status required)
      */
-    // public function update_stock_status(Request $request) {
+    // public function update_stock_status(Request $request): JsonResponse {
     //     return TransactionUtil::transact(null, [], function() use ($request) {
     //             $stockId = $request->stockId;
     //             $status  = $request->status;
@@ -1762,7 +1807,7 @@ class DormitoryController extends Controller
     // }
 
     //  show reserved stocks for boarder(?)
-    // public function get_provided_stocks(Request $request) {
+    // public function get_provided_stocks(Request $request): JsonResponse {
     //     return TransactionUtil::transact(null, [], function() use ($request) {
     //         $dormitoryTenantId = $request->dormitoryTenantId;
     //         $inventoryId       = $request->inventoryId;
@@ -1811,7 +1856,8 @@ class DormitoryController extends Controller
      * Summary of update_stock_status
      * @param Request $request (stockId required, status required)
      */
-    public function update_stock_status(Request $request) {
+    public function update_stock_status(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $stockId = $request->stockId;
             $status  = $request->status;

@@ -63,9 +63,27 @@ class DormitoryServiceRequestManager
      */
     public function setAsGivenAction(string $action, int $id) {
         $req = DormitoryReqService::lockForUpdate()->findOrFail($id);
+        $preparedData = ['status' => $action];
 
-        if ($action === DormitoryEnum::DONE->value &&
-           !\in_array($req->status, [DormitoryEnum::APPROVED->value, DormitoryEnum::FOR_PAYMENT->value])) {
+        if ($action === DormitoryEnum::APPROVED->value && !\in_array($req->status, [DormitoryEnum::APPROVED->value, DormitoryEnum::FOR_PAYMENT->value])) {
+            $thisInvoice = DormitoryInvoice::create([
+                'dormitory_tenant_id' => $req->dormitory_tenant_id,
+                'user_id' => $req->tenant->boarder->id,
+                'trace_number' => GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DRI-'),
+                'invoice_amount' => $req->services->charge,
+                'description' => "Service Request (" . $req->services->name . ")",
+                'type' => "SERVICE"
+            ]);
+
+            $preparedData['status'] = DormitoryEnum::FOR_PAYMENT;
+            $preparedData['dormitory_invoice_id'] = $thisInvoice->id;
+        }
+
+        if ($action === DormitoryEnum::DONE->value && !\in_array($req->status, [
+            DormitoryEnum::APPROVED->value,
+            DormitoryEnum::FOR_PAYMENT->value,
+            DormitoryEnum::PAID->value
+        ])) {
             return ['message' => "Only Approved or For Payment requests can be set to DONE.", 'status' => 409];
         }
 
@@ -80,7 +98,7 @@ class DormitoryServiceRequestManager
                 ->update(['invoice_status' => DormitoryEnum::CANCELLED->value]);
         }
 
-        $req->update(['status' => $action]);
+        $req->update($preparedData);
         return ['message' => "Service request marked as $action.", 'status' => 200];
     }
 }

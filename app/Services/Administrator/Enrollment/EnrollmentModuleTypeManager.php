@@ -6,12 +6,8 @@ use App\Enums\AdministratorReturnResponse;
 use App\Models\ModuleType;
 use App\Utils\DocumentExistenceChecker;
 
-class EnrollmentModuleTypeManager
+class EnrollmentModuleTypeManager extends DocumentExistenceChecker
 {
-    public function __construct(
-        public DocumentExistenceChecker $documentExistenceChecker
-    ) {}
-
     /**
      * Summary of createOrUpdate
      * @param object $payload
@@ -20,7 +16,7 @@ class EnrollmentModuleTypeManager
      * @return array{message: string, status: int}
      */
     public function createOrUpdate(object $payload, bool $isPost, ?int $moduleTypeId) {
-        $isModuleTypeExists = $this->documentExistenceChecker->checkForExistence(ModuleType::class, ['name' => $payload->name], $moduleTypeId);
+        $isModuleTypeExists = DocumentExistenceChecker::checkForExistence(ModuleType::class, $payload->only(['name']), $moduleTypeId);
 
         if($isModuleTypeExists) {
             return ['message' => "Module type already exist.", 'status' => 409];

@@ -7,12 +7,8 @@ use App\Models\BookGenre;
 use App\Utils\DocumentExistenceChecker;
 
 
-class LibraryBookEntryManager
+class LibraryBookEntryManager extends DocumentExistenceChecker
 {
-    public function __construct(
-        public DocumentExistenceChecker $documentExistenceChecker
-    ) {}
-
     /**
      * Summary of createOrUpdate
      * @param object $payload
@@ -22,7 +18,7 @@ class LibraryBookEntryManager
      */
     public function createOrUpdate(object $payload, bool $isPost, ?int $bookEntryId)
     {
-        $isBookEntryExists = $this->documentExistenceChecker->checkForExistence(BookGenre::class, [
+        $isBookEntryExists = DocumentExistenceChecker::checkForExistence(BookGenre::class, [
             'name' => $payload->name,
             'category' => $payload->category
         ], $bookEntryId);

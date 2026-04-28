@@ -18,13 +18,15 @@ class DormRoomsResource extends JsonResource
 
         return [
             "id" => $this->id,
-            "name" => $this->dormitory?->room_name,
-            "description" => $this->dormitory?->room_description,
-            "fee_type" => $this->room_fee_type ,
-            "is_air_conditioned"=> $this->is_air_conditioned,
-            "room_cost" => $this->dormitory?->room_cost,
-            "guest_cost"=> $this->dormitory?->guest_cost,
-            "images" => $this->dormitory?->room_images,
+            "name" => $this->room_name,
+            "fee_type" => $this->dormitory,
+            "is_air_conditioned"=> $this->room_type,
+            "room_cost" => $this->room_cost,
+            "guest_cost"=> $this->guest_cost,
+            "images" => $this->room_images->map(fn($query) => [
+                'id' => $query->id,
+                'filename' => $query->filename
+            ]),
         ];
     }
 }

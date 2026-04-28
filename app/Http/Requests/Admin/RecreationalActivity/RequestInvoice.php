@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Admin\RecreationalActivity;
 
 use App\Enums\UserRoleEnum;
-use App\Rules\Admin\Library\UpdateRAChargeRule;
+use App\Rules\Admin\Recreational\UpdateRAChargeRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RequestInvoice extends FormRequest

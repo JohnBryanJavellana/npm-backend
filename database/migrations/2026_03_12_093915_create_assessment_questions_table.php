@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(AssessmentSection::class)->constrained()->cascadeOnDelete();
             $table->foreignId("updated_by")->nullable()->constrained("users");
             $table->longText("question");
-            $table->enum("type", ["MCQ","TRUE_FALSE","ESSAY"]);
+            $table->enum("type", ["MCQ", "MSQ", "TRUE_FALSE", "ESSAY"]);
             $table->decimal("score",65);
             $table->enum("status", ["ACTIVE", "INACTIVE"])->default("ACTIVE");
             $table->timestamps();

@@ -157,7 +157,10 @@ class RegisterController extends Controller
         $qrPath = public_path("qr/user/$filename");
 
         (new GenerateQR())->generate($filename, $user->id, $user->id, "qr/user/");
-        SendingEmail::dispatch($user, new WelcomeAboard(['image_path' => $qrPath]));
+        SendingEmail::dispatch($user, new WelcomeAboard([
+            'image_path' => $qrPath,
+            'portal_link' => env('FRONTEND_URL')
+        ]));
     }
 
     protected function processAvatar($avatarUrl, $filename, $isBase64 = false) {

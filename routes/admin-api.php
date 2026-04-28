@@ -55,44 +55,44 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::get('get_certificates', [EnrollmentCtrl::class, 'get_certificates']);
             Route::post('create_or_update_certificate', [EnrollmentCtrl::class, 'create_or_update_certificate']);
-            Route::delete('remove_certificate/{certificate_id}', [EnrollmentCtrl::class, 'remove_certificate']);
+            Route::delete('remove_certificate/{certificateId}', [EnrollmentCtrl::class, 'remove_certificate']);
 
             Route::get('get_requirements', [EnrollmentCtrl::class, 'get_requirements']);
             Route::post('create_or_update_requirement', [EnrollmentCtrl::class, 'create_or_update_requirement']);
-            Route::delete('training-requirements/remove_trequirement/{requirement_id}', [EnrollmentCtrl::class, 'remove_requirement']);
+            Route::delete('training-requirements/remove_trequirement/{requirementId}', [EnrollmentCtrl::class, 'remove_requirement']);
 
             Route::get('get_schools', [EnrollmentCtrl::class, 'get_schools']);
             Route::post('create_or_update_school', [EnrollmentCtrl::class, 'create_or_update_school']);
-            Route::delete('remove_school/{school_id}', [EnrollmentCtrl::class, 'remove_school']);
+            Route::delete('remove_school/{schoolId}', [EnrollmentCtrl::class, 'remove_school']);
 
             Route::get('get_courses', [EnrollmentCtrl::class, 'get_courses']);
             Route::post('create_or_update_course', [EnrollmentCtrl::class, 'create_or_update_course']);
-            Route::delete('remove_course/{course_id}', [EnrollmentCtrl::class, 'remove_course']);
+            Route::delete('remove_course/{courseId}', [EnrollmentCtrl::class, 'remove_course']);
 
             Route::get('get_vouchers', [EnrollmentCtrl::class, 'get_vouchers']);
             Route::post('create_or_update_voucher', [EnrollmentCtrl::class, 'create_or_update_voucher']);
-            Route::delete('remove_voucher/{voucher_id}', [EnrollmentCtrl::class, 'remove_voucher']);
+            Route::delete('remove_voucher/{voucherId}', [EnrollmentCtrl::class, 'remove_voucher']);
 
             Route::get('get_sponsors', [EnrollmentCtrl::class, 'get_sponsors']);
             Route::post('create_or_update_sponsor', [EnrollmentCtrl::class, 'create_or_update_sponsor']);
-            Route::delete('remove_sponsor/{sponsor_id}', [EnrollmentCtrl::class, 'remove_sponsor']);
+            Route::delete('remove_sponsor/{sponsorId}', [EnrollmentCtrl::class, 'remove_sponsor']);
 
             Route::get('get_licenses', [EnrollmentCtrl::class, 'get_licenses']);
             Route::post('create_or_update_license', [EnrollmentCtrl::class, 'create_or_update_license']);
-            Route::delete('remove_license/{license_id}', [EnrollmentCtrl::class, 'remove_license']);
+            Route::delete('remove_license/{licenseId}', [EnrollmentCtrl::class, 'remove_license']);
 
             Route::get('get_ranks', [EnrollmentCtrl::class, 'get_ranks']);
             Route::post('create_or_update_rank', [EnrollmentCtrl::class, 'create_or_update_rank']);
-            Route::delete('remove_rank/{rank_id}', [EnrollmentCtrl::class, 'remove_rank']);
+            Route::delete('remove_rank/{rankId}', [EnrollmentCtrl::class, 'remove_rank']);
 
             Route::get('get_facilitators', [EnrollmentCtrl::class, 'get_facilitators']);
             Route::post('create_or_update_facilitator', [EnrollmentCtrl::class, 'create_or_update_facilitator']);
-            Route::delete('remove_facilitator/{facilitator_id}', [EnrollmentCtrl::class, 'remove_facilitator']);
+            Route::delete('remove_facilitator/{facilitatorId}', [EnrollmentCtrl::class, 'remove_facilitator']);
 
             Route::get('get_training_fees_predata', [EnrollmentCtrl::class, 'get_training_fees_predata']);
             Route::get('get_course_module_fees', [EnrollmentCtrl::class, 'get_course_module_fees']);
             Route::post('create_or_update_course_fee', [EnrollmentCtrl::class, 'create_or_update_course_fee']);
-            Route::delete('remove_course_fee/{course_fee_id}', [EnrollmentCtrl::class, 'remove_course_fee']);
+            Route::delete('remove_course_fee/{trainingFeeId}', [EnrollmentCtrl::class, 'remove_course_fee']);
         });
 
         Route::prefix('/books/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY', 'throttle:60,1'])->group(function () {
@@ -257,7 +257,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('remove_charge_category/{chargeCategoryId}', [Cashier::class, 'remove_charge_category']);
 
             Route::match(['GET', 'POST'], 'get_or_numbers', [Cashier::class, 'get_or_numbers']);
-            Route::post('create_or_update_or_number', [Cashier::class, 'create_or_update_or_number']);
+            Route::post('create_or_number', [Cashier::class, 'create_or_number']);
             Route::delete('remove_or_number/{orNumber}', [Cashier::class, 'remove_or_number']);
         });
 

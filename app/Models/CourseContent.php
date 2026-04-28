@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
 class CourseContent extends Model
 {
     use HasFactory;
@@ -23,10 +22,16 @@ class CourseContent extends Model
         return $this->hasMany(CourseContentUpload::class);
     }
 
+    public function courseModuleSection()
+    {
+        return $this->belongsTo(CourseModuleSection::class, 'course_module_section_id', 'id');
+    }
+
     public function assessment()
     {
         return $this->hasMany(Assessments::class);
     }
+
     public function assessment_attempts()
     {
         return $this->hasManyThrough(

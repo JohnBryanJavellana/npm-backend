@@ -16,6 +16,7 @@ use App\Services\Administrator\Cashier\CashierORManager;
 use App\Services\Administrator\Cashier\CashierPaymentVerification;
 use App\Utils\CashierGetTableRef;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Utils\{
     TransactionUtil,
@@ -27,8 +28,8 @@ use App\Enums\{
     NotificationEnum
 };
 use App\Http\Requests\Admin\Cashier\{
-CreateOrUpdateFeeCategory,
-    CreateOrUpdateOR
+    CreateOrUpdateFeeCategory,
+    CreateOR
 };
 use App\Models\{
     Charge,
@@ -51,7 +52,8 @@ class Cashier extends Controller
      * Summary of get_charges
      * @param Request $request
      */
-    public function get_charges (Request $request) {
+    public function get_charges (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use($request)  {
             $charges = Charge::with('chargeCategory')->get();
             return response()->json(['charges' => $charges], 200);
@@ -62,7 +64,8 @@ class Cashier extends Controller
      * Summary of get_charges_predata
      * @param Request $request
      */
-    public function get_charges_predata (Request $request) {
+    public function get_charges_predata (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             return response()->json([
                 'categories' => json_decode($this->get_charges_category($request)->getContent(), true)['categories'],
@@ -74,7 +77,8 @@ class Cashier extends Controller
      * Summary of get_all_paid_payments
      * @param Request $request
      */
-    public function get_all_paid_payments(Request $request) {
+    public function get_all_paid_payments(Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $services = [
                 NotificationEnum::ENROLLMENT->value,
@@ -278,41 +282,28 @@ class Cashier extends Controller
      * Summary of get_payments
      * @param Request $request
      */
-    public function get_payments (Request $request) {
+    public function get_payments (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $payments = $this->cashierGetTableRef->getTable($request->service, null, ['invoice_status' => $request->statuses]);
             $relations = ['payee', 'orNumber'];
 
-            if($request->service === NotificationEnum::LIBRARY->value) {
-                $relations = [
-                    ...$relations,
+            $serviceRelations = match($request->service) {
+                NotificationEnum::DORMITORY->value  => ['dormitoryReqService'],
+                NotificationEnum::ENROLLMENT->value => ['training'],
+                NotificationEnum::LIBRARY->value => [
                     'bookRes',
                     'selectedBooks',
                     'selectedBooks.bookReservation',
                     'selectedBooks.bookReservation.book',
                     'selectedBooks.bookReservation.books',
                     'selectedBooks.bookReservation.books.catalog'
-                ];
-            }
+                ],
+                default => []
+            };
 
-            if($request->service === NotificationEnum::ENROLLMENT->value) {
-                $relations = [
-                    ...$relations,
-                    'training'
-                ];
-            }
-
-            if($request->service === NotificationEnum::DORMITORY->value) {
-                $relations = [
-                    ...$relations,
-                    'dormitoryReqService'
-                ];
-            }
-
-            $paymentsData = $payments->with($relations)->orderBy('created_at', 'DESC');
-
-            if($request->limitter) $paymentsData->take($request->limitter);
-            $paymentsData = $paymentsData ->get();
+            $mergedRelations = [...$relations, ...$serviceRelations];
+            $paymentsData = $payments->with($mergedRelations)->orderBy('created_at', 'DESC')->get();
 
             return response()->json(['payments' => $paymentsData], 200);
         });
@@ -323,32 +314,32 @@ class Cashier extends Controller
      * Summary of get_or_numbers
      * @param Request $request
      */
-    public function get_or_numbers (Request $request) {
+    public function get_or_numbers (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $orNumbersTemp = CashierOR::withCount(['connectionInLibrary', 'connectionInDormitory', 'connectionInEnrollment']);
-
-            if($request->service) {
-                $orNumbersTemp->where([
-                    "service_type" => $request->service,
+            $orNumbers = CashierOR::with(['category'])->withCount([
+                'connectionInLibrary',
+                'connectionInDormitory',
+                'connectionInEnrollment'
+            ])->when($request->service, function ($query, $service) {
+                $query->where([
+                    'service_type' => $service,
                     'status' => CashierEnum::AVAILABLE
                 ]);
-            }
+            })->get();
 
-            $orNumbers = $orNumbersTemp->get();
             return response()->json(['orNumbers' => $orNumbers], 200);
         });
     }
 
     /**
-     * Summary of create_or_update_or_number
-     * @param CreateOrUpdateOR $request
+     * Summary of create_or_number
+     * @param CreateOR $request
      */
-    public function create_or_update_or_number (CreateOrUpdateOR $request) {
+    public function create_or_number (CreateOR $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $isPost = $request->httpMethod === "POST";
-            $documentId = $request->documentId;
-
-            $result = $this->cashierORManager->createOrUpdate($request, $isPost, $documentId);
+            $result = $this->cashierORManager->createOrUpdate($request);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }
@@ -358,7 +349,8 @@ class Cashier extends Controller
      * @param RemoveORNumber $request
      * @param int $orNumber
      */
-    public function remove_or_number (RemoveORNumber $request, int $orNumber) {
+    public function remove_or_number (RemoveORNumber $request, int $orNumber): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request, $orNumber) {
             $result = $this->cashierORManager->removeOR($orNumber);
             return response()->json(['message' => $result['message']], $result['status']);
@@ -370,7 +362,8 @@ class Cashier extends Controller
      * Summary of get_charges_category
      * @param Request $request
      */
-    public function get_charges_category (Request $request) {
+    public function get_charges_category (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request)  {
             $categories = ChargeCategory::withCount(['hasData'])->get();
             return response()->json(['categories' => $categories], 200);
@@ -381,7 +374,8 @@ class Cashier extends Controller
      * Summary of create_or_update_charge_category
      * @param CreateOrUpdateFeeCategory $request
      */
-    public function create_or_update_charge_category (CreateOrUpdateFeeCategory $request) {
+    public function create_or_update_charge_category (CreateOrUpdateFeeCategory $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
             $documentId = $request->documentId;
@@ -396,7 +390,8 @@ class Cashier extends Controller
      * @param RemoveChargeCategory $request
      * @param int $chargeCategoryId
      */
-    public function remove_charge_category (RemoveChargeCategory $request, int $chargeCategoryId) {
+    public function remove_charge_category (RemoveChargeCategory $request, int $chargeCategoryId): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request, $chargeCategoryId) {
             $result = $this->cashierChargeCategoryManager->removeChargeCategory($chargeCategoryId);
             return response()->json(['message' => $result['message']], $result['status']);
@@ -408,7 +403,8 @@ class Cashier extends Controller
      * Summary of verify_payment
      * @param VerifyPayment $request
      */
-    public function verify_payment(VerifyPayment $request) {
+    public function verify_payment(VerifyPayment $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $invoiceId = $request->invoiceId;
             $parentTableId = $request->parentTableId;
@@ -423,7 +419,8 @@ class Cashier extends Controller
      * Summary of pay_walkin
      * @param WalkInPayment $request
      */
-    public function pay_walkin(WalkInPayment $request) {
+    public function pay_walkin(WalkInPayment $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $invoiceId = $request->invoiceId;
             $invoiceTableServiceName = $request->invoiceTableServiceName;

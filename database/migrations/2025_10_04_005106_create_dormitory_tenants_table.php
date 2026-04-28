@@ -1,5 +1,5 @@
 <?php
-
+# 1
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -66,7 +66,7 @@ return new class extends Migration
             $table->dateTime('offset_check_out_date')->nullable();
             $table->string('remarks')->nullable();
             $table->enum('accommodation', self::ACCOMMODATION)->default(self::ACCOMMODATION[1]);
-            $table->enum('status_of_occupancy', self::STATUS_OF_OCCUPANCY)->default(self::STATUS_OF_OCCUPANCY[0]);
+            $table->enum('status_of_occupancy', self::STATUS_OF_OCCUPANCY)->default(self::STATUS_OF_OCCUPANCY[0])->nullable();
             $table->enum('room_type', self::ROOM_TYPE);
             $table->enum('tenant_status', self::TENANT_STATUS)->default(self::TENANT_STATUS[0]);
             $table->enum('process_type', self::PROCESS_METHOD)->default(self::PROCESS_METHOD[0]);

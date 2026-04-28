@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class MainCertificate extends Model
 {
+    protected $guarded = ['id'];
+
     public function hasData() {
         return $this->hasMany(Certificate::class);
     }

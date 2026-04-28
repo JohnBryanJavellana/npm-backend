@@ -6,6 +6,7 @@ use App\Enums\AdministratorAuditActions;
 use App\Enums\AdministratorReturnResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Guest\RegisterController;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Utils\TransactionUtil;
 use App\Http\Requests\Admin\QrReader\{
@@ -44,7 +45,8 @@ class Masterlist extends Controller
      * Summary of get_users
      * @param Request $request
      */
-    public function get_users (Request $request) {
+    public function get_users (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $users = User::withCount([
                 'trainee_enrolled_courses' => function($query) {
@@ -66,7 +68,8 @@ class Masterlist extends Controller
      * @param Request $request
      * @param int $user_id
      */
-    public function get_user_basic_info (Request $request, int $user_id) {
+    public function get_user_basic_info (Request $request, int $user_id): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($user_id) {
             $user_info = User::findOrFail($user_id);
             return response()->json(['user_info' => $user_info], 200);
@@ -78,7 +81,8 @@ class Masterlist extends Controller
      * @param Request $request
      * @param int $user_id
      */
-    public function get_user_activities (Request $request, int $user_id) {
+    public function get_user_activities (Request $request, int $user_id): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($user_id) {
             $activities = AuditTrail::where('user_id', $user_id)->orderBy('created_at', 'DESC')->get();
             return response()->json(['activities' => $activities], 200);
@@ -90,7 +94,8 @@ class Masterlist extends Controller
      * @param Request $request
      * @param int $user_id
      */
-    public function get_user_qr_reader_assignments (Request $request, int $user_id) {
+    public function get_user_qr_reader_assignments (Request $request, int $user_id): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($user_id) {
             $qr_readers = UserAssignedQrLocation::where('user_id', $user_id)
                 ->with('qrLocation')
@@ -104,7 +109,8 @@ class Masterlist extends Controller
      * Summary of qr_assignments
      * @param CreateOrUpdateQRAssignment $request
      */
-    public function qr_assignments (CreateOrUpdateQRAssignment $request) {
+    public function qr_assignments (CreateOrUpdateQRAssignment $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
             $documentId = $request->documentId;
@@ -143,7 +149,8 @@ class Masterlist extends Controller
      * @param Request $request
      * @return void
      */
-    public function create_or_update_user (Request $request) {
+    public function create_or_update_user (Request $request): void
+    {
         $this->registerCtrlInstance->register_user($request);
     }
 
@@ -152,7 +159,8 @@ class Masterlist extends Controller
      * @param Request $request
      * @param int $user_id
      */
-    public function remove_user (Request $request, int $user_id) {
+    public function remove_user (Request $request, int $user_id): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request, $user_id) {
             $this_user = User::withCount(['hasData'])->where('id', $user_id)->first();
 
@@ -179,7 +187,8 @@ class Masterlist extends Controller
      * Summary of get_employers
      * @param Request $request
      */
-    public function get_employers (Request $request) {
+    public function get_employers (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() {
             $employers = Employer::all();
             return response()->json(['employers' => $employers], 200);
@@ -190,7 +199,8 @@ class Masterlist extends Controller
      * Summary of create_or_update_employer
      * @param CreateOrUpdateEmployer $request
      */
-    public function create_or_update_employer (CreateOrUpdateEmployer $request) {
+    public function create_or_update_employer (CreateOrUpdateEmployer $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
             $documentId = $request->documentId;
@@ -230,7 +240,8 @@ class Masterlist extends Controller
      * @param Request $request
      * @param int $employer_id
      */
-    public function remove_employer (Request $request, int $employer_id) {
+    public function remove_employer (Request $request, int $employer_id): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request, $employer_id) {
             $this_employer = Employer::where('id', $employer_id)->first();
 
@@ -256,7 +267,8 @@ class Masterlist extends Controller
      * Summary of get_positions
      * @param Request $request
      */
-    public function get_positions (Request $request) {
+    public function get_positions (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() {
             $positions = Position::all();
             return response()->json(['positions' => $positions], 200);
@@ -267,7 +279,8 @@ class Masterlist extends Controller
      * Summary of create_or_update_position
      * @param CreateOrUpdatePosition $request
      */
-    public function create_or_update_position (CreateOrUpdatePosition $request) {
+    public function create_or_update_position (CreateOrUpdatePosition $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
             $documentId = $request->documentId;
@@ -307,7 +320,8 @@ class Masterlist extends Controller
      * @param Request $request
      * @param int $position_id
      */
-    public function remove_position (Request $request, int $position_id) {
+    public function remove_position (Request $request, int $position_id): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request, $position_id) {
             $this_position = Position::where('id', $position_id)->first();
 
@@ -334,7 +348,8 @@ class Masterlist extends Controller
      * Summary of get_qr_readers
      * @param Request $request
      */
-    public function get_qr_readers (Request $request) {
+    public function get_qr_readers (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use($request) {
             $qr_readers_temp = QrReaderLocation::withCount(['hasData']);
 
@@ -348,7 +363,8 @@ class Masterlist extends Controller
         });
     }
 
-    public function get_qr_reader_records (Request $request) {
+    public function get_qr_reader_records (Request $request): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use($request) {
             $qr_reader_records = CheckInOutLog::where('qr_reader_location_id', $request->documentId)
                 ->with(['initiator'])
@@ -362,7 +378,8 @@ class Masterlist extends Controller
      * Summary of create_or_update_qr_reader
      * @param CreateOrUpdateQRReaderLocation $request
      */
-    public function create_or_update_qr_reader (CreateOrUpdateQRReaderLocation $request) {
+    public function create_or_update_qr_reader (CreateOrUpdateQRReaderLocation $request): JsonResponse
+    {
         return TransactionUtil::transact($request, [], function() use ($request) {
             $isPost = $request->httpMethod === "POST";
             $documentId = $request->documentId;
@@ -406,7 +423,8 @@ class Masterlist extends Controller
      * @param Request $request
      * @param int $qr_reader_id
      */
-    public function remove_qr_reader_assignment (Request $request, int $qr_reader_id) {
+    public function remove_qr_reader_assignment (Request $request, int $qr_reader_id): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request, $qr_reader_id) {
             $this_qr_assignment = UserAssignedQrLocation::where('id', $qr_reader_id)->first();
             $this_qr_assignment->delete();
@@ -429,7 +447,8 @@ class Masterlist extends Controller
      * @param Request $request
      * @param int $qr_reader_id
      */
-    public function remove_qr_reader (Request $request, int $qr_reader_id) {
+    public function remove_qr_reader (Request $request, int $qr_reader_id): JsonResponse
+    {
         return TransactionUtil::transact(null, [], function() use ($request, $qr_reader_id) {
             $this_qr_reader = QrReaderLocation::where('id', $qr_reader_id)
                 ->withCount([
