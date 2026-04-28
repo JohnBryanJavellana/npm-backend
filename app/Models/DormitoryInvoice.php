@@ -39,6 +39,11 @@ class DormitoryInvoice extends Model
         return $this->hasOne(DormitoryExtensionRequest::class);
     }
 
+    public function transferRequest()
+    {
+        return $this->hasOne(DormitoryTransfer::class);
+    }
+
     public function charge()
     {
         return $this->belongsTo(Charge::class);

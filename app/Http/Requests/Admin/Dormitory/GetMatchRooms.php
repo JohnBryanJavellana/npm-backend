@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests\Admin\Dormitory;
 
-use App\Enums\UserRoleEnum;
-use App\Http\Middleware\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 
 class GetMatchRooms extends FormRequest
@@ -13,10 +11,7 @@ class GetMatchRooms extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() !== null && \in_array($this->user()->role, [
-            UserRoleEnum::SUPERADMIN->value,
-            UserRoleEnum::ADMIN_DORMITORY->value
-        ]);
+        return $this->user() !== null;
     }
 
     /**
@@ -27,7 +22,7 @@ class GetMatchRooms extends FormRequest
     public function rules(): array
     {
         return [
-            'dormitory' => ['required', 'string', 'in:OFFICERS,RATINGS'],
+            'dormitory' => ['nullable', 'string', 'in:OFFICERS,RATINGS'],
             'accommodation' => ['required', 'in:SINGLE,SHARED,COUPLE'],
             'room_type' => ['required', 'string', 'in:AIRCON,NON-AIRCON'],
         ];

@@ -9,6 +9,7 @@ use App\Models\DormitoryInclusionRequest;
 use App\Models\DormitoryInvoice;
 use App\Models\DormitoryReqService;
 use App\Models\DormitoryTenant;
+use App\Models\DormitoryTransfer;
 use App\Models\EnrolledCourse;
 use App\Models\EnrollmentInvoice;
 use App\Models\LibraryInvoice;
@@ -33,7 +34,9 @@ class CashierGetTableRef
             'DORMITORY-INCLUSION' => DormitoryInvoice::class,
             'DORMITORY-INCLUSION-MAIN-TABLE' => DormitoryInclusionRequest::class,
             'DORMITORY-EXTENSION' => DormitoryInvoice::class,
-            'DORMITORY-EXTENSION-MAIN-TABLE' => DormitoryExtensionRequest::class
+            'DORMITORY-EXTENSION-MAIN-TABLE' => DormitoryExtensionRequest::class,
+            'DORMITORY-TRANSFER' => DormitoryInvoice::class,
+            'DORMITORY-TRANSFER-MAIN-TABLE' => DormitoryTransfer::class
         ];
 
         $query = $modelMap[$service]::query();

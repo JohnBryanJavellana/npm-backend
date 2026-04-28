@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('old_end_date');
             $table->date("new_end_date");
             $table->enum("status", ['PENDING','APPROVED','CANCELLED','PAID','FOR PAYMENT','FOR VERIFICATION'])->default('PENDING');
+            $table->longText("reason")->nullable();
             $table->timestamps();
         });
     }

@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin\Dormitory;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateExtensionRequest extends FormRequest
+class UpdateTransferRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +23,8 @@ class UpdateExtensionRequest extends FormRequest
     {
         return [
             "status" => ['required', 'string', 'in:PENDING,APPROVED,CANCELLED,COMPLETED,PAID,FOR PAYMENT'],
-            "documentId" => ['required', 'integer', 'exists:dormitory_extension_requests,id']
+            "documentId" => ['required', 'integer', 'exists:dormitory_transfers,id'],
+            "roomId" => ['nullable', 'required_if:status,APPROVED,PAID,FOR PAYMENT', 'integer', 'exists:dormitory_rooms,id']
         ];
     }
 }

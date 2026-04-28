@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\DormitoryInvoice;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,12 +17,12 @@ return new class extends Migration
             $table->engine = 'InnoDB';
             $table->id();
             $table->foreignIdFor(DormitoryTenant::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class,'processed_by')->nullable();
+            $table->foreignIdFor(DormitoryInvoice::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(DormitoryRoom::class)->nullable()->constrained()->cascadeOnDelete();
             $table->longText('trace_number')->nullable();
-            // $table->enum('transfer_type', ['ROOM', 'CLASS']);
-            // $table->enum('room_for_type', ['MALE', 'FEMALE', 'COUPLE']);
-            $table->enum('room_type', ["AIR-CONDITIONED", "NON-AIRCON"]);
-            $table->enum("status", ['PENDING', 'CANCELLED', 'APPROVED'])->default('PENDING');
+            $table->enum('accommodation', ["SINGLE", "SHARED", "COUPLE"]);
+            $table->enum('room_type', ['AIRCON', 'NON-AIRCON']);
+            $table->enum("status", ['PENDING','APPROVED','CANCELLED','PAID','FOR PAYMENT','FOR VERIFICATION'])->default('PENDING');
             $table->longText("reason")->nullable();
             $table->timestamps();
         });

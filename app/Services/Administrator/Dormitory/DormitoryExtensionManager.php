@@ -22,10 +22,10 @@ class DormitoryExtensionManager extends DocumentExistenceChecker
      */
     public function updateExtensionRequest(int $documentId, string $status): array
     {
-        $this_request = DormitoryTenant::lockForUpdate()->findOrFail($documentId);
-        $this_extension_request = DormitoryExtensionRequest::lockForUpdate()->where('dormitory_tenant_id', $documentId)->latest()->first();
+        $this_extension_request = DormitoryExtensionRequest::lockForUpdate()->whereKey($documentId)->latest()->first();
+        $this_request = DormitoryTenant::lockForUpdate()->findOrFail($this_extension_request->dormitory_tenant_id);
 
-        $preparedData = $this->finalPreparedData($status, $documentId, $this_request->user_id, $this_extension_request->new_end_date);
+        $preparedData = $this->finalPreparedData($status, $this_request->id, $this_request->user_id, $this_extension_request->new_end_date);
         $this_request->update($preparedData[0]);
         $this_extension_request->update($preparedData[1]);
 

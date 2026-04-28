@@ -92,7 +92,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
             $this->dormitoryTransfer->create([
                 "dormitory_tenant_id" => $validated["document_id"],
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryTransfer, "-TR-"),
-                "transfer_type" => $validated["transfer_type"],
+                "accommodation" => $validated["accommodation"],
                 "room_type" => $validated["type"],
                 "reason" => $validated["reason"]
             ]);

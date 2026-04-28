@@ -28,8 +28,8 @@ class CreateTransferRequest extends FormRequest
     {
         return [
             'document_id' => 'required',
-            'transfer_type' => 'required|in:ROOM,CLASS',
-            'type' => 'required',
+            'accommodation' => 'required|in:SINGLE,SHARED,COUPLE',
+            'type' => 'required|in:AIRCON,NON-AIRCON',
             'reason' => 'required|string|max:500'
         ];
     }

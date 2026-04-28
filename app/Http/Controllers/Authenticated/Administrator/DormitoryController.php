@@ -20,9 +20,12 @@ use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
 use App\Http\Requests\Admin\Dormitory\UpdateExtensionRequest;
 use App\Http\Requests\Admin\Dormitory\UpdateInclusionRequest;
 use App\Http\Requests\Admin\Dormitory\UpdateInventoryStock;
+use App\Http\Requests\Admin\Dormitory\UpdateTransferRequest;
+use App\Models\DormitoryExtensionRequest;
 use App\Models\DormitoryInclusionRequest;
 use App\Models\DormitoryInventoryItem;
 use App\Models\DormitoryReqService;
+use App\Models\DormitoryTransfer;
 use App\Services\Administrator\Dormitory\DormitoryExtensionManager;
 use App\Services\Administrator\Dormitory\DormitoryInclusionManager;
 use App\Services\Administrator\Dormitory\DormitoryInventoryManager;
@@ -31,6 +34,7 @@ use App\Services\Administrator\Dormitory\DormitoryRoomManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceRequestManager;
+use App\Services\Administrator\Dormitory\DormitoryTransferManager;
 use Illuminate\Http\JsonResponse;
 use App\Enums\Administrator\DormitoryEnum;
 use App\Http\Requests\Admin\Dormitory\{
@@ -60,7 +64,8 @@ class DormitoryController extends Controller
         public DormitoryInventoryManager $dormitoryInventoryManager,
         public DormitoryInventoryStockManager $dormitoryInventoryStockManager,
         public DormitoryInclusionManager $dormitoryInclusionManager,
-        public DormitoryExtensionManager $dormitoryExtensionManager
+        public DormitoryExtensionManager $dormitoryExtensionManager,
+        public DormitoryTransferManager $dormitoryTransferManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -270,9 +275,8 @@ class DormitoryController extends Controller
 
             // get dormitory rooms that match the accommodation, dormitory, and room type.
             // Group the result by wing and floor.
-            $room_managements = DormitoryRoom::where([
+            $room_managements = DormitoryRoom::when($dormitory, fn($query) => $query->where('dormitory', $dormitory))->where([
                 'accommodation' => $accommodation,
-                'dormitory' => $dormitory,
                 'room_type' => $room_type
             ])->orderBy('wing')
             ->orderBy('floor')
@@ -524,6 +528,41 @@ class DormitoryController extends Controller
         });
     }
 
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_dormitory_extension_requests
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function get_dormitory_extension_requests (Request $request): JsonResponse
+    {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $query = $request->q;
+            $status = $request->status;
+
+            $extensionRequests = DormitoryExtensionRequest::with([
+                'tenant.dormitory_room',
+                'tenant.trainee',
+                'invoice.orNumber'
+            ])->when(\count($status) > 0, fn($s) => $s->whereIn('status', $status))
+            ->when($query, function($q) use ($query) {
+                $q->where('trace_number', 'LIKE', "%{$query}%")
+                    ->orWhere('status', 'LIKE', "%{$query}%")
+                    ->orWhereHas('tenant', fn($q2) =>
+                        $q2->whereHas('trainee', fn($q3) =>
+                            $q3->where('fname', 'LIKE', "%{$query}%")
+                               ->orWhere('mname', 'LIKE', "%{$query}%")
+                               ->orWhere('lname', 'LIKE', "%{$query}%")
+                               ->orWhere('suffix', 'LIKE', "%{$query}%")
+                        )
+                    );
+            })->orderByDesc('created_at')->paginate($pageCounter);
+
+            return response()->json(['extensionRequests' => $extensionRequests], 200);
+        });
+    }
+
     /**
      * Summary of update_extension_request
      * @param UpdateExtensionRequest $request
@@ -536,6 +575,58 @@ class DormitoryController extends Controller
             $status = $request->status;
 
             $result = $this->dormitoryExtensionManager->updateExtensionRequest($documentId, $status);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
+    /**
+     * Summary of get_dormitory_transfer_requests
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function get_dormitory_transfer_requests (Request $request): JsonResponse
+    {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $query = $request->q;
+            $status = $request->status;
+
+            $transferRequests = DormitoryTransfer::with([
+                'tenant.dormitory_room',
+                'tenant.trainee',
+                'invoice.orNumber'
+            ])->when(\count($status) > 0, fn($s) => $s->whereIn('status', $status))
+            ->when($query, function($q) use ($query) {
+                $q->where('trace_number', 'LIKE', "%{$query}%")
+                    ->orWhere('status', 'LIKE', "%{$query}%")
+                    ->orWhereHas('tenant', fn($q2) =>
+                        $q2->whereHas('trainee', fn($q3) =>
+                            $q3->where('fname', 'LIKE', "%{$query}%")
+                               ->orWhere('mname', 'LIKE', "%{$query}%")
+                               ->orWhere('lname', 'LIKE', "%{$query}%")
+                               ->orWhere('suffix', 'LIKE', "%{$query}%")
+                        )
+                    );
+            })->orderByDesc('created_at')->paginate($pageCounter);
+
+            return response()->json(['transferRequests' => $transferRequests], 200);
+        });
+    }
+
+    /**
+     * Summary of update_transfer_request
+     * @param UpdateTransferRequest $request
+     * @return JsonResponse
+     */
+    public function update_transfer_request(UpdateTransferRequest $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $documentId = $request->documentId;
+            $status = $request->status;
+            $roomId = $request->roomId;
+
+            $result = $this->dormitoryTransferManager->updateTransferRequest($documentId, $status, $roomId);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }
