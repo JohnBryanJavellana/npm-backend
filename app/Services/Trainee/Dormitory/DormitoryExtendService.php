@@ -109,17 +109,16 @@ class DormitoryExtendService {
     {
         DB::transaction(function() use ($requestId, $userId) {
             $extend = $this->dormitoryExtensionRequest->query()
-            ->with("tenant")
-            ->whereRelation("tenant", "user_id", "=", $userId)
-            ->wherekey($requestId)
-            ->lockForUpdate()
-            ->first();
+                ->with("tenant")
+                ->wherekey($requestId)
+                ->lockForUpdate()
+                ->first();
 
             if($extend->status === RequestStatus::CANCELLED) {
                 throw new DomainException('This extending request has already been cancelled.');
             }
 
-            if (!in_array($extend->status, [
+            if (! \in_array($extend->status, [
                 RequestStatus::PENDING->value,
                 RequestStatus::APPROVED->value,
                 RequestStatus::FOR_PAYMENT->value
@@ -133,11 +132,11 @@ class DormitoryExtendService {
 
             $status = RequestStatus::ACTIVE->value;
 
-            $this->dormitoryTenantService->updateTenantRecordById($extend->dormitory_tenant_id, $userId, $status);
+            $this->dormitoryTenantService->updateTenantRecordById($extend->dormitory_tenant_id, $extend->tenant->user_id, $status);
 
             $this->loggingDetails(
                 $extend->dormitory_tenant_id,
-                $userId,
+                $extend->tenant->user_id,
                 "cancelled",
                 "You cancelled your room extend request."
             );

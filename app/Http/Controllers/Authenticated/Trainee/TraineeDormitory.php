@@ -245,6 +245,7 @@ class TraineeDormitory extends Controller
     public function cancel_extend_request(Request $request, $id)
     {
         $user_id = $request->user()->id;
+
         try {
             $this->dormitoryExtendService->cancelExtendRequest($id, $user_id);
 
