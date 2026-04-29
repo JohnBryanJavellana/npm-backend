@@ -125,14 +125,51 @@ class Account extends Controller
      * @param Request $request
      */
     public function get_activities (Request $request) {
-        return TransactionUtil::transact(null, [], function() use ($request) {
-            $activities = AuditTrail::orderBy('created_at', 'DESC');
-            if ($request->user()->role !== UserRoleEnum::SUPERADMIN->value) $activities->where('user_id', $request->user()->id);
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $activities = AuditTrail::orderBy('created_at', 'DESC');
 
-            return response()->json(['activities' => $activities->get()], 200);
-        });
-    }
+        if ($request->user()->role !== UserRoleEnum::SUPERADMIN->value) {
+            $activities->where('user_id', $request->user()->id);
+        }
 
+        // Get pagination parameters
+        $perPage = $request->input('per_page', 10);
+        $allowedPerPage = [10, 15, 20, 25, 30];
+
+        // Validate per_page against allowed values
+        if (!in_array((int)$perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+
+        $page = $request->input('page', 1);
+
+        // Debug: Check total records
+        \Log::info('Total records: ' . $activities->count());
+        \Log::info('Requested per_page: ' . $perPage);
+        \Log::info('Requested page: ' . $page);
+
+        // Apply pagination
+        $paginatedActivities = $activities->paginate((int)$perPage, ['*'], 'page', (int)$page);
+
+        // Debug: Check actual items being returned
+        \Log::info('Items returned: ' . count($paginatedActivities->items()));
+        \Log::info('From: ' . $paginatedActivities->firstItem());
+        \Log::info('To: ' . $paginatedActivities->lastItem());
+
+        return response()->json([
+            'activities' => $paginatedActivities->items(),
+            'pagination' => [
+                'current_page' => $paginatedActivities->currentPage(),
+                'per_page' => (int)$paginatedActivities->perPage(),
+                'total' => $paginatedActivities->total(),
+                'last_page' => $paginatedActivities->lastPage(),
+                'from' => $paginatedActivities->firstItem(),
+                'to' => $paginatedActivities->lastItem(),
+                'rows_per_page_options' => $allowedPerPage
+            ]
+        ], 200);
+    });
+}
     /**
      * Summary of update_personal
      * @param bool auditActions === TRUE
