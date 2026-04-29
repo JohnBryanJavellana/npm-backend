@@ -150,6 +150,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
             $record->update(["status" => RequestStatus::CANCELLED]);
 
             $this->dormitoryTenantService->updateTenantRecordById($record->dormitory_tenant_id, $record->tenant->user_id, $status);
+            $record->invoice->update([ 'invoice_status' => RequestStatus::CANCELLED ]);
 
             $this->loggingDetails(
                 $record->dormitory_tenant_id,

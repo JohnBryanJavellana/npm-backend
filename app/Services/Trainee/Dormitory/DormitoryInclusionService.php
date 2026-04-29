@@ -92,10 +92,8 @@ class DormitoryInclusionService {
         // validate the owner
         DB::transaction(function () use ($validated, $userId) {
             $record = $this->dormitoryInclusionRequest->query()
-            ->status([RequestStatus::APPROVED, RequestStatus::PENDING])
-            ->whereRelation("tenant", "user_id", "=", $userId)
-            ->whereKey($validated["request_id"])
-            ->first();
+                ->whereKey($validated["request_id"])
+                ->first();
 
             if(!$record) {
                 throw new DomainException("Item request not found!");
@@ -104,6 +102,8 @@ class DormitoryInclusionService {
             $record->update([
                 "status" => RequestStatus::CANCELLED
             ]);
+
+            $record->invoice->update([ 'invoice_status' => RequestStatus::CANCELLED ]);
         });
     }
 }

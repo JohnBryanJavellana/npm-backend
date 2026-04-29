@@ -121,7 +121,8 @@ class DormitoryExtendService {
             if (! \in_array($extend->status, [
                 RequestStatus::PENDING->value,
                 RequestStatus::APPROVED->value,
-                RequestStatus::FOR_PAYMENT->value
+                RequestStatus::FOR_PAYMENT->value,
+                RequestStatus::PROCESSING_PAYMENT->value
             ])) {
                 throw new DomainException('Extending request cancellation is not permitted.');
             }
@@ -133,6 +134,7 @@ class DormitoryExtendService {
             $status = RequestStatus::ACTIVE->value;
 
             $this->dormitoryTenantService->updateTenantRecordById($extend->dormitory_tenant_id, $extend->tenant->user_id, $status);
+            $extend->invoice->update([ 'invoice_status' => RequestStatus::CANCELLED ]);
 
             $this->loggingDetails(
                 $extend->dormitory_tenant_id,

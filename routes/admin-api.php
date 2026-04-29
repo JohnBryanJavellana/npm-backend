@@ -141,7 +141,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::post('get_all_dormitory_invoices', [DormitoryController::class, 'get_all_dormitory_invoices']);
 
-            Route::get('get_dormitory_rooms', [DormitoryController::class, 'get_dormitory_rooms']);
+            Route::post('get_dormitory_rooms', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::post('create_or_update_room', [DormitoryController::class, 'create_or_update_room']);
             Route::delete('remove_room/{roomId}', [DormitoryController::class, 'remove_room']);
 
@@ -180,6 +180,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('/masterlist/')->middleware(['user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD', 'throttle:60,1'])->group(function () {
             Route::prefix('/user/')->middleware('user_role:SUPERADMIN')->group(function () {
                 Route::match(['GET', 'POST'], 'get_users', [Masterlist::class, 'get_users']);
+                Route::post('get_active_guests', [Masterlist::class, 'get_active_guests']);
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
                 Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities']);
                 Route::get('get_user_qr_reader_assignments/{user_id}', [Masterlist::class, 'get_user_qr_reader_assignments']);

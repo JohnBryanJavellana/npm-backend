@@ -33,6 +33,7 @@ class DormitoryRoomReservationManager
                 'status_of_occupancy' => $payload->status_of_occupancy,
                 'user_id' => $payload->user_id,
                 'dormitory_room_id' => $payload->dormitory_room_id,
+                'dormitory_invoice_id' => $this->createInvoice(DormitoryEnum::DORMITORY->value, $res->id, $payload->user_id, $payload->payment_remarks, (object)($payload->pricingBreakdown ?? [])),
                 'purpose' => $payload->purpose
             ]);
         }
@@ -46,11 +47,6 @@ class DormitoryRoomReservationManager
                     DormitoryTenantSupDoc::create(['dormitory_tenant_id' => $res->id, 'filename' => $name ]);
                     SaveAvatar::dispatch($sd, $name, "dormitory/supporting-document", false, true, '');
                 }
-            }
-
-            $pb = (object)($payload->pricingBreakdown ?? []);
-            if ($payload->withFee && \in_array($payload->status_of_occupancy, ['TRAINEE', 'PAYING GUEST/VISITOR']) && $payload->status === DormitoryEnum::FOR_PAYMENT->value) {
-                $this->createInvoice(DormitoryEnum::DORMITORY->value, $res->id, $payload->user_id, $payload->payment_remarks, $pb);
             }
         }
 
@@ -97,14 +93,14 @@ class DormitoryRoomReservationManager
      * @param int $roomReservationId
      * @return array{message: string, status: int}
      */
-    public function setAsReserved(int $roomReservationId) {
+    public function setAsReserved(int $roomReservationId, string $status) {
         $thisReservation = DormitoryTenant::lockForUpdate()->findOrFail($roomReservationId);
 
-        if(!\in_array($thisReservation->tenant_status, [DormitoryEnum::PAID->value, DormitoryEnum::APPROVED->value])) {
-            return [ 'message' => "Room Request is already $thisReservation->tenant_status. Can't set to Reserved.", 'status' => 409 ];
+        if(!\in_array($thisReservation->tenant_status, [DormitoryEnum::PAID->value, DormitoryEnum::APPROVED->value, DormitoryEnum::ACTIVE->value, DormitoryEnum::RESERVED->value])) {
+            return [ 'message' => "Room Request is already $thisReservation->tenant_status. Can't set to {$status}.", 'status' => 409 ];
         }
 
-        $thisReservation->update([ 'tenant_status' => DormitoryEnum::RESERVED ]);
-        return ['message' => "Room reservation set to reserved.", 'status' => 200];
+        $thisReservation->update([ 'tenant_status' => $status ]);
+        return ['message' => "Room reservation set to {$status}.", 'status' => 200];
     }
 }

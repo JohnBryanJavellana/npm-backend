@@ -23,6 +23,7 @@ class SetRoomReservationAsReserved extends FormRequest
     {
         return [
             'roomReservationId' => ['required', 'exists:dormitory_tenants,id'],
+            'status' => ['string', 'in:RESERVED,ACTIVE'],
         ];
     }
 }

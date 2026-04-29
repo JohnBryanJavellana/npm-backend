@@ -42,23 +42,39 @@ class DormitoryInvoiceService {
     public function updateDormitoryInvoice($validated, $userId)
     {
         return DB::transaction(function() use ($validated, $userId) {
-            $this->dormitoryInvoice->query()
+            $inv = $this->dormitoryInvoice->query()
                 ->forUser($userId)
                 ->where("dormitory_tenant_id", $validated["tenant_id"])
                 ->whereKey($validated["billing_id"])
-                ->update([
-                    "invoice_reference" => $validated["ref_number"],
-                    "invoice_status" => RequestStatus::FOR_VERIFICATION->value,
-                    "payment_type" => ProcessEnum::ONLINE->value,
-                    "datePaid" => Carbon::now()
-                ]);
+                ->firstOrFail();
 
             $statusColumn = match(true) {
-                $validated["billing_type"] === "DORMITORY" => "tenant_status",
-                \in_array($validated["billing_type"], ["EXTENSION", "TRANSFER", "INCLUSION"]) => "status"
+                $validated["billing_type"] === "DORMITORY" => [
+                    'column' => "tenant_status",
+                    'key' => $validated["tenant_id"]
+                ],
+                $validated["billing_type"] === "EXTENSION" => [
+                    'column' => "status",
+                    'key' => $inv->extendRequest->id
+                ],
+                $validated["billing_type"] === "TRANSFER" => [
+                    'column' => "status",
+                    'key' => $inv->transferRequest->id
+                ],
+                $validated["billing_type"] === "INCLUSION" => [
+                    'column' => "status",
+                    'key' => $inv->dormitoryIncService->id
+                ]
             };
 
-            $this->updateBillingParentTable($validated["billing_type"], $validated["billing_id"], $statusColumn);
+            $inv->update([
+                "invoice_reference" => $validated["ref_number"],
+                "invoice_status" => RequestStatus::FOR_VERIFICATION->value,
+                "payment_type" => ProcessEnum::ONLINE->value,
+                "datePaid" => Carbon::now()
+            ]);
+
+            $this->updateBillingParentTable($validated["billing_type"], $statusColumn['key'], $statusColumn['column']);
         });
     }
 
@@ -78,7 +94,7 @@ class DormitoryInvoiceService {
             $billingType === "INCLUSION" => $this->dormitoryInclusionRequest::class
         };
 
-        $model::where('dormitory_invoice_id', $billingId)->update([
+        $model::whereKey($billingId)->update([
             $statusColumn => RequestStatus::PROCESSING_PAYMENT->value
         ]);
     }
