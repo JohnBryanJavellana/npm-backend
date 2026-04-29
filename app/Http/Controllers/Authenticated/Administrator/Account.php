@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use App\Jobs\SaveAvatar;
 use App\Jobs\SendingEmail;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Utils\TransactionUtil;
@@ -43,6 +44,7 @@ use App\Enums\{
 };
 use App\Http\Requests\AuditLog\PaginationAuditViewRequest;
 use App\Http\Resources\AuditLog\AuditLogResource;
+use Symfony\Component\HttpFoundation\Response;
 
 class Account extends Controller
 {
@@ -170,6 +172,27 @@ class Account extends Controller
         ], 200);
     });
 }
+
+    /**
+     * Summary of get_activities_john
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function get_activities_john(Request $request): JsonResponse
+    {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $auditTrails = AuditTrail::latest()
+                ->when($request->user()->role !== UserRoleEnum::SUPERADMIN->value, fn($query) => $query->where('user_id', $request->user()->id))
+                ->when($q, fn($query) => $query->where('actions', "LIKE", "%{$q}%"))
+                ->paginate($pageCounter);
+
+            return response()->json(['auditTrails' => $auditTrails], Response::HTTP_OK);
+        });
+    }
+
     /**
      * Summary of update_personal
      * @param bool auditActions === TRUE
