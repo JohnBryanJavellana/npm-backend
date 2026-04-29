@@ -40,7 +40,7 @@ class DormitoryExtensionManager extends DocumentExistenceChecker
      * @param string $newEndDate
      * @return array<array|array{check_out_datetime: Carbon, tenant_status: string|array{dormitory_invoice_id: int}|array{tenant_status: string}>}
      */
-    private function finalPreparedData(string $status, int $documentId, int $tenantUserId, string $newEndDate): array
+    public function finalPreparedData(string $status, int $documentId, int $tenantUserId, string $newEndDate): array
     {
         $preparedData = [['tenant_status' => DormitoryEnum::ACTIVE->value], []];
 

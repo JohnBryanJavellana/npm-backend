@@ -2,6 +2,7 @@
 
 namespace App\Services\Trainee\Dormitory;
 
+use App\Enums\Administrator\DormitoryEnum;
 use App\Models\{
     DormitoryRoom,
     DormitoryTenant,
@@ -11,6 +12,7 @@ use App\Models\{
     DormitoryExtensionRequest
 };
 use App\Enums\RequestStatus;
+use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use Carbon\Carbon;
@@ -29,21 +31,22 @@ class DormitoryExtendService {
         protected DormitoryInventory $dormitoryInventory,
         protected DormitoryTransfer $dormitoryTransfer,
         protected DormitoryExtensionRequest $dormitoryExtensionRequest,
+        protected DormitoryRoomReservationManager $dormitoryRoomReservationManager
     ) {}
 
     private function prepareData($userId, $documentId)
     {
         $record = $this->tenantModel
         ->with([
-            "transferRequest"=> function ($query)use ($userId, $documentId) {
+            "transferRequest"=> function ($query) use ($userId, $documentId) {
                 $query->forUser($userId)
                     ->where("dormitory_tenant_id", $documentId)
-                    ->status([RequestStatus::PENDING, RequestStatus::APPROVED]);
+                    ->status([RequestStatus::PENDING]);
             },
-            "extendRequest" => function ($query)use ($userId, $documentId) {
+            "extendRequest" => function ($query) use ($userId, $documentId) {
                 $query->forUser($userId)
                     ->where("dormitory_tenant_id", $documentId)
-                    ->status([RequestStatus::PENDING, RequestStatus::APPROVED ,RequestStatus::FOR_PAYMENT]);
+                    ->status([RequestStatus::PENDING, RequestStatus::FOR_PAYMENT]);
             }
         ])
         ->forUser($userId)
@@ -59,29 +62,36 @@ class DormitoryExtendService {
         }
 
         if($record->transferRequest->isNotEmpty()) {
-            throw new DomainException("A pending or approved TRANSFERING request already exists.");
+            throw new DomainException("A pending or for payment TRANSFERING request already exists.");
         }
 
         if($record->extendRequest->isNotEmpty()) {
-            throw new DomainException("A pending or approved EXTENDING request already exists.");
+            throw new DomainException("A pending or for payment EXTENDING request already exists.");
         }
 
         // if ($record->isExpired()) {
         //     throw new DomainException("This dormitory tenant record is already terminated.");
         // }
     }
+
     public function createExtendRequest($userId, $validated)
     {
         return DB::transaction(function () use ($userId, $validated) {
             $this->prepareData($userId, $validated["document_id"]);
 
-            $record = $this->dormitoryExtensionRequest->create([
+            $preparedData = [
                 "dormitory_tenant_id" => $validated["document_id"],
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryExtensionRequest, self::PREFIX),
                 "old_end_date" => $validated["to_date"],
                 "new_end_date" => $validated["extension_date"],
-            ]);
+                'status' => $validated["withExternalUser"] ? "FOR PAYMENT" : "APPROVED"
+            ];
 
+            if($validated["withExternalUser"]) {
+                $preparedData['dormitory_invoice_id'] = $this->dormitoryRoomReservationManager->createInvoice(DormitoryEnum::EXTENSION->value, $validated["document_id"], $userId, null, (object)['grandTotal' => 99999]);
+            }
+
+            $record = $this->dormitoryExtensionRequest->create($preparedData);
             $this->dormitoryTenantService->updateTenantRecordById($validated["document_id"], $userId, RequestStatus::EXTENDING);
 
             $this->loggingDetails(

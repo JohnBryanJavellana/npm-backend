@@ -6,6 +6,7 @@ enum DormitoryEnum : string
 {
     case DORMITORY = "DORMITORY";
     case EXTENSION = "EXTENSION";
+    case INCLUSION = "INCLUSION";
     case TRANSFER = "TRANSFER";
     case APPROVED_WITH_FEE = "APPROVED_WITH_FEE";
     case SERVICE = "SERVICE";
