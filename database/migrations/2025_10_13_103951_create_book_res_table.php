@@ -13,8 +13,7 @@ return new class extends Migration
         "PENDING",
         "ACTIVE",
         "FOR CSM",
-        "COMPLETED",
-        'ACTIVE'
+        "COMPLETED"
     ];
 
     /**

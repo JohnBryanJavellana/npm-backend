@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal("score", 65)->nullable();
             $table->enum("status", ["IN_PROGRESS","PASSED","FAILED","SUBMITTED","FOR_REMOVAL"]);
             $table->foreignId("graded_by")->nullable()->constrained("users")->cascadeOnDelete();
-            $table->foreignIdFor(User::class, "created_by")->constrained()->cascadeOnDelete();
+            $table->foreignId("created_by")->constrained("users")->cascadeOnDelete();
             $table->dateTime("submitted_at")->nullable();
             $table->dateTime("graded_at")->nullable();
             $table->timestamps();

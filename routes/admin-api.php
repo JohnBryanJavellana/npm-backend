@@ -217,7 +217,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_payments', [Cashier::class, 'get_payments']);
             Route::post('pay-walk-in', [Cashier::class, 'pay_walkin']);
             Route::post('verify_payment', [Cashier::class, 'verify_payment']);
-            Route::get('payments', [Cashier::class, 'get_all_paid_payments']); //edrascoe
+            Route::get('payments', [Cashier::class, 'get_all_paid_payments']);
 
             Route::get('get_charges', [Cashier::class, 'get_charges']);
             Route::get('get_charges/get_charges_predata', [Cashier::class, 'get_charges_predata']);
