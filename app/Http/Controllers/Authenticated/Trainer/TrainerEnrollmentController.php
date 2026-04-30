@@ -85,8 +85,7 @@ class TrainerEnrollmentController extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $list = EnrolledCourse::where([
-                'training_id' => $request->trainingId,
-                'enrolled_course_status' => 'ENROLLED'
+                'training_id' => $request->trainingId
             ])->with([
                 'trainee',
                 'trainee.assessmentAttempts',

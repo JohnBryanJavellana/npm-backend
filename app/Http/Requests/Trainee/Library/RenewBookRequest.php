@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Trainee\Library;
 
 use App\Enums\UserRoleEnum;
+use App\Models\BookRes;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -21,12 +22,10 @@ class RenewBookRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            "user_id" => in_array($this->user()->role, [
-                UserRoleEnum::SUPERADMIN->value,
-                UserRoleEnum::ADMIN_LIBRARY->value
-            ])
+            "user_id" => \in_array($this->user()->role, [UserRoleEnum::SUPERADMIN->value,UserRoleEnum::ADMIN_LIBRARY->value])
                 ? $this->input("userId")
-                : $this->user()->id
+                : $this->user()->id,
+            "bookResId" => BookRes::findOrFail($this->data[0]['book_res_id'])->id
         ]);
 
         \Log::info("user", [$this->all()]);
@@ -42,6 +41,7 @@ class RenewBookRequest extends FormRequest
     {
         return [
             "user_id" => "required|exists:users,id",
+            "bookResId" => "required|integer|exists:book_res,id",
             "data" => "required|array",
             "data.*.book_res_id" => "required|exists:book_reservations,id",
             "data.*.to" => "required|date"

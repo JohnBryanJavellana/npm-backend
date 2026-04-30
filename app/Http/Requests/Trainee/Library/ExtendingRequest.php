@@ -27,12 +27,9 @@ class ExtendingRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            "user_id" => in_array($this->user()->role, [
-                UserRoleEnum::SUPERADMIN->value,
-                UserRoleEnum::ADMIN_LIBRARY->value
-            ])
+            "user_id" => in_array($this->user()->role, [UserRoleEnum::SUPERADMIN->value, UserRoleEnum::ADMIN_LIBRARY->value])
                 ? $this->input("userId")
-                : $this->user()->id
+                : $this->user()->id,
         ]);
     }
     /**

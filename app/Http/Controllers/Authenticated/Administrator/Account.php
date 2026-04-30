@@ -126,6 +126,9 @@ class Account extends Controller
      */
     public function get_activities (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
             $activities = AuditTrail::orderBy('created_at', 'DESC');
             if ($request->user()->role !== UserRoleEnum::SUPERADMIN->value) $activities->where('user_id', $request->user()->id);
 

@@ -15,6 +15,7 @@ use App\Http\Requests\Admin\Library\UpdateBookCopy;
 use App\Http\Requests\Admin\Library\UpdateProlongationRequest;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
+use App\Models\BookExtensionRequest;
 use App\Services\Administrator\Library\LibraryBookCopyManager;
 use App\Services\Administrator\Library\LibraryBookEntryManager;
 use App\Services\Administrator\Library\LibraryBookFinesManager;
@@ -128,7 +129,13 @@ class LibraryController extends Controller
      */
     public function submit_extension_request (ExtendingRequest $request): JsonResponse
     {
-        return $this->traineeCtrlInstance->extend($request);
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $bookResId = $request->reference_id;
+            $requestor = $request->userId;
+
+            $result = $this->libraryProlongationManager->saveExtensionRequest($request, $bookResId, $requestor);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
     }
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -426,15 +433,15 @@ class LibraryController extends Controller
     public function get_prolongation_request (GetProlongationRequests $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $prolongationMain = BookReservation::with([
-                'bookRes',
-                'books',
-                'bookRes.trainee',
-                'books.catalog',
-                'books.catalog.genre'
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $prolongationMain = BookExtensionRequest::with([
+                'extensionRequest.trainee',
+                'bookReservation.books.catalog.genre'
             ])->where([
                 'book_res_id' => $request->bookResId
-            ])->get();
+            ])->paginate($pageCounter);
 
             return response()->json(['prolongationRequests' => $prolongationMain], 200);
         });
@@ -454,7 +461,7 @@ class LibraryController extends Controller
                 'books.catalog.genre'
             ])->where([
                 'book_res_id' => $request->libraryId
-            ])->whereIn('status', $request->status)->get();
+            ])->whereIn('status', ['RECEIVED', 'EXTENDED', 'RENEWED'])->get();
 
             return response()->json(['booksThatAreProtactible' => $booksThatAreProtactible], 200);
         });

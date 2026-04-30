@@ -23,7 +23,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS,TRAINER'])->group(function () {
         Route::post('dashboard_data', [DashboardCtrl::class, 'dashboard_data']);
 
-        Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS', 'throttle:60,1'])->group(function () {
+        Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS,TRAINER', 'throttle:60,1'])->group(function () {
             Route::post('get_terms_and_condition', [TermsAndConditionCtrl::class, 'get_terms_and_condition']);
             Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
             Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);

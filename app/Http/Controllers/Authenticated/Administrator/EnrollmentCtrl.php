@@ -879,6 +879,8 @@ class EnrollmentCtrl extends Controller
     public function set_training_status(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
+            \Log::debug($request->all());
+
             $this_training_status = EnrolledCourse::findOrFail($request->documentId);
             $this_training_status->enrolled_course_status = $request->status;
             $this_training_status->save();
