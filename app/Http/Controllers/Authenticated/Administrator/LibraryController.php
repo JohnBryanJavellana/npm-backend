@@ -156,11 +156,22 @@ class LibraryController extends Controller
      */
     public function get_books (Request $request): JsonResponse
     {
-        return TransactionUtil::transact(null, [], function() {
-            $books = Book::withCount('copies', 'hasData')->with([
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $books = Book::when($q, function($query) use ($q) {
+                $query->whereHas("catalog", function($query2) use ($q) {
+                    $query2->orWhere("title", "LIKE", "%{$q}%")
+                        ->orWhere("isbn", "LIKE", "%{$q}%")
+                        ->orWhereHas("genre", function($query3) use ($q) {
+                            $query3->orWhere("category", "LIKE", "%{$q}%");
+                        });
+                });
+            })->withCount('copies', 'hasData')->with([
                 'catalog',
                 'catalog.genre'
-            ])->get();
+            ])->paginate($pageCounter);
 
             return response()->json(['books' => $books], 200);
         });

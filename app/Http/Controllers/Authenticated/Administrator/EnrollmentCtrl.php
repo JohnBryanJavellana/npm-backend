@@ -728,7 +728,9 @@ class EnrollmentCtrl extends Controller
                 $query->where('isExpired', $request->isExpired);
             }
 
-            $applications = $query->get()->map(function ($self) use ($allRequirements, $basicRequirements) {
+            $applications = $query->paginate(10);
+
+            $applications->getCollection()->transform(function ($self) use ($allRequirements, $basicRequirements) {
                 $addInfo = $self->trainee->additional_trainee_info;
                 $courseSpecificReqs = $self->training->module->specific_requirements;
                 $allRelevantReqs = $basicRequirements->concat($courseSpecificReqs)->unique('id');
