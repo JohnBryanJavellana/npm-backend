@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(ExtensionRequest::class)->constrained()->cascadeOnDelete();
             $table->date('current_to_date');
             $table->date('date_of_extension');
+            $table->string('prev_status');
             $table->enum('status', ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'])->default('PENDING');
             $table->timestamps();
         });

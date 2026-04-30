@@ -127,12 +127,14 @@ class Account extends Controller
     public function get_activities (Request $request) {
         return TransactionUtil::transact(null, [], function() use ($request) {
             $pageCounter = $request->pageCounter ?? 10;
-            $q = $request->q;
+            $query = $request->q;
 
-            $activities = AuditTrail::orderBy('created_at', 'DESC');
-            if ($request->user()->role !== UserRoleEnum::SUPERADMIN->value) $activities->where('user_id', $request->user()->id);
+            $activities = AuditTrail::when($request->user()->role !== UserRoleEnum::SUPERADMIN->value, fn($q) => $q->where('user_id', $request->user()->id))
+                ->when($query, fn($q) => $q->where('actions', "LIKE", "%{$query}%"))
+                ->latest()
+                ->paginate($pageCounter);
 
-            return response()->json(['activities' => $activities->get()], 200);
+            return response()->json(['activities' => $activities], 200);
         });
     }
 

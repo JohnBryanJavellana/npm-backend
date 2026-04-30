@@ -658,6 +658,7 @@ class DormitoryController extends Controller
             $pageCounter = $request->pageCounter ?? 10;
             $query = $request->q;
             $status = $request->status;
+            $type = $request->type; // DORMITORY | LIBRARY | RECREATIONAL | ENROLLMENT
 
             $transferRequests = DormitoryInvoice::with([
                 'payee',

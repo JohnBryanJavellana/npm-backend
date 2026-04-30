@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Authenticated\Trainee;
 
 use App\Events\BELibrary;
 use App\Http\Controllers\Controller;
+use App\Services\Administrator\Library\LibraryProlongationManager;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
@@ -39,6 +40,7 @@ class TraineeLibrary extends Controller
         protected LibraryService $library_service,
         protected LibraryExtendService $libraryExtendService,
         protected LibraryRenewService $libraryRenewService,
+        protected LibraryProlongationManager $libraryProlongationManager
     ) {}
 
     /** GET ALL AVAILABLE BOOKS */
@@ -376,12 +378,14 @@ class TraineeLibrary extends Controller
     }
 
     /** CREATE RENEW REQUESTS */
-    public function renew(RenewBookRequest $request)
+    public function renew(ExtendingRequest $request)
     {
         try {
             $validated = $request->validated();
-            $this->libraryRenewService->storeRenewRequest($validated);
+            $bookResId = $request->bookResId;
+            $requestor = $request->user_id;
 
+            $this->libraryProlongationManager->saveExtensionRequest($validated, $bookResId, $requestor, "RENEWAL");
             AuditHelper::log($validated["user_id"], "User {$validated["user_id"]} sent a book renewal request.");
 
             return response()->json(["message" => "You've successfully sent a book renewal request."], 200);
@@ -407,6 +411,7 @@ class TraineeLibrary extends Controller
             return response()->json([], 500);
         }
     }
+
     public function count_book_reservation(Request $request)
     {
         return TransactionUtil::transact(null, [], function () use ($request) {

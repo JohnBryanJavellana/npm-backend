@@ -6,6 +6,7 @@ use App\Enums\Administrator\LibraryEnum;
 use App\Enums\AdministratorReturnResponse;
 use App\Models\BookExtensionRequest;
 use App\Models\BookReservation;
+use App\Models\User;
 use Carbon\Carbon;
 
 class LibraryProlongationManager
@@ -17,18 +18,25 @@ class LibraryProlongationManager
      * @param int $requestor
      * @return array{message: string, status: int}
      */
-    public function saveExtensionRequest(object $payload, int $bookResId, int $requestor): array
+    public function saveExtensionRequest(object $payload, int $bookResId, int $requestor, string $type): array
     {
-        $this_extension = collect($payload->data)->each(function($q) {
-            BookReservation::findOrFail($q['book_res_id'])->update(['status' => "EXTENDING"]);
-        })->map(function($q) use ($bookResId) {
+        $this_extension = collect($payload->data)->each(function($q) use ($type) {
+            BookReservation::findOrFail($q['book_res_id'])->update(['status' => $type === "EXTENSION" ? "EXTENDING" : "RENEWING"]);
+        })->map(function($q) use ($bookResId, $requestor, $type) {
             $bookReservation = BookReservation::findOrFail($q['book_res_id']);
+
+            $targetTo = match($type) {
+                "EXTENSION" => User::findOrFail($requestor)->role === "TRAINEE" ? Carbon::parse($bookReservation['to_date'])->addHours(3) : Carbon::parse($bookReservation['to_date'])->addDays(7),
+                "RENEWAL" => User::findOrFail($requestor)->role === "TRAINEE" ? Carbon::parse($bookReservation['to_date'])->addDays(7) : Carbon::parse($bookReservation['to_date'])->addDays(15)
+            };
 
             return [
                 'book_res_id' => $bookResId,
                 'book_reservation_id' => $q['book_res_id'],
                 'current_to_date' => $bookReservation['to_date'],
-                'date_of_extension' => $q['to'],
+                'date_of_extension' => $targetTo,
+                'prev_status' => $bookReservation->status,
+                'type' => $type,
                 'created_at' => now(),
                 'updated_at' => now()
             ];
@@ -42,28 +50,21 @@ class LibraryProlongationManager
      * Summary of updateProlongationRequest
      * @param int $prolongationRequestId
      * @param string $status
-     * @param mixed $acceptedStatus
-     * @param string $targetDateTime
      * @return array{message: string, status: int}
      */
-    public function updateProlongationRequest(int $prolongationRequestId, string $status, ?string $acceptedStatus, string $targetDateTime): array
+    public function updateProlongationRequest(int $prolongationRequestId, string $status, string $type): array
     {
-        $this_prolongation_request = BookReservation::lockForUpdate()
-            ->findOrFail($prolongationRequestId);
+        $this_prolongation_request = BookExtensionRequest::lockForUpdate()->findOrFail($prolongationRequestId);
+        $this_prolongation_request->update(['status' => $status]);
 
-        $isPastDue = now()->gt(Carbon::parse($this_prolongation_request->to_date));
-
-        $tempStatus = match(true) {
-            $isPastDue                                    => 'EXPIRED',
-            $status === LibraryEnum::APPROVED->value      => $acceptedStatus,
-            \in_array($status, ["REJECTED", "CANCELLED"]) => 'RECEIVED',
-            default                                       => 'ERROR'
+        $newBookReservationStatus = match($status) {
+            "APPROVED" => $type === "EXTENSION" ? "EXTENDED" : "RENEWED",
+            default => $this_prolongation_request->prev_status
         };
 
-        $newDate = \in_array($tempStatus, ["EXTENDED", "RENEWED"]) ? Carbon::parse($targetDateTime) : $this_prolongation_request->to_date;
-        $this_prolongation_request->update([
-            'status' => $tempStatus,
-            'to_date' => $newDate
+        $this_prolongation_request->bookReservation()->update([
+            'to_date' => $status === "APPROVED" ? $this_prolongation_request->date_of_extension : $this_prolongation_request->current_to_date,
+            'status' => $newBookReservationStatus
         ]);
 
         return [

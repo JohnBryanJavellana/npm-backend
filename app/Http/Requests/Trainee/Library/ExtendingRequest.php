@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Trainee\Library;
 
 use App\Enums\UserRoleEnum;
+use App\Models\BookReservation;
 use App\Rules\Trainee\Library\BookLibraryRule;
 use App\Rules\ExtensionDateRangeRule;
 use App\Rules\Trainee\Library\UserLibraryRule;
@@ -53,11 +54,13 @@ class ExtendingRequest extends FormRequest
         $validator->after(function ($validator) {
             $user = $this->user();
 
-            $hasData = BookRes::where(["user_id" => $user->id, "status" => "EXTENDING"])->exists();
+            $hasData = BookReservation::whereIn('status', ["EXTENDING", "RENEWING"])
+                ->whereIn("id", collect($this->data)->pluck('book_res_id'))
+                ->exists();
 
             if ($hasData) {
                 $validator->errors()->add(
-                    "You already have a pending book extension request. Please wait for it to be processed first."
+                    "You already have a pending book prolongation request. Please wait for it to be processed first."
                 );
             }
         });

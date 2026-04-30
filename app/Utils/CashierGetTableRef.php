@@ -18,7 +18,7 @@ use App\Models\RARequestInfo;
 
 class CashierGetTableRef
 {
-    public static function getTable(string $service, ?int $referenceId, ?array $whereIns)
+    public static function getTable(string $service, ?int $referenceId, ?array $whereIns, ?array $specificWhere = [])
     {
         $modelMap = [
             'ENROLLMENT' => EnrollmentInvoice::class,
@@ -46,11 +46,7 @@ class CashierGetTableRef
         }
 
         if($whereIns !== null) {
-            foreach ($whereIns as $column => $values) {
-                if (!empty($values)) {
-                    $query->whereIn($column, $values);
-                }
-            }
+            $query->whereIn("invoice_status", $whereIns);
         }
 
         return $query;
