@@ -22,7 +22,6 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Training::class)->constrained()->cascadeOnDelete();
-            // $table->foreignIdFor(TermsAndCondition::class)->constrained()->cascadeOnDelete();
             $table->string('bgColor')->nullable();
             $table->enum('enrolled_course_status', [
                 'PENDING',
@@ -35,7 +34,9 @@ return new class extends Migration
                 'FOR PAYMENT',
                 'IR',
                 'CSFB',
-                'PROCESSING PAYMENT'
+                'PROCESSING PAYMENT',
+                'FAILED',
+                'TERMINATED'
             ])->default('PENDING');
             $table->enum('isExpired', ['YES', 'NO'])->default('NO');
             $table->timestamps();

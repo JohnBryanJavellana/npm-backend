@@ -22,7 +22,7 @@ return new class extends Migration
             $table->longText('trace_number')->nullable();
             $table->enum('accommodation', ["SINGLE", "SHARED", "COUPLE"]);
             $table->enum('room_type', ['AIRCON', 'NON-AIRCON']);
-            $table->enum("status", ['PENDING','APPROVED','CANCELLED','PAID','FOR PAYMENT','FOR VERIFICATION'])->default('PENDING');
+            $table->enum("status", ['PENDING','APPROVED','CANCELLED','PAID','FOR PAYMENT', 'PROCESSING PAYMENT'])->default('PENDING');
             $table->longText("reason")->nullable();
             $table->timestamps();
         });

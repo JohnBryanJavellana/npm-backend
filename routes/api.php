@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Authenticated\Administrator\LibraryController;
 use App\Http\Controllers\Authenticated\Trainee\TraineeLMSController;
 use App\Http\Controllers\Authenticated\Trainer\AnnouncementController;
 use Illuminate\Http\Request;
@@ -164,9 +165,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::match(['GET', 'POST'], 'requests/count', [TraineeLibrary::class, 'count_book_reservation']);
             Route::post('requests/extension', [TraineeLibrary::class, 'view_extend_request']);
             Route::post('requests/available_extension', [TraineeLibrary::class, 'view_available_extension']);
-            Route::post('requests/submit_extension', [TraineeLibrary::class, 'extend']);
+            Route::post('requests/submit_extension', [LibraryController::class, 'submit_extension_request']);
             Route::post('requests/extension/cancel', [TraineeLibrary::class, 'cancel_extend']);
-            Route::post('requests/renew', [TraineeLibrary::class, 'renew']);
+            Route::post('requests/renew', [LibraryController::class, 'submit_extension_request']);
             Route::post('renew/cancel', [TraineeLibrary::class, 'cancelRenew']);
             Route::get("counts", [TraineeLibrary::class, 'viewLibRequestCount']);
         });

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('trace_number', 255)->nullable();
             $table->date('old_end_date');
             $table->date("new_end_date");
-            $table->enum("status", ['PENDING','APPROVED','CANCELLED','PAID','FOR PAYMENT','FOR VERIFICATION'])->default('PENDING');
+            $table->enum("status", ['PENDING','APPROVED','CANCELLED','PAID','FOR PAYMENT', 'PROCESSING PAYMENT'])->default('PENDING');
             $table->longText("reason")->nullable();
             $table->timestamps();
         });

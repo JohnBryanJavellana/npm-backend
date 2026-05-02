@@ -2,6 +2,7 @@
 
 namespace App\Services\Trainee\Dormitory;
 
+use App\Enums\Administrator\DormitoryEnum;
 use App\Enums\RequestStatus;
 use App\Models\ {
     DormitoryInclusionRequest,
@@ -9,6 +10,7 @@ use App\Models\ {
     DormitoryInvoice,
     DormitoryItemBorrowing
 };
+use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Utils\GenerateTrace;
 use DomainException;
 use Illuminate\Support\Facades\Cache;
@@ -24,7 +26,8 @@ class DormitoryInclusionService {
         protected DormitoryInventory $dormitoryInventory,
         protected DormitoryItemBorrowing $dormitoryItemBorrowing,
         protected DormitoryInclusionRequest $dormitoryInclusionRequest,
-        protected DormitoryInvoice $dormitoryInvoiceModel
+        protected DormitoryInvoice $dormitoryInvoiceModel,
+        protected DormitoryRoomReservationManager $dormitoryRoomReservationManager
     )
     {}
 
@@ -64,14 +67,21 @@ class DormitoryInclusionService {
     public function createInclusionRequest($validated, $userId)
     {
         DB::transaction(function () use ($validated, $userId) {
-            $dataToInsert = collect($validated["data"])->map(fn($query) => [
-                "control_number" => GenerateTrace::createTraceNumber($this->dormitoryInclusionRequest, '-INCR-', 'control_number'),
-                "dormitory_inventory_id" => $query["inclusion_id"],
-                "dormitory_tenant_id" => $validated["request_id"],
-                "quantity" => $query["quantity"],
-                'created_at' => now(),
-                'updated_at' => now()
-            ])->toArray();
+            $dataToInsert = collect($validated["data"])->map(function($query) use ($userId, $validated) {
+                $thisInventory = DormitoryInventory::findOrFail($query["inclusion_id"]);
+
+                return [
+                    "control_number" => GenerateTrace::createTraceNumber($this->dormitoryInclusionRequest, '-INCR-', 'control_number'),
+                    "dormitory_invoice_id" => $validated["isWalkIn"]
+                        ? $this->dormitoryRoomReservationManager->createInvoice(DormitoryEnum::INCLUSION->value, $validated["request_id"], $userId, null, (object)['grandTotal' => $thisInventory->charge *  $query["quantity"]])
+                        : null,
+                    "dormitory_inventory_id" => $query["inclusion_id"],
+                    "dormitory_tenant_id" => $validated["request_id"],
+                    "quantity" => $query["quantity"],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            })->toArray();
 
             $this->dormitoryInclusionRequest->insert($dataToInsert);
         });
@@ -82,10 +92,8 @@ class DormitoryInclusionService {
         // validate the owner
         DB::transaction(function () use ($validated, $userId) {
             $record = $this->dormitoryInclusionRequest->query()
-            ->status([RequestStatus::APPROVED, RequestStatus::PENDING])
-            ->whereRelation("tenant", "user_id", "=", $userId)
-            ->whereKey($validated["request_id"])
-            ->first();
+                ->whereKey($validated["request_id"])
+                ->first();
 
             if(!$record) {
                 throw new DomainException("Item request not found!");
@@ -94,6 +102,8 @@ class DormitoryInclusionService {
             $record->update([
                 "status" => RequestStatus::CANCELLED
             ]);
+
+            $record->invoice->update([ 'invoice_status' => RequestStatus::CANCELLED ]);
         });
     }
 }

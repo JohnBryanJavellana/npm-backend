@@ -2,6 +2,7 @@
 
 namespace App\Services\Trainee\Dormitory;
 
+use App\Enums\Administrator\DormitoryEnum;
 use App\Enums\RequestStatus;
 use App\Models\{
     DormitoryInventory,
@@ -11,6 +12,7 @@ use App\Models\{
     DormitoryTransfer,
     DormitoryExtendRequest
 };
+use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use Carbon\Carbon;
@@ -28,6 +30,7 @@ class DormitoryTransferService extends DormitoryHistoryService {
         protected DormitoryInventory $dormitoryInventory,
         protected DormitoryTransfer $dormitoryTransfer,
         protected DormitoryExtendRequest $dormitoryExtendRequest,
+        protected DormitoryRoomReservationManager $dormitoryRoomReservationManager
     ) {}
 
     public function prepareData($userId, $documentId) {
@@ -91,10 +94,15 @@ class DormitoryTransferService extends DormitoryHistoryService {
 
             $this->dormitoryTransfer->create([
                 "dormitory_tenant_id" => $validated["document_id"],
+                "dormitory_invoice_id" => $validated["roomId"] && $validated["isWalkIn"]
+                        ? $this->dormitoryRoomReservationManager->createInvoice(DormitoryEnum::TRANSFER->value, $validated["document_id"], $userId, null, (object)['grandTotal' => 9999])
+                        : null,
+                "dormitory_room_id" => $validated["roomId"],
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryTransfer, "-TR-"),
                 "accommodation" => $validated["accommodation"],
                 "room_type" => $validated["type"],
-                "reason" => $validated["reason"]
+                "reason" => $validated["reason"],
+                "status" => $validated["roomId"] && $validated["isWalkIn"] ? "FOR PAYMENT" : "PENDING"
             ]);
 
             //temporary
@@ -116,23 +124,24 @@ class DormitoryTransferService extends DormitoryHistoryService {
 
     public function cancelTransferRequest(int $id, int $userId)
     {
+        \Log::debug($id);
+
         DB::transaction(function() use($id, $userId) {
             $record = $this->dormitoryTransfer
-            ->with("tenant")
-            ->whereRelation("tenant", "user_id", "=", $userId)
-            ->whereNot("status", RequestStatus::CANCELLED)
-            ->lockForUpdate()
-            ->findOrFail($id);
+                ->with('tenant')
+                ->whereKey($id)
+                ->lockForUpdate()
+                ->first();
 
             if(!$record) {
                 throw new DomainException("Transfer request not found.");
             }
 
-            if($record->status === RequestStatus::CANCELLED) {
+            if($record->status === RequestStatus::CANCELLED->value) {
                 throw new DomainException(("This transfer request has already been cancelled."));
             }
 
-            if($record->status === RequestStatus::APPROVED) {
+            if($record->status === RequestStatus::APPROVED->value) {
                 throw new DomainException("Transfer request cancellation is not permitted.");
             }
 
@@ -140,11 +149,12 @@ class DormitoryTransferService extends DormitoryHistoryService {
 
             $record->update(["status" => RequestStatus::CANCELLED]);
 
-            $this->dormitoryTenantService->updateTenantRecordById($record->dormitory_tenant_id, $userId, $status);
+            $this->dormitoryTenantService->updateTenantRecordById($record->dormitory_tenant_id, $record->tenant->user_id, $status);
+            $record->invoice->update([ 'invoice_status' => RequestStatus::CANCELLED ]);
 
             $this->loggingDetails(
                 $record->dormitory_tenant_id,
-                $userId,
+                $record->tenant->user_id,
                 "cancelled",
                 "You cancelled your room transfer request."
             );

@@ -15,8 +15,16 @@ class CreateExtendRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        
+
         return $this->user() !== null;
+    }
+
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'userId' => $this->userId ?? $this->user()->id,
+            'withExternalUser' => $this->has('userId'),
+        ]);
     }
 
     /**
@@ -27,6 +35,8 @@ class CreateExtendRequest extends FormRequest
     public function rules(): array
     {
         return [
+            "withExternalUser" => "required|boolean",
+            "userId" => "required|integer|exists:users,id",
             "document_id" => "required|exists:dormitory_tenants,id",
             "to_date" => "required|date",
             "extension_date" => "required|date|after:to_date",

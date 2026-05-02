@@ -27,10 +27,9 @@ class UpdateProlongationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'prolongationRequestId' => ['required', 'integer', 'exists:book_reservations,id', new UpdateProlongationRule()],
-            'status' => ['required', 'string', 'in:APPROVED,REJECTED,CANCELLED,RETURNED,RECEIVED,LOST,DAMAGED,EXPIRED'],
-            'acceptedStatus' => ['required', 'string', 'in:RENEWED,EXTENDED'],
-            'targetDateTime' => ['required', 'date']
+            'prolongationRequestId' => ['required', 'integer', 'exists:book_extension_requests,id', new UpdateProlongationRule()],
+            'status' => ['required', 'string'],
+            'type' => ['required', 'string', 'in:RENEWAL,EXTENSION']
         ];
     }
 }

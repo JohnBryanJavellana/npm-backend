@@ -127,6 +127,7 @@ class Account extends Controller
      * @param Request $request
      */
     public function get_activities (Request $request) {
+<<<<<<< HEAD
     return TransactionUtil::transact(null, [], function() use ($request) {
         $activities = AuditTrail::orderBy('created_at', 'DESC');
 
@@ -190,6 +191,18 @@ class Account extends Controller
                 ->paginate($pageCounter);
 
             return response()->json(['auditTrails' => $auditTrails], Response::HTTP_OK);
+=======
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $query = $request->q;
+
+            $activities = AuditTrail::when($request->user()->role !== UserRoleEnum::SUPERADMIN->value, fn($q) => $q->where('user_id', $request->user()->id))
+                ->when($query, fn($q) => $q->where('actions', "LIKE", "%{$query}%"))
+                ->latest()
+                ->paginate($pageCounter);
+
+            return response()->json(['activities' => $activities], 200);
+>>>>>>> cfa2238e63f0957dbd615cce01ee155c7234b864
         });
     }
 

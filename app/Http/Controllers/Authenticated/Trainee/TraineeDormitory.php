@@ -217,7 +217,7 @@ class TraineeDormitory extends Controller
     public function create_extend_request(CreateExtendRequest $request)
     {
         $validated = $request->validated();
-        $userId = $request->user()->id;
+        $userId = $validated['userId'];
 
         \Log::info("create_extend_request", [$request->all()]);
 
@@ -245,6 +245,7 @@ class TraineeDormitory extends Controller
     public function cancel_extend_request(Request $request, $id)
     {
         $user_id = $request->user()->id;
+
         try {
             $this->dormitoryExtendService->cancelExtendRequest($id, $user_id);
 
@@ -261,10 +262,10 @@ class TraineeDormitory extends Controller
     public function create_transfer_request(CreateTransferRequest $request)
     {
         try {
-            $userId = $request->user()->id;
             $validated = $request->validated();
+            $user_id = $validated['userId'];
 
-            $this->dormitoryTransferService->createTransferRequest($validated, $userId);
+            $this->dormitoryTransferService->createTransferRequest($validated, $user_id);
 
             event(new BEDormitory(''));
 
@@ -349,8 +350,8 @@ class TraineeDormitory extends Controller
 
     public function request_inclusion(CreateInclusionRequest $request)
     {
-        $user_id = $request->user()->id;
         $validated = $request->validated();
+        $user_id = $validated['userId'];
 
         try {
             $this->dormitoryInclusionService->createInclusionRequest($validated, $user_id);

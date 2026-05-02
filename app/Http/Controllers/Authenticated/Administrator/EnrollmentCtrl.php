@@ -728,7 +728,9 @@ class EnrollmentCtrl extends Controller
                 $query->where('isExpired', $request->isExpired);
             }
 
-            $applications = $query->get()->map(function ($self) use ($allRequirements, $basicRequirements) {
+            $applications = $query->paginate(10);
+
+            $applications->getCollection()->transform(function ($self) use ($allRequirements, $basicRequirements) {
                 $addInfo = $self->trainee->additional_trainee_info;
                 $courseSpecificReqs = $self->training->module->specific_requirements;
                 $allRelevantReqs = $basicRequirements->concat($courseSpecificReqs)->unique('id');
@@ -879,6 +881,8 @@ class EnrollmentCtrl extends Controller
     public function set_training_status(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
+            \Log::debug($request->all());
+
             $this_training_status = EnrolledCourse::findOrFail($request->documentId);
             $this_training_status->enrolled_course_status = $request->status;
             $this_training_status->save();

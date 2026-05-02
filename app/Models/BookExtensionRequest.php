@@ -18,6 +18,6 @@ class BookExtensionRequest extends Model
 
     // added by king.01 👑
     public function extensionRequest () {
-        return $this->belongsTo(ExtensionRequest::class, 'extension_request_id', 'id');
+        return $this->belongsTo(BookRes::class, 'book_res_id', 'id');
     }
 }

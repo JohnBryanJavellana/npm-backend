@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Trainee\Dormitory;
 
+use App\Models\DormitoryTenant;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -19,6 +20,13 @@ class CreateTransferRequest extends FormRequest
         return $this->user() !== null;
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'userId' => $this->isWalkIn ? DormitoryTenant::findOrFail($this->document_id)->user_id : $this->user()->id,
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -27,7 +35,10 @@ class CreateTransferRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'document_id' => 'required',
+            "isWalkIn" => 'required|boolean',
+            "roomId" => 'nullable',
+            "userId" => "required|integer|exists:users,id",
+            'document_id' => 'required|integer|exists:dormitory_tenants,id',
             'accommodation' => 'required|in:SINGLE,SHARED,COUPLE',
             'type' => 'required|in:AIRCON,NON-AIRCON',
             'reason' => 'required|string|max:500'

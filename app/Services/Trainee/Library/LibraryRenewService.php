@@ -4,6 +4,7 @@ namespace App\Services\Trainee\Library;
 
 use App\Enums\RequestStatus;
 // use App\Models\BookReservation;
+use App\Http\Controllers\Authenticated\Administrator\LibraryController;
 use App\Models\{BookService, BookRes, BookReservation};
 use Carbon\Carbon;
 use DomainException;
@@ -16,7 +17,7 @@ class LibraryRenewService
         protected LibraryExtraService $libraryExtraService,
         protected BookService $bookServiceModel,
         protected BookReservation $bookReservationModel,
-        protected BookRes $bookResModel,
+        protected BookRes $bookResModel
     ) {}
 
     public function prepareData($records, $book_reservation_ids)
@@ -34,26 +35,26 @@ class LibraryRenewService
 
     public function storeRenewRequest($validated)
     {
-        DB::transaction(function () use ($validated) {
-            $userId = $validated['user_id'];
-            $bookIds = collect($validated['data'])->pluck('book_res_id')->values()->toArray();
+        // DB::transaction(function () use ($validated) {
+        //     $userId = $validated['user_id'];
+        //     $bookIds = collect($validated['data'])->pluck('book_res_id')->values()->toArray();
 
-            $records = $this->bookReservationModel->query()
-                ->forStatus(RequestStatus::renewableStatuses())
-                ->whereRelation('bookRes', 'user_id', $userId)
-                ->whereIn('id', $bookIds)
-                ->lockForUpdate()
-                ->get();
+        //     $records = $this->bookReservationModel->query()
+        //         ->forStatus(RequestStatus::renewableStatuses())
+        //         ->whereIn('id', $bookIds)
+        //         ->lockForUpdate()
+        //         ->get();
 
-            $this->prepareData($records, $bookIds);
+        //     $this->prepareData($records, $bookIds);
 
-            $this->libraryExtraService->storeExtraService($validated, $userId, 'RENEW');
+        //     $this->libraryExtraService->storeExtraService($validated, $userId, 'RENEW');
 
-            foreach ($records as $record) {
-                $record->status = RequestStatus::RENEWING->value;
-                $record->save();
-            }
-        });
+        //     foreach ($records as $record) {
+        //         $record->status = RequestStatus::RENEWING->value;
+        //         $record->save();
+        //     }
+        // });
+        return $this->libraryController->submit_extension_request($validated);
     }
 
 

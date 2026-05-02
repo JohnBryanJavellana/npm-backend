@@ -6,6 +6,8 @@ use App\Enums\AdministratorAuditActions;
 use App\Enums\AdministratorReturnResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Guest\RegisterController;
+use App\Models\BookRes;
+use App\Models\DormitoryTenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Utils\TransactionUtil;
@@ -67,6 +69,48 @@ class Masterlist extends Controller
 
             $usersData = $users->get();
             return response()->json(['users' => $usersData], 200);
+        });
+    }
+
+    /**
+     * Summary of get_active_guests
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function get_active_guests (Request $request): JsonResponse
+    {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $query = $request->q;
+            $model = $request->model;
+
+            $matchedModel = match($model) {
+                'DormitoryTenant' => [
+                    'model' => DormitoryTenant::class,
+                    'with' => ['boarder'],
+                    'userInfo' => 'boarder',
+                    'whereActiveStatussesColumn' => 'tenant_status',
+                    'whereActiveStatusses' => ['APPROVED', 'ACTIVE']
+                ]
+            };
+
+            $activeGuests = $matchedModel['model']::with($matchedModel['with'])
+                ->whereIn($matchedModel['whereActiveStatussesColumn'], $matchedModel['whereActiveStatusses'])
+                ->when($query, function($q) use($query, $matchedModel) {
+                    $q->whereHas($matchedModel['userInfo'], function($q2) use ($query) {
+                        $q2->where('id', 'LIKE', "%{$query}%")
+                            ->orWhere('fname', 'LIKE', "%{$query}%")
+                            ->orWhere('mname', 'LIKE', "%{$query}%")
+                            ->orWhere('lname', 'LIKE', "%{$query}%")
+                            ->orWhere('suffix', 'LIKE', "%{$query}%");
+                    });
+                })->get()->map(fn($r) => [
+                    'modelId' => $r->id,
+                    'userId' => $r->{$matchedModel['userInfo']}->id,
+                    'profile_photo_path' => $r->{$matchedModel['userInfo']}->profile_picture,
+                    'fullname' => "{$r->{$matchedModel['userInfo']}->fname} {$r->{$matchedModel['userInfo']}->mname} {$r->{$matchedModel['userInfo']}->lname} {$r->{$matchedModel['userInfo']}?->suffix}"
+                ]);
+
+            return response()->json(['activeGuests' => $activeGuests], 200);
         });
     }
 

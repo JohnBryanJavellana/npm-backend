@@ -25,7 +25,7 @@ class DormitoryTenantService {
 
         return $record->first($columns);
     }
-    
+
     public function updateTenantRecordById($tenantId, $userId, $status)
     {
         $record = $this->dormitoryTenantModel->query()

@@ -15,6 +15,7 @@ use App\Http\Requests\Admin\Library\UpdateBookCopy;
 use App\Http\Requests\Admin\Library\UpdateProlongationRequest;
 use App\Http\Requests\Trainee\Library\ExtendingRequest;
 use App\Http\Requests\Trainee\Library\RenewBookRequest;
+use App\Models\BookExtensionRequest;
 use App\Services\Administrator\Library\LibraryBookCopyManager;
 use App\Services\Administrator\Library\LibraryBookEntryManager;
 use App\Services\Administrator\Library\LibraryBookFinesManager;
@@ -128,18 +129,14 @@ class LibraryController extends Controller
      */
     public function submit_extension_request (ExtendingRequest $request): JsonResponse
     {
-        return $this->traineeCtrlInstance->extend($request);
-    }
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $bookResId = $request->reference_id;
+            $requestor = $request->user_id;
+            $type = $request->type;
 
-    # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
-    /**
-     * Summary of submit_renewal_request
-     * @param RenewBookRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function submit_renewal_request (RenewBookRequest $request): JsonResponse
-    {
-        return $this->traineeCtrlInstance->renew($request);
+            $result = $this->libraryProlongationManager->saveExtensionRequest($request, $bookResId, $requestor, $type);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
     }
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -159,11 +156,22 @@ class LibraryController extends Controller
      */
     public function get_books (Request $request): JsonResponse
     {
-        return TransactionUtil::transact(null, [], function() {
-            $books = Book::withCount('copies', 'hasData')->with([
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $books = Book::when($q, function($query) use ($q) {
+                $query->whereHas("catalog", function($query2) use ($q) {
+                    $query2->orWhere("title", "LIKE", "%{$q}%")
+                        ->orWhere("isbn", "LIKE", "%{$q}%")
+                        ->orWhereHas("genre", function($query3) use ($q) {
+                            $query3->orWhere("category", "LIKE", "%{$q}%");
+                        });
+                });
+            })->withCount('copies', 'hasData')->with([
                 'catalog',
                 'catalog.genre'
-            ])->get();
+            ])->paginate($pageCounter);
 
             return response()->json(['books' => $books], 200);
         });
@@ -426,15 +434,20 @@ class LibraryController extends Controller
     public function get_prolongation_request (GetProlongationRequests $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $prolongationMain = BookReservation::with([
-                'bookRes',
-                'books',
-                'bookRes.trainee',
-                'books.catalog',
-                'books.catalog.genre'
-            ])->where([
-                'book_res_id' => $request->bookResId
-            ])->get();
+            \Log::info($request->all());
+
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $prolongationMain = BookExtensionRequest::with([
+                'extensionRequest.trainee:id,fname,mname,lname,suffix,email,profile_picture,role',
+                'bookReservation.books.catalog.genre'
+            ])->when($q, function($search) use ($q) {
+                $search->where('status', "LIKE", "%{$q}%");
+            })->where([
+                'book_res_id' => $request->bookResId,
+                'type' => $request->type
+            ])->paginate($pageCounter);
 
             return response()->json(['prolongationRequests' => $prolongationMain], 200);
         });
@@ -449,11 +462,9 @@ class LibraryController extends Controller
         return TransactionUtil::transact(null, [], function() use ($request) {
             $booksThatAreProtactible = BookReservation::with([
                 'bookRes',
-                'books',
-                'books.catalog',
                 'books.catalog.genre'
             ])->where([
-                'book_res_id' => $request->libraryId
+                'book_res_id' => $request->bookResId
             ])->whereIn('status', $request->status)->get();
 
             return response()->json(['booksThatAreProtactible' => $booksThatAreProtactible], 200);
@@ -469,10 +480,9 @@ class LibraryController extends Controller
         return TransactionUtil::transact($request, [], function() use ($request) {
             $prolongationRequestId = $request->prolongationRequestId;
             $status = $request->status;
-            $acceptedStatus = $request->acceptedStatus;
-            $targetDateTime = $request->targetDateTime;
+            $type = $request->type;
 
-            $result = $this->libraryProlongationManager->updateProlongationRequest($prolongationRequestId, $status, $acceptedStatus, $targetDateTime);
+            $result = $this->libraryProlongationManager->updateProlongationRequest($prolongationRequestId, $status, $type);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }

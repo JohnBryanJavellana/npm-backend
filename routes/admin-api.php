@@ -20,10 +20,10 @@ use App\Http\Controllers\Authenticated\Administrator\{
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS,TRAINER'])->group(function () {
+    Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS,TRAINER,TRAINEE'])->group(function () {
         Route::post('dashboard_data', [DashboardCtrl::class, 'dashboard_data']);
 
-        Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS', 'throttle:60,1'])->group(function () {
+        Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS,TRAINER', 'throttle:60,1'])->group(function () {
             Route::post('get_terms_and_condition', [TermsAndConditionCtrl::class, 'get_terms_and_condition']);
             Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
             Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);
@@ -96,7 +96,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('remove_course_fee/{trainingFeeId}', [EnrollmentCtrl::class, 'remove_course_fee']);
         });
 
-        Route::prefix('/books/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY', 'throttle:60,1'])->group(function () {
+        Route::prefix('/books/')->middleware(['user_role:SUPERADMIN,ADMIN-LIBRARY,TRAINEE', 'throttle:60,1'])->group(function () {
             Route::post('get_terms_and_condition', [TermsAndConditionCtrl::class, 'get_terms_and_condition']);
             Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
             Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);
@@ -119,7 +119,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('get_book_reservation/remove_fine/{libraryInvoiceId}', [LibraryController::class, 'remove_fine']);
             Route::post('get_book_reservation/get_prolongation_request', [LibraryController::class, 'get_prolongation_request']);
             Route::post('get_book_reservation/get_books_that_protractible', [LibraryController::class, 'get_books_that_protractible']);
-            Route::post('get_book_reservation/submit_renewal_request', [LibraryController::class, 'submit_renewal_request']);
             Route::post('get_book_reservation/submit_extension_request', [LibraryController::class, 'submit_extension_request']);
             Route::post('get_book_reservation/update_prolongation_request', [LibraryController::class, 'update_prolongation_request']);
             Route::post('get_book_reservation/count_book_reservation', [LibraryController::class, 'count_book_reservation']);
@@ -141,7 +140,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
             Route::post('get_all_dormitory_invoices', [DormitoryController::class, 'get_all_dormitory_invoices']);
 
-            Route::get('get_dormitory_rooms', [DormitoryController::class, 'get_dormitory_rooms']);
+            Route::post('get_dormitory_rooms', [DormitoryController::class, 'get_dormitory_rooms']);
             Route::post('create_or_update_room', [DormitoryController::class, 'create_or_update_room']);
             Route::delete('remove_room/{roomId}', [DormitoryController::class, 'remove_room']);
 
@@ -180,6 +179,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('/masterlist/')->middleware(['user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD', 'throttle:60,1'])->group(function () {
             Route::prefix('/user/')->middleware('user_role:SUPERADMIN')->group(function () {
                 Route::match(['GET', 'POST'], 'get_users', [Masterlist::class, 'get_users']);
+                Route::post('get_active_guests', [Masterlist::class, 'get_active_guests']);
                 Route::get('get_user_basic_info/{user_id}', [Masterlist::class, 'get_user_basic_info']);
                 Route::get('get_user_activities/{user_id}', [Masterlist::class, 'get_user_activities']);
                 Route::get('get_user_qr_reader_assignments/{user_id}', [Masterlist::class, 'get_user_qr_reader_assignments']);
@@ -209,11 +209,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             });
         });
 
-        Route::prefix('/cashier/')->middleware(['user_role:SUPERADMIN,CASHIER', 'throttle:60,1'])->group(function () {
+        Route::prefix('/cashier/')->middleware(['throttle:60,1'])->group(function () {
             Route::post('get_terms_and_condition', [TermsAndConditionCtrl::class, 'get_terms_and_condition']);
             Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
             Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);
 
+            Route::post('get_all_payments', [Cashier::class, 'get_all_payments']);
             Route::post('get_payments', [Cashier::class, 'get_payments']);
             Route::post('pay-walk-in', [Cashier::class, 'pay_walkin']);
             Route::post('verify_payment', [Cashier::class, 'verify_payment']);
@@ -275,7 +276,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::prefix('/my-account/')->group(function () {
             Route::post('update_personal', [Account::class, 'update_personal']);
             Route::post('update_password', [Account::class, 'update_password']);
-            Route::get('get_activities', [Account::class, 'get_activities']);
+            Route::post('get_activities', [Account::class, 'get_activities']);
             Route::post('audit_trail_filter', [Account::class, 'audit_trail_filter']);
         });
     });

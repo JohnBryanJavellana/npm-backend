@@ -8,11 +8,16 @@ use App\Http\Requests\Admin\Cashier\RemoveORNumber;
 use App\Http\Requests\Admin\Cashier\VerifyPayment;
 use App\Http\Requests\Admin\Cashier\WalkInPayment;
 use App\Models\CashierOR;
+use App\Models\DormitoryInvoice;
+use App\Models\EnrollmentInvoice;
+use App\Models\LibraryInvoice;
+use App\Models\RAInvoices;
 use App\Services\Administrator\Cashier\CashierChargeCategoryManager;
 use App\Services\Administrator\Cashier\CashierORManager;
 use App\Services\Administrator\Cashier\CashierPaymentVerification;
 use App\Utils\CashierGetTableRef;
-
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Utils\{
@@ -35,6 +40,7 @@ use App\Models\{
 use App\Enums\{
     AdministratorReturnResponse
 };
+use Symfony\Component\HttpFoundation\Response;
 
 class Cashier extends Controller
 {
@@ -282,12 +288,17 @@ class Cashier extends Controller
     public function get_payments (Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $payments = $this->cashierGetTableRef->getTable($request->service, null, ['invoice_status' => $request->statuses]);
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $statusses = $request->statuses ?? null;
+            $payments = $this->cashierGetTableRef->getTable($request->service, null, $statusses);
             $relations = ['payee', 'orNumber'];
 
             $serviceRelations = match($request->service) {
                 NotificationEnum::DORMITORY->value  => ['dormitoryReqService', 'dormitoryIncService', 'extendRequest', 'transferRequest'],
                 NotificationEnum::ENROLLMENT->value => ['training'],
+                NotificationEnum::RECREATIONAL->value => [],
                 NotificationEnum::LIBRARY->value => [
                     'bookRes',
                     'selectedBooks',
@@ -300,7 +311,21 @@ class Cashier extends Controller
             };
 
             $mergedRelations = [...$relations, ...$serviceRelations];
-            $paymentsData = $payments->with($mergedRelations)->orderBy('created_at', 'DESC')->get();
+            $paymentsData = $payments->with($mergedRelations)
+                ->when($q, function($q1) use ($q) {
+                    $q1->where("trace_number", "LIKE", "%{$q}%")
+                        ->orWhere("invoice_amount", "LIKE", "%{$q}%")
+                        ->orWhere("invoice_reference", "LIKE", "%{$q}%")
+                        ->orWhereHas("payee", function($q2) use ($q) {
+                            $q2->where("fname", "LIKE", "%{$q}%")
+                                ->orWhere("mname", "LIKE", "%{$q}%")
+                                ->orWhere("lname", "LIKE", "%{$q}%")
+                                ->orWhere("suffix", "LIKE", "%{$q}%");
+                        })
+                        ->orWhereHas("orNumber", fn($q3) => $q3->where("name", "LIKE", "%{$q}%"));
+                })
+                ->latest()
+                ->paginate($pageCounter);
 
             return response()->json(['payments' => $paymentsData], 200);
         });
@@ -424,6 +449,93 @@ class Cashier extends Controller
 
             $result = $this->cashierPaymentVerification->payWalkIn($request, $invoiceId, $invoiceTableServiceName);
             return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of get_all_payments
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function get_all_payments(Request $request): JsonResponse
+    {
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $generalWith = ['payee', 'orNumber'];
+            $q = $request->q;
+
+            $libraryInvoices = LibraryInvoice::with($generalWith)->when($q, function($q1) use ($q) {
+                    $q1->where("trace_number", "LIKE", "%{$q}%")
+                        ->orWhere("invoice_amount", "LIKE", "%{$q}%")
+                        ->orWhere("invoice_reference", "LIKE", "%{$q}%")
+                        ->orWhereHas("payee", function($q2) use ($q) {
+                            $q2->where("fname", "LIKE", "%{$q}%")
+                                ->orWhere("mname", "LIKE", "%{$q}%")
+                                ->orWhere("lname", "LIKE", "%{$q}%")
+                                ->orWhere("suffix", "LIKE", "%{$q}%");
+                        })
+                        ->orWhereHas("orNumber", fn($q3) => $q3->where("name", "LIKE", "%{$q}%"));
+                })->when($request->userId, fn($query) => $query->where('user_id', $request->userId))->get();
+            $dormitoryInvoices = DormitoryInvoice::with($generalWith)->when($q, function($q1) use ($q) {
+                    $q1->where("trace_number", "LIKE", "%{$q}%")
+                        ->orWhere("invoice_amount", "LIKE", "%{$q}%")
+                        ->orWhere("invoice_reference", "LIKE", "%{$q}%")
+                        ->orWhereHas("payee", function($q2) use ($q) {
+                            $q2->where("fname", "LIKE", "%{$q}%")
+                                ->orWhere("mname", "LIKE", "%{$q}%")
+                                ->orWhere("lname", "LIKE", "%{$q}%")
+                                ->orWhere("suffix", "LIKE", "%{$q}%");
+                        })
+                        ->orWhereHas("orNumber", fn($q3) => $q3->where("name", "LIKE", "%{$q}%"));
+                })->when($request->userId, fn($query) => $query->where('user_id', $request->userId))->get();
+            $enrollmentInvoices = EnrollmentInvoice::with($generalWith)->when($q, function($q1) use ($q) {
+                    $q1->where("trace_number", "LIKE", "%{$q}%")
+                        ->orWhere("invoice_amount", "LIKE", "%{$q}%")
+                        ->orWhere("invoice_reference", "LIKE", "%{$q}%")
+                        ->orWhereHas("payee", function($q2) use ($q) {
+                            $q2->where("fname", "LIKE", "%{$q}%")
+                                ->orWhere("mname", "LIKE", "%{$q}%")
+                                ->orWhere("lname", "LIKE", "%{$q}%")
+                                ->orWhere("suffix", "LIKE", "%{$q}%");
+                        })
+                        ->orWhereHas("orNumber", fn($q3) => $q3->where("name", "LIKE", "%{$q}%"));
+                })->when($request->userId, fn($query) => $query->where('user_id', $request->userId))->get();
+            $recreationalInvoices = RAInvoices::with($generalWith)->when($q, function($q1) use ($q) {
+                    $q1->where("trace_number", "LIKE", "%{$q}%")
+                        ->orWhere("invoice_amount", "LIKE", "%{$q}%")
+                        ->orWhere("invoice_reference", "LIKE", "%{$q}%")
+                        ->orWhereHas("payee", function($q2) use ($q) {
+                            $q2->where("fname", "LIKE", "%{$q}%")
+                                ->orWhere("mname", "LIKE", "%{$q}%")
+                                ->orWhere("lname", "LIKE", "%{$q}%")
+                                ->orWhere("suffix", "LIKE", "%{$q}%");
+                        })
+                        ->orWhereHas("orNumber", fn($q3) => $q3->where("name", "LIKE", "%{$q}%"));
+                })->when($request->userId, fn($query) => $query->where('user_id', $request->userId))->get();
+
+            $allInvoices = collect()
+                ->concat($libraryInvoices)
+                ->concat($dormitoryInvoices)
+                ->concat($enrollmentInvoices)
+                ->concat($recreationalInvoices)
+                ->sortByDesc('created_at')
+                ->map(function($query) {
+                    $service = match(true) {
+                        isset($query->r_a_request_info_id) => "RECREATIONAL",
+                        isset($query->dormitory_tenant_id) => "DORMITORY",
+                        isset($query->enrolled_course_id)  => "ENROLLMENT",
+                        isset($query->book_res_id)         => "LIBRARY"
+                    };
+
+                    $query['service'] = $service;
+                    return $query;
+                })->flatten();
+
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $perPage = $request->pageCounter ?? 10;
+            $currentItems = $allInvoices->slice(($currentPage - 1) * $perPage, $perPage)->values();
+            $paginatedResults = new LengthAwarePaginator($currentItems, $allInvoices->count(), $perPage, $currentPage, ['path' => LengthAwarePaginator::resolveCurrentPath()]);
+
+            return response()->json(['invoices' => $paginatedResults], Response::HTTP_OK);
         });
     }
 }

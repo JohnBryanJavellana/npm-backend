@@ -12,6 +12,8 @@ use App\Models\{
     DormitoryItemBorrowing, DormitoryTenantSupDoc
 };
 use App\Enums\RequestStatus;
+use App\Services\Administrator\Dormitory\DormitoryRoomManager;
+use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Utils\AuditHelper;
 use App\Utils\GenerateTrace;
 use App\Utils\SaveFile;
@@ -32,6 +34,7 @@ class DormitoryRequestService
         protected DormitoryTenantHistory $dormitoryTenantHistory,
         protected DormitoryInventory $dormitoryInventory,
         protected DormitoryItemBorrowing $dormitoryItemBorrowing,
+        protected DormitoryRoomReservationManager $dormitoryRoomReservationManager
     ) {}
 
 
@@ -184,7 +187,6 @@ class DormitoryRequestService
             'status_of_occupancy'
         ]);
         $preparedData['trace_number'] = GenerateTrace::createTraceNumber(DormitoryTenant::class, '-DG-');
-
         $this_request = DormitoryTenant::create($preparedData);
 
         if($payload->accommodation === DormitoryEnum::COUPLE->value && isset($payload->suppportingCoupleDocuments)) {

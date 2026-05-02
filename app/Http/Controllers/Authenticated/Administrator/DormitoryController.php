@@ -129,15 +129,28 @@ class DormitoryController extends Controller
     public function get_dormitory_rooms(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function() use ($request) {
-            $room_managements = DormitoryRoom::withCount(['hasData'])
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $paginatedRooms = DormitoryRoom::withCount(['hasData'])
+                ->when($q, fn($query) => $query->where("room_name", "LIKE", "%{$q}%")
+                    ->orWhere("dormitory", "LIKE", "%{$q}%")
+                    ->orWhere("room_type", "LIKE", "%{$q}%")
+                    ->orWhere("accommodation", "LIKE", "%{$q}%")
+                )
                 ->orderBy('wing')
                 ->orderBy('floor')
-                ->get()
-                ->groupBy(fn($item) => "Wing $item->wing - Floor $item->floor");
+                ->paginate($pageCounter);
 
-            return response()->json([
-                'room_managements' => $room_managements
-            ], 200);
+            $paginatedRooms->setCollection(
+                $paginatedRooms->getCollection()->groupBy(function($item) {
+                    return "Wing {$item->wing} - Floor {$item->floor}";
+                })
+            );
+
+            $room_managements = $paginatedRooms;
+
+            return response()->json(['room_managements' => $room_managements], 200);
         });
     }
 
@@ -240,7 +253,7 @@ class DormitoryController extends Controller
     public function set_as_reserved(SetRoomReservationAsReserved $request): JsonResponse
     {
         return TransactionUtil::transact($request, [], function() use ($request) {
-            $result = $this->dormitoryRoomReservationManager->setAsReserved($request->roomReservationId);
+            $result = $this->dormitoryRoomReservationManager->setAsReserved($request->roomReservationId, $request->status);
             return response()->json(['message' => $result['message']], $result['status']);
         });
     }
@@ -501,6 +514,7 @@ class DormitoryController extends Controller
                 'itemInfo:id,name,charge,description,filename,is_consumable'
             ])->orderByDesc('created_at')->get()->map(fn($query) => [
                 'id' => $query->id,
+                'tenantId' => $query->tenant->id,
                 'tenant' => "{$query->tenant->boarder->fname} {$query->tenant->boarder?->mname} {$query->tenant->boarder->lname} {$query->tenant->boarder->suffix}",
                 'itemInfo' => $query->itemInfo,
                 'status' => $query->status,
@@ -644,6 +658,7 @@ class DormitoryController extends Controller
             $pageCounter = $request->pageCounter ?? 10;
             $query = $request->q;
             $status = $request->status;
+            $type = $request->type; // DORMITORY | LIBRARY | RECREATIONAL | ENROLLMENT
 
             $transferRequests = DormitoryInvoice::with([
                 'payee',
