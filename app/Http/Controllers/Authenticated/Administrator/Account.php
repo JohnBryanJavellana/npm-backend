@@ -142,6 +142,7 @@ class Account extends Controller
     public function update_personal(UpdatePersonal $request) {
         return TransactionUtil::transact($request, ['user_profile_' . $request->user()->id], function() use ($request) {
             $reloggin = false;
+            \Log::info($request->all());
             $user = User::findOrFail($request->documentId ?? $request->user()->id);
 
             $user->fname = $request->firstName;

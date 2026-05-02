@@ -35,10 +35,12 @@ class DormitoryExtensionRequest extends Model
     {
         return $this->belongsTo(DormitoryTenant::class, "dormitory_tenant_id", "id");
     }
-    public function dormitoryTenant(): BelongsTo
+
+    public function invoice()
     {
-        return $this->belongsTo(DormitoryTenant::class, 'dormitory_tenant_id');
+        return $this->hasOne(DormitoryInvoice::class, "id", "dormitory_invoice_id");
     }
+
 
     /**
      * Scopes
@@ -52,5 +54,5 @@ class DormitoryExtensionRequest extends Model
     {
         return $query->whereIn("status", $status);
     }
-    
+
 }

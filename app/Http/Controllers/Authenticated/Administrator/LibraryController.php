@@ -163,17 +163,24 @@ class LibraryController extends Controller
      * Summary of count_book_reservation
      * @param Request $request
      */
-    public function get_books (Request $request): JsonResponse
-    {
-        return TransactionUtil::transact(null, [], function() {
-            $books = Book::withCount('copies', 'hasData')->with([
-                'catalog',
-                'catalog.genre'
-            ])->get();
-
-            return response()->json(['books' => $books], 200);
-        });
-    }
+    public function get_books(Request $request): JsonResponse
+{
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $search = addcslashes($request->input('search', ''), '%_');
+        
+        $books = Book::withCount('copies', 'hasData')
+            ->with(['catalog', 'catalog.genre'])
+            ->when($search, function($q) use ($search) {
+                $q->whereHas('catalog', function($sub) use ($search) {
+                    $sub->where('title', 'LIKE', "%{$search}%")
+                        ->orWhere('isbn', 'LIKE', "%{$search}%");
+                });
+            })
+            ->paginate($request->input('per_page', 10)); // Gets 'per_page' from URL query string
+        
+        return response()->json($books);
+    });
+}
 
     /**
      * Summary of get_book_info
@@ -443,7 +450,7 @@ class LibraryController extends Controller
                 'books.catalog.genre'
             ])->where([
                 'book_res_id' => $request->bookResId
-            ])->whereIn('status', $request->status)->get();
+            ])->get();
 
             return response()->json(['prolongationRequests' => $prolongationMain], 200);
         });

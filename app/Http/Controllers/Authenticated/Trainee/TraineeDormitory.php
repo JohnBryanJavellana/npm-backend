@@ -146,8 +146,7 @@ class TraineeDormitory extends Controller
                 },
             ])
             ->where([
-                'trace_number' => $dormitory_id,
-                'user_id' => $request->user()->id
+                'trace_number' => $dormitory_id
             ])
             ->first();
 
@@ -352,6 +351,7 @@ class TraineeDormitory extends Controller
     {
         $user_id = $request->user()->id;
         $validated = $request->validated();
+
         try {
             $this->dormitoryInclusionService->createInclusionRequest($validated, $user_id);
             return response()->json(["message" => "You've have successfully sent items request!"], 200);

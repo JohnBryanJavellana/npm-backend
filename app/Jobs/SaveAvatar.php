@@ -50,10 +50,12 @@ class SaveAvatar implements ShouldQueue
             }
 
             if($this->isBase64) {
+                \Log::info('DATA ===>', [$this->avatar, $this->filename, $this->path]);
+
                 $imageData = preg_replace('#^data:image/\w+;base64,#i', '', $this->avatar);
                 $binaryData = base64_decode($imageData);
 
-                file_put_contents(public_path($this->path . $this->filename), $binaryData);
+                file_put_contents(public_path("{$this->path}/{$this->filename}"), $binaryData);
             }
         }
     }

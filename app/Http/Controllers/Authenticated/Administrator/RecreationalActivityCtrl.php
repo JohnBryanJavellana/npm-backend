@@ -508,7 +508,7 @@ class RecreationalActivityCtrl extends Controller
                 );
             }
 
-            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQFACILITY->value], 200);
+            return response()->json(['message' => AdministratorReturnResponse::RECREATIONALACTIVITYCTRL_UPDATED_RECREATIONALACTIVITYREQEQUIPMENT->value], 200);
         });
     }
 

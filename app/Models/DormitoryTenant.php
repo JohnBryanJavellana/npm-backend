@@ -104,6 +104,13 @@ class DormitoryTenant extends Model
         return $this->tenant_to_date < now();
     }
 
+    public function latestActiveExtendRequest()
+    {
+        return $this->hasOne(DormitoryExtensionRequest::class)
+            ->whereNotIn('status', ['COMPLETED', 'DECLINED', 'CANCELLED'])
+            ->latestOfMany();
+    }
+
     /**
      * SCOPES
      */

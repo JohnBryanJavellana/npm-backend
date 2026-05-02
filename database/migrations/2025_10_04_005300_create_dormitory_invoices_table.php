@@ -26,7 +26,8 @@ return new class extends Migration
     public const INVOICE_TYPE = [
         'INCLUSION',
         'SERVICE',
-        'DORMITORY'
+        'DORMITORY',
+        'EXTENSION'
     ];
 
     /**

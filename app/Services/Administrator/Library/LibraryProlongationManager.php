@@ -30,7 +30,7 @@ class LibraryProlongationManager
             default                                       => 'ERROR'
         };
 
-        $newDate = \in_array($tempStatus, ["EXTENDED", "RENEWED"]) ? Carbon::parse($targetDateTime) : $this_prolongation_request->current_to_date;
+        $newDate = \in_array($tempStatus, ["EXTENDED", "RENEWED"]) ? Carbon::parse($targetDateTime) : $this_prolongation_request->to_date;
         $this_prolongation_request->update([
             'status' => $tempStatus,
             'to_date' => $newDate

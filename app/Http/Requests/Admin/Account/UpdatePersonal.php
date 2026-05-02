@@ -14,6 +14,13 @@ class UpdatePersonal extends FormRequest
         return $this->user() !== null;
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'documentId' => $this->documentId && $this->documentId !== 'null' ? $this->documentId : null
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

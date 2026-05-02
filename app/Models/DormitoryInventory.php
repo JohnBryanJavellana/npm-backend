@@ -15,6 +15,8 @@ class DormitoryInventory extends Model
     //     return $this->hasMany(DormitoryItemBorrowing::class);
     // }
 
+    protected $guarded = ['id'];
+
     public function stock()
     {
         return $this->hasMany(DormitoryInventoryItem::class);

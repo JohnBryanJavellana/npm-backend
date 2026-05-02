@@ -10,6 +10,8 @@ class DormitoryInventoryItem extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id'];
+
     public function borrowed()
     {
         return $this->hasMany(DormitoryItemBI::class);

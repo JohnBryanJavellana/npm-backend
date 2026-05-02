@@ -90,7 +90,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
         return response()->json(['user' => $user->first()]);
     });
 
-    Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-ENROLLMENT')->group(function () {
+    Route::middleware('user_role:TRAINEE,TRAINER,SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-DORMITORY')->group(function () {
         Route::prefix('/my-account/')->group(function () {
             Route::post('create_or_update_additional_info', [MyAccount::class, 'create_or_update_additional_info']);
             Route::post('upload_profile_picture', [MyAccount::class, 'upload_profile_picture']);
@@ -183,6 +183,7 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
             Route::get('surveys', [CsmsController::class, 'view']);
             Route::post('surveys/create', [CsmsController::class, 'createV1']);
             Route::post('surveys/delete/{id}', [CsmsController::class, 'delete']);
+            Route::get('/get-all-for-csm-transactions', [CsmsController::class, 'getAllForCSMTransactions']);
         });
 
         Route::prefix('/invoices/')->group(function () {

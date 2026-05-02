@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LMS\GradeEssay;
 use App\Http\Requests\LMS\GradeFileAssesment;
 use App\Http\Resources\Trainee\Enrollment\CourseModuleResource;
+use App\Http\Resources\Trainee\Enrollment\CourseModuleResource2;
 use App\Models\{AssessmentAnswer, AssessmentAttempt, Assessments, EnrolledCourse, Training, AttendanceRecord};
 use App\Services\LMS\GradeEssayManager;
 use App\Services\LMS\GradeFileAssessmentManager;
@@ -38,7 +39,8 @@ class TrainerEnrollmentController extends Controller
     public function view(Request $request)
     {
         try {
-            return CourseModuleResource::collection($this->trainerEnrollmentService->getDataFacilitator());
+            \Log::info('', ['' => $this->trainerEnrollmentService->getDataFacilitator()]);
+            return CourseModuleResource2::collection($this->trainerEnrollmentService->getDataFacilitator());
         } catch (\Exception $e) {
             return response()->json(["message" => $e->getMessage()], 500);
         }

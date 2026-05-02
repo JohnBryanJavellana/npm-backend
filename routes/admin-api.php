@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Authenticated\Administrator\CSMAnalyicsController;
 use Illuminate\Support\Facades\Route;
 
 /** administrator controllers */
@@ -19,7 +20,7 @@ use App\Http\Controllers\Authenticated\Administrator\{
 
 /** authenticated routes */
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS'])->group(function () {
+    Route::prefix('/admin/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LIBRARY,ADMIN-DORMITORY,CASHIER,ADMIN-RA,ADMIN-LMS,TRAINER'])->group(function () {
         Route::post('dashboard_data', [DashboardCtrl::class, 'dashboard_data']);
 
         Route::prefix('/enrollment/')->middleware(['user_role:SUPERADMIN,ADMIN-ENROLLMENT,ADMIN-LMS', 'throttle:60,1'])->group(function () {
@@ -146,6 +147,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('create_or_update_service', [DormitoryController::class, 'create_or_update_service']);
             Route::delete('remove_service/{service_id}', [DormitoryController::class, 'remove_service']);
 
+            Route::post('room_reservations/update_extension_request', [DormitoryController::class, 'update_extension_request']);
             Route::post('room_reservations', [DormitoryController::class, 'room_reservations']);
             Route::post('room_reservations/set_as_reserved', [DormitoryController::class, 'set_as_reserved']);
             Route::post('new_room_reservation', [DormitoryController::class, 'new_room_reservation']);
@@ -156,53 +158,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_service_request', [DormitoryController::class, 'get_service_request']);
             Route::post('set_service_request_as_action', [DormitoryController::class, 'set_service_request_as_action']);
 
-            // Route::get('get_dormitory_rooms/{dormitory_id}', [DormitoryController::class, 'get_dormitory_rooms']);
-            // Route::get('get_dormitory_info/{dormitory_id}', [DormitoryController::class, 'get_dormitory_info']);
-
-            Route::post('create_dormitory_rooms', [DormitoryController::class, 'create_dormitory_rooms']);
-            Route::post('update_dormitory_room', [DormitoryController::class, 'update_dormitory_room']);
-            Route::post('create-walk-in-request/get_available_dorms', [DormitoryController::class, 'get_available_dorms']);
-            Route::post('create-walk-in-request/get_available_rooms', [DormitoryController::class, 'get_available_rooms']);
-
-            Route::post('requests/get_available_supplies', [DormitoryController::class, 'get_available_supplies']);
-            Route::post('requests/update_dormitory_room_request', [DormitoryController::class, 'update_dormitory_room_request']);
-
-            Route::post('get_all_requests', [DormitoryController::class, 'get_all_requests']);
-            Route::delete('cancel_dorm_request/{dormReqId}', [DormitoryController::class, 'cancel_dorm_request']);
-            Route::delete('remove_room/{room_id}', [DormitoryController::class, 'remove_room']);
+            Route::post('get_inventories/create_or_update_inventory', [DormitoryController::class, 'create_or_update_inventory']);
+            Route::delete('get_inventories/remove_inventory/{documentId}', [DormitoryController::class, 'remove_inventory']);
             Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories']);
-            Route::post('get_inventories/create_dormitory_inventory_stock', [DormitoryController::class, 'create_dormitory_inventory_stock']);
-            Route::post('get_inventories/get_dormitory_inventory_stock', [DormitoryController::class, 'get_dormitory_inventory_stock']);
-            Route::post('get_inventories/update_dormitory_inventory_stock', [DormitoryController::class, 'update_dormitory_inventory_stock']);
-            Route::post('provide_stocks_to_boarder', [DormitoryController::class, 'provide_stocks_to_boarder']); //move_stockkies
-            Route::get('get_provided_stocks', [DormitoryController::class, 'get_provided_stocks']);//show reserved stockkies to boarder
-            Route::get('get_stock_reserved_tenant', [DormitoryController::class, 'get_stock_reserved_tenant']);//get tenant info of reserved stockkies
-            Route::post('update_stock_status', [DormitoryController::class, 'update_stock_status']);// change stock status not working yet
-            Route::get('audit_placements', [DormitoryController::class, 'audit_placement']);
-            Route::post('create_or_update_dormitory_inventory', [DormitoryController::class, 'create_or_update_dormitory_inventory']);
-            Route::delete('get_inventories/remove_dorm_inventory_stock/{stock_id}', [DormitoryController::class, 'remove_dorm_inventory_stock']);
-            Route::delete('remove_dorm_inventory/{inv_id}', [DormitoryController::class, 'remove_dorm_inventory']);
-            Route::get('services', [DormitoryController::class, 'services']);
-            Route::post('create_or_update_service', [DormitoryController::class, 'create_or_update_service']);
-            Route::delete('remove_service/{service_id}', [DormitoryController::class, 'remove_service']);
-            Route::post('update_provided_stock_status', [DormitoryController::class, 'update_provided_stock_status']);
-            Route::post('update_provided_stock_list', [DormitoryController::class, 'update_provided_stock_list']);
-            Route::post('count_dorm_reservation', [DormitoryController::class, 'count_dorm_reservation']);
-            Route::post('get_requested_service', [DormitoryController::class, 'get_requested_service']);
-            Route::post('request_service', [DormitoryController::class, 'request_service']);
-            Route::post('update_requested_service', [DormitoryController::class, 'update_requested_service']);
-            Route::post('set_status', [DormitoryController::class, 'set_status']);
 
-            Route::post('get_dormitory_charges', [DormitoryController::class, 'get_dormitory_charges']);
-            Route::post('created_or_update_dormitory_charge', [DormitoryController::class, 'created_or_update_dormitory_charge']);
-            Route::delete('cancel_charge/{chargeId}', [DormitoryController::class, 'cancel_charge']);
+            Route::delete('get_dormitory_inventory_stocks/remove_inventory_stock/{documentId}', [DormitoryController::class, 'remove_inventory_stock']);
+            Route::post('get_dormitory_inventory_stocks/create_inventory_stock', [DormitoryController::class, 'create_inventory_stock']);
+            Route::post('get_dormitory_inventory_stocks/update_inventory_stock', [DormitoryController::class, 'update_inventory_stock']);
+            Route::post('get_dormitory_inventory_stocks', [DormitoryController::class, 'get_dormitory_inventory_stocks']);
 
-            Route::post('getRoomsForSelection', [DormitoryController::class, 'getRoomsForSelection']);
-            Route::post('room_reservations_with_costs', [DormitoryController::class, 'room_reservations_with_costs']);
-            // Route::post('updateTenant', [DormitoryController::class, 'updateTenant']);
-
-
-
+            Route::post('get_dormitory_inclusion_requests/update_inclusion_request', [DormitoryController::class, 'update_inclusion_request']);
+            Route::get('get_dormitory_inclusion_requests', [DormitoryController::class, 'get_dormitory_inclusion_requests']);
         });
 
         Route::prefix('/masterlist/')->middleware(['user_role:SUPERADMIN,ADMIN_ENROLLMENT,ADMIN_DORMITORY,ADMIN_LIBRARY,ADMIN-RA,GUARD', 'throttle:60,1'])->group(function () {
@@ -288,6 +254,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('ra_create_or_update_facility', [RecreationalActivityCtrl::class, 'ra_create_or_update_facility']);
             Route::delete('ra_remove_facility/{facilityId}', [RecreationalActivityCtrl::class, 'ra_remove_facility']);
         });
+
+        Route::post('get_csms', [CSMAnalyicsController::class, 'get_csms']);
+        Route::post('get_specific_csm', [CSMAnalyicsController::class, 'get_specific_csm']);
+        Route::get('get_csm_analytics', [CSMAnalyicsController::class, 'get_csm_analytics']);
 
         Route::get('qrcode', [QRReaderCheckInOutCtrl::class, 'qrReader']);
         Route::post('qrreader/check-in-out', [QRReaderCheckInOutCtrl::class, 'check_in_out']);
