@@ -194,13 +194,46 @@ class Masterlist extends Controller
      * Summary of get_employers
      * @param Request $request
      */
+    // public function get_employers (Request $request): JsonResponse
+    // {
+    //     return TransactionUtil::transact(null, [], function() {
+    //         $employers = Employer::all();
+    //         return response()->json(['employers' => $employers], 200);
+    //     });
+    // }
     public function get_employers (Request $request): JsonResponse
-    {
-        return TransactionUtil::transact(null, [], function() {
-            $employers = Employer::all();
-            return response()->json(['employers' => $employers], 200);
-        });
-    }
+{
+    return TransactionUtil::transact(null, [], function() use ($request) {
+        $employers = Employer::orderBy('created_at', 'ASC');
+        $perPage = (int)$request->input('per_page', 10);
+        $allowedPerPage = [10, 15, 20, 25, 30];
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 10;
+        }
+        $page = (int)$request->input('page', 1);
+        if ($page < 1) {
+            $page = 1;
+        }
+        $paginatedEmployers = $employers->paginate(
+            $perPage,
+            ['*'],
+            'page',
+            $page
+        );
+        return response()->json([
+            'employers' => $paginatedEmployers->items(),
+            'pagination' => [
+                'current_page' => $paginatedEmployers->currentPage(),
+                'per_page' => $paginatedEmployers->perPage(),
+                'total' => $paginatedEmployers->total(),
+                'last_page' => $paginatedEmployers->lastPage(),
+                'from' => $paginatedEmployers->firstItem(),
+                'to' => $paginatedEmployers->lastItem(),
+                'rows_per_page_options' => $allowedPerPage
+            ]
+        ], 200);
+    });
+}
 
     /**
      * Summary of create_or_update_employer
