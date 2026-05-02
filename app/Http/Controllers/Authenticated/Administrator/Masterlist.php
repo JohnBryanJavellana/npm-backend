@@ -50,13 +50,16 @@ class Masterlist extends Controller
     public function get_users (Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
             $query = $request->q;
 
             $users = User::when($query, fn($search) => $search->where('id', 'LIKE', "%{$query}%")
                 ->orWhere('fname', 'LIKE', "%{$query}%")
                 ->orWhere('mname', 'LIKE', "%{$query}%")
                 ->orWhere('lname', 'LIKE', "%{$query}%")
+                ->orWhere('email', 'LIKE', "%{$query}%")
                 ->orWhere('suffix', 'LIKE', "%{$query}%")
+                ->orWhere('role', 'LIKE', "%{$query}%")
             )->withCount([
                 'trainee_enrolled_courses' => function($query) {
                     $query->whereNotIn('status', ['CANCELLED', 'COMPLETED', 'DECLINED', 'IR', 'CSFB']);
@@ -67,7 +70,8 @@ class Masterlist extends Controller
                 $users->whereIn('role', $request->role);
             }
 
-            $usersData = $users->get();
+            $usersData = $users->paginate($pageCounter);
+
             return response()->json(['users' => $usersData], 200);
         });
     }
@@ -240,8 +244,16 @@ class Masterlist extends Controller
      */
     public function get_employers (Request $request): JsonResponse
     {
-        return TransactionUtil::transact(null, [], function() {
-            $employers = Employer::all();
+        return TransactionUtil::transact(null, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $employers = Employer::when($q, function($search) use ($q) {
+                $search->where("name", "LIKE", "%{$q}%")
+                    ->orWhere("address", "LIKE", "%{$q}%")
+                    ->orWhere("status", "LIKE", "%{$q}%");
+            })->paginate($pageCounter);
+
             return response()->json(['employers' => $employers], 200);
         });
     }

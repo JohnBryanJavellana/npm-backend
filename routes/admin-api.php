@@ -101,7 +101,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('create_or_update_term_and_condition', [TermsAndConditionCtrl::class, 'create_or_update_term_and_condition']);
             Route::delete('remove_terms_and_condition/{termsAndConditionId}', [TermsAndConditionCtrl::class, 'remove_terms_and_condition']);
 
-            Route::get('get_books', [LibraryController::class, 'get_books']);
+            Route::post('get_books', [LibraryController::class, 'get_books']);
             Route::get('get_pre_data', [LibraryController::class, 'get_pre_data']);
             Route::post('get_book_info/get_book_copy_activity', [LibraryController::class, 'get_book_copy_activity']);
             Route::post('get_book_info/get_copies/update_book_copy', [LibraryController::class, 'update_book_copy']);
@@ -190,7 +190,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             });
 
             Route::prefix('/employer/')->middleware('user_role:SUPERADMIN')->group(function () {
-                Route::get('get_employers', [Masterlist::class, 'get_employers']);
+                Route::post('get_employers', [Masterlist::class, 'get_employers']);
                 Route::post('create_or_update_employer', [Masterlist::class, 'create_or_update_employer']);
                 Route::delete('remove_employer/{employer_id}', [Masterlist::class, 'remove_employer']);
             });

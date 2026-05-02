@@ -696,10 +696,26 @@ class EnrollmentCtrl extends Controller
     public function get_applications(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
             $allRequirements = Requirement::where('status', 'ACTIVE')->get();
             $basicRequirements = $allRequirements->where('isBasic', 'YES');
 
-            $query = EnrolledCourse::with([
+            $query = EnrolledCourse::when($q, function($search) use ($q) {
+                $search->where('enrolled_course_status', "LIKE", "%{$q}%")
+                        ->orWhereHas('trainee', function($traineeSearch) use ($q) {
+                            $traineeSearch->where('fname', "LIKE", "%{$q}%")
+                                ->orWhere('mname', "LIKE", "%{$q}%")
+                                ->orWhere('lname', "LIKE", "%{$q}%")
+                                ->orWhere('suffix', "LIKE", "%{$q}%");
+                        })
+                        ->orWhereHas('training', function($trainingSearch) use ($q) {
+                            $trainingSearch->whereHas('module', function($moduleSearch) use ($q) {
+                                $moduleSearch->where('name', "LIKE", "%{$q}%");
+                            });
+                        });
+            })->with([
                 'training.module.charge',
                 'training.module.moduleType',
                 'training.module.specific_requirements',
@@ -728,7 +744,7 @@ class EnrollmentCtrl extends Controller
                 $query->where('isExpired', $request->isExpired);
             }
 
-            $applications = $query->paginate(10);
+            $applications = $query->paginate($pageCounter);
 
             $applications->getCollection()->transform(function ($self) use ($allRequirements, $basicRequirements) {
                 $addInfo = $self->trainee->additional_trainee_info;

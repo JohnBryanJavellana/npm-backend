@@ -80,7 +80,21 @@ class RecreationalActivityCtrl extends Controller
     public function ra_requests(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-            $query = RARequestInfo::with(['requestor']);
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $query = RARequestInfo::with(['requestor'])
+                ->when($q, function($search) use ($q) {
+                    $search->where("trace_number", "LIKE", "%{$q}%")
+                        ->orWhere("request_type", "LIKE", "%{$q}%")
+                        ->orWhere("status", "LIKE", "%{$q}%")
+                        ->orWhereHas('requestor', function($traineeSearch) use ($q) {
+                            $traineeSearch->where('fname', "LIKE", "%{$q}%")
+                                ->orWhere('mname', "LIKE", "%{$q}%")
+                                ->orWhere('lname', "LIKE", "%{$q}%")
+                                ->orWhere('suffix', "LIKE", "%{$q}%");
+                        });
+                });
 
             if ($request->status) {
                 $query->whereIn('status', $request->status);
@@ -108,7 +122,7 @@ class RecreationalActivityCtrl extends Controller
                     unset($raReq->equipment_request);
                     return $raReq;
                 })->first()
-                : $query->orderBy('created_at', 'DESC')->get();
+                : $query->orderBy('created_at', 'DESC')->paginate($pageCounter);
 
             return response()->json(['ra_requests' => $ra_requests], 200);
         });
@@ -122,10 +136,20 @@ class RecreationalActivityCtrl extends Controller
     public function ra_facilities(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-            $ra_facilities_temp = RAFacility::withCount(['hasData']);
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $ra_facilities_temp = RAFacility::withCount(['hasData'])
+                ->when($q, function($search) use ($q) {
+                    $search->where("name", "LIKE", "%{$q}%")
+                        ->orWhere("unique_identifier", "LIKE", "%{$q}%")
+                        ->orWhere("location", "LIKE", "%{$q}%")
+                        ->orWhere("availability_status", "LIKE", "%{$q}%");
+                });
+
             $ra_facilities = $request->documentId
                 ? $ra_facilities_temp->where('unique_identifier', $request->documentId)->with(['images', 'relationships', 'relationships.equipment'])->first()
-                : $ra_facilities_temp->get();
+                : $ra_facilities_temp->paginate($pageCounter);
 
             return response()->json(['ra_facilities' => $ra_facilities], 200);
         });
@@ -168,10 +192,18 @@ class RecreationalActivityCtrl extends Controller
     public function ra_equipments(Request $request): JsonResponse
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
-            $ra_equipments_temp = RAEquipments::withCount('hasData', 'stocks');
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $ra_equipments_temp = RAEquipments::withCount('hasData', 'stocks')
+                ->when($q, function($search) use ($q) {
+                    $search->where("name", "LIKE", "%{$q}%")
+                        ->orWhere("availability_status", "LIKE", "%{$q}%");
+                });
+
             $ra_equipments = $request->documentId
                 ? $ra_equipments_temp->where('id', $request->documentId)->with(['images'])->first()
-                : $ra_equipments_temp->get();
+                : $ra_equipments_temp->paginate($pageCounter);
 
             return response()->json(['ra_equipments' => $ra_equipments], 200);
         });

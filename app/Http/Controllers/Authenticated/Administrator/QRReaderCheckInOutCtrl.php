@@ -62,6 +62,9 @@ class QRReaderCheckInOutCtrl extends Controller
     {
         return TransactionUtil::transact(null, [], function () use ($request) {
             $userRole = $request->user()->role;
+            $query = $request->q;
+            $pageCounter = $request->pageCounter ?? 10;
+            $type = $request->type;
 
             if ($userRole !== UserRoleEnum::SUPERADMIN->value && $request->type) {
                 $check = UserAssignedQrLocation::where('user_id', $request->user()->id)
@@ -73,16 +76,25 @@ class QRReaderCheckInOutCtrl extends Controller
                 }
             }
 
-            $records_temp = CheckInOutLog::with([
+            $records_temp = CheckInOutLog::when($query, function($search) use ($query) {
+                $search->where('purpose', 'LIKE', "%{$query}%")
+                    ->orWhereRaw("DATE_FORMAT(check_in, '%M %e, %Y') LIKE ?", ["%{$query}%"])
+                    ->orWhereRaw("DATE_FORMAT(check_out, '%M %e, %Y') LIKE ?", ["%{$query}%"])
+                    ->whereHas('initiator', function($q2) use ($query) {
+                        $q2->where('id', 'LIKE', "%{$query}%")
+                            ->orWhere('fname', 'LIKE', "%{$query}%")
+                            ->orWhere('mname', 'LIKE', "%{$query}%")
+                            ->orWhere('lname', 'LIKE', "%{$query}%")
+                            ->orWhere('suffix', 'LIKE', "%{$query}%");
+                    });
+            })->with([
                 'initiator',
                 'qrLocation'
             ])->orderBy('created_at', 'DESC');
 
-            $records = $request->type
-                ? $records_temp->whereHas('qrLocation', function($query) use($request) {
-                    $query->whereIn('type', $request->type);
-                })->get()
-                : $records_temp->get();
+            $records = $records_temp->when($type, function($query) use ($type) {
+                $query->whereHas('qrLocation', fn($query1) => $query1->whereIn('type', $type));
+            })->paginate($pageCounter);
 
             return response()->json(['records' => $records], 200);
         });

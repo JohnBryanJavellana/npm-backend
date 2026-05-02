@@ -33,11 +33,16 @@ class DormitoryRoomReservationManager
                 'status_of_occupancy' => $payload->status_of_occupancy,
                 'user_id' => $payload->user_id,
                 'dormitory_room_id' => $payload->dormitory_room_id,
-                'dormitory_invoice_id' => $this->createInvoice(DormitoryEnum::DORMITORY->value, $res->id, $payload->user_id, $payload->payment_remarks, (object)($payload->pricingBreakdown ?? [])),
                 'purpose' => $payload->purpose
             ]);
         }
         $res->save();
+
+        if($isPost && $payload->status === DormitoryEnum::FOR_PAYMENT->value) {
+            $res->update([
+                'dormitory_invoice_id' => $this->createInvoice(DormitoryEnum::DORMITORY->value, $res->id, $payload->user_id, $payload->payment_remarks, (object)($payload->pricingBreakdown ?? []))
+            ]);
+        }
 
         if ($payload->status !== DormitoryEnum::REJECTED->value) {
             if(!empty($payload->supporting_documents)) {
