@@ -18,7 +18,7 @@ class DormitoryInvoiceManager extends DocumentExistenceChecker
      */
     public function createOrUpdateSimpleInvoice(object $payload, ?int $dormitoryInvoiceId, bool $isPost): array
     {
-        $preparedData = $payload->only([ 'dormitory_tenant_id', 'invoice_amount', 'description', 'invoice_status', 'type' => 'OTHERS' ]);
+        $preparedData = $payload->only([ 'user_id', 'dormitory_tenant_id', 'invoice_amount', 'description', 'invoice_status', 'type' ]);
         if($isPost) {
             $preparedData['trace_number'] = GenerateTrace::createTraceNumber(DormitoryInvoice::class, '-DINV-');
         }

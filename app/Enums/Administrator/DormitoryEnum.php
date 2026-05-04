@@ -5,6 +5,7 @@ namespace App\Enums\Administrator;
 enum DormitoryEnum : string
 {
     case DORMITORY = "DORMITORY";
+    case OFFSET = "OFFSET";
     case EXTENSION = "EXTENSION";
     case INCLUSION = "INCLUSION";
     case TRANSFER = "TRANSFER";

@@ -20,6 +20,7 @@ class DAppliedRequest extends JsonResource
             "dormitory_room_id" => $this->dormitory_room_id,
             "trace_number" => $this->trace_number,
             "user_id" => $this->user_id,
+            'credit_amount' => $this->boarder->credits,
             "room_for_type" => $this->dormitory_room->dormitory,
             "transfer_type" => $this->transfer_type,
             "purpose" => $this->purpose,

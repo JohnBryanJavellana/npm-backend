@@ -162,6 +162,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('get_service_request', [DormitoryController::class, 'get_service_request']);
             Route::post('set_service_request_as_action', [DormitoryController::class, 'set_service_request_as_action']);
 
+            Route::post('set_offset_date', [DormitoryController::class, 'set_offset_date']);
+
             Route::post('get_inventories/create_or_update_inventory', [DormitoryController::class, 'create_or_update_inventory']);
             Route::delete('get_inventories/remove_inventory/{documentId}', [DormitoryController::class, 'remove_inventory']);
             Route::match(['GET', 'POST'], 'get_inventories', [DormitoryController::class, 'get_dorm_inventories']);

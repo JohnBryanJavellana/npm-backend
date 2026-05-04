@@ -16,6 +16,13 @@ class CreateOrUpdateDormitoryCharge extends FormRequest
         return $this->user() !== null;
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'type' => "OTHERS"
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,6 +31,8 @@ class CreateOrUpdateDormitoryCharge extends FormRequest
     public function rules(): array
     {
         return [
+            'type' => ['required', 'string'],
+            'user_id' => ['required', 'integer', 'exists:users,id'],
             'dormitory_tenant_id' => ['required', 'integer', 'exists:dormitory_tenants,id'],
             'invoice_amount' => ['required', 'numeric'],
             'description' => ['required', 'string'],

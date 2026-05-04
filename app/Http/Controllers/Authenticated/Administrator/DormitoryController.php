@@ -17,6 +17,7 @@ use App\Http\Requests\Admin\Dormitory\GetMatchRooms;
 use App\Http\Requests\Admin\Dormitory\NewRoomReservation;
 use App\Http\Requests\Admin\Dormitory\RemoveInventoryRequest;
 use App\Http\Requests\Admin\Dormitory\RemoveInventoryStock;
+use App\Http\Requests\Admin\Dormitory\SetOffsetDate;
 use App\Http\Requests\Admin\Dormitory\SetRoomReservationAsReserved;
 use App\Http\Requests\Admin\Dormitory\SetServiceRequestAsAction;
 use App\Http\Requests\Admin\Dormitory\UpdateExtensionRequest;
@@ -34,6 +35,7 @@ use App\Services\Administrator\Dormitory\DormitoryInclusionManager;
 use App\Services\Administrator\Dormitory\DormitoryInventoryManager;
 use App\Services\Administrator\Dormitory\DormitoryInventoryStockManager;
 use App\Services\Administrator\Dormitory\DormitoryInvoiceManager;
+use App\Services\Administrator\Dormitory\DormitoryOffsetManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceManager;
@@ -71,7 +73,8 @@ class DormitoryController extends Controller
         public DormitoryInclusionManager $dormitoryInclusionManager,
         public DormitoryExtensionManager $dormitoryExtensionManager,
         public DormitoryTransferManager $dormitoryTransferManager,
-        public DormitoryInvoiceManager $dormitoryInvoiceManager
+        public DormitoryInvoiceManager $dormitoryInvoiceManager,
+        public DormitoryOffsetManager $dormitoryOffsetManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -719,14 +722,31 @@ class DormitoryController extends Controller
 
             $charges = DormitoryInvoice::where('dormitory_tenant_id', $request->dormitory_tenant_id)
                 ->with('orNumber:id,name')
-                ->when($q, function() use($q) {
-                    $q->where('trace_number', "LIKE", "%{$q}%")
+                ->when($q, function($search) use($q) {
+                    $search->where('trace_number', "LIKE", "%{$q}%")
+                        ->orWhere('invoice_amount', "LIKE", "%{$q}%")
                         ->orWhere('invoice_status', "LIKE", "%{$q}%")
                         ->orWhere('description', "LIKE", "%{$q}%")
                         ->orWhereHas('orNumber', fn($query) => $query->where('name', "LIKE", "%{$q}%"));
-                })->paginate($pageCounter);
+                })->latest()->paginate($pageCounter);
 
             return response()->json(['charges' => $charges], Response::HTTP_OK);
+        });
+    }
+
+    /**
+     * Summary of set_offset_date
+     * @param SetOffsetDate $request
+     * @return JsonResponse
+     */
+    public function set_offset_date (SetOffsetDate $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $offsetDate = $request->offset_date;
+            $dormitoryTenantId = $request->dormitory_tenant_id;
+
+            $result = $this->dormitoryOffsetManager->setOffsetDate($offsetDate, $dormitoryTenantId);
+            return response()->json(['message' => $result['message']], $result['status']);
         });
     }
 }

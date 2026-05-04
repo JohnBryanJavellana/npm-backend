@@ -92,9 +92,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(AssessmentAttempt::class, 'created_by', 'id');
     }
 
-    // public function creditAmount () {
-    //     return $this->hasMany(Credit::class);
-    // }
+    public function creditAmount () {
+        return $this->hasMany(Credit::class);
+    }
 
     public function asFacilitator()
     {

@@ -21,7 +21,8 @@ return new class extends Migration
         'PAID',
         "PROCESSING PAYMENT",
         "RESERVED",
-        "FOR CSM"
+        "FOR CSM",
+        "OFFSET"
     ];
 
     public const STATUS_OF_OCCUPANCY = [

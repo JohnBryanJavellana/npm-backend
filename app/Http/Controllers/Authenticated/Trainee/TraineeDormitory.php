@@ -135,6 +135,7 @@ class TraineeDormitory extends Controller
     public function view_applied_dormitories (Request $request, $dormitory_id) {
         try {
             $dormitory_info = DormitoryTenant::with([
+                'boarder',
                 'dormitory_room.roomImages',
                 'transferRequest' => fn($q) => $q->latest("created_at"),
                 'extendRequest' => fn($q) => $q->latest("created_at"),

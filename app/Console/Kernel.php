@@ -12,6 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        $schedule->command('set-tenant-as-offset')->daily();
         $schedule->command('library-book-borrow-reminder')->daily();
         $schedule->command('l-m-s-check-for-expired-examination')
             ->everyMinute()

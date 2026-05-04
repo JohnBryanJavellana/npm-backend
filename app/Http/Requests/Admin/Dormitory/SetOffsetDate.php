@@ -2,16 +2,18 @@
 
 namespace App\Http\Requests\Admin\Dormitory;
 
+use App\Rules\Admin\Dormitory\ModifyDormitoryInvoiceRule;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class SetRoomReservationAsReserved extends FormRequest
+class SetOffsetDate extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user() !== null && \in_array($this->user()->role, ['SUPERADMIN', 'ADMIN-DORMITORY']);
+        return $this->user() !== null;
     }
 
     /**
@@ -22,8 +24,8 @@ class SetRoomReservationAsReserved extends FormRequest
     public function rules(): array
     {
         return [
-            'roomReservationId' => ['required', 'exists:dormitory_tenants,id'],
-            'status' => ['string', 'in:RESERVED,ACTIVE,OFFSET'],
+            'offset_date' => ['required', 'date'],
+            'dormitory_tenant_id' => ['required', 'integer', 'exists:dormitory_tenants,id']
         ];
     }
 }
