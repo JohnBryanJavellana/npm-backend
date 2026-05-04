@@ -24,6 +24,7 @@ class CreateTransferRequest extends FormRequest
     {
         $this->merge([
             'userId' => $this->isWalkIn ? DormitoryTenant::findOrFail($this->document_id)->user_id : $this->user()->id,
+            'dormitoryRoomId' => $this?->dormitoryRoomId
         ]);
     }
 
@@ -36,7 +37,7 @@ class CreateTransferRequest extends FormRequest
     {
         return [
             "isWalkIn" => 'required|boolean',
-            "roomId" => 'nullable',
+            "dormitoryRoomId" => 'nullable|exists:dormitory_rooms,id',
             "userId" => "required|integer|exists:users,id",
             'document_id' => 'required|integer|exists:dormitory_tenants,id',
             'accommodation' => 'required|in:SINGLE,SHARED,COUPLE',

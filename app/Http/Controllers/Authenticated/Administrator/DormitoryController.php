@@ -7,10 +7,12 @@ use App\Enums\{
 };
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Dormitory\CreateInventoryStock;
+use App\Http\Requests\Admin\Dormitory\CreateOrUpdateDormitoryCharge;
 use App\Http\Requests\Admin\Dormitory\CreateOrUpdateDormitoryRoom;
 use App\Http\Requests\Admin\Dormitory\CreateOrUpdateInventory;
 use App\Http\Requests\Admin\Dormitory\GetCurrentTenantInfo;
 use App\Http\Requests\Admin\Dormitory\GetDormitoryInventoryStockRequest;
+use App\Http\Requests\Admin\Dormitory\GetGuestCharge;
 use App\Http\Requests\Admin\Dormitory\GetMatchRooms;
 use App\Http\Requests\Admin\Dormitory\NewRoomReservation;
 use App\Http\Requests\Admin\Dormitory\RemoveInventoryRequest;
@@ -31,6 +33,7 @@ use App\Services\Administrator\Dormitory\DormitoryExtensionManager;
 use App\Services\Administrator\Dormitory\DormitoryInclusionManager;
 use App\Services\Administrator\Dormitory\DormitoryInventoryManager;
 use App\Services\Administrator\Dormitory\DormitoryInventoryStockManager;
+use App\Services\Administrator\Dormitory\DormitoryInvoiceManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomManager;
 use App\Services\Administrator\Dormitory\DormitoryRoomReservationManager;
 use App\Services\Administrator\Dormitory\DormitoryServiceManager;
@@ -53,6 +56,7 @@ use App\Models\{
     DormitoryService
 };
 use App\Helpers\Administrator\General\CountCollection;
+use Symfony\Component\HttpFoundation\Response;
 
 class DormitoryController extends Controller
 {
@@ -66,7 +70,8 @@ class DormitoryController extends Controller
         public DormitoryInventoryStockManager $dormitoryInventoryStockManager,
         public DormitoryInclusionManager $dormitoryInclusionManager,
         public DormitoryExtensionManager $dormitoryExtensionManager,
-        public DormitoryTransferManager $dormitoryTransferManager
+        public DormitoryTransferManager $dormitoryTransferManager,
+        public DormitoryInvoiceManager $dormitoryInvoiceManager
     ) {}
 
     # ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
@@ -683,6 +688,45 @@ class DormitoryController extends Controller
             ->orderByDesc('created_at')->paginate($pageCounter);
 
             return response()->json(['transferRequests' => $transferRequests], 200);
+        });
+    }
+
+    /**
+     * Summary of create_or_update_charge
+     * @param CreateOrUpdateDormitoryCharge $request
+     */
+    public function create_or_update_charge(CreateOrUpdateDormitoryCharge $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $isPost = $request->httpMethod === "POST";
+            $dormitoryInvoiceId = $request->dormitoryInvoiceId;
+
+            $result = $this->dormitoryInvoiceManager->createOrUpdateSimpleInvoice($request, $dormitoryInvoiceId, $isPost);
+            return response()->json(['message' => $result['message']], $result['status']);
+        });
+    }
+
+    /**
+     * Summary of get_guest_charges
+     * @param GetGuestCharge $request
+     * @return JsonResponse
+     */
+    public function get_guest_charges(GetGuestCharge $request): JsonResponse
+    {
+        return TransactionUtil::transact($request, [], function() use ($request) {
+            $pageCounter = $request->pageCounter ?? 10;
+            $q = $request->q;
+
+            $charges = DormitoryInvoice::where('dormitory_tenant_id', $request->dormitory_tenant_id)
+                ->with('orNumber:id,name')
+                ->when($q, function() use($q) {
+                    $q->where('trace_number', "LIKE", "%{$q}%")
+                        ->orWhere('invoice_status', "LIKE", "%{$q}%")
+                        ->orWhere('description', "LIKE", "%{$q}%")
+                        ->orWhereHas('orNumber', fn($query) => $query->where('name', "LIKE", "%{$q}%"));
+                })->paginate($pageCounter);
+
+            return response()->json(['charges' => $charges], Response::HTTP_OK);
         });
     }
 }

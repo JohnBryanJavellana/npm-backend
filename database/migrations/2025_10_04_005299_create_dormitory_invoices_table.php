@@ -28,7 +28,8 @@ return new class extends Migration
         'SERVICE',
         'DORMITORY',
         'EXTENSION',
-        'TRANSFER'
+        'TRANSFER',
+        'OTHERS'
     ];
 
     /**

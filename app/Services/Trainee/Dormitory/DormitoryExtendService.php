@@ -84,7 +84,7 @@ class DormitoryExtendService {
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryExtensionRequest, self::PREFIX),
                 "old_end_date" => $validated["to_date"],
                 "new_end_date" => $validated["extension_date"],
-                'status' => $validated["withExternalUser"] ? "FOR PAYMENT" : "APPROVED"
+                'status' => $validated["withExternalUser"] ? "FOR PAYMENT" : "PENDING"
             ];
 
             if($validated["withExternalUser"]) {

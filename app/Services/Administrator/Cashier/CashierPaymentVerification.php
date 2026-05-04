@@ -21,23 +21,25 @@ class CashierPaymentVerification
      * @param mixed $parentTableId
      * @return array{message: string, status: int}
      */
-    public function verifyPayment(object $payload, int $invoiceId, int $parentTableId, bool $invoiceTableAlreadyUpdated = false) {
+    public function verifyPayment(object $payload, int $invoiceId, ?int $parentTableId, bool $invoiceTableAlreadyUpdated = false) {
         if(!$invoiceTableAlreadyUpdated) {
             $this->cashierGetTableRef->getTable($payload->invoiceTableServiceName, $invoiceId, null)->update([
                 'invoice_status' => $payload->invoiceStatus
             ]);
         }
 
-        $thisParentTable = $this->cashierGetTableRef->getTable($payload->parentTableServiceName, $parentTableId, null)
-            ->lockForUpdate()
-            ->firstOrFail();
+        if($parentTableId) {
+            $thisParentTable = $this->cashierGetTableRef->getTable($payload->parentTableServiceName, $parentTableId, null)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        if($payload->invoiceStatus === CashierEnum::PAID->value &&
-           \in_array($thisParentTable->{$payload->parentTableStatusColumn}, [CashierEnum::PROCESSING_PAYMENT->value, CashierEnum::FOR_PAYMENT->value]) &&
-           !empty($payload->parentTableStatusColumn) &&
-           !empty($parentTableId)
-        ) {
-            $thisParentTable->update([ $payload->parentTableStatusColumn => CashierEnum::PAID ]);
+            if($payload->invoiceStatus === CashierEnum::PAID->value &&
+            \in_array($thisParentTable->{$payload->parentTableStatusColumn}, [CashierEnum::PROCESSING_PAYMENT->value, CashierEnum::FOR_PAYMENT->value]) &&
+            !empty($payload->parentTableStatusColumn) &&
+            !empty($parentTableId)
+            ) {
+                $thisParentTable->update([ $payload->parentTableStatusColumn => CashierEnum::PAID ]);
+            }
         }
 
         return [

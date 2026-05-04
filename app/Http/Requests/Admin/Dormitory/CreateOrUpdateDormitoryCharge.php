@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Dormitory;
 
+use App\Rules\Admin\Dormitory\ModifyDormitoryInvoiceRule;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -23,13 +24,12 @@ class CreateOrUpdateDormitoryCharge extends FormRequest
     public function rules(): array
     {
         return [
-            'userId' => ['required'],
-            'tenantId' => ['required'],
-            'amount' => ['required', 'numeric'],
-            'details' => ['required', 'string'],
-            'httpMethod' => ['required'],
-            'documentId' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ],
-            'status' => [ Rule::when($this->httpMethod === "UPDATE", ['required'], ['nullable']) ]
+            'dormitory_tenant_id' => ['required', 'integer', 'exists:dormitory_tenants,id'],
+            'invoice_amount' => ['required', 'numeric'],
+            'description' => ['required', 'string'],
+            'httpMethod' => ['required', 'string', 'in:POST,UPDATE'],
+            'dormitoryInvoiceId' => ['required_if:httpMethod,UPDATE', 'integer', 'exists:dormitory_invoices,id', new ModifyDormitoryInvoiceRule()],
+            'invoice_status' => ['required_if:httpMethod,UPDATE', 'string']
         ];
     }
 }

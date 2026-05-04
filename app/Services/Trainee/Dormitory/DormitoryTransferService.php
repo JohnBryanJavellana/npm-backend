@@ -94,15 +94,15 @@ class DormitoryTransferService extends DormitoryHistoryService {
 
             $this->dormitoryTransfer->create([
                 "dormitory_tenant_id" => $validated["document_id"],
-                "dormitory_invoice_id" => $validated["roomId"] && $validated["isWalkIn"]
+                "dormitory_invoice_id" => $validated["dormitoryRoomId"] && $validated["isWalkIn"]
                         ? $this->dormitoryRoomReservationManager->createInvoice(DormitoryEnum::TRANSFER->value, $validated["document_id"], $userId, null, (object)['grandTotal' => 9999])
                         : null,
-                "dormitory_room_id" => $validated["roomId"],
+                "dormitory_room_id" => $validated["dormitoryRoomId"] ?? null,
                 "trace_number" => GenerateTrace::createTraceNumber($this->dormitoryTransfer, "-TR-"),
                 "accommodation" => $validated["accommodation"],
                 "room_type" => $validated["type"],
                 "reason" => $validated["reason"],
-                "status" => $validated["roomId"] && $validated["isWalkIn"] ? "FOR PAYMENT" : "PENDING"
+                "status" => $validated["dormitoryRoomId"] && $validated["isWalkIn"] ? "FOR PAYMENT" : "PENDING"
             ]);
 
             //temporary

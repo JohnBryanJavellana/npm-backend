@@ -36,7 +36,8 @@ class CashierGetTableRef
             'DORMITORY-EXTENSION' => DormitoryInvoice::class,
             'DORMITORY-EXTENSION-MAIN-TABLE' => DormitoryExtensionRequest::class,
             'DORMITORY-TRANSFER' => DormitoryInvoice::class,
-            'DORMITORY-TRANSFER-MAIN-TABLE' => DormitoryTransfer::class
+            'DORMITORY-TRANSFER-MAIN-TABLE' => DormitoryTransfer::class,
+            'DORMITORY-OTHERS' => DormitoryInvoice::class
         ];
 
         $query = $modelMap[$service]::query();

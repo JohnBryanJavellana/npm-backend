@@ -30,8 +30,7 @@ class DormitoryInvoiceService {
             "orNumber",
          ])
         ->where([
-            "dormitory_tenant_id" => $documentId,
-            "user_id" => $userId
+            "dormitory_tenant_id" => $documentId
             ])
         // FOR NOW
         // ->whereNotNull("description")
@@ -43,7 +42,6 @@ class DormitoryInvoiceService {
     {
         return DB::transaction(function() use ($validated, $userId) {
             $inv = $this->dormitoryInvoice->query()
-                ->forUser($userId)
                 ->where("dormitory_tenant_id", $validated["tenant_id"])
                 ->whereKey($validated["billing_id"])
                 ->firstOrFail();

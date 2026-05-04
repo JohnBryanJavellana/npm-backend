@@ -24,7 +24,7 @@ class VerifyPayment extends FormRequest
     {
         return [
             'invoiceId' => ['required', 'integer'],
-            'parentTableId' => ['required', 'integer'],
+            'parentTableId' => ['nullable', 'integer'],
             'invoiceTableServiceName' => ['required', 'string'],
             'parentTableServiceName' => ['required', 'string'],
             'parentTableStatusColumn' => ['nullable', 'string'],
