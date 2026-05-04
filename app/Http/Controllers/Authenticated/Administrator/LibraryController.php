@@ -102,12 +102,36 @@ class LibraryController extends Controller
      */
     public function get_book_reservation(Request $request): JsonResponse
     {
+        $pageCounter = $request->pageCounter ?? 10;
+        $q = $request->q;
+
         $query = BookRes::with([
             'trainee',
             'csm.user',
             'borrowedBooks.book',
             'borrowedBooks.books.catalog.genre',
         ])
+        ->when($q, function($q1) use ($q) {
+            $q1->where('trace_number', "LIKE", "%{$q}%")
+                ->orWhere('status', "LIKE", "%{$q}%")
+                ->orWhereHas('trainee', function($traineeSearch) use ($q) {
+                    $traineeSearch->where('fname', "LIKE", "%{$q}%")
+                        ->orWhere('mname', "LIKE", "%{$q}%")
+                        ->orWhere('lname', "LIKE", "%{$q}%")
+                        ->orWhere('suffix', "LIKE", "%{$q}%");
+                })
+                ->orWhereHas('borrowedBooks', function($bookSearch1) use ($q) {
+                    $bookSearch1->whereHas('books', function($bookSearch) use ($q) {
+                        $bookSearch->whereHas("catalog", function($query2) use ($q) {
+                            $query2->where("title", "LIKE", "%{$q}%")
+                                ->orWhere("isbn", "LIKE", "%{$q}%")
+                                ->orWhereHas("genre", function($query3) use ($q) {
+                                    $query3->where("name", "LIKE", "%{$q}%")->orWhere("category", "LIKE", "%{$q}%");
+                                });
+                        });
+                    });
+                });
+        })
         ->when($request->userId, fn($q) => $q->where('user_id', $request->userId))
         ->when($request->type, fn ($q, $type) => \in_array($type, ['EXTENDING', 'RENEWING'])
             ? $q->whereHas('borrowedBooks', fn($sub) => $sub->where('status', $type))
@@ -116,7 +140,7 @@ class LibraryController extends Controller
 
         $reservations = $request->traceNumber
             ? $query->where('trace_number', $request->traceNumber)->first()
-            : $query->latest()->get();
+            : $query->latest()->paginate($pageCounter);
 
         return response()->json(['reservations' => $reservations], 200);
     }
@@ -162,10 +186,10 @@ class LibraryController extends Controller
 
             $books = Book::when($q, function($query) use ($q) {
                 $query->whereHas("catalog", function($query2) use ($q) {
-                    $query2->orWhere("title", "LIKE", "%{$q}%")
+                    $query2->where("title", "LIKE", "%{$q}%")
                         ->orWhere("isbn", "LIKE", "%{$q}%")
                         ->orWhereHas("genre", function($query3) use ($q) {
-                            $query3->orWhere("category", "LIKE", "%{$q}%");
+                            $query3->where("name", "LIKE", "%{$q}%")->orWhere("category", "LIKE", "%{$q}%");
                         });
                 });
             })->withCount('copies', 'hasData')->with([
